@@ -2,7 +2,7 @@
 ARG APP_INSIGHTS_AGENT_VERSION=3.4.10
 FROM hmctspublic.azurecr.io/base/java:17-distroless
 
-COPY build/libs/darts-darts-api.jar /opt/app/
+COPY build/libs/darts-api.jar /opt/app/
 
 EXPOSE 4550
-CMD [ "darts-darts-api.jar" ]
+CMD [ "darts-api.jar" ]

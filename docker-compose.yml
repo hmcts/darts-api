@@ -1,7 +1,7 @@
 version: '2.1'
 
 services:
-  darts-darts-api:
+  darts-api:
     build:
       context: .
       args:

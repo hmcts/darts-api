@@ -1,6 +1,6 @@
-# darts-darts-api
+# darts-api
 
-[![Build Status](https://travis-ci.org/hmcts/darts-darts-api.svg?branch=master)](https://travis-ci.org/hmcts/darts-darts-api)
+[![Build Status](https://travis-ci.org/hmcts/darts-api.svg?branch=master)](https://travis-ci.org/hmcts/darts-api)
 
 ## Notes
 
@@ -35,7 +35,7 @@ Create docker image:
   docker-compose build
 ```
 
-Run the distribution (created in `build/install/darts-darts-api` directory)
+Run the distribution (created in `build/install/darts-api` directory)
 by executing the following command:
 
 ```bash

@@ -130,8 +130,8 @@ project.tasks['check'].dependsOn integration
 
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: darts-darts-api"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:darts-darts-api"
+    property "sonar.projectName", "Reform :: darts-api"
+    property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
   }
 }
@@ -209,7 +209,7 @@ dependencies {
 mainClassName = 'uk.gov.hmcts.reform.darts-api.Application'
 
 bootJar {
-  archiveFileName = "darts-darts-api.jar"
+  archiveFileName = "darts-api.jar"
 
   manifest {
     attributes('Implementation-Version': project.version.toString())

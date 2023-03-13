@@ -1,7 +1,7 @@
 java:
   applicationPort: 4550
   image: 'hmctspublic.azurecr.io/darts/darts-api:latest'
-  ingressHost: darts-darts-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+  ingressHost: darts-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   aadIdentityName: darts
 #  Uncomment once the vault containing the app insights key has been set up
 #  keyVaults:
