@@ -1,9 +1,12 @@
 #!groovy
 
 @Library("Infrastructure")
+def type = "java"          // supports "java", "nodejs" and "angular"
 
-def type = "java"
-def product = "rpe"
-def component = "demo"
+def product = "darts"
 
-withPipeline(type, product, component) {}
+def component = "darts-backend" // must match infrastructure module name
+
+withPipeline(type, product, component) {
+  enableSlackNotifications('#darts-builds')
+}
