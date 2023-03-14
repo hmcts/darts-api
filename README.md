@@ -10,6 +10,7 @@ JUnit 5 is now enabled by default in the project. Please refrain from using JUni
 
 ## Building and deploying the application
 
+
 ### Building the application
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
