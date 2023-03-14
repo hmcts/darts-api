@@ -10,9 +10,9 @@
   <!--End of false positives section -->
 
   <!--Please add all the temporary suppression under the below section-->
-  <suppress until="2023-03-14">
-    <notes>
-    </notes>
+  <suppress until="2023-04-14">
+    <notes>snakeyaml-1.33.jar - On latest spring 2.x.x. Will need to upgrade Spring to Version 3</notes>
+    <packageUrl regex="true">^pkg:maven/org.yaml/snakeyaml@1.33</packageUrl>
     <cve>CVE-2022-1471</cve>
   </suppress>
   <!--End of temporary suppression section -->
