@@ -12,5 +12,20 @@
         "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sARG .*?_VERSION=(?<currentValue>.*)\\s"
       ]
     }
-  ]
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "minor", "patch"
+      ],
+      "groupName": "all non major dependencies",
+      "groupSlug": "all-minor-patch"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ]
+  },
+  "rebaseWhen": "behind-base-branch"
 }
