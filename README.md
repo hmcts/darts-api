@@ -10,6 +10,10 @@ JUnit 5 is now enabled by default in the project. Please refrain from using JUni
 
 ## Building and deploying the application
 
+### Prerequisites
+
+- [Java 17](https://www.oracle.com/java)
+
 ### Building the application
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
