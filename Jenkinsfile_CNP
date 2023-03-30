@@ -6,7 +6,6 @@ def type = "java"
 def product = "darts"
 def component = "api"
 
-def branchesToSync = ['demo']
 def branchesToSync = ['sbox']
 
 withPipeline(type, product, component) {
