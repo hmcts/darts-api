@@ -6,7 +6,13 @@ variable "location" {
   default = "UK South"
 }
 
-variable "env" {}
+variable "env" {
+  default = "demo"
+}
+
+variable "aks_subscription_id" {
+  default = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+}
 
 variable "subscription" {}
 
