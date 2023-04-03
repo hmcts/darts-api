@@ -11,7 +11,7 @@ variable "env" {
 }
 
 variable "aks_subscription_id" {
-  default = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  default = "${TF_VAR_aks_subscription_id}"
 }
 
 variable "subscription" {}
