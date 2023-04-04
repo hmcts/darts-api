@@ -1,0 +1,13 @@
+#!groovy
+
+@Library("Infrastructure")
+
+def type = "java"
+def product = "darts"
+def component = "api"
+def kv = product + '-ss-kv'
+
+
+withParameterizedPipeline(type, product, component, 'sbox', 'sbox') {
+  enableSlackNotifications('#darts-builds')
+}
