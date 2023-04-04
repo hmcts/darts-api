@@ -1,21 +1,21 @@
-variable "product" {}
+variable "product" {
+  default = "darts"
+}
 
-variable "component" {}
+variable "component" {
+  default = "api"
+}
 
 variable "location" {
   default = "UK South"
 }
-
-variable "env" {
-  default = "demo"
+variable "env" {}
+variable "subscription" {
+  default = ""
 }
-
-variable "aks_subscription_id" {
-  default = "${TF_VAR_aks_subscription_id}"
+variable "deployment_namespace" {
+  default = ""
 }
-
-variable "subscription" {}
-
 variable "common_tags" {
   type = map(string)
 }
