@@ -4,11 +4,11 @@ variable "resource_group_name" {
   default     = null
 }
 
-variable "location" {
-  description = "Target Azure location to deploy the resource"
-  type        = string
-  default     = "UK South"
-}
+# variable "location" {
+#   description = "Target Azure location to deploy the resource"
+#   type        = string
+#   default     = "UK South"
+# }
 
 variable "pgsql_admin_username" {
   description = "Admin username"

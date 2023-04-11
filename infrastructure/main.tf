@@ -11,7 +11,7 @@ module "db" {
   env                = var.env
   database_name      = "darts-modernisation"
   postgresql_user    = "darts-modernisation"
-  postgresql_version = "10"
+  postgresql_version = "14"
   sku_name           = "GP_Gen5_2"
   sku_tier           = "GeneralPurpose"
   common_tags        = var.common_tags

@@ -1,12 +1,12 @@
-variable "env" {
-  description = "Environment value."
-  type        = string
-}
+# variable "env" {
+#   description = "Environment value."
+#   type        = string
+# }
 
-variable "common_tags" {
-  description = "Common tag to be applied to resources."
-  type        = map(string)
-}
+# variable "common_tags" {
+#   description = "Common tag to be applied to resources."
+#   type        = map(string)
+# }
 
 variable "pgsql_databases" {
   description = "Databases for the pgsql instance."
@@ -24,16 +24,16 @@ variable "pgsql_version" {
   type        = string
 }
 
-variable "product" {
-  description = "https://hmcts.github.io/glossary/#product"
-  type        = string
-}
+# variable "product" {
+#   description = "https://hmcts.github.io/glossary/#product"
+#   type        = string
+# }
 
 variable "business_area" {
   description = "business_area name - sds or cft."
 }
 
-variable "component" {
-  description = "https://hmcts.github.io/glossary/#component"
-  type        = string
-}
+# variable "component" {
+#   description = "https://hmcts.github.io/glossary/#component"
+#   type        = string
+# }
