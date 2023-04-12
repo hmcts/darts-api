@@ -8,6 +8,6 @@ class DemoUnitTest {
 
     @Test
     void exampleOfTest() {
-        assertTrue(System.currentTimeMillis() > 0, "Example of Unit Test");
+        assertTrue(System.currentTimeMillis() > 0, "Example of Unit Test - This is test");
     }
 }
