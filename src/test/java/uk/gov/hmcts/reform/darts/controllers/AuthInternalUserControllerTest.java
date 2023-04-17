@@ -13,7 +13,7 @@ class AuthInternalUserControllerTest {
     private final AuthInternalUserController authInternalUserController = new AuthInternalUserController();
 
     @Test
-    void loginandrefreshtokenfromazureWhentokentoesntexistinsession() {
+    void loginAndRefreshTokenFromAzureWhenTokenDoesntExistInSession() {
         ModelAndView mv = authInternalUserController.loginOrRefresh();
         assertTrue(Objects.nonNull(mv), "The Model View is not null");
     }
