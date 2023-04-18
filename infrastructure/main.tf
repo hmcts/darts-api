@@ -22,50 +22,50 @@ resource "azurerm_resource_group" "outbound" {
 }
 
 resource "azurerm_storage_account" "outbound_data_store_acc" {
-  name                   = local.storage_account_name
+  name                     = local.storage_account_name
   resource_group_name      = local.resource_group_name
   location                 = "West Europe"
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
-resource "azurerm_storage_container" "outbound_data_store_container" {
-  name                   = local.storage_container_name
-  storage_account_name  = local.storage_account_name
-  container_access_type = "private"
-}
+# resource "azurerm_storage_container" "outbound_data_store_container" {
+#   name                   = local.storage_container_name
+#   storage_account_name   = local.storage_account_name
+#   container_access_type  = "private"
+# }
 
 resource "azurerm_storage_blob" "outbound_data_store_blob" {
   name                   = local.storage_blob_name
   storage_account_name   = local.storage_account_name
-  storage_container_name = local.storage_container_name
+  # storage_container_name = local.storage_container_name
   type                   = "Block"
-  source                 = "some-local-file.zip"
+  source_content         = each.value.content
 }
 
 resource "azurerm_resource_group" "unstructured" {
   name                   = local.resource_group_name
-  location = "West Europe"
+  location               = "West Europe"
 }
 
 resource "azurerm_storage_account" "unstructured_data_store_acc" {
- name                   = local.storage_account_name
+  name                     = local.storage_account_name
   resource_group_name      = local.resource_group_name
   location                 = "West Europe"
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
 
-resource "azurerm_storage_container" "unstructured_data_store_container" {
-  name                   = local.storage_container_name
-  storage_account_name  = local.storage_account_name
-  container_access_type = "private"
-}
+# resource "azurerm_storage_container" "unstructured_data_store_container" {
+#   name                   = local.storage_container_name
+#   storage_account_name  = local.storage_account_name
+#   container_access_type = "private"
+# }
 
 resource "azurerm_storage_blob" "unstructured_data_store_blob" {
   name                   = local.storage_blob_name
   storage_account_name   = local.storage_account_name
-  storage_container_name = local.storage_container_name
+  # storage_container_name = local.storage_container_name
   type                   = "Block"
   source_content         = each.value.content
 }
