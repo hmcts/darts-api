@@ -1,47 +1,15 @@
-provider "azurerm" {
-  features {}
-}
+locals {
+  env = (var.env == "aat") ? "stg" : (var.env == "sandbox") ? "sbox" : "${(var.env == "perftest") ? "test" : "${var.env}"}"
 
-module "db" {
-  source             = "git@github.com:hmcts/cnp-module-postgres?ref=master"
-  product            = var.product
-  component          = var.component
-  name               = "rpe-${var.product}"
-  location           = var.location
-  env                = var.env
-  database_name      = "darts-modernisation"
-  postgresql_user    = "darts-modernisation"
-  postgresql_version = "14"
-  sku_name           = "GP_Gen5_2"
-  sku_tier           = "GeneralPurpose"
-  common_tags        = var.common_tags
-  subscription       = var.subscription
-}
+  env_subdomain = local.env_long_name == "prod" ? "" : "${local.env_long_name}."
+  base_url      = "${var.product}-${var.component}.${local.env_subdomain}platform.hmcts.net"
 
+  apim_name     = "sds-api-mgmt-${local.env}"
+  apim_rg       = "ss-${local.env}-network-rg"
+  env_long_name = var.env == "sbox" ? "sandbox" : var.env == "stg" ? "staging" : var.env
 
-module "postgresql" {
+  deploy_apim = local.env == "stg" || local.env == "sbox" || local.env == "prod" ? 1 : 0
 
-  providers = {
-    azurerm.postgres_network = azurerm.postgres_network
-  }
-  
-  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
-  env    = var.env
-
-  product       = var.product
-  component     = var.component
-  business_area = "sds" 
-
-  pgsql_databases = [
-    {
-      name : "application"
-    }
-  ]
-
-  pgsql_version = "14"
-  
-  # The ID of the principal to be granted admin access to the database server, should be the principal running this normally
-  admin_user_object_id = var.admin_user_object_id
-  
-  common_tags = var.common_tags
+  prefix            = "${var.product}-ss"
+  prefix_no_special = replace(local.prefix, "-", "")
 }
