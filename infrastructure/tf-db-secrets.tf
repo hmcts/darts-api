@@ -45,7 +45,7 @@ module "secret" {
   ]
 }
 
-resource  "sdp-host" {
+module  "sdp-host" {
   source              = "git@github.com:https://github.com/hmcts/cnp-module-key-vault"
   key_vault_id = data.azurerm_key_vault.sdp-kv.id
   name         = "${local.secret_prefix}-HOST"
@@ -61,7 +61,7 @@ resource  "sdp-host" {
   ]
 }
 
-resource "sdp-port" {
+module "sdp-port" {
   source              = "git@github.com:https://github.com/hmcts/cnp-module-key-vault"
   key_vault_id = data.azurerm_key_vault.sdp-kv.id
   name         = "${local.secret_prefix}-PORT"
@@ -77,7 +77,7 @@ resource "sdp-port" {
   ]
 }
 
-resource "sdp-database" {
+module "sdp-database" {
   source              = "git@github.com:https://github.com/hmcts/terraform-module-postgresql-flexible"
   key_vault_id = data.azurerm_key_vault.sdp-kv.id
   name         = "${local.secret_prefix}-DATABASE"
