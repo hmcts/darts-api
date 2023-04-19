@@ -40,7 +40,7 @@ resource "azurerm_storage_blob" "outbound_data_store_blob" {
   storage_account_name   = local.storage_account_name
   # storage_container_name = local.storage_container_name
   type                   = "Block"
-  source_content         = each.value.content
+  source                 = value.path
 }
 
 resource "azurerm_resource_group" "unstructured" {
@@ -67,5 +67,5 @@ resource "azurerm_storage_blob" "unstructured_data_store_blob" {
   storage_account_name   = local.storage_account_name
   # storage_container_name = local.storage_container_name
   type                   = "Block"
-  source_content         = each.value.content
+  source                 = value.path
 }

@@ -13,3 +13,7 @@ variable "subscription" {}
 variable "common_tags" {
   type = map(string)
 }
+variable "domain" {
+  type        = string
+  description = "Darts Domain"
+}
