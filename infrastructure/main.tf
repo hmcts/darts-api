@@ -18,13 +18,13 @@ locals {
 }
 resource "azurerm_resource_group" "outbound" {
   name                   = local.resource_group_name
-  location               = "West Europe"
+  location               = variable.location
 }
 
 resource "azurerm_storage_account" "outbound_data_store_acc" {
   name                     = local.storage_account_name
   resource_group_name      = local.resource_group_name
-  location                 = "West Europe"
+  location                 = variable.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
@@ -45,13 +45,13 @@ resource "azurerm_storage_blob" "outbound_data_store_blob" {
 
 resource "azurerm_resource_group" "unstructured" {
   name                   = local.resource_group_name
-  location               = "West Europe"
+  location               = variable.location
 }
 
 resource "azurerm_storage_account" "unstructured_data_store_acc" {
   name                     = local.storage_account_name
   resource_group_name      = local.resource_group_name
-  location                 = "West Europe"
+  location                 = variable.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
