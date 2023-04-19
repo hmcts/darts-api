@@ -4,7 +4,7 @@ locals {
 }
 
 module "database" {
-  source             = "git@github.com:hmcts/cnp-module-postgres?ref=postgresql_tf"
+  source             = "git@github.com:hmcts/terraform-module-postgresql-flexible"
   product            = var.product
   component          = var.component
   subnet_id          = data.azurerm_subnet.iaas.id
@@ -24,7 +24,7 @@ module "database" {
 
 }
 
-resource "postgresql_role" "create_sdp_access" {
+module "postgresql_role" {
   name                = data.azurerm_key_vault_secret.sdp-user.value
   login               = true
   password            = data.azurerm_key_vault_secret.sdp-pass.value
@@ -32,7 +32,7 @@ resource "postgresql_role" "create_sdp_access" {
   skip_drop_role      = true
 }
 
-resource "postgresql_grant" "readonly_mv" {
+module "postgresql_grant" {
   database    = module.database.postgresql_database
   role        = data.azurerm_key_vault_secret.sdp-user.value
   schema      = "public"

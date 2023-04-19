@@ -28,7 +28,7 @@ locals {
 
 
 ## Loop secrets
-resource "azurerm_key_vault_secret" "secret" {
+module "secret" {
   for_each     = { for secret in local.secrets : secret.name_suffix => secret }
   key_vault_id = data.azurerm_key_vault.kv.id
   name         = "${local.secret_prefix}-${each.value.name_suffix}"
@@ -44,7 +44,7 @@ resource "azurerm_key_vault_secret" "secret" {
   ]
 }
 
-resource "azurerm_key_vault_secret" "sdp-host" {
+module "sdp-host" {
   key_vault_id = data.azurerm_key_vault.sdp-kv.id
   name         = "${local.secret_prefix}-HOST"
   value        = module.database.host_name
@@ -59,7 +59,7 @@ resource "azurerm_key_vault_secret" "sdp-host" {
   ]
 }
 
-resource "azurerm_key_vault_secret" "sdp-port" {
+module "sdp-port" {
   key_vault_id = data.azurerm_key_vault.sdp-kv.id
   name         = "${local.secret_prefix}-PORT"
   value        = module.database.postgresql_listen_port
@@ -74,7 +74,7 @@ resource "azurerm_key_vault_secret" "sdp-port" {
   ]
 }
 
-resource "azurerm_key_vault_secret" "sdp-database" {
+module "sdp-database" {
   key_vault_id = data.azurerm_key_vault.sdp-kv.id
   name         = "${local.secret_prefix}-DATABASE"
   value        = module.database.postgresql_database
