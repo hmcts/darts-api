@@ -4,7 +4,7 @@ locals {
 }
 
 module "database" {
-  source             = "git@github.com:hmcts/terraform-module-postgresql-flexible"
+ source              = "git@github.com:https://github.com/hmcts/terraform-module-postgresql-flexible"
   product            = var.product
   component          = var.component
   subnet_id          = data.azurerm_subnet.iaas.id
@@ -24,7 +24,8 @@ module "database" {
 
 }
 
-module "postgresql_role" {
+module  "create_sdp_access" {
+  source              = "git@github.com:https://github.com/hmcts/terraform-module-postgresql-flexible"
   name                = data.azurerm_key_vault_secret.sdp-user.value
   login               = true
   password            = data.azurerm_key_vault_secret.sdp-pass.value
@@ -32,7 +33,8 @@ module "postgresql_role" {
   skip_drop_role      = true
 }
 
-module "postgresql_grant" {
+module  "readonly_mv" {
+  source              = "git@github.com:https://github.com/hmcts/terraform-module-postgresql-flexible"
   database    = module.database.postgresql_database
   role        = data.azurerm_key_vault_secret.sdp-user.value
   schema      = "public"
