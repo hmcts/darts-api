@@ -28,6 +28,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
+@SuppressWarnings({"PMD.ShortClassName"})
 public class Case {
 
     private static final String MAPPED_BY_THE_CASE = "theCase";
