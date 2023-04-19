@@ -2,11 +2,15 @@
 
 @Library("Infrastructure")
 
+import uk.gov.hmcts.contino.GradleBuilder
+
 def type = "java"
 def product = "darts"
 def component = "api"
 
 def branchesToSync = ['demo']
+
+GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
       enableSlackNotifications('#darts-builds')
