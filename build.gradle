@@ -129,10 +129,15 @@ jacocoTestReport {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
+def sonarExclusions = [
+  '**/uk/gov/hmcts/reform/darts/entities/**'
+]
+
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
+    property "sonar.exclusions", sonarExclusions.join(', ')
   }
 }
 
