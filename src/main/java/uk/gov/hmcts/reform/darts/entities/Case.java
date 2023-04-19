@@ -15,6 +15,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
@@ -24,6 +25,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "moj_case")
+@NoArgsConstructor
 @Getter
 @Setter
 public class Case {
