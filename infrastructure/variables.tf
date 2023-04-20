@@ -1,3 +1,28 @@
+variable "product" {
+  default = "darts"
+}
+
+variable "component" {
+  default = "api"
+}
+
+variable "location" {
+  default = "UK South"
+}
+variable "env" {}
+
+variable "subscription" {
+  default = ""
+}
+
+variable "deployment_namespace" {
+  default = ""
+}
+
+variable "common_tags" {
+  type = map(string)
+}
+
 # Resource Group variables
 
 variable "resource_group_name" {
@@ -46,20 +71,8 @@ variable "azurerm_key_vault_secret_insights_key" {
   description = "Key Vault app insights key name"
 }
 
-# These variables are require by a Jenkins shell script used during deployment
+# These variables are required by a Jenkins shell script used during deployment
 # They are not necessarily used by the resources within this Terraform plan
-
-variable "product" {}
-
-variable "component" {}
-
-variable "env" {}
-
-variable "subscription" {}
-
-variable "common_tags" {
-  type = map(string)
-}
 
 variable "tenant_id" {}
 
