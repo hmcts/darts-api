@@ -4,7 +4,7 @@ locals {
 }
 
 module "database" {
-  source             = "git@github.com:hmcts/terraform-module-postgresql-flexible"
+  source             = "git@github.com:hmcts/cnp-module-postgres?ref=postgresql_tf"
   product            = var.product
   component          = var.component
   subnet_id          = data.azurerm_subnet.iaas.id
