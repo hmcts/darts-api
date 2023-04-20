@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.entities;
+package uk.gov.hmcts.darts.common.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,27 +14,26 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "moj_event")
+@Table(name = "moj_media")
 @Data
-public class Event {
+public class Media {
 
     @Id
-    @Column(name = "moj_eve_id")
+    @Column(name = "moj_med_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "r_event_object_id", unique = true, length = 16)
+    @Column(name = "r_media_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_event_id")
-    private Integer eventId;
+    @Column(name = "c_channel")
+    private Integer channel;
 
-    @Column(name = "c_text", length = 2000)
-    private String text;
+    @Column(name = "c_total_channels")
+    private Integer totalChannels;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "c_time_stamp")
-    private Date timestamp;
+    @Column(name = "c_reference_id", length = 32)
+    private String referenceId;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "c_start")

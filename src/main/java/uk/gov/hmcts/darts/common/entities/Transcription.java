@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.entities;
+package uk.gov.hmcts.darts.common.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,7 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -14,30 +15,50 @@ import jakarta.persistence.Version;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(name = "moj_annotation")
+@Table(name = "moj_transcription")
 @Data
-public class Annotation {
+public class Transcription {
 
     @Id
-    @Column(name = "moj_ann_id")
+    @Column(name = "moj_tra_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "moj_cas_id")
     private Case theCase;
 
-    @Column(name = "r_annotation_object_id", length = 16)
+    @Column(name = "r_transcription_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_text", length = 2000)
-    private String text;
+    @Column(name = "c_company", length = 64)
+    private String company;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "c_time_stamp")
-    private Date timestamp;
+    @Column(name = "c_type")
+    private Integer type;
+
+    @Column(name = "c_notification_type", length = 64)
+    private String notificationType;
+
+    @Column(name = "c_urgent")
+    private Integer urgent;
+
+    @Column(name = "c_requestor", length = 32)
+    private String requestor;
+
+    @Column(name = "c_current_state", length = 32)
+    private String currentState;
+
+    @Column(name = "c_urgency", length = 32)
+    private String urgency;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "c_hearing_date")
+    private Date hearingDate;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "c_start")
@@ -68,4 +89,7 @@ public class Annotation {
     @Version
     @Column(name = "i_version_label")
     private Short version;
+
+    @OneToMany(mappedBy = "theTranscription")
+    private Set<TranscriptionComment> theTranscriptionComments = new HashSet<>();
 }

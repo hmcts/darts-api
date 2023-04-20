@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.entities;
+package uk.gov.hmcts.darts.common.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
