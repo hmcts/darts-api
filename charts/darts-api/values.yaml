@@ -5,8 +5,8 @@ java:
   aadIdentityName: darts
 #  Uncomment once the vault containing the app insights key has been set up
 #  keyVaults:
-#    darts:
-#      secrets:
-#        - name: AppInsightsInstrumentationKey
-#          alias: azure.application-insights.instrumentation-key
+    darts:
+      secrets:
+        - name: AppInsightsInstrumentationKey
+        alias: azure.application-insights.instrumentation-key
   environment:
