@@ -70,12 +70,3 @@ variable "azurerm_key_vault_secret_insights_key" {
   default = "AppInsightsInstrumentationKey"
   description = "Key Vault app insights key name"
 }
-
-# These variables are required by a Jenkins shell script used during deployment
-# They are not necessarily used by the resources within this Terraform plan
-
-variable "tenant_id" {}
-
-variable "jenkins_AAD_objectId" {
-  description = "(Required) The Azure AD object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies."
-}

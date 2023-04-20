@@ -46,14 +46,14 @@ resource "azurerm_application_insights" "appinsights" {
 # ... said variables were moved here due to a Jenkins objection
 module "key-vault" {
   source = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
-  product = var.product
-  env = var.env
-  tenant_id = var.tenant_id
-  object_id = var.jenkins_AAD_objectId
+  product = "darts"
+  env = ""
+  tenant_id = ""
+  object_id = ""
   resource_group_name = azurerm_resource_group.rg.name
   # https://github.com/hmcts/devops-azure-ad/blob/master/users/prod_users.yml
   product_group_name  = "Key Vault product group name"
-  common_tags = var.common_tags
+  common_tags = ""
   managed_identity_object_ids = ["${data.azurerm_user_assigned_identity.rpe-shared-identity.principal_id}"]
 }
 
