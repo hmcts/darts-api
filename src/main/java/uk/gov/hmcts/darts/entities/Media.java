@@ -1,12 +1,10 @@
-package uk.gov.hmcts.reform.darts.entities;
+package uk.gov.hmcts.darts.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -16,28 +14,26 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "moj_annotation")
+@Table(name = "moj_media")
 @Data
-public class Annotation {
+public class Media {
 
     @Id
-    @Column(name = "moj_ann_id")
+    @Column(name = "moj_med_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToOne
-    @JoinColumn(name = "moj_cas_id")
-    private Case theCase;
-
-    @Column(name = "r_annotation_object_id", length = 16)
+    @Column(name = "r_media_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_text", length = 2000)
-    private String text;
+    @Column(name = "c_channel")
+    private Integer channel;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "c_time_stamp")
-    private Date timestamp;
+    @Column(name = "c_total_channels")
+    private Integer totalChannels;
+
+    @Column(name = "c_reference_id", length = 32)
+    private String referenceId;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "c_start")
@@ -56,9 +52,6 @@ public class Annotation {
     @Column(name = "c_reporting_restrictions")
     private Integer reportingRestrictions;
 
-    @Column(name = "r_case_object_id", length = 16)
-    private String legacyCaseObjectId;
-
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
 
@@ -68,4 +61,5 @@ public class Annotation {
     @Version
     @Column(name = "i_version_label")
     private Short version;
+
 }

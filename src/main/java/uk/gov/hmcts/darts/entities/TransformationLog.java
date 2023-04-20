@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.darts.entities;
+package uk.gov.hmcts.darts.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,12 +16,12 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "moj_hearing")
+@Table(name = "moj_transformation_log")
 @Data
-public class Hearing {
+public class TransformationLog {
 
     @Id
-    @Column(name = "moj_hea_id")
+    @Column(name = "moj_trl_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -29,27 +29,28 @@ public class Hearing {
     @JoinColumn(name = "moj_cas_id")
     private Case theCase;
 
-    @Column(name = "c_judge", length = 2000)
-    private String judge;
+    @Column(name = "r_transformation_log_object_id", length = 16)
+    private String legacyObjectId;
 
-    @Column(name = "c_defendant", length = 2000)
-    private String defendant;
+    @Column(name = "c_case_id", length = 32)
+    private String caseId;
 
-    @Column(name = "c_prosecutor", length = 2000)
-    private String prosecutor;
-
-    @Column(name = "c_defence", length = 2000)
-    private String defence;
+    @Column(name = "c_courthouse", length = 64)
+    private String courthouse;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "c_hearing_date")
-    private Date hearingDate;
+    @Column(name = "c_requested_date")
+    private Date requestedDate;
 
-    @Column(name = "c_judge_hearing_date", length = 2000)
-    private String judgeHearingDate;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "c_received_date")
+    private Date receivedDate;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;
+
+    @Column(name = "r_version_label", length = 32)
+    private String legacyVersionLabel;
 
     @Column(name = "i_superseded")
     private Boolean superseded;

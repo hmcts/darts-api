@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.darts.entities;
+package uk.gov.hmcts.darts.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -134,30 +134,30 @@ public class Case {
         }
         Case other = (Case) obj;
         return Objects.equals(caseId, other.caseId) && Objects.equals(courthouse, other.courthouse)
-                && Objects.equals(courtroom, other.courtroom) && Objects.equals(type, other.type)
-                && Objects.equals(uploadPriority, other.uploadPriority);
+            && Objects.equals(courtroom, other.courtroom) && Objects.equals(type, other.type)
+            && Objects.equals(uploadPriority, other.uploadPriority);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(250);
         builder.append("Case [id=").append(id)
-        .append(", legacyCaseObjectId=").append(legacyCaseObjectId)
-        .append(", type=").append(type)
-        .append(", caseId=").append(caseId)
-        .append(", courthouse=").append(courthouse)
-        .append(", courtroom=").append(courtroom)
-        .append(", scheduledStart=").append(scheduledStart)
-        .append(", uploadPriority=").append(uploadPriority)
-        .append(", reportingRestrictions=").append(reportingRestrictions)
-        .append(", closed=").append(closed)
-        .append(", interpreterUsed=").append(interpreterUsed)
-        .append(", caseClosedDate=").append(caseClosedDate)
-        .append(", legacyCourthouseObjectId=").append(legacyCourthouseObjectId)
-        .append(", legacyVersionLabel=").append(legacyVersionLabel)
-        .append(", superseded=").append(superseded)
-        .append(", version=").append(version)
-        .append(']');
+            .append(", legacyCaseObjectId=").append(legacyCaseObjectId)
+            .append(", type=").append(type)
+            .append(", caseId=").append(caseId)
+            .append(", courthouse=").append(courthouse)
+            .append(", courtroom=").append(courtroom)
+            .append(", scheduledStart=").append(scheduledStart)
+            .append(", uploadPriority=").append(uploadPriority)
+            .append(", reportingRestrictions=").append(reportingRestrictions)
+            .append(", closed=").append(closed)
+            .append(", interpreterUsed=").append(interpreterUsed)
+            .append(", caseClosedDate=").append(caseClosedDate)
+            .append(", legacyCourthouseObjectId=").append(legacyCourthouseObjectId)
+            .append(", legacyVersionLabel=").append(legacyVersionLabel)
+            .append(", superseded=").append(superseded)
+            .append(", version=").append(version)
+            .append(']');
         return builder.toString();
     }
 }
