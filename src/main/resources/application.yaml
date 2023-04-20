@@ -12,7 +12,7 @@ management:
         include: health, info, prometheus
 
 springdoc:
-  packagesToScan: uk.gov.hmcts.reform.darts.controllers
+  packagesToScan: uk.gov.hmcts.darts
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:

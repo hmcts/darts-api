@@ -206,7 +206,7 @@ dependencies {
   }
 }
 
-mainClassName = 'uk.gov.hmcts.reform.darts.Application'
+mainClassName = 'uk.gov.hmcts.darts.Application'
 
 bootJar {
   archiveFileName = "darts-api.jar"
