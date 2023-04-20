@@ -34,19 +34,6 @@ variable "azurerm_user_assigned_identity_rg_name" {
   description = "Azure user assigned identity resource group name"
 }
 
-# Key Vault variables
-
-variable "key_vault_source" {
-  default = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
-  description = "Key Vault source"
-}
-
-variable "key_vault_product_group_name" {
-  # https://github.com/hmcts/devops-azure-ad/blob/master/users/prod_users.yml
-  default = "DTS Darts Modernisation"
-  description = "Key Vault product group name"
-}
-
 # Key Vault secret variables
 
 variable "azurerm_key_vault_secret_conn_str" {
