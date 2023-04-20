@@ -41,6 +41,7 @@
     <exclude name="UseUtilityClass"/>
     <exclude name="LoosePackageCoupling"/>
     <exclude name="DataClass"/>
+    <exclude name="TooManyFields"/>
   </rule>
   <rule ref="category/java/design.xml/ExcessiveImports">
     <properties>
