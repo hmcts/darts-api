@@ -1,21 +1,15 @@
-variable "product" {
-  default = "darts"
-}
+variable "product" {}
 
-variable "component" {
-  default = "api"
-}
+variable "component" {}
 
 variable "location" {
   default = "UK South"
 }
+
 variable "env" {}
-variable "subscription" {
-  default = ""
-}
-variable "deployment_namespace" {
-  default = ""
-}
+
+variable "subscription" {}
+
 variable "common_tags" {
   type = map(string)
 }
