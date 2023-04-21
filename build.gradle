@@ -11,7 +11,7 @@ plugins {
   id "io.freefair.lombok" version "8.0.1"
 }
 
-group = 'uk.gov.hmcts.reform'
+group = 'uk.gov.hmcts'
 version = '0.0.1'
 
 java {
@@ -129,10 +129,15 @@ jacocoTestReport {
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
+def sonarExclusions = [
+  '**/uk/gov/hmcts/darts/common/entities/**'
+]
+
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
+    property "sonar.exclusions", sonarExclusions.join(', ')
   }
 }
 
@@ -182,6 +187,7 @@ ext {
 }
 
 ext['snakeyaml.version'] = '2.0'
+ext['spring-security.version']='6.0.3' // https://spring.io/security/cve-2023-20862
 
 dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -189,6 +195,10 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
+
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
@@ -197,6 +207,8 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
+
+  runtimeOnly 'org.hsqldb:hsqldb'
 
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
