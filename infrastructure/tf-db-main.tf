@@ -31,6 +31,7 @@ module "create_sdp_access" {
   password            = data.azurerm_key_vault_secret.sdp-pass.value
   skip_reassign_owned = true
   skip_drop_role      = true
+  provider = "postgresql.admindb"
 }
 
 module  "readonly_mv" {
@@ -41,4 +42,5 @@ module  "readonly_mv" {
   object_type = "table"
   privileges  = ["SELECT"]
   objects     = ["sdp_mat_view_location", "sdp_mat_view_artefact"]
+  provider = "postgresql.admindb"
 }
