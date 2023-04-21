@@ -24,23 +24,3 @@ module "database" {
 
 }
 
-module "create_sdp_access" {
-  source             = "git@github.com:hmcts/terraform-module-postgresql-flexible.git?ref=master"
-  name                = data.azurerm_key_vault_secret.sdp-user.value
-  login               = true
-  password            = data.azurerm_key_vault_secret.sdp-pass.value
-  skip_reassign_owned = true
-  skip_drop_role      = true
-  provider = "postgresql.admindb"
-}
-
-module  "readonly_mv" {
-  source      = "git@github.com:hmcts/terraform-module-postgresql-flexible.git?ref=master"
-  database    = module.database.postgresql_database
-  role        = data.azurerm_key_vault_secret.sdp-user.value
-  schema      = "public"
-  object_type = "table"
-  privileges  = ["SELECT"]
-  objects     = ["sdp_mat_view_location", "sdp_mat_view_artefact"]
-  provider = "postgresql.admindb"
-}

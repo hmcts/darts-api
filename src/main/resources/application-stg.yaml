@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    azure:
+      active-directory:
+        enabled: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:${DB_PORT}/postgres
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    properties:
+      charSet: UTF-8
+  autoconfigure:
+    exclude:
+      - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
+      - "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
