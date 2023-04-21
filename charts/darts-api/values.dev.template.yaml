@@ -1,5 +1,5 @@
+# Don't modify this file, it is only needed for the pipeline to set the image and ingressHost
 java:
-  # Don't modify below here
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
@@ -14,5 +14,4 @@ java:
   #disableKeyVaults: true
   postgresql:
     enabled: true
-  devApplicationInsightsInstrumentKeyName: AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
 
