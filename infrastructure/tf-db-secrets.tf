@@ -26,37 +26,6 @@ locals {
 
 }
 
-## Loop secrets
-resource "azurerm_key_vault_secret" "secret" {
-  for_each     = { for secret in local.secrets : secret.name_suffix => secret }
-  key_vault_id = data.azurerm_key_vault.kv.id
-  name         = "${local.secret_prefix}-${each.value.name_suffix}"
-  value        = each.value.value
-  tags = merge(var.common_tags, {
-    "source" : "${var.component} PostgreSQL"
-  })
-  content_type    = ""
-  expiration_date = timeadd(timestamp(), "8760h")
-
-  depends_on = [
-    module.database
-  ]
-}
-
-resource "azurerm_key_vault_secret" "sdp-host" {
-  key_vault_id = data.azurerm_key_vault.sdp-kv.id
-  name         = "${local.secret_prefix}-HOST"
-  value        = module.database.host_name
-  tags = merge(var.common_tags, {
-    "source" : "${var.component} PostgreSQL"
-  })
-  content_type    = ""
-  expiration_date = timeadd(timestamp(), "8760h")
-
-  depends_on = [
-    module.database
-  ]
-}
 
 
 
