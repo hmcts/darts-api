@@ -24,4 +24,5 @@ provider "postgresql" {
   superuser       = false
   sslmode         = "require"
   connect_timeout = 15
+  alias = "admindb"
 }
