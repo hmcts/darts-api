@@ -1,7 +1,11 @@
 package uk.gov.hmcts.darts.authentication.service;
 
-import org.springframework.stereotype.Service;
 
-@Service
-public class AuthenticationService {
+import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
+
+public interface AuthenticationService {
+
+    String getAuthorizationUrl();
+
+    OAuthProviderRawResponse fetchAccessToken(String code);
 }
