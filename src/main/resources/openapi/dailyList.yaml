@@ -1,0 +1,395 @@
+openapi: 3.0.1
+
+info:
+
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /dailylist/addDailyList:
+    post:
+      tags:
+        - DailyLists
+      summary: XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
+      description: |-
+        description
+      parameters:
+        - in: query
+          name: court_list_id
+          schema:
+            type: string
+            format: uuid
+          description: ""
+          required: true
+          example: "43d2e551-3695-3a2e-a635-be2667edae47"
+        - in: query
+          name: court_centre_id
+          schema:
+            type: string
+            format: uuid
+          description: ""
+          required: true
+          example: "ddce58c9-446f-33f4-89cb-914ed173dfb8"
+        - in: query
+          name: publish_court_list_type
+          schema:
+            type: string
+          description: ""
+          required: true
+          example: "DRAFT"
+      requestBody:
+        $ref: '#/components/requestBodies/DailyListPost'
+      responses:
+        '201':
+          description: Created
+
+        '500':
+          description: Internal Server Error
+
+  /dailylist/getCases:
+    get:
+      tags:
+        - DailyLists
+      summary: Retrieves the case list for the specified courthouse, courtroom and a hearing date
+      description: |-
+        description
+      parameters:
+        - in: query
+          name: court_house_code
+          schema:
+            type: integer
+          description: "The CourtHouseCode to get the daily list for."
+          required: true
+          example: 457
+        - in: query
+          name: court_room_number
+          schema:
+            type: integer
+          description: "The CourtRoomNumber to get the daily list for.<br>This is optional, if not provided, the daily list for all court rooms in the court house will be provided."
+          example: 1
+        - in: query
+          name: hearing_date
+          schema:
+            type: string
+            format: date
+          description: "The date to get the daily list for.<br>This is optional, if not provided, the daily list for today will be provided."
+          example: 2023-01-01
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourtList'
+
+        '500':
+          description: Internal Server Error
+
+
+components:
+  examples:
+    OperationName_HappyScenario:
+      value:
+        Header:
+        Body:
+          OperationName: '1'
+
+    #-----------------#
+    #----------------------------------#
+
+    OperationName_RS_HappyScenarioPost:
+      value:
+        Header:
+        Body:
+          OperationName: '1Post'
+
+  #-----------------#
+  #----------------------------------#
+  #-----------------#
+
+  requestBodies:
+    DailyListPost:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DailyList'
+    CreateCase:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Sitting'
+
+
+    #-----------------#
+    #----------------------------------#
+    #-----------------#
+
+  schemas:
+    DailyList:
+      type: object
+      properties:
+        document_id:
+          $ref: '#/components/schemas/DocumentID'
+        list_header:
+          $ref: '#/components/schemas/ListHeader'
+        crown_court:
+          $ref: '#/components/schemas/CourtHouse'
+        court_lists:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourtList'
+    DocumentID:
+      type: object
+      properties:
+        document_name:
+          type: string
+          example: "DailyList_457_20210219174938.xml"
+          description: ""
+        unique_id:
+          type: string
+          example: "CSDDL1613756980160"
+          description: ""
+        document_type:
+          type: string
+          example: "DL"
+          description: ""
+        time_stamp:
+          type: string
+          format: date-time
+          example: "2021-02-19T17:49:38.391"
+          description: ""
+    ListHeader:
+      type: object
+      properties:
+        list_category:
+          type: string
+          example: "Criminal"
+          description: ""
+        start_date:
+          type: string
+          format: date
+          example: "2021-02-23"
+          description: ""
+        end_date:
+          type: string
+          format: date
+          example: "2021-02-23"
+          description: ""
+        version:
+          type: string
+          example: "NOT VERSIONED"
+          description: ""
+        published_time:
+          type: string
+          format: date-time
+          example: "2021-02-19T17:49:38.767Z"
+          description: ""
+    CourtHouseCode:
+      type: object
+      properties:
+        court_house_short_name:
+          type: string
+          example: "SWANS"
+          description: ""
+        code:
+          type: integer
+          example: "457"
+          description: ""
+    CourtHouse:
+      type: object
+      properties:
+        court_house_type:
+          type: string
+          example: "Crown Court"
+          description: ""
+        court_house_code:
+          $ref: '#/components/schemas/CourtHouseCode'
+        court_house_name:
+          type: string
+          example: "SWANSEA"
+          description: ""
+    CourtList:
+      type: object
+      properties:
+        court_house:
+          $ref: '#/components/schemas/CourtHouse'
+        sittings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sitting'
+    Sitting:
+      type: object
+      properties:
+        court_room_number:
+          type: integer
+          example: 1
+          description: ""
+        sitting_sequence_no:
+          type: integer
+          example: 1
+          description: ""
+        sitting_at:
+          type: string
+          format: time
+          example: "11:00:00"
+          description: ""
+        sitting_priority:
+          type: string
+          example: "T"
+          description: ""
+        judiciary:
+          $ref: '#/components/schemas/Judiciary'
+        hearings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hearing'
+    Judiciary:
+      type: array
+      items:
+        $ref: '#/components/schemas/CitizenName'
+    CitizenName:
+      type: object
+      properties:
+        citizen_name_forename:
+          type: string
+          example: "Susan Katherine"
+          description: ""
+        citizen_name_surname:
+          type: string
+          example: "Bonnell"
+          description: ""
+        citizen_name_requested_name:
+          type: string
+          example: "Mrs Susan Katherine Bonnell JP"
+          description: ""
+    Hearing:
+      type: object
+      properties:
+        hearing_sequence_number:
+          type: integer
+          example: 1
+          description: ""
+        hearing_details:
+          $ref: '#/components/schemas/HearingDetails'
+        time_marking_note:
+          type: string
+          example: "NOT BEFORE 11:00 AM"
+          description: ""
+        case_number:
+          type: string
+          example: "CPP"
+          description: ""
+        prosecution:
+          $ref: '#/components/schemas/Prosecution'
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Defendant'
+    HearingDetails:
+      type: object
+      properties:
+        hearing_type:
+          type: string
+          example: "PTR"
+          description: ""
+        hearing_description:
+          type: string
+          example: "For Pre-Trial Review"
+          description: ""
+        hearing_date:
+          type: string
+          format: date
+          example: "2021-02-23"
+          description: ""
+    Prosecution:
+      type: object
+      properties:
+        prosecuting_authority:
+          type: string
+          example: "Crown Prosecution Service"
+          description: ""
+        prosecuting_reference:
+          type: string
+          example: "Crown Prosecution Service"
+          description: ""
+        prosecuting_organisation:
+          type: object
+          properties:
+            organisation_name:
+              type: string
+              example: "Crown Prosecution Service"
+              description: ""
+    Defendant:
+      type: object
+      properties:
+        personal_details:
+          type: object
+          properties:
+            name:
+              $ref: '#/components/schemas/CitizenName'
+            is_masked:
+              type: string
+              example: "no"
+              description: ""
+        urn:
+          type: string
+          example: "42GD2391421"
+          description: ""
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Charge'
+    Charge:
+      type: object
+      properties:
+        indictment_count_number:
+          type: integer
+          example: 1
+          description: ""
+        cjsoffence_code:
+          type: string
+          example: "CA03014"
+          description: ""
+        offence_statement:
+          type: string
+          example: "Fail    / refuse give assistance to person executing Communications Act search warrant"
+          description: ""
+    SearchCaseResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/SearchCaseResponseObject'
+    SearchCaseResponseObject:
+      type: object
+      properties:
+        case:
+          type: string
+          example: "T20200003"
+          description: ""
+        reporting_restriction:
+          type: string
+          example: "Restriction"
+          description: ""
+        court_house:
+          type: string
+          example: "CARDIFF"
+          description: ""
+        judiciary:
+          type: array
+          items:
+            $ref: '#/components/schemas/CitizenName'
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/Defendant'
+
+
+
