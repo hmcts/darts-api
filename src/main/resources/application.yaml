@@ -20,7 +20,7 @@ spring:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:
     name: Spring Boot Template
- datasource:
+  datasource:
    driver-class-name: org.postgresql.Driver
    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
    username: ${DB_USER_NAME}
@@ -34,13 +34,26 @@ spring:
      poolName: {to-be-defined}HikariCP
      maxLifetime: 7200000
      connectionTimeout: 30000
- jpa:
-   properties:
-     hibernate:
-       jdbc:
-         lob:
-           # silence the 'wall-of-text' - unnecessary exception throw about blob types
-           non_contextual_creation: true
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL81Dialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    database: POSTGRESQL
+    generate-ddl: 'true'
+    hibernate:
+      # this ensures the db persists after spring boot connection drops.
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+  # This is needed as locally, all tables are in a single schema. Flyway is only enabled on the clusters by default
+  flyway:
+    enabled: ${ENABLE_FLYWAY:false}
+
 
 azure:
   application-insights:
