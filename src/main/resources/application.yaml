@@ -20,7 +20,7 @@ spring:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:
     name: Spring Boot Template
- datasource:
+  datasource:
    driver-class-name: org.postgresql.Driver
    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
    username: ${DB_USER_NAME}
@@ -34,10 +34,10 @@ spring:
      poolName: ConnectionPool
      maxLifetime: 7200000
      connectionTimeout: 30000
- jpa:
-   properties:
-     hibernate:
-       dialect: org.hibernate.dialect.PostgreSQL81Dialect
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL81Dialect
         jdbc:
           lob:
             non_contextual_creation: true
@@ -53,7 +53,7 @@ spring:
   # This is needed as locally, all tables are in a single schema. Flyway is only enabled on the clusters by default
   flyway:
     enabled: ${ENABLE_FLYWAY:false}
-    
+
 azure:
   application-insights:
     instrumentation-key: ${darts.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
