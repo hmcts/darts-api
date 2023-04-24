@@ -200,7 +200,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
-  implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.4'
+  implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.3'
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
 
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
