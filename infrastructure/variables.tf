@@ -46,7 +46,7 @@ variable "appinsights_application_type" {
   default     = "web"
   description = "Application Insights application type"
 }
-*/
+
 # Azure user assigned identity variables
 
 variable "azurerm_user_assigned_identity_name" {
@@ -58,7 +58,7 @@ variable "azurerm_user_assigned_identity_rg_name" {
   default     = "managed-identities-${var.env}-rg"
   description = "Azure user assigned identity resource group name"
 }
-/*
+
 # Key Vault secret variables
 
 variable "azurerm_key_vault_secret_conn_str" {
