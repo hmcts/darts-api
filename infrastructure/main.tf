@@ -21,15 +21,15 @@ resource "azurerm_resource_group" "rg" {
   location = "uksouth"
   #tags     = var.resource_group_tags
 }
-/*
+
 # Application Insights
 
 resource "azurerm_application_insights" "appinsights" {
-  name                = var.appinsights_name
+  name                = "darts-api-appinsights-dev"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  application_type    = var.appinsights_application_type
-  tags                = var.common_tags
+  application_type    = "web"
+  #tags                = var.common_tags
 
   lifecycle {
     ignore_changes = [
@@ -39,7 +39,7 @@ resource "azurerm_application_insights" "appinsights" {
     ]
   }
 }
-
+/*
 # this key vault is created in every environment, but preview, being short-lived,
 # will use the aat one instead
 # This section includes hardcoded variables that were in variables.tf ...
