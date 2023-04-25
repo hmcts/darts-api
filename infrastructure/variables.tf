@@ -22,7 +22,7 @@ variable "deployment_namespace" {
 variable "common_tags" {
   type = map(string)
 }
-
+/*
 # Resource Group variables
 
 variable "resource_group_name" {
@@ -34,7 +34,7 @@ variable "resource_group_location" {
   default     = "uksouth"
   description = "Location of the resource group"
 }
-/*
+
 # Application Insights variables
 
 variable "appinsights_name" {
