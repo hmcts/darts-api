@@ -21,7 +21,7 @@ resource "azurerm_resource_group" "rg" {
   location = var.resource_group_location
   tags     = var.resource_group_tags
 }
-
+/*
 # Application Insights
 
 resource "azurerm_application_insights" "appinsights" {
@@ -70,3 +70,4 @@ resource "azurerm_key_vault_secret" "azure_appinsights_key" {
   value        = azurerm_application_insights.appinsights.instrumentation_key
   key_vault_id = module.key-vault.key_vault_id
 }
+*/
