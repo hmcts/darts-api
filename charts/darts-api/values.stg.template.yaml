@@ -1,7 +1,7 @@
 # Don't modify this file, it is only needed for the pipeline to set the image and ingressHost
 java:
-  image: 'sdshmctspublic.azurecr.io/darts/api:latest'
-  ingressHost: darts-api.{{ .Values.global.environment }}.platform.hmcts.net
+  image: ${IMAGE_NAME}
+  ingressHost: ${SERVICE_FQDN}
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true
