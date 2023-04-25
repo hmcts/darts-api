@@ -40,7 +40,7 @@ class AuthenticationServiceImplTest {
 
     @Test
     void testGetAuthorizationUrlFromConfigWhenLoginRequested() {
-        mockStubsForAutorizationCode();
+        mockStubsForAuthorizationCode();
         String authUrl = authenticationService.getAuthorizationUrl();
         assertEquals(AUTHORIZE_URL, authUrl, "Expected Authorize URL is generated");
     }
@@ -99,7 +99,7 @@ class AuthenticationServiceImplTest {
         ).build();
     }
 
-    private void mockStubsForAutorizationCode() {
+    private void mockStubsForAuthorizationCode() {
         mockCommonStubs();
         when(authenticationConfiguration.getExternalADauthorizationUri()).thenReturn("AuthUrl");
         when(authenticationConfiguration.getExternalADredirectUri()).thenReturn("RedirectId");
