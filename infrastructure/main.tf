@@ -56,18 +56,17 @@ module "key-vault" {
   common_tags                 = ""
   managed_identity_object_ids = ["${data.azurerm_user_assigned_identity.rpe-shared-identity.principal_id}"]
 }
-/*
+
 # Key Vault secrets
 
 resource "azurerm_key_vault_secret" "app_insights_connection_string" {
-  name         = var.azurerm_key_vault_secret_conn_str
+  name         = "app-insights-connection-string"
   value        = azurerm_application_insights.appinsights.connection_string
   key_vault_id = module.key-vault.key_vault_id
 }
 
 resource "azurerm_key_vault_secret" "azure_appinsights_key" {
-  name         = var.azurerm_key_vault_secret_insights_key
+  name         = "AppInsightsInstrumentationKey"
   value        = azurerm_application_insights.appinsights.instrumentation_key
   key_vault_id = module.key-vault.key_vault_id
 }
-*/
