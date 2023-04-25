@@ -17,9 +17,9 @@ locals {
 # Resource Group
 
 resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
-  location = var.resource_group_location
-  #tags     = var.common_tags
+  name     = "${var.product}-${var.component}-${var.env}"
+  location = "uksouth"
+  #tags     = var.resource_group_tags
 }
 /*
 # Application Insights
