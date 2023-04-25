@@ -21,28 +21,12 @@ paths:
         description
       parameters:
         - in: query
-          name: court_list_id
+          name: source_system
           schema:
             type: string
-            format: uuid
-          description: ""
+            enum: [CPP, XHB]
+          description: "The source system that has sent the message"
           required: true
-          example: "43d2e551-3695-3a2e-a635-be2667edae47"
-        - in: query
-          name: court_centre_id
-          schema:
-            type: string
-            format: uuid
-          description: ""
-          required: true
-          example: "ddce58c9-446f-33f4-89cb-914ed173dfb8"
-        - in: query
-          name: publish_court_list_type
-          schema:
-            type: string
-          description: ""
-          required: true
-          example: "DRAFT"
       requestBody:
         $ref: '#/components/requestBodies/DailyListPost'
       responses:
@@ -363,33 +347,7 @@ components:
           type: string
           example: "Fail    / refuse give assistance to person executing Communications Act search warrant"
           description: ""
-    SearchCaseResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/SearchCaseResponseObject'
-    SearchCaseResponseObject:
-      type: object
-      properties:
-        case:
-          type: string
-          example: "T20200003"
-          description: ""
-        reporting_restriction:
-          type: string
-          example: "Restriction"
-          description: ""
-        court_house:
-          type: string
-          example: "CARDIFF"
-          description: ""
-        judiciary:
-          type: array
-          items:
-            $ref: '#/components/schemas/CitizenName'
-        defendants:
-          type: array
-          items:
-            $ref: '#/components/schemas/Defendant'
+
 
 
 

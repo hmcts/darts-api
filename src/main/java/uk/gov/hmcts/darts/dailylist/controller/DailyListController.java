@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.common.controller;
+package uk.gov.hmcts.darts.dailylist.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,14 +10,13 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uk.gov.hmcts.darts.api.DailylistApi;
-import uk.gov.hmcts.darts.dailylistmodel.CourtList;
-import uk.gov.hmcts.darts.dailylistmodel.DailyList;
+import uk.gov.hmcts.darts.dailylist.api.DailylistApi;
+import uk.gov.hmcts.darts.dailylist.model.CourtList;
+import uk.gov.hmcts.darts.dailylist.model.DailyList;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.UUID;
 
 /**
  * Default endpoints per application.
@@ -29,9 +28,7 @@ public class DailyListController implements DailylistApi {
      * POST /dailylist/addDailyList : XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
      * description
      *
-     * @param courtListId  (required)
-     * @param courtCentreId  (required)
-     * @param publishCourtListType  (required)
+     * @param sourceSystem The source system that has sent the message (required)
      * @param dailyList  (required)
      * @return Created (status code 201)
      *         or Internal Server Error (status code 500)
@@ -46,16 +43,14 @@ public class DailyListController implements DailylistApi {
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
         }
     )
-    @Override
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/dailylist/addDailyList",
         consumes = { "application/json" }
     )
+    @Override
     public ResponseEntity<Void> dailylistAddDailyListPost(
-        @NotNull @Parameter(name = "court_list_id", description = "", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "court_list_id", required = true) UUID courtListId,
-        @NotNull @Parameter(name = "court_centre_id", description = "", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "court_centre_id", required = true) UUID courtCentreId,
-        @NotNull @Parameter(name = "publish_court_list_type", description = "", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "publish_court_list_type", required = true) String publishCourtListType,
+        @NotNull @Parameter(name = "source_system", description = "The source system that has sent the message", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "source_system", required = true) String sourceSystem,
         @Parameter(name = "DailyList", description = "", required = true) @Valid @RequestBody DailyList dailyList
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);

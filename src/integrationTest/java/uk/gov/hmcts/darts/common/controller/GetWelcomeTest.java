@@ -32,6 +32,7 @@ class GetWelcomeTest {
     void dailyListAddDailyListEndpoint() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/dailylist/addDailyList")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam("source_system", "CPP")
             .content("{\n" +
                          "  \"document_id\": {\n" +
                          "    \"document_name\": \"DailyList_457_20210219174938.xml\",\n" +
@@ -123,6 +124,6 @@ class GetWelcomeTest {
                          "}\n");
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented()).andReturn();
 
-        assertThat(response.getResponse().getContentAsString()).startsWith("Welcome");
+        assertThat(response.getResponse().getContentAsString()).isEqualTo("");
     }
 }
