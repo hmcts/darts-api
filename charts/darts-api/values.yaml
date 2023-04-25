@@ -10,8 +10,6 @@ java:
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
   environment:
-    ENABLE_FLYWAY: true
-    RUN_DB_MIGRATION_ON_STARTUP: true
     DB_HOST: localhost
     DB_NAME: postgres
     DB_USER: darts
