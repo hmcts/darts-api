@@ -1,14 +1,14 @@
 # Don't modify this file, it is only needed for the pipeline to set the image and ingressHost
 java:
-  image: ${IMAGE_NAME}
-  ingressHost: ${SERVICE_FQDN}
+  image: 'sdshmctspublic.azurecr.io/darts/api:latest'
+  ingressHost: darts-api.{{ .Values.global.environment }}.platform.hmcts.net
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true
     DB_HOST: "{{ .Release.Name }}-postgresql"
-    DB_NAME: "{{ .Values.postgresql.auth.database}}"
-    DB_USER: "{{ .Values.postgresql.auth.username}}"
-    DB_PASS: "{{ .Values.postgresql.auth.password}}"
+    DB_NAME: postgres
+    DB_USER: darts
+    DB_PASS: darts
     DB_PORT: "5432"
     #AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: '3c3bacb7-64e0-476c-aeaa-657657b063fd'
   #disableKeyVaults: true
