@@ -13,7 +13,7 @@ locals {
   prefix            = "${var.product}-ss"
   prefix_no_special = replace(local.prefix, "-", "")
 }
-
+/*
 # Resource Group
 
 resource "azurerm_resource_group" "rg" {
@@ -21,7 +21,7 @@ resource "azurerm_resource_group" "rg" {
   location = var.resource_group_location
   tags     = var.resource_group_tags
 }
-/*
+
 # Application Insights
 
 resource "azurerm_application_insights" "appinsights" {

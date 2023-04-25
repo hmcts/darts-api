@@ -22,7 +22,7 @@ variable "deployment_namespace" {
 variable "common_tags" {
   type = map(string)
 }
-
+/*
 # Resource Group variables
 
 variable "resource_group_name" {
@@ -70,3 +70,4 @@ variable "azurerm_key_vault_secret_insights_key" {
   default     = "AppInsightsInstrumentationKey"
   description = "Key Vault app insights key name"
 }
+*/
