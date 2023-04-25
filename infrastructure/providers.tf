@@ -5,7 +5,7 @@ terraform {
       version = "3.41.0"
     }
     postgresql = {
-      source = "cyrilgdn/postgresql"
+      source  = "cyrilgdn/postgresql"
       version = ">=1.17.1"
     }
   }
@@ -24,5 +24,5 @@ provider "postgresql" {
   superuser       = false
   sslmode         = "require"
   connect_timeout = 15
-  alias = "admindb"
+  alias           = "admindb"
 }
