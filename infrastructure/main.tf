@@ -39,7 +39,7 @@ resource "azurerm_application_insights" "appinsights" {
     ]
   }
 }
-/*
+
 # this key vault is created in every environment, but preview, being short-lived,
 # will use the aat one instead
 # This section includes hardcoded variables that were in variables.tf ...
@@ -56,7 +56,7 @@ module "key-vault" {
   common_tags                 = ""
   managed_identity_object_ids = ["${data.azurerm_user_assigned_identity.rpe-shared-identity.principal_id}"]
 }
-
+/*
 # Key Vault secrets
 
 resource "azurerm_key_vault_secret" "app_insights_connection_string" {
