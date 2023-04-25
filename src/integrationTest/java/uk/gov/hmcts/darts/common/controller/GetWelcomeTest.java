@@ -126,4 +126,16 @@ class GetWelcomeTest {
 
         assertThat(response.getResponse().getContentAsString()).isEqualTo("");
     }
+
+    @Test
+    void dailyListGetCasesEndpoint() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = get("/dailylist/getCases")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam("court_house_code", "457")
+            .queryParam("court_room_number", "1")
+            .queryParam("hearing_date", "2023-02-02");
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented()).andReturn();
+
+        assertThat(response.getResponse().getContentAsString()).isEqualTo("");
+    }
 }
