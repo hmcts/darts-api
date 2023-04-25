@@ -9,7 +9,8 @@ java:
     DB_NAME: postgres
     DB_USER: darts
     DB_PASS: darts
-    DB_PORT: "5432"
+    DB_PORT: 5432
+    DB_OPTIONS: '?sslmode=allow'
     #AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: '3c3bacb7-64e0-476c-aeaa-657657b063fd'
   #disableKeyVaults: true
   postgresql:
