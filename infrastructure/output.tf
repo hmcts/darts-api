@@ -1,4 +1,5 @@
 
+/*
 # Resource Group outputs
 
 output "resource_group_id" {
@@ -25,3 +26,4 @@ output "app_insights_name" {
 output "app_insights_resource_group_name" {
   value = azurerm_application_insights.appinsights.resource_group_name
 }
+*/
