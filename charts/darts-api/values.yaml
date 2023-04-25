@@ -10,3 +10,12 @@ java:
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
   environment:
+  ENABLE_FLYWAY: true
+  RUN_DB_MIGRATION_ON_STARTUP: true
+  DB_HOST: staging_db_postgresql
+  DB_NAME: postgres
+  DB_USER: darts
+  DB_PASS: darts
+  DB_PORT: "5432"
+  #AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: '3c3bacb7-64e0-476c-aeaa-657657b063fd'
+  #disableKeyVaults: true
