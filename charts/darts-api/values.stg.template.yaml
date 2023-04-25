@@ -5,7 +5,7 @@ java:
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true
-    DB_HOST: "{{ .Release.Name }}-postgresql"
+    DB_HOST: staging_db_postgresql
     DB_NAME: postgres
     DB_USER: darts
     DB_PASS: darts
