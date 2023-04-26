@@ -142,7 +142,9 @@ sonarqube {
   properties {
     property "sonar.projectName", "Reform :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
-    property "sonar.exclusions", sonarExclusions.join(', ')
+    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/darts/authentication/model/OAuthProviderRawResponse.java," +
+      "src/main/java/uk/gov/hmcts/darts/authentication/config/**,"+
+      "src/main/java/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java"
   }
 }
 
@@ -212,9 +214,9 @@ dependencies {
 
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '3.1.6'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
-
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
 

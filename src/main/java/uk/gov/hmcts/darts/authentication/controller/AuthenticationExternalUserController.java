@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.authentication.controller;
 
-import groovy.util.logging.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,7 +13,7 @@ public class AuthenticationExternalUserController extends AuthenticationControll
 
     @GetMapping("/login-or-refresh")
     public ModelAndView loginOrRefresh() {
-
-        return new ModelAndView();
+        log.info("Azure Authorize URL :- {} ", getAuthorizeUrl());
+        return new ModelAndView("redirect:" + getAuthorizeUrl());
     }
 }
