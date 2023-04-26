@@ -48,7 +48,7 @@ class DailyListTest {
     }
 
     private String getContentsFromFile(String filelocation) throws IOException {
-        ClassLoader classLoader = getClass().getClassLoader();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         File file = new File(classLoader.getResource(filelocation).getFile());
         return FileUtils.readFileToString(file, "UTF-8");
     }
