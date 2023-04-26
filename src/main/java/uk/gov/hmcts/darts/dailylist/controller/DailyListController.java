@@ -9,14 +9,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.dailylist.api.DailylistApi;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
 
+import java.time.LocalDate;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 /**
  * Default endpoints per application.
@@ -59,7 +63,7 @@ public class DailyListController implements DailylistApi {
 
 
     /**
-     * GET /dailylist/getCases : Retrieves the case list for the specified courthouse, courtroom and a hearing date
+     * GET /dailylist/getCases : Retrieves the case list for the specified courthouse, courtroom and a hearing date.
      * description
      *
      * @param courtHouseCode The CourtHouseCode to get the daily list for. (required)

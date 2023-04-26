@@ -249,6 +249,10 @@ rootProject.tasks.named("processSmokeTestResources") {
   duplicatesStrategy = 'include'
 }
 
+rootProject.tasks.named("processIntegrationTestResources") {
+  duplicatesStrategy = 'include'
+}
+
 wrapper {
   distributionType = Wrapper.DistributionType.ALL
 }
@@ -259,7 +263,6 @@ openApiGenerate {
   inputSpec = "$rootDir/src/main/resources/openapi/dailyList.yaml".toString()
   outputDir = "$buildDir/generated/openapi".toString()
   apiPackage = "uk.gov.hmcts.darts.dailylist.api"
-  //invokerPackage = "uk.gov.hmcts.darts.invoker"
   modelPackage = "uk.gov.hmcts.darts.dailylist.model"
 
   skipOperationExample = true
