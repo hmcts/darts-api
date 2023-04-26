@@ -24,8 +24,8 @@ spring:
     driver-class-name: org.postgresql.Driver
     # url: jdbc:postgresql://${DB_HOST}:5432/darts
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:darts}
-    username: ${DB_USER:darts}
-    password: ${DB_PASS}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:test}
     properties:
       charSet: UTF-8
     hikari:
