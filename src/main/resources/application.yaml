@@ -19,12 +19,12 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:
-    name: Spring Boot Template
+    name: Darts Api
   datasource:
-   driver-class-name: org.postgresql.Driver
-   url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-   username: ${DB_USER}
-   password: ${DB_PASS}
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:${DB_PORT}/postgres
+    username: ${DB_USER}
+    password: ${DB_PASS}
    properties:
      charSet: UTF-8
    hikari:
