@@ -25,15 +25,15 @@ spring:
     url: jdbc:postgresql://localhost:${DB_PORT}/postgres
     username: ${DB_USER}
     password: ${DB_PASS}
-   properties:
-     charSet: UTF-8
-   hikari:
-     minimumIdle: 2
-     maximumPoolSize: 10
-     idleTimeout: 10000
-     poolName: ConnectionPool
-     maxLifetime: 7200000
-     connectionTimeout: 30000
+    properties:
+      charSet: UTF-8
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 10000
+      poolName: ConnectionPool
+      maxLifetime: 7200000
+      connectionTimeout: 30000
   jpa:
     properties:
       hibernate:
