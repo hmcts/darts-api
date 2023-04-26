@@ -23,7 +23,7 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     # url: jdbc:postgresql://${DB_HOST}:5432/darts
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/jack1
     username: ${DB_USER}
     password: ${DB_PASS}
     properties:
