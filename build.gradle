@@ -131,8 +131,8 @@ project.tasks['check'].dependsOn integration
 
 def sonarExclusions = [
   '**/uk/gov/hmcts/darts/common/entities/**',
-  '**/uk/gov/hmcts/darts/authentication/model/OAuthProviderRawResponse.java',
-  '**/uk/gov/hmcts/darts/authentication/config/**',
+  '**/uk/gov/hmcts/darts/**/model/**',
+  '**/uk/gov/hmcts/darts/**/config/**',
   '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java'
 ]
 
