@@ -8,5 +8,5 @@ java:
     darts:
       secrets:
         - name: AppInsightsInstrumentationKey
-        alias: azure.application-insights.instrumentation-key
+          alias: azure.application-insights.instrumentation-key
   environment:
