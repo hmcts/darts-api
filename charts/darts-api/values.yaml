@@ -9,11 +9,6 @@ java:
 #      secrets:
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
-  environment:
-    api_DB_PORT: 5432
-    api_DB_NAME: darts_api
-    api_DB_HOST: darts-api-postgres-db-v11-{{ .Values.global.environment }}.postgres.database.azure.com
-    darts_api_QUEUE: darts-api-in-out-{{ .Values.global.environment }}
   keyVaults:
     darts:
       secrets:
@@ -29,3 +24,6 @@ java:
           alias: DARTS_API_DB_PORT
         - name: darts-api-POSTGRES-DATABASE
           alias: DARTS_API_DB_NAME
+
+  environment:
+    DARTS_API_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
