@@ -34,8 +34,11 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: UTC
+          lob:
+            non_contextual_creation: true
       org:
         hibernate:
           envers:
