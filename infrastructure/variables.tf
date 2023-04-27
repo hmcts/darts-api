@@ -24,7 +24,7 @@ variable "common_tags" {
 variable "team_contact" {
   type        = string
   description = "The name of your Slack channel people can use to contact your team about your infrastructure"
-  default     = "#civil-sdt"
+  default     = "#darts-devs"
 }
 
 variable "destroy_me" {
@@ -49,4 +49,46 @@ variable "jenkins_AAD_objectId" {
   description = "(Required) The Azure AD object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies."
 }
 
+
+variable "sku_name" {
+  default = "GP_Gen5_2"
+}
+
+variable "sku_tier" {
+  default = "GeneralPurpose"
+}
+
+variable "storage_mb" {
+  default = "51200"
+}
+
+variable "sku_capacity" {
+  default = "2"
+}
+
+variable "ssl_enforcement" {
+  default = "Enabled"
+}
+
+variable "backup_retention_days" {
+  default = "35"
+}
+
+variable "georedundant_backup" {
+  default = "Enabled"
+}
+
+// Define the values for mandatory/required parameters (see https://github.com/hmcts/cnp-module-postgres)
+
+variable "postgresql_user" {
+  default = "darts"
+}
+
+variable "database_name" {
+  default = "darts-api-db"
+}
+
+variable "postgresql_version" {
+  default = "11"
+}
 variable "aks_subscription_id" {}

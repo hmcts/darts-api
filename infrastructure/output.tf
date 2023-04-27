@@ -1,9 +1,9 @@
 output "vaultName" {
-  value = data.azurerm_key_vault.civil_vault.name
+  value = data.azurerm_key_vault.darts_vault.name
 }
 
 output "vaultUri" {
-  value = data.azurerm_key_vault.civil_vault.vault_uri
+  value = data.azurerm_key_vault.darts_vault.vault_uri
 }
 
 output "sb_primary_send_and_listen_connection_string" {

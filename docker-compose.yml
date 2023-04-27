@@ -1,14 +1,14 @@
 version: '2.1'
 
 services:
-  civil-sdt:
+  darts-api:
     build:
       context: .
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: hmcts/civil-sdt
+    image: hmcts/darts-api
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
@@ -22,33 +22,33 @@ services:
       - LOGBACK_REQUIRE_THREAD
       - LOGBACK_REQUIRE_ALERT_LEVEL=false
       - LOGBACK_REQUIRE_ERROR_CODE=false
-      - SDT_DB_HOST=civil-sdt-database
-      - SDT_DB_USERNAME=std_user
-      - SDT_DB_PASSWORD=std_pass
+      - api_DB_HOST=darts-api-database
+      - api_DB_USERNAME=std_user
+      - api_DB_PASSWORD=std_pass
     ports:
       - $SERVER_PORT:$SERVER_PORT
     depends_on:
-      - civil-sdt-database
+      - darts-api-database
     links:
-      - civil-sdt-database
+      - darts-api-database
 
-  civil-sdt-database:
+  darts-api-database:
     build:
       context: docker/database
-    image: hmcts/civil-sdt-database
+    image: hmcts/darts-api-database
     healthcheck:
       interval: 10s
       timeout: 10s
       retries: 10
     environment:
-      - SDT_DB_USERNAME=std_user
-      - SDT_DB_PASSWORD=std_pass
+      - api_DB_USERNAME=std_user
+      - api_DB_PASSWORD=std_pass
       - POSTGRES_HOST_AUTH_METHOD=trust
     ports:
       - 5455:5432
     volumes:
-      - civil-sdt-database-data:/var/lib/postgresql/data
+      - darts-api-database-data:/var/lib/postgresql/data
 
 volumes:
-  civil-sdt-database-data:
+  darts-api-database-data:
 

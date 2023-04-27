@@ -10,17 +10,22 @@ java:
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
   environment:
-    SDT_DB_PORT: 5432
-    SDT_DB_NAME: civil_sdt
-    SDT_DB_HOST: civil-sdt-postgres-db-v11-{{ .Values.global.environment }}.postgres.database.azure.com
-    CIVIL_SDT_QUEUE: civil-sdt-in-out-{{ .Values.global.environment }}
+    api_DB_PORT: 5432
+    api_DB_NAME: darts_api
+    api_DB_HOST: darts-api-postgres-db-v11-{{ .Values.global.environment }}.postgres.database.azure.com
+    darts_api_QUEUE: darts-api-in-out-{{ .Values.global.environment }}
   keyVaults:
-    civil:
-      resourceGroup: civil
+    darts:
       secrets:
-        - name: civil-sdt-POSTGRES-USER
-          alias: SDT_DB_USERNAME
-        - name: civil-sdt-POSTGRES-PASS
-          alias: SDT_DB_PASSWORD
-        - name: civil-sdt-servicebus-connection-string
-          alias: CIVIL_SDT_SERVICEBUS_CONNECTION_STRING
+        - name: AppInsightsInstrumentationKey
+          alias: azure.application-insights.instrumentation-key
+        - name: darts-api-POSTGRES-USER
+          alias: DARTS_API_DB_USERNAME
+        - name: darts-api-POSTGRES-PASS
+          alias: DARTS_API_DB_PASSWORD
+        - name: darts-api-POSTGRES-HOST
+          alias: DARTS_API_DB_HOST
+        - name: darts-api-POSTGRES-PORT
+          alias: DARTS_API_DB_PORT
+        - name: darts-api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME

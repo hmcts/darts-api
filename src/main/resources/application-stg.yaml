@@ -4,10 +4,10 @@ spring:
       active-directory:
         enabled: false
   datasource:
-    url: jdbc:tc:postgresql:11:///civil_sdt_integ?stringtype=unspecified
+    url: jdbc:tc:postgresql:11:///darts_api_integ?stringtype=unspecified
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    username: ${SDT_DB_USERNAME:postgres}
-    password: ${SDT_DB_PASSWORD:test}
+    username: ${api_DB_USERNAME:darts}
+    password: ${api_DB_PASSWORD:darts}
   jpa:
     show-sql: true
     database: postgresql
