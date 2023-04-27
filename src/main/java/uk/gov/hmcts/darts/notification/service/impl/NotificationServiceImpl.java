@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.notification.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.notification.dto.CreateNotificationReq;
 import uk.gov.hmcts.darts.notification.entity.Notification;
@@ -16,8 +15,7 @@ import java.sql.Timestamp;
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
-    @Autowired
-    private NotificationRepository notificationRepo;
+    private final NotificationRepository notificationRepo;
 
     @Override
     public Notification sendNotification(CreateNotificationReq createNotificationReq) {

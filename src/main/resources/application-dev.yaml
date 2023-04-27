@@ -1,4 +1,4 @@
- spring:
+spring:
   cloud:
     azure:
       active-directory:
@@ -40,11 +40,4 @@
      org.springframework.web.servlet.mvc.method.annotation: DEBUG
      org.springframework.web: DEBUG
 
- spring.datasource.url: "jdbc:postgresql://localhost:5432/dartsdb"
- spring.datasource.username: postgres
- spring.datasource.password: password
- spring.jpa.hibernate.ddl-auto: update
- spring.jpa.properties.hibernate.default_schema: darts_schema
- spring.jpa.show-sql: true
- spring.jpa.properties.hibernate.format_sql: true
- spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+
