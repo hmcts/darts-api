@@ -40,17 +40,13 @@ resource "azurerm_application_insights" "appinsights" {
   }
 }
 
-# this key vault is created in every environment, but preview, being short-lived,
-# will use the aat one instead
-# This section includes hardcoded variables that were in variables.tf ...
-# ... said variables were moved here due to a Jenkins objection
+# this key vault is created in every environment, but preview, being short-lived
 module "key-vault" {
-  source              = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
-  product             = var.product
-  env                 = var.env
-  object_id           = var.jenkins_AAD_objectId
-  resource_group_name = azurerm_resource_group.rg.name
-  # https://github.com/hmcts/devops-azure-ad/blob/master/users/prod_users.yml
+  source                      = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
+  product                     = var.product
+  env                         = var.env
+  object_id                   = var.jenkins_AAD_objectId
+  resource_group_name         = azurerm_resource_group.rg.name
   product_group_name          = "DTS Darts Modernisation"
   common_tags                 = var.common_tags
   managed_identity_object_ids = ["${data.azurerm_user_assigned_identity.rpe-shared-identity.principal_id}"]
