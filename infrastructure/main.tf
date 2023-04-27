@@ -44,7 +44,7 @@ resource "azurerm_application_insights" "appinsights" {
 # will use the aat one instead
 # This section includes hardcoded variables that were in variables.tf ...
 # ... said variables were moved here due to a Jenkins objection
-module "key_vault" {
+module "key-vault" {
   source              = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
   product             = "darts"
   env                 = "dev"
