@@ -8,7 +8,7 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: hmctspublic.azurecr.io/spring-boot/template
+    image: hmcts/darts-api
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
@@ -22,5 +22,33 @@ services:
       - LOGBACK_REQUIRE_THREAD
       - LOGBACK_REQUIRE_ALERT_LEVEL=false
       - LOGBACK_REQUIRE_ERROR_CODE=false
+      - api_DB_HOST=darts-api-database
+      - api_DB_USERNAME=std_user
+      - api_DB_PASSWORD=std_pass
     ports:
       - $SERVER_PORT:$SERVER_PORT
+    depends_on:
+      - darts-api-database
+    links:
+      - darts-api-database
+
+  darts-api-database:
+    build:
+      context: docker/database
+    image: hmcts/darts-api-database
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      - api_DB_USERNAME=std_user
+      - api_DB_PASSWORD=std_pass
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5455:5432
+    volumes:
+      - darts-api-database-data:/var/lib/postgresql/data
+
+volumes:
+  darts-api-database-data:
+

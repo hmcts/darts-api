@@ -4,12 +4,18 @@ spring:
       active-directory:
         enabled: false
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/jack2
-    username: ${DB_USER}
-    password: ${DB_PASS}
-    properties:
-      charSet: UTF-8
+    url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
+    ddriver-class-name: org.postgresql.Driver
+    username: ${api_DB_USERNAME:darts}
+    password: ${api_DB_PASSWORD:darts}
+  jpa:
+    show-sql: true
+    database: postgresql
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+    ignore-migration-patterns: true
   autoconfigure:
     exclude:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"

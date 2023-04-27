@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.common.entities;
+package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,12 +16,12 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "moj_transformation_log")
+@Table(name = "moj_cached_media")
 @Data
-public class TransformationLog {
+public class CachedMedia {
 
     @Id
-    @Column(name = "moj_trl_id")
+    @Column(name = "moj_med_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -29,24 +29,43 @@ public class TransformationLog {
     @JoinColumn(name = "moj_cas_id")
     private Case theCase;
 
-    @Column(name = "r_transformation_log_object_id", length = 16)
+    @Column(name = "r_cached_media_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_case_id", length = 32)
-    private String caseId;
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "c_last_accessed")
+    private Date lastAccessed;
+
+    @Column(name = "c_log_id", length = 16)
+    private String logId;
+
+    @Column(name = "c_channel")
+    private Integer channel;
+
+    @Column(name = "c_total_channels")
+    private Integer totalChannels;
+
+    @Column(name = "c_reference_id", length = 32)
+    private String referenceId;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "c_start")
+    private Date start;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "c_end")
+    private Date end;
 
     @Column(name = "c_courthouse", length = 64)
     private String courthouse;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "c_requested_date")
-    private Date requestedDate;
+    @Column(name = "c_courtroom", length = 64)
+    private String courtroom;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "c_received_date")
-    private Date receivedDate;
+    @Column(name = "c_reporting_restrictions")
+    private Integer reportingRestrictions;
 
-    @Column(name = "r_case_object_id", length = 16)
+    @Column(name = "r_case_object_id", length = 32)
     private String legacyCaseObjectId;
 
     @Column(name = "r_version_label", length = 32)

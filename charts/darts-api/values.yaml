@@ -9,14 +9,21 @@ java:
 #      secrets:
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
+  keyVaults:
+    darts:
+      secrets:
+        - name: AppInsightsInstrumentationKey
+          alias: azure.application-insights.instrumentation-key
+        - name: darts-api-POSTGRES-USER
+          alias: DARTS_API_DB_USERNAME
+        - name: darts-api-POSTGRES-PASS
+          alias: DARTS_API_DB_PASSWORD
+        - name: darts-api-POSTGRES-HOST
+          alias: DARTS_API_DB_HOST
+        - name: darts-api-POSTGRES-PORT
+          alias: DARTS_API_DB_PORT
+        - name: darts-api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME
+
   environment:
-    ENABLE_FLYWAY: true
-    RUN_DB_MIGRATION_ON_STARTUP: true
-    DB_HOST: "{{ .Release.Name }}-postgresql"
-    DB_NAME: postgres
-    DB_USER: darts
-    DB_PASS: darts
-    DB_PORT: 5432
-    DB_OPTIONS: '?sslmode=allow'
-  #AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: '3c3bacb7-64e0-476c-aeaa-657657b063fd'
-  #disableKeyVaults: true
+    DARTS_API_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
