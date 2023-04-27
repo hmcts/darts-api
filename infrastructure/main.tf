@@ -18,7 +18,7 @@ locals {
 
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-${var.component}-${var.env}"
-  location = var.resource_group_location
+  location = "${var.resource_group_location}"
   #tags     = var.resource_group_tags
 }
 
