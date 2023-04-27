@@ -44,10 +44,10 @@ resource "azurerm_application_insights" "appinsights" {
 # will use the aat one instead
 # This section includes hardcoded variables that were in variables.tf ...
 # ... said variables were moved here due to a Jenkins objection
-module "key-vault" {
+module "key_vault" {
   source              = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
   product             = "darts"
-  env                 = ""
+  env                 = "dev"
   tenant_id           = ""
   object_id           = "531ff96d-0ae9-462a-8d2d-bec7c0b42082"
   resource_group_name = azurerm_resource_group.rg.name
