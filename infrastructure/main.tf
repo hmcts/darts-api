@@ -19,17 +19,17 @@ locals {
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-${var.component}-${var.env}"
   location = var.location
-  #tags     = var.resource_group_tags
+  tags     = var.common_tags
 }
 
 # Application Insights
 
 resource "azurerm_application_insights" "appinsights" {
-  name                = "darts-api-appinsights-dev"
+  name                = "${var.product}-${var.component}-appinsights${var.env}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   application_type    = "web"
-  #tags                = var.common_tags
+  tags                = var.common_tags
 
   lifecycle {
     ignore_changes = [
