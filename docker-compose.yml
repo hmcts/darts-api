@@ -1,14 +1,14 @@
 version: '2.1'
 
 services:
-  darts-api:
+  civil-sdt:
     build:
       context: .
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: hmctspublic.azurecr.io/spring-boot/template
+    image: hmcts/civil-sdt
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER
@@ -22,5 +22,33 @@ services:
       - LOGBACK_REQUIRE_THREAD
       - LOGBACK_REQUIRE_ALERT_LEVEL=false
       - LOGBACK_REQUIRE_ERROR_CODE=false
+      - SDT_DB_HOST=civil-sdt-database
+      - SDT_DB_USERNAME=std_user
+      - SDT_DB_PASSWORD=std_pass
     ports:
       - $SERVER_PORT:$SERVER_PORT
+    depends_on:
+      - civil-sdt-database
+    links:
+      - civil-sdt-database
+
+  civil-sdt-database:
+    build:
+      context: docker/database
+    image: hmcts/civil-sdt-database
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    environment:
+      - SDT_DB_USERNAME=std_user
+      - SDT_DB_PASSWORD=std_pass
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - 5455:5432
+    volumes:
+      - civil-sdt-database-data:/var/lib/postgresql/data
+
+volumes:
+  civil-sdt-database-data:
+

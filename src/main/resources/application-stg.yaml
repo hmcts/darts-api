@@ -4,12 +4,18 @@ spring:
       active-directory:
         enabled: false
   datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-    username: ${DB_USER}
-    password: ${DB_PASS}
-    properties:
-      charSet: UTF-8
+    url: jdbc:tc:postgresql:11:///civil_sdt_integ?stringtype=unspecified
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    username: ${SDT_DB_USERNAME:postgres}
+    password: ${SDT_DB_PASSWORD:test}
+  jpa:
+    show-sql: true
+    database: postgresql
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+    ignore-migration-patterns: true
   autoconfigure:
     exclude:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
