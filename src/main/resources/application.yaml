@@ -20,39 +20,32 @@ spring:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:
     name: Darts Api
+
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${api_DB_HOST:localhost}:${api_DB_PORT:5432}/${api_DB_NAME:darts_api}${api_DB_OPTIONS:}
-    username: ${api_DB_USERNAME:darts}
-    password: ${api_DB_PASSWORD:darts}
-    hikari:
-      minimumIdle: ${api_DB_MIN_IDLE:2}
-      maximumPoolSize: ${api_DB_MAX_POOL_SIZE:8}
-      idleTimeout: ${api_DB_IDLE_TIMEOUT:300000}
-      maxLifetime: ${api_DB_MAX_LIFTIME:7200000}
-      connectionTimeout: 60000
+    url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
+    username: ${DARTS_API_DB_USERNAME:cpo}
+    password: ${DARTS_API_DB_PASSWORD:cpo}
+    type: com.zaxxer.hikari.HikariDataSource
   jpa:
+    database: postgresql
+    show-sql: false
+    hibernate:
+      ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL81Dialect
         jdbc:
-          lob:
-            non_contextual_creation: true
-    database: POSTGRESQL
-    generate-ddl: 'true'
-    hibernate:
-      # this ensures the db persists after spring boot connection drops.
-      ddl-auto: update
-  servlet:
-    multipart:
-      max-file-size: 2MB
-      max-request-size: 2MB
-  # This is needed as locally, all tables are in a single schema. Flyway is only enabled on the clusters by default
+          time_zone: UTC
+      org:
+        hibernate:
+          envers:
+            audit_table_suffix: _audit
+            store_data_at_delete: true
+
   flyway:
-    ignore-missing-migrations: 'true'
-    baseline-version: '0001'
-    out-of-order: 'true'
-    baseline-on-migrate: 'true'
+    out-of-order: true
+    ignore-missing-migrations: true
+
 
 azure:
   application-insights:
