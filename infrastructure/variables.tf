@@ -9,7 +9,9 @@ variable "component" {
 variable "location" {
   default = "UK South"
 }
-variable "env" {}
+variable "env" {
+  default = "dev"
+}
 
 variable "subscription" {
   default = ""
@@ -22,9 +24,9 @@ variable "deployment_namespace" {
 variable "common_tags" {
   type = map(string)
 }
-/*
-# Resource Group variables
 
+# Resource Group variables
+/*
 variable "resource_group_name" {
   default     = "${var.product}-${var.component}-${var.env}"
   description = "Name of the resource group"
@@ -33,6 +35,7 @@ variable "resource_group_name" {
 variable "resource_group_location" {
   default     = "uksouth"
   description = "Location of the resource group"
+  type = string
 }
 
 # Application Insights variables
