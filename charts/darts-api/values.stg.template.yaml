@@ -13,8 +13,10 @@ java:
     DARTS_API_DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
     DARTS_API_DB_OPTIONS: "?stringtype=unspecified"
     DARTS_API_DB_PORT: 5432
-    # override default 'xui_webapp' permissions with values that support the FTA tests
-    S2S_AUTHORIZATIONS_XUI_ID: xui_webapp
-    S2S_AUTHORIZATIONS_XUI_PERMISSION: CRUD
+    #AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: '3c3bacb7-64e0-476c-aeaa-657657b063fd'
+  #disableKeyVaults: true
   postgresql:
     enabled: true
+    
+  devApplicationInsightsInstrumentKeyName: AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
+
