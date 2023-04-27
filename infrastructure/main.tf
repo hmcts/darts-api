@@ -52,7 +52,7 @@ module "key-vault" {
   object_id           = ""
   resource_group_name = azurerm_resource_group.rg.name
   # https://github.com/hmcts/devops-azure-ad/blob/master/users/prod_users.yml
-  product_group_name          = "Key Vault product group name"
+  product_group_name          = "DTS Darts Modernisation"
   common_tags                 = { Environment = "dev" }
   managed_identity_object_ids = ["${data.azurerm_user_assigned_identity.rpe-shared-identity.principal_id}"]
 }
