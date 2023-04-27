@@ -39,7 +39,7 @@ locals {
 # }
 
 module "outbound_data_store_blob" {
-  source =  "git@ghttps://github.com/hmcts/chart-blobstorage?ref=master"
+  source =  "git@https://github.com/hmcts/chart-blobstorage?ref=master"
   name                   = local.storage_blob_name
   storage_account_name   = local.storage_account_name
   storage_container_name = local.storage_container_name
@@ -68,7 +68,7 @@ module "outbound_data_store_blob" {
 # }
 
 module "unstructured_data_store_blob" {
-  source =  "git@ghttps://github.com/hmcts/chart-blobstorage?ref=master"
+  source =  "git@https://github.com/hmcts/chart-blobstorage?ref=master"
   name_unstructured                   = local.storage_blob_name
   storage_account_name_unstructured   = local.storage_account_name
   storage_container_name_unstructured = local.storage_container_name
