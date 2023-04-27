@@ -135,7 +135,7 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 def sonarExclusions = [
-  '**/uk/gov/hmcts/darts/common/entities/**',
+  '**/uk/gov/hmcts/darts/common/entity/**',
   '**/uk/gov/hmcts/darts/**/model/**',
   '**/uk/gov/hmcts/darts/**/config/**',
   '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java'
