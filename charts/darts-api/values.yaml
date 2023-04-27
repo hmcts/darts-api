@@ -10,33 +10,22 @@ java:
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
   environment:
-    ENABLE_FLYWAY: true
-    RUN_DB_MIGRATION_ON_STARTUP: true
-    DB_HOST: "{{ .Release.Name }}-postgresql"
-    DB_NAME: postgres
-    DB_USER: darts
-    DB_PASS: darts
-    DB_PORT: 5432
-    DB_OPTIONS: '?sslmode=allow'
-  #AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: '3c3bacb7-64e0-476c-aeaa-657657b063fd'
-  #disableKeyVaults: true
-    postgresql:
-      enabled: true
-      image:
-        registry: hmctspublic.azurecr.io
-        repository: imported/bitnami/postgresql
-        tag: '11.6.0'
-      primary:
-        persistence:
-          enabled: false
-        resources:
-          requests:
-            cpu: 25m
-        initdb:
-          scripts:
-            init.sql: |-
-              CREATE DATABASE darts WITH OWNER = hmcts ENCODING = 'UTF-8' CONNECTION LIMIT = -1;
-      auth:
-        username: darts
-        password: darts
-
+    api_DB_PORT: 5432
+    api_DB_NAME: darts_api
+    api_DB_HOST: darts-api-postgres-db-v11-{{ .Values.global.environment }}.postgres.database.azure.com
+    darts_api_QUEUE: darts-api-in-out-{{ .Values.global.environment }}
+  keyVaults:
+    darts:
+      secrets:
+        - name: AppInsightsInstrumentationKey
+          alias: azure.application-insights.instrumentation-key
+        - name: darts-api-POSTGRES-USER
+          alias: DARTS_API_DB_USERNAME
+        - name: darts-api-POSTGRES-PASS
+          alias: DARTS_API_DB_PASSWORD
+        - name: darts-api-POSTGRES-HOST
+          alias: DARTS_API_DB_HOST
+        - name: darts-api-POSTGRES-PORT
+          alias: DARTS_API_DB_PORT
+        - name: darts-api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME

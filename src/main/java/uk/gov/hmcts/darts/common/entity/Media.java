@@ -1,12 +1,10 @@
-package uk.gov.hmcts.darts.common.entities;
+package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -16,28 +14,17 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "moj_cached_media")
+@Table(name = "moj_media")
 @Data
-public class CachedMedia {
+public class Media {
 
     @Id
     @Column(name = "moj_med_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @OneToOne
-    @JoinColumn(name = "moj_cas_id")
-    private Case theCase;
-
-    @Column(name = "r_cached_media_object_id", length = 16)
+    @Column(name = "r_media_object_id", length = 16)
     private String legacyObjectId;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "c_last_accessed")
-    private Date lastAccessed;
-
-    @Column(name = "c_log_id", length = 16)
-    private String logId;
 
     @Column(name = "c_channel")
     private Integer channel;
@@ -64,9 +51,6 @@ public class CachedMedia {
 
     @Column(name = "c_reporting_restrictions")
     private Integer reportingRestrictions;
-
-    @Column(name = "r_case_object_id", length = 32)
-    private String legacyCaseObjectId;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
