@@ -1,10 +1,12 @@
-package uk.gov.hmcts.darts.common.entities;
+package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -14,43 +16,38 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "moj_media")
+@Table(name = "moj_transformation_log")
 @Data
-public class Media {
+public class TransformationLog {
 
     @Id
-    @Column(name = "moj_med_id")
+    @Column(name = "moj_trl_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "r_media_object_id", length = 16)
+    @OneToOne
+    @JoinColumn(name = "moj_cas_id")
+    private Case theCase;
+
+    @Column(name = "r_transformation_log_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_channel")
-    private Integer channel;
-
-    @Column(name = "c_total_channels")
-    private Integer totalChannels;
-
-    @Column(name = "c_reference_id", length = 32)
-    private String referenceId;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "c_start")
-    private Date start;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "c_end")
-    private Date end;
+    @Column(name = "c_case_id", length = 32)
+    private String caseId;
 
     @Column(name = "c_courthouse", length = 64)
     private String courthouse;
 
-    @Column(name = "c_courtroom", length = 64)
-    private String courtroom;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "c_requested_date")
+    private Date requestedDate;
 
-    @Column(name = "c_reporting_restrictions")
-    private Integer reportingRestrictions;
+    @Temporal(TemporalType.DATE)
+    @Column(name = "c_received_date")
+    private Date receivedDate;
+
+    @Column(name = "r_case_object_id", length = 16)
+    private String legacyCaseObjectId;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
