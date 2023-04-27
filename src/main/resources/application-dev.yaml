@@ -1,4 +1,4 @@
- spring:
+spring:
   cloud:
     azure:
       active-directory:
@@ -39,3 +39,11 @@
             authorization-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/authorize
             token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
             jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
+
+  logging:
+    level:
+      uk.gov.hmcts.darts: DEBUG
+      org.springframework.web.servlet.mvc.method.annotation: DEBUG
+      org.springframework.web: DEBUG
+
+

@@ -135,7 +135,7 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 def sonarExclusions = [
-  '**/uk/gov/hmcts/darts/common/entities/**',
+  '**/uk/gov/hmcts/darts/common/entity/**',
   '**/uk/gov/hmcts/darts/**/model/**',
   '**/uk/gov/hmcts/darts/**/config/**',
   '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java'
@@ -146,6 +146,7 @@ sonarqube {
     property "sonar.projectName", "Reform :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.exclusions", sonarExclusions.join(', ')
+    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*"
   }
 }
 
@@ -227,6 +228,8 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
+  //database
+  implementation 'org.postgresql:postgresql:42.6.0'
   runtimeOnly 'org.hsqldb:hsqldb'
 
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
