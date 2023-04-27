@@ -42,11 +42,11 @@ public class Notification {
     @Column(name = "template_values")
     private String templateValues;
 
-    @Column(name = "created_datetime")
-    private Timestamp createdDatetime;
+    @Column(name = "created_date_time")
+    private Timestamp createdDateTime;
 
-    @Column(name = "last_updated_datetime")
-    private Timestamp lastUpdatedDatetime;
+    @Column(name = "last_updated_date_time")
+    private Timestamp lastUpdatedDateTime;
 
 
 }

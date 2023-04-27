@@ -29,8 +29,8 @@ public class NotificationServiceImpl implements NotificationService {
         dbNotification.setAttempts(0);
         dbNotification.setTemplateValues(createNotificationReq.getTemplateValues());
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        dbNotification.setCreatedDatetime(now);
-        dbNotification.setLastUpdatedDatetime(now);
+        dbNotification.setCreatedDateTime(now);
+        dbNotification.setLastUpdatedDateTime(now);
 
         return notificationRepo.saveAndFlush(dbNotification);
 
