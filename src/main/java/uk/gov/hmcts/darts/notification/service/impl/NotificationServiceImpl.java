@@ -25,15 +25,14 @@ public class NotificationServiceImpl implements NotificationService {
         dbNotification.setEventId(createNotificationReq.getEventId());
         dbNotification.setCaseId(createNotificationReq.getCaseId());
         dbNotification.setEmailAddress(createNotificationReq.getEmailAddress());
-        dbNotification.setStatus(NotificationStatus.OPEN.name());
+        dbNotification.setStatus(String.valueOf(NotificationStatus.OPEN));
         dbNotification.setAttempts(0);
         dbNotification.setTemplateValues(createNotificationReq.getTemplateValues());
         Timestamp now = new Timestamp(System.currentTimeMillis());
         dbNotification.setCreatedDatetime(now);
         dbNotification.setLastUpdatedDatetime(now);
 
-        Notification result = notificationRepo.saveAndFlush(dbNotification);
-        return result;
+        return notificationRepo.saveAndFlush(dbNotification);
 
 
     }

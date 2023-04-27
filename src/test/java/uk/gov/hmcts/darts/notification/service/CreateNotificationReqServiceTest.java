@@ -22,9 +22,9 @@ class CreateNotificationReqServiceTest {
         createNotificationReq.setEmailAddress("test@test.com");
         createNotificationReq.setTemplateValues("a json string");
         Notification result = service.sendNotification(createNotificationReq);
-        assertEquals(1, result.getId());
-        assertEquals("OPEN", result.getStatus());
-        assertEquals("A caseId", result.getCaseId());
+        assertEquals(1, result.getId(), "Database may not have been hit");
+        assertEquals("OPEN", result.getStatus(), "Object may not have been enriched properly");
+        assertEquals("A caseId", result.getCaseId(), "Object not populated properly");
     }
 
 
