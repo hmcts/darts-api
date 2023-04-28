@@ -67,7 +67,7 @@ resource "azurerm_application_insights" "appinsights" {
 #   georedundant_backup   = var.georedundant_backup
 #   common_tags           = var.common_tags
 # }
-module "postgresql" {
+module "darts-api-db" {
 
   providers = {
     azurerm.postgres_network = azurerm.postgres_network
