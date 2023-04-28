@@ -43,6 +43,8 @@ module "darts-api-db" {
   source                = "git@github.com:hmcts/cnp-module-postgres?ref=master"
   product               = var.product
   component             = var.component
+  key_vault_rg          = "${var.product}-shared-${var.env}"
+  key_vault_name        = "darts-${var.env}"
   name                  = "${local.app_full_name}-postgres-db"
   location              = var.location
   env                   = var.env
