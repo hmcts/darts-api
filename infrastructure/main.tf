@@ -1,6 +1,12 @@
 provider "azurerm" {
   features {}
 }
+provider "azurerm" {
+  features {}
+  skip_provider_registration = true
+  alias                      = "postgres_network"
+  subscription_id            = var.aks_subscription_id
+}
 
 locals {
   app_full_name = "${var.product}-${var.component}"
@@ -39,29 +45,54 @@ resource "azurerm_application_insights" "appinsights" {
   tags                = var.common_tags
 }
 
-module "darts-api-db" {
-  source                = "git@github.com:hmcts/cnp-module-postgres?ref=master"
-  product               = var.product
-  component             = var.component
-  key_vault_rg          = "${var.product}-shared-${var.env}"
-  key_vault_name        = "darts-${var.env}"
-  name                  = "${local.app_full_name}-postgres-db"
-  location              = var.location
-  env                   = var.env
-  subscription          = var.subscription
-  postgresql_user       = var.postgresql_user
-  postgresql_version    = var.postgresql_version
-  database_name         = var.database_name
-  sku_name              = var.sku_name
-  sku_tier              = var.sku_tier
-  sku_capacity          = var.sku_capacity
-  ssl_enforcement       = var.ssl_enforcement
-  storage_mb            = var.storage_mb
-  backup_retention_days = var.backup_retention_days
-  georedundant_backup   = var.georedundant_backup
-  common_tags           = var.common_tags
-}
+# module "darts-api-db" {
+#   source                = "git@github.com:hmcts/cnp-module-postgres?ref=master"
+#   product               = var.product
+#   component             = var.component
+#   key_vault_rg          = "${var.product}-shared-${var.env}"
+#   key_vault_name        = "darts-${var.env}"
+#   name                  = "${local.app_full_name}-postgres-db"
+#   location              = var.location
+#   env                   = var.env
+#   subscription          = var.subscription
+#   postgresql_user       = var.postgresql_user
+#   postgresql_version    = var.postgresql_version
+#   database_name         = var.database_name
+#   sku_name              = var.sku_name
+#   sku_tier              = var.sku_tier
+#   sku_capacity          = var.sku_capacity
+#   ssl_enforcement       = var.ssl_enforcement
+#   storage_mb            = var.storage_mb
+#   backup_retention_days = var.backup_retention_days
+#   georedundant_backup   = var.georedundant_backup
+#   common_tags           = var.common_tags
+# }
+module "postgresql" {
 
+  providers = {
+    azurerm.postgres_network = azurerm.postgres_network
+  }
+  
+  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
+  env    = var.env
+
+  product       = var.product
+  component     = var.component
+  business_area = "sds" # sds or cft
+
+  pgsql_databases = [
+    {
+      name : "application"
+    }
+  ]
+
+  pgsql_version = "14"
+  
+  # The ID of the principal to be granted admin access to the database server, should be the principal running this normally
+  admin_user_object_id = var.admin_user_object_id
+  
+  common_tags = var.common_tags
+}
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
   name         = "${var.component}-POSTGRES-USER"
