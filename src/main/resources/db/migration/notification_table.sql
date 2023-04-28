@@ -16,7 +16,3 @@ CREATE TABLE IF NOT EXISTS darts_schema.notification
     CONSTRAINT notification_pkey PRIMARY KEY (id)
 )
 
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS darts_schema.notification
-    OWNER to postgres;
