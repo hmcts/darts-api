@@ -92,4 +92,6 @@ variable "postgresql_version" {
 }
 variable "aks_subscription_id" {}
 
-variable "admin_user_object_id" {}
+variable "admin_user_object_id" {
+  default = null
+}
