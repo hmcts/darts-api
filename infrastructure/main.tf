@@ -33,13 +33,13 @@ locals {
 
 }
 
-data "azurerm_subnet" "pg_subnet" {
-  name                 = "postgresql"
-  resource_group_name  = local.vnet_rg_name
-  virtual_network_name = local.vnet_name
+# data "azurerm_subnet" "pg_subnet" {
+#   name                 = "postgresql"
+#   resource_group_name  = local.vnet_rg_name
+#   virtual_network_name = local.vnet_name
 
-  count = var.pgsql_delegated_subnet_id == "" ? 1 : 0
-}
+#   count = var.pgsql_delegated_subnet_id == "" ? 1 : 0
+# }
 
 data "azurerm_client_config" "current" {}
  
