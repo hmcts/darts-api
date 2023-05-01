@@ -79,7 +79,7 @@ module "darts-api-db" {
   product       = var.product
   component     = var.component
   business_area = "sds" # sds or cft
-
+  
   pgsql_databases = [
     {
       name : "application"
@@ -96,31 +96,31 @@ module "darts-api-db" {
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
   name         = "${var.component}-POSTGRES-USER"
-  value        = module.darts-api-db.user_name
+  value        = module.darts-api-db.username
   key_vault_id = module.key-vault.key_vault_id
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
   name         = "${var.component}-POSTGRES-PASS"
-  value        = module.darts-api-db.postgresql_password
+  value        = module.darts-api-db.password
   key_vault_id = module.key-vault.key_vault_id
 }
 
-resource "azurerm_key_vault_secret" "POSTGRES-HOST" {
-  name         = "${var.component}-POSTGRES-HOST"
-  value        = module.darts-api-db.host_name
-  key_vault_id = module.key-vault.key_vault_id
-}
+# resource "azurerm_key_vault_secret" "POSTGRES-HOST" {
+#   name         = "${var.component}-POSTGRES-HOST"
+#   value        = module.darts-api-db.host_name
+#   key_vault_id = module.key-vault.key_vault_id
+# }
 
-resource "azurerm_key_vault_secret" "POSTGRES-PORT" {
-  name         = "${var.component}-POSTGRES-PORT"
-  value        = module.darts-api-db.postgresql_listen_port
-  key_vault_id = module.key-vault.key_vault_id
-}
+# resource "azurerm_key_vault_secret" "POSTGRES-PORT" {
+#   name         = "${var.component}-POSTGRES-PORT"
+#   value        = module.darts-api-db.postgresql_listen_port
+#   key_vault_id = module.key-vault.key_vault_id
+# }
 
 resource "azurerm_key_vault_secret" "POSTGRES-DATABASE" {
   name         = "${var.component}-POSTGRES-DATABASE"
-  value        = module.darts-api-db.postgresql_database
+  value        = module.darts-api-db.name
   key_vault_id = module.key-vault.key_vault_id
 }
 
