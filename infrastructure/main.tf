@@ -35,15 +35,16 @@ locals {
 
 data "azurerm_client_config" "current" {}
  
-data "azuread_group" "db_admin" {
-  display_name     = "Darts Admin"
-  security_enabled = true
-}
+# data "azuread_group" "db_admin" {
+#   display_name     = local.admin_group
+#   security_enabled = true
+# }
 
 data "azuread_service_principal" "mi_name" {
   count     = var.enable_read_only_group_access ? 1 : 0
   object_id = var.admin_user_object_id
 }
+
 
 
 resource "azurerm_resource_group" "rg" {
