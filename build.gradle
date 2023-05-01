@@ -228,6 +228,7 @@ dependencies {
   implementation 'org.postgresql:postgresql:42.6.0'
   runtimeOnly 'org.hsqldb:hsqldb'
 
+  testImplementation 'com.h2database:h2:2.1.214'
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
