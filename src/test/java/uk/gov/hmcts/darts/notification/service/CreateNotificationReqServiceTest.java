@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.notification.entity.Notification;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ActiveProfiles({"dev","integration"})
+@ActiveProfiles({"dev","test"})
 class CreateNotificationReqServiceTest {
 
     @Autowired
