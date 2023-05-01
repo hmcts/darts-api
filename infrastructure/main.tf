@@ -94,6 +94,16 @@ module "darts-api-db" {
   common_tags = var.common_tags
 }
 
+data "azuread_service_principal" "mi_name" {
+  mi_name = "example"
+}
+data "azuread_service_principal" "objId" {
+  object_id = "00000000-0000-0000-0000-000000000000"
+}
+data "azuread_service_principal" "dbName" {
+  display_name = "darts-api-db"
+}
+
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
   name         = "${var.component}-POSTGRES-USER"
   value        = module.darts-api-db.username
