@@ -114,11 +114,11 @@ module "darts-api-db" {
   
   common_tags = var.common_tags
 }
-
 data "azuread_group" "db_admin" {
   display_name     = local.admin_group
   security_enabled = true
 }
+
 
 data "azuread_service_principal" "mi_name" {
   count     = var.enable_read_only_group_access ? 1 : 0
@@ -155,3 +155,50 @@ resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
 #   key_vault_id = module.key-vault.key_vault_id
 # }
 
+resource "azurerm_postgresql_flexible_server" "pgsql_server" {
+  name                = local.server_name
+  resource_group_name = local.postgresql_rg_name
+  location            = local.postgresql_rg_location
+  version             = var.pgsql_version
+
+  create_mode                       = var.create_mode
+  point_in_time_restore_time_in_utc = var.restore_time
+  source_server_id                  = var.source_server_id
+
+  delegated_subnet_id = var.pgsql_delegated_subnet_id == "" ? data.azurerm_subnet.pg_subnet[0].id : var.pgsql_delegated_subnet_id
+  private_dns_zone_id = local.private_dns_zone_id
+
+  administrator_login    = var.pgsql_admin_username
+  administrator_password = random_password.password.result
+
+  storage_mb = var.pgsql_storage_mb
+
+  sku_name = var.pgsql_sku
+
+  authentication {
+    active_directory_auth_enabled = true
+    tenant_id                     = data.azurerm_client_config.current.tenant_id
+    password_auth_enabled         = true
+  }
+
+  tags = var.common_tags
+
+  dynamic "high_availability" {
+    for_each = local.high_availability != false ? [1] : []
+    content {
+      mode = "ZoneRedundant"
+    }
+  }
+
+  maintenance_window {
+    day_of_week  = "0"
+    start_hour   = "03"
+    start_minute = "00"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      zone,
+      high_availability.0.standby_availability_zone,
+    ]
+  }
