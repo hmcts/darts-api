@@ -6,8 +6,6 @@ variable "component" {
   default = "api"
 }
 
-variable "component" {}
-
 variable "location" {
   default = "UK South"
 }
