@@ -9,31 +9,6 @@ provider "azurerm" {
 }
 
 
-# locals {
-#   default_name           = var.component != "" ? "${var.product}-${var.component}" : var.product
-#   name                   = var.name != "" ? var.name : local.default_name
-#   server_name            = "${local.name}-${var.env}"
-#   postgresql_rg_name     = "darts-rg"
-#   postgresql_rg_location = "UK-South"
-#   vnet_rg_name           = var.business_area == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
-#   vnet_name              = var.business_area == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
-
-#   private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
-
-#   is_prod = length(regexall(".*(prod).*", var.env)) > 0
-
-#   admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
-#   db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
-
-
-#   high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
-#   high_availability              = var.high_availability == true || contains(local.high_availability_environments, var.env)
-
-
-
-# }
-
-
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-shared-${var.env}"
   location = var.location
