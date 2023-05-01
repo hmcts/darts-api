@@ -54,7 +54,6 @@ module "darts-api-db" {
   product       = var.product
   component     = var.component
   business_area = "sds" # sds or cft
-  display_name = "Darts DB"
   pgsql_databases = [
     {
       name : "application"
