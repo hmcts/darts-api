@@ -114,9 +114,4 @@ variable "enable_read_only_group_access"{
   default = "1"
 }
 
-variable "mi_name" {
-  default = "darts"
-
-}
-
 
