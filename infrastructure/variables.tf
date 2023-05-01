@@ -118,6 +118,4 @@ variable "mi_name" {
 
 }
 
-variable "pgsql_delegated_subnet_id" {
-  
-}
+
