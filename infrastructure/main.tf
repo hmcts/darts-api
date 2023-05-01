@@ -107,66 +107,6 @@ resource "azurerm_postgresql_flexible_server" "pgsql_server" {
 
 }
 
-resource "azurerm_postgresql_flexible_server_configuration" "pgsql_server_config" {
-  for_each = {
-    for index, config in var.pgsql_server_configuration :
-    config.name => config
-  }
-
-  name      = each.value.name
-  server_id = azurerm_postgresql_flexible_server.pgsql_server.id
-  value     = each.value.value
-}
-
-resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_adadmin" {
-  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
-  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azuread_group.db_admin.object_id
-  principal_name      = local.admin_group
-  principal_type      = "Group"
-  depends_on = [
-    azurerm_postgresql_flexible_server.pgsql_server
-  ]
-}
-
-resource "azurerm_postgresql_flexible_server_active_directory_administrator" "pgsql_principal_admin" {
-  count               = var.enable_read_only_group_access ? 1 : 0
-  server_name         = azurerm_postgresql_flexible_server.pgsql_server.name
-  resource_group_name = azurerm_postgresql_flexible_server.pgsql_server.resource_group_name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = var.admin_user_object_id
-  principal_name      = data.azuread_service_principal.mi_name[0].display_name
-  principal_type      = "ServicePrincipal"
-  depends_on = [
-    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_adadmin
-  ]
-}
-
-resource "null_resource" "set-user-permissions-additionaldbs" {
-  for_each = var.enable_read_only_group_access ? { for index, db in var.pgsql_databases : db.name => db } : {}
-
-  triggers = {
-    script_hash    = filesha256("${path.module}/set-postgres-permissions.bash")
-    name           = local.name
-    db_reader_user = local.db_reader_user
-  }
-
-  provisioner "local-exec" {
-    command = "${path.module}/set-postgres-permissions.bash"
-
-    environment = {
-      DB_HOST_NAME   = azurerm_postgresql_flexible_server.pgsql_server.fqdn
-      DB_USER        = data.azuread_service_principal.mi_name[0].display_name
-      DB_READER_USER = local.db_reader_user
-      DB_NAME        = each.value.name
-    }
-  }
-  depends_on = [
-    azurerm_postgresql_flexible_server_active_directory_administrator.pgsql_principal_admin,
-    azurerm_postgresql_flexible_server_database.pg_databases
-  ]
-}
 
 resource "azurerm_resource_group" "rg" {
   name     = "${var.product}-shared-${var.env}"
