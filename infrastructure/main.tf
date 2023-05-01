@@ -8,8 +8,29 @@ provider "azurerm" {
   subscription_id            = var.aks_subscription_id
 }
 
+
 locals {
+  default_name           = var.component != "" ? "${var.product}-${var.component}" : var.product
+  name                   = var.name != "" ? var.name : local.default_name
+  server_name            = "${local.name}-${var.env}"
+  postgresql_rg_name     = var.resource_group_name == null ? azurerm_resource_group.rg[0].name : var.resource_group_name
+  postgresql_rg_location = var.resource_group_name == null ? azurerm_resource_group.rg[0].location : var.location
+  vnet_rg_name           = var.business_area == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
+  vnet_name              = var.business_area == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
   app_full_name = "${var.product}-${var.component}"
+  private_dns_zone_id = "/subscriptions/1baf5470-1c3e-40d3-a6f7-74bfbce4b348/resourceGroups/core-infra-intsvc-rg/providers/Microsoft.Network/privateDnsZones/private.postgres.database.azure.com"
+
+  is_prod = length(regexall(".*(prod).*", var.env)) > 0
+
+  admin_group    = local.is_prod ? "DTS Platform Operations SC" : "DTS Platform Operations"
+  db_reader_user = local.is_prod ? "DTS JIT Access ${var.product} DB Reader SC" : "DTS ${upper(var.business_area)} DB Access Reader"
+
+
+  high_availability_environments = ["ptl", "perftest", "stg", "aat", "prod"]
+  high_availability              = var.high_availability == true || contains(local.high_availability_environments, var.env)
+
+
+
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -94,14 +115,14 @@ module "darts-api-db" {
   common_tags = var.common_tags
 }
 
+data "azuread_group" "db_admin" {
+  display_name     = local.admin_group
+  security_enabled = true
+}
+
 data "azuread_service_principal" "mi_name" {
-  mi_name = "example"
-}
-data "azuread_service_principal" "objId" {
-  object_id = "00000000-0000-0000-0000-000000000000"
-}
-data "azuread_service_principal" "dbName" {
-  display_name = "darts-api-db"
+  count     = var.enable_read_only_group_access ? 1 : 0
+  object_id = var.admin_user_object_id
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
