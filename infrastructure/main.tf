@@ -53,11 +53,6 @@ data "azuread_service_principal" "mi_name" {
   object_id = var.admin_user_object_id
 }
 
-resource "random_password" "password" {
-  length = 20
-  # safer set of special characters for pasting in the shell
-  override_special = "()-_"
-}
 
 resource "azurerm_postgresql_flexible_server" "pgsql_server" {
   name                = local.server_name
