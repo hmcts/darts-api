@@ -95,3 +95,18 @@ variable "aks_subscription_id" {}
 variable "admin_user_object_id" {
   default = null
 }
+
+variable "name" {
+  default = "darts"
+}
+variable "resource_group_name" {
+  default = "darts-rg"
+}
+
+variable "business_area"{
+  default="sds"
+}
+variable "high_availability" {
+  default= "false"
+  
+}
