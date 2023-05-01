@@ -13,8 +13,8 @@ locals {
   default_name           = var.component != "" ? "${var.product}-${var.component}" : var.product
   name                   = var.name != "" ? var.name : local.default_name
   server_name            = "${local.name}-${var.env}"
-  postgresql_rg_name     = var.resource_group_name == null ? azurerm_resource_group.rg[0].name : var.resource_group_name
-  postgresql_rg_location = var.resource_group_name == null ? azurerm_resource_group.rg[0].location : var.location
+  postgresql_rg_name     = "darts-rg"
+  postgresql_rg_location = "UK-South"
   vnet_rg_name           = var.business_area == "sds" ? "ss-${var.env}-network-rg" : "core-infra-${var.env}"
   vnet_name              = var.business_area == "sds" ? "ss-${var.env}-vnet" : "core-infra-vnet-${var.env}"
 
@@ -42,7 +42,7 @@ data "azurerm_subnet" "pg_subnet" {
 }
 
 data "azurerm_client_config" "current" {}
-
+ 
 data "azuread_group" "db_admin" {
   display_name     = local.admin_group
   security_enabled = true
