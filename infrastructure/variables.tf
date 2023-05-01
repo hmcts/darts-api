@@ -108,11 +108,12 @@ variable "business_area"{
 }
 variable "high_availability" {
   default= "false"
-  
 }
+
 variable "enable_read_only_group_access"{
   default = "1"
 }
+
 variable "mi_name" {
   default = "darts"
 
