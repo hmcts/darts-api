@@ -21,7 +21,6 @@ data "azurerm_resource_group" "rg" {
 data "azurerm_subnet" "postgres" {
   name                 = "iaas"
   resource_group_name  = local.rg_name
-  virtual_network_name = "ss-${var.env}-vnet"
 }
 
 data "azurerm_key_vault" "key_vault" {
