@@ -66,3 +66,13 @@ spring:
 azure:
   application-insights:
     instrumentation-key: ${darts.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+
+darts:
+  notification:
+    max_retry_attempts: 3
+    gov-notify:
+      api-key: ${darts.GovNotifyApiKey:00000000-0000-0000-0000-000000000000}
+      template-map:
+        court_manager_approve_transcript: 2f9e18b5-5046-44c2-8abd-e4ff15008a60
+        request_to_transcriber: 976bf288-705d-4cbb-b24f-c5529abf14cf
+        requested_audio_is_available: 66a1864f-24a6-469a-ac55-66bc57c7e4f6

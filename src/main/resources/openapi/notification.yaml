@@ -1,0 +1,54 @@
+openapi: 3.0.1
+
+info:
+
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /notification/create:
+    post:
+      tags:
+        - Notification
+      summary: Creates a notification entry in the notification table.
+      description: |-
+        description
+      parameters:
+        - in: query
+          name: eventId
+          schema:
+            type: string
+            enum: [court_manager_approve_transcript, request_to_transcriber, requested_audio_is_available]
+          description: "Unique ID that represents the Template to be used."
+          required: true
+        - in: query
+          name: caseId
+          schema:
+            type: string
+          description: "The Case Number"
+          required: true
+        - in: query
+          name: emailAddresses
+          schema:
+            type: string
+          description: "Comma separated list of email addresses to send the notification to."
+          required: true
+        - in: query
+          name: templateValues
+          schema:
+            type: string
+          description: "A Json string representing any extra template parameters that might be needed."
+          required: false
+      responses:
+        '201':
+          description: Created
+
+        '500':
+          description: Internal Server Error
+
