@@ -8,12 +8,9 @@
     <cve>CVE-2016-1000027</cve>
   </suppress>
   <suppress>
-    <notes><![CDATA[
-        This suppresses false positives identified on gov notify.
-        ]]></notes>
-    <gav regex="true">uk\.gov\.service\.notify:notifications.java.client</gav>
-    <vulnerabilityName regex="true"></vulnerabilityName>
-  </suppress>  <!--End of false positives section -->
+    <notes>Dependency brought in through gov-notify, so we can't control this.</notes>
+    <cve>CVE-2022-45688</cve>
+  </suppress>
 
   <!--Please add all the temporary suppression under the below section-->
   <suppress until="2023-04-14">
