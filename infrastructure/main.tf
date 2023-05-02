@@ -29,12 +29,6 @@ data "azurerm_key_vault" "key_vault" {
   resource_group_name = local.rg_name
 }
 
-resource "azurerm_key_vault_secret" "POSTGRES-DATABASE" {
-  name         = "darts-api-POSTGRES-DATABASE"
-  value        = module.postgresql_flexible.name
-  key_vault_id = data.azurerm_key_vault.key_vault.id
-}
-
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
   name         = "darts-api-POSTGRES-USER"
