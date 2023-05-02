@@ -2,11 +2,14 @@ package uk.gov.hmcts.darts.notification.helper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Component
@@ -14,24 +17,31 @@ import java.text.MessageFormat;
 @Slf4j
 public class TemplateIdHelper {
 
-    @Value("${darts.notification.gov_notify.template.transcriber.court_manager_approve_transcript}")
-    private String courtManagerApproveTranscript;
+    @Value("${darts.notification.gov_notify.template_ids}")
+    private String templateIdsString;
 
-    @Value("${darts.notification.gov_notify.template.transcriber.request_to_transcriber}")
-    private String requestToTranscriber;
-
-    @Value("${darts.notification.gov_notify.template.transcriber.requested_audio_is_available}")
-    private String requestedAudioIsAvailable;
+    private Map<String, String> templateIdMap;
 
     public String findTemplateId(String templateName) throws TemplateNotFoundException {
-        switch (templateName) {
-            case "court_manager_approve_transcript" : return courtManagerApproveTranscript;
-            case "request_to_transcriber" : return requestToTranscriber;
-            case "requested_audio_is_available" : return requestedAudioIsAvailable;
-            default:
-                String errorMessage = MessageFormat.format("Unable to find template with name ''{0}''.", templateName);
-                log.error(errorMessage);
-                throw new TemplateNotFoundException(errorMessage);
+        getTemplateIdMap();
+        String templateId = templateIdMap.get(templateName);
+        if(StringUtils.isBlank(templateId)){
+            String errorMessage = MessageFormat.format("Unable to find template with name ''{0}''.", templateName);
+            log.error(errorMessage);
+            throw new TemplateNotFoundException(errorMessage);
+        } else{
+            return templateId;
+        }
+    }
+
+    private void getTemplateIdMap(){
+        if(templateIdMap==null){
+            templateIdMap = new HashMap<>();
+            String[] templateMappings = templateIdsString.split(",");
+            for(String templateMap: templateMappings){
+                String[] nameId = templateMap.split("=");
+                templateIdMap.put(nameId[0], nameId[1]);
+            }
         }
     }
 
