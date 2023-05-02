@@ -26,7 +26,13 @@
   <module name="FileTabCharacter">
     <property name="eachLine" value="true"/>
   </module>
-
+  <module name="BeforeExecutionExclusionFileFilter">
+    <property name="fileNamePattern"  value=".*[\\/]generated[\\/].*$"/>
+  </module>
+  <module name="SuppressionSingleFilter">
+    <property name="files" value=".*[\\/]controller[\\/].*$" />
+    <property name="checks" value="LineLength" />
+  </module>
   <module name="SuppressWarningsFilter" />
   <module name="LineLength">
     <property name="max" value="120"/>

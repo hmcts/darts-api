@@ -1,12 +1,9 @@
 package uk.gov.hmcts.darts.authentication.service;
 
-import groovy.util.logging.Slf4j;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authentication.model.Session;
 
-@Slf4j
-@Component
-@AllArgsConstructor
-public class SessionService {
+public interface SessionService {
+
+    Session getSession(String sessionId);
 
 }
