@@ -19,7 +19,6 @@ import uk.gov.hmcts.darts.notification.service.GovNotifyService;
 import uk.gov.hmcts.darts.notification.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
 
-import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepo;
     private final GovNotifyService govNotifyService;
     private final TemplateIdHelper templateIdHelper;
+    private final EmailValidator emailValidator = EmailValidator.getInstance();
     private static final List<String> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
         String.valueOf(NotificationStatus.OPEN),
         String.valueOf(NotificationStatus.PROCESSING)
@@ -50,7 +50,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private Notification saveNotificationToDb(String eventId, String caseId, String emailAddress, String templateValues) {
-        EmailValidator emailValidator = EmailValidator.getInstance();
         if (!emailValidator.isValid(emailAddress)) {
             log.warn("The supplied email address, {}, is not valid, and so has been ignored.", emailAddress);
             return null;
@@ -62,9 +61,6 @@ public class NotificationServiceImpl implements NotificationService {
         dbNotification.setStatus(String.valueOf(NotificationStatus.OPEN));
         dbNotification.setAttempts(0);
         dbNotification.setTemplateValues(templateValues);
-        Timestamp now = new Timestamp(System.currentTimeMillis());
-        dbNotification.setCreatedDateTime(now);
-        dbNotification.setLastUpdatedDateTime(now);
 
         return notificationRepo.saveAndFlush(dbNotification);
     }
@@ -114,8 +110,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     private void incrementNotificationFailureCount(Notification notification) {
         int attempts = notification.getAttempts();
-        if (attempts < maxRetry) {
-            notification.setAttempts(++attempts);
+        attempts++;
+        if (attempts <= maxRetry) {
+            notification.setAttempts(attempts);
             notification.setStatus(String.valueOf(NotificationStatus.PROCESSING));
         } else {
             markNotificationAsFailed(notification);
