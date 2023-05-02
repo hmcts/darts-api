@@ -3,9 +3,6 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
-    cpo:
-      secrets:
-        - AppInsightsInstrumentationKey
   environment:
     DARTS_API_DB_HOST: "{{ .Release.Name }}-postgresql"
     DARTS_API_DB_NAME: "{{ .Values.postgresql.auth.database}}"

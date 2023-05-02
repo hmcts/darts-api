@@ -50,6 +50,6 @@ spring:
     ignore-missing-migrations: true
 
 
-azure:
-  application-insights:
-    instrumentation-key: ${darts.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+# azure:
+#   application-insights:
+#     instrumentation-key: ${darts.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}

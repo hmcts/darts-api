@@ -1,41 +1,17 @@
 spring:
-  cloud:
-    azure:
-      active-directory:
-        enabled: false
   datasource:
-    url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
-    driver-class-name: org.postgresql.Driver
-    username: ${api_DB_USERNAME:darts}
-    password: ${api_DB_PASSWORD:darts}
+    url: jdbc:h2:mem:mydb
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  h2:
+    console.enabled: true
   jpa:
-    show-sql: true
-    database: postgresql
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
-  flyway:
-    enabled: false
-    ignore-migration-patterns: true
-  autoconfigure:
-    exclude:
-      - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
-      - "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
-  security:
-    oauth2:
-      client:
-        registration:
-          external-azure-ad:
-            client-id: 392deeb8-5557-4f96-ae71-ff8be62f0db8
-            client-secret: hs~8Q~xpluVDuvP0FCvr1bUqfwT68HsDaPy5saRi
-            scope: openid
-            redirect-uri: https://darts-api.staging.platform.hmcts.net/external-user/handle-oauth-code
-            authorization-grant-type: authorization_code
-            response-type: code
-            response-mode: form_post
-            prompt: login
-            provider: external-azure-ad-provider
-        provider:
-          external-azure-ad-provider:
-            authorization-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/authorize
-            token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
-            jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    show-sql: true
