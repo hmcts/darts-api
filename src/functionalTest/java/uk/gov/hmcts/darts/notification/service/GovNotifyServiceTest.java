@@ -16,13 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles({"dev", "test"})
 class GovNotifyServiceTest {
 
     @Autowired
     GovNotifyService govNotifyService;
 
-    @Value("${darts.notification.gov-notify.template.transcriber.requested_audio_is_available}")
+    @Value("${darts.notification.gov-notify.template-map.requested_audio_is_available}")
     private String requestedAudioIsAvailable;
 
     @Test
