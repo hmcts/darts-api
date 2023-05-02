@@ -34,19 +34,22 @@ public class GovNotifyServiceImpl implements GovNotifyService {
                 request.getReference()
             );
         } catch (NotificationClientException e) {
-            log.error("Notification with Id {} failed to send. Error message from GovNotify:- {}", request.getReference(), e.getMessage());
+            log.error(
+                "Notification with Id {} failed to send. Error message from GovNotify:- {}",
+                request.getReference(),
+                e.getMessage()
+            );
             throw e;
         }
         log.debug("Email sent successfully, response received from goNotify = {}", emailResponse);
         return emailResponse;
     }
 
-    private void initiateGovNotifyClient(){
-        if(client==null){
+    private void initiateGovNotifyClient() {
+        if (client == null) {
             client = new NotificationClient(apiKey);
         }
     }
-
 
 
 }
