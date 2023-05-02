@@ -1,14 +1,18 @@
 provider "azurerm" {
-   features {}
-   skip_provider_registration = true
-   alias                      = "postgres_network"
-   subscription_id            = var.aks_subscription_id
- }
+  features {}
+}
 
- locals {
-   vault_name                = "${var.product}-${var.env}"
-   rg_name                   = "${var.product}-${var.env}-rg"
- }
+provider "azurerm" {
+  features {}
+  skip_provider_registration = true
+  alias                      = "postgres_network"
+  subscription_id            = var.aks_subscription_id
+}
+
+locals {
+  vault_name                = "${var.product}-${var.env}"
+  rg_name                   = "${var.product}-${var.env}-rg"
+}
 
  data "azurerm_resource_group" "rg" {
    name     = local.rg_name
