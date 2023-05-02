@@ -18,11 +18,13 @@ public class GovNotifyServiceImpl implements GovNotifyService {
     @Value("${darts.notification.gov-notify.api-key}")
     private String apiKey;
 
+    private NotificationClient client;
+
     @Override
     public SendEmailResponse sendNotification(GovNotifyRequest request) throws NotificationClientException {
 
         log.trace("Sending email with following settings = {}", request);
-        NotificationClient client = new NotificationClient(apiKey);
+        initiateGovNotifyClient();
         SendEmailResponse emailResponse;
         try {
             emailResponse = client.sendEmail(
@@ -38,6 +40,13 @@ public class GovNotifyServiceImpl implements GovNotifyService {
         log.debug("Email sent successfully, response received from goNotify = {}", emailResponse);
         return emailResponse;
     }
+
+    private void initiateGovNotifyClient(){
+        if(client==null){
+            client = new NotificationClient(apiKey);
+        }
+    }
+
 
 
 }

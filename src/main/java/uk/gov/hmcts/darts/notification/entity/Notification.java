@@ -5,12 +5,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -55,24 +55,12 @@ public class Notification {
     @Column(name = TEMPLATE_VALUES)
     private String templateValues;
 
+    @CreationTimestamp
     @Column(name = CREATED_DATE_TIME)
     private Timestamp createdDateTime;
 
+    @UpdateTimestamp
     @Column(name = LAST_UPDATED_DATE_TIME)
     private Timestamp lastUpdatedDateTime;
-
-
-    @PrePersist
-    public void updateTimes() {
-        this.createdDateTime = new Timestamp(System.currentTimeMillis());
-        this.lastUpdatedDateTime = new Timestamp(System.currentTimeMillis());
-    }
-
-    @PreUpdate
-    public void updateLastUpdatedDateTime() {
-        this.lastUpdatedDateTime = new Timestamp(System.currentTimeMillis());
-    }
-
-
 
 }

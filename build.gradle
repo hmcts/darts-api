@@ -198,22 +198,6 @@ ext {
 ext['snakeyaml.version'] = '2.0'
 ext['spring-security.version']='6.0.3' // https://spring.io/security/cve-2023-20862
 
-task generateNotificationApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/notification.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.notification.api"
-  modelPackage = "uk.gov.hmcts.darts.notification.model"
-
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary: "java8",
-    interfaceOnly: "true"
-  ]
-}
-
-
-
 task generateDailyListApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
   generatorName = "spring"
   inputSpec = "$rootDir/src/main/resources/openapi/dailyList.yaml".toString()
@@ -270,7 +254,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
 
-  compileJava.dependsOn generateNotificationApi, generateDailyListApi
+  compileJava.dependsOn generateDailyListApi
 }
 
 mainClassName = 'uk.gov.hmcts.darts.Application'
