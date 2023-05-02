@@ -3,16 +3,16 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
-    DARTS_API_DB_HOST: "{{ .Release.Name }}-postgresql"
-    DARTS_API_DB_NAME: "{{ .Values.postgresql.auth.database}}"
-    DARTS_API_DB_USERNAME: "{{ .Values.postgresql.auth.username}}"
-    DARTS_API_DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
-    DARTS_API_DB_OPTIONS: "?stringtype=unspecified"
-    DARTS_API_DB_PORT: 5432
+    ENABLE_FLYWAY: true
+    RUN_DB_MIGRATION_ON_STARTUP: true
+    DB_HOST: "{{ .Release.Name }}-postgresql"
+    DB_NAME: "{{ .Values.postgresql.auth.database}}"
+    DB_USER: "{{ .Values.postgresql.auth.username}}"
+    DB_PASS: "{{ .Values.postgresql.auth.password}}"
+    DB_PORT: "5432"
     #AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY: '3c3bacb7-64e0-476c-aeaa-657657b063fd'
   #disableKeyVaults: true
   postgresql:
     enabled: true
-    
   devApplicationInsightsInstrumentKeyName: AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
 

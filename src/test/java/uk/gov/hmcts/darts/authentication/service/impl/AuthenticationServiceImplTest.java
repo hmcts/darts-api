@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.authentication.service.impl;
 
 import feign.Request;
 import feign.Response;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,8 +11,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
+import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.AzureActiveDirectoryB2CClient;
+import uk.gov.hmcts.darts.authentication.service.SessionService;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,11 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.TooManyMethods")
 class AuthenticationServiceImplTest {
+
+    private static final String DUMMY_SESSION_ID = "9D65049E1787A924E269747222F60CAA";
 
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
@@ -35,14 +44,41 @@ class AuthenticationServiceImplTest {
     @Mock
     private AzureActiveDirectoryB2CClient azureActiveDirectoryB2CClient;
 
+    @Mock
+    private SessionService sessionService;
+
     private static final String AUTHORIZE_URL = "AuthUrl?client_id=ClientId&response_type=ResponseType&redirect_uri="
         + "RedirectId&response_mode=ResponseMode&scope=Scope&prompt=Prompt";
 
     @Test
+    void loginOrRefreshShouldReturnAuthUrlWhenNoExistingSessionExistsForExternalUser() {
+        when(sessionService.getSession(anyString()))
+            .thenReturn(null);
+        mockStubsForAuthorizationCode();
+
+        URI uri = authenticationService.loginOrRefresh("DUMMY_SESSION_ID");
+
+        assertEquals(AUTHORIZE_URL, uri.toString());
+    }
+
+    @Test
+    void loginOrRefreshShouldThrowExceptionWhenExistingSessionExists() {
+        when(sessionService.getSession(DUMMY_SESSION_ID))
+            .thenReturn(new Session(null, null, null));
+
+        NotImplementedException exception = assertThrows(
+            NotImplementedException.class,
+            () -> authenticationService.loginOrRefresh(DUMMY_SESSION_ID)
+        );
+
+        assertEquals("Active session support not yet implemented", exception.getMessage());
+    }
+
+    @Test
     void testGetAuthorizationUrlFromConfigWhenLoginRequested() {
         mockStubsForAuthorizationCode();
-        String authUrl = authenticationService.getAuthorizationUrl();
-        assertEquals(AUTHORIZE_URL, authUrl, "Expected Authorize URL is generated");
+        URI authUrl = authenticationService.getAuthorizationUrl();
+        assertEquals(AUTHORIZE_URL, authUrl.toString(), "Expected Authorize URL is generated");
     }
 
     @Test

@@ -1,10 +1,6 @@
-variable "product" {
-  default = "darts"
-}
+variable "product" {}
 
-variable "component" {
-  default = "api"
-}
+variable "component" {}
 
 variable "location" {
   default = "UK South"

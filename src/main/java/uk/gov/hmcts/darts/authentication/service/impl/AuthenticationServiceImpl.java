@@ -2,36 +2,48 @@ package uk.gov.hmcts.darts.authentication.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.utils.URIBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
+import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authentication.service.AzureActiveDirectoryB2CClient;
+import uk.gov.hmcts.darts.authentication.service.SessionService;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    @Autowired
-    private AuthenticationConfiguration authServiceConfiguration;
-
-    @Autowired
-    private AzureActiveDirectoryB2CClient azureActiveDirectoryB2CClient;
+    private final AuthenticationConfiguration authServiceConfiguration;
+    private final SessionService sessionService;
+    private final AzureActiveDirectoryB2CClient azureActiveDirectoryB2CClient;
 
     @Override
+    public URI loginOrRefresh(String sessionId) {
+        Session session = sessionService.getSession(sessionId);
+        if (session == null) {
+            return getAuthorizationUrl();
+        }
+
+        throw new NotImplementedException("Active session support not yet implemented");
+    }
+
     @SneakyThrows
-    public String getAuthorizationUrl() {
+    URI getAuthorizationUrl() {
         URIBuilder uriBuilder = new URIBuilder(
             authServiceConfiguration.getExternalADauthorizationUri());
         uriBuilder.addParameter("client_id", authServiceConfiguration.getExternalADclientId());
@@ -43,9 +55,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         uriBuilder.addParameter("response_mode", authServiceConfiguration.getExternalADresponseMode());
         uriBuilder.addParameter("scope", authServiceConfiguration.getExternalADscope());
         uriBuilder.addParameter("prompt", authServiceConfiguration.getExternalADprompt());
-        return uriBuilder.build().toString();
+        return uriBuilder.build();
     }
-
 
     @Override
     public OAuthProviderRawResponse fetchAccessToken(String code) {
