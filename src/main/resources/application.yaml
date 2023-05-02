@@ -33,6 +33,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
+            issuer-uri: https://hmctsdartsb2csbox.b2clogin.com/89b8de2e-eb1b-42fb-a59c-813ea2b82a56/v2.0/
             provider: external-azure-ad-provider
         provider:
           external-azure-ad-provider:
