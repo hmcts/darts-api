@@ -1,37 +1,20 @@
 package uk.gov.hmcts.darts.authentication.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
-import uk.gov.hmcts.darts.authentication.service.SessionService;
 
-@Slf4j
-@Component
-public class AuthenticationController {
+public interface AuthenticationController {
 
-    @Autowired
-    private SessionService sessionService;
-
-    @Autowired
-    private AuthenticationService authenticationService;
+    @GetMapping("/login-or-refresh")
+    ModelAndView loginOrRefresh(HttpSession session);
 
     @PostMapping("/handle-oauth-code")
-    public ModelAndView handleOauthCode(String code) {
-        log.info("Azure AD Token received successfully");
-        authenticationService.fetchAccessToken(code);
-        return new ModelAndView("redirect:/");
-    }
+    ModelAndView handleOauthCode(@RequestParam("code") String code);
 
     @GetMapping("/logout")
-    public ModelAndView logout() {
-        return new ModelAndView("redirect:/external-user/login-or-refresh");
-    }
+    ModelAndView logout();
 
-    public String getAuthorizeUrl() {
-        return authenticationService.getAuthorizationUrl();
-    }
 }
