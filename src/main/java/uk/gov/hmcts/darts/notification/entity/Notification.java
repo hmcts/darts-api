@@ -9,8 +9,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.sql.Timestamp;
 
@@ -62,5 +60,6 @@ public class Notification {
     @UpdateTimestamp
     @Column(name = LAST_UPDATED_DATE_TIME)
     private Timestamp lastUpdatedDateTime;
+
 
 }
