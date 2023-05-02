@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.notification.service;
 
-import uk.gov.hmcts.darts.notification.dto.CreateNotificationReq;
-import uk.gov.hmcts.darts.notification.entity.Notification;
+import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
 public interface NotificationService {
-    Notification sendNotification(CreateNotificationReq createNotificationReq);
+    void scheduleNotification(SaveNotificationToDbRequest request);
+
+    void sendNotificationToGovNotify();
 }
