@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @RequiredArgsConstructor
+@Controller
 public class NotificationController implements NotificationApi {
 
     private final NotificationService notificationService;
@@ -50,7 +52,7 @@ public class NotificationController implements NotificationApi {
             .build();
 
         notificationService.scheduleNotification(request);
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
 
     }
 }
