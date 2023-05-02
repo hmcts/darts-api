@@ -12,6 +12,7 @@ locals {
 
   prefix            = "${var.product}-ss"
   prefix_no_special = replace(local.prefix, "-", "")
+
 }
 
 # Resource Group
@@ -40,28 +41,16 @@ resource "azurerm_application_insights" "appinsights" {
   }
 }
 
-# this key vault is created in every environment, but preview, being short-lived
-module "key-vault" {
-  source                      = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
-  product                     = var.product
-  env                         = var.env
-  object_id                   = var.jenkins_AAD_objectId
-  resource_group_name         = azurerm_resource_group.rg.name
-  product_group_name          = "DTS Darts Modernisation"
-  common_tags                 = var.common_tags
-  managed_identity_object_ids = ["${data.azurerm_user_assigned_identity.rpe-shared-identity.principal_id}"]
-}
-
 # Key Vault secrets
 
 resource "azurerm_key_vault_secret" "app_insights_connection_string" {
   name         = "app-insights-connection-string"
   value        = azurerm_application_insights.appinsights.connection_string
-  key_vault_id = module.key-vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
 resource "azurerm_key_vault_secret" "azure_appinsights_key" {
   name         = "AppInsightsInstrumentationKey"
   value        = azurerm_application_insights.appinsights.instrumentation_key
-  key_vault_id = module.key-vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.key_vault.id
 }

@@ -1,8 +1,8 @@
 locals {
 
   auto_secret_prefix  = "auto-${var.product}-${local.env}"
-  resource_group_name = "${local.prefix}-${var.env}-rg"
-  key_vault_name      = "${local.prefix}-kv-${var.env}"
+  resource_group_name = "${var.product}-${var.env}-rg"
+  key_vault_name      = "${var.product}-${var.env}-kv"
   sdp_key_vault_name  = "${local.prefix}-sdp-kv-${var.env}"
 }
 
@@ -20,4 +20,9 @@ data "azurerm_subnet" "iaas" {
 data "azurerm_user_assigned_identity" "rpe-shared-identity" {
   name                = "pre-${var.env}-mi"
   resource_group_name = "managed-identities-${var.env}-rg"
+}
+
+data "azurerm_key_vault" "key_vault" {
+  name                = local.key_vault_name
+  resource_group_name = local.resource_group_name
 }
