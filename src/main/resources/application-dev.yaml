@@ -1,0 +1,43 @@
+spring:
+  cloud:
+    azure:
+      active-directory:
+        enabled: false
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:${DB_PORT}/postgres
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    properties:
+      charSet: UTF-8
+  autoconfigure:
+    exclude:
+      - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
+      - "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
+  security:
+    oauth2:
+      client:
+        registration:
+          external-azure-ad:
+            client-id: 392deeb8-5557-4f96-ae71-ff8be62f0db8
+            client-secret: hs~8Q~xpluVDuvP0FCvr1bUqfwT68HsDaPy5saRi
+            scope: openid
+            redirect-uri: https://darts-api.staging.platform.hmcts.net/external-user/handle-oauth-code
+            authorization-grant-type: authorization_code
+            response-type: code
+            response-mode: form_post
+            prompt: login
+            provider: external-azure-ad-provider
+        provider:
+          external-azure-ad-provider:
+            authorization-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/authorize
+            token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
+            jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
+
+logging:
+  level:
+    uk.gov.hmcts.darts: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+    org.springframework.web: DEBUG
+
+

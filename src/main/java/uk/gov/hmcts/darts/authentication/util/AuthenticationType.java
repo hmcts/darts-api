@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.authentication.util;
 
 public enum AuthenticationType {
-    AD,
-    B2C
+    INTERNAL_USER_AD,
+    EXTERNAL_USER_B2C_AD
 }
