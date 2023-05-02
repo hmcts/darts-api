@@ -9,54 +9,43 @@ provider "azurerm" {
   subscription_id            = var.aks_subscription_id
 }
 
-# locals {
+locals {
+  vault_name                = "${var.product}-${var.env}-kv"
+  rg_name                   = "${var.product}-${var.env}-rg"
+}
 
-#   shared_infra_rg           = "${var.product}-shared-infrastructure-${var.env}"
-#   # vault_name                = "${var.product}-kv-${var.env}"
-# }
-resource "azurerm_resource_group" "rg" {
-  name     = "${var.product}-shared-${var.env}"
-  location = var.location
-
-  tags = var.common_tags
+data "azurerm_resource_group" "rg" {
+  name     = local.rg_name
 }
 
 data "azurerm_subnet" "postgres" {
   name                 = "iaas"
-  resource_group_name  = azurerm_resource_group.rg.name
+  resource_group_name  = local.rg_name
   virtual_network_name = "ss-${var.env}-vnet"
 }
 
-module "key-vault" {
-  source              = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
-  name                = "darts-kv-${var.env}"
-  product             = var.product
-  env                 = var.env
-  tenant_id           = var.tenant_id
-  object_id           = var.jenkins_AAD_objectId
-  resource_group_name = azurerm_resource_group.rg.name
-  product_group_name  = "DTS Darts Modernisation"
-  common_tags         = var.common_tags
-  create_managed_identity    = true
+data "azurerm_key_vault" "key_vault" {
+  name                = local.vault_name
+  resource_group_name = local.rg_name
 }
 
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
   name         = "darts-api-POSTGRES-USER"
   value        = module.postgresql_flexible.username
-  key_vault_id = module.key-vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
   name         = "darts-api-POSTGRES-PASS"
   value        = module.postgresql_flexible.password
-  key_vault_id = module.key-vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES_HOST" {
   name         = "darts-api-POSTGRES-HOST"
   value        = module.postgresql_flexible.fqdn
-  key_vault_id = module.key-vault.key_vault_id
+  key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
 module "postgresql_flexible" {
