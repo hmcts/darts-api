@@ -50,7 +50,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    void scheduleNotification() {
+    void scheduleNotificationOkConfirmEntryInDb() {
         String caseId = "scheduleNotification";
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
@@ -62,8 +62,8 @@ class NotificationServiceTest {
         List<Notification> resultList = notificationRepo.findByCaseId(caseId);
         Notification result = resultList.get(0);
         assertTrue(result.getId() > 0);
-        assertEquals("OPEN", result.getStatus(), "Object may not have been enriched properly");
-        assertEquals(caseId, result.getCaseId(), "Object not populated properly");
+        assertEquals("OPEN", result.getStatus());
+        assertEquals(caseId, result.getCaseId());
     }
 
     @Test
@@ -78,9 +78,9 @@ class NotificationServiceTest {
         service.scheduleNotification(request);
 
         List<Notification> resultList = notificationRepo.findByCaseId(caseId);
-        assertEquals(2, resultList.size(), "number of records is wrong.");
-        assertEquals(TEST_EMAIL_ADDRESS, resultList.get(0).getEmailAddress(), "first email address is wrong");
-        assertEquals("test2@test.com", resultList.get(1).getEmailAddress(), "");
+        assertEquals(2, resultList.size());
+        assertEquals(TEST_EMAIL_ADDRESS, resultList.get(0).getEmailAddress());
+        assertEquals("test2@test.com", resultList.get(1).getEmailAddress());
     }
 
     @Test
@@ -126,9 +126,9 @@ class NotificationServiceTest {
     @Test
     void sendNotificationToGovNotifyInvalidTemplateId(TestInfo testInfo) throws TemplateNotFoundException, NotificationClientException {
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)).thenReturn(
-            "976bf288-1234-1234-1234-c5529abf14cf");//invalid tempalte number
+            "INVALID-TEMPLATE-ID");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class))).thenThrow(new NotificationClientException(
-            ""));//invalid template id
+            ""));
         String caseId = testInfo.getDisplayName();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)
@@ -148,9 +148,9 @@ class NotificationServiceTest {
     @Test
     void sendNotificationToGovNotifyFailureRetryExceeded(TestInfo testInfo) throws TemplateNotFoundException, NotificationClientException {
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)).thenReturn(
-            "976bf288-1234-1234-1234-c5529abf14cf");//invalid template id
+            "976bf288-1234-1234-1234-c5529abf14cf");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class))).thenThrow(new NotificationClientException(
-            ""));//invalid template id
+            ""));
         String caseId = testInfo.getDisplayName();
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
