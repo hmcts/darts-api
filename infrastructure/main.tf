@@ -10,7 +10,7 @@ provider "azurerm" {
 }
 
 locals {
-  vault_name                = "${var.product}-${var.env}-kv"
+  vault_name                = "${var.product}-${var.env}"
   rg_name                   = "${var.product}-${var.env}-rg"
 }
 
