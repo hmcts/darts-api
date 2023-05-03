@@ -45,7 +45,12 @@ public class NotificationServiceImpl implements NotificationService {
         String emailAddresses = request.getEmailAddresses();
         String[] emailAddressList = emailAddresses.split(",");
         for (String emailAddress : emailAddressList) {
-            saveNotificationToDb(request.getEventId(), request.getCaseId(), StringUtils.trim(emailAddress), request.getTemplateValues());
+            saveNotificationToDb(
+                request.getEventId(),
+                request.getCaseId(),
+                StringUtils.trim(emailAddress),
+                request.getTemplateValues()
+            );
         }
     }
 
@@ -75,7 +80,7 @@ public class NotificationServiceImpl implements NotificationService {
             try {
                 templateId = templateIdHelper.findTemplateId(notification.getEventId());
             } catch (TemplateNotFoundException e) {
-                markNotificationAsFailed(notification);
+                updateNotificationStatus(notification, NotificationStatus.FAILED);
                 break;
             }
 
@@ -83,9 +88,9 @@ public class NotificationServiceImpl implements NotificationService {
             try {
                 govNotifyRequest = GovNotifyRequestMapper.map(notification, templateId);
                 govNotifyService.sendNotification(govNotifyRequest);
-                markNotificationAsSent(notification);
+                updateNotificationStatus(notification, NotificationStatus.SENT);
             } catch (JsonProcessingException e) {
-                markNotificationAsFailed(notification);
+                updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
                 log.error(
                     "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
@@ -98,13 +103,8 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private void markNotificationAsFailed(Notification notification) {
-        notification.setStatus(String.valueOf(NotificationStatus.FAILED));
-        notificationRepo.saveAndFlush(notification);
-    }
-
-    private void markNotificationAsSent(Notification notification) {
-        notification.setStatus(String.valueOf(NotificationStatus.SENT));
+    private void updateNotificationStatus(Notification notification, NotificationStatus status) {
+        notification.setStatus(String.valueOf(status));
         notificationRepo.saveAndFlush(notification);
     }
 
@@ -115,7 +115,7 @@ public class NotificationServiceImpl implements NotificationService {
             notification.setAttempts(attempts);
             notification.setStatus(String.valueOf(NotificationStatus.PROCESSING));
         } else {
-            markNotificationAsFailed(notification);
+            updateNotificationStatus(notification, NotificationStatus.FAILED);
         }
         notificationRepo.saveAndFlush(notification);
     }
