@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.notification.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.service.GovNotifyService;
@@ -15,16 +15,13 @@ import uk.gov.service.notify.SendEmailResponse;
 @Slf4j
 public class GovNotifyServiceImpl implements GovNotifyService {
 
-    @Value("${darts.notification.gov-notify.api-key}")
-    private String apiKey;
-
+    @Autowired
     private NotificationClient client;
 
     @Override
     public SendEmailResponse sendNotification(GovNotifyRequest request) throws NotificationClientException {
 
         log.trace("Sending email with following settings = {}", request);
-        initiateGovNotifyClient();
         SendEmailResponse emailResponse;
         try {
             emailResponse = client.sendEmail(
@@ -44,12 +41,5 @@ public class GovNotifyServiceImpl implements GovNotifyService {
         log.debug("Email sent successfully, response received from goNotify = {}", emailResponse);
         return emailResponse;
     }
-
-    private void initiateGovNotifyClient() {
-        if (client == null) {
-            client = new NotificationClient(apiKey);
-        }
-    }
-
 
 }
