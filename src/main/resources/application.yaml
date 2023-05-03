@@ -63,6 +63,11 @@ spring:
 #            # silence the 'wall-of-text' - unnecessary exception throw about blob types
 #            non_contextual_creation: true
 
+# ATS
+audiotransform:
+  ffmpeg-executable: ${user.home}/audiotransform/ffmpeg
+  concat-workspace: ${user.home}/audiotransform/concat
+
 azure:
   application-insights:
     instrumentation-key: ${darts.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
