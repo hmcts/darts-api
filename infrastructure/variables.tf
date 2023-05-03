@@ -6,9 +6,11 @@ variable "location" {
   default = "UK South"
 }
 
-variable "env" {}
+variable "env" {
+ }
 
-variable "subscription" {}
+ variable aks_subscription_id {
+ }
 
 variable "common_tags" {
   type = map(string)
