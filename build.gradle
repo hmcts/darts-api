@@ -242,6 +242,7 @@ dependencies {
 
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
+  runtimeOnly 'org.hsqldb:hsqldb'
 
   implementation 'uk.gov.service.notify:notifications-java-client:3.19.1-RELEASE'
 
