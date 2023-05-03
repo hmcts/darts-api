@@ -7,10 +7,10 @@ variable "location" {
 }
 
 variable "env" {
- }
+}
 
- variable aks_subscription_id {
- }
+variable "aks_subscription_id" {
+}
 
 variable "common_tags" {
   type = map(string)
