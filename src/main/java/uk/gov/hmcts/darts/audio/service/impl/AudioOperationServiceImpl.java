@@ -44,7 +44,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         command.append(String.format("\"%sconcat=n=%d:v=0:a=1\"", inputFileAudioStreams, concatNumberOfSegments))
             .append(' ').append(String.format("%s/%s-concat-out.mp2", baseFilePath, channel));
 
-        return new CommandLine(command.toString());
+        return CommandLine.parse(command.toString());
     }
 
     @Override

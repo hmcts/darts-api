@@ -65,7 +65,7 @@ spring:
 
 # ATS
 audiotransform:
-  ffmpeg-executable: ${user.home}/audiotransform/ffmpeg
+  ffmpeg-executable: /usr/bin/ffmpeg
   concat-workspace: ${user.home}/audiotransform/concat
   merge-workspace: ${user.home}/audiotransform/merge
 
