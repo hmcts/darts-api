@@ -7,7 +7,22 @@ def product = "darts"
 def component = "api"
 def kv = product + '-ss-kv'
 
+def secrets = [
+  'darts-${env}': [
+    secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY')
+  ],
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [ $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
 
 withParameterizedPipeline(type, product, component, 'sbox', 'sbox') {
+  loadVaultSecrets(secrets)
   enableSlackNotifications('#darts-builds')
 }

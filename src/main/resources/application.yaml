@@ -41,7 +41,6 @@ spring:
             token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
             jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
 
-
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -77,7 +76,7 @@ darts:
   notification:
     max_retry_attempts: 3
     gov-notify:
-      api-key: ${darts.GovNotifyApiKey:00000000-0000-0000-0000-000000000000}
+      api-key: ${darts.GovukNotifyApiKey:00000000-0000-0000-0000-000000000000}
       template-map:
         court_manager_approve_transcript: 2f9e18b5-5046-44c2-8abd-e4ff15008a60
         request_to_transcriber: 976bf288-705d-4cbb-b24f-c5529abf14cf

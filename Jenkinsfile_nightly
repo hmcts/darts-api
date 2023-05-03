@@ -11,6 +11,22 @@ def type = "java"
 def product = "darts"
 def component = "api"
 
+def secrets = [
+  'darts-${env}': [
+    secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY')
+  ],
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [ $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
 withNightlyPipeline(type, product, component) {
+  loadVaultSecrets(secrets)
   enableSlackNotifications('#darts-builds')
 }

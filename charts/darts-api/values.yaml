@@ -4,9 +4,11 @@ java:
   ingressHost: darts-api.{{ .Values.global.environment }}.platform.hmcts.net
   aadIdentityName: darts
 #  Uncomment once the vault containing the app insights key has been set up
-#  keyVaults:
-#    darts:
-#      secrets:
+  keyVaults:
+    darts:
+      secrets:
+        - name: GovukNotifyApiKey
+          alias: darts.notification.gov-notify.api-key
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
   environment:
