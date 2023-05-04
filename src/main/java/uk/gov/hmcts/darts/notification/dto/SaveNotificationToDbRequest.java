@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.notification.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class CreateNotificationReq {
+@Builder
+public class SaveNotificationToDbRequest {
     String eventId;
     String caseId;
-    String emailAddress;
+    String emailAddresses;
     String templateValues;
 }
