@@ -2,10 +2,11 @@ package uk.gov.hmcts.darts.notification.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
+import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
+import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
 import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
 
@@ -20,19 +21,62 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @ActiveProfiles({"dev","test"})
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GovNotifyServiceTest {
 
+    public static final String EMAIL_ADDRESS = "test@test.com";
     @Autowired
     GovNotifyService govNotifyService;
 
-    @Value("${darts.notification.gov-notify.template-map.requested_audio_is_available}")
-    private String requestedAudioIsAvailable;
+    @Autowired
+    TemplateIdHelper templateIdHelper;
 
     @Test
-    void testRequestedAudioIsAvailableOutput() throws NotificationClientException {
+    void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("court_manager_approve_transcript");
         GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
-        govNotifyRequest.setTemplateId(requestedAudioIsAvailable);
-        govNotifyRequest.setEmailAddress("test@test.com");
+        govNotifyRequest.setTemplateId(templateId);
+        govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
+        Map<String, String> parameterMap = new ConcurrentHashMap<>();
+        parameterMap.put("case_id", "TheCaseId");
+        govNotifyRequest.setParameterMap(parameterMap);
+
+        SendEmailResponse emailResponse = govNotifyService.sendNotification(govNotifyRequest);
+        assertEquals("DARTS: New Transcription Request Submitted and Awaiting Review", emailResponse.getSubject());
+        assertEquals("Hello,\r\n" +
+                         "A new Transcription request has been submitted and is awaiting your review. \r\n" +
+                         "Please visit your DARTS Inbox to action this request. \r\n" +
+                         "Regards\r\n" +
+                         "DARTS", emailResponse.getBody());
+    }
+
+
+    @Test
+    void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("request_to_transcriber");
+        GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
+        govNotifyRequest.setTemplateId(templateId);
+        govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
+        Map<String, String> parameterMap = new ConcurrentHashMap<>();
+        parameterMap.put("case_id", "TheCaseId");
+        govNotifyRequest.setParameterMap(parameterMap);
+
+        SendEmailResponse emailResponse = govNotifyService.sendNotification(govNotifyRequest);
+        assertEquals("DARTS: New Transcription Request", emailResponse.getSubject());
+        assertEquals("Hello,\r\n" +
+                         "A new request has been made for a Transcribed document.\r\n" +
+                         "Please visit the My Inbox section from within the DARTS portal to access the request.\r\n" +
+                         "Regards\r\n" +
+                         "DARTS", emailResponse.getBody());
+    }
+
+
+    @Test
+    void requestedAudioIsAvailable() throws NotificationClientException, TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("requested_audio_is_available");
+        GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
+        govNotifyRequest.setTemplateId(templateId);
+        govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
         parameterMap.put("case_id", "TheCaseId");
         govNotifyRequest.setParameterMap(parameterMap);
@@ -45,5 +89,69 @@ class GovNotifyServiceTest {
                          "Regards\r\n" +
                          "DARTS", emailResponse.getBody());
     }
+
+    @Test
+    void transcriptionAvailable() throws NotificationClientException, TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("transcription_available");
+        GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
+        govNotifyRequest.setTemplateId(templateId);
+        govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
+        Map<String, String> parameterMap = new ConcurrentHashMap<>();
+        parameterMap.put("case_id", "TheCaseId");
+        govNotifyRequest.setParameterMap(parameterMap);
+
+        SendEmailResponse emailResponse = govNotifyService.sendNotification(govNotifyRequest);
+        assertEquals("DARTS: Transcribed Document Available", emailResponse.getSubject());
+        assertEquals("Hello,\r\n" +
+                         "The transcript that you requested for case TheCaseId, has now been completed and available for you to view in DARTS.\r\n" +
+                         "The completed transcribed document can be found under your My Transcriptions Section on the DARTS portal.\r\n" +
+                         "Regards\r\n" +
+                         "DARTS", emailResponse.getBody());
+    }
+
+
+    @Test
+    void transcriptionRequestApproved() throws NotificationClientException, TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("transcription_request_approved");
+        GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
+        govNotifyRequest.setTemplateId(templateId);
+        govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
+        Map<String, String> parameterMap = new ConcurrentHashMap<>();
+        parameterMap.put("case_id", "TheCaseId");
+        govNotifyRequest.setParameterMap(parameterMap);
+
+        SendEmailResponse emailResponse = govNotifyService.sendNotification(govNotifyRequest);
+        assertEquals("DARTS: Transcript Request Approved", emailResponse.getSubject());
+        assertEquals("Hello,\r\n" +
+                         "The transcript that you requested for case TheCaseId, has now been approved and will be available soon. " +
+                         "You will be notified again once the Transcript becomes available on DARTS.\r\n" +
+                         "Regards\r\n" +
+                         "DARTS", emailResponse.getBody());
+    }
+
+
+    @Test
+    void transcriptionRequestRejected() throws NotificationClientException, TemplateNotFoundException {
+        String templateId = templateIdHelper.findTemplateId("transcription_request_rejected");
+        GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
+        govNotifyRequest.setTemplateId(templateId);
+        govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
+        Map<String, String> parameterMap = new ConcurrentHashMap<>();
+        parameterMap.put("case_id", "TheCaseId");
+        parameterMap.put("rejection_reason", "TheRejectionReason");
+        govNotifyRequest.setParameterMap(parameterMap);
+
+        SendEmailResponse emailResponse = govNotifyService.sendNotification(govNotifyRequest);
+        assertEquals("DARTS: Transcript Request Rejected", emailResponse.getSubject());
+        assertEquals("Hello,\r\n" +
+                         "The Transcript Request you made for case TheCaseId has been rejected.\r\n" +
+                         "Rejection Reason: TheRejectionReason\r\n" +
+                         "If you still need a transcript for this case, please resubmit your request\r\n" +
+                         "taking into account the rejection reason.\r\n" +
+                         "Regards\r\n" +
+                         "DARTS", emailResponse.getBody());
+    }
+
+
 
 }
