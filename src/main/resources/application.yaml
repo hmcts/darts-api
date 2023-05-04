@@ -34,14 +34,13 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: 'https://hmctsdartsb2csbox.b2clogin.com/${spring.security.oauth2.client.registration.external-azure-ad.tenant-id}/v2.0/'
+            issuer-uri: "https://hmctsdartsb2csbox.b2clogin.com/${spring.security.oauth2.client.registration.external-azure-ad.tenant-id}/v2.0/"
             provider: external-azure-ad-provider
         provider:
           external-azure-ad-provider:
             authorization-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/authorize
             token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
             jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
-
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -71,6 +70,30 @@ spring:
       out-of-order: true
       ignore-missing-migrations: true
 
+  flyway.enabled: ${ENABLE_DB_MIGRATE:true}
+  flyway.locations: classpath:db/migration
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
+#    username: ${DB_USER_NAME}
+#    password: ${DB_PASSWORD}
+#    properties:
+#      charSet: UTF-8
+#    hikari:
+#      minimumIdle: 2
+#      maximumPoolSize: 10
+#      idleTimeout: 10000
+#      poolName: {to-be-defined}HikariCP
+#      maxLifetime: 7200000
+#      connectionTimeout: 30000
+#  jpa:
+#    properties:
+#      hibernate:
+#        jdbc:
+#          lob:
+#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+#            non_contextual_creation: true
+
 # ATS
 audiotransform:
   ffmpeg-executable: ffmpeg
@@ -94,3 +117,8 @@ darts:
         transcription_available: a928742c-5eb7-46f0-9f61-d89d5394785c
         transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
+
+dbMigration:
+  # When true, the app will run DB migration on startup.
+  # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
+  runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
