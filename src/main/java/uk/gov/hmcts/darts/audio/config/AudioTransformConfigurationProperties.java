@@ -14,5 +14,7 @@ public class AudioTransformConfigurationProperties {
     private String ffmpegExecutable;
     @NotEmpty
     private String concatWorkspace;
+    @NotEmpty
+    private String mergeWorkspace;
 
 }

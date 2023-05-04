@@ -80,4 +80,27 @@ class AudioOperationServiceImplTest {
         assertEquals(expectedAudio.getStartTime(), audioFileInfo.getStartTime());
         assertEquals(expectedAudio.getEndTime(), audioFileInfo.getEndTime());
     }
+
+    @Test
+    void shouldReturnMergedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
+        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn("/tempDir/ffmpeg");
+        when(audioTransformConfigurationProperties.getMergeWorkspace()).thenReturn("/tempDir");
+        when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
+
+        AudioFileInfo expectedAudio = new AudioFileInfo(
+            Instant.parse("2023-04-28T09:00:00Z"),
+            Instant.parse("2023-04-28T11:00:00Z"),
+            "/tempDir/requestId/merge/C0-202305.mp2",
+            0);
+
+        AudioFileInfo audioFileInfo =  audioOperationService.merge(audioFileInfos, "requestId");
+
+        String filenameExpression = "/tempDir/requestId/merge/C[0-9]-[0-9]*.mp2";
+        Boolean fileNameMatch = audioFileInfo.getFileName().matches(filenameExpression);
+
+        assertEquals(true, fileNameMatch);
+        assertEquals(expectedAudio.getChannel(), audioFileInfo.getChannel());
+        assertEquals(expectedAudio.getStartTime(), audioFileInfo.getStartTime());
+        assertEquals(expectedAudio.getEndTime(), audioFileInfo.getEndTime());
+    }
 }
