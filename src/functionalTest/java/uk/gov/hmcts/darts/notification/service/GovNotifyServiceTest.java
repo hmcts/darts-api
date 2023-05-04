@@ -14,6 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+// These tests are functional in that they connect to the real external gov.uk notify service.
+// However, unlike other functional tests these will run against the locally spun up application.
+// This is because there is no trigger for sending notifications, such as an API endpoint.
+
 @SpringBootTest
 @ActiveProfiles({"dev","test"})
 class GovNotifyServiceTest {
