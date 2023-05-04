@@ -3,6 +3,10 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
+      darts:
+      secrets:
+        - name: GovukNotifyTestApiKey
+          alias: GOVUK_NOTIFY_API_KEY
   environment:
     DARTS_API_DB_HOST: "{{ .Release.Name }}-postgresql"
     DARTS_API_DB_NAME: "{{ .Values.postgresql.auth.database}}"
@@ -16,4 +20,6 @@ java:
     enabled: true
     
   devApplicationInsightsInstrumentKeyName: AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
+
+
 

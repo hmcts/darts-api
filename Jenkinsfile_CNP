@@ -10,11 +10,27 @@ def component = "api"
 
 def branchesToSync = ['demo']
 
+def secrets = [
+  'darts-${env}': [
+    secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY')
+  ],
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [ $class: 'AzureKeyVaultSecret',
+    secretType: 'Secret',
+    name: secretName,
+    version: '',
+    envVariable: envVar
+  ]
+}
+
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
-      enableSlackNotifications('#darts-builds')
-      syncBranchesWithMaster(branchesToSync)
+  loadVaultSecrets(secrets)
+  enableSlackNotifications('#darts-builds')
+  syncBranchesWithMaster(branchesToSync)
 
   afterAlways('test') {
     builder.gradle('jacocoTestReport')
