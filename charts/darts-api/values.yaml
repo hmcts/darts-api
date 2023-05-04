@@ -3,7 +3,6 @@ java:
   image: 'sdshmctspublic.azurecr.io/darts/api:latest'
   ingressHost: darts-api.{{ .Values.global.environment }}.platform.hmcts.net
   aadIdentityName: darts
-#  Uncomment once the vault containing the app insights key has been set up
   keyVaults:
     darts:
       secrets:
