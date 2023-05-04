@@ -34,7 +34,7 @@ class GovNotifyServiceTest {
     @Test
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
 
-        SendEmailResponse emailResponse = createAndSend("court_manager_approve_transcript", new ConcurrentHashMap<>());
+        SendEmailResponse emailResponse = createAndSend("court_manager_approve_transcript");
         assertEquals("DARTS: New Transcription Request Submitted and Awaiting Review", emailResponse.getSubject());
         assertEquals("Hello,\r\n" +
                          "A new Transcription request has been submitted and is awaiting your review. \r\n" +
@@ -44,7 +44,7 @@ class GovNotifyServiceTest {
     }
 
     private SendEmailResponse createAndSend(String templateName, Map<String, String> parameterMap)
-                                    throws TemplateNotFoundException, NotificationClientException {
+        throws TemplateNotFoundException, NotificationClientException {
         String templateId = templateIdHelper.findTemplateId(templateName);
         GovNotifyRequest govNotifyRequest = new GovNotifyRequest();
         govNotifyRequest.setTemplateId(templateId);
@@ -56,10 +56,15 @@ class GovNotifyServiceTest {
 
     }
 
+    private SendEmailResponse createAndSend(String templateName)
+        throws TemplateNotFoundException, NotificationClientException {
+        return createAndSend(templateName, new ConcurrentHashMap<>());
+    }
+
 
     @Test
     void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("request_to_transcriber", new ConcurrentHashMap<>());
+        SendEmailResponse emailResponse = createAndSend("request_to_transcriber");
         assertEquals("DARTS: New Transcription Request", emailResponse.getSubject());
         assertEquals("Hello,\r\n" +
                          "A new request has been made for a Transcribed document.\r\n" +
@@ -71,7 +76,7 @@ class GovNotifyServiceTest {
 
     @Test
     void requestedAudioIsAvailable() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("requested_audio_is_available", new ConcurrentHashMap<>());
+        SendEmailResponse emailResponse = createAndSend("requested_audio_is_available");
         assertEquals("DARTS: Requested Audio is Available", emailResponse.getSubject());
         assertEquals("Hello,\r\n" +
                          "The audio you requested for case TheCaseId is now available.\r\n" +
@@ -82,7 +87,7 @@ class GovNotifyServiceTest {
 
     @Test
     void transcriptionAvailable() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("transcription_available", new ConcurrentHashMap<>());
+        SendEmailResponse emailResponse = createAndSend("transcription_available");
         assertEquals("DARTS: Transcribed Document Available", emailResponse.getSubject());
         assertEquals("Hello,\r\n" +
                          "The transcript that you requested for case TheCaseId, has now been completed and available for you to view in DARTS.\r\n" +
@@ -94,7 +99,7 @@ class GovNotifyServiceTest {
 
     @Test
     void transcriptionRequestApproved() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("transcription_request_approved", new ConcurrentHashMap<>());
+        SendEmailResponse emailResponse = createAndSend("transcription_request_approved");
         assertEquals("DARTS: Transcript Request Approved", emailResponse.getSubject());
         assertEquals("Hello,\r\n" +
                          "The transcript that you requested for case TheCaseId, has now been approved and will be available soon. " +
