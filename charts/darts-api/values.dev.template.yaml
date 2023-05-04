@@ -15,4 +15,9 @@ java:
   postgresql:
     enabled: true
   devApplicationInsightsInstrumentKeyName: AZURE_APPLICATIONINSIGHTS_INSTRUMENTATIONKEY
+  keyVaults:
+    darts:
+      secrets:
+        - name: GovukNotifyTestApiKey
+          alias: GOVUK_NOTIFY_API_KEY
 
