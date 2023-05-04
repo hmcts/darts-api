@@ -98,24 +98,27 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     }
 
     private Instant getEarliestStartTime(final List<AudioFileInfo> audioFilesInfo) {
-        return audioFilesInfo.stream()
+        var earliestStartDate = audioFilesInfo.stream()
             .map(AudioFileInfo::getStartTime)
-            .min(Instant::compareTo)
-            .get();
+            .min(Instant::compareTo);
+
+        return earliestStartDate.orElseThrow();
     }
 
     private Instant getLatestEndTime(final List<AudioFileInfo> audioFilesInfo) {
-        return audioFilesInfo.stream()
+        var latestEndTime = audioFilesInfo.stream()
             .map(AudioFileInfo::getEndTime)
-            .max(Instant::compareTo)
-            .get();
+            .max(Instant::compareTo);
+
+        return latestEndTime.orElseThrow();
     }
 
     private Integer getFirstChannel(final List<AudioFileInfo> audioFilesInfo) {
-        return audioFilesInfo.stream()
+        var firstChannelNumber = audioFilesInfo.stream()
             .map(AudioFileInfo::getChannel)
-            .findFirst()
-            .get();
+            .findFirst();
+
+        return firstChannelNumber.orElseThrow();
     }
 
     private String generateOutputFilename(String baseDir, AudioConstants.AudioOperationTypes operationType,
