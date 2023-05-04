@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import org.apache.commons.exec.CommandLine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.config.AudioTransformConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.util.AudioUtil;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +30,9 @@ class AudioOperationServiceImplTest {
 
     @Mock
     private AudioTransformConfigurationProperties audioTransformConfigurationProperties;
+
+    @Mock
+    private AudioUtil audioUtil;
 
     @BeforeEach
     void beforeEach() {
@@ -48,25 +54,27 @@ class AudioOperationServiceImplTest {
     @Test
     void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() {
         when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn("/tempDir/ffmpeg");
-        String expectedCommand = "/tempDir/ffmpeg -i sample1-5secs.mp2 -i sample2-5secs.mp2"
-                + " -filter_complex \"[0:a][1:a]concat=n=2:v=0:a=1\" 1-concat-out.mp2";
-        String concatenateCommand = audioOperationService.generateConcatenateCommand(1, audioFileInfos);
+        CommandLine expectedCommand = new CommandLine("/tempDir/ffmpeg -i /tempDir/concat/sample1-5secs.mp2 -i /tempDir/concat/sample2-5secs.mp2"
+                + " -filter_complex \"[0:a][1:a]concat=n=2:v=0:a=1\" /tempDir/concat/1-concat-out.mp2");
+        CommandLine concatenateCommand = audioOperationService.generateConcatenateCommand(1, audioFileInfos, "/tempDir/concat");
         assertNotNull(concatenateCommand);
-        assertEquals(expectedCommand, concatenateCommand);
+        assertEquals(expectedCommand.getArguments().length, concatenateCommand.getArguments().length);
+        assertEquals(expectedCommand.getExecutable(), concatenateCommand.getExecutable());
     }
 
     @Test
-    void shouldReturnConcatenatedAudioFileInfoWhenValidInputAudioFiles() {
+    void shouldReturnConcatenatedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
+        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn("/tempDir/ffmpeg");
+        when(audioTransformConfigurationProperties.getConcatWorkspace()).thenReturn("/tempDir/concatenate");
+        when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse("2023-04-28T09:00:00Z"),
             Instant.parse("2023-04-28T11:00:00Z"),
-            "1-concat-out.mp2",
+            "/tempDir/concatenate/requestId/1-concat-out.mp2",
             1);
 
-        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn("/tempDir/ffmpeg");
-
-        AudioFileInfo audioFileInfo =  audioOperationService.concatenate("/tempDir", audioFileInfos);
+        AudioFileInfo audioFileInfo =  audioOperationService.concatenate("requestId", audioFileInfos);
         assertEquals(expectedAudio.getFileName(), audioFileInfo.getFileName());
         assertEquals(expectedAudio.getChannel(), audioFileInfo.getChannel());
         assertEquals(expectedAudio.getStartTime(), audioFileInfo.getStartTime());
