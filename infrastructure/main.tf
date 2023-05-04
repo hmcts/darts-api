@@ -56,7 +56,7 @@ locals {
    source        = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
    env           = var.env
    product       = var.product
-   name          = "${var.product}-v14-flexible"
+   resource_group_name = local.rg_name
    component     = var.component
    business_area = "sds"
    location      = var.location

@@ -42,4 +42,8 @@ public class AuthenticationConfiguration {
 
     @Value("${spring.security.oauth2.client.registration.external-azure-ad.prompt}")
     private String externalADprompt;
+
+    @Value("${spring.security.oauth2.client.registration.external-azure-ad.issuer-uri}")
+    private String externalADissuerUri;
+
 }

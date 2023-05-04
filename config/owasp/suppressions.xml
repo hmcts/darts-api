@@ -8,13 +8,9 @@
     <cve>CVE-2016-1000027</cve>
   </suppress>
   <suppress>
-    <notes>False Positives
-      CVE-2023-20863 - https://github.com/spring-projects/spring-framework/issues/24434#issuecomment-579669626
-    </notes>
-    <cve>CVE-2023-20863</cve>
+    <notes>Dependency brought in through gov-notify, so we can't control this.</notes>
+    <cve>CVE-2022-45688</cve>
   </suppress>
-
-  <!--End of false positives section -->
 
   <!--Please add all the temporary suppression under the below section-->
   <suppress until="2023-04-14">
