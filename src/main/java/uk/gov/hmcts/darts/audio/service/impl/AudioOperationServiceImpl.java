@@ -97,14 +97,14 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             0);
     }
 
-    public Instant getEarliestStartTime(final List<AudioFileInfo> audioFilesInfo) {
+    private Instant getEarliestStartTime(final List<AudioFileInfo> audioFilesInfo) {
         return audioFilesInfo.stream()
             .map(AudioFileInfo::getStartTime)
             .min(Instant::compareTo)
             .get();
     }
 
-    public Instant getLatestEndTime(final List<AudioFileInfo> audioFilesInfo) {
+    private Instant getLatestEndTime(final List<AudioFileInfo> audioFilesInfo) {
         return audioFilesInfo.stream()
             .map(AudioFileInfo::getEndTime)
             .max(Instant::compareTo)
