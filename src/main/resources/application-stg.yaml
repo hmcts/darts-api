@@ -1,17 +1,51 @@
 spring:
+  cloud:
+    azure:
+      active-directory:
+        enabled: false
   datasource:
-    url: jdbc:h2:mem:mydb
-    username: sa
-    password: password
-    driverClassName: org.h2.Driver
-  h2:
-    console.enabled: true
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
+    username: ${DARTS_API_DB_USERNAME:darts}
+    password: ${DARTS_API_DB_PASSWORD:darts}
+    type: com.zaxxer.hikari.HikariDataSource
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    database: postgresql
     hibernate:
       ddl-auto: create-drop
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        format_sql: true
-    show-sql: true
+  flyway:
+    enabled: false
+    ignore-migration-patterns: true
+  autoconfigure:
+    exclude:
+      - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
+      - "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
+  security:
+    oauth2:
+      client:
+        registration:
+          external-azure-ad:
+            client-id: 392deeb8-5557-4f96-ae71-ff8be62f0db8
+            client-secret: hs~8Q~xpluVDuvP0FCvr1bUqfwT68HsDaPy5saRi
+            scope: openid
+            redirect-uri: https://darts-api.staging.platform.hmcts.net/external-user/handle-oauth-code
+            authorization-grant-type: authorization_code
+            response-type: code
+            response-mode: form_post
+            prompt: login
+            issuer-uri: https://hmctsdartsb2csbox.b2clogin.com/89b8de2e-eb1b-42fb-a59c-813ea2b82a56/v2.0/
+            provider: external-azure-ad-provider
+        provider:
+          external-azure-ad-provider:
+            authorization-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/authorize
+            token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
+            jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
+
+logging:
+  level:
+    uk.gov.hmcts.darts: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
+    org.springframework.web: DEBUG
+
+
