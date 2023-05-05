@@ -12,7 +12,7 @@ public interface AuthenticationController {
     ModelAndView loginOrRefresh(HttpSession session);
 
     @PostMapping("/handle-oauth-code")
-    ModelAndView handleOauthCode(@RequestParam("code") String code);
+    ModelAndView handleOauthCode(HttpSession session, @RequestParam("code") String code);
 
     @GetMapping("/logout")
     ModelAndView logout();
