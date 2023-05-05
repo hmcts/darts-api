@@ -10,13 +10,27 @@ spring:
     password: ${DARTS_API_DB_PASSWORD:darts}
     type: com.zaxxer.hikari.HikariDataSource
   jpa:
-    show-sql: true
     database: postgresql
+    show-sql: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+          lob:
+            non_contextual_creation: true
+      org:
+        hibernate:
+          envers:
+            audit_table_suffix: _audit
+            store_data_at_delete: true
+
   flyway:
-    enabled: false
-    ignore-migration-patterns: true
+    out-of-order: true
+    ignore-missing-migrations: true
+
   autoconfigure:
     exclude:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
