@@ -10,4 +10,6 @@ java:
           alias: GOVUK_NOTIFY_API_KEY
         - name: AppInsightsInstrumentationKey
           alias: azure.application-insights.instrumentation-key
+        - name: AppInsightsConnectionString
+          alias: azure.application-insights.connection-string
   environment:
