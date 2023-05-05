@@ -1,20 +1,27 @@
 # darts-api
 
-[![Build Status](https://travis-ci.org/hmcts/darts-api.svg?branch=master)](https://travis-ci.org/hmcts/darts-api)
+# Building and deploying the application
 
-## Notes
-
-Since Spring Boot 2.1 bean overriding is disabled. If you want to enable it you will need to set `spring.main.allow-bean-definition-overriding` to `true`.
-
-JUnit 5 is now enabled by default in the project. Please refrain from using JUnit4 and use the next generation
-
-## Building and deploying the application
-
-### Prerequisites
+## Prerequisites
 
 - [Java 17](https://www.oracle.com/java)
 
-### Building the application
+### Environment variables
+To run the functional tests locally, you will need to set an environment variable on your machine.
+To do this, first we need to retrieve the key from the azure vault either my running this command in the terminal:-
+```
+az keyvault secret show --name GovukNotifyTestApiKey --vault-name darts-stg
+```
+
+or by logging onto the azure home page, and navigating to darts-stg and secrets etc
+https://portal.azure.com/#home
+Once you have the key, then run this command in the mac terminal replacing <<apikey>> with the relevant one:-
+```
+launchctl setenv GOVUK_NOTIFY_API_KEY <<apikey>>
+```
+this should set the GOVUK_NOTIFY_API_KEY environment variable. you will then need to restart intellij/terminal windows for it to take effect.
+
+## Building the application
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
 `./gradlew` wrapper script, so there's no need to install gradle.
@@ -92,16 +99,6 @@ docker image rm <image-id>
 ```
 
 There is no need to remove postgres and java or similar core images.
-
-### Other
-
-Hystrix offers much more than Circuit Breaker pattern implementation or command monitoring.
-Here are some other functionalities it provides:
- * [Separate, per-dependency thread pools](https://github.com/Netflix/Hystrix/wiki/How-it-Works#isolation)
- * [Semaphores](https://github.com/Netflix/Hystrix/wiki/How-it-Works#semaphores), which you can use to limit
- the number of concurrent calls to any given dependency
- * [Request caching](https://github.com/Netflix/Hystrix/wiki/How-it-Works#request-caching), allowing
- different code paths to execute Hystrix Commands without worrying about duplicating work
 
 ## License
 
