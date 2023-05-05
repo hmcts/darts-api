@@ -67,6 +67,8 @@ spring:
 audiotransform:
   ffmpeg-executable: ${user.home}/audiotransform/ffmpeg
   concat-workspace: ${user.home}/audiotransform/concat
+  merge-workspace: ${user.home}/audiotransform/merge
+
 
 azure:
   application-insights:
