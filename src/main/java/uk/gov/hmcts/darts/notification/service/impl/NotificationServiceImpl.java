@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -72,10 +73,14 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     @Override
+    @Scheduled(fixedRate = 120000, initialDelay = 60000)
     public void sendNotificationToGovNotify() {
+        log.debug("sendNotificationToGovNotify scheduler started");
 
         List<Notification> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
+        int notificationCounter = 0;
         for (Notification notification : notificationEntries) {
+            log.trace("Processing {} of {}, Id {}.", ++notificationCounter, notificationEntries.size(), notification.getId());
             String templateId;
             try {
                 templateId = templateIdHelper.findTemplateId(notification.getEventId());
