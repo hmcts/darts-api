@@ -48,6 +48,11 @@ locals {
    key_vault_id = data.azurerm_key_vault.key_vault.id
  }
 
+ resource "azurerm_key_vault_secret" "POSTGRES_NAME" {
+   name         = "darts-api-POSTGRES-DATABASE"
+   value        = module.postgresql_flexible.name
+   key_vault_id = data.azurerm_key_vault.key_vault.id
+ }
  module "postgresql_flexible" {
      providers = {
      azurerm.postgres_network = azurerm.postgres_network
@@ -60,6 +65,7 @@ locals {
    component     = var.component
    business_area = "sds"
    location      = var.location
+   name          = "${var.product}-${var.env}-db"
 
    common_tags = var.common_tags
    admin_user_object_id = var.jenkins_AAD_objectId
