@@ -81,3 +81,6 @@ darts:
         court_manager_approve_transcript: 2f9e18b5-5046-44c2-8abd-e4ff15008a60
         request_to_transcriber: 976bf288-705d-4cbb-b24f-c5529abf14cf
         requested_audio_is_available: 66a1864f-24a6-469a-ac55-66bc57c7e4f6
+        transcription_available: a928742c-5eb7-46f0-9f61-d89d5394785c
+        transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
+        transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
