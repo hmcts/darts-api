@@ -73,7 +73,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     @Override
-    @Scheduled(fixedRateString = "${darts.notification.scheduler.fixed-rate}", initialDelayString = "${darts.notification.scheduler.initial-delay}")
+    @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started");
 
