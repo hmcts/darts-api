@@ -76,6 +76,9 @@ azure:
 
 darts:
   notification:
+    scheduler:
+      fixed-rate: 120000
+      initial-delay: 60000
     max_retry_attempts: 3
     gov-notify:
       api-key: ${GOVUK_NOTIFY_API_KEY:00000000-0000-0000-0000-000000000000}
