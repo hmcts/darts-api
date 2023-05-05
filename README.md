@@ -25,7 +25,7 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
-### Running the application
+### Running the application in docker
 
 Create the image of the application by executing the following command:
 
@@ -36,18 +36,20 @@ Create the image of the application by executing the following command:
 Create docker image:
 
 ```bash
-  docker-compose build
+  docker-compose -f docker-compose-local.yml build
 ```
 
 Run the distribution (created in `build/install/darts-api` directory)
 by executing the following command:
 
 ```bash
-  docker-compose up
+  docker-compose -f docker-compose-local.yml up
 ```
 
 This will start the API container exposing the application's port
-(set to `4550` in this template app).
+(set to `4550` in this template app).  It will also start a postgres container
+and run any new flyway migrations.  If you need to start from a clean database
+you will need to delete the docker volume `darts-api_darts-db`
 
 In order to test if the application is up, you can call its health endpoint:
 
