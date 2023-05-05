@@ -1,0 +1,43 @@
+version: '2.1'
+
+services:
+  darts-api:
+    container_name: darts-api
+    depends_on:
+      - darts-db
+    environment:
+      - DB_HOST=darts-db
+      - DB_NAME=darts
+      - DB_USER_NAME=postgres
+      - DB_PASSWORD=postgres
+      - SPRING_PROFILES_ACTIVE=local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: darts-api:latest
+    ports:
+      - "4550:4550"
+    networks:
+      - darts-network
+  darts-db:
+    container_name: darts-db
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=darts
+    ports:
+      - "5432:5432"
+    volumes:
+      - darts-db:/var/lib/postgresql/data
+    networks:
+      - darts-network
+
+volumes:
+  darts-db:
+    driver: local
+
+networks:
+  darts-network:
+    driver: bridge
