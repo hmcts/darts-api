@@ -47,12 +47,24 @@ spring:
     url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
     username: ${DARTS_API_DB_USERNAME:darts}
     password: ${DARTS_API_DB_PASSWORD:darts}
+    type: com.zaxxer.hikari.HikariDataSource
+  jpa:
+    database: postgresql
+    show-sql: false
+    hibernate:
+      ddl-auto: none
     properties:
-      charSet: UTF-8
-
-  flyway:
-    out-of-order: true
-    ignore-missing-migrations: true
+      hibernate:
+        jdbc:
+          time_zone: UTC
+      org:
+        hibernate:
+          envers:
+            audit_table_suffix: _audit
+            store_data_at_delete: true
+    flyway:
+      out-of-order: true
+      ignore-missing-migrations: true
 
 
 
