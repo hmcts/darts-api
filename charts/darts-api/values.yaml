@@ -11,3 +11,4 @@ java:
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
   environment:
+    NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
