@@ -19,4 +19,9 @@ public class SessionServiceImpl implements SessionService {
         return sessionCache.get(sessionId);
     }
 
+    @Override
+    public void putSession(String sessionId, Session session) {
+        sessionCache.put(sessionId, session);
+    }
+
 }

@@ -35,7 +35,6 @@ import java.util.StringJoiner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -158,11 +157,13 @@ class TokenValidatorImplTest {
     void validateShouldThrowExceptionWhenNonParsableTokenIsPresented() {
         String jwt = "I AM NOT PARSABLE AS A JWT";
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-            tokenValidator.validate(jwt));
+        JwtValidationResult validationResult = tokenValidator.validate(jwt);
 
-        assertEquals("java.text.ParseException: Invalid JWT serialization: Missing dot delimiter(s)",
-                     exception.getMessage());
+        assertFalse(validationResult.valid());
+        assertEquals(
+            "Invalid JWT serialization: Missing dot delimiter(s)",
+            validationResult.reason()
+        );
     }
 
     @SneakyThrows(NoSuchAlgorithmException.class)

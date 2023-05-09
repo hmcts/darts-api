@@ -51,9 +51,7 @@ public class TokenValidatorImpl implements TokenValidator {
 
         try {
             jwtProcessor.process(accessToken, null);
-        } catch (ParseException | JOSEException e) {
-            throw new IllegalArgumentException(e);
-        } catch (BadJOSEException e) {
+        } catch (ParseException | JOSEException | BadJOSEException e) {
             log.debug("Validation failed", e);
             return new JwtValidationResult(false, e.getMessage());
         }
