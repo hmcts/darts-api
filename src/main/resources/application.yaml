@@ -19,7 +19,7 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:
-    name: Spring Boot Template
+    name: Darts Api
   security:
     oauth2:
       client:
@@ -41,6 +41,7 @@ spring:
             token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
             jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
 
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
@@ -57,21 +58,24 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: UTC
+          lob:
+            non_contextual_creation: true
       org:
         hibernate:
           envers:
             audit_table_suffix: _audit
             store_data_at_delete: true
+
   flyway:
     out-of-order: true
     ignore-missing-migrations: true
 
+
+
 # ATS
 audiotransform:
-  ffmpeg-executable: /usr/bin/ffmpeg
+  ffmpeg-executable: ${user.home}/audiotransform/ffmpeg
   concat-workspace: ${user.home}/audiotransform/concat
-  merge-workspace: ${user.home}/audiotransform/merge
-
 
 azure:
   application-insights:
@@ -79,8 +83,6 @@ azure:
 
 darts:
   notification:
-    scheduler:
-      cron: ${NOTIFICATION_SCHEDULER_CRON:* */2 * * * MON-FRI}
     max_retry_attempts: 3
     gov-notify:
       api-key: ${GOVUK_NOTIFY_API_KEY:00000000-0000-0000-0000-000000000000}
@@ -88,6 +90,3 @@ darts:
         court_manager_approve_transcript: 2f9e18b5-5046-44c2-8abd-e4ff15008a60
         request_to_transcriber: 976bf288-705d-4cbb-b24f-c5529abf14cf
         requested_audio_is_available: 66a1864f-24a6-469a-ac55-66bc57c7e4f6
-        transcription_available: a928742c-5eb7-46f0-9f61-d89d5394785c
-        transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
-        transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb

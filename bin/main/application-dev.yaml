@@ -21,6 +21,11 @@ spring:
           time_zone: UTC
           lob:
             non_contextual_creation: true
+    org:
+      hibernate:
+        envers:
+          audit_table_suffix: _audit
+          store_data_at_delete: true
             
   autoconfigure:
     exclude:
