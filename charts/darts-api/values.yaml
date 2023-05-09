@@ -8,6 +8,14 @@ java:
       secrets:
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
+        - name: darts-api-POSTGRES-USER
+          alias: DARTS_API_DB_USERNAME
+        - name: darts-api-POSTGRES-PASS
+          alias: DARTS_API_DB_PASSWORD
+        - name: darts-api-POSTGRES-HOST
+          alias: DARTS_API_DB_HOST
+        - name: darts-api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME
 #        - name: AppInsightsInstrumentationKey
 #          alias: azure.application-insights.instrumentation-key
   environment:

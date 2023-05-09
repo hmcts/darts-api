@@ -41,27 +41,33 @@ spring:
             token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/oauth2/v2.0/token
             jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
 
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+  datasource:
+     driver-class-name: org.postgresql.Driver
+     url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
+     username: ${DARTS_API_DB_USERNAME:darts}
+     password: ${DARTS_API_DB_PASSWORD:darts}
+     type: com.zaxxer.hikari.HikariDataSource
+   jpa:
+     database: postgresql
+     show-sql: false
+     hibernate:
+       ddl-auto: none
+     properties:
+       hibernate:
+         dialect: org.hibernate.dialect.PostgreSQLDialect
+         jdbc:
+           time_zone: UTC
+           lob:
+             non_contextual_creation: true
+       org:
+         hibernate:
+           envers:
+             audit_table_suffix: _audit
+             store_data_at_delete: true
+
+   flyway:
+     out-of-order: true
+     ignore-missing-migrations: true
 
 # ATS
 audiotransform:
