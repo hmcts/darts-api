@@ -18,9 +18,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @ActiveProfiles("intTest")
-class AuthenticationExternalUserControllerTest {
+class LoginOrRefreshIntTest {
 
-    private static final String EXPECTED_LOGIN_REDIRECT_URL = "https://localhost:8080/oauth2/v2.0/authorize?client_id=dummy_client_id&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&response_mode=form_post&scope=openid&prompt=login";
+    private static final String EXPECTED_LOGIN_REDIRECT_URL = "http://localhost:8080/oauth2/v2.0/authorize?client_id=dummy_client_id&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&response_mode=form_post&scope=openid&prompt=login";
     private static final String EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT = "/external-user/login-or-refresh";
 
     @MockBean
@@ -57,3 +57,4 @@ class AuthenticationExternalUserControllerTest {
     }
 
 }
+

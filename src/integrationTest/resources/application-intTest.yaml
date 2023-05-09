@@ -12,9 +12,10 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
+            issuer-uri: dummy_issuer_uri
             provider: external-azure-ad-provider
         provider:
           external-azure-ad-provider:
-            authorization-uri: https://localhost:8080/oauth2/v2.0/authorize
-            token-uri: https://localhost:8080/oauth2/v2.0/token
-            jwk-set-uri: https://localhost:8080/discovery/v2.0/keys
+            authorization-uri: http://localhost:8080/oauth2/v2.0/authorize
+            token-uri: http://localhost:8080/oauth2/v2.0/token
+            jwk-set-uri: http://localhost:8080/discovery/v2.0/keys
