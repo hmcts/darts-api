@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.notification.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +74,8 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     @Override
+    @SchedulerLock(name = "NotificationService_sendNotificationToGovNotify",
+        lockAtLeastFor = "PT5M", lockAtMostFor = "PT14M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started.");
