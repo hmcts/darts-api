@@ -12,7 +12,7 @@ spring:
   jpa:
     database: postgresql
     show-sql: false
-    hibernate:
+  hibernate:
       ddl-auto: none
     properties:
       charSet: UTF-8

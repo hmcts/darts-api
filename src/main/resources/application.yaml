@@ -64,10 +64,9 @@ spring:
           envers:
             audit_table_suffix: _audit
             store_data_at_delete: true
-
-   flyway:
-     out-of-order: true
-     ignore-missing-migrations: true
+  flyway:
+    out-of-order: true
+    ignore-missing-migrations: true
 
 # ATS
 audiotransform:
