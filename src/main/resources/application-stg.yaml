@@ -9,13 +9,6 @@ spring:
     username: ${DARTS_API_DB_USERNAME:darts}
     password: ${DARTS_API_DB_PASSWORD:darts}
     type: com.zaxxer.hikari.HikariDataSource
-  jpa:
-    database: postgresql
-    show-sql: false
-    hibernate:
-      ddl-auto: none
-    properties:
-      charSet: UTF-8
   autoconfigure:
     exclude:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
