@@ -11,12 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import uk.gov.hmcts.darts.notification.entity.Notification;
 
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = Notification.TABLE_NAME)
+@Table(name = AudioRequest.TABLE_NAME)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
