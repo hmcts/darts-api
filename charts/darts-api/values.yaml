@@ -13,3 +13,4 @@ java:
         - name: AppInsightsConnectionString
           alias: azure.application-insights.connection-string
   environment:
+    NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"

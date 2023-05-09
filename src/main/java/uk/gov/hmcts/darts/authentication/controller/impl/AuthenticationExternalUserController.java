@@ -27,10 +27,9 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     }
 
     @Override
-    public ModelAndView handleOauthCode(String code) {
-        log.info("Authorization Token received successfully");
-        authenticationService.fetchAccessToken(code);
-        return new ModelAndView("redirect:/");
+    public ModelAndView handleOauthCode(HttpSession session, String code) {
+        URI url = authenticationService.handleOauthCode(session.getId(), code);
+        return new ModelAndView("redirect:" + url.toString());
     }
 
     @Override

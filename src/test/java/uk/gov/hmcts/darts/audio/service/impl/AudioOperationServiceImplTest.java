@@ -54,9 +54,14 @@ class AudioOperationServiceImplTest {
     @Test
     void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() {
         when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn("/tempDir/ffmpeg");
-        CommandLine expectedCommand = new CommandLine("/tempDir/ffmpeg -i /tempDir/concat/sample1-5secs.mp2 -i /tempDir/concat/sample2-5secs.mp2"
+        CommandLine expectedCommand = CommandLine.parse(
+            "/tempDir/ffmpeg -i /tempDir/concat/sample1-5secs.mp2 -i /tempDir/concat/sample2-5secs.mp2"
                 + " -filter_complex \"[0:a][1:a]concat=n=2:v=0:a=1\" /tempDir/concat/1-concat-out.mp2");
-        CommandLine concatenateCommand = audioOperationService.generateConcatenateCommand(1, audioFileInfos, "/tempDir/concat");
+        CommandLine concatenateCommand = audioOperationService.generateConcatenateCommand(
+            1,
+            audioFileInfos,
+            "/tempDir/concat"
+        );
         assertNotNull(concatenateCommand);
         assertEquals(expectedCommand.getArguments().length, concatenateCommand.getArguments().length);
         assertEquals(expectedCommand.getExecutable(), concatenateCommand.getExecutable());
@@ -72,9 +77,10 @@ class AudioOperationServiceImplTest {
             Instant.parse("2023-04-28T09:00:00Z"),
             Instant.parse("2023-04-28T11:00:00Z"),
             "/tempDir/concatenate/requestId/1-concat-out.mp2",
-            1);
+            1
+        );
 
-        AudioFileInfo audioFileInfo =  audioOperationService.concatenate("requestId", audioFileInfos);
+        AudioFileInfo audioFileInfo = audioOperationService.concatenate("requestId", audioFileInfos);
         assertEquals(expectedAudio.getFileName(), audioFileInfo.getFileName());
         assertEquals(expectedAudio.getChannel(), audioFileInfo.getChannel());
         assertEquals(expectedAudio.getStartTime(), audioFileInfo.getStartTime());

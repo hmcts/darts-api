@@ -46,7 +46,7 @@ class SimpleInMemorySessionCacheImplTest {
     }
 
     private Session createSession() {
-        return new Session(null, null, null);
+        return new Session(null, null, 0);
     }
 
 }

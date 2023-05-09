@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.servlet.ModelAndView;
-import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 
 import java.net.URI;
@@ -16,6 +15,7 @@ import java.net.URI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 class AuthenticationExternalUserControllerTest {
 
     private static final URI DUMMY_AUTHORIZATION_URI = URI.create("https://www.example.com/authorization?param=value");
+    private static final URI DUMMY_LANDING_PAGE_URI = URI.create("/");
 
     @InjectMocks
     private AuthenticationExternalUserController controller;
@@ -46,9 +47,16 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturned() {
-        when(authenticationService.fetchAccessToken("code")).thenReturn(new OAuthProviderRawResponse());
-        ModelAndView mv = controller.handleOauthCode("code");
-        assertNotNull(mv);
+        MockHttpSession session = new MockHttpSession();
+
+        when(authenticationService.handleOauthCode(any(), anyString()))
+            .thenReturn(DUMMY_LANDING_PAGE_URI);
+
+        ModelAndView modelAndView = controller.handleOauthCode(session, "code");
+
+        assertNotNull(modelAndView);
+        assertEquals("redirect:/", modelAndView.getViewName(),
+                     "Redirect url was not as expected");
     }
 
     @Test

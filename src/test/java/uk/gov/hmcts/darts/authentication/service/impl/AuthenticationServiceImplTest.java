@@ -1,70 +1,68 @@
 package uk.gov.hmcts.darts.authentication.service.impl;
 
-import feign.Request;
-import feign.Response;
 import org.apache.commons.lang3.NotImplementedException;
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
+import uk.gov.hmcts.darts.authentication.component.TokenValidator;
+import uk.gov.hmcts.darts.authentication.component.UriProvider;
+import uk.gov.hmcts.darts.authentication.dao.AzureDao;
+import uk.gov.hmcts.darts.authentication.exception.AuthenticationException;
+import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
+import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 import uk.gov.hmcts.darts.authentication.model.Session;
-import uk.gov.hmcts.darts.authentication.service.AzureActiveDirectoryB2CClient;
 import uk.gov.hmcts.darts.authentication.service.SessionService;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.TooManyMethods")
 class AuthenticationServiceImplTest {
 
     private static final String DUMMY_SESSION_ID = "9D65049E1787A924E269747222F60CAA";
+    private static final URI DUMMY_AUTH_URI = URI.create("DUMMY_AUTH_URI");
+    private static final URI DUMMY_LANDING_PAGE_URI = URI.create("DUMMY_LANDING_PAGE_URI");
+    private static final String DUMMY_CODE = "DUMMY CODE";
+    private static final String DUMMY_ID_TOKEN = "DUMMY ID TOKEN";
 
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
 
     @Mock
-    private AuthenticationConfiguration authenticationConfiguration;
-
-    @Mock
-    private AzureActiveDirectoryB2CClient azureActiveDirectoryB2CClient;
-
-    @Mock
     private SessionService sessionService;
 
-    private static final String AUTHORIZE_URL = "AuthUrl?client_id=ClientId&response_type=ResponseType&redirect_uri="
-        + "RedirectId&response_mode=ResponseMode&scope=Scope&prompt=Prompt";
+    @Mock
+    private TokenValidator tokenValidator;
+
+    @Mock
+    private AzureDao azureDao;
+
+    @Mock
+    private UriProvider uriProvider;
 
     @Test
-    void loginOrRefreshShouldReturnAuthUrlWhenNoExistingSessionExistsForExternalUser() {
+    void loginOrRefreshShouldReturnAuthUriWhenNoExistingSessionExists() {
         when(sessionService.getSession(anyString()))
             .thenReturn(null);
-        mockStubsForAuthorizationCode();
+        when(uriProvider.getAuthorizationUri())
+            .thenReturn(DUMMY_AUTH_URI);
 
         URI uri = authenticationService.loginOrRefresh("DUMMY_SESSION_ID");
 
-        assertEquals(AUTHORIZE_URL, uri.toString());
+        assertEquals(DUMMY_AUTH_URI, uri);
     }
 
     @Test
     void loginOrRefreshShouldThrowExceptionWhenExistingSessionExists() {
         when(sessionService.getSession(DUMMY_SESSION_ID))
-            .thenReturn(new Session(null, null, null));
+            .thenReturn(new Session(null, null, 0));
 
         NotImplementedException exception = assertThrows(
             NotImplementedException.class,
@@ -75,84 +73,45 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void testGetAuthorizationUrlFromConfigWhenLoginRequested() {
-        mockStubsForAuthorizationCode();
-        URI authUrl = authenticationService.getAuthorizationUrl();
-        assertEquals(AUTHORIZE_URL, authUrl.toString(), "Expected Authorize URL is generated");
+    void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
+        when(azureDao.fetchAccessToken(anyString()))
+            .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
+        when(tokenValidator.validate(anyString()))
+            .thenReturn(new JwtValidationResult(true, null));
+        when(uriProvider.getLandingPageUri())
+            .thenReturn(DUMMY_LANDING_PAGE_URI);
+
+        URI uri = authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE);
+
+        assertEquals(DUMMY_LANDING_PAGE_URI, uri);
     }
 
     @Test
-    void fetchAccessTokenSuccesfulWhenAuthorizationCodeIsPassed() {
-        mockStubsForAccessToken();
-        try (Response response = mockResponse()) {
-            when(azureActiveDirectoryB2CClient.fetchAccessToken(any())).thenReturn(response);
-            OAuthProviderRawResponse rawResponse = authenticationService.fetchAccessToken("CODE");
-            assertEquals("test_id_token", rawResponse.getAccessToken(), "Valid Access Token is returned by Azure");
-            assertEquals(1234L, rawResponse.getExpiresIn(), "Valid Expiry Time is returned by Azure");
-        }
+    void handleOauthCodeShouldThrowExceptionWhenFetchAccessTokenThrowsException() throws AzureDaoException {
+        when(azureDao.fetchAccessToken(anyString()))
+            .thenThrow(AzureDaoException.class);
+
+        AuthenticationException exception = assertThrows(
+            AuthenticationException.class,
+            () -> authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE)
+        );
+
+        assertEquals("Failed to obtain access token", exception.getMessage());
     }
 
     @Test
-    void fetchAccessTokenUnsuccesfulWhenAuthorizationCodeIsEmpty() {
-        mockStubsForAccessToken();
-        try (Response response = mockResponse()) {
-            try (Response failedResponse = mockFailedResponse(response)) {
-                when(azureActiveDirectoryB2CClient.fetchAccessToken(any())).thenReturn(failedResponse);
-                OAuthProviderRawResponse rawResponse = authenticationService.fetchAccessToken(null);
-                assertNull(
-                    rawResponse.getAccessToken(),
-                    "No Access Token is returned by Azure for Invalid Request"
-                );
-                assertEquals(0, rawResponse.getExpiresIn(), "No Expiry Time is returned by Azure for Invalid Request");
-            }
-        }
+    void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
+        when(azureDao.fetchAccessToken(anyString()))
+            .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
+        when(tokenValidator.validate(anyString()))
+            .thenReturn(new JwtValidationResult(false, "validation failure reason"));
+
+        AuthenticationException exception = assertThrows(
+            AuthenticationException.class,
+            () -> authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE)
+        );
+
+        assertEquals("Failed to validate access token: validation failure reason", exception.getMessage());
     }
 
-    private Response mockResponse() {
-        String body = "{\"id_token\":\"test_id_token\", \"id_token_expires_in\":\"1234\"}";
-        Map<String, Collection<String>> headersError = new ConcurrentHashMap<>();
-
-        return Response.builder()
-            .reason("REASON")
-            .body(body, StandardCharsets.UTF_8)
-            .status(HttpStatus.SC_OK)
-            .headers(new HashMap<>())
-            .request(Request.create(
-                Request.HttpMethod.POST,
-                "dummy/test",
-                headersError,
-                null,
-                null,
-                null
-            ))
-            .build();
-    }
-
-    private Response mockFailedResponse(Response response) {
-        return response.toBuilder().status(HttpStatus.SC_BAD_REQUEST).body(
-            "body",
-            StandardCharsets.UTF_8
-        ).build();
-    }
-
-    private void mockStubsForAuthorizationCode() {
-        mockCommonStubs();
-        when(authenticationConfiguration.getExternalADauthorizationUri()).thenReturn("AuthUrl");
-        when(authenticationConfiguration.getExternalADredirectUri()).thenReturn("RedirectId");
-        when(authenticationConfiguration.getExternalADresponseMode()).thenReturn("ResponseMode");
-        when(authenticationConfiguration.getExternalADresponseType()).thenReturn("ResponseType");
-        when(authenticationConfiguration.getExternalADprompt()).thenReturn("Prompt");
-    }
-
-    private void mockStubsForAccessToken() {
-        mockCommonStubs();
-        when(authenticationConfiguration.getExternalADauthorizationGrantType()).thenReturn("GrantType");
-        when(authenticationConfiguration.getExternalADclientSecret()).thenReturn("ClientSecret");
-    }
-
-    private void mockCommonStubs() {
-        when(authenticationConfiguration.getExternalADclientId()).thenReturn("ClientId");
-        when(authenticationConfiguration.getExternalADredirectUri()).thenReturn("RedirectId");
-        when(authenticationConfiguration.getExternalADscope()).thenReturn("Scope");
-    }
 }

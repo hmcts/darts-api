@@ -27,6 +27,7 @@ public class SimpleInMemorySessionCacheImpl implements SessionCache {
         }
 
         cache.put(sessionId, session);
+        log.debug("Added session to cache: {}:{}", sessionId, session);
     }
 
     @Override

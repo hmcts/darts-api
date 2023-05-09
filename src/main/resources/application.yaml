@@ -65,7 +65,7 @@ spring:
 
 # ATS
 audiotransform:
-  ffmpeg-executable: ${user.home}/audiotransform/ffmpeg
+  ffmpeg-executable: /usr/bin/ffmpeg
   concat-workspace: ${user.home}/audiotransform/concat
   merge-workspace: ${user.home}/audiotransform/merge
 
@@ -76,6 +76,8 @@ azure:
 
 darts:
   notification:
+    scheduler:
+      cron: ${NOTIFICATION_SCHEDULER_CRON:* */2 * * * MON-FRI}
     max_retry_attempts: 3
     gov-notify:
       api-key: ${GOVUK_NOTIFY_API_KEY:00000000-0000-0000-0000-000000000000}

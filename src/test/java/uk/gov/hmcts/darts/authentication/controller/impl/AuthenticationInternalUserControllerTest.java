@@ -16,12 +16,12 @@ class AuthenticationInternalUserControllerTest {
 
     @Test
     void loginAndRefreshTokenFromAzureWhenTokenDoesntExistsInSession() {
-        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null));
+        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null, null));
     }
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturned() {
-        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null));
+        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null, null));
     }
 
     @Test
