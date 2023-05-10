@@ -44,7 +44,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
+    url: jdbc:postgresql://${DARTS_API_DB_HOST}:5432/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
     username: ${DARTS_API_DB_USERNAME:darts}
     password: ${DARTS_API_DB_PASSWORD:darts}
     type: com.zaxxer.hikari.HikariDataSource
@@ -55,6 +55,7 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
+        # dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: UTC
       org:
