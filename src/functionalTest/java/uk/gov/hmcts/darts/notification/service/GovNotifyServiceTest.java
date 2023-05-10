@@ -129,11 +129,9 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend("audio_request_being_processed");
         assertEquals("DARTS: Audio Request Being Processed", emailResponse.getSubject());
         assertEquals("Hello,\r\n" +
-                         "The audio you requested for case TheCaseId is currently being\r\n" +
-                         "processed.\r\n" +
+                         "The audio you requested for case TheCaseId is currently being processed.\r\n" +
                          "\r\n" +
-                         "You will be further notified once the audio is available in your My\r\n" +
-                         "Audio section in DARTS.\r\n" +
+                         "You will be further notified once the audio is available in your My Audio section in DARTS.\r\n" +
                          "\r\n" +
                          "Regards, \r\n" +
                          "\r\n" +
