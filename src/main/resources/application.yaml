@@ -52,7 +52,7 @@ spring:
     database: postgresql
     show-sql: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     properties:
       hibernate:
         # dialect: org.hibernate.dialect.PostgreSQLDialect
