@@ -74,9 +74,9 @@ spring:
 # ATS
 audiotransform:
   ffmpeg-executable: /usr/bin/ffmpeg
-  concat-workspace: ${user.home}/audiotransform/concat
+  concat-workspace: ${user.home}/audiotransform/concatenate
   merge-workspace: ${user.home}/audiotransform/merge
-
+  trim-workspace: ${user.home}/audiotransform/trim
 
 azure:
   application-insights:
