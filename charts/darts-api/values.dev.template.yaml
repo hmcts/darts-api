@@ -7,11 +7,15 @@ java:
       secrets:
         - name: GovukNotifyTestApiKey
           alias: GOVUK_NOTIFY_API_KEY
+        - name: darts-api-POSTGRES-USER
+          alias: DARTS_API_DB_USERNAME
+        - name: darts-api-POSTGRES-PASS
+          alias: DARTS_API_DB_PASSWORD
+        - name: darts-api-POSTGRES-HOST
+          alias: DARTS_API_DB_HOST
+        - name: darts-api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME
   postgresql:
     enabled: true
   environment:
-    DARTS_API_DB_HOST: "{{ .Release.Name }}-postgresql"
-    DARTS_API_DB_NAME: "{{ .Values.postgresql.auth.database}}"
-    DARTS_API_DB_USERNAME: "{{ .Values.postgresql.auth.username}}"
-    DARTS_API_DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
     NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
