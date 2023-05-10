@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @AutoConfigureWireMock
-@ActiveProfiles("intTest")
+@ActiveProfiles({"intTest", "test"})
 @SuppressWarnings("PMD.ExcessiveImports")
 class HandleOAuthCodeIntTest {
 
