@@ -18,3 +18,4 @@ java:
   environment:
     DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
+    spring.profiles.active: dev
