@@ -2,7 +2,11 @@
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 *.class
-bin/main/application.yaml
+bin/functionalTest/
+bin/integrationTest/
+bin/main/
+bin/smokeTest/
+bin/test/
 
 ### STS ###
 .apt_generated

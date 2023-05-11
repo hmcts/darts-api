@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // This is because there is no trigger for sending notifications, such as an API endpoint.
 
 @SpringBootTest
-@ActiveProfiles({"dev","test"})
+@ActiveProfiles({"dev","h2db"})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GovNotifyServiceTest {
 

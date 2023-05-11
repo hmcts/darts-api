@@ -5,11 +5,25 @@ spring:
         enabled: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:${DB_PORT}/postgres
-    username: ${DB_USER}
-    password: ${DB_PASS}
+    url: jdbc:postgresql://${DARTS_API_DB_HOST}:5432/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
+    username: ${DARTS_API_DB_USERNAME:darts}
+    password: ${DARTS_API_DB_PASSWORD:darts}
+    type: com.zaxxer.hikari.HikariDataSource
+  jpa:
+    database: postgresql
+    show-sql: false
+    hibernate:
+      ddl-auto: create
     properties:
-      charSet: UTF-8
+      hibernate:
+        jdbc:
+          time_zone: UTC
+    org:
+      hibernate:
+        envers:
+          audit_table_suffix: _audit
+          store_data_at_delete: true
+
   autoconfigure:
     exclude:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
@@ -40,5 +54,4 @@ logging:
     uk.gov.hmcts.darts: DEBUG
     org.springframework.web.servlet.mvc.method.annotation: DEBUG
     org.springframework.web: DEBUG
-
 
