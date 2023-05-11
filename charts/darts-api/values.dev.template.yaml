@@ -16,5 +16,5 @@ java:
   postgresql:
     enabled: true
   environment:
-    DARTS_API_DB_NAME: "{{ .Values.postgresql.auth.database}}"
+    DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"

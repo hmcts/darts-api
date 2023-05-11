@@ -14,8 +14,7 @@ java:
           alias: DARTS_API_DB_PASSWORD
         - name: darts-api-POSTGRES-HOST
           alias: DARTS_API_DB_HOST
-        - name: darts-api-POSTGRES-DATABASE
-          alias: DARTS_API_DB_NAME
   environment:
+    DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
