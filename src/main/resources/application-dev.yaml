@@ -5,7 +5,7 @@ spring:
         enabled: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DARTS_API_DB_HOST}:5432/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
+    url: jdbc:postgresql://${DARTS_API_DB_HOST}:5432/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
     username: ${DARTS_API_DB_USERNAME:darts}
     password: ${DARTS_API_DB_PASSWORD:darts}
     type: com.zaxxer.hikari.HikariDataSource
@@ -59,3 +59,8 @@ logging:
     org.springframework.web: DEBUG
 
 
+spring.jpa.properties.hibernate.default_schema: public
+spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+DB_PORT: 5432
+DB_USER: postgres
+DB_PASS: postgres
