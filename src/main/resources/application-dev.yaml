@@ -16,7 +16,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        #dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: UTC
           lob:
@@ -58,9 +58,3 @@ logging:
     org.springframework.web.servlet.mvc.method.annotation: DEBUG
     org.springframework.web: DEBUG
 
-
-spring.jpa.properties.hibernate.default_schema: public
-spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-DB_PORT: 5432
-DB_USER: postgres
-DB_PASS: postgres
