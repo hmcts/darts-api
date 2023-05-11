@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.config.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.darts.authentication.component.UriProvider;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Profile("!intTest")
 public class SecurityConfig {
 
     private final UriProvider uriProvider;

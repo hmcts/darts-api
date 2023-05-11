@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ActiveProfiles({"dev", "h2db"})
+@ActiveProfiles({"intTest", "h2db"})
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 

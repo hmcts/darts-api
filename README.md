@@ -100,6 +100,19 @@ docker image rm <image-id>
 
 There is no need to remove postgres and java or similar core images.
 
+## Spring Profiles
+
+The following Spring Profiles are defined. "External Components" are defined as any service upon which the application is dependent, such as database servers, web services etc.
+
+| Profile          | Config Location                                          | Purpose                                                                                        | External Components                                                                                                                                                                                                             |
+|------------------|----------------------------------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `local`          | `src/main/resources/application-local.yaml`              | For running the application locally as a docker compose stack with `docker-compose-local.yml`. | Provided as needed by `docker-compose-local.yml`. No external connectivity permitted outside the network boundary of the stack.                                                                                                 |
+| `intTest`        | `src/integrationTest/resources/application-intTest.yaml` | For running integration tests under `src/integrationTest`.                                     | No interaction required or permitted, all external calls are mocked via embedded wiremock (for HTTP requests), an embedded database (for db queries) or `@MockBeans` for anything else. Spring Security is explicitly disabled. |
+| `functionalTest` |                                                          | For running functional tests under `src/functionalTest`.                                       | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
+| `dev`            | `src/main/resources/application-dev.yaml`                | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
+| `stg`            | `src/main/resources/application-stg.yaml`                | For running the application in the staging environment.                                        | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
+
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
