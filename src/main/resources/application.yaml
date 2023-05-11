@@ -55,8 +55,10 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
-        # dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
+          lob:
+            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+            non_contextual_creation: true
           time_zone: UTC
       org:
         hibernate:

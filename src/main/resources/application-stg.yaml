@@ -19,8 +19,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: UTC
-          lob:
-            non_contextual_creation: true
   autoconfigure:
     exclude:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
