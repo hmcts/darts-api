@@ -29,15 +29,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     private final AudioUtil audioUtil;
 
     CommandLine generateConcatenateCommand(final Integer channel, final List<AudioFileInfo> audioFileInfos,
-                                           final String baseFilePath, final String outputFilename) {
+                                           final String outputFilename) {
         StringBuilder command = new StringBuilder(audioTransformConfigurationProperties.getFfmpegExecutable());
 
         for (final AudioFileInfo audioFileInfo : audioFileInfos) {
-            command.append(" -i ").append(String.format(
-                STRING_SLASH_STRING_FORMAT,
-                baseFilePath,
-                audioFileInfo.getFileName()
-            ));
+            command.append(" -i ").append(audioFileInfo.getFileName());
         }
 
         command.append(" -filter_complex ");
@@ -49,7 +45,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         }
 
         command.append(String.format("\"%sconcat=n=%d:v=0:a=1\"", inputFileAudioStreams, concatNumberOfSegments))
-            .append(' ').append(String.format("%s/%s", baseFilePath, outputFilename));
+            .append(' ').append(outputFilename);
 
         return CommandLine.parse(command.toString());
     }
@@ -67,7 +63,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         String outputFilename = generateOutputFilename(baseFilePath, AudioOperationTypes.CONCATENATE,
                                                        channel, AudioConstants.AudioFileFormats.MP2
         );
-        CommandLine command = generateConcatenateCommand(channel, audioFileInfos, baseFilePath, outputFilename);
+        CommandLine command = generateConcatenateCommand(channel, audioFileInfos, outputFilename);
         audioUtil.execute(command);
 
         return new AudioFileInfo(
@@ -95,11 +91,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         CommandLine command = new CommandLine(audioTransformConfigurationProperties.getFfmpegExecutable());
         for (AudioFileInfo audioFileInfo : audioFilesInfo) {
-            command.addArgument(String.format("-i %s ", audioFileInfo.getFileName()));
+            command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         }
-        command.addArgument(String.format("-filter_complex amix=inputs=%s:duration=longest %s",
-                                          numberOfChannels, outputFilename
-        ));
+        command.addArgument("-filter_complex")
+            .addArgument(String.format("amix=inputs=%d:duration=longest", numberOfChannels))
+            .addArgument(outputFilename);
 
         audioUtil.execute(command);
 
@@ -126,10 +122,10 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         );
 
         CommandLine command = new CommandLine(audioTransformConfigurationProperties.getFfmpegExecutable());
-        command.addArgument(String.format("-i %s ", audioFileInfo.getFileName()));
-        command.addArgument(String.format("-ss %s", startTime));
-        command.addArgument(String.format("-to %s", endTime));
-        command.addArgument(String.format("-c copy %s", outputFilename));
+        command.addArgument("-i").addArgument(audioFileInfo.getFileName());
+        command.addArgument("-ss").addArgument(startTime);
+        command.addArgument("-to").addArgument(endTime);
+        command.addArgument("-c").addArgument("copy").addArgument(outputFilename);
 
         audioUtil.execute(command);
 

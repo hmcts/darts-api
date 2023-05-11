@@ -49,13 +49,13 @@ class AudioOperationServiceImplTest {
         audioFileInfos.add(new AudioFileInfo(
             Instant.parse(T_09_00_00_Z),
             Instant.parse(T_10_30_00_Z),
-            "sample1-5secs.mp2",
+            "/path/to/audio/requestId/sample1-5secs.mp2",
             1
         ));
         audioFileInfos.add(new AudioFileInfo(
             Instant.parse(T_10_30_00_Z),
             Instant.parse(T_11_00_00_Z),
-            "sample2-5secs.mp2",
+            "/path/to/audio/requestId/sample2-5secs.mp2",
             1
         ));
     }
@@ -63,14 +63,13 @@ class AudioOperationServiceImplTest {
     @Test
     void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() {
         CommandLine expectedCommand = CommandLine.parse(
-            "/usr/bin/ffmpeg -i /tempDir/concatenate/requestId/sample1-5secs.mp2 -i /tempDir/concatenate/requestId/sample2-5secs.mp2"
+            "/usr/bin/ffmpeg -i /path/to/audio/requestId/sample1-5secs.mp2 -i /path/to/audio/requestId/sample2-5secs.mp2"
                 + " -filter_complex \"[0:a][1:a]concat=n=2:v=0:a=1\" /tempDir/concatenate/requestId/C1-concatenate-20230510145233697.mp2");
 
         CommandLine concatenateCommand = audioOperationService.generateConcatenateCommand(
             1,
             audioFileInfos,
-            "/tempDir/concatenate/requestId",
-            "C1-concatenate-20230510145233697.mp2"
+            "/tempDir/concatenate/requestId/C1-concatenate-20230510145233697.mp2"
         );
 
         assertNotNull(concatenateCommand);
@@ -101,19 +100,19 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldReturnMergedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
-        when(audioTransformConfigurationProperties.getMergeWorkspace()).thenReturn("/tempDir");
+        when(audioTransformConfigurationProperties.getMergeWorkspace()).thenReturn("/tempDir/merge");
         when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse(T_09_00_00_Z),
             Instant.parse(T_11_00_00_Z),
-            "/tempDir/requestId/merge/C0-202305.mp2",
+            "/tempDir/merge/requestId/C0-merge-20230510145233697.mp2",
             0
         );
 
         AudioFileInfo audioFileInfo = audioOperationService.merge(audioFileInfos, WORKSPACE_DIR);
 
-        assertTrue(audioFileInfo.getFileName().matches("/tempDir/requestId/C0-merge-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getFileName().matches("/tempDir/merge/requestId/C0-merge-[0-9]*.mp2"));
         assertEquals(expectedAudio.getChannel(), audioFileInfo.getChannel());
         assertEquals(expectedAudio.getStartTime(), audioFileInfo.getStartTime());
         assertEquals(expectedAudio.getEndTime(), audioFileInfo.getEndTime());
