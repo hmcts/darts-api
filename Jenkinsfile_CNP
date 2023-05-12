@@ -31,9 +31,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 GradleBuilder builder = new GradleBuilder(this, product)
 
-enableDbMigration(product)
-
 withPipeline(type, product, component) {
+  enableDbMigration(product)
   loadVaultSecrets(secrets)
   enableSlackNotifications('#darts-builds')
   syncBranchesWithMaster(branchesToSync)
