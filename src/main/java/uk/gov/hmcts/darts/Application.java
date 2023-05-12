@@ -28,13 +28,7 @@ public class Application {
 
     @EventListener(ApplicationReadyEvent.class)
     public void runAfterStartup() {
-        log.info(String.format(
-            "ATS ffmpegExecutable: %s, concatWorkspace: %s, mergeWorkspace: %s, trimWorkspace: %s",
-            audioTransformConfigurationProperties.getFfmpegExecutable(),
-            audioTransformConfigurationProperties.getConcatWorkspace(),
-            audioTransformConfigurationProperties.getMergeWorkspace(),
-            audioTransformConfigurationProperties.getTrimWorkspace()
-        ));
+        log.info(audioTransformConfigurationProperties.toString());
     }
 
 }

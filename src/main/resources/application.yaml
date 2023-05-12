@@ -77,6 +77,7 @@ audiotransform:
   concat-workspace: ${user.home}/audiotransform/concatenate
   merge-workspace: ${user.home}/audiotransform/merge
   trim-workspace: ${user.home}/audiotransform/trim
+  re-encode-workspace: ${user.home}/audiotransform/encode
 
 azure:
   application-insights:
