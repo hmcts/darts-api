@@ -16,5 +16,7 @@ public class AudioTransformConfigurationProperties {
     private String concatWorkspace;
     @NotEmpty
     private String mergeWorkspace;
+    @NotEmpty
+    private String trimWorkspace;
 
 }

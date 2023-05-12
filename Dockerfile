@@ -1,11 +1,8 @@
 FROM openjdk:17-jdk-slim-bullseye AS build-env
 WORKDIR /usr/local/bin
-RUN apt-get update
 # Linux Static Builds (http://www.ffmpeg.org/download.html#build-linux)
 # https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
-COPY lib/ffmpeg-release-amd64-static.tar.xz /usr/local/bin
-RUN apt-get install xz-utils
-RUN tar xvf ffmpeg-release-amd64-static.tar.xz
+ADD lib/ffmpeg-release-amd64-static.tar.xz /usr/local/bin
 RUN cp -p ffmpeg*/ffmpeg /usr/bin
 
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
