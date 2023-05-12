@@ -50,7 +50,9 @@ public class SecurityConfig {
         applyCommonConfig(http)
             .authorizeHttpRequests().anyRequest().authenticated()
             .and()
-            .oauth2Login().loginPage(uriProvider.getAuthorizationUri().toString());
+            .oauth2Login().loginPage(uriProvider.getAuthorizationUri().toString())
+            .and()
+            .oauth2ResourceServer().jwt();
         return http.build();
     }
 

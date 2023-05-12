@@ -22,6 +22,9 @@ spring:
     name: Darts Api
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin/discovery/v2.0/keys
       client:
         registration:
           external-azure-ad:

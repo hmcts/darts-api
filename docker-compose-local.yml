@@ -10,6 +10,7 @@ services:
       - DARTS_API_DB_NAME=darts
       - DARTS_API_DB_USERNAME=postgres
       - DARTS_API_DB_PASSWORD=postgres
+      - SPRING_PROFILES_ACTIVE=local
     build:
       context: .
       dockerfile: Dockerfile
