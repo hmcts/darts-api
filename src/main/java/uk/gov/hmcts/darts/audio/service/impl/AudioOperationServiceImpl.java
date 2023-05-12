@@ -13,6 +13,9 @@ import uk.gov.hmcts.darts.audio.util.AudioUtil;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -130,11 +133,20 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         audioUtil.execute(command);
 
         return new AudioFileInfo(
-            audioFileInfo.getStartTime(),
-            audioFileInfo.getEndTime(),
+            adjustTimeDuration(audioFileInfo.getStartTime(), startTime),
+            adjustTimeDuration(audioFileInfo.getStartTime(), endTime),
             outputFilename,
             audioFileInfo.getChannel()
         );
+    }
+
+    Instant adjustTimeDuration(Instant time, String timeDuration) {
+        Instant adjustedInstant = Instant.from(time);
+        LocalTime localTime = LocalTime.parse(timeDuration);
+        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.HOUR_OF_DAY), ChronoUnit.HOURS);
+        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.MINUTE_OF_HOUR), ChronoUnit.MINUTES);
+        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.SECOND_OF_MINUTE), ChronoUnit.SECONDS);
+        return adjustedInstant;
     }
 
     private Instant getEarliestStartTime(final List<AudioFileInfo> audioFilesInfo) {
