@@ -6,11 +6,10 @@ services:
     depends_on:
       - darts-db
     environment:
-      - DB_HOST=darts-db
-      - DB_NAME=darts
-      - DB_USER_NAME=postgres
-      - DB_PASSWORD=postgres
-      - SPRING_PROFILES_ACTIVE=local
+      - DARTS_API_DB_HOST=darts-db
+      - DARTS_API_DB_NAME=darts
+      - DARTS_API_DB_USERNAME=postgres
+      - DARTS_API_DB_PASSWORD=postgres
     build:
       context: .
       dockerfile: Dockerfile
