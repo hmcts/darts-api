@@ -204,16 +204,21 @@ class AudioOperationServiceImplTest {
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse(T_09_00_00_Z),
             Instant.parse(T_10_30_00_Z),
-            "/tempDir/encode/requestId/C1-encode-20230510123741468.mp2",
-            1
+            "/tempDir/encode/requestId/C0-encode-20230512163422198.mp3",
+            0
         );
 
         AudioFileInfo audioFileInfo = audioOperationService.reEncode(
             WORKSPACE_DIR,
-            audioFileInfos.get(0)
+            new AudioFileInfo(
+                Instant.parse(T_09_00_00_Z),
+                Instant.parse(T_10_30_00_Z),
+                "/tempDir/merge/requestId/C0-merge-20230510145233697.mp2",
+                0
+            )
         );
 
-        assertTrue(audioFileInfo.getFileName().matches("/tempDir/encode/requestId/C[1-4]-encode-[0-9]*.mp3"));
+        assertTrue(audioFileInfo.getFileName().matches("/tempDir/encode/requestId/C[0-4]-encode-[0-9]*.mp3"));
         assertEquals(expectedAudio.getChannel(), audioFileInfo.getChannel());
         assertEquals(expectedAudio.getStartTime(), audioFileInfo.getStartTime());
         assertEquals(expectedAudio.getEndTime(), audioFileInfo.getEndTime());
