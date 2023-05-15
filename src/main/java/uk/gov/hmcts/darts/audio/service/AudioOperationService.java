@@ -16,4 +16,7 @@ public interface AudioOperationService {
     AudioFileInfo trim(String workspaceDir, AudioFileInfo audioFileInfo, String startTime, String endTime)
         throws ExecutionException, InterruptedException;
 
+    AudioFileInfo reEncode(String workspaceDir, AudioFileInfo audioFileInfo)
+        throws ExecutionException, InterruptedException;
+
 }

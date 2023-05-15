@@ -132,7 +132,7 @@ class AudioOperationServiceImplTest {
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse("2023-04-28T09:45:00Z"),
             Instant.parse("2023-04-28T10:15:00Z"),
-            "/tempDir/trim/requestId/trim/C1-20230510123741468.mp2",
+            "/tempDir/trim/requestId/C1-trim-20230510123741468.mp2",
             1
         );
 
@@ -193,6 +193,35 @@ class AudioOperationServiceImplTest {
             DateTimeParseException.class,
             () -> audioOperationService.adjustTimeDuration(Instant.parse("2023-05-12T10:00:00Z"), "60")
         );
+    }
+
+    @Test
+    void shouldReturnReEncodedAudioFileInfoWhenValidInputAudioFile() throws ExecutionException, InterruptedException {
+        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+        when(audioTransformConfigurationProperties.getReEncodeWorkspace()).thenReturn("/tempDir/encode");
+        when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
+
+        AudioFileInfo expectedAudio = new AudioFileInfo(
+            Instant.parse(T_09_00_00_Z),
+            Instant.parse(T_10_30_00_Z),
+            "/tempDir/encode/requestId/C0-encode-20230512163422198.mp3",
+            0
+        );
+
+        AudioFileInfo audioFileInfo = audioOperationService.reEncode(
+            WORKSPACE_DIR,
+            new AudioFileInfo(
+                Instant.parse(T_09_00_00_Z),
+                Instant.parse(T_10_30_00_Z),
+                "/tempDir/merge/requestId/C0-merge-20230510145233697.mp2",
+                0
+            )
+        );
+
+        assertTrue(audioFileInfo.getFileName().matches("/tempDir/encode/requestId/C[0-4]-encode-[0-9]*.mp3"));
+        assertEquals(expectedAudio.getChannel(), audioFileInfo.getChannel());
+        assertEquals(expectedAudio.getStartTime(), audioFileInfo.getStartTime());
+        assertEquals(expectedAudio.getEndTime(), audioFileInfo.getEndTime());
     }
 
 }

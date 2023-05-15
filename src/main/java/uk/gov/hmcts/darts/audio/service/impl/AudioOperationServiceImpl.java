@@ -140,6 +140,34 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         );
     }
 
+    @Override
+    public AudioFileInfo reEncode(String workspaceDir, AudioFileInfo audioFileInfo)
+        throws ExecutionException, InterruptedException {
+
+        String baseFilePath = String.format(
+            STRING_SLASH_STRING_FORMAT,
+            audioTransformConfigurationProperties.getReEncodeWorkspace(),
+            workspaceDir
+        );
+
+        String outputFilename = generateOutputFilename(baseFilePath, AudioOperationTypes.ENCODE,
+                                                       audioFileInfo.getChannel(), AudioConstants.AudioFileFormats.MP3
+        );
+
+        CommandLine command = new CommandLine(audioTransformConfigurationProperties.getFfmpegExecutable());
+        command.addArgument("-i").addArgument(audioFileInfo.getFileName());
+        command.addArgument(outputFilename);
+
+        audioUtil.execute(command);
+
+        return new AudioFileInfo(
+            audioFileInfo.getStartTime(),
+            audioFileInfo.getEndTime(),
+            outputFilename,
+            audioFileInfo.getChannel()
+        );
+    }
+
     Instant adjustTimeDuration(Instant time, String timeDuration) {
         Instant adjustedInstant = Instant.from(time);
         LocalTime localTime = LocalTime.parse(timeDuration);
