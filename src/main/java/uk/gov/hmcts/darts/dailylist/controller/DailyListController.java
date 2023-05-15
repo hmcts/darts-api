@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.dailylist.api.DailylistApi;
+import uk.gov.hmcts.darts.dailylist.api.DailyListsApi;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
 
@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
  * Default endpoints per application.
  */
 @RestController
-public class DailyListController implements DailylistApi {
+public class DailyListController implements DailyListsApi {
 
     /**
      * POST /dailylist/addDailyList : XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
