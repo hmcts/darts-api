@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts;
 
+import com.microsoft.applicationinsights.attach.ApplicationInsights;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -23,6 +24,7 @@ public class Application {
     private AudioTransformConfigurationProperties audioTransformConfigurationProperties;
 
     public static void main(final String[] args) {
+        ApplicationInsights.attach();
         SpringApplication.run(Application.class, args);
     }
 

@@ -12,7 +12,8 @@ def branchesToSync = ['demo']
 
 def secrets = [
   'darts-${env}': [
-    secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY')
+    secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
+    secret('AppInsightsInstrumentationKey', 'APP_INSIGHTS_KEY')
   ],
 ]
 
