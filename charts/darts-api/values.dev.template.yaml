@@ -7,6 +7,8 @@ java:
       secrets:
         - name: GovukNotifyTestApiKey
           alias: GOVUK_NOTIFY_API_KEY
+        - name: AppInsightsInstrumentationKey
+          alias: APP_INSIGHTS_KEY
   postgresql:
     enabled: true
   environment:
