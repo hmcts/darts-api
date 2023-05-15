@@ -16,6 +16,12 @@ java:
           alias: DARTS_API_DB_HOST
         - name: AppInsightsInstrumentationKey
           alias: APP_INSIGHTS_KEY
+        - name: Azure-AD-B2C-TenantIdKey
+          alias: AAD-B2C-TENANT_ID_KEY
+        - name: Azure-AD-B2C-ClientIdKey
+          alias: AAD-B2C-CLIENT_ID_KEY
+        - name: Azure-AD-B2C-ClientSecretKey
+          alias: AAD-B2C-CLIENT_SECRET_KEY
   environment:
     DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
