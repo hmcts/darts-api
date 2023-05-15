@@ -23,6 +23,9 @@ public class Media {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "moj_crt_id")
+    private Integer courthouseId;
+
     @Column(name = "r_media_object_id", length = 16)
     private String legacyObjectId;
 
@@ -43,14 +46,17 @@ public class Media {
     @Column(name = "c_end")
     private Date end;
 
-    @Column(name = "c_courthouse", length = 64)
-    private String courthouse;
-
     @Column(name = "c_courtroom", length = 64)
     private String courtroom;
 
     @Column(name = "c_reporting_restrictions")
     private Integer reportingRestrictions;
+
+    @Column(name = "c_case_id", length = 32)
+    private String caseId;
+
+    @Column(name = "r_case_object_id", length = 16)
+    private String caseObjectId;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
