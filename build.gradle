@@ -243,6 +243,7 @@ dependencies {
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
   implementation 'com.microsoft.azure:applicationinsights-runtime-attach:3.4.12'
+  implementation 'com.microsoft.azure:applicationinsights-logging-log4j2:2.6.4'
 
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
