@@ -208,7 +208,8 @@ task generateDailyListApi(type: org.openapitools.generator.gradle.plugin.tasks.G
   skipOperationExample = true
   configOptions = [
     dateLibrary: "java8",
-    interfaceOnly: "true"
+    interfaceOnly: "true",
+    useTags: "true"
   ]
 }
 
