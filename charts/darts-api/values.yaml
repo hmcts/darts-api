@@ -25,5 +25,5 @@ java:
 
   environment:
     DARTS_API_DB_NAME: "darts"
-    NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
+    NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require

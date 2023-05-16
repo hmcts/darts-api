@@ -3,9 +3,6 @@ package uk.gov.hmcts.darts.notification.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,9 +20,7 @@ import uk.gov.hmcts.darts.notification.service.GovNotifyService;
 import uk.gov.hmcts.darts.notification.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
 
-import java.io.File;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 
@@ -45,8 +40,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Value("${darts.notification.max_retry_attempts}")
     private int maxRetry;
-    @Value("${darts.notification.scheduler.cron}")
-    private String cronExpression;
 
     @Override
     public void scheduleNotification(SaveNotificationToDbRequest request) {
@@ -82,23 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
-        log.debug("sendNotificationToGovNotify scheduler started with cron expressions - {}", cronExpression);
-
-        File directory = new File("/mnt/secrets");
-        log.debug("Listing files:-");
-        if (directory.exists()) {
-            Collection<File> files = FileUtils.listFiles(
-                directory,
-                new RegexFileFilter("^(.*?)"),
-                DirectoryFileFilter.DIRECTORY
-            );
-            for (File file : files) {
-                log.debug(file.getAbsolutePath());
-            }
-        } else {
-            log.debug("/mnt does not exist.");
-        }
-
+        log.debug("sendNotificationToGovNotify scheduler started.");
 
         List<Notification> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
         int notificationCounter = 0;
