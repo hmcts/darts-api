@@ -9,6 +9,8 @@ RUN cp -p ffmpeg*/ffmpeg /usr/bin
 ARG APP_INSIGHTS_AGENT_VERSION=3.4.11
 FROM hmctspublic.azurecr.io/base/java:17-distroless
 COPY --from=build-env /usr/bin/ffmpeg /usr/bin
+
+COPY lib/applicationinsights.json /opt/app/
 COPY build/libs/darts-api.jar /opt/app/
 
 EXPOSE 4550

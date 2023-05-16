@@ -14,8 +14,6 @@ java:
           alias: DARTS_API_DB_PASSWORD
         - name: darts-api-POSTGRES-HOST
           alias: DARTS_API_DB_HOST
-        - name: AppInsightsConnectionString
-          alias: APPLICATIONINSIGHTS_CONNECTION_STRING
         - name: AzureAdB2CTenantIdKey
           alias: AAD-B2C-TENANT_ID_KEY
         - name: AzureAdB2CClientIdKey
