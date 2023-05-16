@@ -20,6 +20,9 @@ java:
           alias: AAD-B2C-CLIENT_ID_KEY
         - name: AzureAdB2CClientSecretKey
           alias: AAD-B2C-CLIENT_SECRET_KEY
+        - name: AppInsightsConnectionString
+          alias: APPLICATIONINSIGHTS_CONNECTION_STRING
+
   environment:
     DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
