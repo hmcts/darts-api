@@ -13,7 +13,7 @@ def branchesToSync = ['demo']
 def secrets = [
   'darts-${env}': [
     secret('GovukNotifyTestApiKey', 'GOVUK_NOTIFY_API_KEY'),
-    secret('AppInsightsConnectionString', 'APPLICATIONINSIGHTS_CONNECTION_STRING'),
+    secret('app-insights-connection-string', 'app-insights-connection-string'),
     secret('AzureAdB2CTenantIdKey', 'AAD-B2C-TENANT_ID_KEY'),
     secret('AzureAdB2CClientIdKey', 'AAD-B2C-CLIENT_ID_KEY'),
     secret('AzureAdB2CClientSecretKey', 'AAD-B2C-CLIENT_SECRET_KEY')
