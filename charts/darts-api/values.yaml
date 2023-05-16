@@ -26,3 +26,20 @@ java:
     DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
+function:
+  releaseNameOverride: darts-api-audio
+  scaleType: Object
+  object: 
+    apiVersion: apps/v1
+    kind: Deployment
+    name: darts-api
+    pollingInterval: 30
+    cooldownPeriod: 90
+    idleReplicaCount: 1
+    maxReplicaCount: 1
+    minReplicaCount: 1
+  triggerAuth:
+    create: true
+    enabled: true
+    triggerPodIdentityProvider: azure
+  triggers: []
