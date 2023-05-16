@@ -32,23 +32,14 @@ function:
   object: 
     apiVersion: apps/v1
     kind: Deployment
-    name: darts-api
+    name: darts-api-pr-98-java
     pollingInterval: 30
     cooldownPeriod: 90
-    idleReplicaCount: 1
-    maxReplicaCount: 1
-    minReplicaCount: 1
-  triggerAuth:
-    create: true
-    enabled: true
-    triggerPodIdentityProvider: azure
   triggers:
-    - type: postgresql
+    - type: cron
       metadata:
-        userName: "{{ .Values.postgresql.auth.username}}"
-        password: "{{ .Values.postgresql.auth.password}}"
-        host: "{{ .Release.Name }}-postgresql"
-        port: "5432"
-        dbName: "{{ .Values.postgresql.auth.database}}"
-        sslmode: disable
-        query: "SELECT 5 as desired_pods"
+        # Required
+        timezone: Europe/London  # The acceptable values would be a value from the IANA Time Zone Database.
+        start: 5 * * * *         # Every hour on the 5th minute
+        end: 55 * * * *          # Every hour on the 55th minute
+        desiredReplicas: "3"
