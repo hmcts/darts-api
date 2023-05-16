@@ -242,8 +242,6 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
-  implementation 'com.microsoft.azure:applicationinsights-runtime-attach:3.4.12'
-
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
   runtimeOnly 'org.hsqldb:hsqldb'
