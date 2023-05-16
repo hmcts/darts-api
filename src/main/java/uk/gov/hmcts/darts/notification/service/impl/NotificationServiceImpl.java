@@ -84,7 +84,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started with cron expressions - {}", cronExpression);
 
-        File directory = new File("/mnt");
+        File directory = new File("/mnt/secrets");
         log.debug("Listing files:-");
         if (directory.exists()) {
             Collection<File> files = FileUtils.listFiles(
