@@ -42,4 +42,13 @@ function:
     create: true
     enabled: true
     triggerPodIdentityProvider: azure
-  triggers: []
+  triggers:
+    - type: postgresql
+      metadata:
+        userName: "{{ .Values.postgresql.auth.username}}"
+        password: "{{ .Values.postgresql.auth.password}}"
+        host: "{{ .Release.Name }}-postgresql"
+        port: "5432"
+        dbName: "{{ .Values.postgresql.auth.database}}"
+        sslmode: disable
+        query: "SELECT 5 as desired_pods"

@@ -15,3 +15,29 @@ java:
     DARTS_API_DB_USERNAME: "{{ .Values.postgresql.auth.username}}"
     DARTS_API_DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
     spring.profiles.active: dev
+function:
+  releaseNameOverride: darts-api-audio
+  scaleType: Object
+  object: 
+    apiVersion: apps/v1
+    kind: Deployment
+    name: darts-api
+    pollingInterval: 30
+    cooldownPeriod: 90
+    idleReplicaCount: 1
+    maxReplicaCount: 1
+    minReplicaCount: 1
+  triggerAuth:
+    create: true
+    enabled: true
+    triggerPodIdentityProvider: azure
+  triggers:
+    - type: postgresql
+      metadata:
+        userName: "{{ .Values.postgresql.auth.username}}"
+        password: "{{ .Values.postgresql.auth.password}}"
+        host: "{{ .Release.Name }}-postgresql"
+        port: "5432"
+        dbName: "{{ .Values.postgresql.auth.database}}"
+        sslmode: disable
+        query: "SELECT 5 as desired_pods"
