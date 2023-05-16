@@ -20,8 +20,8 @@ java:
           alias: AAD-B2C-CLIENT_ID_KEY
         - name: AzureAdB2CClientSecretKey
           alias: AAD-B2C-CLIENT_SECRET_KEY
-        - name: AppInsightsConnectionString
-          alias: AppInsightsConnectionString
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
 
   environment:
     DARTS_API_DB_NAME: "darts"
