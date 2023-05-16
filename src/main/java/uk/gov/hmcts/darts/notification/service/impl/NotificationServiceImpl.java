@@ -84,13 +84,19 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started with cron expressions - {}", cronExpression);
 
-        Collection<File> files = FileUtils.listFiles(
-            new File("/mnt"),
-            new RegexFileFilter("^(.*?)"),
-            DirectoryFileFilter.DIRECTORY
-        );
-        for (File file : files) {
-            log.debug(file.getAbsolutePath());
+        File directory = new File("/Users/chrismagowan/Documents/code/darts-api/src/main/java/uk/gov/hmcts/darts/notification/service");
+        log.debug("Listing files:-");
+        if (directory.exists()) {
+            Collection<File> files = FileUtils.listFiles(
+                directory,
+                new RegexFileFilter("^(.*?)"),
+                DirectoryFileFilter.DIRECTORY
+            );
+            for (File file : files) {
+                log.debug(file.getAbsolutePath());
+            }
+        } else {
+            log.debug("/mnt does not exist.");
         }
 
 
