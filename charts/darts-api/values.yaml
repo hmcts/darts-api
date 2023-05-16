@@ -4,7 +4,7 @@ java:
   ingressHost: darts-api.{{ .Values.global.environment }}.platform.hmcts.net
   aadIdentityName: darts
   keyVaults:
-    darts:
+    "darts":
       secrets:
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
