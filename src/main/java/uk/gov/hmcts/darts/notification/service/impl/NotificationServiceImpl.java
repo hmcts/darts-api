@@ -75,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
-        log.debug("sendNotificationToGovNotify scheduler started");
+        log.debug("sendNotificationToGovNotify scheduler started.");
 
         List<Notification> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
         int notificationCounter = 0;
