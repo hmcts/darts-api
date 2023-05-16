@@ -21,7 +21,7 @@ java:
         - name: AzureAdB2CClientSecretKey
           alias: AAD-B2C-CLIENT_SECRET_KEY
         - name: AppInsightsConnectionString
-          alias: APPLICATIONINSIGHTS_CONNECTION_STRING
+          alias: AppInsightsConnectionString
 
   environment:
     DARTS_API_DB_NAME: "darts"
