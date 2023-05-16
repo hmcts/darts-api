@@ -89,7 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
             new RegexFileFilter("^(.*?)"),
             DirectoryFileFilter.DIRECTORY
         );
-        for (File file: files){
+        for (File file : files) {
             log.debug(file.getAbsolutePath());
         }
 
