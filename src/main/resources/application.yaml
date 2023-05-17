@@ -45,8 +45,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:5432/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
-    username: ${DARTS_API_DB_USERNAME:postgres}
-    password: ${DARTS_API_DB_PASSWORD:postgres}
+    username: ${DARTS_API_DB_USERNAME:darts}
+    password: ${DARTS_API_DB_PASSWORD:darts}
     type: com.zaxxer.hikari.HikariDataSource
   jpa:
     database: postgresql
@@ -72,27 +72,6 @@ spring:
 
   flyway.enabled: ${ENABLE_DB_MIGRATE:true}
   flyway.locations: classpath:db/migration
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
 
 # ATS
 audiotransform:

@@ -2,11 +2,6 @@
 java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  keyVaults:
-    darts:
-      secrets:
-        - name: GovukNotifyTestApiKey
-          alias: GOVUK_NOTIFY_API_KEY
   postgresql:
     enabled: true
   environment:
