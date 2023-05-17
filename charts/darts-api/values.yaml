@@ -8,12 +8,14 @@ java:
       secrets:
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
-        - name: darts-api-POSTGRES-USER
+        - name: api-POSTGRES-USER
           alias: DARTS_API_DB_USERNAME
-        - name: darts-api-POSTGRES-PASS
+        - name: api-POSTGRES-PASS
           alias: DARTS_API_DB_PASSWORD
-        - name: darts-api-POSTGRES-HOST
+        - name: api-POSTGRES-HOST
           alias: DARTS_API_DB_HOST
+        - name: api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME
         - name: AzureAdB2CTenantIdKey
           alias: AAD-B2C-TENANT_ID_KEY
         - name: AzureAdB2CClientIdKey
@@ -24,7 +26,6 @@ java:
           alias: app-insights-connection-string
 
   environment:
-    DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
