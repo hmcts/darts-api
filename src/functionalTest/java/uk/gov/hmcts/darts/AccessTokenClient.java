@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.TestComponent;
+import org.springframework.context.annotation.Profile;
+import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -16,22 +20,38 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+@TestComponent
+@Profile("functionalTest")
 public class AccessTokenClient {
 
-    @SneakyThrows
-    public String getAccessToken(String tokenUri,
-                                 String clientId,
-                                 String scope,
-                                 String ropcClientSecret,
-                                 String ropcUsername,
-                                 String ropcPassword) {
+    private final String tokenUri;
+    private final String scope;
+    private final String username;
+    private final String password;
+    private final String clientId;
+    private final String clientSecret;
 
+    public AccessTokenClient(@Value("${azure-ad-ropc.token-uri}") String tokenUri,
+                             @Value("${azure-ad-ropc.scope}") String scope,
+                             @Value("${azure-ad-ropc.username}") String username,
+                             @Value("${azure-ad-ropc.password}") String password,
+                             AuthenticationConfiguration authenticationConfiguration) {
+        this.tokenUri = tokenUri;
+        this.scope = scope;
+        this.username = username;
+        this.password = password;
+        this.clientId = authenticationConfiguration.getExternalADclientId();
+        this.clientSecret = authenticationConfiguration.getExternalADclientSecret();
+    }
+
+    @SneakyThrows
+    public String getAccessToken() {
         Map<String, String> params = Map.of("client_id", clientId,
-                                            "client_secret", ropcClientSecret,
+                                            "client_secret", clientSecret,
                                             "scope", scope,
                                             "grant_type", "password",
-                                            "username", ropcUsername,
-                                            "password", ropcPassword
+                                            "username", username,
+                                            "password", password
         );
 
         HttpRequest request = HttpRequest.newBuilder(URI.create(tokenUri))
@@ -39,16 +59,17 @@ public class AccessTokenClient {
             .header("Content-Type", "application/x-www-form-urlencoded")
             .build();
 
-        String responseString = HttpClient.newHttpClient()
+        String response = HttpClient.newHttpClient()
             .send(request, BodyHandlers.ofString())
             .body();
 
         TokenResponse tokenResponse = new ObjectMapper()
-            .readValue(responseString, TokenResponse.class);
+            .readValue(response, TokenResponse.class);
 
         return tokenResponse.accessToken();
     }
 
+    @SuppressWarnings("PMD.LawOfDemeter")
     private BodyPublisher encode(Map<String, String> params) {
         String urlEncoded = params.entrySet()
             .stream()
