@@ -1,5 +1,6 @@
 {
+  "connectionString": "${file:/mnt/secrets/darts/app-insights-connection-string}",
   "role": {
-    "name": "rpe-demo"
+    "name": "DARTS API"
   }
 }

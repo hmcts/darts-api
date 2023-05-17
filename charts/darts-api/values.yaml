@@ -4,7 +4,7 @@ java:
   ingressHost: darts-api.{{ .Values.global.environment }}.platform.hmcts.net
   aadIdentityName: darts
   keyVaults:
-    darts:
+    "darts":
       secrets:
         - name: GovukNotifyApiKey
           alias: GOVUK_NOTIFY_API_KEY
@@ -14,17 +14,18 @@ java:
           alias: DARTS_API_DB_PASSWORD
         - name: darts-api-POSTGRES-HOST
           alias: DARTS_API_DB_HOST
-        - name: AppInsightsInstrumentationKey
-          alias: APP_INSIGHTS_KEY
         - name: AzureAdB2CTenantIdKey
           alias: AAD-B2C-TENANT_ID_KEY
         - name: AzureAdB2CClientIdKey
           alias: AAD-B2C-CLIENT_ID_KEY
         - name: AzureAdB2CClientSecretKey
           alias: AAD-B2C-CLIENT_SECRET_KEY
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
+
   environment:
     DARTS_API_DB_NAME: "darts"
-    NOTIFICATION_SCHEDULER_CRON: "* */2 * * * MON-FRI"
+    NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
 function:
   releaseNameOverride: darts-api-audio

@@ -56,6 +56,7 @@ spring:
       ddl-auto: create
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           lob:
             # silence the 'wall-of-text' - unnecessary exception throw about blob types
@@ -70,8 +71,6 @@ spring:
       out-of-order: true
       ignore-missing-migrations: true
 
-
-
 # ATS
 audiotransform:
   ffmpeg-executable: ffmpeg
@@ -80,14 +79,10 @@ audiotransform:
   trim-workspace: ${user.home}/audiotransform/trim
   re-encode-workspace: ${user.home}/audiotransform/encode
 
-azure:
-  application-insights:
-    instrumentation-key: ${APP_INSIGHTS_KEY:00000000-0000-0000-0000-000000000000}
-
 darts:
   notification:
     scheduler:
-      cron: ${NOTIFICATION_SCHEDULER_CRON:* */2 * * * MON-FRI}
+      cron: ${NOTIFICATION_SCHEDULER_CRON:3 */2 * * * MON-FRI}
     max_retry_attempts: 3
     gov-notify:
       api-key: ${GOVUK_NOTIFY_API_KEY:00000000-0000-0000-0000-000000000000}
