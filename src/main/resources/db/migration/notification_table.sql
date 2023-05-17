@@ -1,6 +1,6 @@
 -- Table: darts_schema.notification
 
--- DROP TABLE IF EXISTS darts_schema.notification;
+-- DROP TABLE IF EXISTS public.notification;
 
 CREATE TABLE IF NOT EXISTS darts_schema.notification
 (
