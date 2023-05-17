@@ -27,3 +27,4 @@ java:
     DARTS_API_DB_NAME: "darts"
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
+    RUN_DB_MIGRATION_ON_STARTUP: false
