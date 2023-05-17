@@ -9,6 +9,10 @@ java:
           alias: GOVUK_NOTIFY_API_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
+        - name: api-FUNC-TEST-ROPC-USERNAME
+          alias: FUNC_TEST_ROPC_USERNAME
+        - name: api-FUNC-TEST-ROPC-PASSWORD
+          alias: FUNC_TEST_ROPC_PASSWORD
   postgresql:
     enabled: true
   environment:

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestComponent;
@@ -33,8 +34,8 @@ public class AccessTokenClient {
 
     public AccessTokenClient(@Value("${azure-ad-ropc.token-uri}") String tokenUri,
                              @Value("${azure-ad-ropc.scope}") String scope,
-                             @Value("${azure-ad-ropc.username}") String username,
-                             @Value("${azure-ad-ropc.password}") String password,
+                             @NonNull @Value("${azure-ad-ropc.username}") String username,
+                             @NonNull @Value("${azure-ad-ropc.password}") String password,
                              AuthenticationConfiguration authenticationConfiguration) {
         this.tokenUri = tokenUri;
         this.scope = scope;

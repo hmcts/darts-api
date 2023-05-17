@@ -13,6 +13,8 @@ def secrets = [
     secret('app-insights-connection-string', 'app-insights-connection-string'),
     secret('AzureAdB2CTenantIdKey', 'AAD-B2C-TENANT_ID_KEY'),
     secret('AzureAdB2CClientIdKey', 'AAD-B2C-CLIENT_ID_KEY'),
+    secret('AzureAdB2CClientSecretKey', 'AAD-B2C-CLIENT_SECRET_KEY'),
+    secret('AzureAdB2CClientIdKey', 'AAD-B2C-CLIENT_ID_KEY'),
     secret('AzureAdB2CClientSecretKey', 'AAD-B2C-CLIENT_SECRET_KEY')
   ],
 ]
