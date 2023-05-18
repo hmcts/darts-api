@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.authentication.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
 import uk.gov.hmcts.darts.authentication.component.UriProvider;
@@ -35,7 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return uriProvider.getAuthorizationUri();
         }
 
-        throw new NotImplementedException("Active session support not yet implemented");
+        return uriProvider.getLandingPageUri();
     }
 
     @Override

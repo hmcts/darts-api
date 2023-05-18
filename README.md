@@ -7,19 +7,32 @@
 - [Java 17](https://www.oracle.com/java)
 
 ### Environment variables
-To run the functional tests locally, you will need to set an environment variable on your machine.
-To do this, first we need to retrieve the key from the azure vault either my running this command in the terminal:-
+To run the functional tests locally, you must set the following environment variables on your machine.
+The required value of each variable is stored in Azure Key Vault as a Secret.
+
+| Environment Variable Name | Corresponding Azure Key Vault Secret Name |
+|---------------------------|-------------------------------------------|
+| GOVUK_NOTIFY_API_KEY      | GovukNotifyTestApiKey                     |
+| FUNC_TEST_ROPC_USERNAME   | api-FUNC-TEST-ROPC-USERNAME               |
+| FUNC_TEST_ROPC_PASSWORD   | api-FUNC-TEST-ROPC-PASSWORD               |
+
+To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
+command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
 ```
 az keyvault secret show --name GovukNotifyTestApiKey --vault-name darts-stg
 ```
+and inspect the `"value"` field of the response.
 
-or by logging onto the azure home page, and navigating to darts-stg and secrets etc
-https://portal.azure.com/#home
-Once you have the key, then run this command in the mac terminal replacing <<apikey>> with the relevant one:-
+Alternatively, you can log into the [Azure home page](https://portal.azure.com/#home), and navigate to
+`Key Vault -> darts-stg -> Secrets`. Note in your Portal Settings you must have the `CJS Common Platform` directory
+active for the secrets to be visible.
+
+Once you have obtained the values, set the environment variables on your system. E.g. On Mac, you may run this command in
+the terminal, replacing `<<env var name>>` and `<<secret value>>` as necessary:
 ```
-launchctl setenv GOVUK_NOTIFY_API_KEY <<apikey>>
+launchctl setenv <<env var name>> <<secret value>>
 ```
-this should set the GOVUK_NOTIFY_API_KEY environment variable. you will then need to restart intellij/terminal windows for it to take effect.
+You will then need to restart intellij/terminal windows for it to take effect.
 
 ## Building the application
 
@@ -99,6 +112,19 @@ docker image rm <image-id>
 ```
 
 There is no need to remove postgres and java or similar core images.
+
+## Spring Profiles
+
+The following Spring Profiles are defined. "External Components" are defined as any service upon which the application is dependent, such as database servers, web services etc.
+
+| Profile          | Config Location                                                | Purpose                                                                                        | External Components                                                                                                                                                                                                             |
+|------------------|----------------------------------------------------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `local`          | `src/main/resources/application-local.yaml`                    | For running the application locally as a docker compose stack with `docker-compose-local.yml`. | Provided as needed by `docker-compose-local.yml`. No external connectivity permitted outside the network boundary of the stack.                                                                                                 |
+| `intTest`        | `src/integrationTest/resources/application-intTest.yaml`       | For running integration tests under `src/integrationTest`.                                     | No interaction required or permitted, all external calls are mocked via embedded wiremock (for HTTP requests), an embedded database (for db queries) or `@MockBeans` for anything else. Spring Security is explicitly disabled. |
+| `functionalTest` | `src/functionalTest/resources/application-functionalTest.yaml` | For running functional tests under `src/functionalTest`.                                       | Functional tests execute API calls against the application deployed in the PR environment. That application is deployed with the `dev` profile (see below).                                                                     |
+| `dev`            | `src/main/resources/application-dev.yaml`                      | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
+| `stg`            | `src/main/resources/application-stg.yaml`                      | For running the application in the staging environment.                                        | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
+
 
 ## License
 

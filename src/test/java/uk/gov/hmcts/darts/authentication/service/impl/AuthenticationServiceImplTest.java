@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.authentication.service.impl;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,15 +60,14 @@ class AuthenticationServiceImplTest {
 
     @Test
     void loginOrRefreshShouldThrowExceptionWhenExistingSessionExists() {
-        when(sessionService.getSession(DUMMY_SESSION_ID))
+        when(sessionService.getSession(anyString()))
             .thenReturn(new Session(null, null, 0));
+        when(uriProvider.getLandingPageUri())
+            .thenReturn(DUMMY_LANDING_PAGE_URI);
 
-        NotImplementedException exception = assertThrows(
-            NotImplementedException.class,
-            () -> authenticationService.loginOrRefresh(DUMMY_SESSION_ID)
-        );
+        URI uri = authenticationService.loginOrRefresh("DUMMY_SESSION_ID");
 
-        assertEquals("Active session support not yet implemented", exception.getMessage());
+        assertEquals(DUMMY_LANDING_PAGE_URI, uri);
     }
 
     @Test

@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ActiveProfiles({"dev","h2db"})
+@ActiveProfiles({"intTest", "h2db"})
 class TemplateIdHelperTest {
 
     @Autowired
