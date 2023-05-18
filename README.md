@@ -7,19 +7,32 @@
 - [Java 17](https://www.oracle.com/java)
 
 ### Environment variables
-To run the functional tests locally, you will need to set an environment variable on your machine.
-To do this, first we need to retrieve the key from the azure vault either my running this command in the terminal:-
+To run the functional tests locally, you must set the following environment variables on your machine.
+The required value of each variable is stored in Azure Key Vault as a Secret.
+
+| Environment Variable Name | Corresponding Azure Key Vault Secret Name |
+|---------------------------|-------------------------------------------|
+| GOVUK_NOTIFY_API_KEY      | GovukNotifyTestApiKey                     |
+| FUNC_TEST_ROPC_USERNAME   | api-FUNC-TEST-ROPC-USERNAME               |
+| FUNC_TEST_ROPC_PASSWORD   | api-FUNC-TEST-ROPC-PASSWORD               |
+
+To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
+command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
 ```
 az keyvault secret show --name GovukNotifyTestApiKey --vault-name darts-stg
 ```
+and inspect the `"value"` field of the response.
 
-or by logging onto the azure home page, and navigating to darts-stg and secrets etc
-https://portal.azure.com/#home
-Once you have the key, then run this command in the mac terminal replacing <<apikey>> with the relevant one:-
+Alternatively, you can log into the [Azure home page](https://portal.azure.com/#home), and navigate to
+`Key Vault -> darts-stg -> Secrets`. Note in your Portal Settings you must have the `CJS Common Platform` directory
+active for the secrets to be visible.
+
+Once you have obtained the values, set the environment variables on your system. E.g. On Mac, you may run this command in
+the terminal, replacing `<<env var name>>` and `<<secret value>>` as necessary:
 ```
-launchctl setenv GOVUK_NOTIFY_API_KEY <<apikey>>
+launchctl setenv <<env var name>> <<secret value>>
 ```
-this should set the GOVUK_NOTIFY_API_KEY environment variable. you will then need to restart intellij/terminal windows for it to take effect.
+You will then need to restart intellij/terminal windows for it to take effect.
 
 ## Building the application
 
