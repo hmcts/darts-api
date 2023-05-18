@@ -2,12 +2,4 @@
 java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  postgresql:
-    enabled: true
-  environment:
-    ENABLE_FLYWAY: true
-    RUN_DB_MIGRATION_ON_STARTUP: true
-    DARTS_API_DB_HOST: "{{ .Release.Name }}-postgresql"
-    DARTS_API_DB_NAME: "{{ .Values.postgresql.auth.database}}"
-    DARTS_API_DB_USERNAME: "{{ .Values.postgresql.auth.username}}"
-    DARTS_API_DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
+  
