@@ -300,6 +300,12 @@ flyway {
   cleanDisabled = false
 }
 
+task cleanPostgresDatabase(type: org.flywaydb.gradle.task.FlywayCleanTask) {
+  if (project.hasProperty("dburl")) {
+    url = "jdbc:postgresql://${dburl}"
+  }
+}
+
 task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
   baselineOnMigrate = true
   if (project.hasProperty("dburl")) {
@@ -307,4 +313,4 @@ task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
   }
 }
 
-migratePostgresDatabase.dependsOn flywayClean
+migratePostgresDatabase.dependsOn cleanPostgresDatabase
