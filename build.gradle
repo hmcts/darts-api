@@ -297,9 +297,11 @@ flyway {
   password = System.getenv('FLYWAY_PASSWORD')
   baselineOnMigrate = true
   baselineVersion = '000'
-  cleanDisabled = false
+  // change to false to allow flyway clean to be run
+  cleanDisabled = true
 }
 
+// this can be run to clean the DB down allowing from a fresh migration from scratch
 task cleanPostgresDatabase(type: org.flywaydb.gradle.task.FlywayCleanTask) {
   if (project.hasProperty("dburl")) {
     url = "jdbc:postgresql://${dburl}"
@@ -313,4 +315,5 @@ task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
   }
 }
 
-migratePostgresDatabase.dependsOn cleanPostgresDatabase
+// set flyway cleanDisabled to true above and uncomment if we require a fresh migration from scratch across all DBs
+// migratePostgresDatabase.dependsOn cleanPostgresDatabase
