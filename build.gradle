@@ -297,6 +297,7 @@ flyway {
   password = System.getenv('FLYWAY_PASSWORD')
   baselineOnMigrate = true
   baselineVersion = '000'
+  cleanDisabled = false
 }
 
 task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {

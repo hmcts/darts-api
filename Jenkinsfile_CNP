@@ -39,6 +39,16 @@ withPipeline(type, product, component) {
   enableSlackNotifications('#darts-builds')
   syncBranchesWithMaster(branchesToSync)
 
+  before('dbmigrate:stg') {
+    echo 'Running Flyway Clean'
+    builder.gradle('flywayClean')
+  }
+
+  before('dbmigrate:prod') {
+    echo 'Running Flyway Clean'
+    builder.gradle('flywayClean')
+  }
+
   afterAlways('test') {
     builder.gradle('jacocoTestReport')
 
