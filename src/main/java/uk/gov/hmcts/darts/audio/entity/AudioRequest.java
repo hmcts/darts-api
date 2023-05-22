@@ -36,7 +36,7 @@ public class AudioRequest {
     @Id
     @Column(name = REQUEST_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Integer id;
+    private Integer requestId;
 
     @Column(name = CASE_ID)
     private String caseId;
