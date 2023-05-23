@@ -10,15 +10,15 @@ spring:
       client:
         registration:
           external-azure-ad:
-            client-id: 053d44f9-cd27-463e-a995-bcf835233cf8
-            client-secret: zKO8Q~0Ab-4MZKHcghuhLKvzG8Ot~lkzr4EaacjI
+            client-id: ${AAD_B2C_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000011}
+            client-secret: ${AAD_B2C_CLIENT_SECRET_KEY:}
             scope: openid
             redirect-uri: https://darts-api.staging.platform.hmcts.net/external-user/handle-oauth-code
             authorization-grant-type: authorization_code
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: https://hmctsdartsb2csbox.b2clogin.com/89b8de2e-eb1b-42fb-a59c-813ea2b82a56/v2.0/
+            issuer-uri: https://hmctsdartsb2csbox.b2clogin.com/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
             provider: external-azure-ad-provider
         provider:
           external-azure-ad-provider:
