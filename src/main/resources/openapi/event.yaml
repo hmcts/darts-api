@@ -1,0 +1,78 @@
+openapi: 3.0.1
+
+info:
+
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /event/addDocument:
+    post:
+      tags:
+        - Event
+      summary: SORT OUT LATER.
+      description: |-
+        description
+      parameters:
+        - in: query
+          name: message_id
+          schema:
+            type: number
+          description: "The source system that has sent the message"
+          required: true
+        - in: query
+          name: type
+          schema:
+            type: string
+          description: "The source system that has sent the message"
+          required: true
+        - in: query
+          name: sub_type
+          schema:
+            type: string
+          description: "The source system that has sent the message"
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/AddDocumentBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddDocumentResponse'
+
+        '500':
+          description: Internal Server Error
+
+components:
+  requestBodies:
+    AddDocumentBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DocumentXML'
+
+
+    #-----------------#
+    #----------------------------------#
+    #-----------------#
+
+  schemas:
+    DocumentXML:
+      type: string
+
+    AddDocumentResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
