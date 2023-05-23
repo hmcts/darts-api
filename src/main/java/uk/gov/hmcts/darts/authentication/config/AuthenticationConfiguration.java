@@ -10,9 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 public class AuthenticationConfiguration {
 
-    @Value("${spring.security.oauth2.client.registration.external-azure-ad.tenant-id}")
-    private String externalADtenantId;
-
     @Value("${spring.security.oauth2.client.registration.external-azure-ad.client-id}")
     private String externalADclientId;
 
