@@ -15,6 +15,10 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | GOVUK_NOTIFY_API_KEY      | GovukNotifyTestApiKey                     |
 | FUNC_TEST_ROPC_USERNAME   | api-FUNC-TEST-ROPC-USERNAME               |
 | FUNC_TEST_ROPC_PASSWORD   | api-FUNC-TEST-ROPC-PASSWORD               |
+| AAD_B2C_TENANT_ID_KEY     | AzureAdB2CTenantIdKey                     |
+| AAD_B2C_CLIENT_ID_KEY     | AzureAdB2CClientIdKey                     |
+| AAD_B2C_CLIENT_SECRET_KEY | AzureAdB2CClientSecretKey                 |
+
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
