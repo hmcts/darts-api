@@ -1,0 +1,60 @@
+openapi: 3.0.1
+
+servers:
+  -  url: http://localhost:4550/
+
+info:
+  description: Modernised DARTS (Digital Audio Recording and Transcription Service).
+  version: "0.0.1"
+  title: Modernised DARTS
+
+paths:
+  /audio-request/addAudioRequest:
+    post:
+      tags:
+        - Audio Requests
+      summary: Users can request audio for specific cases and date/time periods
+      operationId: addAudioRequest
+      description: Adds a user audio request for processing
+      responses:
+        '201':
+          description: audio request created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: audio request item already exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioRequestDetails'
+        description: Audio Request item to add
+
+components:
+  schemas:
+    AudioRequestDetails:
+      type: object
+      required:
+        - caseId
+        - requester
+        - startTime
+        - endTime
+        - requestType
+      properties:
+        caseId:
+          type: string
+          example: 12345
+        requester:
+          type: string
+          example: judge
+        startTime:
+          type: string
+          format: date-time
+          example: '2023-05-15T09:00:00.001Z'
+        endTime:
+          type: string
+          format: date-time
+          example: '2023-05-15T12:00:00.001Z'
+        requestType:
+          type: string
+          example: Download

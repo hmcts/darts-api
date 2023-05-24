@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import uk.gov.hmcts.darts.audio.dto.AudioRequestDetails;
+
+import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 
 public interface AudioRequestService {
 
-    void saveAudioRequest(AudioRequestDetails audioRequestDetails);
+    Integer saveAudioRequest(AudioRequestDetails audioRequestDetails);
 }

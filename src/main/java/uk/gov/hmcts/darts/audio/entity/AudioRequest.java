@@ -23,12 +23,13 @@ public class AudioRequest {
 
     public static final String REQUEST_ID = "request_id";
     public static final String CASE_ID = "case_id";
-    public static final String EMAIL_ADDRESS = "email_address";
+    public static final String REQUESTER = "requester";
     public static final String START_TIME = "start_time";
     public static final String END_TIME = "end_time";
     public static final String REQUEST_TYPE = "request_type";
     public static final String STATUS = "status";
     public static final String ATTEMPTS = "attempts";
+    public static final String OUTBOUND_LOCATION = "outbound_location";
     public static final String CREATED_DATE_TIME = "created_date_time";
     public static final String LAST_UPDATED_DATE_TIME = "last_updated_date_time";
     public static final String TABLE_NAME = "audio_request";
@@ -41,8 +42,8 @@ public class AudioRequest {
     @Column(name = CASE_ID)
     private String caseId;
 
-    @Column(name = EMAIL_ADDRESS)
-    private String emailAddress;
+    @Column(name = REQUESTER)
+    private String requester;
 
     @Column(name = START_TIME)
     private Timestamp startTime;
@@ -58,6 +59,9 @@ public class AudioRequest {
 
     @Column(name = ATTEMPTS)
     private int attempts;
+
+    @Column(name = OUTBOUND_LOCATION)
+    private String outboundLocation;
 
     @CreationTimestamp
     @Column(name = CREATED_DATE_TIME)

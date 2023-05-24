@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface AudioRequestRepository extends JpaRepository<AudioRequest, Integer> {
 
-    List<AudioRequest> findByRequestId(String requestId);
+    List<AudioRequest> findByRequestId(Integer requestId);
 }
