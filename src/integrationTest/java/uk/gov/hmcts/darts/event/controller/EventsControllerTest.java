@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.events.controller;
+package uk.gov.hmcts.darts.event.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

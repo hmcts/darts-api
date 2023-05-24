@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.events.controller;
+package uk.gov.hmcts.darts.event.controller;
 
 
 import io.swagger.v3.oas.annotations.Operation;
