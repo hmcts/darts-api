@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 
 @RequiredArgsConstructor
 @Service
@@ -39,8 +39,8 @@ public class AudioRequestServiceImpl implements AudioRequestService {
         AudioRequest audioRequest = new AudioRequest();
         audioRequest.setCaseId(caseId);
         audioRequest.setRequester(requester);
-        audioRequest.setStartTime(Timestamp.valueOf(startTime.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()));
-        audioRequest.setEndTime(Timestamp.valueOf(endTime.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()));
+        audioRequest.setStartTime(Timestamp.valueOf(startTime.atZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime()));
+        audioRequest.setEndTime(Timestamp.valueOf(endTime.atZoneSameInstant(ZoneId.of("Europe/London")).toLocalDateTime()));
         audioRequest.setRequestType(requestType);
         audioRequest.setStatus(String.valueOf(AudioRequestStatus.OPEN));
         audioRequest.setAttempts(0);

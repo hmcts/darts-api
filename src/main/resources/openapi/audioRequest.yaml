@@ -9,7 +9,7 @@ info:
   title: Modernised DARTS
 
 paths:
-  /audio-request/addAudioRequest:
+  /audio/request:
     post:
       tags:
         - Audio Requests

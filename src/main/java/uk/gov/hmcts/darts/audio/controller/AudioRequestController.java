@@ -45,7 +45,7 @@ public class AudioRequestController implements AudioRequestsApi {
     @Override
     @RequestMapping(
         method = RequestMethod.POST,
-        value = "/audio-request/addAudioRequest",
+        value = "/audio/request",
         consumes = { "application/json" }
     )
     public ResponseEntity<Void> addAudioRequest(
@@ -57,7 +57,7 @@ public class AudioRequestController implements AudioRequestsApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
 }
