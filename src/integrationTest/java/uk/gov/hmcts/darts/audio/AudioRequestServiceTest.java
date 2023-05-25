@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.audio.service.AudioRequestService;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,10 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @ExtendWith(MockitoExtension.class)
-public class AudioRequestServiceTest {
+class AudioRequestServiceTest {
 
     public static final String TEST_REQUESTER = "test@test.com";
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final String T_09_00_00_Z = "2023-05-15T09:00:00.001Z";
     private static final String T_12_00_00_Z = "2023-05-15T12:00:00.001Z";
     private static final String DOWNLOAD_REQ_TYPE = "Download";
