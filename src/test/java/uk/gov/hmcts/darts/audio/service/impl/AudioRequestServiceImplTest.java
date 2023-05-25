@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AudioRequestServiceImplTest {
+class AudioRequestServiceImplTest {
 
     private static final String TEST_REQUESTER = "test@test.com";
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

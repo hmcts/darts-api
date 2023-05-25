@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import java.io.File;
@@ -25,6 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class DailyListTest {
     @MockBean
     private NotificationRepository notificationRepository;
+
+    @MockBean
+    private AudioRequestRepository audioRequestRepository;
 
     @Autowired
     private transient MockMvc mockMvc;

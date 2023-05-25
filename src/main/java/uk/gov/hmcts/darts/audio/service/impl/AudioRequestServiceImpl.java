@@ -45,7 +45,6 @@ public class AudioRequestServiceImpl implements AudioRequestService {
         audioRequest.setStatus(String.valueOf(AudioRequestStatus.OPEN));
         audioRequest.setAttempts(0);
 
-        var result = audioRequestRepository.saveAndFlush(audioRequest);
-        return result;
+        return audioRequestRepository.saveAndFlush(audioRequest);
     }
 }

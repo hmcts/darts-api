@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +21,9 @@ class GetWelcomeTest {
 
     @MockBean
     private NotificationRepository notificationRepository;
+
+    @MockBean
+    private AudioRequestRepository audioRequestRepository;
 
     @Autowired
     private transient MockMvc mockMvc;

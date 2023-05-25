@@ -42,6 +42,7 @@ public class AudioRequestController implements AudioRequestsApi {
             @ApiResponse(responseCode = "409", description = "audio request item already exists")
         }
     )
+    @Override
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/audio-request/addAudioRequest",
@@ -51,7 +52,7 @@ public class AudioRequestController implements AudioRequestsApi {
         @Parameter(name = "AudioRequestDetails", description = "Audio Request item to add") @Valid @RequestBody(required = false) AudioRequestDetails audioRequestDetails
     ) {
         try {
-            var requestId = audioRequestService.saveAudioRequest(audioRequestDetails);
+            audioRequestService.saveAudioRequest(audioRequestDetails);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
