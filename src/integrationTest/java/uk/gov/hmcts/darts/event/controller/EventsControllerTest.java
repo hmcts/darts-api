@@ -29,7 +29,7 @@ class EventsControllerTest {
         String requestBody = "{}"; //getContentsFromFile("Tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
         MockHttpServletRequestBuilder requestBuilder = post("/event/addDocument")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam("message_id", "400")
+            .queryParam("message_id", "1")
             .queryParam("type", "1")
             .queryParam("sub_type", "1")
             .content(requestBody);

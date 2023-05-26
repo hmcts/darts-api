@@ -22,8 +22,6 @@ import java.math.BigDecimal;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-
-
 @Slf4j
 @RestController
 public class EventsController implements EventApi {
