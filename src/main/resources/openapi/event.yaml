@@ -16,27 +16,27 @@ paths:
     post:
       tags:
         - Event
-      summary: Event data received from XHIBIT and CPP through a custom web service to add context to the audio recordings it stores, which allows users to request audio by case and hearing data without needing to know the time or physical location of where the audio was recorded.
+      summary: An Endpoint which allows users to request audio by case and hearing data
       description: |-
-        description
+        Event data received from XHIBIT and CPP through a custom web service to add context to the audio recordings it stores, which allows users to request audio by case and hearing data without needing to know the time or physical location of where the audio was recorded.
       parameters:
         - in: query
           name: message_id
           schema:
             type: number
-          description: "The source system that has sent the message"
+          description: "message id"
           required: true
         - in: query
           name: type
           schema:
             type: string
-          description: "The source system that has sent the message"
+          description: "The type of Event"
           required: true
         - in: query
           name: sub_type
           schema:
             type: string
-          description: "The source system that has sent the message"
+          description: "The subtype of Event"
           required: true
       requestBody:
         $ref: '#/components/requestBodies/AddDocumentBody'
