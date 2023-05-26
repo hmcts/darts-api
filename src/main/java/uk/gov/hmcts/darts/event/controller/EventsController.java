@@ -30,8 +30,8 @@ public class EventsController implements EventApi {
 
     @Operation(
         operationId = "eventAddDocumentPost",
-        summary = "Event data received from XHIBIT and CPP through a custom web service to add context to the audio recordings it stores, which allows users to request audio by case and hearing data without needing to know the time or physical location of where the audio was recorded.",
-        description = "description",
+        summary = "An Endpoint which allows users to request and submit events.",
+        description = "Event data received from XHIBIT and CPP through a custom web service to add context to the audio recordings it stores.",
         tags = { "Event" },
         responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
