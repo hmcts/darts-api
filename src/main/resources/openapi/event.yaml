@@ -24,7 +24,7 @@ paths:
           name: message_id
           schema:
             type: number
-          description: "message id"
+          description: "ID of message"
           required: true
         - in: query
           name: type
