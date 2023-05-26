@@ -22,7 +22,7 @@ paths:
     get:
       tags:
         - Courthouses
-      summary: Gets all court house records..
+      summary: Gets all courthouse records..
       responses:
         '200':
           description: OK
@@ -37,7 +37,7 @@ paths:
     put:
       tags:
         - Courthouses
-      summary: Amends a court house record with supplied details.
+      summary: Amends a courthouse record with supplied details.
       parameters:
         - in: path
           name: courthouse_id
@@ -58,7 +58,7 @@ paths:
     delete:
       tags:
         - Courthouses
-      summary: Deletes the court house entery with the supplied id.
+      summary: Deletes the courthouse entry with the supplied id.
       parameters:
         - in: path
           name: courthouse_id

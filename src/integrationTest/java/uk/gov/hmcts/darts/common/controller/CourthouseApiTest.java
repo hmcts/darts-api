@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,8 +26,13 @@ class CourthouseApiTest {
     @MockBean
     private NotificationRepository notificationRepository;
 
+    @MockBean
+    AudioRequestRepository audioRequestRepository;
+
     @Autowired
     private transient MockMvc mockMvc;
+
+
 
     @Test
     void courthousesGet() throws Exception {
