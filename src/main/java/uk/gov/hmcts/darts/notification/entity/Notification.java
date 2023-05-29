@@ -9,8 +9,10 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
 
 import java.sql.Timestamp;
 
@@ -19,6 +21,7 @@ import java.sql.Timestamp;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Audited
 public class Notification {
 
     public static final String ID = "id";
@@ -50,6 +53,7 @@ public class Notification {
     private String status;
 
     @Column(name = ATTEMPTS)
+    @ColumnDefault("0")
     private int attempts;
 
     @Column(name = TEMPLATE_VALUES)

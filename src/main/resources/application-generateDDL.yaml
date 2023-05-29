@@ -1,0 +1,4 @@
+spring.jpa.properties.javax.persistence.schema-generation.create-source: metadata
+spring.jpa.properties.javax.persistence.schema-generation.scripts.action: create
+spring.jpa.properties.javax.persistence.schema-generation.scripts.create-target: src/main/resources/db/migration/V1_1__create_from_hibernate.sql
+spring.flyway.enabled: false

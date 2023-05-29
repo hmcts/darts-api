@@ -18,11 +18,6 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
-    org:
-      hibernate:
-        envers:
-          audit_table_suffix: _audit
-          store_data_at_delete: true
 
   autoconfigure:
     exclude:
