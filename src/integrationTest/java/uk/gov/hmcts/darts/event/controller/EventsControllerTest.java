@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audio.service.AudioRequestService;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,12 +22,15 @@ class EventsControllerTest {
     @MockBean
     private NotificationRepository notificationRepository;
 
+    @MockBean
+    AudioRequestService audioRequestService;
+
     @Autowired
     private transient MockMvc mockMvc;
 
     @Test
     void eventsApiAddDocumentsEndpoint() throws Exception {
-        String requestBody = "{}"; //getContentsFromFile("Tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
+        String requestBody = "{}";
         MockHttpServletRequestBuilder requestBuilder = post("/event/addDocument")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam("message_id", "1")
