@@ -48,7 +48,7 @@ public class EventsController implements EventApi {
     public ResponseEntity<AddDocumentResponse> eventAddDocumentPost(
         @NotNull @Parameter(name = "message_id", description = "ID of message", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "message_id", required = true) BigDecimal messageId,
         @NotNull @Parameter(name = "type", description = "The type of Event", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "type", required = true) String type,
-        @NotNull @Parameter(name = "sub_type", description = "The type of Event", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "sub_type", required = true) String subType,
+        @NotNull @Parameter(name = "sub_type", description = "The subtype of Event", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "sub_type", required = true) String subType,
         @Parameter(name = "body", description = "", required = true) @Valid @RequestBody String body
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
