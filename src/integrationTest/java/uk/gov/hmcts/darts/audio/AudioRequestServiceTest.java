@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -24,9 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AudioRequestServiceTest {
 
     public static final String TEST_REQUESTER = "test@test.com";
-    private static final String T_09_00_00_Z = "2023-05-15T09:00:00.001Z";
-    private static final String T_12_00_00_Z = "2023-05-15T12:00:00.001Z";
+    private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
+    private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
     private static final String DOWNLOAD_REQ_TYPE = "Download";
+
+    private static final String ISO_OFFSET_DATE_TIME_T13_00_00_01_00 = "2023-05-31T13:00:00+01:00";
+    private static final String ISO_OFFSET_DATE_TIME_T10_00_00_01_00 = "2023-05-31T10:00:00+01:00";
+
     @Autowired
     AudioRequestService audioRequestService;
 
@@ -39,7 +44,7 @@ class AudioRequestServiceTest {
     }
 
     @Test
-    void saveAudioRequestOkConfirmEntryInDb() {
+    void saveAudioRequestWithZuluTimeOkConfirmEntryInDb() {
         String caseId = "123456";
 
         var requestDetails = new AudioRequestDetails();
@@ -55,5 +60,32 @@ class AudioRequestServiceTest {
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals("OPEN", requestResult.getStatus());
         assertEquals(caseId, requestResult.getCaseId());
+        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T10_00_00_01_00), requestResult.getStartTime());
+        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T13_00_00_01_00), requestResult.getEndTime());
+        assertNotNull(requestResult.getCreatedDateTime());
+        assertNotNull(requestResult.getLastUpdatedDateTime());
+    }
+
+    @Test
+    void saveAudioRequestWithOffsetTimeOkConfirmEntryInDb() {
+        String caseId = "123456";
+
+        var requestDetails = new AudioRequestDetails();
+        requestDetails.setCaseId(caseId);
+        requestDetails.setRequester(TEST_REQUESTER);
+        requestDetails.setStartTime(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T10_00_00_01_00));
+        requestDetails.setEndTime(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T13_00_00_01_00));
+        requestDetails.setRequestType(DOWNLOAD_REQ_TYPE);
+
+        var requestId = audioRequestService.saveAudioRequest(requestDetails);
+        List<AudioRequest> resultList = audioRequestRepository.findByRequestId(requestId);
+        AudioRequest requestResult = resultList.get(0);
+        assertTrue(requestResult.getRequestId() > 0);
+        assertEquals("OPEN", requestResult.getStatus());
+        assertEquals(caseId, requestResult.getCaseId());
+        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T10_00_00_01_00), requestResult.getStartTime());
+        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T13_00_00_01_00), requestResult.getEndTime());
+        assertNotNull(requestResult.getCreatedDateTime());
+        assertNotNull(requestResult.getLastUpdatedDateTime());
     }
 }

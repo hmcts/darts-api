@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = AudioRequest.TABLE_NAME)
@@ -46,10 +46,10 @@ public class AudioRequest {
     private String requester;
 
     @Column(name = START_TIME)
-    private Timestamp startTime;
+    private OffsetDateTime startTime;
 
     @Column(name = END_TIME)
-    private Timestamp endTime;
+    private OffsetDateTime endTime;
 
     @Column(name = REQUEST_TYPE)
     private String requestType;
@@ -65,11 +65,11 @@ public class AudioRequest {
 
     @CreationTimestamp
     @Column(name = CREATED_DATE_TIME)
-    private Timestamp createdDateTime;
+    private OffsetDateTime createdDateTime;
 
     @UpdateTimestamp
     @Column(name = LAST_UPDATED_DATE_TIME)
-    private Timestamp lastUpdatedDateTime;
+    private OffsetDateTime lastUpdatedDateTime;
 
 }
 

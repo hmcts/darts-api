@@ -1,7 +1,7 @@
 openapi: 3.0.1
 
 servers:
-  -  url: http://localhost:4550/
+  - url: http://localhost:4550/
 
 info:
   description: Modernised DARTS (Digital Audio Recording and Transcription Service).
@@ -12,7 +12,7 @@ paths:
   /audio/request:
     post:
       tags:
-        - Audio Requests
+        - AudioRequests
       summary: Users can request audio for specific cases and date/time periods
       operationId: addAudioRequest
       description: Adds a user audio request for processing
@@ -50,11 +50,11 @@ components:
         startTime:
           type: string
           format: date-time
-          example: '2023-05-15T09:00:00.001Z'
+          example: '2023-05-31T09:00:00Z'
         endTime:
           type: string
           format: date-time
-          example: '2023-05-15T12:00:00.001Z'
+          example: '2023-05-31T12:00:00Z'
         requestType:
           type: string
           example: Download

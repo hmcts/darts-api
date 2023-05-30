@@ -10,9 +10,7 @@ import uk.gov.hmcts.darts.audio.entity.AudioRequest;
 import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.any;
@@ -24,11 +22,8 @@ import static org.mockito.Mockito.when;
 class AudioRequestServiceImplTest {
 
     private static final String TEST_REQUESTER = "test@test.com";
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final String OFFSET_T_09_00_00_Z = "2023-05-15T09:00:00.001Z";
-    private static final String OFFSET_T_12_00_00_Z = "2023-05-15T12:00:00.001Z";
-    private static final String TIMESTAMP_T_09_00_00_Z = "2023-05-15 09:00:00.001";
-    private static final String TIMESTAMP_T_12_00_00_Z = "2023-05-15 12:00:00.001";
+    private static final String OFFSET_T_09_00_00_Z = "2023-05-31T09:00:00Z";
+    private static final String OFFSET_T_12_00_00_Z = "2023-05-31T12:00:00Z";
     private static final String DOWNLOAD_REQ_TYPE = "Download";
 
     private static final String REQUEST_STATUS_OPEN = "OPEN";
@@ -46,13 +41,14 @@ class AudioRequestServiceImplTest {
 
         mockAudioRequest = new AudioRequest();
         mockAudioRequest.setRequestId(1);
-        mockAudioRequest.setStartTime(Timestamp.valueOf(TIMESTAMP_T_09_00_00_Z));
-        mockAudioRequest.setEndTime(Timestamp.valueOf(TIMESTAMP_T_12_00_00_Z));
+        mockAudioRequest.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
+        mockAudioRequest.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         mockAudioRequest.setRequester(TEST_REQUESTER);
         mockAudioRequest.setStatus(REQUEST_STATUS_OPEN);
         mockAudioRequest.setAttempts(0);
-        mockAudioRequest.setCreatedDateTime(Timestamp.valueOf("2023-05-23 18:53:24.288"));
-        mockAudioRequest.setLastUpdatedDateTime(Timestamp.valueOf("2023-05-23 18:53:24.288"));
+        OffsetDateTime now = OffsetDateTime.now();
+        mockAudioRequest.setCreatedDateTime(now);
+        mockAudioRequest.setLastUpdatedDateTime(now);
     }
 
     @Test
@@ -72,7 +68,7 @@ class AudioRequestServiceImplTest {
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
 
-        verify(audioRequestRepository,times(1)).saveAndFlush(any(AudioRequest.class));
+        verify(audioRequestRepository, times(1)).saveAndFlush(any(AudioRequest.class));
         assertEquals(requestId, mockAudioRequest.getRequestId());
     }
 
