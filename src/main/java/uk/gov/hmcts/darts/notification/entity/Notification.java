@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = Notification.TABLE_NAME)
@@ -34,7 +35,8 @@ public class Notification {
 
     @Id
     @Column(name = ID)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_gen")
+    @SequenceGenerator(name = "notification_gen", sequenceName = "notification_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = EVENT_ID)
@@ -57,10 +59,10 @@ public class Notification {
 
     @CreationTimestamp
     @Column(name = CREATED_DATE_TIME)
-    private Timestamp createdDateTime;
+    private OffsetDateTime createdDateTime;
 
     @UpdateTimestamp
     @Column(name = LAST_UPDATED_DATE_TIME)
-    private Timestamp lastUpdatedDateTime;
+    private OffsetDateTime lastUpdatedDateTime;
 
 }

@@ -5,13 +5,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "moj_media")
@@ -20,7 +20,8 @@ public class Media {
 
     @Id
     @Column(name = "moj_med_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_med_gen")
+    @SequenceGenerator(name = "moj_med_gen", sequenceName = "moj_med_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "moj_crt_id")
@@ -35,28 +36,23 @@ public class Media {
     @Column(name = "c_total_channels")
     private Integer totalChannels;
 
-    @Column(name = "c_reference_id", length = 32)
+    @Column(name = "c_reference_id")
     private String referenceId;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_start")
-    private Date start;
+    private OffsetDateTime start;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_end")
-    private Date end;
+    private OffsetDateTime end;
 
-    @Column(name = "c_courtroom", length = 64)
+    @Column(name = "c_courtroom")
     private String courtroom;
 
-    @Column(name = "c_reporting_restrictions")
-    private Integer reportingRestrictions;
+    @Column(name = "c_case_id")
+    private List<String> caseId;
 
-    @Column(name = "c_case_id", length = 32)
-    private String caseId;
-
-    @Column(name = "r_case_object_id", length = 16)
-    private String caseObjectId;
+    @Column(name = "r_case_object_id")
+    private List<String> caseObjectId;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;

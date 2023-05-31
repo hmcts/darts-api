@@ -8,12 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_transformation_log")
@@ -29,22 +27,20 @@ public class TransformationLog {
     @JoinColumn(name = "moj_cas_id")
     private Case theCase;
 
+    @Column(name = "moj_crt_id", nullable = false)
+    private Integer courthouseId;
+
     @Column(name = "r_transformation_log_object_id", length = 16)
     private String legacyObjectId;
 
     @Column(name = "c_case_id", length = 32)
     private String caseId;
 
-    @Column(name = "c_courthouse", length = 64)
-    private String courthouse;
-
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_requested_date")
-    private Date requestedDate;
+    private OffsetDateTime requestedDate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_received_date")
-    private Date receivedDate;
+    private OffsetDateTime receivedDate;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;
@@ -56,7 +52,7 @@ public class TransformationLog {
     private Boolean superseded;
 
     @Version
-    @Column(name = "i_version_label")
+    @Column(name = "i_version")
     private Short version;
 
 }

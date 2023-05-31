@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +37,8 @@ public class AudioRequest {
 
     @Id
     @Column(name = REQUEST_ID)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "audio_request_gen")
+    @SequenceGenerator(name = "audio_request_gen", sequenceName = "audio_request_seq", allocationSize = 1)
     private Integer requestId;
 
     @Column(name = CASE_ID)

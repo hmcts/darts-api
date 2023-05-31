@@ -6,14 +6,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_cached_media")
@@ -29,14 +28,17 @@ public class CachedMedia {
     @JoinColumn(name = "moj_cas_id")
     private Case theCase;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "moj_crt_id")
+    private Courthouse theCourthouse;
+
     @Column(name = "r_cached_media_object_id", length = 16)
     private String legacyObjectId;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_last_accessed")
-    private Date lastAccessed;
+    private OffsetDateTime lastAccessed;
 
-    @Column(name = "c_log_id", length = 16)
+    @Column(name = "c_log_id")
     private String logId;
 
     @Column(name = "c_channel")
@@ -45,25 +47,17 @@ public class CachedMedia {
     @Column(name = "c_total_channels")
     private Integer totalChannels;
 
-    @Column(name = "c_reference_id", length = 32)
+    @Column(name = "c_reference_id")
     private String referenceId;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_start")
-    private Date start;
+    private OffsetDateTime start;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_end")
-    private Date end;
+    private OffsetDateTime end;
 
-    @Column(name = "c_courthouse", length = 64)
-    private String courthouse;
-
-    @Column(name = "c_courtroom", length = 64)
+    @Column(name = "c_courtroom")
     private String courtroom;
-
-    @Column(name = "c_reporting_restrictions")
-    private Integer reportingRestrictions;
 
     @Column(name = "r_case_object_id", length = 32)
     private String legacyCaseObjectId;
