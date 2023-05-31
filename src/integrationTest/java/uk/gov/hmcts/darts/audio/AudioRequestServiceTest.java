@@ -29,9 +29,6 @@ class AudioRequestServiceTest {
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
     private static final String DOWNLOAD_REQ_TYPE = "Download";
 
-    private static final String ISO_OFFSET_DATE_TIME_T13_00_00_01_00 = "2023-05-31T13:00:00+01:00";
-    private static final String ISO_OFFSET_DATE_TIME_T10_00_00_01_00 = "2023-05-31T10:00:00+01:00";
-
     @Autowired
     AudioRequestService audioRequestService;
 
@@ -60,8 +57,8 @@ class AudioRequestServiceTest {
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals("OPEN", requestResult.getStatus());
         assertEquals(caseId, requestResult.getCaseId());
-        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T10_00_00_01_00), requestResult.getStartTime());
-        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T13_00_00_01_00), requestResult.getEndTime());
+        assertEquals(OffsetDateTime.parse(T_09_00_00_Z), requestResult.getStartTime());
+        assertEquals(OffsetDateTime.parse(T_12_00_00_Z), requestResult.getEndTime());
         assertNotNull(requestResult.getCreatedDateTime());
         assertNotNull(requestResult.getLastUpdatedDateTime());
     }
@@ -73,8 +70,8 @@ class AudioRequestServiceTest {
         var requestDetails = new AudioRequestDetails();
         requestDetails.setCaseId(caseId);
         requestDetails.setRequester(TEST_REQUESTER);
-        requestDetails.setStartTime(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T10_00_00_01_00));
-        requestDetails.setEndTime(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T13_00_00_01_00));
+        requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
+        requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
         requestDetails.setRequestType(DOWNLOAD_REQ_TYPE);
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
@@ -83,8 +80,8 @@ class AudioRequestServiceTest {
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals("OPEN", requestResult.getStatus());
         assertEquals(caseId, requestResult.getCaseId());
-        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T10_00_00_01_00), requestResult.getStartTime());
-        assertEquals(OffsetDateTime.parse(ISO_OFFSET_DATE_TIME_T13_00_00_01_00), requestResult.getEndTime());
+        assertEquals(OffsetDateTime.parse(T_09_00_00_Z), requestResult.getStartTime());
+        assertEquals(OffsetDateTime.parse(T_12_00_00_Z), requestResult.getEndTime());
         assertNotNull(requestResult.getCreatedDateTime());
         assertNotNull(requestResult.getLastUpdatedDateTime());
     }
