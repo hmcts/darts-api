@@ -11,7 +11,6 @@ import jakarta.persistence.Version;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "moj_media")
@@ -49,10 +48,10 @@ public class Media {
     private String courtroom;
 
     @Column(name = "c_case_id")
-    private List<String> caseId;
+    private String caseId;
 
     @Column(name = "r_case_object_id")
-    private List<String> caseObjectId;
+    private String caseObjectId;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
