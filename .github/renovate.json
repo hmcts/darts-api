@@ -1,31 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
-  "labels": ["dependencies"],
-  "helmv3": {
-    "bumpVersion": "patch"
-  },
-  "regexManagers": [
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": [
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sARG .*?_VERSION=(?<currentValue>.*)\\s"
-      ]
-    }
-  ],
-  "packageRules": [
-    {
-      "matchUpdateTypes": [
-        "minor", "patch"
-      ],
-      "groupName": "all non major dependencies",
-      "groupSlug": "all-minor-patch"
-    }
-  ],
-  "vulnerabilityAlerts": {
-    "labels": [
-      "security"
-    ]
-  },
-  "rebaseWhen": "behind-base-branch"
+  "extends": [
+    "local>hmcts/.github:renovate-config",
+    "local>hmcts/.github//renovate/automerge-minor"
+  ]
 }
