@@ -282,7 +282,7 @@ dependencies {
   implementation 'uk.gov.service.notify:notifications-java-client:4.1.0-RELEASE'
 
   testImplementation 'com.h2database:h2:2.1.214'
-  testImplementation(platform('org.junit:junit-bom:5.9.2'))
+  testImplementation(platform('org.junit:junit-bom:5.9.3'))
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
