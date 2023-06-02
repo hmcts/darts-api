@@ -279,7 +279,7 @@ dependencies {
   implementation 'org.postgresql:postgresql:42.6.0'
   runtimeOnly 'org.hsqldb:hsqldb'
 
-  implementation 'uk.gov.service.notify:notifications-java-client:3.19.1-RELEASE'
+  implementation 'uk.gov.service.notify:notifications-java-client:4.1.0-RELEASE'
 
   testImplementation 'com.h2database:h2:2.1.214'
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
