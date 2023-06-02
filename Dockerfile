@@ -1,7 +1,7 @@
 # ARG must be before all "FROM"s
 ARG APP_INSIGHTS_AGENT_VERSION=3.4.12
 
-FROM openjdk:17-jdk-slim-bullseye AS build-env
+FROM openjdk:17.0.2-jdk-slim-bullseye AS build-env
 WORKDIR /usr/local/bin
 # Linux Static Builds (http://www.ffmpeg.org/download.html#build-linux)
 # https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
