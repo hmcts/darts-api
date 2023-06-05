@@ -11,14 +11,12 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -57,9 +55,8 @@ public class Case {
     @Column(name = "c_courtroom", length = 64)
     private String courtroom;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_scheduled_start")
-    private Date scheduledStart;
+    private OffsetDateTime scheduledStart;
 
     @Column(name = "c_upload_priority")
     private Integer uploadPriority;
@@ -73,9 +70,8 @@ public class Case {
     @Column(name = "c_interpreter_used")
     private Short interpreterUsed;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_case_closed_date")
-    private Date caseClosedDate;
+    private OffsetDateTime caseClosedDate;
 
     @Column(name = "r_courthouse_object_id", length = 16)
     private String legacyCourthouseObjectId;
@@ -109,9 +105,6 @@ public class Case {
 
     @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
     private Set<Transcription> theTranscriptions = new HashSet<>();
-
-    @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<Hearing> theHearings = new HashSet<>();
 
     @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
     private Set<Annotation> theAnnotations = new HashSet<>();

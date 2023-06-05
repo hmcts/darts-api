@@ -35,7 +35,7 @@ public class AudioRequestController implements AudioRequestsApi {
         operationId = "addAudioRequest",
         summary = "Users can request audio for specific cases and date/time periods",
         description = "Adds a user audio request for processing",
-        tags = { "Audio Requests" },
+        tags = { "AudioRequests" },
         responses = {
             @ApiResponse(responseCode = "201", description = "audio request created"),
             @ApiResponse(responseCode = "400", description = "invalid input, object invalid"),

@@ -6,12 +6,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_event")
@@ -29,29 +27,17 @@ public class Event {
     @Column(name = "c_event_id")
     private Integer eventId;
 
-    @Column(name = "c_text", length = 2000)
-    private String text;
+    @Column(name = "event_name")
+    private String eventName;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "event_text")
+    private String eventText;
+
     @Column(name = "c_time_stamp")
-    private Date timestamp;
+    private OffsetDateTime timestamp;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name = "c_start")
-    private Date start;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "c_end")
-    private Date end;
-
-    @Column(name = "c_courthouse", length = 64)
-    private String courthouse;
-
-    @Column(name = "c_courtroom", length = 64)
+    @Column(name = "c_courtroom")
     private String courtroom;
-
-    @Column(name = "c_reporting_restrictions")
-    private Integer reportingRestrictions;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;

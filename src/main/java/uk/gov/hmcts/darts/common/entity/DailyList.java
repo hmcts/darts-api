@@ -8,12 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_daily_list")
@@ -32,32 +30,23 @@ public class DailyList {
     @Column(name = "r_daily_list_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_unique_id", length = 200)
+    @Column(name = "c_unique_id")
     private String uniqueId;
 
-    @Column(name = "c_crown_court_name", length = 200)
-    private String crownCourtName;
-
-    @Column(name = "c_job_status", length = 20)
+    @Column(name = "c_job_status")
     private String jobStatus;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_timestamp")
-    private Date timestamp;
-
-    @Column(name = "c_crown_court_code", length = 100)
-    private String crownCourtCode;
+    private OffsetDateTime timestamp;
 
     @Column(name = "c_daily_list_id")
     private Integer dailyListId;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_start_date")
-    private Date startDate;
+    private OffsetDateTime startDate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_end_date")
-    private Date endDate;
+    private OffsetDateTime endDate;
 
     @Column(name = "c_daily_list_id_s", length = 100)
     private String dailyListIdString;

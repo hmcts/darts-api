@@ -6,14 +6,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_annotation")
@@ -29,32 +28,27 @@ public class Annotation {
     @JoinColumn(name = "moj_cas_id")
     private Case theCase;
 
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "moj_crt_id")
+    private Courthouse theCourthouse;
+
     @Column(name = "r_annotation_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_text", length = 2000)
+    @Column(name = "c_text")
     private String text;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "c_time_stamp")
-    private Date timestamp;
+    private OffsetDateTime timestamp;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_start")
-    private Date start;
+    private OffsetDateTime start;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_end")
-    private Date end;
+    private OffsetDateTime end;
 
-    @Column(name = "c_courthouse", length = 64)
-    private String courthouse;
-
-    @Column(name = "c_courtroom", length = 64)
+    @Column(name = "c_courtroom")
     private String courtroom;
-
-    @Column(name = "c_reporting_restrictions")
-    private Integer reportingRestrictions;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;

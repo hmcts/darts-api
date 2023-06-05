@@ -8,12 +8,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_transformation_request")
@@ -29,25 +27,28 @@ public class TransformationRequest {
     @JoinColumn(name = "moj_cas_id")
     private Case theCase;
 
+    @Column(name = "moj_crt_id")
+    private Integer courthouseId;
+
     @Column(name = "r_transformation_request_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_type", length = 12)
+    @Column(name = "c_type")
     private String type;
 
-    @Column(name = "c_output_format", length = 12)
+    @Column(name = "c_output_format")
     private String outputFormat;
 
-    @Column(name = "c_audio_folder_id", length = 16)
+    @Column(name = "c_audio_folder_id")
     private String audioFolderId;
 
-    @Column(name = "c_output_file", length = 100)
+    @Column(name = "c_output_file")
     private String outputFile;
 
-    @Column(name = "c_requestor", length = 32)
+    @Column(name = "c_requestor")
     private String requestor;
 
-    @Column(name = "c_court_log_id", length = 16)
+    @Column(name = "c_court_log_id")
     private String courtLogId;
 
     @Column(name = "c_priority")
@@ -59,21 +60,16 @@ public class TransformationRequest {
     @Column(name = "c_total_channels")
     private Integer totalChannels;
 
-    @Column(name = "c_reference_id", length = 32)
+    @Column(name = "c_reference_id")
     private String referenceId;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_start")
-    private Date start;
+    private OffsetDateTime start;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "c_end")
-    private Date end;
+    private OffsetDateTime end;
 
-    @Column(name = "c_courthouse", length = 64)
-    private String courthouse;
-
-    @Column(name = "c_courtroom", length = 64)
+    @Column(name = "c_courtroom")
     private String courtroom;
 
     @Column(name = "c_reporting_restrictions")
@@ -89,7 +85,7 @@ public class TransformationRequest {
     private Boolean superseded;
 
     @Version
-    @Column(name = "i_version_label")
+    @Column(name = "i_version")
     private Short version;
 
 }
