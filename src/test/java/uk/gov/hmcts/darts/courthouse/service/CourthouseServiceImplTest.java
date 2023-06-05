@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.courthouse.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -11,7 +13,12 @@ import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 
 @ExtendWith(MockitoExtension.class)
 class CourthouseServiceImplTest {
@@ -27,6 +34,10 @@ class CourthouseServiceImplTest {
 
     @Mock
     CourthouseToCourthouseEntityMapper mapper;
+
+    @Captor
+    ArgumentCaptor<Integer> captorInteger;
+
 
     @BeforeEach
     void setUp() {
@@ -51,7 +62,74 @@ class CourthouseServiceImplTest {
         Courthouse returnedEntity = courthouseService.addCourtHouse(courthouseModel);
         assertEquals("Test courthouse", returnedEntity.getCourthouseName());
         assertEquals(123, returnedEntity.getCode());
+    }
+
+    @Test
+    void testDeleteCourthouseById() {
+        Mockito.doNothing().when(repository).deleteById((int) CODE);
+
+        courthouseService.deleteCourthouseById((int) CODE);
+
+        Mockito.verify(repository).deleteById(captorInteger.capture());
+        assertEquals(CODE, captorInteger.getValue());
+    }
+
+    @Test
+    void testAmendCourthouseById() {
+        Courthouse courthouseEntityOriginal = new Courthouse();
+        courthouseEntityOriginal.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseEntityOriginal.setCode(CODE);
+
+        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModelAmendment = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        courthouseModelAmendment.setCourthouseName("Changed courthouse");
+        courthouseModelAmendment.setCode(543);
+
+        Courthouse courthouseEntityChanged = new Courthouse();
+        courthouseEntityChanged.setCourthouseName("Changed courthouse");
+        courthouseEntityChanged.setCode((short) 543);
 
 
+        Mockito.when(repository.getReferenceById(anyInt())).thenReturn(courthouseEntityOriginal);
+        Mockito.when(repository.saveAndFlush(any())).thenReturn(courthouseEntityChanged);
+
+        Courthouse returnedEntity = courthouseService.amendCourthouseById(courthouseModelAmendment, (int) CODE);
+
+
+
+        assertEquals("Changed courthouse", returnedEntity.getCourthouseName());
+        assertEquals(543, returnedEntity.getCode());
+
+    }
+
+    @Test
+    void testGetCourtHouseByIdTest() {
+        Courthouse courthouseEntity = new Courthouse();
+        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseEntity.setCode(CODE);
+
+        Mockito.when(repository.getReferenceById(anyInt())).thenReturn(courthouseEntity);
+
+
+        Courthouse returnedEntity = courthouseService.getCourtHouseById((int) CODE);
+        assertEquals("Test courthouse", returnedEntity.getCourthouseName());
+        assertEquals(123, returnedEntity.getCode());
+    }
+
+    @Test
+    void testGetAllCourthouses() {
+        Courthouse courthouseEntity = new Courthouse();
+        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseEntity.setCode(CODE);
+
+        Courthouse courthouseEntity2 = new Courthouse();
+        courthouseEntity2.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseEntity2.setCode(CODE);
+
+        List<Courthouse> courthouseList = Arrays.asList(courthouseEntity,courthouseEntity2);
+        Mockito.when(repository.findAll()).thenReturn(courthouseList);
+
+
+        List<Courthouse> returnedEntities = courthouseService.getAllCourthouses();
+        assertEquals(2, returnedEntities.size());
     }
 }
