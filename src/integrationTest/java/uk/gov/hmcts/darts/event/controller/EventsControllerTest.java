@@ -1,17 +1,14 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audio.service.AudioRequestService;
-import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,16 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @ActiveProfiles("intTest")
+@ContextConfiguration(classes = EventsController.class)
 class EventsControllerTest {
-
-    @MockBean
-    private LockProvider lock;
-
-    @MockBean
-    private NotificationRepository notificationRepository;
-
-    @MockBean
-    AudioRequestService audioRequestService;
 
     @Autowired
     private transient MockMvc mockMvc;
