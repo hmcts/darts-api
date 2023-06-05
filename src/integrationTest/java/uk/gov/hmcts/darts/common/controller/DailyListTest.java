@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.controller;
 
+import net.javacrumbs.shedlock.core.LockProvider;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ActiveProfiles("intTest")
 class DailyListTest {
+
+    @MockBean
+    private LockProvider lock;
+
     @MockBean
     private NotificationRepository notificationRepository;
 

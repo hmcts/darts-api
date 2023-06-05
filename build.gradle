@@ -99,7 +99,7 @@ task integration(type: Test) {
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
-  failFast = true
+  failFast = false
 }
 
 task smoke(type: Test) {

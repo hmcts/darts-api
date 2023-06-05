@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.controller;
 
+import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -19,6 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ActiveProfiles("intTest")
 class EventsControllerTest {
+
+    @MockBean
+    private LockProvider lock;
+
     @MockBean
     private NotificationRepository notificationRepository;
 
