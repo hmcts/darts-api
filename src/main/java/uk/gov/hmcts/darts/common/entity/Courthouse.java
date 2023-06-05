@@ -2,17 +2,15 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "moj_courthouse")
@@ -24,31 +22,17 @@ public class Courthouse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "r_courthouse_object_id", length = 16)
-    private String legacyObjectId;
+    @Column(name = "code")
+    private short code;
 
-    @Column(name = "c_code", length = 32)
-    private String code;
+    @Column(name = "courthouse_name")
+    private String courthouseName;
 
-    @Column(name = "c_id", length = 32)
-    private String idString;
+    @CreationTimestamp
+    @Column(name = "created_date_time")
+    private Timestamp createdDateTime;
 
-    @Column(name = "c_alias_set_id", length = 16)
-    private String aliasSetIdString;
-
-    @Column(name = "r_version_label", length = 32)
-    private String legacyVersionLabel;
-
-    @Column(name = "i_superseded")
-    private Boolean superseded;
-
-    @Version
-    @Column(name = "i_version_label")
-    private Short version;
-
-    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
-    private Set<Case> theCases = new HashSet<>();
-
-    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
-    private Set<DailyList> theDailyLists = new HashSet<>();
+    @UpdateTimestamp
+    @Column(name = "last_modified_date_time")
+    private Timestamp lastModifiedDateTime;
 }

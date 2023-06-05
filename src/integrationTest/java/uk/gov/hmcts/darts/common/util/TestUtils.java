@@ -5,9 +5,9 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
-public final class Utils {
+public final class TestUtils {
 
-    private Utils() {
+    private TestUtils() {
         throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
     }
 

@@ -1,18 +1,16 @@
 package uk.gov.hmcts.darts.common.controller;
 
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
-import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
+import uk.gov.hmcts.darts.dailylist.controller.DailyListController;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,18 +20,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
+@WebMvcTest()
+@ContextConfiguration(classes = DailyListController.class)
 @ActiveProfiles("intTest")
 class DailyListTest {
-
-    @MockBean
-    private LockProvider lock;
-
-    @MockBean
-    private NotificationRepository notificationRepository;
-
-    @MockBean
-    private AudioRequestRepository audioRequestRepository;
 
     @Autowired
     private transient MockMvc mockMvc;
