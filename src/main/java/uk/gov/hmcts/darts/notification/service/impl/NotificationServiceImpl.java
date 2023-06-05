@@ -75,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @SchedulerLock(name = "NotificationService_sendNotificationToGovNotify",
-        lockAtLeastFor = "PT5M", lockAtMostFor = "PT14M")
+        lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started.");
