@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases"})
 public final class TestUtils {
 
     private TestUtils() {

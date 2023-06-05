@@ -55,11 +55,12 @@ public class CourthousesController implements CourthousesApi {
         method = RequestMethod.DELETE,
         value = "/courthouses/{courthouse_id}"
     )
+    @Override
     public ResponseEntity<Void> courthousesCourthouseIdDelete(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
         courthouseService.deleteCourthouseById(courthouseId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
     }
 
@@ -86,6 +87,7 @@ public class CourthousesController implements CourthousesApi {
         value = "/courthouses/{courthouse_id}",
         produces = { "application/json" }
     )
+    @Override
     public ResponseEntity<ExtendedCourthouse> courthousesCourthouseIdGet(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
@@ -123,6 +125,7 @@ public class CourthousesController implements CourthousesApi {
         value = "/courthouses/{courthouse_id}",
         consumes = { "application/json" }
     )
+    @Override
     public ResponseEntity<Void> courthousesCourthouseIdPut(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId,
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
@@ -154,6 +157,7 @@ public class CourthousesController implements CourthousesApi {
         value = "/courthouses",
         produces = { "application/json" }
     )
+    @Override
     public ResponseEntity<List<ExtendedCourthouse>> courthousesGet(
 
     ) {
@@ -186,6 +190,7 @@ public class CourthousesController implements CourthousesApi {
         produces = { "application/json" },
         consumes = { "application/json" }
     )
+    @Override
     public ResponseEntity<ExtendedCourthouse> courthousesPost(
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
     ) {
