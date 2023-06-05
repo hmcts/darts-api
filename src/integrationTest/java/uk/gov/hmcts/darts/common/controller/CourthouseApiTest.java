@@ -36,7 +36,6 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 class CourthouseApiTest {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
-    public static final String GET_ALL_RESPONSE_JSON = "Tests/CourthousesTest/courthousesGetAllEndpoint/getAllResponse.json";
     private static final String REQUEST_BODY_SWANSEA_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBodySwansea.json";
     @Autowired
     private CourthouseService courthouseService;
@@ -83,7 +82,6 @@ class CourthouseApiTest {
         ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
         ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
 
-        courthouseList.toString();
         assertTrue(courthouseList.contains(swanseaCourthouse));
         assertTrue(courthouseList.contains(haverfordwestCourthouse));
     }
