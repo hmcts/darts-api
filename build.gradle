@@ -226,7 +226,8 @@ task generateCourtHousesApi(type: org.openapitools.generator.gradle.plugin.tasks
   configOptions = [
     dateLibrary: "java8",
     interfaceOnly: "true",
-    useTags: "true"
+    useTags: "true",
+    useSpringBoot3: "true"
   ]
 }
 
