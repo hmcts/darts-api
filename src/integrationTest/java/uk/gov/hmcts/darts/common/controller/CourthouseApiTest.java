@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,6 +38,7 @@ class CourthouseApiTest {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
     private static final String REQUEST_BODY_SWANSEA_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBodySwansea.json";
+    public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
     @Autowired
     private CourthouseService courthouseService;
 
@@ -99,6 +101,15 @@ class CourthouseApiTest {
             .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+    }
+
+    @Test
+    void courthousesPostMissingCourthouseName() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+        assertEquals("{\"code\":\"400 BAD_REQUEST\",\"message\":\"courthouseName must not be null\"}", response.getResponse().getContentAsString());
     }
 
     /**
