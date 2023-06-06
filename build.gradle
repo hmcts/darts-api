@@ -254,7 +254,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.0.2'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.1.0'
 
   implementation group: 'commons-io', name: 'commons-io', version: '2.12.0'
   implementation 'org.apache.commons:commons-collections4:4.4'
