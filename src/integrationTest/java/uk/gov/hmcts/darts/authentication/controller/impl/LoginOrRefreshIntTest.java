@@ -36,7 +36,7 @@ class LoginOrRefreshIntTest {
     private AudioRequestRepository audioRequestRepository;
 
     @MockBean
-    CourthouseRepository courthouseRepository;
+    private CourthouseRepository courthouseRepository;
 
     @Autowired
     private MockMvc mockMvc;
