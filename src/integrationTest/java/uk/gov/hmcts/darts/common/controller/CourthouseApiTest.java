@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,6 +49,12 @@ class CourthouseApiTest {
 
     @Autowired
     private transient MockMvc mockMvc;
+
+
+    @BeforeEach
+    void setUp() {
+        courthouseRepository.deleteAll();
+    }
 
     /**
      * Test adds courthouse and then retrieves to check for equality.
@@ -131,17 +139,20 @@ class CourthouseApiTest {
      */
     @Test
     void courthousesPut() throws Exception {
-        makeRequestToAddCourthouseToDatabase(
+        MvcResult addResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
 
+        Integer addedEntityId = JsonPath.read(addResponse.getResponse().getContentAsString(), "$.id");
+
         String requestBody = getContentsFromFile("Tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
-        MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", 1)
+        MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
-        requestBuilder = get("/courthouses/{courthouse_id}", 1)
+        requestBuilder = get("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
+
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
             .andExpect(jsonPath("$.courthouse_name", is("SWANSEA")))
             .andExpect(jsonPath("$.code", is(457)))
