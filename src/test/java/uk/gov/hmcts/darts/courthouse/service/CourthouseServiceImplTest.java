@@ -25,6 +25,7 @@ class CourthouseServiceImplTest {
 
     public static final String TEST_COURTHOUSE_NAME = "Test courthouse";
     public static final short CODE = (short) 123;
+    public static final int COURTHOUSE_ID = 11;
 
     @InjectMocks
     CourthouseServiceImpl courthouseService;
@@ -66,12 +67,12 @@ class CourthouseServiceImplTest {
 
     @Test
     void testDeleteCourthouseById() {
-        Mockito.doNothing().when(repository).deleteById((int) CODE);
+        Mockito.doNothing().when(repository).deleteById(COURTHOUSE_ID);
 
-        courthouseService.deleteCourthouseById((int) CODE);
+        courthouseService.deleteCourthouseById(COURTHOUSE_ID);
 
         Mockito.verify(repository).deleteById(captorInteger.capture());
-        assertEquals(CODE, captorInteger.getValue());
+        assertEquals(COURTHOUSE_ID, captorInteger.getValue());
     }
 
     @Test
@@ -89,10 +90,10 @@ class CourthouseServiceImplTest {
         courthouseEntityChanged.setCode((short) 543);
 
 
-        Mockito.when(repository.getReferenceById(anyInt())).thenReturn(courthouseEntityOriginal);
+        Mockito.when(repository.getReferenceById(COURTHOUSE_ID)).thenReturn(courthouseEntityOriginal);
         Mockito.when(repository.saveAndFlush(any())).thenReturn(courthouseEntityChanged);
 
-        Courthouse returnedEntity = courthouseService.amendCourthouseById(courthouseModelAmendment, (int) CODE);
+        Courthouse returnedEntity = courthouseService.amendCourthouseById(courthouseModelAmendment, COURTHOUSE_ID);
 
 
 
@@ -110,7 +111,7 @@ class CourthouseServiceImplTest {
         Mockito.when(repository.getReferenceById(anyInt())).thenReturn(courthouseEntity);
 
 
-        Courthouse returnedEntity = courthouseService.getCourtHouseById((int) CODE);
+        Courthouse returnedEntity = courthouseService.getCourtHouseById(COURTHOUSE_ID);
         assertEquals("Test courthouse", returnedEntity.getCourthouseName());
         assertEquals(123, returnedEntity.getCode());
     }
