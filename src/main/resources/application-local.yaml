@@ -10,7 +10,7 @@ spring:
       client:
         registration:
           external-azure-ad:
-            client-id: ${AAD_B2C_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000011}
+            client-id: ${AAD_B2C_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}
             client-secret: ${AAD_B2C_CLIENT_SECRET_KEY:}
             scope: openid
             redirect-uri: https://darts-api.staging.platform.hmcts.net/external-user/handle-oauth-code

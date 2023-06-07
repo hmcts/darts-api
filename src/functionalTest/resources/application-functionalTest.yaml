@@ -3,5 +3,7 @@ azure-ad-ropc:
   scope: https://hmctsdartsb2csbox.onmicrosoft.com/053d44f9-cd27-463e-a995-bcf835233cf8/Functional.Test
   username: ${FUNC_TEST_ROPC_USERNAME:#{null}}
   password: ${FUNC_TEST_ROPC_PASSWORD:#{null}}
+  client-id: ${AAD_B2C_ROPC_CLIENT_ID_KEY:#{null}}
+  client-secret: ${AAD_B2C_ROPC_CLIENT_SECRET_KEY:#{null}}
 
 deployed-application-uri: ${TEST_URL:http://localhost:4550}
