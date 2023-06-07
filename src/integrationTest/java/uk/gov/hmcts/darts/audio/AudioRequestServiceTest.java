@@ -1,11 +1,13 @@
 package uk.gov.hmcts.darts.audio;
 
+import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.AudioRequest;
 import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
@@ -27,6 +29,9 @@ class AudioRequestServiceTest {
     private static final String OPEN_STATUS = "OPEN";
     private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
+
+    @MockBean
+    private LockProvider lock;
 
     @Autowired
     private AudioRequestService audioRequestService;

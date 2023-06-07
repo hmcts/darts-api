@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.controller;
 
+import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest
 @ActiveProfiles("intTest")
 class GetWelcomeTest {
+
+    @MockBean
+    private LockProvider lock;
 
     @MockBean
     private NotificationRepository notificationRepository;
