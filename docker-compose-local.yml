@@ -15,6 +15,8 @@ services:
       - AAD_B2C_CLIENT_SECRET_KEY
       - AAD_B2C_TENANT_ID_KEY
       - GOVUK_NOTIFY_API_KEY
+      - AAD_B2C_ROPC_CLIENT_ID_KEY
+      - AAD_B2C_ROPC_CLIENT_SECRET_KEY
     build:
       context: .
       dockerfile: Dockerfile

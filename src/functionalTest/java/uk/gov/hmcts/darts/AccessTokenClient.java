@@ -8,7 +8,6 @@ import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Profile;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -36,13 +35,14 @@ public class AccessTokenClient {
                              @Value("${azure-ad-ropc.scope}") String scope,
                              @NonNull @Value("${azure-ad-ropc.username}") String username,
                              @NonNull @Value("${azure-ad-ropc.password}") String password,
-                             AuthenticationConfiguration authenticationConfiguration) {
+                             @NonNull @Value("${azure-ad-ropc.client-id}") String clientId,
+                             @NonNull @Value("${azure-ad-ropc.client-secret}") String clientSecret) {
         this.tokenUri = tokenUri;
         this.scope = scope;
         this.username = username;
         this.password = password;
-        this.clientId = authenticationConfiguration.getExternalADclientId();
-        this.clientSecret = authenticationConfiguration.getExternalADclientSecret();
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
     }
 
     @SneakyThrows

@@ -19,7 +19,9 @@ def secrets = [
     secret('AzureAdB2CClientIdKey', 'AAD_B2C_CLIENT_ID_KEY'),
     secret('AzureAdB2CClientSecretKey', 'AAD_B2C_CLIENT_SECRET_KEY'),
     secret('api-FUNC-TEST-ROPC-USERNAME', 'FUNC_TEST_ROPC_USERNAME'),
-    secret('api-FUNC-TEST-ROPC-PASSWORD', 'FUNC_TEST_ROPC_PASSWORD')
+    secret('api-FUNC-TEST-ROPC-PASSWORD', 'FUNC_TEST_ROPC_PASSWORD'),
+    secret('AzureAdB2CFuncTestROPCClientIdKey', 'AAD_B2C_ROPC_CLIENT_ID_KEY'),
+    secret('AzureAdB2CFuncTestROPCClientSecretKey', 'AAD_B2C_ROPC_CLIENT_SECRET_KEY')
   ],
 ]
 

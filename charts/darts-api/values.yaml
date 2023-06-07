@@ -24,6 +24,10 @@ java:
           alias: AAD_B2C_CLIENT_SECRET_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
+        - name: AzureAdB2CFuncTestROPCClientIdKey
+          alias: AAD_B2C_ROPC_CLIENT_ID_KEY
+        - name: AzureAdB2CFuncTestROPCClientSecretKey
+          alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
 
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
