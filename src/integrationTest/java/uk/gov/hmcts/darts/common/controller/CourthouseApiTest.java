@@ -75,6 +75,16 @@ class CourthouseApiTest {
     }
 
     /**
+     * Test adds courthouse and then retrieves to check for equality.
+     */
+    @Test
+    void courthousesGetNonExistingId() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", 900)
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+    }
+
+    /**
      * Test adds multiple courthouses and then retrieves them all to check for equality.
      */
     @Test
@@ -115,6 +125,26 @@ class CourthouseApiTest {
             .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+    }
+
+    /**
+     * Test adds courthouse and checks if returned object matches.
+     */
+    @Test
+    void courthousesPostNonUniqueInsert() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
+
+        mockMvc.perform(requestBuilder).andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id", is(notNullValue())))
+            .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
+            .andExpect(jsonPath("$.code", is(761)))
+            .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
+            .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
+
+        mockMvc.perform(requestBuilder).andExpect(status().isConflict());
+
     }
 
     @Test
@@ -180,6 +210,6 @@ class CourthouseApiTest {
 
         requestBuilder = get("/courthouses/{courthouse_id}", 1)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }
 }

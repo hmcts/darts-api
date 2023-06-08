@@ -24,10 +24,10 @@ public class Courthouse {
     @SequenceGenerator(name = "courthouse_gen", sequenceName = "moj_crt_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "courthouse_code")
+    @Column(name = "courthouse_code", unique = true)
     private Integer code;
 
-    @Column(name = "courthouse_name")
+    @Column(name = "courthouse_name", unique = true)
     private String courthouseName;
 
     @CreationTimestamp

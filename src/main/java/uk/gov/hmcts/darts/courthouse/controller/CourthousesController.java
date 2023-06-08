@@ -40,14 +40,16 @@ public class CourthousesController implements CourthousesApi {
      *
      * @param courthouseId  (required)
      * @return OK (status code 204)
+     *         or A required parameter is missing or an invalid datatype or value was provided for property. (status code 400)
      *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "courthousesCourthouseIdDelete",
-        summary = "Deletes the courthouse entery with the supplied id.",
+        summary = "Deletes the courthouse entry with the supplied id.",
         tags = { "Courthouses" },
         responses = {
             @ApiResponse(responseCode = "204", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "A required parameter is missing or an invalid datatype or value was provided for property."),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
         }
     )
@@ -97,7 +99,7 @@ public class CourthousesController implements CourthousesApi {
             ExtendedCourthouse responseEntity = mapper.mapFromEntityToExtendedCourthouse(courtHouseEntity);
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
 
