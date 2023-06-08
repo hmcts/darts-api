@@ -125,8 +125,10 @@ components:
               type: integer
             created_date_time:
               type: string
+              format: date-time
             last_modified_date_time:
               type: string
+              format: date-time
     CourtList:
       type: array
       items:

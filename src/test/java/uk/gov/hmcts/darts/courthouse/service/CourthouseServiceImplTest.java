@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 class CourthouseServiceImplTest {
 
     public static final String TEST_COURTHOUSE_NAME = "Test courthouse";
-    public static final short CODE = (short) 123;
+    public static final Integer CODE = 123;
     public static final int COURTHOUSE_ID = 11;
 
     @InjectMocks
@@ -87,7 +87,7 @@ class CourthouseServiceImplTest {
 
         Courthouse courthouseEntityChanged = new Courthouse();
         courthouseEntityChanged.setCourthouseName("Changed courthouse");
-        courthouseEntityChanged.setCode((short) 543);
+        courthouseEntityChanged.setCode(543);
 
 
         Mockito.when(repository.getReferenceById(COURTHOUSE_ID)).thenReturn(courthouseEntityOriginal);

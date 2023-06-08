@@ -1,9 +1,11 @@
 CREATE TABLE moj_courthouse (
-  moj_crt_id                INTEGER                         GENERATED ALWAYS AS IDENTITY
+  moj_crt_id                INTEGER                         NOT NULL
 , courthouse_name           CHARACTER VARYING               NOT NULL
-, code                      SMALLINT
-, created_date_time         TIMESTAMP with TIME ZONE     NOT NULL
-, last_modified_date_time   TIMESTAMP with TIME ZONE     NOT NULL
+, courthouse_code           INTEGER
+, created_ts         TIMESTAMP with TIME ZONE     NOT NULL
+, last_modified_ts   TIMESTAMP with TIME ZONE     NOT NULL
 , CONSTRAINT moj_courthouse_pkey PRIMARY KEY (moj_crt_id)
 );
+
+CREATE SEQUENCE IF NOT EXISTS moj_crt_seq
 

@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,6 +80,9 @@ class CourthouseApiTest {
     @Test
     void courthousesGetAll() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
         MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
@@ -105,6 +110,7 @@ class CourthouseApiTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
         mockMvc.perform(requestBuilder).andExpect(status().isCreated())
+            .andExpect(jsonPath("$.id", is(notNullValue())))
             .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
             .andExpect(jsonPath("$.code", is(761)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
