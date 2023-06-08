@@ -23,12 +23,14 @@ paths:
                 $ref: '#/components/schemas/ExtendedCourthouse'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '409':
+            description: Resource already exists.
         '500':
           description: Internal Server Error
     get:
       tags:
         - Courthouses
-      summary: Gets all courthouse records..
+      summary: Gets all courthouse records.
       responses:
         '200':
           description: OK
@@ -59,6 +61,8 @@ paths:
                 $ref: '#/components/schemas/ExtendedCourthouse'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '404':
+          description: Resource does not exist.
         '500':
           description: Internal Server Error
     put:
