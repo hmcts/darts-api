@@ -38,7 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public URI handleOauthCode(String sessionId, String code) {
+    public String handleOauthCode(String sessionId, String code) {
         log.debug("Session {} has presented authorization code {}", sessionId, code);
 
         OAuthProviderRawResponse tokenResponse;
@@ -57,7 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var session = new Session(sessionId, accessToken, tokenResponse.getExpiresIn());
         sessionService.putSession(sessionId, session);
 
-        return uriProvider.getLandingPageUri();
+        return accessToken;
     }
 
 }

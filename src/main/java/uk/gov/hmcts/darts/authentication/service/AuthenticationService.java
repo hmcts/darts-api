@@ -7,6 +7,6 @@ public interface AuthenticationService {
 
     URI loginOrRefresh(String sessionId);
 
-    URI handleOauthCode(String sessionId, String code);
+    String handleOauthCode(String sessionId, String code);
 
 }
