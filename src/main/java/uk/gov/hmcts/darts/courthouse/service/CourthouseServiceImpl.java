@@ -28,7 +28,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         Courthouse originalEntity = repository.getReferenceById(id);
 
         originalEntity.setCourthouseName(courthouse.getCourthouseName());
-        originalEntity.setCode(courthouse.getCode());
+        originalEntity.setCode(courthouse.getCode().shortValue());
 
         return repository.saveAndFlush(originalEntity);
     }

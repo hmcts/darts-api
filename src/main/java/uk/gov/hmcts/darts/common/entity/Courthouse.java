@@ -25,9 +25,9 @@ public class Courthouse {
     private Integer id;
 
     @Column(name = "courthouse_code", unique = true)
-    private Integer code;
+    private short code;
 
-    @Column(name = "courthouse_name", unique = true)
+    @Column(name = "courthouse_name")
     private String courthouseName;
 
     @CreationTimestamp
