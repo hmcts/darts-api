@@ -27,7 +27,7 @@ public class Courthouse {
     @Column(name = "courthouse_code", unique = true)
     private Short code;
 
-    @Column(name = "courthouse_name")
+    @Column(name = "courthouse_name", unique = true)
     private String courthouseName;
 
     @CreationTimestamp
