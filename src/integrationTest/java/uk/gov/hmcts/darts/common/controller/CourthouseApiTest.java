@@ -95,8 +95,9 @@ class CourthouseApiTest {
 
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
+        System.out.println(haverfordwestResponse.getResponse().getContentAsString());
         MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
-
+        System.out.println(swanseaResponse.getResponse().getContentAsString());
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -128,7 +129,7 @@ class CourthouseApiTest {
     }
 
     /**
-     * Test adds courthouse and checks if returned object matches.
+     * Test adds two courthouses with the same code which should return a conflict status.
      */
     @Test
     void courthousesPostNonUniqueInsert() throws Exception {
