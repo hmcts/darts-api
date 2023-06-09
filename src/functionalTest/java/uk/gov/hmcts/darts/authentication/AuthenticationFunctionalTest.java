@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class AuthenticationFunctionalTest extends FunctionalTest {
 
