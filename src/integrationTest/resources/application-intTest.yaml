@@ -27,3 +27,6 @@ spring:
     - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
     - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
     - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+logging:
+  level:
+    root: DEBUG
