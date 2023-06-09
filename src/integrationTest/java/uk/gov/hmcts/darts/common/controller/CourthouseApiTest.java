@@ -95,9 +95,9 @@ class CourthouseApiTest {
 
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
-        System.out.println(haverfordwestResponse.getResponse().getContentAsString());
+        System.out.println("saad: " + haverfordwestResponse.getResponse().getContentAsString());
         MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
-        System.out.println(swanseaResponse.getResponse().getContentAsString());
+        System.out.println("saad: " + swanseaResponse.getResponse().getContentAsString());
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
