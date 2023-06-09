@@ -196,6 +196,19 @@ class CourthouseApiTest {
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
+    /**
+     * Test adds courthouse then amends it and then retrieves it to check amendment was made.
+     */
+    @Test
+    void courthousesPutWhenIdDoesNotExist() throws Exception {
+        String requestBody = getContentsFromFile("Tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
+        MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", 123)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+    }
+
     /*
         Test adds a courthouse, deletes it and then tries to retrieve it but should get no content response.
      */

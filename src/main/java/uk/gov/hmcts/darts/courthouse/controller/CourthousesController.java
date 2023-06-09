@@ -132,8 +132,13 @@ public class CourthousesController implements CourthousesApi {
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId,
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
     ) {
-        courthouseService.amendCourthouseById(courthouse, courthouseId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        try {
+            courthouseService.amendCourthouseById(courthouse, courthouseId);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (EntityNotFoundException exception) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
 
     }
 

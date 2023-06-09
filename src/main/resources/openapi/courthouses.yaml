@@ -62,7 +62,7 @@ paths:
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '404':
-          description: Resource does not exist.
+          description: Resource with the provided id does not exist.
         '500':
           description: Internal Server Error
     put:
@@ -82,6 +82,8 @@ paths:
           description: No Content
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '404':
+            description: Resource with the provided id does not exist.
         '500':
           description: Internal Server Error
     delete:

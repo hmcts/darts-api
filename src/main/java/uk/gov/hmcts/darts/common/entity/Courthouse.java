@@ -25,7 +25,7 @@ public class Courthouse {
     private Integer id;
 
     @Column(name = "courthouse_code", unique = true)
-    private short code;
+    private Short code;
 
     @Column(name = "courthouse_name")
     private String courthouseName;

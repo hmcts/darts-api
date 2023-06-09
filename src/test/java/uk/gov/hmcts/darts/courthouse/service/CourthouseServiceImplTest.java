@@ -62,7 +62,7 @@ class CourthouseServiceImplTest {
 
         Courthouse returnedEntity = courthouseService.addCourtHouse(courthouseModel);
         assertEquals("Test courthouse", returnedEntity.getCourthouseName());
-        assertEquals(123, returnedEntity.getCode());
+        assertEquals((short) 123, returnedEntity.getCode());
     }
 
     @Test
@@ -98,7 +98,7 @@ class CourthouseServiceImplTest {
 
 
         assertEquals("Changed courthouse", returnedEntity.getCourthouseName());
-        assertEquals(543, returnedEntity.getCode());
+        assertEquals((short) 543, returnedEntity.getCode());
 
     }
 
@@ -113,7 +113,7 @@ class CourthouseServiceImplTest {
 
         Courthouse returnedEntity = courthouseService.getCourtHouseById(COURTHOUSE_ID);
         assertEquals("Test courthouse", returnedEntity.getCourthouseName());
-        assertEquals(123, returnedEntity.getCode());
+        assertEquals((short) 123, returnedEntity.getCode());
     }
 
     @Test
