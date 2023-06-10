@@ -26,7 +26,6 @@ import java.util.List;
 import javax.validation.Valid;
 
 @RestController
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CourthousesController implements CourthousesApi {
 
     @Autowired
@@ -35,28 +34,6 @@ public class CourthousesController implements CourthousesApi {
     @Autowired
     CourthouseToCourthouseEntityMapper mapper;
 
-    /**
-     * DELETE /courthouses/{courthouse_id} : Deletes the courthouse entry with the supplied id.
-     *
-     * @param courthouseId  (required)
-     * @return OK (status code 204)
-     *         or A required parameter is missing or an invalid datatype or value was provided for property. (status code 400)
-     *         or Internal Server Error (status code 500)
-     */
-    @Operation(
-        operationId = "courthousesCourthouseIdDelete",
-        summary = "Deletes the courthouse entry with the supplied id.",
-        tags = { "Courthouses" },
-        responses = {
-            @ApiResponse(responseCode = "204", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "A required parameter is missing or an invalid datatype or value was provided for property."),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.DELETE,
-        value = "/courthouses/{courthouse_id}"
-    )
     @Override
     public ResponseEntity<Void> courthousesCourthouseIdDelete(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
@@ -66,29 +43,6 @@ public class CourthousesController implements CourthousesApi {
 
     }
 
-    /**
-     * GET /courthouses/{courthouse_id} : Get a courthouse record with specified id.
-     *
-     * @param courthouseId  (required)
-     * @return OK (status code 200)
-     *         or Internal Server Error (status code 500)
-     */
-    @Operation(
-        operationId = "courthousesCourthouseIdGet",
-        summary = "Get a courthouse record with specified id.",
-        tags = { "Courthouses" },
-        responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ExtendedCourthouse.class))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/courthouses/{courthouse_id}",
-        produces = { "application/json" }
-    )
     @Override
     public ResponseEntity<ExtendedCourthouse> courthousesCourthouseIdGet(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
@@ -105,28 +59,6 @@ public class CourthousesController implements CourthousesApi {
 
     }
 
-    /**
-     * PUT /courthouses/{courthouse_id} : Amends a courthouse record with supplied details.
-     *
-     * @param courthouseId  (required)
-     * @param courthouse  (required)
-     * @return No Content (status code 204)
-     *         or Internal Server Error (status code 500)
-     */
-    @Operation(
-        operationId = "courthousesCourthouseIdPut",
-        summary = "Amends a courthouse record with supplied details.",
-        tags = { "Courthouses" },
-        responses = {
-            @ApiResponse(responseCode = "204", description = "No Content"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.PUT,
-        value = "/courthouses/{courthouse_id}",
-        consumes = { "application/json" }
-    )
     @Override
     public ResponseEntity<Void> courthousesCourthouseIdPut(
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId,
@@ -142,28 +74,6 @@ public class CourthousesController implements CourthousesApi {
 
     }
 
-    /**
-     * GET /courthouses : Gets all courthouse records..
-     *
-     * @return OK (status code 200)
-     *         or Internal Server Error (status code 500)
-     */
-    @Operation(
-        operationId = "courthousesGet",
-        summary = "Gets all courthouse records..",
-        tags = { "Courthouses" },
-        responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {
-                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ExtendedCourthouse.class)))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/courthouses",
-        produces = { "application/json" }
-    )
     @Override
     public ResponseEntity<List<ExtendedCourthouse>> courthousesGet(
 
@@ -173,30 +83,6 @@ public class CourthousesController implements CourthousesApi {
         return new ResponseEntity<>(responseEntities, HttpStatus.OK);
     }
 
-    /**
-     * POST /courthouses : Adds a courthouse record with supplied details.
-     *
-     * @param courthouse  (required)
-     * @return Created (status code 201)
-     *         or Internal Server Error (status code 500)
-     */
-    @Operation(
-        operationId = "courthousesPost",
-        summary = "Adds a courthouse record with supplied details.",
-        tags = { "Courthouses" },
-        responses = {
-            @ApiResponse(responseCode = "201", description = "Created", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ExtendedCourthouse.class))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.POST,
-        value = "/courthouses",
-        produces = { "application/json" },
-        consumes = { "application/json" }
-    )
     @Override
     public ResponseEntity<ExtendedCourthouse> courthousesPost(
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
