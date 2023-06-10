@@ -37,7 +37,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals", "PMD.SystemPrintln"})
 class CourthouseApiTest {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
