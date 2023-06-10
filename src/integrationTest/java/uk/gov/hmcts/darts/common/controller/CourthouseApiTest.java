@@ -40,9 +40,9 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals", "PMD.SystemPrintln"})
 class CourthouseApiTest {
 
-    public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
-    private static final String REQUEST_BODY_SWANSEA_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBodySwansea.json";
-    public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON = "Tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
+    public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
+    private static final String REQUEST_BODY_SWANSEA_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodySwansea.json";
+    public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
     @Autowired
     private CourthouseService courthouseService;
 
@@ -181,7 +181,7 @@ class CourthouseApiTest {
 
         Integer addedEntityId = JsonPath.read(addResponse.getResponse().getContentAsString(), "$.id");
 
-        String requestBody = getContentsFromFile("Tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
+        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
         MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
@@ -202,7 +202,7 @@ class CourthouseApiTest {
      */
     @Test
     void courthousesPutWhenIdDoesNotExist() throws Exception {
-        String requestBody = getContentsFromFile("Tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
+        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
         MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", 123)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);

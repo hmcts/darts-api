@@ -30,7 +30,7 @@ class DailyListTest {
 
     @Test
     void dailyListAddDailyListEndpoint() throws Exception {
-        String requestBody = getContentsFromFile("Tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
+        String requestBody = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
         MockHttpServletRequestBuilder requestBuilder = post("/dailylist/addDailyList")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam("source_system", "CPP")
