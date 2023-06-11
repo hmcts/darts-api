@@ -37,12 +37,12 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals", "PMD.SystemPrintln"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals", "PMD.SystemPrintln", "PMD.TooManyMethods"})
 class CourthouseApiTest {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
-    private static final String REQUEST_BODY_SWANSEA_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodySwansea.json";
     public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
+    private static final String REQUEST_BODY_SWANSEA_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodySwansea.json";
     @Autowired
     private CourthouseService courthouseService;
 
@@ -58,14 +58,11 @@ class CourthouseApiTest {
         courthouseRepository.deleteAll();
     }
 
-    /**
-     * Test adds courthouse and then retrieves to check for equality.
-     */
     @Test
     void courthousesGet() throws Exception {
-        makeRequestToAddCourthouseToDatabase(
-            REQUEST_BODY_HAVERFORDWEST_JSON);
-        MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", 1)
+        Integer addedId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
+
+        MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", addedId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$.courthouse_name", is("HAVERFORDWEST")))
@@ -74,9 +71,6 @@ class CourthouseApiTest {
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
-    /**
-     * Test adds courthouse and then retrieves to check for equality.
-     */
     @Test
     void courthousesGetNonExistingId() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses/{courthouse_id}", 900)
@@ -84,9 +78,6 @@ class CourthouseApiTest {
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }
 
-    /**
-     * Test adds multiple courthouses and then retrieves them all to check for equality.
-     */
     @Test
     void courthousesGetAll() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -112,9 +103,6 @@ class CourthouseApiTest {
         assertTrue(courthouseList.contains(haverfordwestCourthouse));
     }
 
-    /**
-     * Test adds courthouse and checks if returned object matches.
-     */
     @Test
     void courthousesPost() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
@@ -128,11 +116,8 @@ class CourthouseApiTest {
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
-    /**
-     * Test adds two courthouses with the same code which should return a conflict status.
-     */
     @Test
-    void courthousesPostNonUniqueInsert() throws Exception {
+    void courthousesPostTwoCourthousesWithSameCode() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(REQUEST_BODY_HAVERFORDWEST_JSON));
@@ -149,7 +134,7 @@ class CourthouseApiTest {
     }
 
     @Test
-    void courthousesPostMissingCourthouseName() throws Exception {
+    void courthousesPosWithtMissingCourthouseName() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
@@ -170,16 +155,14 @@ class CourthouseApiTest {
         return mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andDo(print()).andReturn();
     }
 
+    private Integer addCourthouseAndGetId(String fileLocation) throws Exception {
+        MvcResult addedCourthouseResponse = makeRequestToAddCourthouseToDatabase(fileLocation);
+        return JsonPath.read(addedCourthouseResponse.getResponse().getContentAsString(), "$.id");
+    }
 
-    /**
-     * Test adds courthouse then amends it and then retrieves it to check amendment was made.
-     */
     @Test
     void courthousesPut() throws Exception {
-        MvcResult addResponse = makeRequestToAddCourthouseToDatabase(
-            REQUEST_BODY_HAVERFORDWEST_JSON);
-
-        Integer addedEntityId = JsonPath.read(addResponse.getResponse().getContentAsString(), "$.id");
+        Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
         String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
         MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", addedEntityId)
@@ -197,9 +180,6 @@ class CourthouseApiTest {
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
-    /**
-     * Test adds courthouse then amends it and then retrieves it to check amendment was made.
-     */
     @Test
     void courthousesPutWhenIdDoesNotExist() throws Exception {
         String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
@@ -210,15 +190,11 @@ class CourthouseApiTest {
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }
 
-    /*
-        Test adds a courthouse, deletes it and then tries to retrieve it but should get no content response.
-     */
     @Test
     void courthousesDelete() throws Exception {
-        makeRequestToAddCourthouseToDatabase(
-            REQUEST_BODY_HAVERFORDWEST_JSON);
+        Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
-        MockHttpServletRequestBuilder requestBuilder = delete("/courthouses/{courthouse_id}", 1)
+        MockHttpServletRequestBuilder requestBuilder = delete("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
