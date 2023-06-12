@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.FunctionalTest;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class AuthenticationFunctionalTest extends FunctionalTest {
 
@@ -34,7 +35,7 @@ class AuthenticationFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        assertEquals(401, response.statusCode());
+        assertNotNull(response.getHeader("Location"));
     }
 
     @Test

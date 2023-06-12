@@ -76,12 +76,10 @@ class AuthenticationServiceImplTest {
             .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString()))
             .thenReturn(new JwtValidationResult(true, null));
-        when(uriProvider.getLandingPageUri())
-            .thenReturn(DUMMY_LANDING_PAGE_URI);
 
-        URI uri = authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE);
+        String token = authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE);
 
-        assertEquals(DUMMY_LANDING_PAGE_URI, uri);
+        assertEquals(DUMMY_ID_TOKEN, token);
     }
 
     @Test
