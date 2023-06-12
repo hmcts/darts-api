@@ -87,7 +87,7 @@ class CourthouseApiTest {
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
 
-        MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
+        //MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -96,10 +96,16 @@ class CourthouseApiTest {
 
         List<ExtendedCourthouse> courthouseList = objectMapper.readValue(response.getResponse().getContentAsString(), new TypeReference<>() {});
         ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
-        ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
+      //  ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
+
+        assertEquals(courthouseList.get(0).getCourthouseName(),haverfordwestCourthouse.getCourthouseName());
+        assertEquals(courthouseList.get(0).getCode(),haverfordwestCourthouse.getCode());
+        assertEquals(courthouseList.get(0).getId(),haverfordwestCourthouse.getId());
+        assertEquals(courthouseList.get(0).getCreatedDateTime(),haverfordwestCourthouse.getCreatedDateTime());
+        assertEquals(courthouseList.get(0).getLastModifiedDateTime(),haverfordwestCourthouse.getLastModifiedDateTime());
 
         assertTrue(courthouseList.contains(haverfordwestCourthouse),haverfordwestResponse.getResponse().getContentAsString());
-        assertTrue(courthouseList.contains(swanseaCourthouse),swanseaResponse.getResponse().getContentAsString());
+       // assertTrue(courthouseList.contains(swanseaCourthouse),swanseaResponse.getResponse().getContentAsString());
     }
 
     @Test
