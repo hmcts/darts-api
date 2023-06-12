@@ -99,8 +99,8 @@ class CourthouseApiTest {
         ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
         ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
 
-        assertTrue(courthouseList.contains(swanseaCourthouse),haverfordwestResponse.getResponse().toString());
-        assertTrue(courthouseList.contains(haverfordwestCourthouse),swanseaResponse.getResponse().toString());
+        assertTrue(courthouseList.contains(swanseaCourthouse),haverfordwestResponse.getResponse().getContentAsString());
+        assertTrue(courthouseList.contains(haverfordwestCourthouse),swanseaResponse.getResponse().getContentAsString());
     }
 
     @Test
