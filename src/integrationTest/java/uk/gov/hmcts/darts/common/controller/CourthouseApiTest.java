@@ -86,9 +86,8 @@ class CourthouseApiTest {
 
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
-        System.out.println("saad: " + haverfordwestResponse.getResponse().getContentAsString());
+
         MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
-        System.out.println("saad: " + swanseaResponse.getResponse().getContentAsString());
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -99,12 +98,8 @@ class CourthouseApiTest {
         ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
         ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
 
-        assertTrue(false,haverfordwestCourthouse.toString());
-
-
-        assertTrue(true,haverfordwestResponse.getResponse().getContentAsString());
-        assertTrue(courthouseList.contains(swanseaCourthouse),haverfordwestResponse.getResponse().getContentAsString());
-        assertTrue(courthouseList.contains(haverfordwestCourthouse),swanseaResponse.getResponse().getContentAsString());
+        assertTrue(courthouseList.contains(haverfordwestCourthouse),haverfordwestResponse.getResponse().getContentAsString());
+        assertTrue(courthouseList.contains(swanseaCourthouse),swanseaResponse.getResponse().getContentAsString());
     }
 
     @Test
