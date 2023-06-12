@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -86,26 +87,29 @@ class CourthouseApiTest {
 
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
+        MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
 
-        //MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
+
+        ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
+        ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
+
+        // Truncate created and modified to milliseconds as the post (saveAndFlush) returns a more precise timestamp
+        haverfordwestCourthouse.setCreatedDateTime(haverfordwestCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
+        haverfordwestCourthouse.setLastModifiedDateTime(haverfordwestCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
+        swanseaCourthouse.setCreatedDateTime(swanseaCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
+        swanseaCourthouse.setLastModifiedDateTime(swanseaCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
 
         MockHttpServletRequestBuilder requestBuilder = get("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andDo(print()).andReturn();
 
         List<ExtendedCourthouse> courthouseList = objectMapper.readValue(response.getResponse().getContentAsString(), new TypeReference<>() {});
-        ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
-      //  ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
-
-        assertEquals(courthouseList.get(0).getCourthouseName(),haverfordwestCourthouse.getCourthouseName());
-        assertEquals(courthouseList.get(0).getCode(),haverfordwestCourthouse.getCode());
-        assertEquals(courthouseList.get(0).getId(),haverfordwestCourthouse.getId());
-        assertEquals(courthouseList.get(0).getCreatedDateTime(),haverfordwestCourthouse.getCreatedDateTime());
-        assertEquals(courthouseList.get(0).getLastModifiedDateTime(),haverfordwestCourthouse.getLastModifiedDateTime());
-
+        for (ExtendedCourthouse extendedCourthouse : courthouseList) {
+            extendedCourthouse.setCreatedDateTime(extendedCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
+            extendedCourthouse.setLastModifiedDateTime(extendedCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
+        }
         assertTrue(courthouseList.contains(haverfordwestCourthouse),haverfordwestResponse.getResponse().getContentAsString());
-       // assertTrue(courthouseList.contains(swanseaCourthouse),swanseaResponse.getResponse().getContentAsString());
+        assertTrue(courthouseList.contains(swanseaCourthouse),swanseaResponse.getResponse().getContentAsString());
     }
 
     @Test
@@ -208,3 +212,4 @@ class CourthouseApiTest {
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }
 }
+
