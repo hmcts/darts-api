@@ -19,9 +19,9 @@ import java.time.OffsetDateTime;
 public class Courthouse {
 
     @Id
-    @Column(name = "moj_crt_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "courthouse_gen")
-    @SequenceGenerator(name = "courthouse_gen", sequenceName = "moj_crt_seq", allocationSize = 1)
+    @Column(name = "moj_cth_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_cth_gen")
+    @SequenceGenerator(name = "moj_cth_gen", sequenceName = "moj_cth_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "courthouse_code", unique = true)
@@ -37,4 +37,5 @@ public class Courthouse {
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
     private OffsetDateTime lastModifiedDateTime;
+
 }

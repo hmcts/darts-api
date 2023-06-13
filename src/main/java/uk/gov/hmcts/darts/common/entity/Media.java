@@ -60,7 +60,7 @@ public class Media {
     private Boolean superseded;
 
     @Version
-    @Column(name = "i_version_label")
+    @Column(name = "i_version")
     private Short version;
 
 }

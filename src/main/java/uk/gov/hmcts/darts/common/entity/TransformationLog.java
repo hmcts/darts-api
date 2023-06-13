@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.Data;
@@ -20,7 +21,8 @@ public class TransformationLog {
 
     @Id
     @Column(name = "moj_trl_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_trl_gen")
+    @SequenceGenerator(name = "moj_trl_gen", sequenceName = "moj_trl_seq", allocationSize = 1)
     private Integer id;
 
     @OneToOne
@@ -33,7 +35,7 @@ public class TransformationLog {
     @Column(name = "r_transformation_log_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_case_id", length = 32)
+    @Column(name = "c_case_id")
     private String caseId;
 
     @Column(name = "c_requested_date")

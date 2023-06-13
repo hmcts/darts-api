@@ -5,27 +5,19 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "moj_case")
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
 @SuppressWarnings({"PMD.ShortClassName"})
 public class Case {
 
@@ -33,48 +25,42 @@ public class Case {
 
     @Id
     @Column(name = "moj_cas_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_cas_gen")
+    @SequenceGenerator(name = "moj_cas_gen", sequenceName = "moj_cas_seq", allocationSize = 1)
     private Integer id;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "moj_crt_id")
-    private Courthouse theCourthouse;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;
 
-    @Column(name = "c_type", length = 32)
+    @Column(name = "c_type")
     private String type;
 
-    @Column(name = "c_case_id", length = 32)
+    @Column(name = "c_case_id")
     private String caseId;
 
-    @Column(name = "c_courthouse", length = 64)
-    private String courthouse;
-
-    @Column(name = "c_courtroom", length = 64)
-    private String courtroom;
-
-    @Column(name = "c_scheduled_start")
-    private OffsetDateTime scheduledStart;
-
-    @Column(name = "c_upload_priority")
-    private Integer uploadPriority;
-
-    @Column(name = "c_reporting_restrictions", length = 128)
+    @Column(name = "c_reporting_restrictions")
     private String reportingRestrictions;
 
     @Column(name = "c_closed")
-    private Integer closed;
+    private Boolean closed;
 
     @Column(name = "c_interpreter_used")
-    private Short interpreterUsed;
+    private Boolean interpreterUsed;
 
-    @Column(name = "c_case_closed_date")
-    private OffsetDateTime caseClosedDate;
+    @Column(name = "c_case_closed_ts")
+    private OffsetDateTime caseClosedTimestamp;
 
-    @Column(name = "r_courthouse_object_id", length = 16)
-    private String legacyCourthouseObjectId;
+    @Column(name = "c_defendant")
+    private List<String> defendant = new ArrayList<>();
+
+    @Column(name = "c_prosecutor")
+    private List<String> prosecutor = new ArrayList<>();
+
+    @Column(name = "c_defence")
+    private List<String> defence = new ArrayList<>();
+
+    @Column(name = "retain_until_ts")
+    private OffsetDateTime retainUntilTimestamp;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
@@ -83,74 +69,13 @@ public class Case {
     private Boolean superseded;
 
     @Version
-    @Column(name = "i_version_label")
+    @Column(name = "i_version")
     private Short version;
 
     @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<TransformationRequest> theTransformationRequests = new HashSet<>();
+    private List<Transcription> theTranscriptions;
 
     @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<TransformationLog> theTransformationLogs = new HashSet<>();
+    private List<Annotation> theAnnotations;
 
-    @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<CachedMedia> theCachedMedias = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(name = "moj_case_media_ae")
-    private Set<Media> theMedias = new HashSet<>();
-
-    @ManyToMany
-    @JoinTable(name = "moj_case_event_ae")
-    private Set<Event> theEvents = new HashSet<>();
-
-    @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<Transcription> theTranscriptions = new HashSet<>();
-
-    @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<Annotation> theAnnotations = new HashSet<>();
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(caseId, courthouse, courtroom, type, uploadPriority);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Case other = (Case) obj;
-        return Objects.equals(caseId, other.caseId) && Objects.equals(courthouse, other.courthouse)
-            && Objects.equals(courtroom, other.courtroom) && Objects.equals(type, other.type)
-            && Objects.equals(uploadPriority, other.uploadPriority);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder(250);
-        builder.append("Case [id=").append(id)
-            .append(", legacyCaseObjectId=").append(legacyCaseObjectId)
-            .append(", type=").append(type)
-            .append(", caseId=").append(caseId)
-            .append(", courthouse=").append(courthouse)
-            .append(", courtroom=").append(courtroom)
-            .append(", scheduledStart=").append(scheduledStart)
-            .append(", uploadPriority=").append(uploadPriority)
-            .append(", reportingRestrictions=").append(reportingRestrictions)
-            .append(", closed=").append(closed)
-            .append(", interpreterUsed=").append(interpreterUsed)
-            .append(", caseClosedDate=").append(caseClosedDate)
-            .append(", legacyCourthouseObjectId=").append(legacyCourthouseObjectId)
-            .append(", legacyVersionLabel=").append(legacyVersionLabel)
-            .append(", superseded=").append(superseded)
-            .append(", version=").append(version)
-            .append(']');
-        return builder.toString();
-    }
 }

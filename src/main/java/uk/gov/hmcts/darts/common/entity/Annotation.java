@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.Data;
@@ -21,7 +22,8 @@ public class Annotation {
 
     @Id
     @Column(name = "moj_ann_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_ann_gen")
+    @SequenceGenerator(name = "moj_ann_gen", sequenceName = "moj_ann_seq", allocationSize = 1)
     private Integer id;
 
     @OneToOne
@@ -60,6 +62,6 @@ public class Annotation {
     private Boolean superseded;
 
     @Version
-    @Column(name = "i_version_label")
+    @Column(name = "i_version")
     private Short version;
 }
