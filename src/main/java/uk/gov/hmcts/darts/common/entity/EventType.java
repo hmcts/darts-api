@@ -20,7 +20,7 @@ public class EventType {
     @SequenceGenerator(name = "moj_evt_gen", sequenceName = "moj_evt_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "type", nullable = false)
+    @Column(name = "evt_type", nullable = false)
     private String type;
 
     @Column(name = "sub_type")
