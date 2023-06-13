@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.Data;
@@ -20,7 +21,8 @@ public class TransformationRequest {
 
     @Id
     @Column(name = "moj_trr_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_trr_gen")
+    @SequenceGenerator(name = "moj_trr_gen", sequenceName = "moj_trr_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne(optional = false)
@@ -71,9 +73,6 @@ public class TransformationRequest {
 
     @Column(name = "c_courtroom")
     private String courtroom;
-
-    @Column(name = "c_reporting_restrictions")
-    private Integer reportingRestrictions;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;

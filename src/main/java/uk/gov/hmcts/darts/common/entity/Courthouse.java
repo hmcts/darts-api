@@ -2,9 +2,11 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -20,8 +22,8 @@ public class Courthouse {
 
     @Id
     @Column(name = "moj_crt_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "courthouse_gen")
-    @SequenceGenerator(name = "courthouse_gen", sequenceName = "moj_crt_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_crt_gen")
+    @SequenceGenerator(name = "moj_crt_gen", sequenceName = "moj_crt_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "courthouse_code", unique = true)
@@ -37,4 +39,11 @@ public class Courthouse {
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
     private OffsetDateTime lastModifiedDateTime;
+
+    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
+    private Set<Hearing> theHearings = new HashSet<>();
+
+    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
+    private Set<DailyList> theDailyLists = new HashSet<>();
+
 }

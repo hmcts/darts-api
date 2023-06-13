@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.Data;
@@ -20,7 +21,8 @@ public class DailyList {
 
     @Id
     @Column(name = "moj_dal_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_dal_gen")
+    @SequenceGenerator(name = "moj_dal_gen", sequenceName = "moj_dal_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne
@@ -64,7 +66,7 @@ public class DailyList {
     private Boolean superseded;
 
     @Version
-    @Column(name = "i_version_label")
+    @Column(name = "i_version")
     private Short version;
 
 }
