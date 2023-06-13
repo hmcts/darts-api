@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,6 +13,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "moj_courthouse")
@@ -22,8 +23,8 @@ public class Courthouse {
 
     @Id
     @Column(name = "moj_crt_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_crt_gen")
-    @SequenceGenerator(name = "moj_crt_gen", sequenceName = "moj_crt_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_cth_gen")
+    @SequenceGenerator(name = "moj_cth_gen", sequenceName = "moj_cth_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "courthouse_code", unique = true)
@@ -40,10 +41,10 @@ public class Courthouse {
     @Column(name = "last_modified_ts")
     private OffsetDateTime lastModifiedDateTime;
 
-    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "theCourthouse")
     private Set<Hearing> theHearings = new HashSet<>();
 
-    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "theCourthouse")
     private Set<DailyList> theDailyLists = new HashSet<>();
 
 }
