@@ -19,7 +19,7 @@ public class AuthenticationInternalUserController implements AuthenticationContr
     }
 
     @Override
-    public ModelAndView handleOauthCode(HttpSession session, String code) {
+    public String handleOauthCode(HttpSession session, String code) {
         log.info("Authorization Token received successfully");
 
         throw new NotImplementedException("Internal users not yet supported");
