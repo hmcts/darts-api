@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import java.util.UUID;
@@ -33,6 +34,9 @@ class LoginOrRefreshIntTest {
 
     @MockBean
     private AudioRequestRepository audioRequestRepository;
+
+    @MockBean
+    private CourthouseRepository courthouseRepository;
 
     @Autowired
     private MockMvc mockMvc;

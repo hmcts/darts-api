@@ -1,0 +1,143 @@
+openapi: 3.0.1
+info:
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+servers:
+  - url: http://localhost:4550/
+paths:
+  /courthouses:
+    post:
+      tags:
+        - Courthouses
+      summary: Adds a courthouse record with supplied details.
+      requestBody:
+        $ref: '#/components/requestBodies/CourthousePost'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtendedCourthouse'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '409':
+            description: Resource already exists.
+        '500':
+          description: Internal Server Error
+    get:
+      tags:
+        - Courthouses
+      summary: Gets all courthouse records.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourtList'
+        '500':
+          description: Internal Server Error
+
+  /courthouses/{courthouse_id}:
+    get:
+      tags:
+        - Courthouses
+      summary: Get a courthouse record with specified id.
+      parameters:
+        - in: path
+          name: courthouse_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtendedCourthouse'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '404':
+          description: Resource with the provided id does not exist.
+        '500':
+          description: Internal Server Error
+    put:
+      tags:
+        - Courthouses
+      summary: Amends a courthouse record with supplied details.
+      parameters:
+        - in: path
+          name: courthouse_id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        $ref: '#/components/requestBodies/CourthousePost'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '409':
+          description: Returned in the case where courthouse name or code amended is not unique.
+        '404':
+            description: Resource with the provided id does not exist.
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+        - Courthouses
+      summary: Deletes the courthouse entry with the supplied id.
+      parameters:
+        - in: path
+          name: courthouse_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: OK
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '500':
+          description: Internal Server Error
+
+components:
+  requestBodies:
+    CourthousePost:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Courthouse'
+  schemas:
+    Courthouse:
+      type: object
+      required:
+        - courthouse_name
+      properties:
+        courthouse_name:
+          type: string
+        code:
+          type: integer
+    ExtendedCourthouse:
+      allOf:
+        - $ref: '#/components/schemas/Courthouse'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_date_time:
+              type: string
+              format: date-time
+            last_modified_date_time:
+              type: string
+              format: date-time
+    CourtList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExtendedCourthouse'

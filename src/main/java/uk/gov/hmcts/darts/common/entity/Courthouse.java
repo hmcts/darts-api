@@ -2,17 +2,16 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_courthouse")
@@ -21,34 +20,21 @@ public class Courthouse {
 
     @Id
     @Column(name = "moj_crt_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "courthouse_gen")
+    @SequenceGenerator(name = "courthouse_gen", sequenceName = "moj_crt_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "r_courthouse_object_id", length = 16)
-    private String legacyObjectId;
+    @Column(name = "courthouse_code", unique = true)
+    private Short code;
 
-    @Column(name = "c_code", length = 32)
-    private String code;
+    @Column(name = "courthouse_name", unique = true)
+    private String courthouseName;
 
-    @Column(name = "c_id", length = 32)
-    private String idString;
+    @CreationTimestamp
+    @Column(name = "created_ts")
+    private OffsetDateTime createdDateTime;
 
-    @Column(name = "c_alias_set_id", length = 16)
-    private String aliasSetIdString;
-
-    @Column(name = "r_version_label", length = 32)
-    private String legacyVersionLabel;
-
-    @Column(name = "i_superseded")
-    private Boolean superseded;
-
-    @Version
-    @Column(name = "i_version_label")
-    private Short version;
-
-    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
-    private Set<Case> theCases = new HashSet<>();
-
-    @OneToMany(mappedBy = "theCourthouse", fetch = FetchType.EAGER)
-    private Set<DailyList> theDailyLists = new HashSet<>();
+    @UpdateTimestamp
+    @Column(name = "last_modified_ts")
+    private OffsetDateTime lastModifiedDateTime;
 }
