@@ -52,10 +52,9 @@ class AuthenticationExternalUserControllerTest {
         when(authenticationService.handleOauthCode(any(), anyString()))
             .thenReturn(DUMMY_TOKEN);
 
-        ModelAndView modelAndView = controller.handleOauthCode(session, "code");
+        String accessToken = controller.handleOauthCode(session, "code");
 
-        assertNotNull(modelAndView);
-        assertNotNull(modelAndView.getModel().get("token"));
+        assertNotNull(accessToken);
     }
 
     @Test

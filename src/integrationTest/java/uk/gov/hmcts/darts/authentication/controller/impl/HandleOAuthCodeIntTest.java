@@ -21,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -67,10 +66,9 @@ class HandleOAuthCodeIntTest {
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        ModelAndView mv = response.getModelAndView();
-        if (mv != null) {
-            assertThat(mv.getModel().get("token")).isNotNull();
-        }
+        String token = response.getResponse().getContentAsString();
+        assertThat(token).isNotNull();
+
     }
 
     /**
