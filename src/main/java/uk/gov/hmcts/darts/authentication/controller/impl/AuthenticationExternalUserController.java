@@ -27,11 +27,8 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     }
 
     @Override
-    public ModelAndView handleOauthCode(HttpSession session, String code) {
-        String token = authenticationService.handleOauthCode(session.getId(), code);
-        ModelAndView modelView = new ModelAndView();
-        modelView.addObject("token", token);
-        return modelView;
+    public String handleOauthCode(HttpSession session, String code) {
+        return authenticationService.handleOauthCode(session.getId(), code);
     }
 
     @Override
