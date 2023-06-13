@@ -14,8 +14,7 @@ import jakarta.persistence.Version;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Table(name = "moj_transcription")
@@ -103,5 +102,6 @@ public class Transcription {
     private Short version;
 
     @OneToMany(mappedBy = "theTranscription")
-    private Set<TranscriptionComment> theTranscriptionComments = new HashSet<>();
+    private List<TranscriptionComment> theTranscriptionComments;
+
 }

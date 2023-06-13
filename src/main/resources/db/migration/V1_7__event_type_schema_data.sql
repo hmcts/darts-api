@@ -390,3 +390,7 @@ ALTER SEQUENCE moj_evt_seq RESTART WITH 377;
 
 DROP SEQUENCE IF EXISTS moj_crt_seq;
 CREATE SEQUENCE IF NOT EXISTS moj_cth_seq;
+
+ALTER TABLE moj_courthouse DROP CONSTRAINT moj_courthouse_pkey;
+ALTER TABLE moj_courthouse RENAME COLUMN moj_crt_id TO moj_cth_id;
+ALTER TABLE moj_courthouse ADD PRIMARY KEY (moj_cth_id);

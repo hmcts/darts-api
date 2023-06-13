@@ -15,9 +15,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "moj_hearing")
@@ -56,12 +54,12 @@ public class Hearing {
     @JoinTable(name = "moj_hearing_media_ae",
         joinColumns = {@JoinColumn(name = "moj_hea_id")},
         inverseJoinColumns = {@JoinColumn(name = "moj_med_id")})
-    private Set<Media> theMedias = new HashSet<>();
+    private List<Media> theMedias;
 
     @ManyToMany
     @JoinTable(name = "moj_hearing_event_ae",
         joinColumns = {@JoinColumn(name = "moj_hea_id")},
         inverseJoinColumns = {@JoinColumn(name = "moj_eve_id")})
-    private Set<Event> theEvents = new HashSet<>();
+    private List<Event> theEvents;
 
 }

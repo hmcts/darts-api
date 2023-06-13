@@ -13,9 +13,7 @@ import lombok.Data;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "moj_case")
@@ -75,18 +73,9 @@ public class Case {
     private Short version;
 
     @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<TransformationRequest> theTransformationRequests = new HashSet<>();
+    private List<Transcription> theTranscriptions;
 
     @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<TransformationLog> theTransformationLogs = new HashSet<>();
-
-    @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<CachedMedia> theCachedMedias = new HashSet<>();
-
-    @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<Transcription> theTranscriptions = new HashSet<>();
-
-    @OneToMany(mappedBy = MAPPED_BY_THE_CASE)
-    private Set<Annotation> theAnnotations = new HashSet<>();
+    private List<Annotation> theAnnotations;
 
 }
