@@ -82,7 +82,8 @@ paths:
           description: No Content
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
-                       Also returned in the case where courthouse code inserted is not unique.
+        '409':
+          description: Returned in the case where courthouse name or code amended is not unique.
         '404':
             description: Resource with the provided id does not exist.
         '500':
