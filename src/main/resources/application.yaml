@@ -99,6 +99,8 @@ audiotransform:
   re-encode-workspace: ${user.home}/audiotransform/encode
 
 darts:
+  gateway:
+    url: http://localhost:8070
   notification:
     scheduler:
       cron: ${NOTIFICATION_SCHEDULER_CRON:3 */2 * * * MON-FRI}
