@@ -26,11 +26,11 @@ import java.time.OffsetDateTime;
 public class DailyList {
 
     public static final String ID = "moj_dal_id";
-    public static final String COURTHOUSE_ID = "moj_crt_id";
+    public static final String COURTHOUSE_ID = "moj_cth_id";
     public static final String DAILY_LIST_OBJECT_ID = "r_daily_list_object_id";
     public static final String UNIQUE_ID = "c_unique_id";
     public static final String JOB_STATUS = "c_job_status";
-    public static final String PUBLISHED_TIME = "c_timestamp";
+    public static final String TIMESTAMP = "c_timestamp";
     public static final String DAILY_LIST_ID = "c_daily_list_id";
     public static final String START_DATE = "c_start_date";
     public static final String END_DATE = "c_end_date";
@@ -41,7 +41,7 @@ public class DailyList {
     public static final String LEGACY_COURTHOUSE_OBJECT_ID = "r_courthouse_object_id";
     public static final String LEGACY_VERSION_LABEL = "r_version_label";
     public static final String SUPERSEDED = "i_superseded";
-    public static final String VERSION_LABEL = "i_version_label";
+    public static final String VERSION_LABEL = "i_version";
     public static final String TABLE_NAME = "moj_daily_list";
 
     @Id
@@ -52,19 +52,19 @@ public class DailyList {
 
     @ManyToOne
     @JoinColumn(name = COURTHOUSE_ID)
-    private Courthouse crtId;
+    private Courthouse courtHouse;
 
     @Column(name = DAILY_LIST_OBJECT_ID)
     private String dailyListObjectId;
 
     @Column(name = UNIQUE_ID)
-    private String uniqueID;
+    private String uniqueId;
 
     @Column(name = JOB_STATUS)
     private String jobStatus;
 
-    @Column(name = PUBLISHED_TIME)
-    private OffsetDateTime publishedTime;
+    @Column(name = TIMESTAMP)
+    private OffsetDateTime timeStamp;
 
     @Column(name = DAILY_LIST_ID)
     private Integer dailylistId;
@@ -83,16 +83,16 @@ public class DailyList {
     @Column(name = LAST_UPDATED_DATE_TIME)
     private OffsetDateTime lastUpdatedDateTime;
 
-    @Column(name = DAILY_LIST_ID_STRING, length = 100)
+    @Column(name = DAILY_LIST_ID_STRING)
     private String dailyListIdString;
 
-    @Column(name = DAILY_LIST_SOURCE, length = 3)
+    @Column(name = DAILY_LIST_SOURCE)
     private String dailyListSource;
 
-    @Column(name = LEGACY_COURTHOUSE_OBJECT_ID, length = 16)
+    @Column(name = LEGACY_COURTHOUSE_OBJECT_ID)
     private String legacyCourthouseObjectId;
 
-    @Column(name = LEGACY_VERSION_LABEL, length = 32)
+    @Column(name = LEGACY_VERSION_LABEL)
     private String legacyVersionLabel;
 
     @Column(name = SUPERSEDED)
