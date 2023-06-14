@@ -16,6 +16,6 @@ CREATE TABLE IF NOT EXISTS moj_daily_list (
 , i_superseded                   BOOLEAN
 , i_version                      SMALLINT
 , CONSTRAINT moj_daily_list_pkey PRIMARY KEY (moj_dal_id)
-)
+);
 
 CREATE SEQUENCE IF NOT EXISTS moj_dal_seq;
