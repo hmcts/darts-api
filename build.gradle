@@ -83,10 +83,6 @@ tasks.withType(Test) {
   }
 }
 
-test {
-  failFast = true
-}
-
 task functional(type: Test) {
   description = "Runs functional tests"
   group = "Verification"
@@ -99,7 +95,6 @@ task integration(type: Test) {
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
   classpath = sourceSets.integrationTest.runtimeClasspath
-  failFast = true
 }
 
 task smoke(type: Test) {
@@ -248,7 +243,7 @@ task generateAudioRequestApi(type: org.openapitools.generator.gradle.plugin.task
 
 task generateEventsAPI(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
   generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/event.yaml".toString()
+  inputSpec = "$rootDir/src/main/resources/openapi/events.yaml".toString()
   outputDir = "$buildDir/generated/openapi".toString()
   apiPackage = "uk.gov.hmcts.darts.event.api"
   modelPackage = "uk.gov.hmcts.darts.event.model"

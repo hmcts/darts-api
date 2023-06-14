@@ -43,7 +43,7 @@ class AudioRequestServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        requestDetails = new AudioRequestDetails();
+        requestDetails = new AudioRequestDetails(null,null,null,null,null);
         requestDetails.setCaseId("123456");
         requestDetails.setRequester("test@test.com");
         requestDetails.setRequestType("Download");

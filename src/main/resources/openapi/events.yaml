@@ -1,0 +1,123 @@
+openapi: 3.0.1
+
+info:
+
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /events:
+    post:
+      tags:
+        - Event
+      summary: An Endpoint which allows users to request and submit events.
+      description: |-
+        Event data received from XHIBIT and CPP through a custom web service to add context to the audio recordings it stores.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DartsEvent'
+            examples:
+              example1:
+                summary: Case called on
+                value:
+                  messageId: '18422'
+                  type: '10100'
+                  subType: '10100'
+                  courthouse: SNARESBROOK
+                  courtroom: '1'
+                  caseNumbers:
+                    - A20230049
+                  dateTime: '2023-06-14T08:37:30.945Z'
+              example2:
+                summary: Freetext
+                value:
+                  messageId: '18422'
+                  type: '21300'
+                  subType: '21300'
+                  courthouse: SNARESBROOK
+                  courtroom: '1'
+                  caseNumbers:
+                    - T20190441
+                  eventText: 'test'
+                  dateTime: '2023-06-14T08:37:30.945Z'
+              example3:
+                summary: Life Imprisonment
+                value:
+                  messageId: '18422'
+                  type: '40750'
+                  subType: '11504'
+                  courthouse: SNARESBROOK
+                  courtroom: '1'
+                  caseNumbers:
+                    - T20190441
+                  eventText: '[Defendant: DEFENDANT ONE]'
+                  dateTime: '2023-06-14T08:37:30.945Z'
+                  RetentionPolicy:
+                    CaseRetentionFixedPolicy: 4
+                    CaseTotalSentence: 26Y0M0D
+
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddDocumentResponse'
+
+        '500':
+          description: Internal Server Error
+
+components:
+
+  #-----------------#
+  #----------------------------------#
+  #-----------------#
+
+  schemas:
+    DartsEvent:
+      type: object
+      properties:
+        message_id:
+          type: string
+        type:
+          type: string
+        sub_type:
+          type: string
+        courthouse:
+          type: string
+        courtroom:
+          type: string
+        case_numbers:
+          type: array
+          items:
+            type: string
+        event_text:
+          type: string
+        date_time:
+          type: string
+          format: date-time
+        retention_policy:
+          type: object
+          properties:
+            case_retention_fixed_policy:
+              type: string
+            case_total_sentence:
+              type: string
+
+
+    AddDocumentResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
