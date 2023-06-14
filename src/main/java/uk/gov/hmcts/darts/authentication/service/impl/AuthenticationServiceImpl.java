@@ -60,4 +60,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return accessToken;
     }
 
+    @Override
+    public URI logout() {
+        return uriProvider.getLogoutPageUri();
+    }
+
 }

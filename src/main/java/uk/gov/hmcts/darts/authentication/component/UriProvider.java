@@ -8,4 +8,6 @@ public interface UriProvider {
 
     URI getLandingPageUri();
 
+    URI getLogoutPageUri();
+
 }

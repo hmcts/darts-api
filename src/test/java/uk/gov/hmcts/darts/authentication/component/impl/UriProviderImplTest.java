@@ -40,6 +40,13 @@ class UriProviderImplTest {
         assertEquals("/", landingPageUri.toString());
     }
 
+    @Test
+    void getLogoutPageUriShouldReturnExpectedUri() {
+        URI logoutPageUri = uriProvider.getLogoutPageUri();
+
+        assertEquals("/", logoutPageUri.toString());
+    }
+
     private void mockStubsForAuthorization() {
         when(authConfig.getExternalADauthorizationUri()).thenReturn("AuthUrl");
         when(authConfig.getExternalADclientId()).thenReturn("ClientId");

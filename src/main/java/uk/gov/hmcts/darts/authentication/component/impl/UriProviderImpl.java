@@ -38,4 +38,9 @@ public class UriProviderImpl implements UriProvider {
         return URI.create("/");
     }
 
+    @Override
+    public URI getLogoutPageUri() {
+        return URI.create("/");
+    }
+
 }

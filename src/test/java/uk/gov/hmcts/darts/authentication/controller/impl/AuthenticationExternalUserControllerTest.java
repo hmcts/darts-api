@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +13,6 @@ import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -23,6 +21,7 @@ import static org.mockito.Mockito.when;
 class AuthenticationExternalUserControllerTest {
 
     private static final URI DUMMY_AUTHORIZATION_URI = URI.create("https://www.example.com/authorization?param=value");
+    private static final URI DUMMY_LOGOUT_URI = URI.create("https://www.example.com/logoutpage");
     private static final String DUMMY_TOKEN = "token";
 
     @InjectMocks
@@ -58,8 +57,13 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void logoutWhenUserLogoutFromdarts() {
-        assertThrows(NotImplementedException.class, () -> controller.logout());
+    void logoutShouldReturnRedirectToLogoutPage() {
+        when(authenticationService.logout())
+            .thenReturn(DUMMY_LOGOUT_URI);
+
+        ModelAndView modelAndView = controller.logout();
+
+        assertEquals("redirect:https://www.example.com/logoutpage", modelAndView.getViewName());
     }
 
 }
