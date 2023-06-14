@@ -23,13 +23,20 @@ class EventsControllerTest {
     private transient MockMvc mockMvc;
 
     @Test
-    void eventsApiAddDocumentsEndpoint() throws Exception {
-        String requestBody = "{}";
-        MockHttpServletRequestBuilder requestBuilder = post("/event/addDocument")
+    void eventsApiPostEndpoint() throws Exception {
+        String requestBody = "{\n" +
+            "  \"messageId\": \"18422\",\n" +
+            "  \"type\": \"10100\",\n" +
+            "  \"subType\": \"10100\",\n" +
+            "  \"courthouse\": \"SNARESBROOK\",\n" +
+            "  \"courtroom\": \"1\",\n" +
+            "  \"caseNumbers\": [\n" +
+            "    \"A20230049\"\n" +
+            "  ],\n" +
+            "  \"dateTime\": \"2023-06-14T08:37:30.945Z\"\n" +
+            "}";
+        MockHttpServletRequestBuilder requestBuilder = post("/events")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam("message_id", "1")
-            .queryParam("type", "1")
-            .queryParam("sub_type", "1")
             .content(requestBody);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented()).andReturn();
 
