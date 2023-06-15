@@ -19,7 +19,6 @@ public class EventsServiceImpl implements EventsService {
     private static final String NOTIFICATION_TYPE = DarNotifyType.CASE_UPDATE.getNotificationType();
 
     @Override
-
     public void notifyEvent(DartsEvent dartsEvent) {
         DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
             .notificationType(NOTIFICATION_TYPE)
