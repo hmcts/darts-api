@@ -28,6 +28,7 @@ class AuthenticationServiceImplTest {
     private static final String DUMMY_SESSION_ID = "9D65049E1787A924E269747222F60CAA";
     private static final URI DUMMY_AUTH_URI = URI.create("DUMMY_AUTH_URI");
     private static final URI DUMMY_LANDING_PAGE_URI = URI.create("DUMMY_LANDING_PAGE_URI");
+    private static final URI DUMMY_LOGOUT_PAGE_URI = URI.create("DUMMY_LOGOUT_PAGE_URI");
     private static final String DUMMY_CODE = "DUMMY CODE";
     private static final String DUMMY_ID_TOKEN = "DUMMY ID TOKEN";
 
@@ -108,6 +109,16 @@ class AuthenticationServiceImplTest {
         );
 
         assertEquals("Failed to validate access token: validation failure reason", exception.getMessage());
+    }
+
+    @Test
+    void logoutShouldReturnLogoutPage() {
+        when(uriProvider.getLogoutPageUri())
+            .thenReturn(DUMMY_LOGOUT_PAGE_URI);
+
+        URI uri = authenticationService.logout();
+        
+        assertEquals(DUMMY_LOGOUT_PAGE_URI, uri);
     }
 
 }
