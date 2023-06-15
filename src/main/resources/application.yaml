@@ -101,6 +101,7 @@ audiotransform:
 darts:
   gateway:
     url: http://localhost:8070
+    events-dar-notify-path: /events/dar-notify
   notification:
     scheduler:
       cron: ${NOTIFICATION_SCHEDULER_CRON:3 */2 * * * MON-FRI}
