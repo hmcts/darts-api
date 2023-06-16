@@ -41,9 +41,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/SearchResult'
         '400':
-          description: 'invalid input, object invalid'
-        '409':
-          description: audio request item already exists
+          description: 'At least one filter parameter was not provided or an invalid datatype or value was provided for property.'
+        '500':
+          description: Internal Server Error
 components:
   schemas:
     SearchResult:
