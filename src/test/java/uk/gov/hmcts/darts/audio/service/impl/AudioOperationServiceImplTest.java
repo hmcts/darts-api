@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.config.AudioTransformConfigurationProperties;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.util.AudioUtil;
 
@@ -39,7 +39,7 @@ class AudioOperationServiceImplTest {
     private AudioOperationServiceImpl audioOperationService;
 
     @Mock
-    private AudioTransformConfigurationProperties audioTransformConfigurationProperties;
+    private AudioConfigurationProperties audioConfigurationProperties;
 
     @Mock
     private AudioUtil audioUtil;
@@ -63,7 +63,7 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldGenerateConcatenateCommandWhenValidAudioFilesAreReceived() {
-        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
 
         CommandLine expectedCommand = CommandLine.parse(
             "/usr/bin/ffmpeg -i /path/to/audio/requestId/sample1-5secs.mp2 -i /path/to/audio/requestId/sample2-5secs.mp2"
@@ -83,8 +83,8 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldReturnConcatenatedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
-        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioTransformConfigurationProperties.getConcatWorkspace()).thenReturn("/tempDir/concatenate");
+        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+        when(audioConfigurationProperties.getConcatWorkspace()).thenReturn("/tempDir/concatenate");
         when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
@@ -104,8 +104,8 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldReturnMergedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
-        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioTransformConfigurationProperties.getMergeWorkspace()).thenReturn("/tempDir/merge");
+        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+        when(audioConfigurationProperties.getMergeWorkspace()).thenReturn("/tempDir/merge");
         when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
@@ -125,8 +125,8 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldReturnTrimmedAudioFileWhenValidInputAudioFile() throws ExecutionException, InterruptedException {
-        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioTransformConfigurationProperties.getTrimWorkspace()).thenReturn("/tempDir/trim");
+        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+        when(audioConfigurationProperties.getTrimWorkspace()).thenReturn("/tempDir/trim");
         when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
@@ -197,8 +197,8 @@ class AudioOperationServiceImplTest {
 
     @Test
     void shouldReturnReEncodedAudioFileInfoWhenValidInputAudioFile() throws ExecutionException, InterruptedException {
-        when(audioTransformConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
-        when(audioTransformConfigurationProperties.getReEncodeWorkspace()).thenReturn("/tempDir/encode");
+        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+        when(audioConfigurationProperties.getReEncodeWorkspace()).thenReturn("/tempDir/encode");
         when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
