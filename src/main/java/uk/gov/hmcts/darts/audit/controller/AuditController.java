@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.audit.controller;
 
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.darts.event.api.AuditApi;
-import uk.gov.hmcts.darts.event.model.SearchResult;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.audit.model.SearchResult;
 
 import java.time.OffsetDateTime;
 
