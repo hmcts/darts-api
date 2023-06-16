@@ -6,11 +6,11 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("audiotransform")
+@ConfigurationProperties("darts.audio")
 @Getter
 @Setter
 @ToString
-public class AudioTransformConfigurationProperties {
+public class AudioConfigurationProperties {
 
     @NotEmpty
     private String ffmpegExecutable;

@@ -90,15 +90,13 @@ spring:
   flyway.enabled: ${ENABLE_DB_MIGRATE:true}
   flyway.locations: classpath:db/migration
 
-# ATS
-audiotransform:
-  ffmpeg-executable: ffmpeg
-  concat-workspace: ${user.home}/audiotransform/concatenate
-  merge-workspace: ${user.home}/audiotransform/merge
-  trim-workspace: ${user.home}/audiotransform/trim
-  re-encode-workspace: ${user.home}/audiotransform/encode
-
 darts:
+  audio:
+    ffmpeg-executable: ffmpeg
+    concat-workspace: ${user.home}/audiotransform/concatenate
+    merge-workspace: ${user.home}/audiotransform/merge
+    trim-workspace: ${user.home}/audiotransform/trim
+    re-encode-workspace: ${user.home}/audiotransform/encode
   gateway:
     url: http://localhost:8070
     events-dar-notify-path: /events/dar-notify
