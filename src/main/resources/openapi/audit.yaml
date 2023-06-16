@@ -1,0 +1,84 @@
+openapi: 3.0.1
+
+servers:
+  - url: http://localhost:4550/
+info:
+  description: Modernised DARTS (Digital Audio Recording and Transcription Service).
+  version: "0.0.1"
+  title: Modernised DARTS
+
+paths:
+  /audit/search:
+    get:
+      tags:
+        - Audit
+      summary: User can search through audit logs using various filters.
+      operationId: search
+      description: Searches through the audit log based on the filters provided.
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            format: date-time
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: caseId
+          schema:
+            type: string
+        - in: query
+          name: eventId
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit logs returned matching filters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: audio request item already exists
+components:
+  schemas:
+    SearchResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        case_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        event_type:
+          type: string
+        username:
+          type: string
+          example: Download
+        application_server:
+          type: string
+          example: Download
+        additional_data:
+          type: string
+    AuditSearchQuery:
+      type: object
+      properties:
+        case_id:
+          type: string
+        start_date:
+          type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        end_date:
+          type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        event_type:
+          type: string
