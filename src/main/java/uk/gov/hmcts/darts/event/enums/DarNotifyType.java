@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.event.enums;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 public enum DarNotifyType {
 
