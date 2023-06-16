@@ -2,9 +2,9 @@ package uk.gov.hmcts.darts.authentication.controller.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,9 +19,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
-@ComponentScan({"uk.gov.hmcts.darts"})
-@ActiveProfiles("intTest")
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles({"intTest", "h2db"})
 class LoginOrRefreshIntTest {
 
     private static final String EXPECTED_LOGIN_REDIRECT_URL = "http://localhost:8080/oauth2/v2.0/authorize?client_id=dummy_client_id&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&response_mode=form_post&scope=openid&prompt=login";
