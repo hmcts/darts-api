@@ -17,20 +17,21 @@ paths:
       description: Searches through the audit log based on the filters provided.
       parameters:
         - in: query
-          name: startDate
-          schema:
-            format: date-time
-        - in: query
-          name: endDate
+          name: start_date
           schema:
             type: string
             format: date-time
         - in: query
-          name: caseId
+          name: end_date
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: case_id
           schema:
             type: string
         - in: query
-          name: eventId
+          name: event_id
           schema:
             type: string
       responses:
@@ -61,10 +62,8 @@ components:
           type: string
         username:
           type: string
-          example: Download
         application_server:
           type: string
-          example: Download
         additional_data:
           type: string
     AuditSearchQuery:
