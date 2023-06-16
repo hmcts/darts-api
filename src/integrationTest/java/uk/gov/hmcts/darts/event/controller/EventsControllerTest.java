@@ -11,9 +11,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.event.client.DartsGatewayClient;
 import uk.gov.hmcts.darts.event.enums.DarNotifyType;
 import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
-import uk.gov.hmcts.darts.event.service.DartsGatewayClient;
 import uk.gov.hmcts.darts.event.service.EventsService;
 import uk.gov.hmcts.darts.event.service.impl.EventsServiceImpl;
 

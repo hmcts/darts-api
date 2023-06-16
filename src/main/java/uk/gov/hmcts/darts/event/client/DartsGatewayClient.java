@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.service;
+package uk.gov.hmcts.darts.event.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;

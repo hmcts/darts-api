@@ -1,5 +1,10 @@
 package uk.gov.hmcts.darts.event.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum DarNotifyType {
 
     START_RECORDING("1"),
@@ -7,13 +12,5 @@ public enum DarNotifyType {
     CASE_UPDATE("3");
 
     private final String notificationType;
-
-    DarNotifyType(String notificationType) {
-        this.notificationType = notificationType;
-    }
-
-    public String getNotificationType() {
-        return notificationType;
-    }
 
 }
