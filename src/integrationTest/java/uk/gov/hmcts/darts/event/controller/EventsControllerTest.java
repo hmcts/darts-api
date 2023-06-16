@@ -65,7 +65,7 @@ class EventsControllerTest {
             .courtroom("1")
             .caseNumbers(List.of("A20230049"))
             .build();
-        Mockito.verify(mockDartsGatewayClient).notifyEvent(eq(expectedDarNotifyEvent));
+        Mockito.verify(mockDartsGatewayClient).darNotify(eq(expectedDarNotifyEvent));
         Mockito.verifyNoMoreInteractions(mockDartsGatewayClient);
     }
 

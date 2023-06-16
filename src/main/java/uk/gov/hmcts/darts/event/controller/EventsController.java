@@ -52,7 +52,7 @@ public class EventsController implements EventApi {
     ) {
 
         // send to darts-gateway for DAR PC Notify
-        eventsService.notifyEvent(dartsEvent);
+        eventsService.darNotify(dartsEvent);
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
 

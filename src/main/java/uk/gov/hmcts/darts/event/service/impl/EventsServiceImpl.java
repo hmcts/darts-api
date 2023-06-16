@@ -19,7 +19,7 @@ public class EventsServiceImpl implements EventsService {
     private static final String NOTIFICATION_TYPE = DarNotifyType.CASE_UPDATE.getNotificationType();
 
     @Override
-    public void notifyEvent(DartsEvent dartsEvent) {
+    public void darNotify(DartsEvent dartsEvent) {
         DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
             .notificationType(NOTIFICATION_TYPE)
             .timestamp(dartsEvent.getDateTime())
@@ -28,7 +28,7 @@ public class EventsServiceImpl implements EventsService {
             .caseNumbers(dartsEvent.getCaseNumbers())
             .build();
 
-        dartsGatewayClient.notifyEvent(darNotifyEvent);
+        dartsGatewayClient.darNotify(darNotifyEvent);
     }
 
 }

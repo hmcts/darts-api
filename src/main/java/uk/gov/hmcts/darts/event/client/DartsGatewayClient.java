@@ -14,6 +14,6 @@ public interface DartsGatewayClient {
         consumes = {MediaType.APPLICATION_JSON_VALUE},
         produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    ResponseEntity<Void> notifyEvent(DarNotifyEvent darNotifyEvent);
+    ResponseEntity<Void> darNotify(DarNotifyEvent darNotifyEvent);
 
 }
