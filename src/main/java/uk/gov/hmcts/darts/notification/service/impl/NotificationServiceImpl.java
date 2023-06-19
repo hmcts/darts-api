@@ -106,7 +106,6 @@ public class NotificationServiceImpl implements NotificationService {
                     govNotifyRequest,
                     e.getMessage()
                 );
-                log.error("notification failed to send");
                 incrementNotificationFailureCount(notification);
             }
         }
@@ -123,7 +122,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (attempts <= maxRetry) {
             notification.setAttempts(attempts);
             notification.setStatus(String.valueOf(NotificationStatus.PROCESSING));
-            log.info("Notification has failed to send, retrying");
+            log.info("Notification has failed to send, retrying ID: {}", notification.getId());
         } else {
             updateNotificationStatus(notification, NotificationStatus.FAILED);
             log.error("Notification has fully failed");
