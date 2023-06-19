@@ -12,18 +12,15 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = DailyList.TABLE_NAME)
+@Table(name = DailyListEntity.TABLE_NAME)
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DailyList {
+public class DailyListEntity {
 
     public static final String ID = "moj_dal_id";
     public static final String COURTHOUSE_ID = "moj_cth_id";
@@ -52,7 +49,7 @@ public class DailyList {
 
     @ManyToOne
     @JoinColumn(name = COURTHOUSE_ID)
-    private Courthouse courtHouse;
+    private Courthouse courthouse;
 
     @Column(name = DAILY_LIST_OBJECT_ID)
     private String dailyListObjectId;
@@ -61,7 +58,7 @@ public class DailyList {
     private String uniqueId;
 
     @Column(name = JOB_STATUS)
-    private String jobStatus;
+    private String status;
 
     @Column(name = TIMESTAMP)
     private OffsetDateTime timeStamp;
@@ -75,19 +72,14 @@ public class DailyList {
     @Column(name = END_DATE)
     private OffsetDateTime endDate;
 
-    @CreationTimestamp
-    @Column(name = CREATED_DATE_TIME)
-    private OffsetDateTime createdDateTime;
-
-    @UpdateTimestamp
-    @Column(name = LAST_UPDATED_DATE_TIME)
-    private OffsetDateTime lastUpdatedDateTime;
-
     @Column(name = DAILY_LIST_ID_STRING)
-    private String dailyListIdString;
+    private String leagacyIdString;
 
     @Column(name = DAILY_LIST_SOURCE)
-    private String dailyListSource;
+    private String source;
+
+    @Column(name = "daily_list_content")
+    private String content;
 
     @Column(name = LEGACY_COURTHOUSE_OBJECT_ID)
     private String legacyCourthouseObjectId;
@@ -101,5 +93,13 @@ public class DailyList {
     @Version
     @Column(name = VERSION_LABEL)
     private Short version;
+
+    @CreationTimestamp
+    @Column(name = CREATED_DATE_TIME)
+    private OffsetDateTime createdDate;
+
+    @UpdateTimestamp
+    @Column(name = LAST_UPDATED_DATE_TIME)
+    private OffsetDateTime modifiedDateTime;
 
 }

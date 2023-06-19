@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import java.util.UUID;
@@ -35,6 +36,8 @@ class LoginOrRefreshIntTest {
 
     @MockBean
     private CourthouseRepository courthouseRepository;
+    @MockBean
+    private DailyListRepository dailyListRepository;
 
     @Autowired
     private MockMvc mockMvc;

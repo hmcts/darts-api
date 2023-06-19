@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,11 +47,9 @@ public class CourthousesController implements CourthousesApi {
                 courthouseId);
             ExtendedCourthouse responseEntity = mapper.mapFromEntityToExtendedCourthouse(courtHouseEntity);
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
+        } catch (EntityNotFoundException|JpaObjectRetrievalFailureException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
-
     }
 
     @Override

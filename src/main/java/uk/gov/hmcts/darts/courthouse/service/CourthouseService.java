@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.courthouse.service;
 
 import uk.gov.hmcts.darts.common.entity.Courthouse;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 
 import java.util.List;
 
@@ -15,4 +17,6 @@ public interface CourthouseService {
     List<Courthouse> getAllCourthouses();
 
     Courthouse addCourtHouse(uk.gov.hmcts.darts.courthouse.model.Courthouse courthouse);
+
+    Courthouse retrieveCourtHouse(Short courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
 }

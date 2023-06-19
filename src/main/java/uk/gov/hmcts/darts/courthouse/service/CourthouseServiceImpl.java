@@ -5,9 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -47,5 +50,38 @@ public class CourthouseServiceImpl implements CourthouseService {
     public Courthouse addCourtHouse(uk.gov.hmcts.darts.courthouse.model.Courthouse courthouse) {
         Courthouse mappedEntity = this.mapper.mapToEntity(courthouse);
         return repository.saveAndFlush(mappedEntity);
+    }
+
+
+    /**
+     * @param courthouseCode Optional parameter. If it is not provided, then name will be used by itself.
+     * @param courthouseName Name of the courthouse to search for.
+     * @return
+     * @throws CourthouseNameNotFoundException
+     * @throws CourthouseCodeNotMatchException
+     */
+    @Override
+    public Courthouse retrieveCourtHouse(Short courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
+        Optional<Courthouse> courthouseOptional = Optional.empty();
+        if(courthouseCode!=null){
+            courthouseOptional= repository.findByCode(courthouseCode);
+        }
+        if (courthouseOptional.isEmpty()) {
+            //update Courthouse with code
+            courthouseOptional = repository.findByCourthouseName(courthouseName);
+            if (courthouseOptional.isEmpty()) {
+                throw new CourthouseNameNotFoundException(courthouseName);
+            }
+            Courthouse courthouse = courthouseOptional.get();
+            if (courthouse.getCode() == null) {
+                //update courthouse with new code
+                courthouse.setCode(courthouseCode);
+                repository.saveAndFlush(courthouse);
+            } else {
+                throw new CourthouseCodeNotMatchException(courthouse, courthouseCode);
+            }
+
+        }
+        return courthouseOptional.get();
     }
 }
