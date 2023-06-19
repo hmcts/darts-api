@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.config.AudioTransformConfigurationProperties;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.util.AudioConstants;
@@ -28,12 +28,12 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
     private static final String STRING_SLASH_STRING_FORMAT = "%s/%s";
 
-    private final AudioTransformConfigurationProperties audioTransformConfigurationProperties;
+    private final AudioConfigurationProperties audioConfigurationProperties;
     private final AudioUtil audioUtil;
 
     CommandLine generateConcatenateCommand(final Integer channel, final List<AudioFileInfo> audioFileInfos,
                                            final String outputFilename) {
-        StringBuilder command = new StringBuilder(audioTransformConfigurationProperties.getFfmpegExecutable());
+        StringBuilder command = new StringBuilder(audioConfigurationProperties.getFfmpegExecutable());
 
         for (final AudioFileInfo audioFileInfo : audioFileInfos) {
             command.append(" -i ").append(audioFileInfo.getFileName());
@@ -60,7 +60,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         Integer channel = getFirstChannel(audioFileInfos);
         String baseFilePath = String.format(
             STRING_SLASH_STRING_FORMAT,
-            audioTransformConfigurationProperties.getConcatWorkspace(),
+            audioConfigurationProperties.getConcatWorkspace(),
             workspaceDir
         );
         String outputFilename = generateOutputFilename(baseFilePath, AudioOperationTypes.CONCATENATE,
@@ -83,7 +83,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         String baseFilePath = String.format(
             STRING_SLASH_STRING_FORMAT,
-            audioTransformConfigurationProperties.getMergeWorkspace(),
+            audioConfigurationProperties.getMergeWorkspace(),
             workspaceDir
         );
 
@@ -92,7 +92,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
                                                        0, AudioConstants.AudioFileFormats.MP2
         );
 
-        CommandLine command = new CommandLine(audioTransformConfigurationProperties.getFfmpegExecutable());
+        CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         for (AudioFileInfo audioFileInfo : audioFilesInfo) {
             command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         }
@@ -116,7 +116,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         String baseFilePath = String.format(
             STRING_SLASH_STRING_FORMAT,
-            audioTransformConfigurationProperties.getTrimWorkspace(),
+            audioConfigurationProperties.getTrimWorkspace(),
             workspaceDir
         );
 
@@ -124,7 +124,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
                                                        audioFileInfo.getChannel(), AudioConstants.AudioFileFormats.MP2
         );
 
-        CommandLine command = new CommandLine(audioTransformConfigurationProperties.getFfmpegExecutable());
+        CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         command.addArgument("-ss").addArgument(startTime);
         command.addArgument("-to").addArgument(endTime);
@@ -146,7 +146,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         String baseFilePath = String.format(
             STRING_SLASH_STRING_FORMAT,
-            audioTransformConfigurationProperties.getReEncodeWorkspace(),
+            audioConfigurationProperties.getReEncodeWorkspace(),
             workspaceDir
         );
 
@@ -154,7 +154,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
                                                        audioFileInfo.getChannel(), AudioConstants.AudioFileFormats.MP3
         );
 
-        CommandLine command = new CommandLine(audioTransformConfigurationProperties.getFfmpegExecutable());
+        CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         command.addArgument(outputFilename);
 
