@@ -6,6 +6,7 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
+import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.model.DocumentID;
 
@@ -25,7 +26,7 @@ public class DailyListMapper {
         DocumentID documentId = dailyList.getDocumentId();
         dailyListEntity.setCourthouse(courthouse);
         dailyListEntity.setUniqueId(documentId.getUniqueId());
-        dailyListEntity.setStatus(JobStatusType.NEW.name());
+        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
         dailyListEntity.setTimestamp(documentId.getTimeStamp());
         dailyListEntity.setStartDate(dailyList.getListHeader().getStartDate());
         dailyListEntity.setEndDate(dailyList.getListHeader().getEndDate());
@@ -36,7 +37,7 @@ public class DailyListMapper {
         try {
             dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList.getCourtLists()));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);//todo
+            throw new DailyListException(e);
         }
     }
 }

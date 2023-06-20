@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.dailylist.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -19,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
@@ -37,6 +37,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DailyListServiceTest {
+    public static final String CPP = "CPP";
     ObjectMapper objectMapper;
 
     @Autowired
@@ -61,11 +62,11 @@ class DailyListServiceTest {
     }
 
     @Test
-    void insert1_ok() throws IOException {
+    void insert1Ok() throws IOException {
         String requestBody = getContentsFromFile("tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
         DailyList dailyList = objectMapper.readValue(requestBody, DailyList.class);
 
-        DailyListPostRequest request = new DailyListPostRequest("CPP", dailyList);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         service.processIncomingDailyList(request);
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(1, resultList.size());
@@ -75,19 +76,19 @@ class DailyListServiceTest {
     }
 
     @Test
-    void insert1_duplicate_ok() throws IOException {
+    void insert1DuplicateOk() throws IOException {
         String requestBody = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/DailyListRequest.json");
         DailyList dailyList = objectMapper.readValue(requestBody, DailyList.class);
 
-        DailyListPostRequest request = new DailyListPostRequest("CPP", dailyList);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         service.processIncomingDailyList(request);
 
         String requestBody2 = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/DailyListRequest2.json");
         DailyList dailyList2 = objectMapper.readValue(requestBody2, DailyList.class);
 
-        DailyListPostRequest request2 = new DailyListPostRequest("CPP", dailyList2);
+        DailyListPostRequest request2 = new DailyListPostRequest(CPP, dailyList2);
         service.processIncomingDailyList(request2);
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(1, resultList.size());
@@ -107,15 +108,13 @@ class DailyListServiceTest {
             String actualResponse = objectMapper.writeValueAsString(dailyListEntity);
             String expectedResponse = getContentsFromFile(expectedResponseLocation);
             JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new DailyListException(e);
         }
     }
 
     @Test
-    void update_courthouse_ok() throws IOException {
+    void updateCourthouseOk() throws IOException {
         Courthouse courthouseTemp = new Courthouse();
         courthouseTemp.setCourthouseName("Temp");
         courthouseRepository.saveAndFlush(courthouseTemp);
@@ -123,7 +122,7 @@ class DailyListServiceTest {
             "tests/dailylist/DailyListServiceTest/update_courthouse_ok/DailyListRequest.json");
         DailyList dailyList = objectMapper.readValue(requestBody, DailyList.class);
 
-        DailyListPostRequest request = new DailyListPostRequest("CPP", dailyList);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         service.processIncomingDailyList(request);
         Optional<Courthouse> updatedCourthouse = courthouseRepository.findByCourthouseName("Temp");
         assertEquals(updatedCourthouse.get().getCode(), Short.valueOf("9999"));
@@ -132,12 +131,12 @@ class DailyListServiceTest {
     }
 
     @Test
-    void insert1_invalidCourthouse() throws IOException {
+    void insert1InvalidCourthouse() throws IOException {
         String requestBody = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_invalidCourthouse/DailyListRequest.json");
         DailyList dailyList = objectMapper.readValue(requestBody, DailyList.class);
 
-        DailyListPostRequest request = new DailyListPostRequest("CPP", dailyList);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
             service.processIncomingDailyList(request);
         });

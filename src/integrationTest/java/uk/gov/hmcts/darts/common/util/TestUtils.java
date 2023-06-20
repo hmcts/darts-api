@@ -18,7 +18,7 @@ public final class TestUtils {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL resource = classLoader.getResource(filelocation);
         if (resource == null) {
-            throw new RuntimeException(MessageFormat.format("File not found {0}", filelocation));
+            throw new IOException(MessageFormat.format("File not found {0}", filelocation));
         }
         File file = new File(resource.getFile());
         return FileUtils.readFileToString(file, "UTF-8");

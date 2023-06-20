@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
+import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.CourtHouse;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
@@ -74,7 +75,7 @@ public class DailyListServiceImpl implements DailyListService {
                 dailyList.getDocumentId().getUniqueId(),
                 crownCourt.getCourtHouseName()
             );
-            throw new RuntimeException(message);
+            throw new DailyListException(message, e);
         }
     }
 
