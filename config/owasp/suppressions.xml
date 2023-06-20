@@ -27,7 +27,7 @@
 
   <suppress until="2023-09-14">
     <notes>The exploitation depends on the structure of the target LDAP directory, as well as what kind of errors are exposed to the user.</notes>
-    <packageUrl regex="true">(pkg:maven/org.bouncycastle/bcprov-jdk15on@1.69, cpe:2.3:a:bouncycastle:bouncy-castle-crypto-package:1.69:*:*:*:*:*:*:*, cpe:2.3:a:bouncycastle:bouncy_castle_crypto_package:1.69:*:*:*:*:*:*:*, cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle:1.69:*:*:*:*:*:*:*, cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api:1.69:*:*:*:*:*:*:*, cpe:2.3:a:bouncycastle:the_bouncy_castle_crypto_package_for_java:1.69:*:*:*:*:*:*:*)</packageUrl>
+    <packageUrl regex="true">pkg:maven/org.bouncycastle/bcprov-jdk15on@1.69</packageUrl>
     <vulnerabilityName>CVE-2023-33201</vulnerabilityName>
   </suppress>
   <!--End of temporary suppression section -->
