@@ -72,9 +72,9 @@ public class DailyListController implements DailyListsApi {
 
     }
 
-
+    @Override
     /**
-     * GET /dailylists/getCases : Retrieves the case list for the specified courthouse, courtroom and a hearing date
+     * GET /dailylists/getCases : Retrieves the case list for the specified courthouse, courtroom and a hearing date.
      * description
      *
      * @param courtHouseCode The CourtHouseCode to get the daily list for. (required)
@@ -85,7 +85,7 @@ public class DailyListController implements DailyListsApi {
      */
     @Operation(
         operationId = "dailylistsGetCasesGet",
-        summary = "Retrieves the case list for the specified courthouse, courtroom and a hearing date",
+        summary = "Retrieves the case list for the specified courthouse, courtroom and a hearing date.",
         description = "description",
         tags = { "DailyLists" },
         responses = {

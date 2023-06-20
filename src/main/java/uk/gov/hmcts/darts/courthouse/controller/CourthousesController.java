@@ -47,7 +47,7 @@ public class CourthousesController implements CourthousesApi {
                 courthouseId);
             ExtendedCourthouse responseEntity = mapper.mapFromEntityToExtendedCourthouse(courtHouseEntity);
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
-        } catch (EntityNotFoundException|JpaObjectRetrievalFailureException e) {
+        } catch (EntityNotFoundException | JpaObjectRetrievalFailureException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

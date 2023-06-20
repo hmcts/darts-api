@@ -54,17 +54,18 @@ public class CourthouseServiceImpl implements CourthouseService {
 
 
     /**
+     * retrieves the courtroom from the database.
      * @param courthouseCode Optional parameter. If it is not provided, then name will be used by itself.
      * @param courthouseName Name of the courthouse to search for.
-     * @return
-     * @throws CourthouseNameNotFoundException
-     * @throws CourthouseCodeNotMatchException
+     * @return the found courtroom
+     * @throws CourthouseNameNotFoundException when the courthouse isn't found
+     * @throws CourthouseCodeNotMatchException when the courtroom is found, but it has a different code that expected.
      */
     @Override
     public Courthouse retrieveCourtHouse(Short courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
         Optional<Courthouse> courthouseOptional = Optional.empty();
-        if(courthouseCode!=null){
-            courthouseOptional= repository.findByCode(courthouseCode);
+        if (courthouseCode != null) {
+            courthouseOptional = repository.findByCode(courthouseCode);
         }
         if (courthouseOptional.isEmpty()) {
             //update Courthouse with code

@@ -10,12 +10,12 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = DailyListEntity.TABLE_NAME)
@@ -40,6 +40,7 @@ public class DailyListEntity {
     public static final String SUPERSEDED = "i_superseded";
     public static final String VERSION_LABEL = "i_version";
     public static final String TABLE_NAME = "moj_daily_list";
+    public static final String DAILY_LIST_CONTENT = "daily_list_content";
 
     @Id
     @Column(name = ID)
@@ -52,7 +53,7 @@ public class DailyListEntity {
     private Courthouse courthouse;
 
     @Column(name = DAILY_LIST_OBJECT_ID)
-    private String dailyListObjectId;
+    private String legacyObjectId;
 
     @Column(name = UNIQUE_ID)
     private String uniqueId;
@@ -61,16 +62,16 @@ public class DailyListEntity {
     private String status;
 
     @Column(name = TIMESTAMP)
-    private OffsetDateTime timeStamp;
+    private OffsetDateTime timestamp;
 
     @Column(name = DAILY_LIST_ID)
-    private Integer dailylistId;
+    private Integer dailyListId;
 
     @Column(name = START_DATE)
-    private OffsetDateTime startDate;
+    private Date startDate;
 
     @Column(name = END_DATE)
-    private OffsetDateTime endDate;
+    private Date endDate;
 
     @Column(name = DAILY_LIST_ID_STRING)
     private String leagacyIdString;
@@ -78,7 +79,7 @@ public class DailyListEntity {
     @Column(name = DAILY_LIST_SOURCE)
     private String source;
 
-    @Column(name = "daily_list_content")
+    @Column(name = DAILY_LIST_CONTENT)
     private String content;
 
     @Column(name = LEGACY_COURTHOUSE_OBJECT_ID)

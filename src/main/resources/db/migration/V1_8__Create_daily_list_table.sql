@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS moj_daily_list (
 , c_end_date                     TIMESTAMP WITH TIME ZONE
 , c_daily_list_id_s              CHARACTER VARYING
 , c_daily_list_source            CHARACTER VARYING
+, daily_list_content             CHARACTER VARYING
+, r_courthouse_object_id         CHARACTER VARYING
 , created_ts                     TIMESTAMP WITH TIME ZONE
 , last_modified_ts               TIMESTAMP WITH TIME ZONE
 , r_version_label                CHARACTER VARYING(32)

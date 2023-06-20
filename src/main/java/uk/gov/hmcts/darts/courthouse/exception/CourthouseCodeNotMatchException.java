@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.Courthouse;
 
 @AllArgsConstructor
 @Getter
-public class CourthouseCodeNotMatchException extends Exception{
+public class CourthouseCodeNotMatchException extends Exception {
     Courthouse courthouse;
     Short newCourthouseCode;
 
