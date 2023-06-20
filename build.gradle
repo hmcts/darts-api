@@ -328,7 +328,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.3'
-
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.3")
   compileJava.dependsOn = [ 'generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioRequestApi', 'generateCourtHousesApi' ]
 }
 
