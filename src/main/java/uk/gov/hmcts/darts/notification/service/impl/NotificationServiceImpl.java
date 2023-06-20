@@ -122,8 +122,10 @@ public class NotificationServiceImpl implements NotificationService {
         if (attempts <= maxRetry) {
             notification.setAttempts(attempts);
             notification.setStatus(String.valueOf(NotificationStatus.PROCESSING));
+            log.info("Notification has failed to send, retrying ID: {}", notification.getId());
         } else {
             updateNotificationStatus(notification, NotificationStatus.FAILED);
+            log.error("Notification ID {} has fully failed", notification.getId());
         }
         notificationRepo.saveAndFlush(notification);
     }
