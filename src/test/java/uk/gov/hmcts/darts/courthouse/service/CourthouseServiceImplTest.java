@@ -10,12 +10,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 
@@ -126,4 +130,55 @@ class CourthouseServiceImplTest {
         List<Courthouse> returnedEntities = courthouseService.getAllCourthouses();
         assertEquals(2, returnedEntities.size());
     }
+    @Test
+    void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        Mockito.when(repository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
+        Courthouse courthouse = courthouseService.retrieveCourtHouse(null, "swansea");
+        assertEquals("SWANSEA", courthouse.getCourthouseName());
+        assertEquals( Short.parseShort("457"), courthouse.getCode());
+    }
+
+    @Test
+    void retrieveCourthouseUsingCodeAndName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        Mockito.when(repository.findByCode(Short.parseShort("457"))).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
+        Courthouse courthouse = courthouseService.retrieveCourtHouse(457, "swansea");
+        assertEquals("SWANSEA", courthouse.getCourthouseName());
+        assertEquals( Short.parseShort("457"), courthouse.getCode());
+    }
+
+    @Test
+    void retrieveCourthouseUsingNameAndDifferentCode() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        Mockito.when(repository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
+        Mockito.when(repository.findByCourthouseName("SWANSEA")).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
+
+        CourthouseCodeNotMatchException thrownException = assertThrows(
+            CourthouseCodeNotMatchException.class,
+            () -> courthouseService.retrieveCourtHouse(458, "swansea")
+        );
+
+        Courthouse courthouse = thrownException.getCourthouse();
+        assertEquals("SWANSEA", courthouse.getCourthouseName());
+        assertEquals( Short.parseShort("457"), courthouse.getCode());
+    }
+
+    @Test
+    void retrieveCourthouseUsingInvalidName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
+        Mockito.when(repository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
+        Mockito.when(repository.findByCourthouseName("TEST")).thenReturn(Optional.empty());
+
+        assertThrows(
+            CourthouseNameNotFoundException.class,
+            () -> courthouseService.retrieveCourtHouse(458, "test")
+        );
+
+    }
+    private Courthouse createSwanseaCourthouseEntity(){
+        Courthouse courthouseEntity = new Courthouse();
+        courthouseEntity.setCourthouseName("SWANSEA");
+        courthouseEntity.setCode(Short.parseShort("457"));
+        return courthouseEntity;
+    }
+
+
+
 }

@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.courthouse.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
@@ -62,10 +63,11 @@ public class CourthouseServiceImpl implements CourthouseService {
      * @throws CourthouseCodeNotMatchException when the courtroom is found, but it has a different code that expected.
      */
     @Override
-    public Courthouse retrieveCourtHouse(Short courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
+    public Courthouse retrieveCourtHouse(Integer courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
+        courthouseName = StringUtils.upperCase(courthouseName);
         Optional<Courthouse> courthouseOptional = Optional.empty();
         if (courthouseCode != null) {
-            courthouseOptional = repository.findByCode(courthouseCode);
+            courthouseOptional = repository.findByCode(courthouseCode.shortValue());
         }
         if (courthouseOptional.isEmpty()) {
             //update Courthouse with code
@@ -74,12 +76,14 @@ public class CourthouseServiceImpl implements CourthouseService {
                 throw new CourthouseNameNotFoundException(courthouseName);
             }
             Courthouse courthouse = courthouseOptional.get();
-            if (courthouse.getCode() == null) {
+            if (courthouse.getCode() == null && courthouseCode!=null) {
                 //update courthouse with new code
-                courthouse.setCode(courthouseCode);
+                courthouse.setCode(courthouseCode.shortValue());
                 repository.saveAndFlush(courthouse);
             } else {
-                throw new CourthouseCodeNotMatchException(courthouse, courthouseCode);
+                if(courthouseCode!=null){
+                    throw new CourthouseCodeNotMatchException(courthouse, courthouseCode);
+                }
             }
 
         }

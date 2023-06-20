@@ -8,6 +8,6 @@ import uk.gov.hmcts.darts.common.entity.Courthouse;
 @Getter
 public class CourthouseCodeNotMatchException extends Exception {
     Courthouse courthouse;
-    Short newCourthouseCode;
+    Integer newCourthouseCode;
 
 }

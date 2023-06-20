@@ -57,7 +57,7 @@ public class DailyListServiceImpl implements DailyListService {
 
     private Courthouse retrieveCourtHouse(DailyList dailyList) {
         CourtHouse crownCourt = dailyList.getCrownCourt();
-        Short courthouseCode = crownCourt.getCourtHouseCode().getCode().shortValue();
+        Integer courthouseCode = crownCourt.getCourtHouseCode().getCode();
         String courthouseName = crownCourt.getCourtHouseName();
         try {
             return courthouseService.retrieveCourtHouse(courthouseCode, courthouseName);

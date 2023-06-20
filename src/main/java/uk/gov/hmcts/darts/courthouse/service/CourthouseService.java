@@ -18,5 +18,5 @@ public interface CourthouseService {
 
     Courthouse addCourtHouse(uk.gov.hmcts.darts.courthouse.model.Courthouse courthouse);
 
-    Courthouse retrieveCourtHouse(Short courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
+    Courthouse retrieveCourtHouse(Integer courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException;
 }
