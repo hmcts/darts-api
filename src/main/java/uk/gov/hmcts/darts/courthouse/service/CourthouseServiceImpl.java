@@ -72,7 +72,7 @@ public class CourthouseServiceImpl implements CourthouseService {
             courthouseOptional = repository.findByCode(courthouseCode.shortValue());
         }
         if (courthouseOptional.isEmpty()) {
-            //update Courthouse with code
+            //code not found, lookup name instead
             courthouseOptional = repository.findByCourthouseName(courthouseNameUC);
             if (courthouseOptional.isEmpty()) {
                 throw new CourthouseNameNotFoundException(courthouseNameUC);
