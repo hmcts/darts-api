@@ -116,7 +116,7 @@ class DailyListServiceTest {
     @Test
     void updateCourthouseOk() throws IOException {
         Courthouse courthouseTemp = new Courthouse();
-        courthouseTemp.setCourthouseName("Temp");
+        courthouseTemp.setCourthouseName("TEMP");
         courthouseRepository.saveAndFlush(courthouseTemp);
         String requestBody = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/update_courthouse_ok/DailyListRequest.json");
@@ -124,7 +124,7 @@ class DailyListServiceTest {
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         service.processIncomingDailyList(request);
-        Optional<Courthouse> updatedCourthouse = courthouseRepository.findByCourthouseName("Temp");
+        Optional<Courthouse> updatedCourthouse = courthouseRepository.findByCourthouseName("TEMP");
         assertEquals(updatedCourthouse.get().getCode(), Short.valueOf("9999"));
         dailyListRepository.deleteAll();
         courthouseRepository.delete(courthouseTemp);

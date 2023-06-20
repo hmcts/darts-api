@@ -56,6 +56,7 @@ public class CourthouseServiceImpl implements CourthouseService {
 
     /**
      * retrieves the courtroom from the database.
+     *
      * @param courthouseCode Optional parameter. If it is not provided, then name will be used by itself.
      * @param courthouseName Name of the courthouse to search for.
      * @return the found courtroom
@@ -63,25 +64,26 @@ public class CourthouseServiceImpl implements CourthouseService {
      * @throws CourthouseCodeNotMatchException when the courtroom is found, but it has a different code that expected.
      */
     @Override
-    public Courthouse retrieveCourtHouse(Integer courthouseCode, String courthouseName) throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
-        courthouseName = StringUtils.upperCase(courthouseName);
+    public Courthouse retrieveCourtHouse(Integer courthouseCode, String courthouseName)
+        throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
+        String courthouseNameUC = StringUtils.upperCase(courthouseName);
         Optional<Courthouse> courthouseOptional = Optional.empty();
         if (courthouseCode != null) {
             courthouseOptional = repository.findByCode(courthouseCode.shortValue());
         }
         if (courthouseOptional.isEmpty()) {
             //update Courthouse with code
-            courthouseOptional = repository.findByCourthouseName(courthouseName);
+            courthouseOptional = repository.findByCourthouseName(courthouseNameUC);
             if (courthouseOptional.isEmpty()) {
-                throw new CourthouseNameNotFoundException(courthouseName);
+                throw new CourthouseNameNotFoundException(courthouseNameUC);
             }
             Courthouse courthouse = courthouseOptional.get();
-            if (courthouse.getCode() == null && courthouseCode!=null) {
+            if (courthouse.getCode() == null && courthouseCode != null) {
                 //update courthouse with new code
                 courthouse.setCode(courthouseCode.shortValue());
                 repository.saveAndFlush(courthouse);
             } else {
-                if(courthouseCode!=null){
+                if (courthouseCode != null) {
                     throw new CourthouseCodeNotMatchException(courthouse, courthouseCode);
                 }
             }
