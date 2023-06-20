@@ -125,7 +125,7 @@ public class NotificationServiceImpl implements NotificationService {
             log.info("Notification has failed to send, retrying ID: {}", notification.getId());
         } else {
             updateNotificationStatus(notification, NotificationStatus.FAILED);
-            log.error("Notification has fully failed");
+            log.error("Notification ID {} has fully failed", notification.getId());
         }
         notificationRepo.saveAndFlush(notification);
     }
