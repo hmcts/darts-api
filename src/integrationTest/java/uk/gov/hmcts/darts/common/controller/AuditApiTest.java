@@ -58,7 +58,7 @@ class AuditApiTest {
             .queryParam(idType, Integer.toString(id))
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id", is(1)))
+            .andExpect(jsonPath("$[0].id", is(999)))
             .andExpect(jsonPath("$[0].case_id", is(2)))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
             .andExpect(jsonPath("$[0].event_id", is(3)))
@@ -83,7 +83,7 @@ class AuditApiTest {
             .queryParam("to_date", "2023-07-13T08:13:09.688537759Z")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id", is(1)))
+            .andExpect(jsonPath("$[0].id", is(999)))
             .andExpect(jsonPath("$[0].case_id", is(2)))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
             .andExpect(jsonPath("$[0].event_id", is(3)))
