@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles({"intTest", "h2db"})
-public class LogoutIntTest {
+class LogoutIntTest {
 
     private static final String EXTERNAL_USER_LOGOUT_ENDPOINT = "/external-user/logout";
 
@@ -43,6 +43,7 @@ public class LogoutIntTest {
     private MockMvc mockMvc;
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void logoutShouldReturnRedirectWhenSessionExists() throws Exception {
         MockHttpSession mockHttpSession = new MockHttpSession();
         String id = mockHttpSession.getId();
