@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.entity.AudioRequest;
+import uk.gov.hmcts.darts.audio.entity.MediaRequest;
 import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AudioRequestServiceImplTest {
 
-    private static final String TEST_REQUESTER = "test@test.com";
+    private static final Integer TEST_REQUESTER = 1234;
     private static final String OFFSET_T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String OFFSET_T_12_00_00_Z = "2023-05-31T12:00:00Z";
     private static final String DOWNLOAD_REQ_TYPE = "Download";
@@ -34,42 +34,42 @@ class AudioRequestServiceImplTest {
     @Mock
     private AudioRequestRepository audioRequestRepository;
 
-    private AudioRequest mockAudioRequest;
+    private MediaRequest mockMediaRequest;
 
     @BeforeEach
     void beforeEach() {
 
-        mockAudioRequest = new AudioRequest();
-        mockAudioRequest.setRequestId(1);
-        mockAudioRequest.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
-        mockAudioRequest.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
-        mockAudioRequest.setRequester(TEST_REQUESTER);
-        mockAudioRequest.setStatus(REQUEST_STATUS_OPEN);
-        mockAudioRequest.setAttempts(0);
+        mockMediaRequest = new MediaRequest();
+        mockMediaRequest.setRequestId(1);
+        mockMediaRequest.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
+        mockMediaRequest.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
+        mockMediaRequest.setRequestor(TEST_REQUESTER);
+        mockMediaRequest.setStatus(REQUEST_STATUS_OPEN);
+        mockMediaRequest.setAttempts(0);
         OffsetDateTime now = OffsetDateTime.now();
-        mockAudioRequest.setCreatedDateTime(now);
-        mockAudioRequest.setLastUpdatedDateTime(now);
+        mockMediaRequest.setCreatedDateTime(now);
+        mockMediaRequest.setLastUpdatedDateTime(now);
     }
 
     @Test
     void whenSavingAudioRequestIsSuccessful() {
 
-        String caseId = "123456";
-        mockAudioRequest.setRequestId(1);
+        Integer hearingId = 4567;
+        mockMediaRequest.setRequestId(1);
 
         var requestDetails = new AudioRequestDetails();
-        requestDetails.setCaseId(caseId);
-        requestDetails.setRequester(TEST_REQUESTER);
+        requestDetails.setHearingId(hearingId);
+        requestDetails.setRequestor(TEST_REQUESTER);
         requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD_REQ_TYPE);
 
-        when(audioRequestRepository.saveAndFlush(any(AudioRequest.class))).thenReturn(mockAudioRequest);
+        when(audioRequestRepository.saveAndFlush(any(MediaRequest.class))).thenReturn(mockMediaRequest);
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
 
-        verify(audioRequestRepository, times(1)).saveAndFlush(any(AudioRequest.class));
-        assertEquals(requestId, mockAudioRequest.getRequestId());
+        verify(audioRequestRepository, times(1)).saveAndFlush(any(MediaRequest.class));
+        assertEquals(requestId, mockMediaRequest.getRequestId());
     }
 
 }

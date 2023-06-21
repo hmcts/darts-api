@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.darts.audio.entity.AudioRequest;
+import uk.gov.hmcts.darts.audio.entity.MediaRequest;
 import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.audio.service.AudioRequestService;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
@@ -44,8 +44,8 @@ class AudioRequestServiceTest {
     @BeforeEach
     void beforeEach() {
         requestDetails = new AudioRequestDetails(null,null,null,null,null);
-        requestDetails.setCaseId("123456");
-        requestDetails.setRequester("test@test.com");
+        requestDetails.setHearingId(4567);
+        requestDetails.setRequestor(1234);
         requestDetails.setRequestType("Download");
     }
 
@@ -56,11 +56,11 @@ class AudioRequestServiceTest {
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
 
-        List<AudioRequest> resultList = audioRequestRepository.findByRequestId(requestId);
-        AudioRequest requestResult = resultList.get(0);
+        List<MediaRequest> resultList = audioRequestRepository.findByRequestId(requestId);
+        MediaRequest requestResult = resultList.get(0);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN_STATUS, requestResult.getStatus());
-        assertEquals(requestDetails.getCaseId(), requestResult.getCaseId());
+        assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
         assertEquals(requestDetails.getStartTime(), requestResult.getStartTime());
         assertEquals(requestDetails.getEndTime(), requestResult.getEndTime());
         assertNotNull(requestResult.getCreatedDateTime());
@@ -74,11 +74,11 @@ class AudioRequestServiceTest {
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
 
-        List<AudioRequest> resultList = audioRequestRepository.findByRequestId(requestId);
-        AudioRequest requestResult = resultList.get(0);
+        List<MediaRequest> resultList = audioRequestRepository.findByRequestId(requestId);
+        MediaRequest requestResult = resultList.get(0);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN_STATUS, requestResult.getStatus());
-        assertEquals(requestDetails.getCaseId(), requestResult.getCaseId());
+        assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
         assertEquals(OffsetDateTime.parse(T_09_00_00_Z), requestResult.getStartTime());
         assertEquals(OffsetDateTime.parse(T_12_00_00_Z), requestResult.getEndTime());
         assertNotNull(requestResult.getCreatedDateTime());
@@ -94,11 +94,11 @@ class AudioRequestServiceTest {
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
 
-        List<AudioRequest> resultList = audioRequestRepository.findByRequestId(requestId);
-        AudioRequest requestResult = resultList.get(0);
+        List<MediaRequest> resultList = audioRequestRepository.findByRequestId(requestId);
+        MediaRequest requestResult = resultList.get(0);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN_STATUS, requestResult.getStatus());
-        assertEquals(requestDetails.getCaseId(), requestResult.getCaseId());
+        assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
         assertEquals(requestDetails.getStartTime(), requestResult.getStartTime());
         assertEquals(requestDetails.getEndTime(), requestResult.getEndTime());
         assertNotNull(requestResult.getCreatedDateTime());
@@ -113,11 +113,11 @@ class AudioRequestServiceTest {
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
 
-        List<AudioRequest> resultList = audioRequestRepository.findByRequestId(requestId);
-        AudioRequest requestResult = resultList.get(0);
+        List<MediaRequest> resultList = audioRequestRepository.findByRequestId(requestId);
+        MediaRequest requestResult = resultList.get(0);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN_STATUS, requestResult.getStatus());
-        assertEquals(requestDetails.getCaseId(), requestResult.getCaseId());
+        assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
         assertEquals(requestDetails.getStartTime(), requestResult.getStartTime());
         assertEquals(requestDetails.getEndTime(), requestResult.getEndTime());
         assertNotNull(requestResult.getCreatedDateTime());

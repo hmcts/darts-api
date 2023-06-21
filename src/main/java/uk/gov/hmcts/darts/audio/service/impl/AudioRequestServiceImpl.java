@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.entity.AudioRequest;
+import uk.gov.hmcts.darts.audio.entity.MediaRequest;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.audio.service.AudioRequestService;
@@ -20,8 +20,8 @@ public class AudioRequestServiceImpl implements AudioRequestService {
     public Integer saveAudioRequest(AudioRequestDetails request) {
 
         var audioRequest = saveAudioRequestToDb(
-            request.getCaseId(),
-            request.getRequester(),
+            request.getHearingId(),
+            request.getRequestor(),
             request.getStartTime(),
             request.getEndTime(),
             request.getRequestType()
@@ -30,20 +30,20 @@ public class AudioRequestServiceImpl implements AudioRequestService {
         return audioRequest.getRequestId();
     }
 
-    private AudioRequest saveAudioRequestToDb(String caseId, String requester,
+    private MediaRequest saveAudioRequestToDb(Integer hearingId, Integer requestor,
                                               OffsetDateTime startTime, OffsetDateTime endTime,
                                               String requestType) {
 
-        AudioRequest audioRequest = new AudioRequest();
-        audioRequest.setCaseId(caseId);
-        audioRequest.setRequester(requester);
-        audioRequest.setStartTime(startTime);
-        audioRequest.setEndTime(endTime);
-        audioRequest.setRequestType(requestType);
-        audioRequest.setStatus(String.valueOf(AudioRequestStatus.OPEN));
-        audioRequest.setAttempts(0);
+        MediaRequest mediaRequest = new MediaRequest();
+        mediaRequest.setHearingId(hearingId);
+        mediaRequest.setRequestor(requestor);
+        mediaRequest.setStartTime(startTime);
+        mediaRequest.setEndTime(endTime);
+        mediaRequest.setRequestType(requestType);
+        mediaRequest.setStatus(String.valueOf(AudioRequestStatus.OPEN));
+        mediaRequest.setAttempts(0);
 
-        return audioRequestRepository.saveAndFlush(audioRequest);
+        return audioRequestRepository.saveAndFlush(mediaRequest);
     }
 
 }
