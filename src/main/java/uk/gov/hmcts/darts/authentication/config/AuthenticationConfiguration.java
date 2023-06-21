@@ -19,6 +19,9 @@ public class AuthenticationConfiguration {
     @Value("${spring.security.oauth2.client.provider.external-azure-ad-provider.authorization-uri}")
     private String externalADauthorizationUri;
 
+    @Value("${spring.security.oauth2.client.provider.external-azure-ad-provider.logout-uri}")
+    private String externalADlogoutUri;
+
     @Value("${spring.security.oauth2.client.provider.external-azure-ad-provider.token-uri}")
     private String externalADtokenUri;
 
@@ -30,6 +33,9 @@ public class AuthenticationConfiguration {
 
     @Value("${spring.security.oauth2.client.registration.external-azure-ad.redirect-uri}")
     private String externalADredirectUri;
+
+    @Value("${spring.security.oauth2.client.registration.external-azure-ad.logout-redirect-uri}")
+    private String externalADlogoutRedirectUri;
 
     @Value("${spring.security.oauth2.client.registration.external-azure-ad.authorization-grant-type}")
     private String externalADauthorizationGrantType;

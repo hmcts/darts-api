@@ -8,4 +8,5 @@ public interface UriProvider {
 
     URI getLandingPageUri();
 
+    URI getLogoutUri(String sessionId);
 }

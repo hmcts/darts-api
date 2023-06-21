@@ -60,4 +60,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return accessToken;
     }
 
+    @Override
+    public URI logout(String sessionId) {
+        log.debug("Session {} has initiated logout flow", sessionId);
+
+        Session session = sessionService.getSession(sessionId);
+        if (session == null) {
+            throw new AuthenticationException(
+                String.format("Session %s attempted logout but this session is not active", sessionId));
+        }
+
+        return uriProvider.getLogoutUri(sessionId);
+    }
+
 }

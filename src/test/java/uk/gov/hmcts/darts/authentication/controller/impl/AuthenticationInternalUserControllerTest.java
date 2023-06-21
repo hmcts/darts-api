@@ -26,7 +26,7 @@ class AuthenticationInternalUserControllerTest {
 
     @Test
     void logoutWhenUserLogoutFromdarts() {
-        assertThrows(NotImplementedException.class, () -> controller.logout());
+        assertThrows(NotImplementedException.class, () -> controller.logout(null));
     }
 
 }
