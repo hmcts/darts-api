@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -24,11 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles({"intTest", "h2db"})
 public class LogoutIntTest {
 
-    private static final String EXPECTED_LOGOUT_REDIRECT_URL = """
-        https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_darts_externaluser_signin\
-        /oauth2/v2.0/logout\
-        ?id_token_hint=1\
-        &post_logout_redirect_uri=https%3A%2F%2Fdarts-portal.staging.platform.hmcts.net%2Fauth%2Flogout-callback""";
     private static final String EXTERNAL_USER_LOGOUT_ENDPOINT = "/external-user/logout";
 
     @MockBean
@@ -48,15 +44,24 @@ public class LogoutIntTest {
 
     @Test
     void logoutShouldReturnRedirectWhenSessionExists() throws Exception {
-        sessionService.putSession("1", new Session(null, null, 0));
+        MockHttpSession mockHttpSession = new MockHttpSession();
+        String id = mockHttpSession.getId();
 
-        MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGOUT_ENDPOINT);
+        sessionService.putSession(id, new Session(id, null, 0));
+
+        String expectedUri = "https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com" +
+            "/B2C_1_darts_externaluser_signin/oauth2/v2.0/logout?id_token_hint=" +
+            id +
+            "&post_logout_redirect_uri=https%3A%2F%2Fdarts-portal.staging.platform.hmcts.net%2Fauth%2Flogout-callback";
+
+        MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGOUT_ENDPOINT)
+            .session(mockHttpSession);
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isFound())
             .andExpect(header().string(
                 HttpHeaders.LOCATION,
-                EXPECTED_LOGOUT_REDIRECT_URL
+                expectedUri
             ));
     }
 
