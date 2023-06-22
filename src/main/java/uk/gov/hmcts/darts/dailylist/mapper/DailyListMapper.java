@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.dailylist.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
@@ -11,8 +11,12 @@ import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.model.DocumentID;
 
-@UtilityClass
+@Component
+@RequiredArgsConstructor
 public class DailyListMapper {
+
+    private final ObjectMapper objectMapper;
+
 
     public DailyListEntity mapToDailyListEntity(DailyListPostRequest postRequest, Courthouse courthouse) {
 
@@ -33,8 +37,6 @@ public class DailyListMapper {
         dailyListEntity.setEndDate(dailyList.getListHeader().getEndDate());
         dailyListEntity.setSource(postRequest.getSourceSystem());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
 
         try {
             dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList));

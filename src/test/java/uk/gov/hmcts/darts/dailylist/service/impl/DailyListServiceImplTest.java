@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.dailylist.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -10,11 +8,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
+import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
@@ -44,11 +44,13 @@ class DailyListServiceImplTest {
     @Mock
     DailyListRepository dailyListRepository;
 
+    @Mock
+    DailyListMapper dailyListMapper;
+
     @BeforeAll
     void beforeAll() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        objectMapper = objectMapperConfig.objectMapper();
     }
 
     @Test
@@ -60,12 +62,15 @@ class DailyListServiceImplTest {
 
         when(courthouseApi.retrieveAndUpdateCourtHouse(anyInt(), anyString())).thenThrow(exception);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
+        when(dailyListMapper.mapToDailyListEntity(any(DailyListPostRequest.class), any(Courthouse.class))).thenReturn(new DailyListEntity());
         String requestBody = getContentsFromFile(
             "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
         DailyList dailyList = objectMapper.readValue(requestBody, DailyList.class);
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         service.processIncomingDailyList(request);
+
+        //make sure an exception is not thrown.
         verify(dailyListRepository).saveAndFlush(any(DailyListEntity.class));
 
     }

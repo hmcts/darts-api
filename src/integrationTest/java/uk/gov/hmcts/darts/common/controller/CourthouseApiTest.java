@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +50,9 @@ class CourthouseApiTest {
     private CourthouseRepository courthouseRepository;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private transient MockMvc mockMvc;
 
     @Test
@@ -76,9 +77,6 @@ class CourthouseApiTest {
 
     @Test
     void courthousesGetAll() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);

@@ -26,6 +26,7 @@ public class DailyListServiceImpl implements DailyListService {
 
     private final DailyListRepository dailyListRepository;
     private final CourthouseApi courthouseApi;
+    private final DailyListMapper dailyListMapper;
 
 
     @Override
@@ -42,11 +43,11 @@ public class DailyListServiceImpl implements DailyListService {
         if (existingRecordOpt.isPresent()) {
             //update the record
             DailyListEntity existingRecord = existingRecordOpt.get();
-            DailyListMapper.mapToExistingDailyListEntity(postRequest, courthouse, existingRecord);
+            dailyListMapper.mapToExistingDailyListEntity(postRequest, courthouse, existingRecord);
             dailyListRepository.saveAndFlush(existingRecord);
         } else {
             //insert new record
-            DailyListEntity dailyListEntity = DailyListMapper.mapToDailyListEntity(
+            DailyListEntity dailyListEntity = dailyListMapper.mapToDailyListEntity(
                 postRequest,
                 courthouse
             );
