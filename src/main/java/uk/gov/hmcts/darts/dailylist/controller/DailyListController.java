@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.dailylist.model.DailyList;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 
-import java.util.Date;
+import java.time.LocalDate;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -103,7 +103,7 @@ public class DailyListController implements DailyListsApi {
     public ResponseEntity<CourtList> dailylistsGetCasesGet(
         @NotNull @Parameter(name = "court_house_code", description = "The CourtHouseCode to get the daily list for.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "court_house_code", required = true) Integer courtHouseCode,
         @Parameter(name = "court_room_number", description = "The CourtRoomNumber to get the daily list for.<br>This is optional, if not provided, the daily list for all court rooms in the court house will be provided.", in = ParameterIn.QUERY) @Valid @RequestParam(value = "court_room_number", required = false) String courtRoomNumber,
-        @Parameter(name = "hearing_date", description = "The date to get the daily list for.<br>This is optional, if not provided, the daily list for today will be provided.", in = ParameterIn.QUERY) @Valid @RequestParam(value = "hearing_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date hearingDate
+        @Parameter(name = "hearing_date", description = "The date to get the daily list for.<br>This is optional, if not provided, the daily list for today will be provided.", in = ParameterIn.QUERY) @Valid @RequestParam(value = "hearing_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hearingDate
     ) {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
 

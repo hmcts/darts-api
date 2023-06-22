@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.dailylist.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -33,9 +34,10 @@ public class DailyListMapper {
         dailyListEntity.setSource(postRequest.getSourceSystem());
 
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
 
         try {
-            dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList.getCourtLists()));
+            dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList));
         } catch (JsonProcessingException e) {
             throw new DailyListException(e);
         }

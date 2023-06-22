@@ -14,8 +14,8 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = DailyListEntity.TABLE_NAME)
@@ -68,13 +68,13 @@ public class DailyListEntity {
     private Integer dailyListId;
 
     @Column(name = START_DATE)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = END_DATE)
-    private Date endDate;
+    private LocalDate endDate;
 
     @Column(name = DAILY_LIST_ID_STRING)
-    private String leagacyIdString;
+    private String legacyIdString;
 
     @Column(name = DAILY_LIST_SOURCE)
     private String source;
