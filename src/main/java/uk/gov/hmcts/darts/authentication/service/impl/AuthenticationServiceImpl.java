@@ -73,4 +73,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return uriProvider.getLogoutUri(sessionId);
     }
 
+    @Override
+    public void invalidateSession(String sessionId) {
+        log.debug("Session {} is requesting invalidation", sessionId);
+
+        Session session = sessionService.dropSession(sessionId);
+        if (session == null) {
+            throw new AuthenticationException(
+                String.format("Session %s requested invalidation but this session is not active", sessionId));
+        }
+
+        log.debug("Session {} invalidated", sessionId);
+    }
+
 }

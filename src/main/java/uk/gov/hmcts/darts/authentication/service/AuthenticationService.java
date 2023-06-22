@@ -10,4 +10,7 @@ public interface AuthenticationService {
     String handleOauthCode(String sessionId, String code);
 
     URI logout(String sessionId);
+
+    void invalidateSession(String sessionId);
+
 }

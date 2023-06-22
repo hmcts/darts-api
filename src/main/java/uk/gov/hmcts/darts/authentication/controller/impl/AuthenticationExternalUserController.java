@@ -36,4 +36,9 @@ public class AuthenticationExternalUserController implements AuthenticationContr
         return new ModelAndView("redirect:" + url.toString());
     }
 
+    @Override
+    public void invalidateSession(HttpSession session) {
+        authenticationService.invalidateSession(session.getId());
+    }
+
 }

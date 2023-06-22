@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.authentication.component.SessionCache;
 import uk.gov.hmcts.darts.authentication.model.Session;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SimpleInMemorySessionCacheImplTest {
@@ -43,6 +44,26 @@ class SimpleInMemorySessionCacheImplTest {
     @SuppressWarnings("PMD.LinguisticNaming")
     void getShouldThrowExceptionWhenProvidedWithNullKey() {
         assertThrows(NullPointerException.class, () -> sessionCache.get(null));
+    }
+
+    @Test
+    void removeShouldRemoveAndReturnExistingSession() {
+        Session existingSession = createSession();
+        sessionCache.put(DUMMY_SESSION_ID, existingSession);
+
+        Session removedSession = sessionCache.remove(DUMMY_SESSION_ID);
+
+        assertEquals(existingSession, removedSession);
+
+        Session session = sessionCache.get(DUMMY_SESSION_ID);
+        assertNull(session);
+    }
+
+    @Test
+    void removeShouldReturnNullWhenNoSessionExists() {
+        Session removedSession = sessionCache.remove(DUMMY_SESSION_ID);
+
+        assertNull(removedSession);
     }
 
     private Session createSession() {

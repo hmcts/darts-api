@@ -8,4 +8,5 @@ public interface SessionService {
 
     void putSession(String sessionId, Session session);
 
+    Session dropSession(String sessionId);
 }

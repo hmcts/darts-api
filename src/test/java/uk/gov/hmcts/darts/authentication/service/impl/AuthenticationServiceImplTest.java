@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.authentication.service.SessionService;
 
 import java.net.URI;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -135,6 +136,28 @@ class AuthenticationServiceImplTest {
         URI uri = authenticationService.logout(DUMMY_SESSION_ID);
 
         assertEquals(DUMMY_LOGOUT_URI, uri);
+    }
+
+    @Test
+    void invalidateSessionShouldThrowExceptionWhenSessionDoesNotExist() {
+        when(sessionService.dropSession(anyString()))
+            .thenReturn(null);
+
+        AuthenticationException exception = assertThrows(
+            AuthenticationException.class,
+            () -> authenticationService.invalidateSession(DUMMY_SESSION_ID)
+        );
+
+        assertEquals("Session 9D65049E1787A924E269747222F60CAA requested invalidation but this session is not active",
+                     exception.getMessage());
+    }
+
+    @Test
+    void invalidateSessionShouldCompleteWithoutExceptionWhenSessionExists() {
+        when(sessionService.dropSession(anyString()))
+            .thenReturn(new Session(null, null, 0));
+
+        assertDoesNotThrow(() -> authenticationService.invalidateSession(DUMMY_SESSION_ID));
     }
 
 }

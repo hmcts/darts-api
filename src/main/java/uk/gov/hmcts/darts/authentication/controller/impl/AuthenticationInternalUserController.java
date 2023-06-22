@@ -13,21 +13,28 @@ import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
 @RequestMapping("/internal-user")
 public class AuthenticationInternalUserController implements AuthenticationController {
 
+    private static final String INTERNAL_USERS_NOT_SUPPORTED_MESSAGE = "Internal users not yet supported";
+
     @Override
     public ModelAndView loginOrRefresh(HttpSession session) {
-        throw new NotImplementedException("Internal users not yet supported");
+        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
     @Override
     public String handleOauthCode(HttpSession session, String code) {
         log.info("Authorization Token received successfully");
 
-        throw new NotImplementedException("Internal users not yet supported");
+        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
     @Override
     public ModelAndView logout(HttpSession httpSession) {
-        throw new NotImplementedException("Internal users not yet supported");
+        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
+    }
+
+    @Override
+    public void invalidateSession(HttpSession session) {
+        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
 }
