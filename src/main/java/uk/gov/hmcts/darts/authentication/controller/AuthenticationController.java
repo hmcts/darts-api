@@ -16,4 +16,8 @@ public interface AuthenticationController {
 
     @GetMapping("/logout")
     ModelAndView logout(HttpSession session);
+
+    @PostMapping("/invalidate-session")
+    void invalidateSession(HttpSession session);
+
 }

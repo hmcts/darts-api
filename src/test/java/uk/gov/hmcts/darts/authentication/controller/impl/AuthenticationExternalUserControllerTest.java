@@ -11,10 +11,12 @@ import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 
 import java.net.URI;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,6 +68,15 @@ class AuthenticationExternalUserControllerTest {
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/logout?param=value", modelAndView.getViewName());
+    }
+
+    @Test
+    void invalidateSessionShouldCompleteWithoutExceptionWhenSessionIsInvalidated() {
+        doNothing().when(authenticationService).invalidateSession(anyString());
+
+        MockHttpSession session = new MockHttpSession();
+
+        assertDoesNotThrow(() -> controller.invalidateSession(session));
     }
 
 }
