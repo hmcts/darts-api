@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '4.2.1.3168'
   id "io.freefair.lombok" version "8.0.1"
   id "org.openapi.generator" version "6.6.0"
-  id "org.flywaydb.flyway" version "9.19.4"
+  id "org.flywaydb.flyway" version "9.20.0"
 }
 
 group = 'uk.gov.hmcts'
@@ -281,7 +281,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
 
-  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.1.0'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-authorization-server', version: '1.1.1'
 
   implementation group: 'commons-io', name: 'commons-io', version: '2.13.0'
   implementation 'org.apache.commons:commons-collections4:4.4'
