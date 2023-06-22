@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.error;
 
+import jakarta.validation.ValidationException;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -40,5 +41,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         basicRestException.setCode(HttpStatus.CONFLICT.toString());
         basicRestException.setMessage(NestedExceptionUtils.getMostSpecificCause(exception).getMessage());
         return new ResponseEntity<>(basicRestException, HttpStatus.CONFLICT);
+    }
+
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<?> handleValidationException(ValidationException exception) {
+        BasicRestException basicRestException = new BasicRestException();
+        basicRestException.setCode(HttpStatus.BAD_REQUEST.toString());
+        basicRestException.setMessage(NestedExceptionUtils.getMostSpecificCause(exception).getMessage());
+        return new ResponseEntity<>(basicRestException, HttpStatus.BAD_REQUEST);
     }
 }
