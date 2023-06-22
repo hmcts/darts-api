@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -32,7 +33,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         Courthouse originalEntity = repository.getReferenceById(id);
 
         originalEntity.setCourthouseName(courthouse.getCourthouseName());
-        originalEntity.setCode(courthouse.getCode().shortValue());
+        originalEntity.setCode(courthouse.getCode());
 
         return repository.saveAndFlush(originalEntity);
     }
@@ -55,7 +56,7 @@ public class CourthouseServiceImpl implements CourthouseService {
 
 
     /**
-     * retrieves the courtroom from the database.
+     * retrieves the courtroom from the database. If the database doesn't have the code, then it will insert it.
      *
      * @param courthouseCode Optional parameter. If it is not provided, then name will be used by itself.
      * @param courthouseName Name of the courthouse to search for.
@@ -64,8 +65,24 @@ public class CourthouseServiceImpl implements CourthouseService {
      * @throws CourthouseCodeNotMatchException when the courtroom is found, but it has a different code that expected.
      */
     @Override
-    public Courthouse retrieveCourtHouse(Integer courthouseCode, String courthouseName)
+    @SuppressWarnings("PMD.UselessParentheses")
+    public Courthouse retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
         throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
+        Courthouse foundCourthouse = retrieveCourthouse(courthouseCode, courthouseName);
+        if (foundCourthouse.getCode() == null && courthouseCode != null) {
+            //update courthouse in database with new code
+            foundCourthouse.setCode(courthouseCode);
+            repository.saveAndFlush(foundCourthouse);
+        } else {
+            if (!StringUtils.equalsIgnoreCase(foundCourthouse.getCourthouseName(), courthouseName)
+                || (courthouseCode != null && !Objects.equals(courthouseCode, foundCourthouse.getCode()))) {
+                throw new CourthouseCodeNotMatchException(foundCourthouse, courthouseCode, courthouseName);
+            }
+        }
+        return foundCourthouse;
+    }
+
+    private Courthouse retrieveCourthouse(Integer courthouseCode, String courthouseName) throws CourthouseNameNotFoundException {
         String courthouseNameUC = StringUtils.upperCase(courthouseName);
         Optional<Courthouse> courthouseOptional = Optional.empty();
         if (courthouseCode != null) {
@@ -77,17 +94,6 @@ public class CourthouseServiceImpl implements CourthouseService {
             if (courthouseOptional.isEmpty()) {
                 throw new CourthouseNameNotFoundException(courthouseNameUC);
             }
-            Courthouse courthouse = courthouseOptional.get();
-            if (courthouse.getCode() == null && courthouseCode != null) {
-                //update courthouse with new code
-                courthouse.setCode(courthouseCode.shortValue());
-                repository.saveAndFlush(courthouse);
-            } else {
-                if (courthouseCode != null) {
-                    throw new CourthouseCodeNotMatchException(courthouse, courthouseCode);
-                }
-            }
-
         }
         return courthouseOptional.get();
     }

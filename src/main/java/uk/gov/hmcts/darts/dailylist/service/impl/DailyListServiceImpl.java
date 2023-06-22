@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
-import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.CourtHouse;
@@ -25,7 +25,7 @@ import java.util.Optional;
 public class DailyListServiceImpl implements DailyListService {
 
     private final DailyListRepository dailyListRepository;
-    private final CourthouseService courthouseService;
+    private final CourthouseApi courthouseApi;
 
 
     @Override
@@ -60,15 +60,15 @@ public class DailyListServiceImpl implements DailyListService {
         Integer courthouseCode = crownCourt.getCourtHouseCode().getCode();
         String courthouseName = crownCourt.getCourtHouseName();
         try {
-            return courthouseService.retrieveCourtHouse(courthouseCode, courthouseName);
+            return courthouseApi.retrieveAndUpdateCourtHouse(courthouseCode, courthouseName);
         } catch (CourthouseCodeNotMatchException ccnme) {
             log.warn(
-                "Courthouse {} has code {} but dailyList says it should be {}",
-                courthouseName,
-                ccnme.getCourthouse().getCode(),
-                courthouseCode
+                "Courthouse in database {} Does not match that received by dailyList, {} {}",
+                ccnme.getDatabaseCourthouse(),
+                courthouseCode,
+                courthouseName
             );
-            return ccnme.getCourthouse();
+            return ccnme.getDatabaseCourthouse();
         } catch (CourthouseNameNotFoundException e) {
             String message = MessageFormat.format(
                 "DailyList with uniqueId {0} received with an invalid courthouse ''{1}''",

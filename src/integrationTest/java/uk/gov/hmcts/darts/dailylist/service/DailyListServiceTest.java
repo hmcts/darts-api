@@ -125,7 +125,7 @@ class DailyListServiceTest {
         DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         service.processIncomingDailyList(request);
         Optional<Courthouse> updatedCourthouse = courthouseRepository.findByCourthouseName("TEMP");
-        assertEquals(updatedCourthouse.get().getCode(), Short.valueOf("9999"));
+        assertEquals(updatedCourthouse.get().getCode(), 9999);
         dailyListRepository.deleteAll();
         courthouseRepository.delete(courthouseTemp);
     }

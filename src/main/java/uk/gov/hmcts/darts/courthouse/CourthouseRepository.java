@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface CourthouseRepository extends JpaRepository<Courthouse, Integer> {
 
-    Optional<Courthouse> findByCode(Short code);
+    Optional<Courthouse> findByCode(int code);
 
     Optional<Courthouse> findByCourthouseName(String name);
 }

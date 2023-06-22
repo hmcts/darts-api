@@ -27,11 +27,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 class CourthouseServiceImplTest {
 
     public static final String TEST_COURTHOUSE_NAME = "Test courthouse";
-    public static final short CODE = 123;
+    public static final int CODE = 123;
     public static final int COURTHOUSE_ID = 11;
     public static final String SWANSEA_NAME = "swansea";
     public static final int SWANSEA_CODE = 457;
-    public static final String SWANSEA_CODE_STRING = "457";
     public static final String SWANSEA_NAME_UC = "SWANSEA";
 
     @InjectMocks
@@ -88,7 +87,7 @@ class CourthouseServiceImplTest {
 
         Courthouse courthouseEntityChanged = new Courthouse();
         courthouseEntityChanged.setCourthouseName("Changed courthouse");
-        courthouseEntityChanged.setCode((short) 543);
+        courthouseEntityChanged.setCode(543);
 
 
         Mockito.when(repository.getReferenceById(COURTHOUSE_ID)).thenReturn(courthouseEntityOriginal);
@@ -137,33 +136,33 @@ class CourthouseServiceImplTest {
     @Test
     void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
         Mockito.when(repository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
-        Courthouse courthouse = courthouseService.retrieveCourtHouse(null, SWANSEA_NAME);
+        Courthouse courthouse = courthouseService.retrieveAndUpdateCourtHouse(null, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
-        assertEquals(Short.parseShort(SWANSEA_CODE_STRING), courthouse.getCode());
+        assertEquals(SWANSEA_CODE, courthouse.getCode());
     }
 
     @Test
     void retrieveCourthouseUsingCodeAndName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
-        Mockito.when(repository.findByCode(Short.parseShort(SWANSEA_CODE_STRING))).thenReturn(Optional.of(
+        Mockito.when(repository.findByCode(SWANSEA_CODE)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
-        Courthouse courthouse = courthouseService.retrieveCourtHouse(SWANSEA_CODE, SWANSEA_NAME);
+        Courthouse courthouse = courthouseService.retrieveAndUpdateCourtHouse(SWANSEA_CODE, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
-        assertEquals(Short.parseShort(SWANSEA_CODE_STRING), courthouse.getCode());
+        assertEquals(SWANSEA_CODE, courthouse.getCode());
     }
 
     @Test
     void retrieveCourthouseUsingNameAndDifferentCode() {
-        Mockito.when(repository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
+        Mockito.when(repository.findByCode(458)).thenReturn(Optional.empty());
         Mockito.when(repository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(createSwanseaCourthouseEntity()));
 
         CourthouseCodeNotMatchException thrownException = assertThrows(
             CourthouseCodeNotMatchException.class,
-            () -> courthouseService.retrieveCourtHouse(458, SWANSEA_NAME)
+            () -> courthouseService.retrieveAndUpdateCourtHouse(458, SWANSEA_NAME)
         );
 
-        Courthouse courthouse = thrownException.getCourthouse();
+        Courthouse courthouse = thrownException.getDatabaseCourthouse();
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
-        assertEquals(Short.parseShort(SWANSEA_CODE_STRING), courthouse.getCode());
+        assertEquals(SWANSEA_CODE, courthouse.getCode());
     }
 
     @Test
@@ -173,7 +172,7 @@ class CourthouseServiceImplTest {
 
         assertThrows(
             CourthouseNameNotFoundException.class,
-            () -> courthouseService.retrieveCourtHouse(458, "test")
+            () -> courthouseService.retrieveAndUpdateCourtHouse(458, "test")
         );
 
     }
@@ -181,7 +180,7 @@ class CourthouseServiceImplTest {
     private Courthouse createSwanseaCourthouseEntity() {
         Courthouse courthouseEntity = new Courthouse();
         courthouseEntity.setCourthouseName(SWANSEA_NAME_UC);
-        courthouseEntity.setCode(Short.parseShort(SWANSEA_CODE_STRING));
+        courthouseEntity.setCode(SWANSEA_CODE);
         return courthouseEntity;
     }
 
