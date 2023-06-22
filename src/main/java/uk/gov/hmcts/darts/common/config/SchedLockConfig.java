@@ -25,7 +25,7 @@ public class SchedLockConfig {
     @Bean
     public LockProvider lockProvider(DataSource dataSource) {
         String tablename = "shedlock";
-        if(StringUtils.isNotBlank(schema)){
+        if (StringUtils.isNotBlank(schema)) {
             tablename = schema + "." + tablename;
         }
         return new JdbcTemplateLockProvider(dataSource, tablename);
