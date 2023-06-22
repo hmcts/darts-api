@@ -66,6 +66,7 @@ spring:
     url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:5432/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
     username: ${DARTS_API_DB_USERNAME:darts}
     password: ${DARTS_API_DB_PASSWORD:darts}
+    schema: ${DARTS_API_DB_SCHEMA:darts}
     type: com.zaxxer.hikari.HikariDataSource
   jpa:
     database: postgresql

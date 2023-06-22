@@ -46,10 +46,10 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
-        default_schema: darts
+        default_schema: ${spring.datasource.schema}
         format_sql: true
   flyway:
-    default-schema: darts
+    default-schema: ${spring.datasource.schema}
 logging:
   level:
     uk.gov.hmcts.darts: DEBUG
