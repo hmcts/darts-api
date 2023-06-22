@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @Service
 @Slf4j
-public class AudiServiceImpl implements AuditService {
+public class AuditServiceImpl implements AuditService {
 
     public static final String CASE_ID = "caseId";
     public static final String CREATED_TS = "createdAt";

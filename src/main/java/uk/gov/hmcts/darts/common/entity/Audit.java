@@ -25,10 +25,10 @@ public class Audit {
     @Column(name = "case_id")
     private Integer caseId;
 
-    @Column(name = "event_id")
+    @Column(name = "audit_activity_id")
     private Integer eventId;
 
-    @Column(name = "moj_usr_id")
+    @Column(name = "user_id")
     private Integer userId;
 
     @CreationTimestamp

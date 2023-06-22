@@ -27,13 +27,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals"})
 class AuditApiTest {
+    public static final int EVENT_ID = 998;
+    public static final int CASE_ID = 2;
+    public static final int ID = 999;
+    private static final int USER_ID = 4;
     @Autowired
     private transient MockMvc mockMvc;
 
     private static Stream<Arguments> existingIdTypeAndId() {
         return Stream.of(
-            arguments("case_id", 2),
-            arguments("event_id", 3)
+            arguments("case_id", CASE_ID),
+            arguments("event_id", EVENT_ID)
         );
     }
 
@@ -58,11 +62,11 @@ class AuditApiTest {
             .queryParam(idType, Integer.toString(id))
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id", is(999)))
-            .andExpect(jsonPath("$[0].case_id", is(2)))
+            .andExpect(jsonPath("$[0].id", is(ID)))
+            .andExpect(jsonPath("$[0].case_id", is(CASE_ID)))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
-            .andExpect(jsonPath("$[0].event_id", is(3)))
-            .andExpect(jsonPath("$[0].user_id", is(4)))
+            .andExpect(jsonPath("$[0].event_id", is(EVENT_ID)))
+            .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
             .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
     }
@@ -83,11 +87,11 @@ class AuditApiTest {
             .queryParam("to_date", "2023-07-13T08:13:09.688537759Z")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id", is(999)))
-            .andExpect(jsonPath("$[0].case_id", is(2)))
+            .andExpect(jsonPath("$[0].id", is(ID)))
+            .andExpect(jsonPath("$[0].case_id", is(CASE_ID)))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
-            .andExpect(jsonPath("$[0].event_id", is(3)))
-            .andExpect(jsonPath("$[0].user_id", is(4)))
+            .andExpect(jsonPath("$[0].event_id", is(EVENT_ID)))
+            .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
             .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
     }
