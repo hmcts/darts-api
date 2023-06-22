@@ -38,4 +38,15 @@ public class UriProviderImpl implements UriProvider {
         return URI.create("/");
     }
 
+    @Override
+    @SneakyThrows(URISyntaxException.class)
+    public URI getLogoutUri(String sessionId) {
+        URIBuilder uriBuilder = new URIBuilder(
+            authConfig.getExternalADlogoutUri());
+        uriBuilder.addParameter("id_token_hint", sessionId);
+        uriBuilder.addParameter("post_logout_redirect_uri", authConfig.getExternalADlogoutRedirectUri());
+
+        return uriBuilder.build();
+    }
+
 }

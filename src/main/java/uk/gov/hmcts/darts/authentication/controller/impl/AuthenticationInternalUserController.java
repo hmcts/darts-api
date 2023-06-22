@@ -26,7 +26,7 @@ public class AuthenticationInternalUserController implements AuthenticationContr
     }
 
     @Override
-    public ModelAndView logout() {
+    public ModelAndView logout(HttpSession httpSession) {
         throw new NotImplementedException("Internal users not yet supported");
     }
 

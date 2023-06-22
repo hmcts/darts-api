@@ -27,6 +27,7 @@ class AuthenticationServiceImplTest {
 
     private static final String DUMMY_SESSION_ID = "9D65049E1787A924E269747222F60CAA";
     private static final URI DUMMY_AUTH_URI = URI.create("DUMMY_AUTH_URI");
+    private static final URI DUMMY_LOGOUT_URI = URI.create("DUMMY_LOGOUT_URI");
     private static final URI DUMMY_LANDING_PAGE_URI = URI.create("DUMMY_LANDING_PAGE_URI");
     private static final String DUMMY_CODE = "DUMMY CODE";
     private static final String DUMMY_ID_TOKEN = "DUMMY ID TOKEN";
@@ -53,19 +54,19 @@ class AuthenticationServiceImplTest {
         when(uriProvider.getAuthorizationUri())
             .thenReturn(DUMMY_AUTH_URI);
 
-        URI uri = authenticationService.loginOrRefresh("DUMMY_SESSION_ID");
+        URI uri = authenticationService.loginOrRefresh(DUMMY_SESSION_ID);
 
         assertEquals(DUMMY_AUTH_URI, uri);
     }
 
     @Test
-    void loginOrRefreshShouldThrowExceptionWhenExistingSessionExists() {
+    void loginOrRefreshShouldReturnLandingPageUriWhenSessionExists() {
         when(sessionService.getSession(anyString()))
             .thenReturn(new Session(null, null, 0));
         when(uriProvider.getLandingPageUri())
             .thenReturn(DUMMY_LANDING_PAGE_URI);
 
-        URI uri = authenticationService.loginOrRefresh("DUMMY_SESSION_ID");
+        URI uri = authenticationService.loginOrRefresh(DUMMY_SESSION_ID);
 
         assertEquals(DUMMY_LANDING_PAGE_URI, uri);
     }
@@ -108,6 +109,32 @@ class AuthenticationServiceImplTest {
         );
 
         assertEquals("Failed to validate access token: validation failure reason", exception.getMessage());
+    }
+
+    @Test
+    void logoutShouldThrowExceptionWhenNoExistingSessionExists() {
+        when(sessionService.getSession(anyString()))
+            .thenReturn(null);
+
+        AuthenticationException exception = assertThrows(
+            AuthenticationException.class,
+            () -> authenticationService.logout(DUMMY_SESSION_ID)
+        );
+
+        assertEquals("Session 9D65049E1787A924E269747222F60CAA attempted logout but this session is not active",
+                     exception.getMessage());
+    }
+
+    @Test
+    void logoutShouldReturnLogoutPageUriWhenSessionExists() {
+        when(sessionService.getSession(anyString()))
+            .thenReturn(new Session(null, null, 0));
+        when(uriProvider.getLogoutUri(anyString()))
+            .thenReturn(DUMMY_LOGOUT_URI);
+
+        URI uri = authenticationService.logout(DUMMY_SESSION_ID);
+
+        assertEquals(DUMMY_LOGOUT_URI, uri);
     }
 
 }
