@@ -40,6 +40,17 @@ class UriProviderImplTest {
         assertEquals("/", landingPageUri.toString());
     }
 
+    @Test
+    void getLogoutUriShouldReturnExpectedUri() {
+        when(authConfig.getExternalADlogoutUri()).thenReturn("LogoutUrl");
+        when(authConfig.getExternalADlogoutRedirectUri()).thenReturn("LogoutRedirectUrl");
+
+        URI logoutUri = uriProvider.getLogoutUri("DUMMY_SESSION_ID");
+
+        assertEquals("LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=LogoutRedirectUrl",
+                     logoutUri.toString());
+    }
+
     private void mockStubsForAuthorization() {
         when(authConfig.getExternalADauthorizationUri()).thenReturn("AuthUrl");
         when(authConfig.getExternalADclientId()).thenReturn("ClientId");

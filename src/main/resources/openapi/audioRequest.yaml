@@ -35,18 +35,18 @@ components:
     AudioRequestDetails:
       type: object
       required:
-        - caseId
-        - requester
+        - hearingId
+        - requestor
         - startTime
         - endTime
         - requestType
       properties:
-        caseId:
-          type: string
+        hearingId:
+          type: integer
           example: 12345
-        requester:
-          type: string
-          example: judge
+        requestor:
+          type: integer
+          example: 4656
         startTime:
           type: string
           format: date-time

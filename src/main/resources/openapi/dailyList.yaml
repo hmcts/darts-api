@@ -12,7 +12,7 @@ servers:
 
 
 paths:
-  /dailylist/addDailyList:
+  /dailylists:
     post:
       tags:
         - DailyLists
@@ -36,11 +36,11 @@ paths:
         '500':
           description: Internal Server Error
 
-  /dailylist/getCases:
+  /dailylists/getCases:
     get:
       tags:
         - DailyLists
-      summary: Retrieves the case list for the specified courthouse, courtroom and a hearing date
+      summary: Retrieves the case list for the specified courthouse, courtroom and a hearing date.
       description: |-
         description
       parameters:

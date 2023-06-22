@@ -8,4 +8,5 @@ public interface SessionCache {
 
     Session get(String sessionId);
 
+    Session remove(String sessionId);
 }

@@ -15,6 +15,9 @@ public interface AuthenticationController {
     String handleOauthCode(HttpSession session, @RequestParam("code") String code);
 
     @GetMapping("/logout")
-    ModelAndView logout();
+    ModelAndView logout(HttpSession session);
+
+    @PostMapping("/invalidate-session")
+    void invalidateSession(HttpSession session);
 
 }

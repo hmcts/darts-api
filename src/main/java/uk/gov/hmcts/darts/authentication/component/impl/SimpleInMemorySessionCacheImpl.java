@@ -17,7 +17,9 @@ public class SimpleInMemorySessionCacheImpl implements SessionCache {
 
     @PostConstruct
     public void postConstruct() {
-        log.warn("### This implementation is intended only for test purposes, and is not intended for production ###");
+        log.warn(
+            "### This implementation is intended only for dev and test purposes, and is not intended for production ###"
+        );
     }
 
     @Override
@@ -33,6 +35,11 @@ public class SimpleInMemorySessionCacheImpl implements SessionCache {
     @Override
     public Session get(String sessionId) {
         return cache.get(sessionId);
+    }
+
+    @Override
+    public Session remove(String sessionId) {
+        return cache.remove(sessionId);
     }
 
 }

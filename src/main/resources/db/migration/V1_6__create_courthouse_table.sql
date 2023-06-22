@@ -9,4 +9,3 @@ CREATE TABLE moj_courthouse (
 
 CREATE SEQUENCE IF NOT EXISTS moj_crt_seq;
 
-

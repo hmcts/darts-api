@@ -17,51 +17,55 @@ paths:
       description: Searches through the audit log based on the filters provided.
       parameters:
         - in: query
-          name: start_date
+          name: from_date
           schema:
             type: string
             format: date-time
         - in: query
-          name: end_date
+          name: to_date
           schema:
             type: string
             format: date-time
         - in: query
           name: case_id
           schema:
-            type: string
+            type: integer
         - in: query
           name: event_id
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: Audit logs returned matching filters.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SearchResult'
+                $ref: '#/components/schemas/SearchResponse'
         '400':
           description: 'At least one filter parameter was not provided or an invalid datatype or value was provided for property.'
         '500':
           description: Internal Server Error
 components:
   schemas:
+    SearchResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/SearchResult'
     SearchResult:
       type: object
       properties:
         id:
           type: integer
         case_id:
-          type: string
+          type: integer
         created_at:
           type: string
           format: date-time
           example: '2023-05-31T09:00:00Z'
-        event_type:
-          type: string
-        username:
-          type: string
+        event_id:
+          type: integer
+        user_id:
+          type: integer
         application_server:
           type: string
         additional_data:
@@ -70,14 +74,14 @@ components:
       type: object
       properties:
         case_id:
-          type: string
-        start_date:
-          type: string
-          format: date-time
-          example: '2023-05-31T09:00:00Z'
-        end_date:
+          type: integer
+        from_date:
           type: string
           format: date-time
           example: '2023-05-31T09:00:00Z'
-        event_type:
+        to_date:
           type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        event_id:
+          type: integer

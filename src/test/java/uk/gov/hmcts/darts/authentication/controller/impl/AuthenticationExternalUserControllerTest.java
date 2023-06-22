@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,17 +11,19 @@ import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 
 import java.net.URI;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationExternalUserControllerTest {
 
     private static final URI DUMMY_AUTHORIZATION_URI = URI.create("https://www.example.com/authorization?param=value");
+    private static final URI DUMMY_LOGOUT_URI = URI.create("https://www.example.com/logout?param=value");
     private static final String DUMMY_TOKEN = "token";
 
     @InjectMocks
@@ -41,8 +42,7 @@ class AuthenticationExternalUserControllerTest {
         ModelAndView modelAndView = controller.loginOrRefresh(session);
 
         assertNotNull(modelAndView);
-        assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName(),
-                     "Redirect url was not as expected");
+        assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
     }
 
     @Test
@@ -58,8 +58,25 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void logoutWhenUserLogoutFromdarts() {
-        assertThrows(NotImplementedException.class, () -> controller.logout());
+    void logoutShouldReturnLogoutPageUriWhenTokenExistsInSession() {
+        MockHttpSession session = new MockHttpSession();
+
+        when(authenticationService.logout(any()))
+            .thenReturn(DUMMY_LOGOUT_URI);
+
+        ModelAndView modelAndView = controller.logout(session);
+
+        assertNotNull(modelAndView);
+        assertEquals("redirect:https://www.example.com/logout?param=value", modelAndView.getViewName());
+    }
+
+    @Test
+    void invalidateSessionShouldCompleteWithoutExceptionWhenSessionIsInvalidated() {
+        doNothing().when(authenticationService).invalidateSession(anyString());
+
+        MockHttpSession session = new MockHttpSession();
+
+        assertDoesNotThrow(() -> controller.invalidateSession(session));
     }
 
 }
