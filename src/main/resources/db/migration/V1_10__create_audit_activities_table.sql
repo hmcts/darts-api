@@ -17,4 +17,4 @@ INSERT INTO audit_activities VALUES(5, 'Apply Retention', 'Apply Retention');
 INSERT INTO audit_activities VALUES(6, 'Request Transcription', 'Request Transcription');
 INSERT INTO audit_activities VALUES(7, 'Import Transcription', 'Import Transcription');
 
-ALTER SEQUENCE audit_activities_seq RESTART WITH 8
+ALTER SEQUENCE audit_activities_seq RESTART WITH 8;
