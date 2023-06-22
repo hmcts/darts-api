@@ -2,10 +2,7 @@ package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
@@ -38,12 +36,13 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
+@Transactional
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals", "PMD.SystemPrintln", "PMD.TooManyMethods"})
 class CourthouseApiTest {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
     public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
-    private static final String REQUEST_BODY_SWANSEA_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodySwansea.json";
+    private static final String REQUEST_BODY_TEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyTest.json";
     @Autowired
     private CourthouseService courthouseService;
 
@@ -51,13 +50,10 @@ class CourthouseApiTest {
     private CourthouseRepository courthouseRepository;
 
     @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
     private transient MockMvc mockMvc;
-
-
-    @BeforeEach
-    void setUp() {
-        courthouseRepository.deleteAll();
-    }
 
     @Test
     void courthousesGet() throws Exception {
@@ -81,13 +77,10 @@ class CourthouseApiTest {
 
     @Test
     void courthousesGetAll() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         MvcResult haverfordwestResponse = makeRequestToAddCourthouseToDatabase(
             REQUEST_BODY_HAVERFORDWEST_JSON);
-        MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_SWANSEA_JSON);
+        MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_TEST_JSON);
 
 
         ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
@@ -173,7 +166,7 @@ class CourthouseApiTest {
     void courthousesPut() throws Exception {
         Integer addedEntityId = addCourthouseAndGetId(REQUEST_BODY_HAVERFORDWEST_JSON);
 
-        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
+        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
         MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
@@ -183,15 +176,15 @@ class CourthouseApiTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.courthouse_name", is("SWANSEA")))
-            .andExpect(jsonPath("$.code", is(457)))
+            .andExpect(jsonPath("$.courthouse_name", is("test")))
+            .andExpect(jsonPath("$.code", is(9001)))
             .andExpect(jsonPath("$.created_date_time", is(notNullValue())))
             .andExpect(jsonPath("$.last_modified_date_time", is(notNullValue())));
     }
 
     @Test
     void courthousesPutWhenIdDoesNotExist() throws Exception {
-        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodySwansea.json");
+        String requestBody = getContentsFromFile("tests/CourthousesTest/courthousesPutEndpoint/requestBodyTest.json");
         MockHttpServletRequestBuilder requestBuilder = put("/courthouses/{courthouse_id}", 123)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
@@ -207,7 +200,7 @@ class CourthouseApiTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent()).andReturn();
 
-        requestBuilder = get("/courthouses/{courthouse_id}", 1)
+        requestBuilder = get("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }

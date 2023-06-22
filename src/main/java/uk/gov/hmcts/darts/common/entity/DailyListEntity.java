@@ -10,20 +10,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = DailyList.TABLE_NAME)
+@Table(name = DailyListEntity.TABLE_NAME)
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class DailyList {
+public class DailyListEntity {
 
     public static final String ID = "moj_dal_id";
     public static final String COURTHOUSE_ID = "moj_cth_id";
@@ -43,6 +40,7 @@ public class DailyList {
     public static final String SUPERSEDED = "i_superseded";
     public static final String VERSION_LABEL = "i_version";
     public static final String TABLE_NAME = "moj_daily_list";
+    public static final String DAILY_LIST_CONTENT = "daily_list_content";
 
     @Id
     @Column(name = ID)
@@ -52,42 +50,37 @@ public class DailyList {
 
     @ManyToOne
     @JoinColumn(name = COURTHOUSE_ID)
-    private Courthouse courtHouse;
+    private Courthouse courthouse;
 
     @Column(name = DAILY_LIST_OBJECT_ID)
-    private String dailyListObjectId;
+    private String legacyObjectId;
 
     @Column(name = UNIQUE_ID)
     private String uniqueId;
 
     @Column(name = JOB_STATUS)
-    private String jobStatus;
+    private String status;
 
     @Column(name = TIMESTAMP)
-    private OffsetDateTime timeStamp;
+    private OffsetDateTime timestamp;
 
     @Column(name = DAILY_LIST_ID)
-    private Integer dailylistId;
+    private Integer dailyListId;
 
     @Column(name = START_DATE)
-    private OffsetDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = END_DATE)
-    private OffsetDateTime endDate;
-
-    @CreationTimestamp
-    @Column(name = CREATED_DATE_TIME)
-    private OffsetDateTime createdDateTime;
-
-    @UpdateTimestamp
-    @Column(name = LAST_UPDATED_DATE_TIME)
-    private OffsetDateTime lastUpdatedDateTime;
+    private LocalDate endDate;
 
     @Column(name = DAILY_LIST_ID_STRING)
-    private String dailyListIdString;
+    private String legacyIdString;
 
     @Column(name = DAILY_LIST_SOURCE)
-    private String dailyListSource;
+    private String source;
+
+    @Column(name = DAILY_LIST_CONTENT)
+    private String content;
 
     @Column(name = LEGACY_COURTHOUSE_OBJECT_ID)
     private String legacyCourthouseObjectId;
@@ -101,5 +94,13 @@ public class DailyList {
     @Version
     @Column(name = VERSION_LABEL)
     private Short version;
+
+    @CreationTimestamp
+    @Column(name = CREATED_DATE_TIME)
+    private OffsetDateTime createdDate;
+
+    @UpdateTimestamp
+    @Column(name = LAST_UPDATED_DATE_TIME)
+    private OffsetDateTime modifiedDateTime;
 
 }

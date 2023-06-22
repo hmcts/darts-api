@@ -10,7 +10,7 @@
     "start_date": "2021-02-23",
     "end_date": "2021-02-23",
     "version": "NOT VERSIONED",
-    "published_time": "2021-02-19T17:49:38.767+01:00"
+    "published_time": "2021-02-19T17:49:38.767Z"
   },
   "crown_court": {
     "court_house_type": "Crown Court",
@@ -39,7 +39,7 @@
           "judiciary": [
             {
               "citizen_name_forename": "Susan Katherine",
-              "citizen_name_surname": "Bonnell",
+              "citizen_name_surname": "updated",
               "citizen_name_requested_name": "Mrs Susan Katherine Bonnell JP"
             }
           ],
