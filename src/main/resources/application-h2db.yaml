@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:mydb;TIME ZONE=UTC
+    url: jdbc:h2:mem:mydb;TIME ZONE=UTC;DATABASE_TO_UPPER=false
     username: sa
     password: password
     driverClassName: org.h2.Driver

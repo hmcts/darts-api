@@ -10,6 +10,7 @@ services:
       - DARTS_API_DB_NAME=darts
       - DARTS_API_DB_USERNAME=postgres
       - DARTS_API_DB_PASSWORD=postgres
+      - DARTS_API_DB_SCHEMA=darts
       - SPRING_PROFILES_ACTIVE=local
       - AAD_B2C_CLIENT_ID_KEY
       - AAD_B2C_CLIENT_SECRET_KEY
