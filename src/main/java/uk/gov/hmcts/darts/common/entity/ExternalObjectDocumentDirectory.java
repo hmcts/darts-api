@@ -31,7 +31,7 @@ public class ExternalObjectDocumentDirectory {
     public static final String STATUS = "status";
     public static final String CHECKSUM = "checksum";
     public static final String ATTEMPTS = "attempts";
-    public static final String TABLE_NAME = "external_object_document_directory";
+    public static final String TABLE_NAME = "external_object_directory";
 
     @Id
     @Column(name = ID)
