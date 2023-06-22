@@ -139,17 +139,11 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void invalidateSessionShouldThrowExceptionWhenSessionDoesNotExist() {
+    void invalidateSessionShouldShouldCompleteWithoutExceptionWhenSessionDoesNotExist() {
         when(sessionService.dropSession(anyString()))
             .thenReturn(null);
 
-        AuthenticationException exception = assertThrows(
-            AuthenticationException.class,
-            () -> authenticationService.invalidateSession(DUMMY_SESSION_ID)
-        );
-
-        assertEquals("Session 9D65049E1787A924E269747222F60CAA requested invalidation but this session is not active",
-                     exception.getMessage());
+        assertDoesNotThrow(() -> authenticationService.invalidateSession(DUMMY_SESSION_ID));
     }
 
     @Test
