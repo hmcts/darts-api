@@ -21,9 +21,9 @@ import java.util.List;
 @Slf4j
 public class AuditServiceImpl implements AuditService {
 
-    public static final String CASE_ID = "caseId";
-    public static final String CREATED_TS = "createdAt";
-    public static final String EVENT_ID = "eventId";
+    private static final String CASE_ID = "caseId";
+    private static final String CREATED_TS = "createdAt";
+    private static final String EVENT_ID = "eventId";
     @PersistenceContext
     private EntityManager entityManager;
 
