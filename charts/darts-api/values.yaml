@@ -16,6 +16,8 @@ java:
           alias: DARTS_API_DB_HOST
         - name: api-POSTGRES-DATABASE
           alias: DARTS_API_DB_NAME
+        - name: api-POSTGRES-SCHEMA
+          alias: DARTS_API_DB_SCHEMA
         - name: AzureAdB2CTenantIdKey
           alias: AAD_B2C_TENANT_ID_KEY
         - name: AzureAdB2CClientIdKey
