@@ -6,4 +6,5 @@ public interface EventsService {
 
     void darNotify(DartsEvent dartsEvent);
 
+    void receive(DartsEvent dartsEvent);
 }

@@ -40,17 +40,18 @@ class EventsControllerTest {
 
     @Test
     void eventsApiPostEndpoint() throws Exception {
-        String requestBody = "{\n" +
-            "  \"message_id\": \"18422\",\n" +
-            "  \"type\": \"10100\",\n" +
-            "  \"sub_type\": \"10100\",\n" +
-            "  \"courthouse\": \"SNARESBROOK\",\n" +
-            "  \"courtroom\": \"1\",\n" +
-            "  \"case_numbers\": [\n" +
-            "    \"A20230049\"\n" +
-            "  ],\n" +
-            "  \"date_time\": \"2023-06-14T08:37:30.945Z\"\n" +
-            "}";
+        String requestBody = """
+            {
+              "message_id": "18422",
+              "type": "10100",
+              "sub_type": "10100",
+              "courthouse": "SNARESBROOK",
+              "courtroom": "1",
+              "case_numbers": [
+                "A20230049"
+              ],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }""";
         MockHttpServletRequestBuilder requestBuilder = post("/events")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);

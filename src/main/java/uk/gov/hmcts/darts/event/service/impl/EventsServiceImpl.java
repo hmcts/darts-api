@@ -9,14 +9,19 @@ import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventsService;
 
-@RequiredArgsConstructor
+import java.util.List;
+
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class EventsServiceImpl implements EventsService {
+
+    private static final String NOTIFICATION_TYPE = DarNotifyType.CASE_UPDATE.getNotificationType();
 
     private final DartsGatewayClient dartsGatewayClient;
 
-    private static final String NOTIFICATION_TYPE = DarNotifyType.CASE_UPDATE.getNotificationType();
+    private final List<EventsHandler> eventsHandlers;
+
 
     @Override
     public void darNotify(DartsEvent dartsEvent) {
@@ -29,6 +34,15 @@ public class EventsServiceImpl implements EventsService {
             .build();
 
         dartsGatewayClient.darNotify(darNotifyEvent);
+    }
+
+    // Check out findAny()
+    @Override
+    public void receive(DartsEvent event) {
+        eventsHandlers.stream()
+            .filter(handler -> handler.isHandlerFor(event.getType(), event.getSubType()))
+            .findFirst().orElseThrow(() -> new HandlerNotFoundException(event))
+            .handle(event);
     }
 
 }
