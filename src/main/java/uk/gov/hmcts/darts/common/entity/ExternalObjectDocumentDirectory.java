@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 public class ExternalObjectDocumentDirectory {
 
     public static final String ID = "eod_id";
-    public static final String MEDIA_ID = "moj_media_id";
+    public static final String MEDIA_ID = "moj_med_id";
     public static final String TRANSCRIPTION_ID = "moj_tra_id";
     public static final String ANNOTATION_ID = "moj_ann_id";
     public static final String EXTERNAL_LOCATION = "external_location";
