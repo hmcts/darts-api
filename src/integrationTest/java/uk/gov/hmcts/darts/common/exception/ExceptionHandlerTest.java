@@ -1,0 +1,153 @@
+package uk.gov.hmcts.darts.common.exception;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
+import uk.gov.hmcts.darts.common.exception.ExceptionHandlerTest.MockController;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles({"intTest", "h2db"})
+@ExtendWith(SpringExtension.class)
+@Import(MockController.class)
+class ExceptionHandlerTest {
+
+    private static final String ENDPOINT = "/test";
+
+    @MockBean
+    private NotificationRepository notificationRepository;
+
+    @MockBean
+    private AudioRequestRepository audioRequestRepository;
+
+    @MockBean
+    private CourthouseRepository courthouseRepository;
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private MockController mockController;
+
+    @RestController
+    static class MockController {
+        @GetMapping(ENDPOINT)
+        public ResponseEntity<Void> test() {
+            return ResponseEntity.ok()
+                .build();
+        }
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    enum TestError implements DartsApiError {
+        TEST_ERROR("999",
+                   HttpStatus.I_AM_A_TEAPOT,
+                   "A descriptive title");
+
+        private static final String ERROR_TYPE_PREFIX = "TEST";
+
+        private final String errorTypeNumeric;
+        private final HttpStatus httpStatus;
+        private final String title;
+
+        @Override
+        public String getErrorTypePrefix() {
+            return ERROR_TYPE_PREFIX;
+        }
+    }
+
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void shouldReturnRfc7807ResponseWhenADartsApiExceptionIsThrown() throws Exception {
+        Mockito.when(mockController.test())
+            .thenThrow(new DartsApiException(TestError.TEST_ERROR));
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT))
+            .andExpect(status().isIAmATeapot())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+            {
+                "type":"TEST_999",
+                "title":"A descriptive title",
+                "status":418
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void shouldReturnRfc7807ResponseWithDetailFieldPopulatedWhenADartsApiExceptionIsThrownWithDetail() throws Exception {
+        Mockito.when(mockController.test())
+            .thenThrow(new DartsApiException(TestError.TEST_ERROR, "Some descriptive details"));
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT))
+            .andExpect(status().isIAmATeapot())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+            {
+                "type":"TEST_999",
+                "title":"A descriptive title",
+                "status":418,
+                "detail":"Some descriptive details"
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void shouldReturnAGenericRfc7807ResponseWhenARuntimeExceptionIsThrown() throws Exception {
+        Mockito.when(mockController.test())
+            .thenThrow(new RuntimeException("A runtime exception occurred"));
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT))
+            .andExpect(status().isInternalServerError())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+            {
+                "title":"Internal Server Error",
+                "status":500,
+                "detail":"A runtime exception occurred"
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+}
