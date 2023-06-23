@@ -13,11 +13,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = ExternalObjectDocumentDirectory.TABLE_NAME)
+@Table(name = ExternalObjectDirectory.TABLE_NAME)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExternalObjectDocumentDirectory {
+public class ExternalObjectDirectory {
 
     public static final String ID = "eod_id";
     public static final String MEDIA_ID = "moj_med_id";
