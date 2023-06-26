@@ -29,7 +29,7 @@ public class Transcription {
 
     @ManyToOne
     @JoinColumn(name = "moj_cas_id", nullable = false)
-    private Case theCase;
+    private CaseEntity theCase;
 
     @Column(name = "moj_crt_id", nullable = false)
     private Integer courthouseId;
