@@ -6,19 +6,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
-import uk.gov.hmcts.darts.courthouse.CourtroomRepository;
 import uk.gov.hmcts.darts.cases.repository.ReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.entity.Case;
 import uk.gov.hmcts.darts.common.entity.Courthouse;
 import uk.gov.hmcts.darts.common.entity.Courtroom;
 import uk.gov.hmcts.darts.common.entity.Hearing;
 import uk.gov.hmcts.darts.common.entity.ReportingRestrictions;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouse.CourtroomRepository;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,14 +51,14 @@ class RepositoryTest {
 
     @Test
     void canAddHearingsToCase() {
-        var aCase = new Case();
+        var someCase = new Case();
         var hearing1 = new Hearing();
         var hearing2 = new Hearing();
         var hearings = new ArrayList<Hearing>();
         hearings.add(hearing1);
         hearings.add(hearing2);
-        aCase.setHearings(hearings);
-        caseRepository.saveAndFlush(aCase);
+        someCase.setHearings(hearings);
+        caseRepository.saveAndFlush(someCase);
 
         var cases = caseRepository.findAll();
         var persistedHearings = cases.get(0).getHearings();
@@ -74,9 +72,9 @@ class RepositoryTest {
         var reportingRestrictions = new ReportingRestrictions();
         var persistedRestrictions = reportingRestrictionsRepository.saveAndFlush(reportingRestrictions);
 
-        var aCase = new Case();
-        aCase.setReportingRestrictions(persistedRestrictions);
-        caseRepository.saveAndFlush(aCase);
+        var someCase = new Case();
+        someCase.setReportingRestrictions(persistedRestrictions);
+        caseRepository.saveAndFlush(someCase);
 
         var cases = caseRepository.findAll();
         var attachedRestrictions = cases.get(0).getReportingRestrictions();
@@ -90,11 +88,11 @@ class RepositoryTest {
         var hearing = new Hearing();
         hearing.setCourtroom(persistedCourthouse.getCourtrooms().get(0));
 
-        var aCase = new Case();
+        var someCase = new Case();
         var hearings = new ArrayList<Hearing>();
         hearings.add(hearing);
-        aCase.setHearings(hearings);
-        caseRepository.saveAndFlush(aCase);
+        someCase.setHearings(hearings);
+        caseRepository.saveAndFlush(someCase);
 
         var cases = caseRepository.findAll();
         var attachedCourtroom = cases.get(0).getHearings().get(0).getCourtroom();
