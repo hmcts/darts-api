@@ -28,7 +28,7 @@ public class Annotation {
 
     @OneToOne
     @JoinColumn(name = "moj_cas_id")
-    private Case theCase;
+    private CaseEntity theCase;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "moj_crt_id")

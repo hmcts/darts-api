@@ -19,7 +19,7 @@ import java.util.List;
 @Table(name = "moj_case")
 @Data
 @SuppressWarnings({"PMD.ShortClassName"})
-public class Case {
+public class CaseEntity {
 
     private static final String MAPPED_BY_THE_CASE = "theCase";
 
@@ -36,7 +36,7 @@ public class Case {
     private String type;
 
     @Column(name = "c_case_id")
-    private String caseId;
+    private String caseNumber;
 
     @Column(name = "c_reporting_restrictions")
     private String reportingRestrictions;

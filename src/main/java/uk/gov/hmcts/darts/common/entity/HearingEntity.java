@@ -20,7 +20,7 @@ import java.util.List;
 @Entity
 @Table(name = "moj_hearing")
 @Data
-public class Hearing {
+public class HearingEntity {
 
     @Id
     @Column(name = "moj_hea_id")
@@ -29,11 +29,8 @@ public class Hearing {
     private Integer id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "moj_crt_id")
-    private Courthouse theCourthouse;
-
-    @Column(name = "c_courtroom")
-    private String courtroom;
+    @JoinColumn(name = "moj_ctr_id")
+    private CourtroomEntity courtroom;
 
     @Column(name = "c_judge")
     private List<String> judge;
