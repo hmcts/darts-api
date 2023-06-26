@@ -1,6 +1,6 @@
 
 CREATE TABLE moj_case
-(moj_cas_id                INTEGER					 NOT NULL
+(moj_cas_id                INTEGER      NOT NULL
 ,moj_rer_id                INTEGER
 ,r_case_object_id          CHARACTER VARYING(16)
 ,c_type                    CHARACTER VARYING
