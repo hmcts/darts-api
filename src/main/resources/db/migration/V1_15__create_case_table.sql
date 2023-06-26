@@ -1,5 +1,5 @@
 
-CREATE TABLE DARTS.moj_case
+CREATE TABLE moj_case
 (moj_cas_id                INTEGER					 NOT NULL
 ,moj_rer_id                INTEGER
 ,r_case_object_id          CHARACTER VARYING(16)
@@ -17,9 +17,9 @@ CREATE TABLE DARTS.moj_case
 ,i_version                 SMALLINT);
 
 
-ALTER TABLE DARTS.moj_case                      ADD PRIMARY KEY (moj_cas_id);
+ALTER TABLE moj_case                      ADD PRIMARY KEY (moj_cas_id);
 
-ALTER TABLE DARTS.moj_case                      ADD CONSTRAINT moj_case_reporting_restriction_fk
+ALTER TABLE moj_case                      ADD CONSTRAINT moj_case_reporting_restriction_fk
 FOREIGN KEY (moj_rer_id) REFERENCES moj_reporting_restrictions(moj_rer_id);
 
 CREATE SEQUENCE IF NOT EXISTS moj_cas_seq;
