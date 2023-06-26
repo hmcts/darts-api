@@ -5,6 +5,7 @@
     "code": 457,
     "courthouseName": "SWANSEA",
     "createdDateTime": "2023-05-06T00:00:00Z",
+    "courtrooms": [],
     "lastModifiedDateTime": "2023-06-14T16:45:09.998033Z"
   },
   "legacyObjectId": null,
