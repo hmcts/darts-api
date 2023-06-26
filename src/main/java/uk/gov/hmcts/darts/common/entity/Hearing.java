@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,10 +14,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "moj_hearing")
@@ -28,14 +34,12 @@ public class Hearing {
     @SequenceGenerator(name = "moj_hea_gen", sequenceName = "moj_hea_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "moj_crt_id")
-    private Courthouse theCourthouse;
+    @JoinColumn(name = "moj_ctr_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Courtroom courtroom;
 
-    @Column(name = "c_courtroom")
-    private String courtroom;
-
-    @Column(name = "c_judge")
+    @Type(ListArrayType.class)
+    @Column(name = "c_judges")
     private List<String> judge;
 
     @Column(name = "c_hearing_date")
@@ -62,4 +66,7 @@ public class Hearing {
         inverseJoinColumns = {@JoinColumn(name = "moj_eve_id")})
     private List<Event> theEvents;
 
+    @ManyToMany(mappedBy = "hearings")
+    @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
+    private Set<Case> cases;
 }
