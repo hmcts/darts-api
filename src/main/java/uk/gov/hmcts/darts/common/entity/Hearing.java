@@ -14,14 +14,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "moj_hearing")
@@ -40,7 +37,7 @@ public class Hearing {
 
     @Type(ListArrayType.class)
     @Column(name = "c_judges")
-    private List<String> judge;
+    private List<String> judges;
 
     @Column(name = "c_hearing_date")
     private LocalDate hearingDate;
@@ -58,15 +55,15 @@ public class Hearing {
     @JoinTable(name = "moj_hearing_media_ae",
         joinColumns = {@JoinColumn(name = "moj_hea_id")},
         inverseJoinColumns = {@JoinColumn(name = "moj_med_id")})
-    private List<Media> theMedias;
+    private List<Media> mediaList;
 
     @ManyToMany
     @JoinTable(name = "moj_hearing_event_ae",
         joinColumns = {@JoinColumn(name = "moj_hea_id")},
         inverseJoinColumns = {@JoinColumn(name = "moj_eve_id")})
-    private List<Event> theEvents;
+    private List<Event> eventList;
 
-    @ManyToMany(mappedBy = "hearings")
-    @Cascade({ CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<Case> cases;
+    @ManyToOne()
+    @JoinColumn(name = "moj_cas_id")
+    private Case courtCase;
 }
