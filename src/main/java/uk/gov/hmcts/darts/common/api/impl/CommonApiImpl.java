@@ -9,9 +9,9 @@ import uk.gov.hmcts.darts.common.entity.Courtroom;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.CommonCourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.service.CommonTransactionalService;
 
 import java.text.MessageFormat;
-import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +20,7 @@ public class CommonApiImpl implements CommonApi {
 
     private final CourtroomRepository courtroomRepository;
     private final CommonCourthouseRepository courthouseRepository;
+    private final CommonTransactionalService commonTransactionalService;
 
     @Override
     public Courtroom retrieveOrCreateCourtroom(String courthouseName, String courtroomName) {
@@ -33,11 +34,7 @@ public class CommonApiImpl implements CommonApi {
                 log.error(message);
                 throw new DartsException(message);
             } else {
-                //create the courtroom
-                courtroom = new Courtroom();
-                courtroom.setName(courtroomName.toUpperCase(Locale.ROOT));
-                courtroom.setCourthouse(courthouse);
-                courtroomRepository.saveAndFlush(courtroom);
+                courtroom = commonTransactionalService.createCourtroom(courthouse, courtroomName);
             }
         }
         return courtroom;
