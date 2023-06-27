@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequest;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
-import uk.gov.hmcts.darts.audio.service.AudioRequestService;
+import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestType;
 
@@ -14,9 +14,14 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 
 @RequiredArgsConstructor
 @Service
-public class AudioRequestServiceImpl implements AudioRequestService {
+public class MediaRequestServiceImpl implements MediaRequestService {
 
-    private final AudioRequestRepository audioRequestRepository;
+    private final MediaRequestRepository mediaRequestRepository;
+
+    @Override
+    public MediaRequest getMediaRequestById(Integer id) {
+        return mediaRequestRepository.getReferenceById(id);
+    }
 
     @Override
     public Integer saveAudioRequest(AudioRequestDetails request) {
@@ -45,7 +50,7 @@ public class AudioRequestServiceImpl implements AudioRequestService {
         mediaRequest.setStatus(OPEN);
         mediaRequest.setAttempts(0);
 
-        return audioRequestRepository.saveAndFlush(mediaRequest);
+        return mediaRequestRepository.saveAndFlush(mediaRequest);
     }
 
 }

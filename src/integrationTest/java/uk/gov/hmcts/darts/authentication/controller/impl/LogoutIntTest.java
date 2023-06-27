@@ -10,7 +10,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
+import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.SessionService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
@@ -31,7 +31,7 @@ class LogoutIntTest {
     private NotificationRepository notificationRepository;
 
     @MockBean
-    private AudioRequestRepository audioRequestRepository;
+    private MediaRequestRepository mediaRequestRepository;
 
     @MockBean
     private CourthouseRepository courthouseRepository;

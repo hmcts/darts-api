@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequest;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
+import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 
 import java.time.OffsetDateTime;
@@ -21,17 +21,17 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @ExtendWith(MockitoExtension.class)
-class AudioRequestServiceImplTest {
+class MediaRequestServiceImplTest {
 
     private static final Integer TEST_REQUESTER = 1234;
     private static final String OFFSET_T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String OFFSET_T_12_00_00_Z = "2023-05-31T12:00:00Z";
 
     @InjectMocks
-    private AudioRequestServiceImpl audioRequestService;
+    private MediaRequestServiceImpl audioRequestService;
 
     @Mock
-    private AudioRequestRepository audioRequestRepository;
+    private MediaRequestRepository mediaRequestRepository;
 
     private MediaRequest mockMediaRequest;
 
@@ -63,11 +63,11 @@ class AudioRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(audioRequestRepository.saveAndFlush(any(MediaRequest.class))).thenReturn(mockMediaRequest);
+        when(mediaRequestRepository.saveAndFlush(any(MediaRequest.class))).thenReturn(mockMediaRequest);
 
         var requestId = audioRequestService.saveAudioRequest(requestDetails);
 
-        verify(audioRequestRepository, times(1)).saveAndFlush(any(MediaRequest.class));
+        verify(mediaRequestRepository, times(1)).saveAndFlush(any(MediaRequest.class));
         assertEquals(requestId, mockMediaRequest.getRequestId());
     }
 

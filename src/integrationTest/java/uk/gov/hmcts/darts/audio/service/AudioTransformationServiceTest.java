@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequest;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
+import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 
 import java.time.OffsetDateTime;
 
@@ -21,7 +21,7 @@ import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 class AudioTransformationServiceTest {
 
     @Autowired
-    private AudioRequestRepository audioRequestRepository;
+    private MediaRequestRepository mediaRequestRepository;
     @Autowired
     private AudioTransformationService audioTransformationService;
 
@@ -42,7 +42,7 @@ class AudioTransformationServiceTest {
         mediaRequest.setOutputFilename(null);
         mediaRequest.setLastAccessedDateTime(null);
 
-        MediaRequest savedMediaRequest = audioRequestRepository.saveAndFlush(mediaRequest);
+        MediaRequest savedMediaRequest = mediaRequestRepository.saveAndFlush(mediaRequest);
         assertNotNull(savedMediaRequest);
         requestId = savedMediaRequest.getRequestId();
     }

@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.audio.entity.MediaRequest;
 
 @Repository
-public interface AudioRequestRepository extends JpaRepository<MediaRequest, Integer> {
+public interface MediaRequestRepository extends JpaRepository<MediaRequest, Integer> {
 
 }

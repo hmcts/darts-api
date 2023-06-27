@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -9,8 +8,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequest;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 
 import java.time.OffsetDateTime;
@@ -27,16 +26,13 @@ import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 @ActiveProfiles({"intTest", "h2db"})
 @Transactional
 @TestInstance(Lifecycle.PER_CLASS)
-class AudioRequestServiceTest {
+class MediaRequestServiceTest {
 
     private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
 
     @Autowired
-    private AudioRequestService audioRequestService;
-
-    @Autowired
-    private AudioRequestRepository audioRequestRepository;
+    private MediaRequestService mediaRequestService;
 
     private AudioRequestDetails requestDetails;
 
@@ -52,13 +48,43 @@ class AudioRequestServiceTest {
     }
 
     @Test
-    void saveAudioRequestWithZuluTimeOkConfirmEntryInDb() {
+    void shouldGetMediaRequestByIdWhenStartAndEndTimesInsertedWithZuluTime() {
+        MediaRequest requestResult = mediaRequestService.getMediaRequestById(-1);
+        assertNotNull(requestResult);
+        assertEquals(-1, requestResult.getRequestId());
+        assertEquals(-2, requestResult.getHearingId());
+        assertEquals(-3, requestResult.getRequestor());
+        assertEquals(OPEN, requestResult.getStatus());
+        assertEquals(DOWNLOAD, requestResult.getRequestType());
+        assertEquals(OffsetDateTime.parse("2023-06-26T13:00:00Z"), requestResult.getStartTime());
+        assertEquals(OffsetDateTime.parse("2023-06-26T13:45:00Z"), requestResult.getEndTime());
+        assertNotNull(requestResult.getCreatedDateTime());
+        assertNotNull(requestResult.getLastUpdatedDateTime());
+    }
+
+    @Test
+    void shouldGetMediaRequestByIdWhenStartAndEndTimesInsertedWithOffsetTime() {
+        MediaRequest requestResult = mediaRequestService.getMediaRequestById(-2);
+        assertNotNull(requestResult);
+        assertEquals(-2, requestResult.getRequestId());
+        assertEquals(-2, requestResult.getHearingId());
+        assertEquals(-3, requestResult.getRequestor());
+        assertEquals(OPEN, requestResult.getStatus());
+        assertEquals(DOWNLOAD, requestResult.getRequestType());
+        assertEquals(OffsetDateTime.parse("2023-06-26T13:00:00Z"), requestResult.getStartTime());
+        assertEquals(OffsetDateTime.parse("2023-06-26T13:45:00Z"), requestResult.getEndTime());
+        assertNotNull(requestResult.getCreatedDateTime());
+        assertNotNull(requestResult.getLastUpdatedDateTime());
+    }
+
+    @Test
+    void shouldSaveAudioRequestWithZuluTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
-        var requestId = audioRequestService.saveAudioRequest(requestDetails);
+        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequest requestResult = audioRequestRepository.getReferenceById(requestId);
+        MediaRequest requestResult = mediaRequestService.getMediaRequestById(requestId);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN, requestResult.getStatus());
         assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
@@ -68,15 +94,15 @@ class AudioRequestServiceTest {
         assertNotNull(requestResult.getLastUpdatedDateTime());
     }
 
-    @Disabled("Disabled until h2database TIME ZONE=UTC command works as expected - spring.jpa.properties.hibernate.jdbc.time_zone=UTC")
+    @Disabled("Disabled until h2database TIME ZONE=UTC command works as expected with Transactional - spring.jpa.properties.hibernate.jdbc.time_zone=UTC")
     @Test
-    void saveAudioRequestWithOffsetTimeOkConfirmEntryInDb() {
+    void shouldSaveAudioRequestWithOffsetTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
 
-        var requestId = audioRequestService.saveAudioRequest(requestDetails);
+        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequest requestResult = audioRequestRepository.getReferenceById(requestId);
+        MediaRequest requestResult = mediaRequestService.getMediaRequestById(requestId);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN, requestResult.getStatus());
         assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
@@ -87,15 +113,15 @@ class AudioRequestServiceTest {
     }
 
     @Test
-    void saveAudioRequestDaylightSavingTimeStarts() {
+    void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeStarts() {
         // In the UK the clocks go forward 1 hour at 1am on the last Sunday in March.
         // The period when the clocks are 1 hour ahead is called British Summer Time (BST).
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
 
-        var requestId = audioRequestService.saveAudioRequest(requestDetails);
+        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequest requestResult = audioRequestRepository.getReferenceById(requestId);
+        MediaRequest requestResult = mediaRequestService.getMediaRequestById(requestId);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN, requestResult.getStatus());
         assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
@@ -106,14 +132,14 @@ class AudioRequestServiceTest {
     }
 
     @Test
-    void saveAudioRequestDaylightSavingTimeEnds() {
+    void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeEnds() {
         // In the UK the clocks go back 1 hour at 2am on the last Sunday in October.
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-10-29T02:15:00Z"));
 
-        var requestId = audioRequestService.saveAudioRequest(requestDetails);
+        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequest requestResult = audioRequestRepository.getReferenceById(requestId);
+        MediaRequest requestResult = mediaRequestService.getMediaRequestById(requestId);
         assertTrue(requestResult.getRequestId() > 0);
         assertEquals(OPEN, requestResult.getStatus());
         assertEquals(requestDetails.getHearingId(), requestResult.getHearingId());
