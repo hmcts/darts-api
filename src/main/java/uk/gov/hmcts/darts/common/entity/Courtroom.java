@@ -7,18 +7,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
-
-import java.util.List;
 
 @Entity
 @Table(name = "moj_courtroom")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Courtroom {
 
     @Id
@@ -30,14 +31,10 @@ public class Courtroom {
     @Column(name = "courtroom_name")
     private String name;
 
-    @OneToMany(mappedBy = "courtroom")
-    private List<Hearing> hearings;
-
     @ManyToOne
     @Cascade(CascadeType.SAVE_UPDATE)
     @JoinColumn(name = "moj_cth_id")
     private Courthouse courthouse;
-
 
 
 }
