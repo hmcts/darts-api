@@ -7,8 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
@@ -43,7 +41,7 @@ public class Case {
     private String legacyCaseObjectId;
 
     @Column(name = "c_case_id")
-    private String caseId;
+    private String caseNumber;
 
     @Column(name = "c_closed")
     private Boolean closed;
@@ -56,15 +54,15 @@ public class Case {
 
     @Type(ListArrayType.class)
     @Column(name = "c_defendant")
-    private List<String> defendant = new ArrayList<>();
+    private List<String> defendants = new ArrayList<>();
 
     @Type(ListArrayType.class)
     @Column(name = "c_prosecutor")
-    private List<String> prosecutor = new ArrayList<>();
+    private List<String> prosecutors = new ArrayList<>();
 
     @Type(ListArrayType.class)
     @Column(name = "c_defence")
-    private List<String> defence = new ArrayList<>();
+    private List<String> defenders = new ArrayList<>();
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTimestamp;
@@ -77,14 +75,4 @@ public class Case {
 
     @OneToMany(mappedBy = "theCase")
     private List<Annotation> theAnnotations;
-
-    @ManyToMany()
-    @Cascade({CascadeType.SAVE_UPDATE, CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(
-        name = "moj_case_hearing_ae",
-        joinColumns = @JoinColumn(name = "moj_cas_id"),
-        inverseJoinColumns = @JoinColumn(name = "moj_hea_id"))
-    private List<Hearing> hearings;
-
-
 }

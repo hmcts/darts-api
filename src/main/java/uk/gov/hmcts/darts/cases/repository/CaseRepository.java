@@ -7,4 +7,5 @@ import uk.gov.hmcts.darts.common.entity.Case;
 @Repository
 public interface CaseRepository extends JpaRepository<Case, Integer> {
 
+    Case findByCaseNumber(String caseNumber);
 }

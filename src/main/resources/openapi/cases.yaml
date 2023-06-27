@@ -1,0 +1,120 @@
+openapi: 3.0.1
+
+info:
+
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /cases:
+    get:
+      tags:
+        - Cases
+      summary: Allows the retrieval of all cases for a given courthouse, courtroom and date
+      description: |-
+        Retrieves all cases for a given courthouse, courtroom and date
+      parameters:
+        - in: query
+          name: courthouse
+          schema:
+            type: string
+          description: "The name of the courthouse"
+          example: "SWANSEA"
+          required: true
+        - in: query
+          name: courtroom
+          schema:
+            type: string
+          description: "The name of the courtroom"
+          example: "1"
+          required: true
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: "The date to get the cases for. Normally today"
+          example: 2023-06-22
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cases'
+
+        '500':
+          description: Internal Server Error
+
+
+components:
+
+  #-----------------#
+  #----------------------------------#
+  #-----------------#
+
+  schemas:
+    cases:
+      type: array
+      items:
+        $ref: '#/components/schemas/scheduled_case'
+    scheduled_case:
+      type: object
+      properties:
+        courthouse:
+          type: string
+          example: SWANSEA
+        courtroom:
+          type: string
+          example: 1
+        hearing_date:
+          type: string
+          format: date
+          example: 2023-06-23
+        case_number:
+          type: string
+          example: CASE1001
+        scheduled_start:
+          type: string
+          format: time
+          example: 10:00
+        upload_priority:
+          type: string
+          example:
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        prosecutors:
+          type: array
+          items:
+            $ref: '#/components/schemas/prosecutor'
+        defenders:
+          type: array
+          items:
+            $ref: '#/components/schemas/defender'
+
+    defendant:
+      type: string
+      example: Jow Bloggs
+    judge:
+      type: string
+      example: Mr Judge
+    prosecutor:
+      type: string
+      example: Mrs Prosecutor
+    defender:
+      type: string
+      example: Mr Defender
+
