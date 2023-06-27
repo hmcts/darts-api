@@ -194,22 +194,22 @@ ext {
 ext['snakeyaml.version'] = '2.0'
 ext['spring-security.version'] = '6.0.3' // https://spring.io/security/cve-2023-20862
 
-task generateDailyListApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+task generateDailyListApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
   generatorName = "spring"
   inputSpec = "$rootDir/src/main/resources/openapi/dailyList.yaml".toString()
   outputDir = "$buildDir/generated/openapi".toString()
   apiPackage = "uk.gov.hmcts.darts.dailylist.api"
   modelPackage = "uk.gov.hmcts.darts.dailylist.model"
   typeMappings = [
-                  "string+date"    : "LocalDate"]
+    "string+date": "LocalDate"]
   importMappings = [
-                    "LocalDate": "java.time.LocalDate"]
+    "LocalDate": "java.time.LocalDate"]
 
   skipOperationExample = true
   configOptions = [
-    dateLibrary: "java8",
+    dateLibrary  : "java8",
     interfaceOnly: "true",
-    useTags: "true"
+    useTags      : "true"
   ]
 }
 
@@ -223,14 +223,14 @@ task generateCourtHousesApi(type: org.openapitools.generator.gradle.plugin.tasks
 
   skipOperationExample = true
   configOptions = [
-    dateLibrary: "java8",
-    interfaceOnly: "true",
-    useTags: "true",
+    dateLibrary   : "java8",
+    interfaceOnly : "true",
+    useTags       : "true",
     useSpringBoot3: "true"
   ]
 }
 
-task generateAudioRequestApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+task generateAudioRequestApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
   generatorName = "spring"
   inputSpec = "$rootDir/src/main/resources/openapi/audioRequest.yaml".toString()
   outputDir = "$buildDir/generated/openapi".toString()
@@ -239,13 +239,13 @@ task generateAudioRequestApi(type: org.openapitools.generator.gradle.plugin.task
 
   skipOperationExample = true
   configOptions = [
-    dateLibrary: "java8",
+    dateLibrary  : "java8",
     interfaceOnly: "true",
-    useTags: "true"
+    useTags      : "true"
   ]
 }
 
-task generateEventsAPI(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+task generateEventsAPI(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
   generatorName = "spring"
   inputSpec = "$rootDir/src/main/resources/openapi/events.yaml".toString()
   outputDir = "$buildDir/generated/openapi".toString()
@@ -254,13 +254,13 @@ task generateEventsAPI(type: org.openapitools.generator.gradle.plugin.tasks.Gene
 
   skipOperationExample = true
   configOptions = [
-    dateLibrary: "java8",
+    dateLibrary  : "java8",
     interfaceOnly: "true",
-    useTags: "true"
+    useTags      : "true"
   ]
 }
 
-task generateAuditApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask){
+task generateAuditApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
   generatorName = "spring"
   inputSpec = "$rootDir/src/main/resources/openapi/audit.yaml".toString()
   outputDir = "$buildDir/generated/openapi".toString()
@@ -269,9 +269,9 @@ task generateAuditApi(type: org.openapitools.generator.gradle.plugin.tasks.Gener
 
   skipOperationExample = true
   configOptions = [
-    dateLibrary: "java8",
+    dateLibrary  : "java8",
     interfaceOnly: "true",
-    useTags: "true",
+    useTags      : "true",
   ]
 }
 
@@ -313,7 +313,6 @@ dependencies {
 
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
-  runtimeOnly 'org.hsqldb:hsqldb'
 
   implementation 'uk.gov.service.notify:notifications-java-client:4.1.0-RELEASE'
 
@@ -330,7 +329,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.3'
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.3")
-  compileJava.dependsOn = [ 'generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioRequestApi', 'generateCourtHousesApi' ]
+  compileJava.dependsOn = ['generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioRequestApi', 'generateCourtHousesApi']
 }
 
 mainClassName = 'uk.gov.hmcts.darts.Application'

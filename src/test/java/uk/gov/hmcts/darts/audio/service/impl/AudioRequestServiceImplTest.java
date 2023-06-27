@@ -17,6 +17,8 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @ExtendWith(MockitoExtension.class)
 class AudioRequestServiceImplTest {
@@ -24,9 +26,6 @@ class AudioRequestServiceImplTest {
     private static final Integer TEST_REQUESTER = 1234;
     private static final String OFFSET_T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String OFFSET_T_12_00_00_Z = "2023-05-31T12:00:00Z";
-    private static final String DOWNLOAD_REQ_TYPE = "Download";
-
-    private static final String REQUEST_STATUS_OPEN = "OPEN";
 
     @InjectMocks
     private AudioRequestServiceImpl audioRequestService;
@@ -44,7 +43,7 @@ class AudioRequestServiceImplTest {
         mockMediaRequest.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         mockMediaRequest.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         mockMediaRequest.setRequestor(TEST_REQUESTER);
-        mockMediaRequest.setStatus(REQUEST_STATUS_OPEN);
+        mockMediaRequest.setStatus(OPEN);
         mockMediaRequest.setAttempts(0);
         OffsetDateTime now = OffsetDateTime.now();
         mockMediaRequest.setCreatedDateTime(now);
@@ -62,7 +61,7 @@ class AudioRequestServiceImplTest {
         requestDetails.setRequestor(TEST_REQUESTER);
         requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
-        requestDetails.setRequestType(DOWNLOAD_REQ_TYPE);
+        requestDetails.setRequestType(DOWNLOAD);
 
         when(audioRequestRepository.saveAndFlush(any(MediaRequest.class))).thenReturn(mockMediaRequest);
 

@@ -3,9 +3,7 @@ package uk.gov.hmcts.darts.notification.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
-@ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
     public static final String TEST_EMAIL_ADDRESS = "test@test.com";
@@ -108,7 +105,7 @@ class NotificationServiceTest {
             .caseId(caseId)
             .emailAddresses(TEST_EMAIL_ADDRESS)
             .templateValues("{\n" +
-                            "  \"key1\": \"value1\",\n" +
+                                "  \"key1\": \"value1\",\n" +
                                 "  \"key2\": \"value2\",\n" +
                                 "  \"key3\": \"value3\",\n" +
                                 "  \"key4\": \"value4\",\n" +
@@ -124,7 +121,8 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendNotificationToGovNotifyInvalidTemplateId(TestInfo testInfo) throws TemplateNotFoundException, NotificationClientException {
+    void sendNotificationToGovNotifyInvalidTemplateId(TestInfo testInfo)
+        throws TemplateNotFoundException, NotificationClientException {
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)).thenReturn(
             "INVALID-TEMPLATE-ID");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class))).thenThrow(new NotificationClientException(
@@ -146,7 +144,8 @@ class NotificationServiceTest {
     }
 
     @Test
-    void sendNotificationToGovNotifyFailureRetryExceeded(TestInfo testInfo) throws TemplateNotFoundException, NotificationClientException {
+    void sendNotificationToGovNotifyFailureRetryExceeded(TestInfo testInfo)
+        throws TemplateNotFoundException, NotificationClientException {
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)).thenReturn(
             "976bf288-1234-1234-1234-c5529abf14cf");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class))).thenThrow(new NotificationClientException(

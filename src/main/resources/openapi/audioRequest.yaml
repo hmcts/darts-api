@@ -32,6 +32,12 @@ paths:
 
 components:
   schemas:
+    AudioRequestType:
+      type: string
+      enum:
+        - DOWNLOAD
+        - PLAYBACK
+
     AudioRequestDetails:
       type: object
       required:
@@ -56,5 +62,4 @@ components:
           format: date-time
           example: '2023-05-31T12:00:00Z'
         requestType:
-          type: string
-          example: Download
+          $ref: '#/components/schemas/AudioRequestType'

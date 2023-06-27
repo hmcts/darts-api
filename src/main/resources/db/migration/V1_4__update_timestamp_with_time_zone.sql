@@ -1,12 +1,6 @@
 ALTER TABLE notification ALTER created_date_time TYPE TIMESTAMP WITH TIME ZONE;
 ALTER TABLE notification ALTER last_updated_date_time TYPE TIMESTAMP WITH TIME ZONE;
 
-ALTER TABLE moj_media_request ALTER start_ts TYPE TIMESTAMP WITH TIME ZONE;
-ALTER TABLE moj_media_request ALTER end_ts TYPE TIMESTAMP WITH TIME ZONE;
-ALTER TABLE moj_media_request ALTER created_ts TYPE TIMESTAMP WITH TIME ZONE;
-ALTER TABLE moj_media_request ALTER last_updated_ts TYPE TIMESTAMP WITH TIME ZONE;
-ALTER TABLE moj_media_request ALTER last_accessd_ts TYPE TIMESTAMP WITH TIME ZONE;
-
 ALTER TABLE moj_media ALTER c_start TYPE TIMESTAMP WITH TIME ZONE;
 ALTER TABLE moj_media ALTER c_end TYPE TIMESTAMP WITH TIME ZONE;
 ALTER TABLE moj_media ALTER r_media_object_id TYPE CHARACTER VARYING(16);
@@ -16,6 +10,5 @@ ALTER TABLE moj_media DROP COLUMN c_reporting_restrictions;
 ALTER TABLE moj_media ALTER r_version_label TYPE CHARACTER VARYING(32);
 
 CREATE SEQUENCE IF NOT EXISTS notification_seq;
-CREATE SEQUENCE IF NOT EXISTS moj_mer_seq;
 CREATE SEQUENCE IF NOT EXISTS moj_med_seq;
 CREATE SEQUENCE IF NOT EXISTS moj_hma_seq;
