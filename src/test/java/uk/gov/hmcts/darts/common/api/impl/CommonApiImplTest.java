@@ -11,10 +11,12 @@ import uk.gov.hmcts.darts.common.entity.Courtroom;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.CommonCourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.service.CommonTransactionalService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,6 +32,9 @@ class CommonApiImplTest {
 
     @InjectMocks
     CommonApiImpl commonApi;
+
+    @Mock
+    CommonTransactionalService commonTransactionalService;
 
     @Test
     void testCourtroomExists() {
@@ -49,6 +54,9 @@ class CommonApiImplTest {
 
         Mockito.when(courtroomRepository.findByNames(anyString(), anyString())).thenReturn(null);
         Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(courthouse);
+        Mockito.when(commonTransactionalService.createCourtroom(any(Courthouse.class), anyString()))
+            .thenReturn(CommonTestDataUtil.createCourtroom("1"));
+
 
         Courtroom courtroom = commonApi.retrieveOrCreateCourtroom("SWANSEA", "1");
         assertEquals("1", courtroom.getName());

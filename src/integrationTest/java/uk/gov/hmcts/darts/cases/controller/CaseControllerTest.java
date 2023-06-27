@@ -22,6 +22,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class CaseControllerTest {
     @Autowired
     private transient MockMvc mockMvc;
