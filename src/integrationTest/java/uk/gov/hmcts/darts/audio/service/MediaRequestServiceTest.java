@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @SpringBootTest
@@ -48,6 +50,7 @@ class MediaRequestServiceTest {
     }
 
     @Test
+    @Order(1)
     void shouldGetMediaRequestByIdWhenStartAndEndTimesInsertedWithZuluTime() {
         MediaRequest requestResult = mediaRequestService.getMediaRequestById(-1);
         assertNotNull(requestResult);
@@ -63,6 +66,7 @@ class MediaRequestServiceTest {
     }
 
     @Test
+    @Order(2)
     void shouldGetMediaRequestByIdWhenStartAndEndTimesInsertedWithOffsetTime() {
         MediaRequest requestResult = mediaRequestService.getMediaRequestById(-2);
         assertNotNull(requestResult);
@@ -78,6 +82,15 @@ class MediaRequestServiceTest {
     }
 
     @Test
+    @Order(3)
+    void shouldUpdateStatusToProcessing() {
+        MediaRequest mediaRequest = mediaRequestService.updateAudioRequestStatus(-1, PROCESSING);
+
+        assertEquals(PROCESSING, mediaRequest.getStatus());
+    }
+
+    @Test
+    @Order(4)
     void shouldSaveAudioRequestWithZuluTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -96,6 +109,7 @@ class MediaRequestServiceTest {
 
     @Disabled("Disabled until h2database TIME ZONE=UTC command works as expected with Transactional - spring.jpa.properties.hibernate.jdbc.time_zone=UTC")
     @Test
+    @Order(5)
     void shouldSaveAudioRequestWithOffsetTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
@@ -113,6 +127,7 @@ class MediaRequestServiceTest {
     }
 
     @Test
+    @Order(6)
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeStarts() {
         // In the UK the clocks go forward 1 hour at 1am on the last Sunday in March.
         // The period when the clocks are 1 hour ahead is called British Summer Time (BST).
@@ -132,6 +147,7 @@ class MediaRequestServiceTest {
     }
 
     @Test
+    @Order(7)
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeEnds() {
         // In the UK the clocks go back 1 hour at 2am on the last Sunday in October.
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));

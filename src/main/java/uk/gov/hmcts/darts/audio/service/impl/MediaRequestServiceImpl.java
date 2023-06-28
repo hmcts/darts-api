@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequest;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
@@ -23,6 +25,16 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return mediaRequestRepository.getReferenceById(id);
     }
 
+    @Transactional
+    @Override
+    public MediaRequest updateAudioRequestStatus(Integer id, AudioRequestStatus status) {
+        MediaRequest mediaRequest = getMediaRequestById(id);
+        mediaRequest.setStatus(status);
+
+        return mediaRequestRepository.saveAndFlush(mediaRequest);
+    }
+
+    @Transactional
     @Override
     public Integer saveAudioRequest(AudioRequestDetails request) {
 
