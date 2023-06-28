@@ -4,6 +4,8 @@
 
 ## Prerequisites
 
+This is a test
+
 - [Java 17](https://www.oracle.com/java)
 
 ### Environment variables
