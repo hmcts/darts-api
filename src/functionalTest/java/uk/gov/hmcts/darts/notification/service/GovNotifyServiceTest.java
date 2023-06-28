@@ -143,7 +143,7 @@ class GovNotifyServiceTest {
         SendEmailResponse emailResponse = createAndSend("error_processing_audio");
         assertEquals("DARTS: Audio Request has Failed", emailResponse.getSubject());
         assertEquals("Hello,\r\n" +
-                         "You audio request for case TheCaseId has failed.Please contact the helpdesk.\r\n" +
+                         "Your audio request for case TheCaseId has failed.Please contact the helpdesk.\r\n" +
                          "\r\n" +
                          "Regards, \r\n" +
                          "\r\n" +
