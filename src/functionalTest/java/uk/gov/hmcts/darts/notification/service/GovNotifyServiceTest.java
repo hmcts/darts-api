@@ -148,6 +148,7 @@ class GovNotifyServiceTest {
                          "Regards, \r\n" +
                          "\r\n" +
                          "DARTS", emailResponse.getBody());
+
     }
 
 }
