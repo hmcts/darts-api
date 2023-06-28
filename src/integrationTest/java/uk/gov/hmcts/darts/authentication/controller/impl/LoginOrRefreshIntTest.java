@@ -9,7 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
+import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
@@ -31,7 +31,7 @@ class LoginOrRefreshIntTest {
     private NotificationRepository notificationRepository;
 
     @MockBean
-    private AudioRequestRepository audioRequestRepository;
+    private MediaRequestRepository mediaRequestRepository;
 
     @MockBean
     private DailyListRepository dailyListRepository;

@@ -20,10 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.audio.repository.AudioRequestRepository;
 import uk.gov.hmcts.darts.common.exception.ExceptionHandlerTest.MockController;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
-import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,15 +34,6 @@ class ExceptionHandlerTest {
 
     private static final String ENDPOINT = "/test";
 
-    @MockBean
-    private NotificationRepository notificationRepository;
-
-    @MockBean
-    private AudioRequestRepository audioRequestRepository;
-
-    @MockBean
-    private CourthouseRepository courthouseRepository;
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -54,6 +42,7 @@ class ExceptionHandlerTest {
 
     @RestController
     static class MockController {
+
         @GetMapping(ENDPOINT)
         public ResponseEntity<Void> test() {
             return ResponseEntity.ok()
@@ -64,9 +53,11 @@ class ExceptionHandlerTest {
     @Getter
     @RequiredArgsConstructor
     enum TestError implements DartsApiError {
-        TEST_ERROR("999",
-                   HttpStatus.I_AM_A_TEAPOT,
-                   "A descriptive title");
+        TEST_ERROR(
+            "999",
+            HttpStatus.I_AM_A_TEAPOT,
+            "A descriptive title"
+        );
 
         private static final String ERROR_TYPE_PREFIX = "TEST";
 
@@ -105,7 +96,8 @@ class ExceptionHandlerTest {
 
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void shouldReturnRfc7807ResponseWithDetailFieldPopulatedWhenADartsApiExceptionIsThrownWithDetail() throws Exception {
+    void shouldReturnRfc7807ResponseWithDetailFieldPopulatedWhenADartsApiExceptionIsThrownWithDetail()
+        throws Exception {
         Mockito.when(mockController.test())
             .thenThrow(new DartsApiException(TestError.TEST_ERROR, "Some descriptive details"));
 

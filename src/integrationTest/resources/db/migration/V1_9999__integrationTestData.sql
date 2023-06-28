@@ -225,3 +225,11 @@ INSERT INTO moj_hearing VALUES (158,30,4,'{Judge4}','2023-06-24','14:00:00',TRUE
 INSERT INTO moj_hearing VALUES (159,31,4,'{Judge4}','2023-06-24','15:00:00',TRUE, NULL);
 INSERT INTO moj_hearing VALUES (160,32,4,'{Judge4}','2023-06-24','16:00:00',TRUE, NULL);
 ALTER SEQUENCE moj_hea_seq RESTART WITH 200;
+
+
+
+INSERT INTO moj_media_request (moj_mer_id, moj_hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_updated_ts)
+VALUES (-1, -2, -3, 'OPEN', 'DOWNLOAD', TIMESTAMP WITH TIME ZONE '2023-06-26 13:00:00+00:00', TIMESTAMP WITH TIME ZONE '2023-06-26 13:45:00+00:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO moj_media_request (moj_mer_id, moj_hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_updated_ts)
+VALUES (-2, -2, -3, 'OPEN', 'DOWNLOAD', TIMESTAMP WITH TIME ZONE '2023-06-26 14:00:00+01:00', TIMESTAMP WITH TIME ZONE '2023-06-26 14:45:00+01:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
