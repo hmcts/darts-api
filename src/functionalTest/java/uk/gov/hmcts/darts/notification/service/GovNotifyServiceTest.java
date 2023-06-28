@@ -138,6 +138,17 @@ class GovNotifyServiceTest {
                          "DARTS", emailResponse.getBody());
     }
 
+    @Test
+    void errorProcessingAudio() throws NotificationClientException, TemplateNotFoundException {
+        SendEmailResponse emailResponse = createAndSend("error_processing_audio");
+        assertEquals("DARTS: Audio Request has Failed", emailResponse.getSubject());
+        assertEquals("Hello,\r\n" +
+                         "Your audio request for case TheCaseId has failed.Please contact the helpdesk.\r\n" +
+                         "\r\n" +
+                         "Regards, \r\n" +
+                         "\r\n" +
+                         "DARTS", emailResponse.getBody());
 
+    }
 
 }
