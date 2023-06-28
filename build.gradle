@@ -385,7 +385,7 @@ flyway {
   println "FLYWAY url=${url}"
   user = System.getenv('FLYWAY_USER')
   password = System.getenv('FLYWAY_PASSWORD')
-  schemas = [ System.getenv('FLYWAY_DEFAULT_SCHEMA') ]
+  schemas = [ 'darts' ]
   println "FLYWAY schemas=${schemas}"
   baselineOnMigrate = true
   baselineVersion = '000'
