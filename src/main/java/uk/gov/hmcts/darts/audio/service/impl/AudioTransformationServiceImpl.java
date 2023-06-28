@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.entity.MediaRequest;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 
@@ -17,7 +17,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Transactional
     @Override
-    public MediaRequest processAudioRequest(Integer requestId) {
+    public MediaRequestEntity processAudioRequest(Integer requestId) {
 
         return mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
     }

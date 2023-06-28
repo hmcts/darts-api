@@ -21,11 +21,11 @@ import uk.gov.hmcts.darts.audiorequest.model.AudioRequestType;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = MediaRequest.TABLE_NAME)
+@Table(name = MediaRequestEntity.TABLE_NAME)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MediaRequest {
+public class MediaRequestEntity {
 
     public static final String REQUEST_ID = "moj_mer_id";
     public static final String HEARING_ID = "moj_hea_id";

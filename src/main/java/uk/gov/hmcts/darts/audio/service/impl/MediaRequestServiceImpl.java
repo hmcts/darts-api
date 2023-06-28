@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audio.entity.MediaRequest;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -21,17 +21,17 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaRequestRepository mediaRequestRepository;
 
     @Override
-    public MediaRequest getMediaRequestById(Integer id) {
-        return mediaRequestRepository.getReferenceById(id);
+    public MediaRequestEntity getMediaRequestById(Integer id) {
+        return mediaRequestRepository.findById(id).orElseThrow();
     }
 
     @Transactional
     @Override
-    public MediaRequest updateAudioRequestStatus(Integer id, AudioRequestStatus status) {
-        MediaRequest mediaRequest = getMediaRequestById(id);
-        mediaRequest.setStatus(status);
+    public MediaRequestEntity updateAudioRequestStatus(Integer id, AudioRequestStatus status) {
+        MediaRequestEntity mediaRequestEntity = getMediaRequestById(id);
+        mediaRequestEntity.setStatus(status);
 
-        return mediaRequestRepository.saveAndFlush(mediaRequest);
+        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
 
     @Transactional
@@ -49,20 +49,20 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return audioRequest.getRequestId();
     }
 
-    private MediaRequest saveAudioRequestToDb(Integer hearingId, Integer requestor,
-                                              OffsetDateTime startTime, OffsetDateTime endTime,
-                                              AudioRequestType requestType) {
+    private MediaRequestEntity saveAudioRequestToDb(Integer hearingId, Integer requestor,
+                                                    OffsetDateTime startTime, OffsetDateTime endTime,
+                                                    AudioRequestType requestType) {
 
-        MediaRequest mediaRequest = new MediaRequest();
-        mediaRequest.setHearingId(hearingId);
-        mediaRequest.setRequestor(requestor);
-        mediaRequest.setStartTime(startTime);
-        mediaRequest.setEndTime(endTime);
-        mediaRequest.setRequestType(requestType);
-        mediaRequest.setStatus(OPEN);
-        mediaRequest.setAttempts(0);
+        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setHearingId(hearingId);
+        mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setStartTime(startTime);
+        mediaRequestEntity.setEndTime(endTime);
+        mediaRequestEntity.setRequestType(requestType);
+        mediaRequestEntity.setStatus(OPEN);
+        mediaRequestEntity.setAttempts(0);
 
-        return mediaRequestRepository.saveAndFlush(mediaRequest);
+        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
 
 }

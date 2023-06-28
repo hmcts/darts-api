@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import uk.gov.hmcts.darts.audio.entity.MediaRequest;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 
 public interface AudioTransformationService {
 
-    MediaRequest processAudioRequest(Integer requestId);
+    MediaRequestEntity processAudioRequest(Integer requestId);
 
 }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.darts.audio.entity.MediaRequest;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 
 import java.time.OffsetDateTime;
@@ -29,28 +29,28 @@ class AudioTransformationServiceTest {
 
     @BeforeEach
     void setUp() {
-        MediaRequest mediaRequest = new MediaRequest();
-        mediaRequest.setHearingId(-1);
-        mediaRequest.setRequestor(-2);
-        mediaRequest.setStatus(OPEN);
-        mediaRequest.setRequestType(DOWNLOAD);
-        mediaRequest.setAttempts(0);
-        mediaRequest.setStartTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
-        mediaRequest.setEndTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
-        mediaRequest.setOutboundLocation(null);
-        mediaRequest.setOutputFormat(null);
-        mediaRequest.setOutputFilename(null);
-        mediaRequest.setLastAccessedDateTime(null);
+        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setHearingId(-1);
+        mediaRequestEntity.setRequestor(-2);
+        mediaRequestEntity.setStatus(OPEN);
+        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setAttempts(0);
+        mediaRequestEntity.setStartTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
+        mediaRequestEntity.setEndTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
+        mediaRequestEntity.setOutboundLocation(null);
+        mediaRequestEntity.setOutputFormat(null);
+        mediaRequestEntity.setOutputFilename(null);
+        mediaRequestEntity.setLastAccessedDateTime(null);
 
-        MediaRequest savedMediaRequest = mediaRequestRepository.saveAndFlush(mediaRequest);
-        assertNotNull(savedMediaRequest);
-        requestId = savedMediaRequest.getRequestId();
+        MediaRequestEntity savedMediaRequestEntity = mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+        assertNotNull(savedMediaRequestEntity);
+        requestId = savedMediaRequestEntity.getRequestId();
     }
 
     @Test
     void processAudioRequest() {
-        MediaRequest processingMediaRequest = audioTransformationService.processAudioRequest(requestId);
-        assertEquals(PROCESSING, processingMediaRequest.getStatus());
+        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(requestId);
+        assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
     }
 
 }
