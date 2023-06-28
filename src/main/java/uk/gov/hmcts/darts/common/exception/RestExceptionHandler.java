@@ -1,7 +1,8 @@
-package uk.gov.hmcts.darts.common.error;
+package uk.gov.hmcts.darts.common.exception;
 
 import jakarta.validation.ValidationException;
 import org.springframework.core.NestedExceptionUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,11 +18,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.Objects;
 import java.util.Optional;
 
-
+/*
+ * @deprecated in favour of RFC-7807 compliant handler uk.gov.hmcts.darts.common.exception.ExceptionHandler
+ * TODO: Eliminate this class (DMP-516)
+ */
+@Deprecated(forRemoval = true)
 @SuppressWarnings("PMD.LawOfDemeter")
 @RestControllerAdvice
+/*
+ * Temporarily prioritise this handler over uk.gov.hmcts.darts.common.exception.ExceptionHandler to keep behaviour
+ * consistent with existing test expectations
+ */
+@Order(1)
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @Deprecated
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -35,6 +46,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exception, HttpStatus.BAD_REQUEST);
     }
 
+    @Deprecated
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> conflict(DataIntegrityViolationException exception) {
         BasicRestException basicRestException = new BasicRestException();
@@ -44,6 +56,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
+    @Deprecated
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<?> handleValidationException(ValidationException exception) {
         BasicRestException basicRestException = new BasicRestException();
