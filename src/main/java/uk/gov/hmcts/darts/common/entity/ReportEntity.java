@@ -13,7 +13,7 @@ import lombok.Data;
 @Entity
 @Table(name = "moj_report")
 @Data
-public class Report {
+public class ReportEntity {
 
     @Id
     @Column(name = "moj_rep_id")

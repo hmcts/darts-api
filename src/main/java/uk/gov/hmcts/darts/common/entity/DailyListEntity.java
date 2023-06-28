@@ -50,7 +50,7 @@ public class DailyListEntity {
 
     @ManyToOne
     @JoinColumn(name = COURTHOUSE_ID)
-    private Courthouse courthouse;
+    private CourthouseEntity courthouse;
 
     @Column(name = DAILY_LIST_OBJECT_ID)
     private String legacyObjectId;

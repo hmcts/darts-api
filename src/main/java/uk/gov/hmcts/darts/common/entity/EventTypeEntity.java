@@ -12,7 +12,7 @@ import lombok.Data;
 @Entity
 @Table(name = "moj_event_type")
 @Data
-public class EventType {
+public class EventTypeEntity {
 
     @Id
     @Column(name = "moj_evt_id")

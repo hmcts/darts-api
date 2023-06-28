@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
-import uk.gov.hmcts.darts.common.entity.Courtroom;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 
 import java.io.IOException;
@@ -73,7 +73,7 @@ class CaseServiceTest {
         String courthouseName = "Swansea";
         String courtroomName = "99";
 
-        Courtroom foundCourtroom = courtroomRepository.findByNames(courthouseName, courtroomName);
+        CourtroomEntity foundCourtroom = courtroomRepository.findByNames(courthouseName, courtroomName);
         assertNull(foundCourtroom);
 
         GetCasesRequest request = new GetCasesRequest();

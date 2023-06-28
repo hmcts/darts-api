@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
-import uk.gov.hmcts.darts.common.entity.Audit;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,21 +29,21 @@ public class AuditServiceImpl implements AuditService {
 
 
     @Override
-    public List<Audit> search(AuditSearchQuery auditSearchQuery) {
+    public List<AuditEntity> search(AuditSearchQuery auditSearchQuery) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Audit> criteriaQuery = criteriaBuilder.createQuery(Audit.class);
-        Root<Audit> root = criteriaQuery.from(Audit.class);
+        CriteriaQuery<AuditEntity> criteriaQuery = criteriaBuilder.createQuery(AuditEntity.class);
+        Root<AuditEntity> root = criteriaQuery.from(AuditEntity.class);
 
         List<Predicate> predicates = getPredicates(auditSearchQuery, criteriaBuilder, root);
         Predicate finalAndPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         criteriaQuery.where(finalAndPredicate);
-        TypedQuery<Audit> query = entityManager.createQuery(criteriaQuery);
+        TypedQuery<AuditEntity> query = entityManager.createQuery(criteriaQuery);
 
         return query.getResultList();
 
     }
 
-    private List<Predicate> getPredicates(AuditSearchQuery auditSearchQuery, CriteriaBuilder criteriaBuilder, Root<Audit> root) {
+    private List<Predicate> getPredicates(AuditSearchQuery auditSearchQuery, CriteriaBuilder criteriaBuilder, Root<AuditEntity> root) {
         List<Predicate> predicates = new ArrayList<>();
         if (auditSearchQuery.getCaseId() != null) {
             predicates.add(criteriaBuilder.equal(root.get(CASE_ID), auditSearchQuery.getCaseId()));
@@ -51,7 +51,8 @@ public class AuditServiceImpl implements AuditService {
 
         if (auditSearchQuery.getFromDate() != null && auditSearchQuery.getToDate() != null) {
             predicates.add(criteriaBuilder.between(root.get(CREATED_TS), auditSearchQuery.getFromDate(),
-                                                   auditSearchQuery.getToDate()));
+                                                   auditSearchQuery.getToDate()
+            ));
         }
 
         if (auditSearchQuery.getEventId() != null) {

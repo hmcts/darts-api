@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.audit.controller.mapper.AuditDtoMapper;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.model.SearchResult;
 import uk.gov.hmcts.darts.audit.service.AuditService;
-import uk.gov.hmcts.darts.common.entity.Audit;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -39,7 +39,7 @@ public class AuditController implements AuditApi {
         searchQuery.setEventId(eventId);
 
         validate(searchQuery);
-        List<Audit> searchResults = auditService.search(searchQuery);
+        List<AuditEntity> searchResults = auditService.search(searchQuery);
         List<SearchResult> responseResults = auditDtoMapper.mapToSearchResult(searchResults);
 
         return new ResponseEntity<>(responseResults, HttpStatus.OK);

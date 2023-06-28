@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
-import uk.gov.hmcts.darts.common.entity.Courtroom;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
@@ -28,14 +28,14 @@ class CommonTransactionalServiceImplTest {
 
     @Test
     void courtroomAlreadyExists() {
-        when(courtroomRepository.saveAndFlush(any(Courtroom.class))).thenThrow(new DataIntegrityViolationException(
+        when(courtroomRepository.saveAndFlush(any(CourtroomEntity.class))).thenThrow(new DataIntegrityViolationException(
             "already a courtroom"));
         when(courtroomRepository.findByNameAndId(anyInt(), anyString())).thenReturn(CommonTestDataUtil.createCourtroom(
             "test result"));
 
-        Courthouse courthouse = CommonTestDataUtil.createCourthouse("test");
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("test");
         courthouse.setId(100);
-        Courtroom createdCourtroom = transactionalService.createCourtroom(courthouse, "Courtroom Name 1");
+        CourtroomEntity createdCourtroom = transactionalService.createCourtroom(courthouse, "Courtroom Name 1");
         assertEquals("test result", createdCourtroom.getName());
     }
 }

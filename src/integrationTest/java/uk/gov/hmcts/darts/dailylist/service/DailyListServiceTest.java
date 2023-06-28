@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
@@ -117,7 +117,7 @@ class DailyListServiceTest {
 
     @Test
     void updateCourthouseOk() throws IOException {
-        Courthouse courthouseTemp = new Courthouse();
+        CourthouseEntity courthouseTemp = new CourthouseEntity();
         courthouseTemp.setCourthouseName("TEMP");
         courthouseRepository.saveAndFlush(courthouseTemp);
         String requestBody = getContentsFromFile(
@@ -126,7 +126,7 @@ class DailyListServiceTest {
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
         service.processIncomingDailyList(request);
-        Optional<Courthouse> updatedCourthouse = courthouseRepository.findByCourthouseName("TEMP");
+        Optional<CourthouseEntity> updatedCourthouse = courthouseRepository.findByCourthouseName("TEMP");
         assertEquals(updatedCourthouse.get().getCode(), 9999);
         dailyListRepository.deleteAll();
         courthouseRepository.delete(courthouseTemp);

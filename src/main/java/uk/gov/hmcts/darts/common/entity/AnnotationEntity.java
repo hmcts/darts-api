@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "moj_annotation")
 @Data
-public class Annotation {
+public class AnnotationEntity {
 
     @Id
     @Column(name = "moj_ann_id")
@@ -28,11 +28,11 @@ public class Annotation {
 
     @OneToOne
     @JoinColumn(name = "moj_cas_id")
-    private Case theCase;
+    private CaseEntity courtCase;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "moj_crt_id")
-    private Courthouse theCourthouse;
+    private CourthouseEntity courthouse;
 
     @Column(name = "r_annotation_object_id", length = 16)
     private String legacyObjectId;

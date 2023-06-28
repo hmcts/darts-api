@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.courthouse.api.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
@@ -15,7 +15,7 @@ public class CourthouseApiImpl implements CourthouseApi {
     private final CourthouseService courthouseService;
 
     @Override
-    public Courthouse retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
+    public CourthouseEntity retrieveAndUpdateCourtHouse(Integer courthouseCode, String courthouseName)
         throws CourthouseNameNotFoundException, CourthouseCodeNotMatchException {
         return courthouseService.retrieveAndUpdateCourtHouse(courthouseCode, courthouseName);
     }

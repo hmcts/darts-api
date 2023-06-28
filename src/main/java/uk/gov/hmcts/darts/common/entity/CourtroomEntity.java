@@ -17,11 +17,11 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 
 @Entity
-@Table(name = Courtroom.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {Courtroom.MOJ_CTH_ID, Courtroom.COURTROOM_NAME})})
+@Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.MOJ_CTH_ID, CourtroomEntity.COURTROOM_NAME})})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Courtroom {
+public class CourtroomEntity {
 
     public static final String MOJ_CTR_ID = "moj_ctr_id";
     public static final String COURTROOM_NAME = "courtroom_name";
@@ -40,7 +40,7 @@ public class Courtroom {
     @ManyToOne
     @Cascade(CascadeType.SAVE_UPDATE)
     @JoinColumn(name = MOJ_CTH_ID)
-    private Courthouse courthouse;
+    private CourthouseEntity courthouse;
 
 
 }

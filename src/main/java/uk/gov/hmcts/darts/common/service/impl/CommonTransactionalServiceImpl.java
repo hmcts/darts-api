@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
-import uk.gov.hmcts.darts.common.entity.Courtroom;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.service.CommonTransactionalService;
 
@@ -21,8 +21,8 @@ public class CommonTransactionalServiceImpl implements CommonTransactionalServic
 
     @Override
     @Transactional
-    public Courtroom createCourtroom(Courthouse courthouse, String courtroomName) {
-        Courtroom courtroom = new Courtroom();
+    public CourtroomEntity createCourtroom(CourthouseEntity courthouse, String courtroomName) {
+        CourtroomEntity courtroom = new CourtroomEntity();
 
         try {
             courtroom.setName(courtroomName.toUpperCase(Locale.ROOT));

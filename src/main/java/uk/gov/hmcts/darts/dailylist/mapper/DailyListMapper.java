@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
@@ -18,7 +18,7 @@ public class DailyListMapper {
     private final ObjectMapper objectMapper;
 
 
-    public DailyListEntity mapToDailyListEntity(DailyListPostRequest postRequest, Courthouse courthouse) {
+    public DailyListEntity mapToDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse) {
 
         DailyListEntity dailyListEntity = new DailyListEntity();
         dailyListEntity.setVersion((short) 1);
@@ -26,7 +26,7 @@ public class DailyListMapper {
         return dailyListEntity;
     }
 
-    public void mapToExistingDailyListEntity(DailyListPostRequest postRequest, Courthouse courthouse, DailyListEntity dailyListEntity) {
+    public void mapToExistingDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse, DailyListEntity dailyListEntity) {
         uk.gov.hmcts.darts.dailylist.model.DailyList dailyList = postRequest.getDailyList();
         DocumentID documentId = dailyList.getDocumentId();
         dailyListEntity.setCourthouse(courthouse);

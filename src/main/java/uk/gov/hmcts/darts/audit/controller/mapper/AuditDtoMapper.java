@@ -4,7 +4,7 @@ package uk.gov.hmcts.darts.audit.controller.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.audit.model.SearchResult;
-import uk.gov.hmcts.darts.common.entity.Audit;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = "spring")
 public interface AuditDtoMapper {
 
-    List<SearchResult> mapToSearchResult(List<Audit> auditEntities);
+    List<SearchResult> mapToSearchResult(List<AuditEntity> auditEntities);
 
     default String map(OffsetDateTime value) {
         return value.toString();

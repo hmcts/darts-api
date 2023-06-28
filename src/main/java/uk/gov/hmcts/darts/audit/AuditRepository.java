@@ -2,9 +2,9 @@ package uk.gov.hmcts.darts.audit;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import uk.gov.hmcts.darts.common.entity.Audit;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 
 @Repository
-public interface AuditRepository extends JpaRepository<Audit, Integer> {
+public interface AuditRepository extends JpaRepository<AuditEntity, Integer> {
 
 }

@@ -24,7 +24,7 @@ import java.util.List;
 @Table(name = "moj_case")
 @Data
 @SuppressWarnings({"PMD.ShortClassName"})
-public class Case {
+public class CaseEntity {
 
     @Id
     @Column(name = "moj_cas_id")
@@ -35,7 +35,7 @@ public class Case {
     @ManyToOne
     @JoinColumn(name = "moj_rer_id")
     @Cascade(CascadeType.SAVE_UPDATE)
-    private ReportingRestrictions reportingRestrictions;
+    private ReportingRestrictionsEntity reportingRestrictions;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;
@@ -70,9 +70,9 @@ public class Case {
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
 
-    @OneToMany(mappedBy = "theCase")
-    private List<Transcription> theTranscriptions;
+    @OneToMany(mappedBy = "courtCase")
+    private List<TranscriptionEntity> transcriptions;
 
-    @OneToMany(mappedBy = "theCase")
-    private List<Annotation> theAnnotations;
+    @OneToMany(mappedBy = "courtCase")
+    private List<AnnotationEntity> annotations;
 }
