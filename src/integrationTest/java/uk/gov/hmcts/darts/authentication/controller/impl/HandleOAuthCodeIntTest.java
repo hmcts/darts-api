@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.nimbusds.jose.JOSEException;
@@ -12,6 +13,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -60,7 +63,8 @@ class HandleOAuthCodeIntTest {
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void handOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
-        setWiremockStubs();
+        KeyPair keyPair = setTokenStub();
+        setKeyStoreStub(keyPair);
 
         MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().is2xxSuccessful())
@@ -71,13 +75,62 @@ class HandleOAuthCodeIntTest {
 
     }
 
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void handleOAuthCodeShouldReturnErrorResponseWhenDownstreamCallToAzureFails() throws Exception {
+        stubFor(
+            WireMock.post(OAUTH_TOKEN_ENDPOINT)
+                .willReturn(
+                    aResponse().withStatus(500)
+                )
+        );
+
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+            .andExpect(status().isInternalServerError())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+            {
+                "type":"AUTHENTICATION_100",
+                "title":"Failed to obtain access token",
+                "status":500
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void handleOAuthCodeShouldReturnErrorResponseWhenTokenValidationFails() throws Exception {
+        setTokenStub();
+
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+            .andExpect(status().isInternalServerError())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+            {
+                "type":"AUTHENTICATION_101",
+                "title":"Failed to validate access token",
+                "status":500
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     /**
      * To test the access token validation aspects of the /handle-oauth-code flow, we must ensure the Azure /token stub
      * provides a token whose signature can be verified against a public key provided by the configured Remote JWKS.
      * This setup method generates these private and public RSA keys and sets the stub responses accordingly.
      */
-    @SneakyThrows
-    private void setWiremockStubs() {
+    @SuppressWarnings("PMD.LinguisticNaming")
+    private KeyPair setTokenStub() {
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(CONFIGURED_AUDIENCE_VALUE)
             .issuer(CONFIGURED_ISSUER_VALUE)
@@ -95,6 +148,12 @@ class HandleOAuthCodeIntTest {
                 )
         );
 
+        return keyPair;
+    }
+
+    @SneakyThrows(JsonProcessingException.class)
+    @SuppressWarnings("PMD.LinguisticNaming")
+    private void setKeyStoreStub(KeyPair keyPair) {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         Encoder encoder = Base64.getEncoder();
         JwksKey jwksKey = new JwksKey(

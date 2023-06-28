@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.authentication.model.Session;
@@ -64,6 +67,26 @@ class LogoutIntTest {
                 HttpHeaders.LOCATION,
                 expectedUri
             ));
+    }
+
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void logoutShouldReturnErrorResponseWhenSessionDoesNotExist() throws Exception {
+        MvcResult response = mockMvc.perform(get(EXTERNAL_USER_LOGOUT_ENDPOINT))
+            .andExpect(status().isInternalServerError())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+
+        String expectedResponseBody = """
+            {
+                "type":"AUTHENTICATION_102",
+                "title":"Logout was attempted for a session that was inactive",
+                "status":500
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
     }
 
 }

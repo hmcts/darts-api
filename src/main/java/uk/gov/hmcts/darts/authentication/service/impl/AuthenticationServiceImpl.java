@@ -6,12 +6,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
 import uk.gov.hmcts.darts.authentication.component.UriProvider;
 import uk.gov.hmcts.darts.authentication.dao.AzureDao;
-import uk.gov.hmcts.darts.authentication.exception.AuthenticationException;
+import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authentication.service.SessionService;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
 
@@ -45,13 +46,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         try {
             tokenResponse = azureDao.fetchAccessToken(code);
         } catch (AzureDaoException e) {
-            throw new AuthenticationException("Failed to obtain access token", e);
+            throw new DartsApiException(AuthenticationError.FAILED_TO_OBTAIN_ACCESS_TOKEN, e);
         }
         var accessToken = tokenResponse.getAccessToken();
 
         var validationResult = tokenValidator.validate(accessToken);
         if (!validationResult.valid()) {
-            throw new AuthenticationException("Failed to validate access token", validationResult.reason());
+            throw new DartsApiException(AuthenticationError.FAILED_TO_VALIDATE_ACCESS_TOKEN);
         }
 
         var session = new Session(sessionId, accessToken, tokenResponse.getExpiresIn());
@@ -66,8 +67,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Session session = sessionService.getSession(sessionId);
         if (session == null) {
-            throw new AuthenticationException(
-                String.format("Session %s attempted logout but this session is not active", sessionId));
+            throw new DartsApiException(AuthenticationError.LOGOUT_ATTEMPTED_FOR_INACTIVE_SESSION);
         }
 
         return uriProvider.getLogoutUri(sessionId);

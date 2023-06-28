@@ -8,12 +8,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
 import uk.gov.hmcts.darts.authentication.component.UriProvider;
 import uk.gov.hmcts.darts.authentication.dao.AzureDao;
-import uk.gov.hmcts.darts.authentication.exception.AuthenticationException;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.SessionService;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
 
@@ -89,12 +89,12 @@ class AuthenticationServiceImplTest {
         when(azureDao.fetchAccessToken(anyString()))
             .thenThrow(AzureDaoException.class);
 
-        AuthenticationException exception = assertThrows(
-            AuthenticationException.class,
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
             () -> authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE)
         );
 
-        assertEquals("Failed to obtain access token", exception.getMessage());
+        assertEquals("100", exception.getError().getErrorTypeNumeric());
     }
 
     @Test
@@ -104,12 +104,12 @@ class AuthenticationServiceImplTest {
         when(tokenValidator.validate(anyString()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
 
-        AuthenticationException exception = assertThrows(
-            AuthenticationException.class,
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
             () -> authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE)
         );
 
-        assertEquals("Failed to validate access token: validation failure reason", exception.getMessage());
+        assertEquals("101", exception.getError().getErrorTypeNumeric());
     }
 
     @Test
@@ -117,13 +117,12 @@ class AuthenticationServiceImplTest {
         when(sessionService.getSession(anyString()))
             .thenReturn(null);
 
-        AuthenticationException exception = assertThrows(
-            AuthenticationException.class,
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
             () -> authenticationService.logout(DUMMY_SESSION_ID)
         );
 
-        assertEquals("Session 9D65049E1787A924E269747222F60CAA attempted logout but this session is not active",
-                     exception.getMessage());
+        assertEquals("102", exception.getError().getErrorTypeNumeric());
     }
 
     @Test
