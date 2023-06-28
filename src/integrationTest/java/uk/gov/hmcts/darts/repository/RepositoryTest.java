@@ -7,8 +7,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.repository.ReportingRestrictionsRepository;
-import uk.gov.hmcts.darts.common.entity.Case;
-import uk.gov.hmcts.darts.common.entity.ReportingRestrictions;
+import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.ReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
@@ -36,7 +36,7 @@ class RepositoryTest {
 
     @Test
     void canCreateNewCase() {
-        Case courtCase = CommonTestDataUtil.createCase("2");
+        CaseEntity courtCase = CommonTestDataUtil.createCase("2");
         caseRepository.saveAndFlush(courtCase);
 
         var newCourtCase = caseRepository.findByCaseNumber("2");
@@ -46,7 +46,7 @@ class RepositoryTest {
 
     @Test
     void canAddReportingRestrictionsToCase() {
-        var reportingRestrictions = new ReportingRestrictions();
+        var reportingRestrictions = new ReportingRestrictionsEntity();
         var persistedRestrictions = reportingRestrictionsRepository.saveAndFlush(reportingRestrictions);
 
         var someCase = CommonTestDataUtil.createCase("1");
@@ -56,6 +56,6 @@ class RepositoryTest {
         var courtCase = caseRepository.findByCaseNumber("1");
         var attachedRestrictions = courtCase.getReportingRestrictions();
 
-        assertThat(attachedRestrictions).isInstanceOf(ReportingRestrictions.class);
+        assertThat(attachedRestrictions).isInstanceOf(ReportingRestrictionsEntity.class);
     }
 }

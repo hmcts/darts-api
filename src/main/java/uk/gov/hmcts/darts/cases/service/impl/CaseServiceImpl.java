@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.api.CommonApi;
-import uk.gov.hmcts.darts.common.entity.Hearing;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class CaseServiceImpl implements CaseService {
     @Override
     public List<ScheduledCase> getCases(GetCasesRequest request) {
 
-        List<Hearing> hearings = hearingRepository.findByCourthouseCourtroomAndDate(
+        List<HearingEntity> hearings = hearingRepository.findByCourthouseCourtroomAndDate(
             request.getCourthouse(),
             request.getCourtroom(),
             request.getDate()
@@ -33,7 +33,7 @@ public class CaseServiceImpl implements CaseService {
 
     }
 
-    private void createCourtroomIfMissing(List<Hearing> hearings, GetCasesRequest request) {
+    private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
         if (CollectionUtils.isEmpty(hearings)) {
             //find out if courthouse or courtroom are missing.
             commonApi.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());

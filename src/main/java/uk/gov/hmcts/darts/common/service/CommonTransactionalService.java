@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.common.service;
 
-import uk.gov.hmcts.darts.common.entity.Courthouse;
-import uk.gov.hmcts.darts.common.entity.Courtroom;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
 public interface CommonTransactionalService {
-    Courtroom createCourtroom(Courthouse courthouse, String courtroomName);
+    CourtroomEntity createCourtroom(CourthouseEntity courthouse, String courtroomName);
 }

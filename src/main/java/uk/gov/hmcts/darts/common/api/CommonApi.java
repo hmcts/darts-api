@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.common.api;
 
-import uk.gov.hmcts.darts.common.entity.Courtroom;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
 public interface CommonApi {
 
-    Courtroom retrieveOrCreateCourtroom(String courthouseName, String courtroomName);
+    CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName);
 }

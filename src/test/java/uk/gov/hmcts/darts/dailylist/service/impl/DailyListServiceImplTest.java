@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
@@ -55,14 +55,17 @@ class DailyListServiceImplTest {
 
     @Test
     void processIncomingDailyListOkWhenCodeNotMatchExceptionThrown() throws IOException, CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
-        Courthouse entity = new Courthouse();
+        CourthouseEntity entity = new CourthouseEntity();
         entity.setCourthouseName("SWANSEA");
         entity.setCode(457);
         CourthouseCodeNotMatchException exception = new CourthouseCodeNotMatchException(entity, 457, "test");
 
         when(courthouseApi.retrieveAndUpdateCourtHouse(anyInt(), anyString())).thenThrow(exception);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
-        when(dailyListMapper.mapToDailyListEntity(any(DailyListPostRequest.class), any(Courthouse.class))).thenReturn(new DailyListEntity());
+        when(dailyListMapper.mapToDailyListEntity(
+            any(DailyListPostRequest.class),
+            any(CourthouseEntity.class)
+        )).thenReturn(new DailyListEntity());
         String requestBody = getContentsFromFile(
             "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
         DailyList dailyList = objectMapper.readValue(requestBody, DailyList.class);

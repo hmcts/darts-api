@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.dailylist.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
@@ -37,7 +37,7 @@ public class DailyListServiceImpl implements DailyListService {
         DailyList dailyList = postRequest.getDailyList();
 
         dailyList.getCrownCourt().getCourtHouseName();
-        Courthouse courthouse = retrieveCourtHouse(dailyList);
+        CourthouseEntity courthouse = retrieveCourtHouse(dailyList);
         String uniqueId = dailyList.getDocumentId().getUniqueId();
         Optional<DailyListEntity> existingRecordOpt = dailyListRepository.findByUniqueId(uniqueId);
         if (existingRecordOpt.isPresent()) {
@@ -56,7 +56,7 @@ public class DailyListServiceImpl implements DailyListService {
 
     }
 
-    private Courthouse retrieveCourtHouse(DailyList dailyList) {
+    private CourthouseEntity retrieveCourtHouse(DailyList dailyList) {
         CourtHouse crownCourt = dailyList.getCrownCourt();
         Integer courthouseCode = crownCourt.getCourtHouseCode().getCode();
         String courthouseName = crownCourt.getCourtHouseName();

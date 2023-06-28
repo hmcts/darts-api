@@ -10,6 +10,7 @@ import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.courthouse.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
@@ -43,7 +44,7 @@ public class CourthousesController implements CourthousesApi {
         @Parameter(name = "courthouse_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("courthouse_id") Integer courthouseId
     ) {
         try {
-            uk.gov.hmcts.darts.common.entity.Courthouse courtHouseEntity = courthouseService.getCourtHouseById(
+            CourthouseEntity courtHouseEntity = courthouseService.getCourtHouseById(
                 courthouseId);
             ExtendedCourthouse responseEntity = mapper.mapFromEntityToExtendedCourthouse(courtHouseEntity);
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
@@ -71,7 +72,7 @@ public class CourthousesController implements CourthousesApi {
     public ResponseEntity<List<ExtendedCourthouse>> courthousesGet(
 
     ) {
-        List<uk.gov.hmcts.darts.common.entity.Courthouse> courtHouseEntities = courthouseService.getAllCourthouses();
+        List<CourthouseEntity> courtHouseEntities = courthouseService.getAllCourthouses();
         List<ExtendedCourthouse> responseEntities = mapper.mapFromListEntityToListExtendedCourthouse(courtHouseEntities);
         return new ResponseEntity<>(responseEntities, HttpStatus.OK);
     }
@@ -80,7 +81,7 @@ public class CourthousesController implements CourthousesApi {
     public ResponseEntity<ExtendedCourthouse> courthousesPost(
         @Parameter(name = "Courthouse", description = "", required = true) @Valid @RequestBody Courthouse courthouse
     ) {
-        uk.gov.hmcts.darts.common.entity.Courthouse addedCourtHouse = courthouseService.addCourtHouse(courthouse);
+        CourthouseEntity addedCourtHouse = courthouseService.addCourtHouse(courthouse);
         ExtendedCourthouse extendedCourthouse = mapper.mapFromEntityToExtendedCourthouse(addedCourtHouse);
         return new ResponseEntity<>(extendedCourthouse, HttpStatus.CREATED);
     }

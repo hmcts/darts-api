@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.common.entity.Courthouse;
-import uk.gov.hmcts.darts.common.entity.Courtroom;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.exception.DartsException;
 import uk.gov.hmcts.darts.common.repository.CommonCourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
@@ -38,27 +38,27 @@ class CommonApiImplTest {
 
     @Test
     void testCourtroomExists() {
-        Courtroom courtroom1 = CommonTestDataUtil.createCourtroom("1");
+        CourtroomEntity courtroom1 = CommonTestDataUtil.createCourtroom("1");
 
         Mockito.when(courtroomRepository.findByNames(anyString(), anyString())).thenReturn(courtroom1);
 
-        Courtroom courtroom = commonApi.retrieveOrCreateCourtroom("SWANSEA", "1");
+        CourtroomEntity courtroom = commonApi.retrieveOrCreateCourtroom("SWANSEA", "1");
         assertEquals("1", courtroom.getName());
         verify(courthouseRepository, never()).findByCourthouseNameIgnoreCase(anyString());
     }
 
     @Test
     void testCreateCourtroom() {
-        Courthouse courthouse = new Courthouse();
+        CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("SWANSEA");
 
         Mockito.when(courtroomRepository.findByNames(anyString(), anyString())).thenReturn(null);
         Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(courthouse);
-        Mockito.when(commonTransactionalService.createCourtroom(any(Courthouse.class), anyString()))
+        Mockito.when(commonTransactionalService.createCourtroom(any(CourthouseEntity.class), anyString()))
             .thenReturn(CommonTestDataUtil.createCourtroom("1"));
 
 
-        Courtroom courtroom = commonApi.retrieveOrCreateCourtroom("SWANSEA", "1");
+        CourtroomEntity courtroom = commonApi.retrieveOrCreateCourtroom("SWANSEA", "1");
         assertEquals("1", courtroom.getName());
     }
 

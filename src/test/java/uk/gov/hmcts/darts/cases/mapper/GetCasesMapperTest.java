@@ -8,7 +8,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
-import uk.gov.hmcts.darts.common.entity.Hearing;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.io.IOException;
@@ -32,7 +32,7 @@ class GetCasesMapperTest {
     @Test
     void testOk() throws IOException {
 
-        List<Hearing> hearings = CommonTestDataUtil.createHearings(5);
+        List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
 
         List<ScheduledCase> scheduledCases = GetCasesMapper.mapToCourtCases(hearings);
 
@@ -45,7 +45,7 @@ class GetCasesMapperTest {
     @Test
     void testOrderedByTime() throws IOException {
 
-        List<Hearing> hearingList = new ArrayList<>();
+        List<HearingEntity> hearingList = new ArrayList<>();
         int counter = 1;
         String caseNumString = "caseNum_";
         hearingList.add(CommonTestDataUtil.createHearing(caseNumString + counter++, LocalTime.of(9, 0, 0)));

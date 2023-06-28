@@ -23,7 +23,7 @@ import java.util.List;
 @Entity
 @Table(name = "moj_hearing")
 @Data
-public class Hearing {
+public class HearingEntity {
 
     @Id
     @Column(name = "moj_hea_id")
@@ -33,7 +33,7 @@ public class Hearing {
 
     @JoinColumn(name = "moj_ctr_id")
     @ManyToOne(fetch = FetchType.LAZY)
-    private Courtroom courtroom;
+    private CourtroomEntity courtroom;
 
     @Type(ListArrayType.class)
     @Column(name = "c_judges")
@@ -55,15 +55,15 @@ public class Hearing {
     @JoinTable(name = "moj_hearing_media_ae",
         joinColumns = {@JoinColumn(name = "moj_hea_id")},
         inverseJoinColumns = {@JoinColumn(name = "moj_med_id")})
-    private List<Media> mediaList;
+    private List<MediaEntity> mediaList;
 
     @ManyToMany
     @JoinTable(name = "moj_hearing_event_ae",
         joinColumns = {@JoinColumn(name = "moj_hea_id")},
         inverseJoinColumns = {@JoinColumn(name = "moj_eve_id")})
-    private List<Event> eventList;
+    private List<EventEntity> eventList;
 
     @ManyToOne()
     @JoinColumn(name = "moj_cas_id")
-    private Case courtCase;
+    private CaseEntity courtCase;
 }

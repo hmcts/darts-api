@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "moj_transcription_comment")
 @Data
-public class TranscriptionComment {
+public class TranscriptionCommentEntity {
 
     @Id
     @Column(name = "moj_trc_id")
@@ -27,7 +27,7 @@ public class TranscriptionComment {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "moj_tra_id")
-    private Transcription theTranscription;
+    private TranscriptionEntity transcription;
 
     @Column(name = "r_transcription_object_id", length = 16)
     private String legacyTranscriptionObjectId;

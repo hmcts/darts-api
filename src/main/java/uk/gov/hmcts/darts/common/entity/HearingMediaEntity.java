@@ -12,11 +12,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = HearingMedia.TABLE_NAME)
+@Table(name = HearingMediaEntity.TABLE_NAME)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class HearingMedia {
+public class HearingMediaEntity {
 
     public static final String HEARING_MEDIA_ID = "moj_hma_id";
     public static final String HEARING_ID = "moj_hea_id";

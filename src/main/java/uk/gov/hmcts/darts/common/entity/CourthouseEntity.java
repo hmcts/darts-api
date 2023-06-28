@@ -16,7 +16,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "moj_courthouse")
 @Data
-public class Courthouse {
+public class CourthouseEntity {
 
     @Id
     @Column(name = "moj_cth_id")

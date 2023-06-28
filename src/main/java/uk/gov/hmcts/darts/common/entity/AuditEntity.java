@@ -15,7 +15,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "audit")
 @Data
-public class Audit {
+public class AuditEntity {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "audit_gen")

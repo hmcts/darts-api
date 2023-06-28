@@ -19,7 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "moj_transcription")
 @Data
-public class Transcription {
+public class TranscriptionEntity {
 
     @Id
     @Column(name = "moj_tra_id")
@@ -29,7 +29,7 @@ public class Transcription {
 
     @ManyToOne
     @JoinColumn(name = "moj_cas_id", nullable = false)
-    private Case theCase;
+    private CaseEntity courtCase;
 
     @Column(name = "moj_crt_id", nullable = false)
     private Integer courthouseId;
@@ -101,7 +101,7 @@ public class Transcription {
     @Column(name = "i_version")
     private Short version;
 
-    @OneToMany(mappedBy = "theTranscription")
-    private List<TranscriptionComment> theTranscriptionComments;
+    @OneToMany(mappedBy = "transcription")
+    private List<TranscriptionCommentEntity> transcriptionComments;
 
 }

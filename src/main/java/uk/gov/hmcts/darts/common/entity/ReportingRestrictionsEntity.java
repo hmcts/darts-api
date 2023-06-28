@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "moj_reporting_restrictions")
-public class ReportingRestrictions {
+public class ReportingRestrictionsEntity {
 
     @Id
     @Column(name = "moj_rer_id")
