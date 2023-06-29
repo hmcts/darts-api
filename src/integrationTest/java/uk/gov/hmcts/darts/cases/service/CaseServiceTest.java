@@ -28,6 +28,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @ActiveProfiles({"intTest", "h2db"})
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@Transactional
 class CaseServiceTest {
 
     @Autowired
@@ -40,7 +41,6 @@ class CaseServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
-    @Transactional
     void testGetCasesOk1() throws IOException {
         GetCasesRequest request = new GetCasesRequest();
         request.setCourthouse("Swansea");
@@ -54,7 +54,6 @@ class CaseServiceTest {
     }
 
     @Test
-    @Transactional
     void testGetCasesOk2() throws IOException {
         GetCasesRequest request = new GetCasesRequest();
         request.setCourthouse("Swansea");
@@ -68,7 +67,7 @@ class CaseServiceTest {
     }
 
     @Test
-    void testGetCasesCreateCourtroom() throws IOException {
+    void testGetCasesCreateCourtroom() {
         String courthouseName = "Swansea";
         String courtroomName = "99";
 
