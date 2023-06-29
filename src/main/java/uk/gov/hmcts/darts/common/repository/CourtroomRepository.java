@@ -13,7 +13,7 @@ public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Inte
     @Query("SELECT cr FROM CourthouseEntity ch, CourtroomEntity cr " +
         "WHERE upper(ch.courthouseName) = upper(:courthouse) " +
         "AND upper(cr.name) = upper(:courtroom) " +
-        "AND cr.courthouse = ch.id "
+        "AND cr.courthouse = ch"
     )
     CourtroomEntity findByNames(String courthouse, String courtroom);
 
