@@ -13,8 +13,8 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+
+import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
 @Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.MOJ_CTH_ID, CourtroomEntity.COURTROOM_NAME})})
@@ -37,10 +37,8 @@ public class CourtroomEntity {
     @Column(name = COURTROOM_NAME)
     private String name;
 
-    @ManyToOne
-    @Cascade(CascadeType.SAVE_UPDATE)
+    @ManyToOne(cascade = PERSIST)
     @JoinColumn(name = MOJ_CTH_ID)
     private CourthouseEntity courthouse;
-
 
 }

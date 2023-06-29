@@ -2,9 +2,12 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -23,17 +26,15 @@ public class EventEntity {
     @SequenceGenerator(name = "moj_eve_gen", sequenceName = "moj_eve_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "moj_crt_id")
-    private Integer courthouseId;
-
-    @Column(name = "moj_evt_id")
-    private Integer eventTypeId;
-
     @Column(name = "r_event_object_id", unique = true, length = 16)
     private String legacyObjectId;
 
+    @ManyToOne
+    @JoinColumn(name = "moj_evt_id")
+    private EventTypeEntity eventType;
+
     @Column(name = "c_event_id")
-    private Integer eventId;
+    private Integer legacyEventId;
 
     @Column(name = "event_name")
     private String eventName;
@@ -44,8 +45,9 @@ public class EventEntity {
     @Column(name = "c_time_stamp")
     private OffsetDateTime timestamp;
 
-    @Column(name = "c_courtroom")
-    private String courtroom;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moj_ctr_id")
+    private CourtroomEntity courtroom;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;
