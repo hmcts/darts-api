@@ -15,8 +15,8 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         "WHERE upper(ch.courthouseName) = upper(:courthouse) " +
         "AND upper(cr.name) = upper(:courtroom) " +
         "AND h.hearingDate = :date " +
-        "AND h.courtroom = cr.id " +
-        "AND cr.courthouse = ch.id "
+        "AND h.courtroom = cr " +
+        "AND cr.courthouse = ch"
     )
     List<HearingEntity> findByCourthouseCourtroomAndDate(String courthouse, String courtroom, LocalDate date);
 
