@@ -23,13 +23,16 @@ class UriProviderImplTest {
     private UriProviderImpl uriProvider;
 
     @Test
-    void getAuthorizationUriShouldReturnExpectedUri() {
-        mockStubsForAuthorization();
+    void getLoginUriShouldReturnExpectedUri() {
+        commonMocksForAuthorisation();
+        when(authConfig.getExternalADauthorizationUri()).thenReturn("AuthUrl");
+        when(authConfig.getExternalADresponseMode()).thenReturn("ResponseMode");
+        when(authConfig.getExternalADresponseType()).thenReturn("ResponseType");
 
-        URI authUrl = uriProvider.getAuthorizationUri();
+        URI authUrl = uriProvider.getLoginUri();
 
-        assertEquals("AuthUrl?client_id=ClientId&response_type=ResponseType&redirect_uri=RedirectId"
-                         + "&response_mode=ResponseMode&scope=Scope&prompt=Prompt",
+        assertEquals("AuthUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
+                         "&response_mode=ResponseMode&response_type=ResponseType",
                      authUrl.toString());
     }
 
@@ -51,12 +54,21 @@ class UriProviderImplTest {
                      logoutUri.toString());
     }
 
-    private void mockStubsForAuthorization() {
-        when(authConfig.getExternalADauthorizationUri()).thenReturn("AuthUrl");
+    @Test
+    void getResetPasswordUriShouldReturnExpectedUri() {
+        commonMocksForAuthorisation();
+        when(authConfig.getExternalADresetPasswordUri()).thenReturn("ResetUrl");
+
+        URI logoutUri = uriProvider.getResetPasswordUri();
+
+        assertEquals("ResetUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
+                         "&response_type=id_token",
+                     logoutUri.toString());
+    }
+
+    private void commonMocksForAuthorisation() {
         when(authConfig.getExternalADclientId()).thenReturn("ClientId");
-        when(authConfig.getExternalADresponseType()).thenReturn("ResponseType");
         when(authConfig.getExternalADredirectUri()).thenReturn("RedirectId");
-        when(authConfig.getExternalADresponseMode()).thenReturn("ResponseMode");
         when(authConfig.getExternalADscope()).thenReturn("Scope");
         when(authConfig.getExternalADprompt()).thenReturn("Prompt");
     }

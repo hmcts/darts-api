@@ -50,6 +50,7 @@ public class SecurityConfig {
                 "/metrics/**",
                 "/external-user/login-or-refresh",
                 "/external-user/handle-oauth-code",
+                "/external-user/reset-password",
                 "/"
             )
             .authorizeHttpRequests().anyRequest().permitAll();
@@ -89,7 +90,7 @@ public class SecurityConfig {
                 filterChain.doFilter(request, response);
                 return;
             }
-            response.sendRedirect(uriProvider.getAuthorizationUri().toString());
+            response.sendRedirect(uriProvider.getLoginUri().toString());
         }
     }
 }

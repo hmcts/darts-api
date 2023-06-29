@@ -20,4 +20,6 @@ public interface AuthenticationController {
     @PostMapping("/invalidate-session")
     void invalidateSession(HttpSession session);
 
+    @GetMapping("/reset-password")
+    ModelAndView resetPassword(HttpSession session);
 }

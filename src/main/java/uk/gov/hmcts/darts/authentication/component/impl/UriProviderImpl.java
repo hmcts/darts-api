@@ -18,19 +18,11 @@ public class UriProviderImpl implements UriProvider {
 
     @Override
     @SneakyThrows(URISyntaxException.class)
-    public URI getAuthorizationUri() {
-        URIBuilder uriBuilder = new URIBuilder(
-            authConfig.getExternalADauthorizationUri());
-        uriBuilder.addParameter("client_id", authConfig.getExternalADclientId());
-        uriBuilder.addParameter("response_type", authConfig.getExternalADresponseType());
-        uriBuilder.addParameter(
-            "redirect_uri",
-            authConfig.getExternalADredirectUri()
-        );
-        uriBuilder.addParameter("response_mode", authConfig.getExternalADresponseMode());
-        uriBuilder.addParameter("scope", authConfig.getExternalADscope());
-        uriBuilder.addParameter("prompt", authConfig.getExternalADprompt());
-        return uriBuilder.build();
+    public URI getLoginUri() {
+        return buildCommonAuthUri(authConfig.getExternalADauthorizationUri())
+            .addParameter("response_mode", authConfig.getExternalADresponseMode())
+            .addParameter("response_type", authConfig.getExternalADresponseType())
+            .build();
     }
 
     @Override
@@ -41,12 +33,28 @@ public class UriProviderImpl implements UriProvider {
     @Override
     @SneakyThrows(URISyntaxException.class)
     public URI getLogoutUri(String sessionId) {
-        URIBuilder uriBuilder = new URIBuilder(
-            authConfig.getExternalADlogoutUri());
-        uriBuilder.addParameter("id_token_hint", sessionId);
-        uriBuilder.addParameter("post_logout_redirect_uri", authConfig.getExternalADlogoutRedirectUri());
+        return new URIBuilder(
+            authConfig.getExternalADlogoutUri())
+            .addParameter("id_token_hint", sessionId)
+            .addParameter("post_logout_redirect_uri", authConfig.getExternalADlogoutRedirectUri())
+            .build();
+    }
 
-        return uriBuilder.build();
+    @Override
+    @SneakyThrows(URISyntaxException.class)
+    public URI getResetPasswordUri() {
+        return buildCommonAuthUri(authConfig.getExternalADresetPasswordUri())
+            .addParameter("response_type", "id_token")
+            .build();
+    }
+
+    @SneakyThrows(URISyntaxException.class)
+    private URIBuilder buildCommonAuthUri(String uri) {
+        return new URIBuilder(uri)
+            .addParameter("client_id", authConfig.getExternalADclientId())
+            .addParameter("redirect_uri", authConfig.getExternalADredirectUri())
+            .addParameter("scope", authConfig.getExternalADscope())
+            .addParameter("prompt", authConfig.getExternalADprompt());
     }
 
 }

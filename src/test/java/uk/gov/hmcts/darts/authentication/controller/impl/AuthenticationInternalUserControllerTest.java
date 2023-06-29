@@ -34,4 +34,9 @@ class AuthenticationInternalUserControllerTest {
         assertThrows(NotImplementedException.class, () -> controller.invalidateSession(null));
     }
 
+    @Test
+    void resetPasswordShouldCompleteWithoutExceptionWhenSessionIsInvalidated() {
+        assertThrows(NotImplementedException.class, () -> controller.resetPassword(null));
+    }
+
 }

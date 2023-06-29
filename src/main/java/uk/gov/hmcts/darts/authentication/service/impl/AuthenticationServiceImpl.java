@@ -32,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Session session = sessionService.getSession(sessionId);
         if (session == null) {
-            return uriProvider.getAuthorizationUri();
+            return uriProvider.getLoginUri();
         }
 
         return uriProvider.getLandingPageUri();
@@ -80,6 +80,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         sessionService.dropSession(sessionId);
 
         log.debug("Session {} invalidated", sessionId);
+    }
+
+    @Override
+    public URI resetPassword(String sessionId) {
+        log.debug("Session {} is requesting password reset", sessionId);
+
+        return uriProvider.getResetPasswordUri();
     }
 
 }
