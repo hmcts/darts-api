@@ -24,6 +24,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.darts.common.util.ClearDatabase;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -46,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureWireMock
 @ActiveProfiles({"intTest", "h2db"})
+@ClearDatabase
 @SuppressWarnings("PMD.ExcessiveImports")
 class HandleOAuthCodeIntTest {
 

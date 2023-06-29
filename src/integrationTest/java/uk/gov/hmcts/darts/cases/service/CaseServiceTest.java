@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -28,8 +27,6 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @ExtendWith(MockitoExtension.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Transactional
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class CaseServiceTest {
 
@@ -43,6 +40,7 @@ class CaseServiceTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @Transactional
     void testGetCasesOk1() throws IOException {
         GetCasesRequest request = new GetCasesRequest();
         request.setCourthouse("Swansea");
@@ -56,6 +54,7 @@ class CaseServiceTest {
     }
 
     @Test
+    @Transactional
     void testGetCasesOk2() throws IOException {
         GetCasesRequest request = new GetCasesRequest();
         request.setCourthouse("Swansea");

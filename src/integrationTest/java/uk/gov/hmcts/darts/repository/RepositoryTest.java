@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.repository.ReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.ReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.util.ClearDatabase;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 // These tests maybe ok to remove once service level tests are in place
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
-@Transactional
+@ClearDatabase
 class RepositoryTest {
 
     @Autowired

@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.SessionService;
+import uk.gov.hmcts.darts.common.util.ClearDatabase;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles({"intTest", "h2db"})
+@ClearDatabase
 class InvalidateSessionIntTest {
 
     private static final String EXTERNAL_USER_INVALIDATE_SESSION_ENDPOINT = "/external-user/invalidate-session";
