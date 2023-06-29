@@ -4,9 +4,12 @@ import java.net.URI;
 
 public interface UriProvider {
 
-    URI getAuthorizationUri();
+    URI getLoginUri();
 
     URI getLandingPageUri();
 
     URI getLogoutUri(String sessionId);
+
+    URI getResetPasswordUri();
+
 }

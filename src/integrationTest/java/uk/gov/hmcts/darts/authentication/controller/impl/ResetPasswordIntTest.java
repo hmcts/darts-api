@@ -13,8 +13,6 @@ import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
-import java.util.UUID;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,10 +20,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles({"intTest", "h2db"})
-class LoginOrRefreshIntTest {
+class ResetPasswordIntTest {
 
-    private static final String EXPECTED_LOGIN_REDIRECT_URL = "http://localhost:8080/oauth2/v2.0/authorize?client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&scope=openid&prompt=login&response_mode=form_post&response_type=code";
-    private static final String EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT = "/external-user/login-or-refresh";
+    private static final String EXPECTED_REDIRECT_URL = "https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/" +
+        "B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize?" +
+        "client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&" +
+        "scope=openid&prompt=login&response_type=id_token";
+    private static final String EXTERNAL_USER_RESET_PASSWORD_ENDPOINT = "/external-user/reset-password";
 
     @MockBean
     private NotificationRepository notificationRepository;
@@ -41,30 +42,15 @@ class LoginOrRefreshIntTest {
 
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void loginOrRefreshShouldReturnRedirectWhenNoSessionIdQueryParamIsSent() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT);
+    void resetPasswordShouldReturnRedirect() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_RESET_PASSWORD_ENDPOINT);
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isFound())
             .andExpect(header().string(
                 HttpHeaders.LOCATION,
-                EXPECTED_LOGIN_REDIRECT_URL
-            ));
-    }
-
-    @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void loginOrRefreshShouldReturnRedirectWhenNoSessionExistsInCache() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT)
-            .queryParam("session-id", UUID.randomUUID().toString());
-
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isFound())
-            .andExpect(header().string(
-                HttpHeaders.LOCATION,
-                EXPECTED_LOGIN_REDIRECT_URL
+                EXPECTED_REDIRECT_URL
             ));
     }
 
 }
-

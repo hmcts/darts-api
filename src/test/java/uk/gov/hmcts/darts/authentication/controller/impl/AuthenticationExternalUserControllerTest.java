@@ -33,7 +33,7 @@ class AuthenticationExternalUserControllerTest {
     private AuthenticationService authenticationService;
 
     @Test
-    void loginAndRefreshTokenFromAzureWhenTokenDoesntExistsInSession() {
+    void loginAndRefreshShouldReturnLoginPageAsRedirectWhenTokenDoesntExistsInSession() {
         MockHttpSession session = new MockHttpSession();
 
         when(authenticationService.loginOrRefresh(anyString()))
@@ -58,7 +58,7 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void logoutShouldReturnLogoutPageUriWhenTokenExistsInSession() {
+    void logoutShouldReturnLogoutPageUriAsRedirectWhenTokenExistsInSession() {
         MockHttpSession session = new MockHttpSession();
 
         when(authenticationService.logout(any()))
@@ -77,6 +77,19 @@ class AuthenticationExternalUserControllerTest {
         MockHttpSession session = new MockHttpSession();
 
         assertDoesNotThrow(() -> controller.invalidateSession(session));
+    }
+
+    @Test
+    void resetPasswordShouldReturnResetPageAsRedirect() {
+        MockHttpSession session = new MockHttpSession();
+
+        when(authenticationService.resetPassword(anyString()))
+            .thenReturn(DUMMY_AUTHORIZATION_URI);
+
+        ModelAndView modelAndView = controller.resetPassword(session);
+
+        assertNotNull(modelAndView);
+        assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
     }
 
 }

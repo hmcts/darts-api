@@ -13,4 +13,6 @@ public interface AuthenticationService {
 
     void invalidateSession(String sessionId);
 
+    URI resetPassword(String sessionId);
+
 }

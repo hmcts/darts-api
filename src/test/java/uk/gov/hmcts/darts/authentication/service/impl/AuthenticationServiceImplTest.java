@@ -52,7 +52,7 @@ class AuthenticationServiceImplTest {
     void loginOrRefreshShouldReturnAuthUriWhenNoExistingSessionExists() {
         when(sessionService.getSession(anyString()))
             .thenReturn(null);
-        when(uriProvider.getAuthorizationUri())
+        when(uriProvider.getLoginUri())
             .thenReturn(DUMMY_AUTH_URI);
 
         URI uri = authenticationService.loginOrRefresh(DUMMY_SESSION_ID);
@@ -151,6 +151,16 @@ class AuthenticationServiceImplTest {
             .thenReturn(new Session(null, null, 0));
 
         assertDoesNotThrow(() -> authenticationService.invalidateSession(DUMMY_SESSION_ID));
+    }
+
+    @Test
+    void resetPasswordShouldReturnResetPasswordUri() {
+        when(uriProvider.getResetPasswordUri())
+            .thenReturn(DUMMY_AUTH_URI);
+
+        URI uri = authenticationService.resetPassword(DUMMY_SESSION_ID);
+
+        assertEquals(DUMMY_AUTH_URI, uri);
     }
 
 }

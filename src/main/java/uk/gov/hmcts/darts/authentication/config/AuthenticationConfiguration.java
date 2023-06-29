@@ -22,6 +22,9 @@ public class AuthenticationConfiguration {
     @Value("${spring.security.oauth2.client.provider.external-azure-ad-provider.logout-uri}")
     private String externalADlogoutUri;
 
+    @Value("${spring.security.oauth2.client.provider.external-azure-ad-provider.reset-password-uri}")
+    private String externalADresetPasswordUri;
+
     @Value("${spring.security.oauth2.client.provider.external-azure-ad-provider.token-uri}")
     private String externalADtokenUri;
 

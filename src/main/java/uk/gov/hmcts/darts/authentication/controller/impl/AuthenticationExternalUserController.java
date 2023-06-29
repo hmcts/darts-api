@@ -41,4 +41,10 @@ public class AuthenticationExternalUserController implements AuthenticationContr
         authenticationService.invalidateSession(session.getId());
     }
 
+    @Override
+    public ModelAndView resetPassword(HttpSession session) {
+        URI url = authenticationService.resetPassword(session.getId());
+        return new ModelAndView("redirect:" + url.toString());
+    }
+
 }
