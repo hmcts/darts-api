@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.SessionService;
+import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles({"intTest", "h2db"})
+@ReprovisionDatabaseBeforeEach
 class LogoutIntTest {
 
     private static final String EXTERNAL_USER_LOGOUT_ENDPOINT = "/external-user/logout";
