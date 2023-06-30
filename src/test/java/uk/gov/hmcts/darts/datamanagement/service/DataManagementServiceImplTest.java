@@ -40,20 +40,20 @@ class DataManagementServiceImplTest {
     }
 
     @Test
-    void testGetAudioBlobData() {
+    void testGetBlobData() {
         Mockito.when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         Mockito.when(dataManagementDao.getBlobClient(blobContainerClient, BLOB_ID)).thenReturn(blobClient);
         Mockito.when(blobClient.downloadContent()).thenReturn(BINARY_DATA);
-        BinaryData blobData = dataManagementService.getAudioBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
+        BinaryData blobData = dataManagementService.getBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
         assertNotNull(blobData);
         assertEquals(BINARY_DATA, blobData);
     }
 
     @Test
-    void testSaveAudioBlobData() {
+    void testSaveBlobData() {
         Mockito.when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         Mockito.when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
-        UUID blobId = dataManagementService.saveAudioBlobData(BLOB_CONTAINER_NAME, BINARY_DATA);
+        UUID blobId = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME, BINARY_DATA);
         assertNotNull(blobId);
     }
 }

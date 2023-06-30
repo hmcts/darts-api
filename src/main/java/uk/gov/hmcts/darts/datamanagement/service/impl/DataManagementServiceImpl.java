@@ -19,7 +19,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     private DataManagementDao dataManagementDao;
 
     @Override
-    public BinaryData getAudioBlobData(String containerName, UUID blobId) {
+    public BinaryData getBlobData(String containerName, UUID blobId) {
 
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
         BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
@@ -27,7 +27,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public UUID saveAudioBlobData(String containerName, BinaryData audioData) {
+    public UUID saveBlobData(String containerName, BinaryData audioData) {
 
         UUID uniqueBlobId = UUID.randomUUID();
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);

@@ -5,7 +5,7 @@ import com.azure.core.util.BinaryData;
 import java.util.UUID;
 
 public interface DataManagementService {
-    BinaryData getAudioBlobData(String containerName, UUID uniqueBlobName);
+    BinaryData getBlobData(String containerName, UUID uniqueBlobName);
 
-    UUID saveAudioBlobData(String containerName, BinaryData audioData);
+    UUID saveBlobData(String containerName, BinaryData audioData);
 }

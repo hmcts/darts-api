@@ -40,7 +40,7 @@ class DataManagementServiceTest {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
-        var uniqueBlobName = dataManagementService.saveAudioBlobData(unstructuredStorageContainerName, data);
+        var uniqueBlobName = dataManagementService.saveBlobData(unstructuredStorageContainerName, data);
 
         assertTrue(uniqueBlobName instanceof UUID);
     }
@@ -51,9 +51,9 @@ class DataManagementServiceTest {
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
 
-        var uniqueBlobName = dataManagementService.saveAudioBlobData(unstructuredStorageContainerName, data);
+        var uniqueBlobName = dataManagementService.saveBlobData(unstructuredStorageContainerName, data);
 
-        var blobData = dataManagementService.getAudioBlobData(
+        var blobData = dataManagementService.getBlobData(
                  unstructuredStorageContainerName,
                  uniqueBlobName);
 
@@ -63,7 +63,7 @@ class DataManagementServiceTest {
     @Test
     void whenGetShouldThrowExceptionWhenProvidedWithInvalidContainerName() {
         assertThrows(BlobStorageException.class, () ->
-            dataManagementService.getAudioBlobData(
+            dataManagementService.getBlobData(
                 "INVALID_CONTAINER_NAME",
                 UUID.fromString(TEST_BLOB_ID)));
     }
