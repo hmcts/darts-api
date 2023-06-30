@@ -33,13 +33,9 @@ public class DataManagementDaoImpl implements DataManagementDao {
         return containerClient.getBlobClient(String.valueOf(blobId));
     }
 
-    public BlobServiceClient getBlobServiceClient() {
-        return getBlobServiceClientBuilder()
+    private BlobServiceClient getBlobServiceClient() {
+        return new BlobServiceClientBuilder()
             .connectionString(dataManagementConfiguration.getBlobStorageAccountConnectionString())
             .buildClient();
-    }
-
-    public BlobServiceClientBuilder getBlobServiceClientBuilder() {
-        return new BlobServiceClientBuilder();
     }
 }
