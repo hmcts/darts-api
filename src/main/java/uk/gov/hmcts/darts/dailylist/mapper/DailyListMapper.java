@@ -21,12 +21,13 @@ public class DailyListMapper {
     public DailyListEntity mapToDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse) {
 
         DailyListEntity dailyListEntity = new DailyListEntity();
-        dailyListEntity.setVersion((short) 1);
+        dailyListEntity.setVersion(1);
         mapToExistingDailyListEntity(postRequest, courthouse, dailyListEntity);
         return dailyListEntity;
     }
 
-    public void mapToExistingDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse, DailyListEntity dailyListEntity) {
+    public void mapToExistingDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse,
+                                             DailyListEntity dailyListEntity) {
         uk.gov.hmcts.darts.dailylist.model.DailyList dailyList = postRequest.getDailyList();
         DocumentID documentId = dailyList.getDocumentId();
         dailyListEntity.setCourthouse(courthouse);
@@ -36,7 +37,6 @@ public class DailyListMapper {
         dailyListEntity.setStartDate(dailyList.getListHeader().getStartDate());
         dailyListEntity.setEndDate(dailyList.getListHeader().getEndDate());
         dailyListEntity.setSource(postRequest.getSourceSystem());
-
 
         try {
             dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList));

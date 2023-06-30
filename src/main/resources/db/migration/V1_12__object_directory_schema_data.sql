@@ -10,12 +10,12 @@ CREATE TABLE IF NOT EXISTS moj_object_directory_status (
 
 CREATE TABLE IF NOT EXISTS transient_object_directory (
   tod_id                        INTEGER                     NOT NULL
-, moj_mer_id                    INTEGER
-, moj_ods_id                    INTEGER
-, external_location             UUID
+, moj_mer_id                    INTEGER                     NOT NULL
+, moj_ods_id                    INTEGER                     NOT NULL
+, external_location             UUID                        NOT NULL
 , checksum                      CHARACTER VARYING
-, created_ts                    TIMESTAMP WITH TIME ZONE
-, modified_ts                   TIMESTAMP WITH TIME ZONE
+, created_ts                    TIMESTAMP WITH TIME ZONE    NOT NULL
+, modified_ts                   TIMESTAMP WITH TIME ZONE    NOT NULL
 , modified_by                   INTEGER
 , CONSTRAINT transient_object_directory_pk PRIMARY KEY (tod_id)
 , CONSTRAINT tod_media_request_fk FOREIGN KEY (moj_mer_id) REFERENCES moj_media_request (moj_mer_id)
@@ -24,18 +24,18 @@ CREATE TABLE IF NOT EXISTS transient_object_directory (
 );
 
 CREATE TABLE IF NOT EXISTS external_object_directory (
-  eod_id                         INTEGER                     NOT NULL
-, moj_med_id                     INTEGER
-, moj_tra_id                     INTEGER
-, moj_ann_id                     INTEGER
-, moj_ods_id                     INTEGER                     NOT NULL
-, external_location              UUID                        NOT NULL
-, external_location_type         CHARACTER VARYING           NOT NULL
-, created_ts                     TIMESTAMP WITH TIME ZONE    NOT NULL
-, modified_ts                    TIMESTAMP WITH TIME ZONE    NOT NULL
-, modified_by                    INTEGER                     NOT NULL
-, checksum                       CHARACTER VARYING
-, attempts                       INTEGER
+  eod_id                        INTEGER                     NOT NULL
+, moj_med_id                    INTEGER
+, moj_tra_id                    INTEGER
+, moj_ann_id                    INTEGER
+, moj_ods_id                    INTEGER                     NOT NULL
+, external_location             UUID                        NOT NULL
+, external_location_type        CHARACTER VARYING           NOT NULL
+, created_ts                    TIMESTAMP WITH TIME ZONE    NOT NULL
+, modified_ts                   TIMESTAMP WITH TIME ZONE    NOT NULL
+, modified_by                   INTEGER                     NOT NULL
+, checksum                      CHARACTER VARYING
+, attempts                      INTEGER
 , CONSTRAINT external_object_directory_pkey PRIMARY KEY (eod_id)
 , CONSTRAINT eod_media_fk FOREIGN KEY (moj_med_id) REFERENCES moj_media (moj_med_id)
 , CONSTRAINT eod_object_directory_status_fk FOREIGN KEY (moj_ods_id) REFERENCES moj_object_directory_status (moj_ods_id)

@@ -233,3 +233,5 @@ VALUES (-1, -2, -3, 'OPEN', 'DOWNLOAD', TIMESTAMP WITH TIME ZONE '2023-06-26 13:
 INSERT INTO moj_media_request (moj_mer_id, moj_hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_updated_ts)
 VALUES (-2, -2, -3, 'OPEN', 'DOWNLOAD', TIMESTAMP WITH TIME ZONE '2023-06-26 14:00:00+01:00', TIMESTAMP WITH TIME ZONE '2023-06-26 14:45:00+01:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+INSERT INTO transient_object_directory (tod_id, moj_mer_id, moj_ods_id, external_location, checksum, created_ts, modified_ts)
+VALUES (-1, -1, 1, 'f744a74f-83c0-47e4-8bb2-2fd4d2b68647', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

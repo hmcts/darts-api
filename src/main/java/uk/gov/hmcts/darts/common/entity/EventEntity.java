@@ -10,15 +10,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_event")
 @Data
-public class EventEntity {
+@EqualsAndHashCode(callSuper = false)
+public class EventEntity extends VersionedEntity {
 
     @Id
     @Column(name = "moj_eve_id")
@@ -57,9 +58,5 @@ public class EventEntity {
 
     @Column(name = "i_superseded")
     private Boolean superseded;
-
-    @Version
-    @Column(name = "i_version")
-    private Short version;
 
 }
