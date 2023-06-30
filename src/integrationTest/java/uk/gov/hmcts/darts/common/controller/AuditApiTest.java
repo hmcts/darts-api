@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.common.util.ClearDatabase;
+import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 
 import java.util.stream.Stream;
 
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@ClearDatabase
+@ReprovisionDatabaseBeforeEach
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals"})
 class AuditApiTest {
     public static final int EVENT_ID = 998;
