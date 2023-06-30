@@ -2,9 +2,12 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -26,14 +29,16 @@ public class HearingMediaEntity {
     @Id
     @Column(name = HEARING_MEDIA_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hearing_media_gen")
-    @SequenceGenerator(name = "hearing_media_gen", sequenceName = "hearing_media_seq", allocationSize = 1)
-    private Integer hearingMediaId;
+    @SequenceGenerator(name = "hearing_media_gen", sequenceName = "moj_hma_seq", allocationSize = 1)
+    private Integer id;
 
-    @Column(name = HEARING_ID)
-    private Integer hearingId;
+    @JoinColumn(name = HEARING_ID)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private HearingEntity hearing;
 
-    @Column(name = MEDIA_ID)
-    private Integer mediaId;
+    @JoinColumn(name = MEDIA_ID)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private MediaEntity media;
 
 }
 

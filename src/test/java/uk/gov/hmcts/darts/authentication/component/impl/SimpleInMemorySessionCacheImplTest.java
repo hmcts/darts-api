@@ -41,7 +41,6 @@ class SimpleInMemorySessionCacheImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.LinguisticNaming")
     void getShouldThrowExceptionWhenProvidedWithNullKey() {
         assertThrows(NullPointerException.class, () -> sessionCache.get(null));
     }

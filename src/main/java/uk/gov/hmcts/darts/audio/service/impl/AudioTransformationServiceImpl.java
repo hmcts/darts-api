@@ -7,11 +7,14 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
@@ -25,10 +28,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final DataManagementConfiguration dataManagementConfiguration;
     private final TransientObjectDirectoryService transientObjectDirectoryService;
 
+    private final MediaRepository mediaRepository;
+
     @Transactional
     @Override
     public MediaRequestEntity processAudioRequest(Integer requestId) {
-
         return mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
     }
 
@@ -49,6 +53,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest,
                                                                     UUID externalLocation) {
         return transientObjectDirectoryService.saveTransientDataLocation(mediaRequest, externalLocation);
+    }
+
+    @Override
+    public List<MediaEntity> getMediaMetadata(Integer hearingId) {
+        return mediaRepository.findAllByHearingId(hearingId);
     }
 
 }
