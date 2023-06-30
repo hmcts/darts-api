@@ -10,7 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.common.util.ClearDatabase;
+import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles({"intTest", "h2db"})
-@ClearDatabase
+@ReprovisionDatabaseBeforeEach
 class LoginOrRefreshIntTest {
 
     private static final String EXPECTED_LOGIN_REDIRECT_URL = "http://localhost:8080/oauth2/v2.0/authorize?client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&scope=openid&prompt=login&response_mode=form_post&response_type=code";

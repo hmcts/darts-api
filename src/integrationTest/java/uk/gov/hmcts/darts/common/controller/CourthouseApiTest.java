@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.common.util.ClearDatabase;
+import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
@@ -36,7 +36,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@ClearDatabase
+@ReprovisionDatabaseBeforeEach
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class CourthouseApiTest {
 

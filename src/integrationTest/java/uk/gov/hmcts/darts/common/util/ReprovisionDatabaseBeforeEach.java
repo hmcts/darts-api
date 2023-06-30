@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(ClearDatabaseExtension.class)
+@ExtendWith(ReprovisionDatabaseBeforeEachExtension.class)
 @TestPropertySource(properties = "spring.flyway.clean-disabled=false")
-public @interface ClearDatabase {
+public @interface ReprovisionDatabaseBeforeEach {
 }
