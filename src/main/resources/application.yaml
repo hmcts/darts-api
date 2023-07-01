@@ -103,7 +103,7 @@ darts:
     merge-workspace: ${user.home}/audiotransform/merge
     trim-workspace: ${user.home}/audiotransform/trim
     re-encode-workspace: ${user.home}/audiotransform/encode
-    Temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
+    temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
 
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}

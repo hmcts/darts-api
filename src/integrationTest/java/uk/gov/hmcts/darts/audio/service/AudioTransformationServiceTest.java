@@ -60,11 +60,11 @@ class AudioTransformationServiceTest {
 
     @Test
     @DisplayName("Check if file is created in temporary folder")
-    void saveBlobDataToTempWorkspaceTest_1() throws IOException {
+    void saveBlobDataToTempWorkspaceTest_1() {
         String data = "this is a binary data file";
         BinaryData mediaFile = BinaryData.fromString(data);
 
-        String fileName = "caseAudioFile";
+        String fileName = "caseAudioFile.pdf";
         Path filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
 
         assertTrue(Files.exists(filePath));
