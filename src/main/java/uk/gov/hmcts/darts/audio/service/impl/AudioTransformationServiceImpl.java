@@ -26,7 +26,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 //    @Value("${darts.audio.temp-blob-workspace}")
 //    private final String tempDir;
 
-    private final String tempDir = "/Users/uchennamani";
+    private final String tempDir = "/Users/uchennamani/audiotransform/tempworkspace";
 
     @Transactional
     @Override
@@ -38,10 +38,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) {
 // get logger
+        Path targetTempDirectory = Path.of(tempDir);
         Path targetTempFile = Path.of(tempDir).resolve(System.currentTimeMillis() + fileName);
         // log step
 
         try (InputStream audioInputStream = mediaFile.toStream()) {
+            Files.createDirectories(targetTempDirectory);
             Path tempFilePath = Files.createFile(targetTempFile);
             Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
