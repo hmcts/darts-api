@@ -1,11 +1,14 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import com.azure.core.util.BinaryData;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+
+import java.nio.file.Path;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 
@@ -20,6 +23,15 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public MediaRequestEntity processAudioRequest(Integer requestId) {
 
         return mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
+    }
+
+    @Override
+    public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) {
+
+
+
+
+        return null;
     }
 
 }
