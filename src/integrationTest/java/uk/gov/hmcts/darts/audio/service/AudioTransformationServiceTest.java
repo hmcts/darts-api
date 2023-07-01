@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,9 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,8 +60,14 @@ class AudioTransformationServiceTest {
 
     @Test
     @DisplayName("Check if file is created in temporary folder")
-    void saveBlobDataToTempWorkspaceTest_1() {
-        fail("Not yet implemented");
+    void saveBlobDataToTempWorkspaceTest_1() throws IOException {
+        String data = "this is a binary data file";
+        BinaryData mediaFile = BinaryData.fromString(data);
+
+        String fileName = "caseAudioFile";
+        Path filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
+
+        assertTrue(Files.exists(filePath));
     }
 
 }
