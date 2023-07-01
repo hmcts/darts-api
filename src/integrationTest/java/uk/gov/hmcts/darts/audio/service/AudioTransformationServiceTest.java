@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,8 +11,7 @@ import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 
 import java.time.OffsetDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
@@ -51,6 +51,13 @@ class AudioTransformationServiceTest {
     void processAudioRequest() {
         MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(requestId);
         assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
+    }
+
+
+    @Test
+    @DisplayName("Check if file is created in temporary folder")
+    void saveBlobDataToTempWorkspaceTest_1() {
+        fail("Not yet implemented");
     }
 
 }
