@@ -331,6 +331,10 @@ dependencies {
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.19.4'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.5.1'
 
+  // Azure BinaryData Dependencies
+  implementation platform('com.azure:azure-sdk-bom:1.2.13')
+  implementation 'com.azure:azure-storage-blob'
+
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
 
