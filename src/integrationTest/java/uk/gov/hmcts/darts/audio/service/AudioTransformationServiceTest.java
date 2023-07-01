@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,8 @@ class AudioTransformationServiceTest {
     private MediaRequestRepository mediaRequestRepository;
     @Autowired
     private AudioTransformationService audioTransformationService;
+
+    Path filePath = null;
 
     private Integer requestId;
 
@@ -65,9 +68,20 @@ class AudioTransformationServiceTest {
         BinaryData mediaFile = BinaryData.fromString(data);
 
         String fileName = "caseAudioFile.pdf";
-        Path filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
+        filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
+
+        // make the filePath global and get cleanup method to be called after each test.
 
         assertTrue(Files.exists(filePath));
+    }
+
+    @AfterEach
+    void deleteFile() throws IOException, InterruptedException {
+        if (filePath != null) {
+            Thread.sleep(10000);
+            Files.delete(filePath);
+        }
+
     }
 
 }

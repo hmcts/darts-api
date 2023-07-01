@@ -23,6 +23,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     private final MediaRequestService mediaRequestService;
 
+    // I am having issues injecting properties from the yaml
 //    @Value("${darts.audio.temp-blob-workspace}")
 //    private final String tempDir;
 
@@ -39,7 +40,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) {
 // get logger
         Path targetTempDirectory = Path.of(tempDir);
-        Path targetTempFile = Path.of(tempDir).resolve(System.currentTimeMillis() + fileName);
+        Path targetTempFile = targetTempDirectory.resolve(System.currentTimeMillis() + fileName);
         // log step
 
         try (InputStream audioInputStream = mediaFile.toStream()) {
