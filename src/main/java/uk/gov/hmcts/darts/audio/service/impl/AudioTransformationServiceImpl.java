@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import com.azure.core.util.BinaryData;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
@@ -23,11 +23,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     private final MediaRequestService mediaRequestService;
 
-    // I am having issues injecting properties from the yaml
-//    @Value("${darts.audio.temp-blob-workspace}")
-//    private final String tempDir;
-
-    private final String tempDir = "/Users/uchennamani/audiotransform/tempworkspace";
+    private final AudioConfigurationProperties audioConfigurationProperties;
 
     @Transactional
     @Override
@@ -38,9 +34,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) {
-// get logger
-        Path targetTempDirectory = Path.of(tempDir);
+        // get local logger or check with Hemanta on the project logging strategy
+
+        Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace());
         Path targetTempFile = targetTempDirectory.resolve(System.currentTimeMillis() + fileName);
+
         // log step
 
         try (InputStream audioInputStream = mediaFile.toStream()) {
@@ -50,11 +48,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         } catch (IOException e) {
             //log error
-            // implement exception handling. Speak to Chris
+            // implement exception handling. Speak to Chris Bellingham on the project error handling strategy
             throw new RuntimeException(e);
         }
 
         return targetTempFile;
     }
-
 }
