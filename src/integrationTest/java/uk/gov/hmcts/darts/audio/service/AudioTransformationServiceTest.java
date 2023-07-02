@@ -70,23 +70,26 @@ class AudioTransformationServiceTest {
         String fileName = "caseAudioFile.pdf";
         filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
 
-        // make the filePath global and get cleanup method to be called after each test.
-
         assertTrue(Files.exists(filePath));
     }
 
     @Test
     @DisplayName("Check if file is empty")
-    void saveBlobDataToTempWorkspaceTest_2() {
-        // TODO: 01/07/2023  
+    void saveBlobDataToTempWorkspaceTest_2() throws IOException {
+        String data = "this is not an empty binary data file";
+        BinaryData mediaFile = BinaryData.fromString(data);
+
+        String fileName = "caseAudioFile.pdf";
+        filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
+
+        assertNotEquals(0L, Files.size(filePath));
     }
-    
-    
-    
+
+
     @AfterEach
     void deleteFile() throws IOException, InterruptedException {
         if (filePath != null) {
-            Thread.sleep(10000);
+            Thread.sleep(5000);
             Files.delete(filePath);
         }
 
