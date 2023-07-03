@@ -40,6 +40,32 @@ launchctl setenv <<env var name>> <<secret value>>
 ```
 You will then need to restart intellij/terminal windows for it to take effect.
 
+### Storage Account
+Some functional tests require a storage account to complete. Locally, this can be achieved by installing and running the Azurite open-source emulator which provides a free local environment for testing any Azure Blob, Queue or Table storage.
+
+#### Install Azurite
+Use DockerHub to pull the latest Azurite image by using the following command:
+```
+docker pull mcr.microsoft.com/azure-storage/azurite
+```
+#### Run Azurite
+The following command runs the Azurite Docker image. The -p 10000:10000 parameter redirects requests from host machine's port 10000 to the Docker instance.
+```
+docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 \
+    mcr.microsoft.com/azure-storage/azurite
+```
+
+#### Connection String Configuration
+The application obtains the connection string from the key vault. However, locally the default Azurite account details are required. Therefore, you will need to add its connection string as an environment variable .
+
+Environment Variable Name: AZURE_STORAGE_CONNECTION_STRING
+
+Environment Variable Value:
+```
+DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey={DEFAULT_ACCOUNT_KEY};BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
+```
+Replace the {DEFAULT_ACCOUNT_KEY} with the value provided in the following link: https://github.com/Azure/Azurite#default-storage-account
+
 ## Building the application
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
