@@ -10,15 +10,16 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_annotation")
 @Data
-public class AnnotationEntity {
+@EqualsAndHashCode(callSuper = false)
+public class AnnotationEntity extends VersionedEntity {
 
     @Id
     @Column(name = "moj_ann_id")
@@ -61,7 +62,4 @@ public class AnnotationEntity {
     @Column(name = "i_superseded")
     private Boolean superseded;
 
-    @Version
-    @Column(name = "i_version")
-    private Short version;
 }

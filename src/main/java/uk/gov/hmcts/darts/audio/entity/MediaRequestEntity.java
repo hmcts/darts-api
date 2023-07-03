@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -17,8 +18,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = MediaRequestEntity.TABLE_NAME)
@@ -91,6 +95,9 @@ public class MediaRequestEntity {
     @UpdateTimestamp
     @Column(name = LAST_UPDATED_DATE_TIME)
     private OffsetDateTime lastUpdatedDateTime;
+
+    @OneToMany(mappedBy = "mediaRequest")
+    private List<TransientObjectDirectoryEntity> transientObjectDirectoryList = new ArrayList<>();
 
 }
 
