@@ -20,6 +20,7 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | AAD_B2C_CLIENT_SECRET_KEY      | AzureAdB2CClientSecretKey                 |
 | AAD_B2C_ROPC_CLIENT_ID_KEY     | AzureAdB2CFuncTestROPCClientIdKey         |
 | AAD_B2C_ROPC_CLIENT_SECRET_KEY | AzureAdB2CFuncTestROPCClientSecretKey     |
+| AZURE_STORAGE_CONNECTION_STRING| AzureStorageConnectionString              |
 
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
