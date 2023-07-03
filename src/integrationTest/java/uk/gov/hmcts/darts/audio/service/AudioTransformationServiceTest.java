@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,6 +22,9 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
@@ -34,19 +38,22 @@ class AudioTransformationServiceTest {
     @Autowired
     private MediaRequestRepository mediaRequestRepository;
     @Autowired
-    private TransientObjectDirectoryService transientObjectDirectoryService;
-    @Autowired
     private AudioTransformationService audioTransformationService;
     @Autowired
     private DataManagementConfiguration dataManagementConfiguration;
     @MockBean
-    private DataManagementService dataManagementService;
+    private DataManagementService mockDataManagementService;
+    @MockBean
+    private TransientObjectDirectoryService mockTransientObjectDirectoryService;
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     private static final UUID BLOB_LOCATION = UUID.randomUUID();
 
+    private String containerName;
     private MediaRequestEntity savedMediaRequestEntity;
+    @Mock
+    private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
 
     @BeforeAll
     void beforeAll() {
@@ -65,6 +72,8 @@ class AudioTransformationServiceTest {
 
         savedMediaRequestEntity = mediaRequestRepository.saveAndFlush(mediaRequestEntity);
         assertNotNull(savedMediaRequestEntity);
+
+        containerName = dataManagementConfiguration.getUnstructuredContainerName();
     }
 
     @Test
@@ -76,36 +85,56 @@ class AudioTransformationServiceTest {
 
     @Test
     void shouldGetAudioBlobDataUsingLocation() {
-        when(dataManagementService.getBlobData(
-            dataManagementConfiguration.getUnstructuredContainerName(),
+        when(mockDataManagementService.getBlobData(
+            containerName,
             BLOB_LOCATION
         )).thenReturn(BINARY_DATA);
+
         BinaryData binaryData = audioTransformationService.getAudioBlobData(BLOB_LOCATION);
+
         assertEquals(BINARY_DATA, binaryData);
+        verify(mockDataManagementService).getBlobData(
+            eq(containerName),
+            eq(BLOB_LOCATION)
+        );
+        verifyNoMoreInteractions(mockDataManagementService);
     }
 
     @Test
     void shouldSaveAudioBlobData() {
-        when(dataManagementService.saveBlobData(
-            dataManagementConfiguration.getUnstructuredContainerName(),
+        when(mockDataManagementService.saveBlobData(
+            containerName,
             BINARY_DATA
         )).thenReturn(BLOB_LOCATION);
+
         UUID externalLocation = audioTransformationService.saveAudioBlobData(BINARY_DATA);
+
         assertEquals(BLOB_LOCATION, externalLocation);
+        verify(mockDataManagementService).saveBlobData(
+            eq(containerName),
+            eq(BINARY_DATA)
+        );
+        verifyNoMoreInteractions(mockDataManagementService);
     }
 
     @Test
     void shouldSaveTransientDataLocation() {
-        TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientDataLocation(
+        when(mockTransientObjectDirectoryService.saveTransientDataLocation(
+            savedMediaRequestEntity,
+            BLOB_LOCATION
+        )).thenReturn(mockTransientObjectDirectoryEntity);
+
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity = audioTransformationService.saveTransientDataLocation(
             savedMediaRequestEntity,
             BLOB_LOCATION
         );
+
         assertNotNull(transientObjectDirectoryEntity);
-        assertEquals(
-            transientObjectDirectoryEntity.getMediaRequest().getRequestId(),
-            savedMediaRequestEntity.getRequestId()
+        verify(mockTransientObjectDirectoryService).saveTransientDataLocation(
+            eq(savedMediaRequestEntity),
+            eq(BLOB_LOCATION)
         );
-        assertEquals(transientObjectDirectoryEntity.getExternalLocation(), BLOB_LOCATION);
+        verifyNoMoreInteractions(mockTransientObjectDirectoryService);
     }
 
 }
