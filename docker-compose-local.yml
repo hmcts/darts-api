@@ -18,6 +18,7 @@ services:
       - GOVUK_NOTIFY_API_KEY
       - AAD_B2C_ROPC_CLIENT_ID_KEY
       - AAD_B2C_ROPC_CLIENT_SECRET_KEY
+      - AZURE_STORAGE_CONNECTION_STRING
     build:
       context: .
       dockerfile: Dockerfile

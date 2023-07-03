@@ -22,7 +22,8 @@ def secrets = [
     secret('api-FUNC-TEST-ROPC-PASSWORD', 'FUNC_TEST_ROPC_PASSWORD'),
     secret('AzureAdB2CFuncTestROPCClientIdKey', 'AAD_B2C_ROPC_CLIENT_ID_KEY'),
     secret('AzureAdB2CFuncTestROPCClientSecretKey', 'AAD_B2C_ROPC_CLIENT_SECRET_KEY'),
-    secret('api-POSTGRES-SCHEMA', 'DARTS_API_DB_SCHEMA')
+    secret('api-POSTGRES-SCHEMA', 'DARTS_API_DB_SCHEMA'),
+    secret('AzureStorageConnectionString', 'AZURE_STORAGE_CONNECTION_STRING')
   ],
 ]
 
