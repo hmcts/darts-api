@@ -12,5 +12,4 @@ import java.nio.file.StandardCopyOption;
 public interface FileOperationService {
 
     Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
-
 }

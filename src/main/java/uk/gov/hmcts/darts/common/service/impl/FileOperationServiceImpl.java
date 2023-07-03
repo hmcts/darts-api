@@ -22,7 +22,6 @@ public class FileOperationServiceImpl implements FileOperationService {
 
     @Override
     public Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
-        // get local logger or check with Hemanta on the project logging strategy
 
         Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace());
         Path targetTempFile = targetTempDirectory.resolve(fileName);
@@ -33,7 +32,7 @@ public class FileOperationServiceImpl implements FileOperationService {
             Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
         } catch (IOException e) {
-            log.error("");
+            log.error("IOException. Unable to copy Blob Data to temporary workspace");
             throw new IOException(e);
         }
 

@@ -8,18 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
-import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -65,12 +59,13 @@ class AudioFileOperationServiceTest {
     }
 
     @Test
-    @DisplayName("Test-4: Check if throws exception")
+    @DisplayName("Test-4: Check if method throws exception")
     void saveBlobDataToTempWorkspaceTest_4() throws IOException {
 
         filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
         assertArrayEquals(mediaFile.toBytes(), Files.readAllBytes(filePath));
     }
+
     @AfterEach
     void deleteFile() throws IOException, InterruptedException {
         if (filePath != null) {
