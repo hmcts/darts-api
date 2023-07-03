@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
@@ -21,6 +23,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final MediaRequestService mediaRequestService;
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
+    private final TransientObjectDirectoryService transientObjectDirectoryService;
 
     @Transactional
     @Override
@@ -32,6 +35,20 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public BinaryData getAudioBlobData(UUID location) {
         return dataManagementService.getBlobData(dataManagementConfiguration.getUnstructuredContainerName(), location);
+    }
+
+    @Override
+    public UUID saveAudioBlobData(BinaryData binaryData) {
+        return dataManagementService.saveBlobData(
+            dataManagementConfiguration.getUnstructuredContainerName(),
+            binaryData
+        );
+    }
+
+    @Override
+    public TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest,
+                                                                    UUID externalLocation) {
+        return transientObjectDirectoryService.saveTransientDataLocation(mediaRequest, externalLocation);
     }
 
 }

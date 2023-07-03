@@ -1,14 +1,18 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
@@ -24,10 +28,13 @@ import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
+@TestInstance(Lifecycle.PER_CLASS)
 class AudioTransformationServiceTest {
 
     @Autowired
     private MediaRequestRepository mediaRequestRepository;
+    @Autowired
+    private TransientObjectDirectoryService transientObjectDirectoryService;
     @Autowired
     private AudioTransformationService audioTransformationService;
     @Autowired
@@ -39,10 +46,10 @@ class AudioTransformationServiceTest {
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     private static final UUID BLOB_LOCATION = UUID.randomUUID();
 
-    private Integer requestId;
+    private MediaRequestEntity savedMediaRequestEntity;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    void beforeAll() {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearingId(-1);
         mediaRequestEntity.setRequestor(-2);
@@ -56,22 +63,49 @@ class AudioTransformationServiceTest {
         mediaRequestEntity.setOutputFilename(null);
         mediaRequestEntity.setLastAccessedDateTime(null);
 
-        MediaRequestEntity savedMediaRequestEntity = mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+        savedMediaRequestEntity = mediaRequestRepository.saveAndFlush(mediaRequestEntity);
         assertNotNull(savedMediaRequestEntity);
-        requestId = savedMediaRequestEntity.getRequestId();
     }
 
     @Test
-    void processAudioRequest() {
-        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(requestId);
+    void shouldProcessAudioRequest() {
+        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(
+            savedMediaRequestEntity.getRequestId());
         assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
     }
 
     @Test
-    void testGetAudioBlobDataUsingLocation() {
-        when(dataManagementService.getBlobData(dataManagementConfiguration.getUnstructuredContainerName(), BLOB_LOCATION)).thenReturn(BINARY_DATA);
+    void shouldGetAudioBlobDataUsingLocation() {
+        when(dataManagementService.getBlobData(
+            dataManagementConfiguration.getUnstructuredContainerName(),
+            BLOB_LOCATION
+        )).thenReturn(BINARY_DATA);
         BinaryData binaryData = audioTransformationService.getAudioBlobData(BLOB_LOCATION);
         assertEquals(BINARY_DATA, binaryData);
+    }
+
+    @Test
+    void shouldSaveAudioBlobData() {
+        when(dataManagementService.saveBlobData(
+            dataManagementConfiguration.getUnstructuredContainerName(),
+            BINARY_DATA
+        )).thenReturn(BLOB_LOCATION);
+        UUID externalLocation = audioTransformationService.saveAudioBlobData(BINARY_DATA);
+        assertEquals(BLOB_LOCATION, externalLocation);
+    }
+
+    @Test
+    void shouldSaveTransientDataLocation() {
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientDataLocation(
+            savedMediaRequestEntity,
+            BLOB_LOCATION
+        );
+        assertNotNull(transientObjectDirectoryEntity);
+        assertEquals(
+            transientObjectDirectoryEntity.getMediaRequest().getRequestId(),
+            savedMediaRequestEntity.getRequestId()
+        );
+        assertEquals(transientObjectDirectoryEntity.getExternalLocation(), BLOB_LOCATION);
     }
 
 }
