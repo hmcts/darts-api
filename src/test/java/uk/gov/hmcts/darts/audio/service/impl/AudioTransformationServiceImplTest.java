@@ -11,8 +11,8 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.util.UUID;
 
-import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceImplTest {
