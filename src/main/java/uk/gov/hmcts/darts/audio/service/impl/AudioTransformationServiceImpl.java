@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     private final MediaRequestService mediaRequestService;
 
+    private final FileOperationService fileOperationService;
 
     @Transactional
     @Override
@@ -33,26 +35,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
-        // get local logger or check with Hemanta on the project logging strategy
-        // ca// file ops service
 
-        Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace());
-        Path targetTempFile = targetTempDirectory.resolve(fileName);
-
-        // log step
-
-        try (InputStream audioInputStream = mediaFile.toStream()) {
-            Files.createDirectories(targetTempDirectory);
-            Path tempFilePath = Files.createFile(targetTempFile);
-            Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
-
-        } catch (IOException e) {
-            //log error
-
-            // implement exception handling. Speak to Chris Bellingham on the project error handling strategy
-            throw new RuntimeException(e);
-        }
-
-        return targetTempFile;
+        return fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
     }
 }
