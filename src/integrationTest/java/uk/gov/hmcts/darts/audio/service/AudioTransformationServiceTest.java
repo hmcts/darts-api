@@ -1,17 +1,23 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
+import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
@@ -24,6 +30,14 @@ class AudioTransformationServiceTest {
     private MediaRequestRepository mediaRequestRepository;
     @Autowired
     private AudioTransformationService audioTransformationService;
+    @Autowired
+    private DataManagementConfiguration dataManagementConfiguration;
+    @MockBean
+    private DataManagementService dataManagementService;
+
+    private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
+    private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
+    private static final UUID BLOB_LOCATION = UUID.randomUUID();
 
     private Integer requestId;
 
@@ -51,6 +65,13 @@ class AudioTransformationServiceTest {
     void processAudioRequest() {
         MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(requestId);
         assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
+    }
+
+    @Test
+    void testGetAudioBlobDataUsingLocation() {
+        when(dataManagementService.getBlobData(dataManagementConfiguration.getUnstructuredContainerName(), BLOB_LOCATION)).thenReturn(BINARY_DATA);
+        BinaryData binaryData = audioTransformationService.getAudioBlobData(BLOB_LOCATION);
+        assertEquals(BINARY_DATA, binaryData);
     }
 
 }
