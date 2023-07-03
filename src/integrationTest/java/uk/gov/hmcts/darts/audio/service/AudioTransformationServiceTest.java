@@ -30,7 +30,7 @@ class AudioTransformationServiceTest {
     @Autowired
     private AudioTransformationService audioTransformationService;
 
-    Path filePath;
+    private Path filePath;
 
     private Integer requestId;
 
