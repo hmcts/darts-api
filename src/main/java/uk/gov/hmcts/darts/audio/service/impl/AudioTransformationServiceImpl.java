@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -29,10 +30,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final DataManagementConfiguration dataManagementConfiguration;
     private final TransientObjectDirectoryService transientObjectDirectoryService;
 
+    private final MediaRepository mediaRepository;
+
     @Transactional
     @Override
     public MediaRequestEntity processAudioRequest(Integer requestId) {
-
         return mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
     }
 
@@ -53,6 +55,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest,
                                                                     UUID externalLocation) {
         return transientObjectDirectoryService.saveTransientDataLocation(mediaRequest, externalLocation);
+    }
+
+    @Override
+    public List<MediaEntity> getMediaMetadata(Integer hearingId) {
+        return mediaRepository.findAllByHearingId(hearingId);
     }
 
     @Override
