@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -36,7 +38,7 @@ class AudioFileOperationServiceTest {
 
     @Test
     @DisplayName("Test-1: Check if file is created in temporary folder")
-    void saveBlobDataToTempWorkspaceTest_1() throws IOException {
+    void saveBlobDataToTempWorkspaceTestOne() throws IOException {
 
         filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
         assertTrue(Files.exists(filePath));
@@ -44,7 +46,7 @@ class AudioFileOperationServiceTest {
 
     @Test
     @DisplayName("Test-2: Check if file is empty")
-    void saveBlobDataToTempWorkspaceTest_2() throws IOException {
+    void saveBlobDataToTempWorkspaceTestTwo() throws IOException {
 
         filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
         assertNotEquals(0L, Files.size(filePath));
@@ -52,7 +54,7 @@ class AudioFileOperationServiceTest {
 
     @Test
     @DisplayName("Test-3: Check if the saved file is equal to the original BinaryData file")
-    void saveBlobDataToTempWorkspaceTest_3() throws IOException {
+    void saveBlobDataToTempWorkspaceTestThree() throws IOException {
 
         filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
         assertArrayEquals(mediaFile.toBytes(), Files.readAllBytes(filePath));
