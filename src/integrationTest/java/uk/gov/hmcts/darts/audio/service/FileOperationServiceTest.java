@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
-class AudioFileOperationServiceTest {
+class FileOperationServiceTest {
 
     @Autowired
-    private AudioTransformationService audioTransformationService;
+    private FileOperationService fileOperationService;
 
     private Path filePath;
     private BinaryData mediaFile;
@@ -40,7 +41,7 @@ class AudioFileOperationServiceTest {
     @DisplayName("Test-1: Check if file is created in temporary folder")
     void saveBlobDataToTempWorkspaceTestOne() throws IOException {
 
-        filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
+        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertTrue(Files.exists(filePath));
     }
 
@@ -48,7 +49,7 @@ class AudioFileOperationServiceTest {
     @DisplayName("Test-2: Check if file is empty")
     void saveBlobDataToTempWorkspaceTestTwo() throws IOException {
 
-        filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
+        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertNotEquals(0L, Files.size(filePath));
     }
 
@@ -56,7 +57,7 @@ class AudioFileOperationServiceTest {
     @DisplayName("Test-3: Check if the saved file is equal to the original BinaryData file")
     void saveBlobDataToTempWorkspaceTestThree() throws IOException {
 
-        filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
+        filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertArrayEquals(mediaFile.toBytes(), Files.readAllBytes(filePath));
     }
 
