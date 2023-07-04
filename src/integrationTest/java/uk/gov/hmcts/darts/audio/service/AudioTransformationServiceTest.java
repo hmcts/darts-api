@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -12,14 +11,28 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.HearingMediaRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
+import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,59 +45,68 @@ import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
+@ReprovisionDatabaseBeforeEach
 @TestInstance(Lifecycle.PER_CLASS)
+@SuppressWarnings("PMD.ExcessiveImports")
 class AudioTransformationServiceTest {
-
-    @Autowired
-    private MediaRequestRepository mediaRequestRepository;
-    @Autowired
-    private AudioTransformationService audioTransformationService;
-    @Autowired
-    private DataManagementConfiguration dataManagementConfiguration;
-    @MockBean
-    private DataManagementService mockDataManagementService;
-    @MockBean
-    private TransientObjectDirectoryService mockTransientObjectDirectoryService;
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     private static final UUID BLOB_LOCATION = UUID.randomUUID();
 
-    private String containerName;
+    @Autowired
+    private AudioTransformationService audioTransformationService;
+
+    @Autowired
+    private DataManagementConfiguration dataManagementConfiguration;
+
+    @Autowired
+    private MediaRequestRepository mediaRequestRepository;
+
+    @Autowired
+    private CaseRepository caseRepository;
+
+    @Autowired
+    private MediaRepository mediaRepository;
+
+    @Autowired
+    private CourtroomRepository courtroomRepository;
+
+    @Autowired
+    private HearingRepository hearingRepository;
+
+    @Autowired
+    private HearingMediaRepository hearingMediaRepository;
+
+    @MockBean
+    private DataManagementService mockDataManagementService;
+
+    @MockBean
+    private TransientObjectDirectoryService mockTransientObjectDirectoryService;
+
     private MediaRequestEntity savedMediaRequestEntity;
+    private HearingEntity hearingEntityWithMedia1;
+    private HearingEntity hearingEntityWithoutMedia;
+    private MediaEntity mediaEntity1;
+    private MediaEntity mediaEntity2;
+    private MediaEntity mediaEntity3;
+
     @Mock
     private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
 
-    @BeforeAll
-    void beforeAll() {
-        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
-        mediaRequestEntity.setHearingId(-1);
-        mediaRequestEntity.setRequestor(-2);
-        mediaRequestEntity.setStatus(OPEN);
-        mediaRequestEntity.setRequestType(DOWNLOAD);
-        mediaRequestEntity.setAttempts(0);
-        mediaRequestEntity.setStartTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
-        mediaRequestEntity.setEndTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
-        mediaRequestEntity.setOutboundLocation(null);
-        mediaRequestEntity.setOutputFormat(null);
-        mediaRequestEntity.setOutputFilename(null);
-        mediaRequestEntity.setLastAccessedDateTime(null);
-
-        savedMediaRequestEntity = mediaRequestRepository.saveAndFlush(mediaRequestEntity);
-        assertNotNull(savedMediaRequestEntity);
-
-        containerName = dataManagementConfiguration.getUnstructuredContainerName();
-    }
-
     @Test
     void shouldProcessAudioRequest() {
-        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(
-            savedMediaRequestEntity.getRequestId());
+        createAndLoadMediaRequestEntity();
+
+        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(savedMediaRequestEntity.getRequestId());
+
         assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
     }
 
     @Test
     void shouldGetAudioBlobDataUsingLocation() {
+        String containerName = dataManagementConfiguration.getUnstructuredContainerName();
+
         when(mockDataManagementService.getBlobData(
             containerName,
             BLOB_LOCATION
@@ -102,6 +124,8 @@ class AudioTransformationServiceTest {
 
     @Test
     void shouldSaveAudioBlobData() {
+        String containerName = dataManagementConfiguration.getUnstructuredContainerName();
+
         when(mockDataManagementService.saveBlobData(
             containerName,
             BINARY_DATA
@@ -119,6 +143,8 @@ class AudioTransformationServiceTest {
 
     @Test
     void shouldSaveTransientDataLocation() {
+        createAndLoadMediaRequestEntity();
+
         when(mockTransientObjectDirectoryService.saveTransientDataLocation(
             savedMediaRequestEntity,
             BLOB_LOCATION
@@ -135,6 +161,103 @@ class AudioTransformationServiceTest {
             eq(BLOB_LOCATION)
         );
         verifyNoMoreInteractions(mockTransientObjectDirectoryService);
+    }
+
+    @Test
+    void getMediaMetadataShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
+        createAndLoadMediaEntityGraph();
+
+        Integer hearingIdWithMedia = hearingEntityWithMedia1.getId();
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithMedia);
+
+        assertEquals(2, mediaEntities.size());
+
+        assertThat(mediaEntities, hasItem(mediaEntity1));
+        assertThat(mediaEntities, hasItem(mediaEntity2));
+
+        assertThat(mediaEntities, not(hasItem(mediaEntity3)));
+    }
+
+    @Test
+    void getMediaMetadataShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
+        createAndLoadMediaEntityGraph();
+
+        Integer hearingIdWithNoRelatedMedia = hearingEntityWithoutMedia.getId();
+
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithNoRelatedMedia);
+
+        assertEquals(0, mediaEntities.size());
+    }
+
+    @Test
+    void getMediaMetadataShouldReturnEmptyListWhenHearingIdDoesNotExist() {
+        createAndLoadMediaEntityGraph();
+
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(123_456);
+
+        assertEquals(0, mediaEntities.size());
+    }
+
+    private void createAndLoadMediaRequestEntity() {
+        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setHearingId(-1);
+        mediaRequestEntity.setRequestor(-2);
+        mediaRequestEntity.setStatus(OPEN);
+        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setAttempts(0);
+        mediaRequestEntity.setStartTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
+        mediaRequestEntity.setEndTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
+        mediaRequestEntity.setOutboundLocation(null);
+        mediaRequestEntity.setOutputFormat(null);
+        mediaRequestEntity.setOutputFilename(null);
+        mediaRequestEntity.setLastAccessedDateTime(null);
+
+        savedMediaRequestEntity = mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+        assertNotNull(savedMediaRequestEntity);
+    }
+
+    private void createAndLoadMediaEntityGraph() {
+        var caseEntity = CommonTestDataUtil.createCase("1");
+        caseRepository.saveAndFlush(caseEntity);
+
+        var courtroomEntity = CommonTestDataUtil.createCourtroom("Int Test Courtroom");
+        courtroomRepository.saveAndFlush(courtroomEntity);
+
+        hearingEntityWithMedia1 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
+        var hearingEntityWithMedia2 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
+        hearingEntityWithoutMedia = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
+        hearingRepository.saveAllAndFlush(Arrays.asList(
+            hearingEntityWithMedia1,
+            hearingEntityWithMedia2,
+            hearingEntityWithoutMedia
+        ));
+
+        mediaEntity1 = CommonTestDataUtil.createMedia();
+        mediaEntity2 = CommonTestDataUtil.createMedia();
+        mediaEntity3 = CommonTestDataUtil.createMedia();
+        mediaRepository.saveAllAndFlush(Arrays.asList(
+            mediaEntity1,
+            mediaEntity2,
+            mediaEntity3
+        ));
+
+        var hearingMediaEntity1 = CommonTestDataUtil.createHearingMedia(
+            hearingEntityWithMedia1,
+            mediaEntity1
+        );
+        var hearingMediaEntity2 = CommonTestDataUtil.createHearingMedia(
+            hearingEntityWithMedia1,
+            mediaEntity2
+        );
+        var hearingMediaEntity3 = CommonTestDataUtil.createHearingMedia(
+            hearingEntityWithMedia2,
+            mediaEntity3
+        );
+        hearingMediaRepository.saveAllAndFlush(Arrays.asList(
+            hearingMediaEntity1,
+            hearingMediaEntity2,
+            hearingMediaEntity3
+        ));
     }
 
 }

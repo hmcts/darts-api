@@ -131,7 +131,6 @@ class HandleOAuthCodeIntTest {
      * provides a token whose signature can be verified against a public key provided by the configured Remote JWKS.
      * This setup method generates these private and public RSA keys and sets the stub responses accordingly.
      */
-    @SuppressWarnings("PMD.LinguisticNaming")
     private KeyPair setTokenStub() {
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(CONFIGURED_AUDIENCE_VALUE)
@@ -154,7 +153,6 @@ class HandleOAuthCodeIntTest {
     }
 
     @SneakyThrows(JsonProcessingException.class)
-    @SuppressWarnings("PMD.LinguisticNaming")
     private void setKeyStoreStub(KeyPair keyPair) {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         Encoder encoder = Base64.getEncoder();
