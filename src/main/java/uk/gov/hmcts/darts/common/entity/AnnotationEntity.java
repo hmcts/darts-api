@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,9 +32,9 @@ public class AnnotationEntity extends VersionedEntity {
     @JoinColumn(name = "moj_cas_id")
     private CaseEntity courtCase;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "moj_crt_id")
-    private CourthouseEntity courthouse;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "moj_ctr_id")
+    private CourtroomEntity courtroom;
 
     @Column(name = "r_annotation_object_id", length = 16)
     private String legacyObjectId;
@@ -49,9 +50,6 @@ public class AnnotationEntity extends VersionedEntity {
 
     @Column(name = "c_end")
     private OffsetDateTime end;
-
-    @Column(name = "c_courtroom")
-    private String courtroom;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;

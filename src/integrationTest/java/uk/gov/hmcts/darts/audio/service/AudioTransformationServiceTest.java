@@ -10,14 +10,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,6 +43,10 @@ class AudioTransformationServiceTest {
 
     @Autowired
     private MediaRequestRepository mediaRequestRepository;
+    @Autowired
+    private MediaRepository mediaRepository;
+    @Autowired
+    private CourtroomRepository courtroomRepository;
     @Autowired
     private AudioTransformationService audioTransformationService;
     @Autowired
@@ -65,7 +75,6 @@ class AudioTransformationServiceTest {
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
         mediaRequestEntity.setEndTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
-        mediaRequestEntity.setOutboundLocation(null);
         mediaRequestEntity.setOutputFormat(null);
         mediaRequestEntity.setOutputFilename(null);
         mediaRequestEntity.setLastAccessedDateTime(null);
@@ -135,6 +144,32 @@ class AudioTransformationServiceTest {
             eq(BLOB_LOCATION)
         );
         verifyNoMoreInteractions(mockTransientObjectDirectoryService);
+    }
+
+    @Test
+    @Transactional
+    void shouldGetMediaLocation() {
+        MediaEntity media = mediaRepository.getReferenceById(-1);
+
+        assertEquals(
+            Optional.of(UUID.fromString("a7ad5828-6a20-4bd0-adb1-bf1496a2622a")),
+            audioTransformationService.getMediaLocation(media)
+        );
+    }
+
+    @Test
+    void shouldGetEmptyOptionalMediaLocationWhenNoExternalObjectDirectoryExists() {
+        CourtroomEntity courtroom = courtroomRepository.getReferenceById(1);
+
+        MediaEntity newMedia = new MediaEntity();
+        newMedia.setCourtroom(courtroom);
+        newMedia.setChannel(1);
+        newMedia.setTotalChannels(4);
+        newMedia.setStart(OffsetDateTime.parse("2023-07-04T10:00:00Z"));
+        newMedia.setEnd(OffsetDateTime.parse("2023-07-04T11:00:00Z"));
+        newMedia = mediaRepository.saveAndFlush(newMedia);
+
+        assertEquals(Optional.empty(), audioTransformationService.getMediaLocation(newMedia));
     }
 
 }

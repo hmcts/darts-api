@@ -39,7 +39,6 @@ public class MediaRequestEntity {
     public static final String REQ_PROC_ATTEMPTS = "req_proc_attempts";
     public static final String START_TIME = "start_ts";
     public static final String END_TIME = "end_ts";
-    public static final String OUTBOUND_LOCATION = "outbound_location";
     public static final String OUTPUT_FORMAT = "output_format";
     public static final String OUTPUT_FILENAME = "output_filename";
     public static final String LAST_ACCESSED_DATE_TIME = "last_accessed_ts";
@@ -75,9 +74,6 @@ public class MediaRequestEntity {
 
     @Column(name = END_TIME)
     private OffsetDateTime endTime;
-
-    @Column(name = OUTBOUND_LOCATION)
-    private String outboundLocation;
 
     @Column(name = OUTPUT_FORMAT)
     private AudioRequestOutputFormat outputFormat;
