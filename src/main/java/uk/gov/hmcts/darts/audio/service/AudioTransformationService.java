@@ -24,6 +24,7 @@ public interface AudioTransformationService {
     List<MediaEntity> getMediaMetadata(Integer hearingId);
 
     Optional<UUID> getMediaLocation(MediaEntity media);
+
     Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
 
 }

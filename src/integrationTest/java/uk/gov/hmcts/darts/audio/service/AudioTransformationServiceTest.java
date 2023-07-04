@@ -55,7 +55,6 @@ import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 @ActiveProfiles({"intTest", "h2db"})
 @ReprovisionDatabaseBeforeEach
 @TestInstance(Lifecycle.PER_CLASS)
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"})
 class AudioTransformationServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
