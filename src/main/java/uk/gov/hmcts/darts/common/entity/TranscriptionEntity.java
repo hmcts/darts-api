@@ -32,8 +32,8 @@ public class TranscriptionEntity extends VersionedEntity {
     @JoinColumn(name = "moj_cas_id", nullable = false)
     private CaseEntity courtCase;
 
-    @Column(name = "moj_crt_id", nullable = false)
-    private Integer courthouseId;
+    @Column(name = "moj_ctr_id", nullable = false)
+    private Integer courtroomId;
 
     @Column(name = "moj_trt_id", nullable = false)
     private Integer transcriptionTypeId;

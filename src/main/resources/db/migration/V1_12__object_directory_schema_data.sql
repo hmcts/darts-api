@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS transient_object_directory (
 , checksum                      CHARACTER VARYING
 , created_ts                    TIMESTAMP WITH TIME ZONE    NOT NULL
 , modified_ts                   TIMESTAMP WITH TIME ZONE    NOT NULL
-, modified_by                   INTEGER
+, modified_by                   INTEGER                     --NOT NULL
 , CONSTRAINT transient_object_directory_pk PRIMARY KEY (tod_id)
 , CONSTRAINT tod_media_request_fk FOREIGN KEY (moj_mer_id) REFERENCES moj_media_request (moj_mer_id)
 --,CONSTRAINT tod_modified_by_fk FOREIGN KEY (modified_by) REFERENCES moj_user (moj_usr_id)
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS external_object_directory (
 , external_location_type        CHARACTER VARYING           NOT NULL
 , created_ts                    TIMESTAMP WITH TIME ZONE    NOT NULL
 , modified_ts                   TIMESTAMP WITH TIME ZONE    NOT NULL
-, modified_by                   INTEGER                     NOT NULL
+, modified_by                   INTEGER                     --NOT NULL
 , checksum                      CHARACTER VARYING
 , attempts                      INTEGER
 , CONSTRAINT external_object_directory_pkey PRIMARY KEY (eod_id)

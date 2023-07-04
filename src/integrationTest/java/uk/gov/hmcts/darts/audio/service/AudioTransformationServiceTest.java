@@ -9,16 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingMediaRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
@@ -28,6 +34,7 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,12 +49,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @ReprovisionDatabaseBeforeEach
 @TestInstance(Lifecycle.PER_CLASS)
-@SuppressWarnings("PMD.ExcessiveImports")
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"})
 class AudioTransformationServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
@@ -78,6 +86,12 @@ class AudioTransformationServiceTest {
     @Autowired
     private HearingMediaRepository hearingMediaRepository;
 
+    @Autowired
+    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+
+    @Autowired
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+
     @MockBean
     private DataManagementService mockDataManagementService;
 
@@ -98,7 +112,8 @@ class AudioTransformationServiceTest {
     void shouldProcessAudioRequest() {
         createAndLoadMediaRequestEntity();
 
-        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(savedMediaRequestEntity.getRequestId());
+        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(
+            savedMediaRequestEntity.getRequestId());
 
         assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
     }
@@ -164,6 +179,7 @@ class AudioTransformationServiceTest {
     }
 
     @Test
+    @Transactional
     void getMediaMetadataShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
         createAndLoadMediaEntityGraph();
 
@@ -198,6 +214,70 @@ class AudioTransformationServiceTest {
         assertEquals(0, mediaEntities.size());
     }
 
+    @Test
+    void shouldGetMediaLocation() {
+        MediaEntity media = mediaRepository.getReferenceById(-1);
+
+        assertEquals(
+            Optional.of(UUID.fromString("a7ad5828-6a20-4bd0-adb1-bf1496a2622a")),
+            audioTransformationService.getMediaLocation(media)
+        );
+    }
+
+    @Test
+    void shouldGetEmptyOptionalMediaLocationWhenNoExternalObjectDirectoryExists() {
+        CourtroomEntity courtroom = courtroomRepository.getReferenceById(1);
+
+        MediaEntity newMedia = new MediaEntity();
+        newMedia.setCourtroom(courtroom);
+        newMedia.setChannel(1);
+        newMedia.setTotalChannels(4);
+        newMedia.setStart(OffsetDateTime.parse("2023-07-04T10:00:00Z"));
+        newMedia.setEnd(OffsetDateTime.parse("2023-07-04T11:00:00Z"));
+        newMedia = mediaRepository.saveAndFlush(newMedia);
+
+        assertEquals(Optional.empty(), audioTransformationService.getMediaLocation(newMedia));
+    }
+
+    @Test
+    void shouldGetMediaLocationWithWarningThatMultipleExistByStatusAndType() {
+
+        CourtroomEntity courtroom = courtroomRepository.getReferenceById(1);
+
+        MediaEntity newMedia = new MediaEntity();
+        newMedia.setCourtroom(courtroom);
+        newMedia.setChannel(1);
+        newMedia.setTotalChannels(4);
+        newMedia.setStart(OffsetDateTime.parse("2023-07-04T16:00:00Z"));
+        newMedia.setEnd(OffsetDateTime.parse("2023-07-04T17:00:00Z"));
+        newMedia = mediaRepository.saveAndFlush(newMedia);
+
+        ObjectDirectoryStatusEntity objectDirectoryStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
+        UUID externalLocation1 = UUID.randomUUID();
+        UUID externalLocation2 = UUID.randomUUID();
+        ExternalObjectDirectoryEntity externalObjectDirectory1 = CommonTestDataUtil.createExternalObjectDirectory(
+            newMedia,
+            objectDirectoryStatus,
+            "unstructured",
+            externalLocation1
+        );
+        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory1);
+
+        ExternalObjectDirectoryEntity externalObjectDirectory2 = CommonTestDataUtil.createExternalObjectDirectory(
+            newMedia,
+            objectDirectoryStatus,
+            "unstructured",
+            externalLocation2
+        );
+        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory2);
+
+        assertEquals(
+            Optional.of(externalLocation1),
+            audioTransformationService.getMediaLocation(newMedia)
+        );
+
+    }
+
     private void createAndLoadMediaRequestEntity() {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearingId(-1);
@@ -207,7 +287,6 @@ class AudioTransformationServiceTest {
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
         mediaRequestEntity.setEndTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
-        mediaRequestEntity.setOutboundLocation(null);
         mediaRequestEntity.setOutputFormat(null);
         mediaRequestEntity.setOutputFilename(null);
         mediaRequestEntity.setLastAccessedDateTime(null);
@@ -232,9 +311,9 @@ class AudioTransformationServiceTest {
             hearingEntityWithoutMedia
         ));
 
-        mediaEntity1 = CommonTestDataUtil.createMedia();
-        mediaEntity2 = CommonTestDataUtil.createMedia();
-        mediaEntity3 = CommonTestDataUtil.createMedia();
+        mediaEntity1 = CommonTestDataUtil.createMedia(courtroomEntity);
+        mediaEntity2 = CommonTestDataUtil.createMedia(courtroomEntity);
+        mediaEntity3 = CommonTestDataUtil.createMedia(courtroomEntity);
         mediaRepository.saveAllAndFlush(Arrays.asList(
             mediaEntity1,
             mediaEntity2,

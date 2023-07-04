@@ -2,12 +2,20 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
@@ -36,10 +44,17 @@ public class ExternalObjectDirectoryEntity implements JpaAuditing {
 
     @Id
     @Column(name = ID)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eod_gen")
+    @SequenceGenerator(name = "eod_gen", sequenceName = "eod_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = MEDIA_ID)
-    private Integer mediaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = MEDIA_ID, foreignKey = @ForeignKey(name = "eod_media_fk"))
+    private MediaEntity media;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = STATUS_ID, foreignKey = @ForeignKey(name = "eod_object_directory_status_fk"))
+    private ObjectDirectoryStatusEntity status;
 
     @Column(name = TRANSCRIPTION_ID)
     private Integer transcriptionId;
@@ -47,7 +62,8 @@ public class ExternalObjectDirectoryEntity implements JpaAuditing {
     @Column(name = ANNOTATION_ID)
     private Integer annotationId;
 
-    @Column(name = EXTERNAL_LOCATION)
+    @NaturalId
+    @Column(name = EXTERNAL_LOCATION, unique = true, nullable = false)
     private UUID externalLocation;
 
     @Column(name = EXTERNAL_LOCATION_TYPE)
@@ -63,9 +79,6 @@ public class ExternalObjectDirectoryEntity implements JpaAuditing {
 
     @Column(name = MODIFIED_BY)
     private Integer modifiedBy;
-
-    @Column(name = STATUS_ID)
-    private Integer status;
 
     @Column(name = CHECKSUM)
     private String checksum;

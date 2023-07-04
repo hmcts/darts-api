@@ -4,16 +4,20 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @UtilityClass
+@SuppressWarnings("PMD.TooManyMethods")
 public class CommonTestDataUtil {
 
     public CourthouseEntity createCourthouse(String name) {
@@ -76,8 +80,10 @@ public class CommonTestDataUtil {
         return returnList;
     }
 
-    public MediaEntity createMedia() {
-        return new MediaEntity();
+    public MediaEntity createMedia(CourtroomEntity courtroomEntity) {
+        MediaEntity media = new MediaEntity();
+        media.setCourtroom(courtroomEntity);
+        return media;
     }
 
     public HearingMediaEntity createHearingMedia(HearingEntity hearingEntity, MediaEntity mediaEntity) {
@@ -86,6 +92,19 @@ public class CommonTestDataUtil {
         hearingMediaEntity.setMedia(mediaEntity);
 
         return hearingMediaEntity;
+    }
+
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
+                                                                       ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                       String externalLocationType,
+                                                                       UUID externalLocation) {
+        var externalObjectDirectory = new ExternalObjectDirectoryEntity();
+        externalObjectDirectory.setMedia(mediaEntity);
+        externalObjectDirectory.setStatus(objectDirectoryStatusEntity);
+        externalObjectDirectory.setExternalLocationType(externalLocationType);
+        externalObjectDirectory.setExternalLocation(externalLocation);
+
+        return externalObjectDirectory;
     }
 
 }

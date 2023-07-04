@@ -9,10 +9,13 @@ import java.util.List;
 
 @Repository
 public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
+
     @Query(
-        "SELECT mr FROM HearingMediaEntity he, MediaEntity mr " +
-            "WHERE he.hearing.id = :hearingId " +
-            "AND mr = he.media "
+        "SELECT med FROM HearingMediaEntity hma, MediaEntity med " +
+            "WHERE hma.hearing.id = :hearingId " +
+            "AND med = hma.media "
     )
     List<MediaEntity> findAllByHearingId(Integer hearingId);
+
 }
+
