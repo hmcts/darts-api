@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.datamanagement;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import org.junit.ClassRule;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import uk.gov.hmcts.darts.PostgresqlContainer;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.nio.charset.StandardCharsets;
@@ -33,6 +37,14 @@ class DataManagementServiceTest {
 
     @Autowired
     DataManagementService dataManagementService;
+
+    @ClassRule
+    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
+
+    @BeforeAll
+    public static void postgresSetUp() {
+        postgreSQLContainer.start();
+    }
 
     @Test
     void saveBinaryDataToBlobStorage() {
