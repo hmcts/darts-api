@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS moj_media_request (
 , req_proc_attempts         INTEGER                     NOT NULL DEFAULT 0
 , start_ts                  TIMESTAMP WITH TIME ZONE    NOT NULL
 , end_ts                    TIMESTAMP WITH TIME ZONE    NOT NULL
-, outbound_location         CHARACTER VARYING
 , output_format             CHARACTER VARYING
 , output_filename           CHARACTER VARYING
 , last_accessed_ts          TIMESTAMP WITH TIME ZONE    -- when the output file is accessed (DOWNLOAD, PLAYBACK)

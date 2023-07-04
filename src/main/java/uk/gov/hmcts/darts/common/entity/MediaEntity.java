@@ -1,16 +1,25 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Type;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "moj_media")
@@ -24,8 +33,12 @@ public class MediaEntity extends VersionedEntity {
     @SequenceGenerator(name = "moj_med_gen", sequenceName = "moj_med_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "moj_crt_id")
-    private Integer courthouseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "moj_ctr_id", foreignKey = @ForeignKey(name = "moj_media_courtroom_fk"))
+    private CourtroomEntity courtroom;
+
+    @OneToMany(mappedBy = "media")
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = new ArrayList<>();
 
     @Column(name = "r_media_object_id", length = 16)
     private String legacyObjectId;
@@ -45,14 +58,13 @@ public class MediaEntity extends VersionedEntity {
     @Column(name = "c_end")
     private OffsetDateTime end;
 
-    @Column(name = "c_courtroom")
-    private String courtroom;
-
+    @Type(ListArrayType.class)
     @Column(name = "c_case_id")
-    private String caseId;
+    private List<String> caseIdList = new ArrayList<>();
 
+    @Type(ListArrayType.class)
     @Column(name = "r_case_object_id")
-    private String caseObjectId;
+    private List<String> caseObjectIdList = new ArrayList<>();
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;

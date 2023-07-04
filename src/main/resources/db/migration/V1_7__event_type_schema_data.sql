@@ -387,10 +387,3 @@ INSERT INTO moj_event_type (moj_evt_id, evt_type, sub_type, event_name, handler)
 INSERT INTO moj_event_type (moj_evt_id, evt_type, sub_type, event_name, handler) VALUES (376, 'UPDCASE', NULL, 'Update Case', 'com.synapps.moj.dfs.handler.DARTSXHIBITUpdateCaseHandler');
 
 ALTER SEQUENCE moj_evt_seq RESTART WITH 377;
-
-DROP SEQUENCE IF EXISTS moj_crt_seq;
-CREATE SEQUENCE IF NOT EXISTS moj_cth_seq;
-
-ALTER TABLE moj_courthouse DROP CONSTRAINT moj_courthouse_pkey;
-ALTER TABLE moj_courthouse RENAME COLUMN moj_crt_id TO moj_cth_id;
-ALTER TABLE moj_courthouse ADD PRIMARY KEY (moj_cth_id);

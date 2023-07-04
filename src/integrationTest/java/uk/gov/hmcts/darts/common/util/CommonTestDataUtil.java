@@ -4,14 +4,20 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @UtilityClass
+@SuppressWarnings("PMD.TooManyMethods")
 public class CommonTestDataUtil {
 
     public CourthouseEntity createCourthouse(String name) {
@@ -28,8 +34,7 @@ public class CommonTestDataUtil {
     }
 
     public CourtroomEntity createCourtroom(String name) {
-        createCourthouse("SWANSEA");
-        return createCourtroom(createCourthouse("SWANSEA"), name);
+        return createCourtroom(createCourthouse("NEWCASTLE"), name);
     }
 
     public CaseEntity createCase(String caseNumber) {
@@ -49,13 +54,20 @@ public class CommonTestDataUtil {
         return hearing1;
     }
 
-    public HearingEntity createHearing(String caseNumber, LocalTime time) {
+    public HearingEntity createHearing(String caseNumber, LocalTime scheduledStartTime) {
         HearingEntity hearing1 = new HearingEntity();
         hearing1.setCourtCase(createCase(caseNumber));
         hearing1.setCourtroom(createCourtroom("1"));
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
-        hearing1.setScheduledStartTime(time);
+        hearing1.setScheduledStartTime(scheduledStartTime);
         return hearing1;
+    }
+
+    public HearingEntity createHearing(CaseEntity caseEntity, CourtroomEntity courtroomEntity) {
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setCourtCase(caseEntity);
+        hearingEntity.setCourtroom(courtroomEntity);
+        return hearingEntity;
     }
 
     public List<HearingEntity> createHearings(int numOfHearings) {
@@ -66,6 +78,33 @@ public class CommonTestDataUtil {
             time = time.plusHours(1);
         }
         return returnList;
+    }
+
+    public MediaEntity createMedia(CourtroomEntity courtroomEntity) {
+        MediaEntity media = new MediaEntity();
+        media.setCourtroom(courtroomEntity);
+        return media;
+    }
+
+    public HearingMediaEntity createHearingMedia(HearingEntity hearingEntity, MediaEntity mediaEntity) {
+        var hearingMediaEntity = new HearingMediaEntity();
+        hearingMediaEntity.setHearing(hearingEntity);
+        hearingMediaEntity.setMedia(mediaEntity);
+
+        return hearingMediaEntity;
+    }
+
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
+                                                                       ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                       String externalLocationType,
+                                                                       UUID externalLocation) {
+        var externalObjectDirectory = new ExternalObjectDirectoryEntity();
+        externalObjectDirectory.setMedia(mediaEntity);
+        externalObjectDirectory.setStatus(objectDirectoryStatusEntity);
+        externalObjectDirectory.setExternalLocationType(externalLocationType);
+        externalObjectDirectory.setExternalLocation(externalLocation);
+
+        return externalObjectDirectory;
     }
 
 }

@@ -52,4 +52,4 @@ create table if not exists  moj_hearing
 );
 create sequence if not exists moj_hea_seq;
 
-
+ALTER TABLE moj_media ADD CONSTRAINT moj_media_courtroom_fk FOREIGN KEY (moj_ctr_id) REFERENCES moj_courtroom(moj_ctr_id);
