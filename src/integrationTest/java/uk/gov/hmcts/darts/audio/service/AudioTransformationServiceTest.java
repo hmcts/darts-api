@@ -1,14 +1,16 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
+import org.junit.ClassRule;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import uk.gov.hmcts.darts.PostgresqlContainer;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -44,15 +47,22 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @ReprovisionDatabaseBeforeEach
-@TestInstance(Lifecycle.PER_CLASS)
 @SuppressWarnings("PMD.ExcessiveImports")
 class AudioTransformationServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     private static final UUID BLOB_LOCATION = UUID.randomUUID();
+
+    @ClassRule
+    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
+
+    @BeforeAll
+    public static void postgresSetUp() {
+        postgreSQLContainer.start();
+    }
 
     @Autowired
     private AudioTransformationService audioTransformationService;
@@ -65,6 +75,9 @@ class AudioTransformationServiceTest {
 
     @Autowired
     private CaseRepository caseRepository;
+
+    @Autowired
+    private CommonTestDataUtil commonTestDataUtil;
 
     @Autowired
     private MediaRepository mediaRepository;
@@ -98,7 +111,8 @@ class AudioTransformationServiceTest {
     void shouldProcessAudioRequest() {
         createAndLoadMediaRequestEntity();
 
-        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(savedMediaRequestEntity.getRequestId());
+        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(
+            savedMediaRequestEntity.getRequestId());
 
         assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
     }
@@ -199,15 +213,15 @@ class AudioTransformationServiceTest {
     }
 
     private void createAndLoadMediaRequestEntity() {
+        HearingEntity hearing = commonTestDataUtil.createHearing("test1", LocalTime.of(10, 0));
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
-        mediaRequestEntity.setHearingId(-1);
+        mediaRequestEntity.setHearingId(hearing.getId());
         mediaRequestEntity.setRequestor(-2);
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
         mediaRequestEntity.setEndTime(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
-        mediaRequestEntity.setOutboundLocation(null);
         mediaRequestEntity.setOutputFormat(null);
         mediaRequestEntity.setOutputFilename(null);
         mediaRequestEntity.setLastAccessedDateTime(null);
@@ -217,39 +231,39 @@ class AudioTransformationServiceTest {
     }
 
     private void createAndLoadMediaEntityGraph() {
-        var caseEntity = CommonTestDataUtil.createCase("1");
+        var caseEntity = commonTestDataUtil.createCase("1");
         caseRepository.saveAndFlush(caseEntity);
 
-        var courtroomEntity = CommonTestDataUtil.createCourtroom("Int Test Courtroom");
+        var courtroomEntity = commonTestDataUtil.createCourtroom("Int Test Courtroom");
         courtroomRepository.saveAndFlush(courtroomEntity);
 
-        hearingEntityWithMedia1 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
-        var hearingEntityWithMedia2 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
-        hearingEntityWithoutMedia = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
+        hearingEntityWithMedia1 = commonTestDataUtil.createHearing(caseEntity, courtroomEntity);
+        var hearingEntityWithMedia2 = commonTestDataUtil.createHearing(caseEntity, courtroomEntity);
+        hearingEntityWithoutMedia = commonTestDataUtil.createHearing(caseEntity, courtroomEntity);
         hearingRepository.saveAllAndFlush(Arrays.asList(
             hearingEntityWithMedia1,
             hearingEntityWithMedia2,
             hearingEntityWithoutMedia
         ));
 
-        mediaEntity1 = CommonTestDataUtil.createMedia();
-        mediaEntity2 = CommonTestDataUtil.createMedia();
-        mediaEntity3 = CommonTestDataUtil.createMedia();
+        mediaEntity1 = commonTestDataUtil.createMedia();
+        mediaEntity2 = commonTestDataUtil.createMedia();
+        mediaEntity3 = commonTestDataUtil.createMedia();
         mediaRepository.saveAllAndFlush(Arrays.asList(
             mediaEntity1,
             mediaEntity2,
             mediaEntity3
         ));
 
-        var hearingMediaEntity1 = CommonTestDataUtil.createHearingMedia(
+        var hearingMediaEntity1 = commonTestDataUtil.createHearingMedia(
             hearingEntityWithMedia1,
             mediaEntity1
         );
-        var hearingMediaEntity2 = CommonTestDataUtil.createHearingMedia(
+        var hearingMediaEntity2 = commonTestDataUtil.createHearingMedia(
             hearingEntityWithMedia1,
             mediaEntity2
         );
-        var hearingMediaEntity3 = CommonTestDataUtil.createHearingMedia(
+        var hearingMediaEntity3 = commonTestDataUtil.createHearingMedia(
             hearingEntityWithMedia2,
             mediaEntity3
         );
