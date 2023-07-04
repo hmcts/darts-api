@@ -58,14 +58,6 @@ class AudioFileOperationServiceTest {
         assertArrayEquals(mediaFile.toBytes(), Files.readAllBytes(filePath));
     }
 
-    @Test
-    @DisplayName("Test-4: Check if method throws exception")
-    void saveBlobDataToTempWorkspaceTest_4() throws IOException {
-
-        filePath = audioTransformationService.saveBlobDataToTempWorkspace(mediaFile, fileName);
-        assertArrayEquals(mediaFile.toBytes(), Files.readAllBytes(filePath));
-    }
-
     @AfterEach
     void deleteFile() throws IOException, InterruptedException {
         if (filePath != null) {
