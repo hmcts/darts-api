@@ -15,19 +15,19 @@ import lombok.EqualsAndHashCode;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "moj_transcription_comment")
+@Table(name = "transcription_comment")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class TranscriptionCommentEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_trc_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_trc_gen")
-    @SequenceGenerator(name = "moj_trc_gen", sequenceName = "moj_trc_seq", allocationSize = 1)
+    @Column(name = "trc_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trc_gen")
+    @SequenceGenerator(name = "trc_gen", sequenceName = "trc_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "moj_tra_id")
+    @JoinColumn(name = "tra_id")
     private TranscriptionEntity transcription;
 
     @Column(name = "r_transcription_object_id", length = 16)

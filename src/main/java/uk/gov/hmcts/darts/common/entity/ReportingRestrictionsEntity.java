@@ -9,16 +9,16 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "moj_reporting_restrictions")
+@Table(name = "reporting_restrictions")
 public class ReportingRestrictionsEntity {
 
     @Id
-    @Column(name = "moj_rer_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_rer_gen")
-    @SequenceGenerator(name = "moj_rer_gen", sequenceName = "moj_rer_seq", allocationSize = 1)
+    @Column(name = "rer_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rer_gen")
+    @SequenceGenerator(name = "rer_gen", sequenceName = "rer_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "rer_description")
-    private Integer description;
+    private String description;
 
 }

@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS moj_media (
-  moj_med_id               INTEGER                     NOT NULL
-, moj_crt_id               INTEGER
+CREATE TABLE IF NOT EXISTS media (
+  med_id               INTEGER                     NOT NULL
+, crt_id               INTEGER
 , r_media_object_id        text
 , c_channel                INTEGER
 , c_total_channels         INTEGER
@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS moj_media (
 , r_version_label          text
 , i_superseded             boolean
 , i_version                INTEGER
-, CONSTRAINT moj_media_pkey PRIMARY KEY (moj_med_id)
+, CONSTRAINT media_pkey PRIMARY KEY (med_id)
 )

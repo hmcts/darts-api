@@ -21,26 +21,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "moj_case")
+@Table(name = "court_case")
 @Data
 @SuppressWarnings({"PMD.ShortClassName"})
 public class CaseEntity {
 
     @Id
-    @Column(name = "moj_cas_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_cas_gen")
-    @SequenceGenerator(name = "moj_cas_gen", sequenceName = "moj_cas_seq", allocationSize = 1)
+    @Column(name = "cas_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cas_gen")
+    @SequenceGenerator(name = "cas_gen", sequenceName = "cas_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "moj_rer_id")
+    @JoinColumn(name = "rer_id")
     @Cascade(CascadeType.SAVE_UPDATE)
     private ReportingRestrictionsEntity reportingRestrictions;
+
+    @ManyToOne
+    @JoinColumn(name = "cth_id")
+    private CourthouseEntity courthouse;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;
 
-    @Column(name = "c_case_id")
+    @Column(name = "c_case_number")
     private String caseNumber;
 
     @Column(name = "c_closed")

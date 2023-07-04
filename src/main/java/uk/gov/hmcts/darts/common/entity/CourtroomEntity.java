@@ -14,31 +14,29 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static jakarta.persistence.CascadeType.PERSIST;
-
 @Entity
-@Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.MOJ_CTH_ID, CourtroomEntity.COURTROOM_NAME})})
+@Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.CTH_ID, CourtroomEntity.COURTROOM_NAME})})
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class CourtroomEntity {
 
-    public static final String MOJ_CTR_ID = "moj_ctr_id";
+    public static final String CTR_ID = "ctr_id";
     public static final String COURTROOM_NAME = "courtroom_name";
-    public static final String MOJ_CTH_ID = "moj_cth_id";
-    public static final String TABLE_NAME = "moj_courtroom";
+    public static final String CTH_ID = "cth_id";
+    public static final String TABLE_NAME = "courtroom";
 
     @Id
-    @Column(name = MOJ_CTR_ID)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_ctr_gen")
-    @SequenceGenerator(name = "moj_ctr_gen", sequenceName = "moj_ctr_seq", allocationSize = 1)
+    @Column(name = CTR_ID)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ctr_gen")
+    @SequenceGenerator(name = "ctr_gen", sequenceName = "ctr_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = COURTROOM_NAME)
     private String name;
 
-    @ManyToOne(cascade = PERSIST)
-    @JoinColumn(name = MOJ_CTH_ID)
+    @ManyToOne
+    @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
 
 }

@@ -13,29 +13,30 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "moj_event")
+@Table(name = "event")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class EventEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_eve_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_eve_gen")
-    @SequenceGenerator(name = "moj_eve_gen", sequenceName = "moj_eve_seq", allocationSize = 1)
+    @Column(name = "eve_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eve_gen")
+    @SequenceGenerator(name = "eve_gen", sequenceName = "eve_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "r_event_object_id", unique = true, length = 16)
     private String legacyObjectId;
 
     @ManyToOne
-    @JoinColumn(name = "moj_evt_id")
+    @JoinColumn(name = "evt_id")
     private EventTypeEntity eventType;
 
     @Column(name = "c_event_id")
-    private Integer legacyEventId;
+    private BigDecimal legacyEventId;
 
     @Column(name = "event_name")
     private String eventName;
@@ -47,7 +48,7 @@ public class EventEntity extends VersionedEntity {
     private OffsetDateTime timestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "moj_ctr_id")
+    @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
     @Column(name = "r_version_label", length = 32)

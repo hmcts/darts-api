@@ -5,27 +5,31 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
-@Table(name = "moj_media")
+@Table(name = "media")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class MediaEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_med_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_med_gen")
-    @SequenceGenerator(name = "moj_med_gen", sequenceName = "moj_med_seq", allocationSize = 1)
+    @Column(name = "med_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "med_gen")
+    @SequenceGenerator(name = "med_gen", sequenceName = "med_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "moj_crt_id")
-    private Integer courthouseId;
+    @ManyToOne
+    @JoinColumn(name = "ctr_id", nullable = false)
+    private CourtroomEntity courtroom;
 
     @Column(name = "r_media_object_id", length = 16)
     private String legacyObjectId;
@@ -45,14 +49,11 @@ public class MediaEntity extends VersionedEntity {
     @Column(name = "c_end")
     private OffsetDateTime end;
 
-    @Column(name = "c_courtroom")
-    private String courtroom;
-
     @Column(name = "c_case_id")
-    private String caseId;
+    private List<String> legacyCaseId;
 
     @Column(name = "r_case_object_id")
-    private String caseObjectId;
+    private List<String> legacyCaseObjectId;
 
     @Column(name = "r_version_label", length = 32)
     private String legacyVersionLabel;

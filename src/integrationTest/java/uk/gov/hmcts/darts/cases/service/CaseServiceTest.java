@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @Transactional

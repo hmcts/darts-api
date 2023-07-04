@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS moj_daily_list (
-  moj_dal_id                     INTEGER                     NOT NULL
-, moj_cth_id                     INTEGER                     NOT NULL
+CREATE TABLE IF NOT EXISTS daily_list (
+  dal_id                     INTEGER                     NOT NULL
+, cth_id                     INTEGER                     NOT NULL
 , r_daily_list_object_id         CHARACTER VARYING(16)
 , c_unique_id                    CHARACTER VARYING
 , c_job_status                   CHARACTER VARYING
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS moj_daily_list (
 , r_version_label                CHARACTER VARYING(32)
 , i_superseded                   BOOLEAN
 , i_version                      INTEGER
-, CONSTRAINT moj_daily_list_pkey PRIMARY KEY (moj_dal_id)
+, CONSTRAINT daily_list_pkey PRIMARY KEY (dal_id)
 );
 
-CREATE SEQUENCE IF NOT EXISTS moj_dal_seq;
+CREATE SEQUENCE IF NOT EXISTS dal_seq;

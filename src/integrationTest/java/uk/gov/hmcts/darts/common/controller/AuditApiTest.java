@@ -24,10 +24,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @AutoConfigureMockMvc
 @ReprovisionDatabaseBeforeEach
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals"})
 class AuditApiTest {
     public static final int EVENT_ID = 998;
     public static final int CASE_ID = 2;

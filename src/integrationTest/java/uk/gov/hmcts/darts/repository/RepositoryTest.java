@@ -18,12 +18,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 // These tests maybe ok to remove once service level tests are in place
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @ReprovisionDatabaseBeforeEach
 class RepositoryTest {
 
     @Autowired
     CaseRepository caseRepository;
+
+    @Autowired
+    CommonTestDataUtil commonTestDataUtil;
 
     @Autowired
     ReportingRestrictionsRepository reportingRestrictionsRepository;
@@ -36,7 +39,7 @@ class RepositoryTest {
 
     @Test
     void canCreateNewCase() {
-        CaseEntity courtCase = CommonTestDataUtil.createCase("2");
+        CaseEntity courtCase = commonTestDataUtil.createCase("2");
         caseRepository.saveAndFlush(courtCase);
 
         var newCourtCase = caseRepository.findByCaseNumber("2");
@@ -49,7 +52,7 @@ class RepositoryTest {
         var reportingRestrictions = new ReportingRestrictionsEntity();
         var persistedRestrictions = reportingRestrictionsRepository.saveAndFlush(reportingRestrictions);
 
-        var someCase = CommonTestDataUtil.createCase("1");
+        var someCase = commonTestDataUtil.createCase("1");
         someCase.setReportingRestrictions(persistedRestrictions);
         caseRepository.saveAndFlush(someCase);
 

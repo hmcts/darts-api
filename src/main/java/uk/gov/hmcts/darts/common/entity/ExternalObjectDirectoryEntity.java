@@ -21,17 +21,17 @@ import java.util.UUID;
 public class ExternalObjectDirectoryEntity implements JpaAuditing {
 
     public static final String ID = "eod_id";
-    public static final String MEDIA_ID = "moj_med_id";
-    public static final String TRANSCRIPTION_ID = "moj_tra_id";
-    public static final String ANNOTATION_ID = "moj_ann_id";
+    public static final String MEDIA_ID = "med_id";
+    public static final String TRANSCRIPTION_ID = "tra_id";
+    public static final String ANNOTATION_ID = "ann_id";
     public static final String EXTERNAL_LOCATION = "external_location";
     public static final String EXTERNAL_LOCATION_TYPE = "external_location_type";
     public static final String CREATED_TIMESTAMP = "created_ts";
     public static final String MODIFIED_TIMESTAMP = "modified_ts";
     public static final String MODIFIED_BY = "modified_by";
-    public static final String STATUS_ID = "moj_ods_id";
+    public static final String STATUS_ID = "ods_id";
     public static final String CHECKSUM = "checksum";
-    public static final String ATTEMPTS = "attempts";
+    public static final String ATTEMPTS = "transfer_attempts";
     public static final String TABLE_NAME = "external_object_directory";
 
     @Id

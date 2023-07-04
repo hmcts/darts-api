@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @ReprovisionDatabaseBeforeEach
 class LogoutIntTest {
 

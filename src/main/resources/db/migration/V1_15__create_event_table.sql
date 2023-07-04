@@ -1,8 +1,8 @@
-create table if not exists moj_event
+create table if not exists event
 (
-    moj_eve_id          integer not null constraint moj_event_pk primary key,
-    moj_ctr_id          integer constraint moj_event_courtroom_fk references moj_courtroom(moj_ctr_id),
-    moj_evt_id          integer constraint moj_event_event_type_fk references moj_event_type(moj_evt_id),
+    eve_id          integer not null constraint event_pk primary key,
+    ctr_id          integer constraint event_courtroom_fk references courtroom(ctr_id),
+    evt_id          integer constraint event_event_type_fk references event_type(evt_id),
     r_event_object_id   character varying(16),
     c_event_id          numeric,
     event_name          character varying,
@@ -13,5 +13,5 @@ create table if not exists moj_event
     i_superseded        boolean,
     i_version           integer
 );
-create sequence if not exists moj_eve_seq;
+create sequence if not exists eve_seq;
 

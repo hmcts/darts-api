@@ -62,7 +62,7 @@ public class NotificationServiceImpl implements NotificationService {
             return null;
         }
         Notification dbNotification = new Notification();
-        dbNotification.setEventId(eventId);
+        dbNotification.setEventType(eventId);
         dbNotification.setCaseId(caseId);
         dbNotification.setEmailAddress(emailAddress);
         dbNotification.setStatus(String.valueOf(NotificationStatus.OPEN));
@@ -83,10 +83,15 @@ public class NotificationServiceImpl implements NotificationService {
         List<Notification> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
         int notificationCounter = 0;
         for (Notification notification : notificationEntries) {
-            log.trace("Processing {} of {}, Id {}.", ++notificationCounter, notificationEntries.size(), notification.getId());
+            log.trace(
+                "Processing {} of {}, Id {}.",
+                ++notificationCounter,
+                notificationEntries.size(),
+                notification.getId()
+            );
             String templateId;
             try {
-                templateId = templateIdHelper.findTemplateId(notification.getEventId());
+                templateId = templateIdHelper.findTemplateId(notification.getEventType());
             } catch (TemplateNotFoundException e) {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
                 break;

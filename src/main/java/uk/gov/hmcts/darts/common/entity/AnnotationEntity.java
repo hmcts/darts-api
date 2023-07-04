@@ -16,24 +16,24 @@ import lombok.EqualsAndHashCode;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "moj_annotation")
+@Table(name = "annotation")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class AnnotationEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_ann_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_ann_gen")
-    @SequenceGenerator(name = "moj_ann_gen", sequenceName = "moj_ann_seq", allocationSize = 1)
+    @Column(name = "ann_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ann_gen")
+    @SequenceGenerator(name = "ann_gen", sequenceName = "ann_seq", allocationSize = 1)
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "moj_cas_id")
+    @JoinColumn(name = "cas_id")
     private CaseEntity courtCase;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "moj_crt_id")
-    private CourthouseEntity courthouse;
+    @JoinColumn(name = "ctr_id")
+    private CourtroomEntity courtroom;
 
     @Column(name = "r_annotation_object_id", length = 16)
     private String legacyObjectId;
@@ -50,8 +50,8 @@ public class AnnotationEntity extends VersionedEntity {
     @Column(name = "c_end")
     private OffsetDateTime end;
 
-    @Column(name = "c_courtroom")
-    private String courtroom;
+    @Column(name = "c_case_id")
+    private String legacyCaseId;
 
     @Column(name = "r_case_object_id", length = 16)
     private String legacyCaseObjectId;

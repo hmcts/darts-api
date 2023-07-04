@@ -3,9 +3,12 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -21,15 +24,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HearingMediaEntity {
 
-    public static final String HEARING_MEDIA_ID = "moj_hma_id";
-    public static final String HEARING_ID = "moj_hea_id";
-    public static final String MEDIA_ID = "moj_med_id";
-    public static final String TABLE_NAME = "moj_hearing_media_ae";
+    public static final String HEARING_MEDIA_ID = "hma_id";
+    public static final String HEARING_ID = "hea_id";
+    public static final String MEDIA_ID = "med_id";
+    public static final String TABLE_NAME = "hearing_media_ae";
 
     @Id
     @Column(name = HEARING_MEDIA_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hearing_media_gen")
-    @SequenceGenerator(name = "hearing_media_gen", sequenceName = "moj_hma_seq", allocationSize = 1)
+    @SequenceGenerator(name = "hearing_media_gen", sequenceName = "hma_seq", allocationSize = 1)
     private Integer id;
 
     @JoinColumn(name = HEARING_ID)

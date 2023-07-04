@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @AutoConfigureMockMvc
 @ReprovisionDatabaseBeforeEach
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
@@ -83,12 +83,19 @@ class CourthouseApiTest {
         MvcResult swanseaResponse = makeRequestToAddCourthouseToDatabase(REQUEST_BODY_TEST_JSON);
 
 
-        ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(haverfordwestResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
-        ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(swanseaResponse.getResponse().getContentAsString(), ExtendedCourthouse.class);
+        ExtendedCourthouse haverfordwestCourthouse = objectMapper.readValue(
+            haverfordwestResponse.getResponse().getContentAsString(),
+            ExtendedCourthouse.class
+        );
+        ExtendedCourthouse swanseaCourthouse = objectMapper.readValue(
+            swanseaResponse.getResponse().getContentAsString(),
+            ExtendedCourthouse.class
+        );
 
         // Truncate created and modified to milliseconds as the post (saveAndFlush) returns a more precise timestamp
         haverfordwestCourthouse.setCreatedDateTime(haverfordwestCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
-        haverfordwestCourthouse.setLastModifiedDateTime(haverfordwestCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
+        haverfordwestCourthouse.setLastModifiedDateTime(haverfordwestCourthouse.getLastModifiedDateTime().truncatedTo(
+            ChronoUnit.MILLIS));
         swanseaCourthouse.setCreatedDateTime(swanseaCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
         swanseaCourthouse.setLastModifiedDateTime(swanseaCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
 
@@ -96,13 +103,19 @@ class CourthouseApiTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andDo(print()).andReturn();
 
-        List<ExtendedCourthouse> courthouseList = objectMapper.readValue(response.getResponse().getContentAsString(), new TypeReference<>() {});
+        List<ExtendedCourthouse> courthouseList = objectMapper.readValue(
+            response.getResponse().getContentAsString(),
+            new TypeReference<>() {
+            }
+        );
         for (ExtendedCourthouse extendedCourthouse : courthouseList) {
             extendedCourthouse.setCreatedDateTime(extendedCourthouse.getCreatedDateTime().truncatedTo(ChronoUnit.MILLIS));
-            extendedCourthouse.setLastModifiedDateTime(extendedCourthouse.getLastModifiedDateTime().truncatedTo(ChronoUnit.MILLIS));
+            extendedCourthouse.setLastModifiedDateTime(extendedCourthouse.getLastModifiedDateTime().truncatedTo(
+                ChronoUnit.MILLIS));
         }
-        assertTrue(courthouseList.contains(haverfordwestCourthouse),haverfordwestResponse.getResponse().getContentAsString());
-        assertTrue(courthouseList.contains(swanseaCourthouse),swanseaResponse.getResponse().getContentAsString());
+        assertTrue(courthouseList.contains(haverfordwestCourthouse),
+                   haverfordwestResponse.getResponse().getContentAsString());
+        assertTrue(courthouseList.contains(swanseaCourthouse), swanseaResponse.getResponse().getContentAsString());
     }
 
     @Test
@@ -141,7 +154,10 @@ class CourthouseApiTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
-        assertEquals("{\"code\":\"400 BAD_REQUEST\",\"message\":\"courthouseName must not be null\"}", response.getResponse().getContentAsString());
+        assertEquals(
+            "{\"code\":\"400 BAD_REQUEST\",\"message\":\"courthouseName must not be null\"}",
+            response.getResponse().getContentAsString()
+        );
     }
 
     /**

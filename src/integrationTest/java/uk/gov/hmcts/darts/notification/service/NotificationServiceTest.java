@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.notification.service;
 
+import org.junit.ClassRule;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -8,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import uk.gov.hmcts.darts.PostgresqlContainer;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.Notification;
@@ -24,7 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 class NotificationServiceTest {
 
     public static final String TEST_EMAIL_ADDRESS = "test@test.com";
@@ -40,6 +44,14 @@ class NotificationServiceTest {
 
     @MockBean
     GovNotifyService govNotifyService;
+
+    @ClassRule
+    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
+
+    @BeforeAll
+    public static void setUp() {
+        postgreSQLContainer.start();
+    }
 
     @BeforeEach
     void beforeEach() {

@@ -11,15 +11,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "moj_report")
+@Table(name = "report")
 @Data
 @EqualsAndHashCode(callSuper = false)
 public class ReportEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_rep_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_rep_gen")
-    @SequenceGenerator(name = "moj_rep_gen", sequenceName = "moj_rep_seq", allocationSize = 1)
+    @Column(name = "rep_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rep_gen")
+    @SequenceGenerator(name = "rep_gen", sequenceName = "rep_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "r_report_object_id", length = 16)

@@ -13,7 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest
-@ActiveProfiles({"h2db"})
+@ActiveProfiles({"postgresTestContainer"})
 class SampleSmokeTest {
     protected static final String CONTENT_TYPE_VALUE = "application/json";
 

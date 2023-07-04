@@ -21,17 +21,17 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Entity
-@Table(name = "moj_hearing")
+@Table(name = "hearing")
 @Data
 public class HearingEntity {
 
     @Id
-    @Column(name = "moj_hea_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_hea_gen")
-    @SequenceGenerator(name = "moj_hea_gen", sequenceName = "moj_hea_seq", allocationSize = 1)
+    @Column(name = "hea_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hea_gen")
+    @SequenceGenerator(name = "hea_gen", sequenceName = "hea_seq", allocationSize = 1)
     private Integer id;
 
-    @JoinColumn(name = "moj_ctr_id")
+    @JoinColumn(name = "ctr_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private CourtroomEntity courtroom;
 
@@ -52,18 +52,18 @@ public class HearingEntity {
     private String judgeHearingDate;
 
     @ManyToMany
-    @JoinTable(name = "moj_hearing_media_ae",
-        joinColumns = {@JoinColumn(name = "moj_hea_id")},
-        inverseJoinColumns = {@JoinColumn(name = "moj_med_id")})
+    @JoinTable(name = "hearing_media_ae",
+        joinColumns = {@JoinColumn(name = "hea_id")},
+        inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList;
 
     @ManyToMany
-    @JoinTable(name = "moj_hearing_event_ae",
-        joinColumns = {@JoinColumn(name = "moj_hea_id")},
-        inverseJoinColumns = {@JoinColumn(name = "moj_eve_id")})
+    @JoinTable(name = "hearing_event_ae",
+        joinColumns = {@JoinColumn(name = "hea_id")},
+        inverseJoinColumns = {@JoinColumn(name = "eve_id")})
     private List<EventEntity> eventList;
 
     @ManyToOne()
-    @JoinColumn(name = "moj_cas_id")
+    @JoinColumn(name = "cas_id")
     private CaseEntity courtCase;
 }

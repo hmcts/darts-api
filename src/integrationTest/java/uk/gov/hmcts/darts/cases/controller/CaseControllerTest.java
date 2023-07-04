@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.ClassRule;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -10,6 +12,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.testcontainers.containers.PostgreSQLContainer;
+import uk.gov.hmcts.darts.PostgresqlContainer;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 
@@ -21,7 +25,7 @@ import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @AutoConfigureMockMvc
 @ReprovisionDatabaseBeforeEach
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -31,6 +35,14 @@ class CaseControllerTest {
 
     @Autowired
     private CaseService caseService;
+
+    @ClassRule
+    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
+
+    @BeforeAll
+    public static void postgresSetUp() {
+        postgreSQLContainer.start();
+    }
 
     @Test
     void casesGetEndpoint() throws Exception {

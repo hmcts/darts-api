@@ -10,14 +10,14 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "moj_event_type")
+@Table(name = "event_type")
 @Data
 public class EventTypeEntity {
 
     @Id
-    @Column(name = "moj_evt_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_evt_gen")
-    @SequenceGenerator(name = "moj_evt_gen", sequenceName = "moj_evt_seq", allocationSize = 1)
+    @Column(name = "evt_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "evt_gen")
+    @SequenceGenerator(name = "evt_gen", sequenceName = "evt_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "evt_type", nullable = false)

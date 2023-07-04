@@ -1,9 +1,14 @@
 package uk.gov.hmcts.darts.notification.service;
 
+import org.junit.ClassRule;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import uk.gov.hmcts.darts.PostgresqlContainer;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
@@ -20,7 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 // This is because there is no trigger for sending notifications, such as an API endpoint.
 
 @SpringBootTest
-@ActiveProfiles({"dev","h2db"})
+@ActiveProfiles({"dev", "postgresTestContainer"})
+@Testcontainers
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class GovNotifyServiceTest {
 
@@ -30,6 +36,14 @@ class GovNotifyServiceTest {
 
     @Autowired
     TemplateIdHelper templateIdHelper;
+
+    @ClassRule
+    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
+
+    @BeforeAll
+    public static void setUp() {
+        postgreSQLContainer.start();
+    }
 
     @Test
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {

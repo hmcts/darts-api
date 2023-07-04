@@ -22,25 +22,25 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 public class Notification {
 
-    public static final String ID = "id";
-    public static final String EVENT_ID = "event_id";
-    public static final String CASE_ID = "case_id";
+    public static final String ID = "not_id";
+    public static final String EVENT_TYPE = "notification_event";
+    public static final String CASE_ID = "cas_id";
     public static final String EMAIL_ADDRESS = "email_address";
-    public static final String STATUS = "status";
-    public static final String ATTEMPTS = "attempts";
+    public static final String STATUS = "notification_status";
+    public static final String ATTEMPTS = "send_attempts";
     public static final String TEMPLATE_VALUES = "template_values";
-    public static final String CREATED_DATE_TIME = "created_date_time";
-    public static final String LAST_UPDATED_DATE_TIME = "last_updated_date_time";
+    public static final String CREATED_DATE_TIME = "created_ts";
+    public static final String LAST_UPDATED_DATE_TIME = "last_updated_ts";
     public static final String TABLE_NAME = "notification";
 
     @Id
     @Column(name = ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_gen")
-    @SequenceGenerator(name = "notification_gen", sequenceName = "notification_seq", allocationSize = 1)
+    @SequenceGenerator(name = "notification_gen", sequenceName = "not_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = EVENT_ID)
-    private String eventId;
+    @Column(name = EVENT_TYPE)
+    private String eventType;
 
     @Column(name = CASE_ID)
     private String caseId;

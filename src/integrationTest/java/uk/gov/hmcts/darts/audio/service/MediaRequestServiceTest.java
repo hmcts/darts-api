@@ -1,16 +1,20 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import uk.gov.hmcts.darts.PostgresqlContainer;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.NoSuchElementException;
 
@@ -23,8 +27,7 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
 
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
-@TestInstance(Lifecycle.PER_CLASS)
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 class MediaRequestServiceTest {
 
     private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
@@ -33,14 +36,24 @@ class MediaRequestServiceTest {
     @Autowired
     private MediaRequestService mediaRequestService;
 
-    private AudioRequestDetails requestDetails;
+    @Autowired
+    private CommonTestDataUtil commonTestDataUtil;
+
+    @ClassRule
+    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
 
     @BeforeAll
-    void beforeAll() {
-        requestDetails = new AudioRequestDetails(null, null, null, null, null);
-        requestDetails.setHearingId(4567);
+    public static void postgresSetUp() {
+        postgreSQLContainer.start();
+    }
+
+    private AudioRequestDetails createRequest() {
+        HearingEntity hearing = commonTestDataUtil.createHearing("4567", LocalTime.NOON);
+        AudioRequestDetails requestDetails = new AudioRequestDetails(null, null, null, null, null);
+        requestDetails.setHearingId(hearing.getId());
         requestDetails.setRequestor(1234);
         requestDetails.setRequestType(DOWNLOAD);
+        return requestDetails;
     }
 
     @Test
@@ -49,8 +62,8 @@ class MediaRequestServiceTest {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(-1);
         assertNotNull(mediaRequestEntity);
         assertEquals(-1, mediaRequestEntity.getRequestId());
-        assertEquals(-2, mediaRequestEntity.getHearingId());
-        assertEquals(-3, mediaRequestEntity.getRequestor());
+        assertEquals(2, mediaRequestEntity.getHearingId());
+        assertEquals(3, mediaRequestEntity.getRequestor());
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(DOWNLOAD, mediaRequestEntity.getRequestType());
         assertEquals(OffsetDateTime.parse("2023-06-26T13:00:00Z"), mediaRequestEntity.getStartTime());
@@ -65,8 +78,8 @@ class MediaRequestServiceTest {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(-2);
         assertNotNull(mediaRequestEntity);
         assertEquals(-2, mediaRequestEntity.getRequestId());
-        assertEquals(-2, mediaRequestEntity.getHearingId());
-        assertEquals(-3, mediaRequestEntity.getRequestor());
+        assertEquals(2, mediaRequestEntity.getHearingId());
+        assertEquals(3, mediaRequestEntity.getRequestor());
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(DOWNLOAD, mediaRequestEntity.getRequestType());
         assertEquals(OffsetDateTime.parse("2023-06-26T13:00:00Z"), mediaRequestEntity.getStartTime());
@@ -92,6 +105,7 @@ class MediaRequestServiceTest {
     @Test
     @Order(5)
     void shouldSaveAudioRequestWithZuluTimeOk() {
+        AudioRequestDetails requestDetails = createRequest();
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
@@ -110,6 +124,7 @@ class MediaRequestServiceTest {
     @Test
     @Order(6)
     void shouldSaveAudioRequestWithOffsetTimeOk() {
+        AudioRequestDetails requestDetails = createRequest();
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
 
@@ -128,6 +143,7 @@ class MediaRequestServiceTest {
     @Test
     @Order(7)
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeStarts() {
+        AudioRequestDetails requestDetails = createRequest();
         // In the UK the clocks go forward 1 hour at 1am on the last Sunday in March.
         // The period when the clocks are 1 hour ahead is called British Summer Time (BST).
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
@@ -148,6 +164,7 @@ class MediaRequestServiceTest {
     @Test
     @Order(8)
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeEnds() {
+        AudioRequestDetails requestDetails = createRequest();
         // In the UK the clocks go back 1 hour at 2am on the last Sunday in October.
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-10-29T02:15:00Z"));

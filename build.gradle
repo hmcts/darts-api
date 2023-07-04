@@ -353,6 +353,10 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.3'
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.3")
+
+  testImplementation 'org.testcontainers:testcontainers:1.18.3'
+  testImplementation "org.testcontainers:postgresql:1.18.3"
+  testImplementation "org.testcontainers:junit-jupiter:1.18.3"
   compileJava.dependsOn = [ 'generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioRequestApi', 'generateCourtHousesApi', 'generateCasesApi' ]
 }
 

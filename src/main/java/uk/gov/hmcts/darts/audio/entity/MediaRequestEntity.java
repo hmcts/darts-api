@@ -31,8 +31,8 @@ import java.util.List;
 @NoArgsConstructor
 public class MediaRequestEntity {
 
-    public static final String REQUEST_ID = "moj_mer_id";
-    public static final String HEARING_ID = "moj_hea_id";
+    public static final String REQUEST_ID = "mer_id";
+    public static final String HEARING_ID = "hea_id";
     public static final String REQUESTOR = "requestor";
     public static final String REQUEST_STATUS = "request_status";
     public static final String REQUEST_TYPE = "request_type";
@@ -45,12 +45,12 @@ public class MediaRequestEntity {
     public static final String LAST_ACCESSED_DATE_TIME = "last_accessed_ts";
     public static final String CREATED_DATE_TIME = "created_ts";
     public static final String LAST_UPDATED_DATE_TIME = "last_updated_ts";
-    public static final String TABLE_NAME = "moj_media_request";
+    public static final String TABLE_NAME = "media_request";
 
     @Id
     @Column(name = REQUEST_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "media_request_gen")
-    @SequenceGenerator(name = "media_request_gen", sequenceName = "moj_mer_seq", allocationSize = 1)
+    @SequenceGenerator(name = "media_request_gen", sequenceName = "mer_seq", allocationSize = 1)
     private Integer requestId;
 
     @Column(name = HEARING_ID)
@@ -76,10 +76,8 @@ public class MediaRequestEntity {
     @Column(name = END_TIME)
     private OffsetDateTime endTime;
 
-    @Column(name = OUTBOUND_LOCATION)
-    private String outboundLocation;
-
     @Column(name = OUTPUT_FORMAT)
+    @Enumerated(EnumType.STRING)
     private AudioRequestOutputFormat outputFormat;
 
     @Column(name = OUTPUT_FILENAME)

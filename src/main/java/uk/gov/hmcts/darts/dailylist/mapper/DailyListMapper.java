@@ -33,7 +33,7 @@ public class DailyListMapper {
         dailyListEntity.setCourthouse(courthouse);
         dailyListEntity.setUniqueId(documentId.getUniqueId());
         dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
-        dailyListEntity.setTimestamp(documentId.getTimeStamp());
+        dailyListEntity.setPublishedTime(documentId.getTimeStamp());
         dailyListEntity.setStartDate(dailyList.getListHeader().getStartDate());
         dailyListEntity.setEndDate(dailyList.getListHeader().getEndDate());
         dailyListEntity.setSource(postRequest.getSourceSystem());

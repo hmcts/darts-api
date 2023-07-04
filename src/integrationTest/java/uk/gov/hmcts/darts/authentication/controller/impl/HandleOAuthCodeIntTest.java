@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @AutoConfigureWireMock
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "postgresTestContainer"})
 @ReprovisionDatabaseBeforeEach
 @SuppressWarnings("PMD.ExcessiveImports")
 class HandleOAuthCodeIntTest {
@@ -68,7 +68,8 @@ class HandleOAuthCodeIntTest {
         KeyPair keyPair = setTokenStub();
         setKeyStoreStub(keyPair);
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
@@ -87,7 +88,8 @@ class HandleOAuthCodeIntTest {
                 )
         );
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().isInternalServerError())
             .andReturn();
 
@@ -109,7 +111,8 @@ class HandleOAuthCodeIntTest {
     void handleOAuthCodeShouldReturnErrorResponseWhenTokenValidationFails() throws Exception {
         setTokenStub();
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().isInternalServerError())
             .andReturn();
 

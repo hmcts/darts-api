@@ -10,14 +10,14 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "moj_object_directory_status")
+@Table(name = "object_directory_status")
 @Data
 public class ObjectDirectoryStatusEntity {
 
     @Id
-    @Column(name = "moj_ods_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_ods_gen")
-    @SequenceGenerator(name = "moj_ods_gen", sequenceName = "moj_ods_seq", allocationSize = 1)
+    @Column(name = "ods_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ods_gen")
+    @SequenceGenerator(name = "ods_gen", sequenceName = "ods_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "ods_description")
