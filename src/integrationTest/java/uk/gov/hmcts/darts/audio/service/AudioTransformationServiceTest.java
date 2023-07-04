@@ -14,13 +14,17 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingMediaRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
@@ -45,6 +49,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -80,6 +85,12 @@ class AudioTransformationServiceTest {
 
     @Autowired
     private HearingMediaRepository hearingMediaRepository;
+
+    @Autowired
+    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+
+    @Autowired
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     @MockBean
     private DataManagementService mockDataManagementService;
@@ -204,7 +215,6 @@ class AudioTransformationServiceTest {
     }
 
     @Test
-    @Transactional
     void shouldGetMediaLocation() {
         MediaEntity media = mediaRepository.getReferenceById(-1);
 
@@ -227,6 +237,45 @@ class AudioTransformationServiceTest {
         newMedia = mediaRepository.saveAndFlush(newMedia);
 
         assertEquals(Optional.empty(), audioTransformationService.getMediaLocation(newMedia));
+    }
+
+    @Test
+    void shouldGetMediaLocationWithWarningThatMultipleExistByStatusAndType() {
+
+        CourtroomEntity courtroom = courtroomRepository.getReferenceById(1);
+
+        MediaEntity newMedia = new MediaEntity();
+        newMedia.setCourtroom(courtroom);
+        newMedia.setChannel(1);
+        newMedia.setTotalChannels(4);
+        newMedia.setStart(OffsetDateTime.parse("2023-07-04T16:00:00Z"));
+        newMedia.setEnd(OffsetDateTime.parse("2023-07-04T17:00:00Z"));
+        newMedia = mediaRepository.saveAndFlush(newMedia);
+
+        ObjectDirectoryStatusEntity objectDirectoryStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
+        UUID externalLocation1 = UUID.randomUUID();
+        UUID externalLocation2 = UUID.randomUUID();
+        ExternalObjectDirectoryEntity externalObjectDirectory1 = CommonTestDataUtil.createExternalObjectDirectory(
+            newMedia,
+            objectDirectoryStatus,
+            "unstructured",
+            externalLocation1
+        );
+        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory1);
+
+        ExternalObjectDirectoryEntity externalObjectDirectory2 = CommonTestDataUtil.createExternalObjectDirectory(
+            newMedia,
+            objectDirectoryStatus,
+            "unstructured",
+            externalLocation2
+        );
+        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory2);
+
+        assertEquals(
+            Optional.of(externalLocation1),
+            audioTransformationService.getMediaLocation(newMedia)
+        );
+
     }
 
     private void createAndLoadMediaRequestEntity() {

@@ -240,5 +240,5 @@ INSERT INTO moj_media (moj_med_id, moj_ctr_id, c_channel, c_total_channels, c_st
 VALUES (-1, 1, 1, 4, TIMESTAMP WITH TIME ZONE '2023-07-03 17:00:00+00:00', TIMESTAMP WITH TIME ZONE '2023-07-03 17:30:00+00:00', 0);
 
 INSERT INTO external_object_directory (eod_id, moj_med_id, moj_ods_id, external_location, external_location_type, created_ts, modified_ts)
-VALUES(-1, -1, 1, 'a7ad5828-6a20-4bd0-adb1-bf1496a2622a', 'unstructured', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES(-1, -1, 2, 'a7ad5828-6a20-4bd0-adb1-bf1496a2622a', 'unstructured', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
