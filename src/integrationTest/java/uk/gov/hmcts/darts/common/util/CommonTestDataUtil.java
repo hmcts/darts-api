@@ -8,11 +8,11 @@ import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
-import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
-import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

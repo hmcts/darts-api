@@ -56,14 +56,6 @@ class AudioTransformationServiceTest {
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     private static final UUID BLOB_LOCATION = UUID.randomUUID();
 
-    @ClassRule
-    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
-
-    @BeforeAll
-    public static void postgresSetUp() {
-        postgreSQLContainer.start();
-    }
-
     @Autowired
     private AudioTransformationService audioTransformationService;
 
@@ -106,6 +98,14 @@ class AudioTransformationServiceTest {
 
     @Mock
     private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
+
+    @ClassRule
+    private static PostgreSQLContainer postgreSQLContainer = PostgresqlContainer.getInstance();
+
+    @BeforeAll
+    public static void postgresSetUp() {
+        postgreSQLContainer.start();
+    }
 
     @Test
     void shouldProcessAudioRequest() {
