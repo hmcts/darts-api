@@ -9,15 +9,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_transcription_comment")
 @Data
-public class TranscriptionCommentEntity {
+@EqualsAndHashCode(callSuper = false)
+public class TranscriptionCommentEntity extends VersionedEntity {
 
     @Id
     @Column(name = "moj_trc_id")
@@ -52,9 +53,5 @@ public class TranscriptionCommentEntity {
 
     @Column(name = "i_superseded")
     private Boolean superseded;
-
-    @Version
-    @Column(name = "i_version")
-    private Short version;
 
 }

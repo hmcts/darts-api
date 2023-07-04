@@ -9,8 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,7 +20,8 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = DailyListEntity.TABLE_NAME)
 @Data
-public class DailyListEntity {
+@EqualsAndHashCode(callSuper = false)
+public class DailyListEntity extends VersionedEntity {
 
     public static final String ID = "moj_dal_id";
     public static final String COURTHOUSE_ID = "moj_cth_id";
@@ -38,7 +39,6 @@ public class DailyListEntity {
     public static final String LEGACY_COURTHOUSE_OBJECT_ID = "r_courthouse_object_id";
     public static final String LEGACY_VERSION_LABEL = "r_version_label";
     public static final String SUPERSEDED = "i_superseded";
-    public static final String VERSION_LABEL = "i_version";
     public static final String TABLE_NAME = "moj_daily_list";
     public static final String DAILY_LIST_CONTENT = "daily_list_content";
 
@@ -90,10 +90,6 @@ public class DailyListEntity {
 
     @Column(name = SUPERSEDED)
     private Boolean superseded;
-
-    @Version
-    @Column(name = VERSION_LABEL)
-    private Short version;
 
     @CreationTimestamp
     @Column(name = CREATED_DATE_TIME)

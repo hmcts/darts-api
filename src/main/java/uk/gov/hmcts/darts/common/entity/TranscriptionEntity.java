@@ -10,8 +10,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,7 +19,8 @@ import java.util.List;
 @Entity
 @Table(name = "moj_transcription")
 @Data
-public class TranscriptionEntity {
+@EqualsAndHashCode(callSuper = false)
+public class TranscriptionEntity extends VersionedEntity {
 
     @Id
     @Column(name = "moj_tra_id")
@@ -96,10 +97,6 @@ public class TranscriptionEntity {
 
     @Column(name = "i_superseded")
     private Boolean superseded;
-
-    @Version
-    @Column(name = "i_version")
-    private Short version;
 
     @OneToMany(mappedBy = "transcription")
     private List<TranscriptionCommentEntity> transcriptionComments;

@@ -7,15 +7,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_media")
 @Data
-public class MediaEntity {
+@EqualsAndHashCode(callSuper = false)
+public class MediaEntity extends VersionedEntity {
 
     @Id
     @Column(name = "moj_med_id")
@@ -58,9 +59,5 @@ public class MediaEntity {
 
     @Column(name = "i_superseded")
     private Boolean superseded;
-
-    @Version
-    @Column(name = "i_version")
-    private Short version;
 
 }

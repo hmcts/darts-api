@@ -11,13 +11,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = ExternalObjectDirectoryEntity.TABLE_NAME)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExternalObjectDirectoryEntity {
+public class ExternalObjectDirectoryEntity implements JpaAuditing {
 
     public static final String ID = "eod_id";
     public static final String MEDIA_ID = "moj_med_id";
@@ -25,10 +26,10 @@ public class ExternalObjectDirectoryEntity {
     public static final String ANNOTATION_ID = "moj_ann_id";
     public static final String EXTERNAL_LOCATION = "external_location";
     public static final String EXTERNAL_LOCATION_TYPE = "external_location_type";
-    public static final String CREATED_DATE_TIME = "created_ts";
-    public static final String LAST_UPDATED_DATE_TIME = "modified_ts";
+    public static final String CREATED_TIMESTAMP = "created_ts";
+    public static final String MODIFIED_TIMESTAMP = "modified_ts";
     public static final String MODIFIED_BY = "modified_by";
-    public static final String STATUS = "status";
+    public static final String STATUS_ID = "moj_ods_id";
     public static final String CHECKSUM = "checksum";
     public static final String ATTEMPTS = "attempts";
     public static final String TABLE_NAME = "external_object_directory";
@@ -47,23 +48,23 @@ public class ExternalObjectDirectoryEntity {
     private Integer annotationId;
 
     @Column(name = EXTERNAL_LOCATION)
-    private String externalLocation;
+    private UUID externalLocation;
 
     @Column(name = EXTERNAL_LOCATION_TYPE)
     private String externalLocationType;
 
     @CreationTimestamp
-    @Column(name = CREATED_DATE_TIME)
-    private OffsetDateTime createdDateTime;
+    @Column(name = CREATED_TIMESTAMP)
+    private OffsetDateTime createdTimestamp;
 
     @UpdateTimestamp
-    @Column(name = LAST_UPDATED_DATE_TIME)
-    private OffsetDateTime lastUpdatedDateTime;
+    @Column(name = MODIFIED_TIMESTAMP)
+    private OffsetDateTime modifiedTimestamp;
 
     @Column(name = MODIFIED_BY)
     private Integer modifiedBy;
 
-    @Column(name = STATUS)
+    @Column(name = STATUS_ID)
     private Integer status;
 
     @Column(name = CHECKSUM)

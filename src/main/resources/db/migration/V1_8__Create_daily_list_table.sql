@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS moj_daily_list (
 , last_modified_ts               TIMESTAMP WITH TIME ZONE
 , r_version_label                CHARACTER VARYING(32)
 , i_superseded                   BOOLEAN
-, i_version                      SMALLINT
+, i_version                      INTEGER
 , CONSTRAINT moj_daily_list_pkey PRIMARY KEY (moj_dal_id)
 );
 

@@ -7,13 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Entity
 @Table(name = "moj_report")
 @Data
-public class ReportEntity {
+@EqualsAndHashCode(callSuper = false)
+public class ReportEntity extends VersionedEntity {
 
     @Id
     @Column(name = "moj_rep_id")
@@ -44,9 +45,5 @@ public class ReportEntity {
 
     @Column(name = "i_superseded")
     private Boolean superseded;
-
-    @Version
-    @Column(name = "i_version")
-    private Short version;
 
 }
