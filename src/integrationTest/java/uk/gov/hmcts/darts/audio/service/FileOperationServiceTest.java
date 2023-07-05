@@ -64,7 +64,6 @@ class FileOperationServiceTest {
     @AfterEach
     void deleteFile() throws IOException, InterruptedException {
         if (filePath != null) {
-            Thread.sleep(1000);     //remove this line before pull request
             Files.delete(filePath);
         }
     }
