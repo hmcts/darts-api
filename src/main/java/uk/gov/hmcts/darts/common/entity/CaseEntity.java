@@ -11,9 +11,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import java.time.OffsetDateTime;
@@ -22,8 +21,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "moj_case")
-@Data
 @SuppressWarnings({"PMD.ShortClassName"})
+@Getter
+@Setter
 public class CaseEntity {
 
     @Id
@@ -34,7 +34,6 @@ public class CaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "moj_rer_id")
-    @Cascade(CascadeType.SAVE_UPDATE)
     private ReportingRestrictionsEntity reportingRestrictions;
 
     @Column(name = "r_case_object_id", length = 16)

@@ -13,8 +13,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import java.time.OffsetDateTime;
@@ -23,7 +24,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "moj_media")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 public class MediaEntity extends VersionedEntity {
 
