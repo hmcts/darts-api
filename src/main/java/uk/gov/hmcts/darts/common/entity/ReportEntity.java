@@ -7,12 +7,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 
 @Entity
 @Table(name = "moj_report")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 public class ReportEntity extends VersionedEntity {
 
