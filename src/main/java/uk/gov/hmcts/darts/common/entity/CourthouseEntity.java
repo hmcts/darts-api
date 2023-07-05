@@ -7,7 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,7 +16,8 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_courthouse")
-@Data
+@Getter
+@Setter
 public class CourthouseEntity {
 
     @Id

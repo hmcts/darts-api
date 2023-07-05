@@ -13,7 +13,8 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
@@ -22,7 +23,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "moj_hearing")
-@Data
+@Getter
+@Setter
 public class HearingEntity {
 
     @Id
@@ -63,7 +65,7 @@ public class HearingEntity {
         inverseJoinColumns = {@JoinColumn(name = "moj_eve_id")})
     private List<EventEntity> eventList;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "moj_cas_id")
     private CaseEntity courtCase;
 }

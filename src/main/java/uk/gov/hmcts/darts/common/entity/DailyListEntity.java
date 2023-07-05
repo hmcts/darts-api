@@ -9,8 +9,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,7 +20,8 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = DailyListEntity.TABLE_NAME)
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 public class DailyListEntity extends VersionedEntity {
 

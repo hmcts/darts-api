@@ -72,7 +72,6 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepo.saveAndFlush(dbNotification);
     }
 
-
     @Override
     @SchedulerLock(name = "NotificationService_sendNotificationToGovNotify",
         lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")

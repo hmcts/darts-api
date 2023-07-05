@@ -10,15 +10,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "moj_transcription")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = false)
 public class TranscriptionEntity extends VersionedEntity {
 

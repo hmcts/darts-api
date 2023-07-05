@@ -9,17 +9,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "moj_transcription_comment")
-@Data
 @EqualsAndHashCode(callSuper = false)
+@Getter
+@Setter
 public class TranscriptionCommentEntity extends VersionedEntity {
-
     @Id
     @Column(name = "moj_trc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_trc_gen")

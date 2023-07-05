@@ -12,8 +12,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -23,9 +24,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = ExternalObjectDirectoryEntity.TABLE_NAME)
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class ExternalObjectDirectoryEntity implements JpaAuditing {
 
     public static final String ID = "eod_id";
