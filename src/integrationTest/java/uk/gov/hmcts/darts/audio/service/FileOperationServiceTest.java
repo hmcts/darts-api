@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -19,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -27,9 +25,6 @@ class FileOperationServiceTest {
 
     @Autowired
     private FileOperationService fileOperationService;
-
-    @Mock
-    FileOperationService mockFileOperationService;
 
     private Path filePath;
     private BinaryData mediaFile;
@@ -68,14 +63,11 @@ class FileOperationServiceTest {
     }
 
     @Test
-    @DisplayName("Test-4: Test for exception")
-    void saveBlobDataToTempWorkspaceTestFour() throws IOException {
-        when(mockFileOperationService.saveFileToTempWorkspace(
-            mediaFile,
-            fileName
-        )).thenThrow(IOException.class);
+    @DisplayName("Test-4: Test for exception thrown")
+    void saveBlobDataToTempWorkspaceTestFive() {
+        String invalidFileName = "inlaid/<:?*|>/file";
 
-        assertThrows(IOException.class, () -> mockFileOperationService.saveFileToTempWorkspace(mediaFile, fileName));
+        assertThrows(IOException.class, () -> fileOperationService.saveFileToTempWorkspace(mediaFile, invalidFileName));
     }
 
     @AfterEach
