@@ -62,7 +62,7 @@ class FileOperationServiceTest {
     }
 
     @AfterEach
-    void deleteFile() throws IOException, InterruptedException {
+    void deleteFile() throws IOException {
         if (filePath != null) {
             Files.delete(filePath);
         }
