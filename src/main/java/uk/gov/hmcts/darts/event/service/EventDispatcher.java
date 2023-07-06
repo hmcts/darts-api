@@ -2,8 +2,7 @@ package uk.gov.hmcts.darts.event.service;
 
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
-public interface EventsService {
+public interface EventDispatcher {
 
-    void darNotify(DartsEvent dartsEvent);
-
+    void receive(DartsEvent dartsEvent);
 }

@@ -31,6 +31,7 @@ paths:
                   messageId: '18422'
                   type: '10100'
                   subType: '10100'
+                  eventId: '001'
                   courthouse: SNARESBROOK
                   courtroom: '1'
                   caseNumbers:
@@ -42,6 +43,7 @@ paths:
                   messageId: '18422'
                   type: '21300'
                   subType: '21300'
+                  eventId: '002'
                   courthouse: SNARESBROOK
                   courtroom: '1'
                   caseNumbers:
@@ -54,6 +56,7 @@ paths:
                   messageId: '18422'
                   type: '40750'
                   subType: '11504'
+                  eventId: '003'
                   courthouse: SNARESBROOK
                   courtroom: '1'
                   caseNumbers:
@@ -91,6 +94,8 @@ components:
         type:
           type: string
         sub_type:
+          type: string
+        event_id:
           type: string
         courthouse:
           type: string

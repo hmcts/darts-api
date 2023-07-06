@@ -19,6 +19,7 @@ import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
@@ -68,4 +69,8 @@ public class HearingEntity {
     @ManyToOne
     @JoinColumn(name = "moj_cas_id")
     private CaseEntity courtCase;
+
+    public boolean isFor(OffsetDateTime dateTime) {
+        return hearingDate.equals(dateTime.toLocalDate());
+    }
 }

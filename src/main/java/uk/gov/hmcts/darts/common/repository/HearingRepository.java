@@ -19,6 +19,4 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         "AND cr.courthouse = ch"
     )
     List<HearingEntity> findByCourthouseCourtroomAndDate(String courthouse, String courtroom, LocalDate date);
-
-
 }

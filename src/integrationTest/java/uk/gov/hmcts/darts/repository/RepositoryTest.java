@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.event.testutils.IntegrationBase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @ReprovisionDatabaseBeforeEach
-class RepositoryTest {
+class RepositoryTest extends IntegrationBase {
 
     @Autowired
     CaseRepository caseRepository;
@@ -39,7 +40,7 @@ class RepositoryTest {
         CaseEntity courtCase = CommonTestDataUtil.createCase("2");
         caseRepository.saveAndFlush(courtCase);
 
-        var newCourtCase = caseRepository.findByCaseNumber("2");
+        var newCourtCase = caseRepository.findByCaseNumber("2").get(0);
 
         assertThat(newCourtCase.getId()).isInstanceOf(Integer.class);
     }
@@ -53,7 +54,7 @@ class RepositoryTest {
         someCase.setReportingRestrictions(persistedRestrictions);
         caseRepository.saveAndFlush(someCase);
 
-        var courtCase = caseRepository.findByCaseNumber("1");
+        var courtCase = caseRepository.findByCaseNumber("1").get(0);
         var attachedRestrictions = courtCase.getReportingRestrictions();
 
         assertThat(attachedRestrictions).isInstanceOf(ReportingRestrictionsEntity.class);

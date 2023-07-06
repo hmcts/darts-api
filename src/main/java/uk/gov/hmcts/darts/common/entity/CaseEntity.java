@@ -42,6 +42,10 @@ public class CaseEntity {
     @Column(name = "c_case_id")
     private String caseNumber;
 
+    @ManyToOne
+    @JoinColumn(name = "moj_cth_id")
+    private CourthouseEntity courthouse;
+
     @Column(name = "c_closed")
     private Boolean closed;
 
@@ -74,4 +78,11 @@ public class CaseEntity {
 
     @OneToMany(mappedBy = "courtCase")
     private List<AnnotationEntity> annotations;
+
+    @OneToMany(mappedBy = "courtCase")
+    private List<HearingEntity> hearings = new ArrayList<>();
+
+    public void addHearing(HearingEntity hearing) {
+        this.hearings.add(hearing);
+    }
 }
