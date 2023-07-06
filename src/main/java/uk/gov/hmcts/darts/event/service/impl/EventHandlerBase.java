@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -10,7 +11,6 @@ import uk.gov.hmcts.darts.event.service.EventHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.PostConstruct;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
