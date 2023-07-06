@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
+import java.util.Optional;
+
 import static uk.gov.hmcts.darts.common.entity.CourtroomEntity.TABLE_NAME;
 
 @Repository
@@ -23,4 +25,10 @@ public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Inte
     )
     CourtroomEntity findByNameAndId(int courthouseId, String courtroom);
 
+    @Query("SELECT cr FROM CourthouseEntity ch, CourtroomEntity cr " +
+        "WHERE upper(ch.courthouseName) = upper(:courthouseName) " +
+        "AND upper(cr.name) = upper(:courtroomName) " +
+        "AND cr.courthouse = ch"
+    )
+    Optional<CourtroomEntity> findByCourthouseNameAndCourtroomName(String courthouseName, String courtroomName);
 }
