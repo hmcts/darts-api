@@ -18,10 +18,13 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +42,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
     private final TransientObjectDirectoryService transientObjectDirectoryService;
+
+    private final FileOperationService fileOperationService;
 
     private final MediaRepository mediaRepository;
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
@@ -104,4 +109,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return externalLocation;
     }
 
+    @Override
+    public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
+
+        return fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
+    }
 }

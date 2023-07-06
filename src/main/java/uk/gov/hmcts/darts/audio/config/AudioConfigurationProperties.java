@@ -22,5 +22,7 @@ public class AudioConfigurationProperties {
     private String trimWorkspace;
     @NotEmpty
     private String reEncodeWorkspace;
+    @NotEmpty
+    private String tempBlobWorkspace;
 
 }

@@ -106,6 +106,8 @@ darts:
     merge-workspace: ${user.home}/audiotransform/merge
     trim-workspace: ${user.home}/audiotransform/trim
     re-encode-workspace: ${user.home}/audiotransform/encode
+    temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
+
   azure:
     active-directory-b2c-base-uri: https://hmctsdartsb2csbox.b2clogin.com
     active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsdartsb2csbox.onmicrosoft.com
