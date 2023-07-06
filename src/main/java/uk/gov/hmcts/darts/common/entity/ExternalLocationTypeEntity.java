@@ -7,20 +7,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "object_directory_status")
-@Data
-public class ObjectDirectoryStatusEntity {
+@Table(name = "external_location_type")
+@Getter
+@Setter
+public class ExternalLocationTypeEntity {
 
     @Id
-    @Column(name = "ods_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ods_gen")
-    @SequenceGenerator(name = "ods_gen", sequenceName = "ods_seq", allocationSize = 1)
+    @Column(name = "elt_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "elt_gen")
+    @SequenceGenerator(name = "elt_gen", sequenceName = "elt_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "ods_description")
+    @Column(name = "elt_description")
     private String description;
 
 }

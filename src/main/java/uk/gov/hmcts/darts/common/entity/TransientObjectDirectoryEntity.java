@@ -32,11 +32,11 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "moj_mer_id", foreignKey = @ForeignKey(name = "tod_media_request_fk"))
+    @JoinColumn(name = "mer_id", foreignKey = @ForeignKey(name = "tod_media_request_fk"), nullable = false)
     private MediaRequestEntity mediaRequest;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "moj_ods_id", foreignKey = @ForeignKey(name = "tod_object_directory_status_fk"))
+    @JoinColumn(name = "ods_id", foreignKey = @ForeignKey(name = "tod_object_directory_status_fk"), nullable = false)
     private ObjectDirectoryStatusEntity status;
 
     @NaturalId
@@ -45,6 +45,9 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
 
     @Column(name = "checksum")
     private String checksum;
+
+    @Column(name = "transfer_attempts")
+    private Integer transferAttempts;
 
     @CreationTimestamp
     @Column(name = "created_ts")

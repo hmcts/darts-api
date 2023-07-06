@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
@@ -38,9 +37,6 @@ public class MediaEntity extends VersionedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "moj_ctr_id", foreignKey = @ForeignKey(name = "moj_media_courtroom_fk"))
     private CourtroomEntity courtroom;
-
-    @OneToMany(mappedBy = "media")
-    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = new ArrayList<>();
 
     @Column(name = "r_media_object_id", length = 16)
     private String legacyObjectId;

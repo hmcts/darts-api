@@ -9,12 +9,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
@@ -31,15 +33,20 @@ class MediaRequestServiceImplTest {
     private MediaRequestServiceImpl mediaRequestService;
 
     @Mock
+    private HearingRepository hearingRepository;
+    @Mock
     private MediaRequestRepository mediaRequestRepository;
 
+    private HearingEntity mockHearingEntity;
     private MediaRequestEntity mockMediaRequestEntity;
 
     @BeforeEach
     void beforeEach() {
 
+        mockHearingEntity = new HearingEntity();
+
         mockMediaRequestEntity = new MediaRequestEntity();
-        mockMediaRequestEntity.setRequestId(1);
+        mockMediaRequestEntity.setHearing(mockHearingEntity);
         mockMediaRequestEntity.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         mockMediaRequestEntity.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         mockMediaRequestEntity.setRequestor(TEST_REQUESTER);
@@ -54,7 +61,8 @@ class MediaRequestServiceImplTest {
     void whenSavingAudioRequestIsSuccessful() {
 
         Integer hearingId = 4567;
-        mockMediaRequestEntity.setRequestId(1);
+        mockHearingEntity.setId(hearingId);
+        mockMediaRequestEntity.setId(1);
 
         var requestDetails = new AudioRequestDetails();
         requestDetails.setHearingId(hearingId);
@@ -63,12 +71,14 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
+        when(hearingRepository.getReferenceById(eq(hearingId))).thenReturn(mockHearingEntity);
         when(mediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
 
         var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
-        verify(mediaRequestRepository, times(1)).saveAndFlush(any(MediaRequestEntity.class));
-        assertEquals(requestId, mockMediaRequestEntity.getRequestId());
+        verify(hearingRepository).getReferenceById(eq(hearingId));
+        verify(mediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
+        assertEquals(requestId, mockMediaRequestEntity.getId());
     }
 
 }

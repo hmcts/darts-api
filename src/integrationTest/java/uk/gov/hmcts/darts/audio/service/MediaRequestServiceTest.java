@@ -45,52 +45,6 @@ class MediaRequestServiceTest {
 
     @Test
     @Order(1)
-    void shouldGetMediaRequestByIdWhenStartAndEndTimesInsertedWithZuluTime() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(-1);
-        assertNotNull(mediaRequestEntity);
-        assertEquals(-1, mediaRequestEntity.getRequestId());
-        assertEquals(-2, mediaRequestEntity.getHearingId());
-        assertEquals(-3, mediaRequestEntity.getRequestor());
-        assertEquals(OPEN, mediaRequestEntity.getStatus());
-        assertEquals(DOWNLOAD, mediaRequestEntity.getRequestType());
-        assertEquals(OffsetDateTime.parse("2023-06-26T13:00:00Z"), mediaRequestEntity.getStartTime());
-        assertEquals(OffsetDateTime.parse("2023-06-26T13:45:00Z"), mediaRequestEntity.getEndTime());
-        assertNotNull(mediaRequestEntity.getCreatedDateTime());
-        assertNotNull(mediaRequestEntity.getLastUpdatedDateTime());
-    }
-
-    @Test
-    @Order(2)
-    void shouldGetMediaRequestByIdWhenStartAndEndTimesInsertedWithOffsetTime() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(-2);
-        assertNotNull(mediaRequestEntity);
-        assertEquals(-2, mediaRequestEntity.getRequestId());
-        assertEquals(-2, mediaRequestEntity.getHearingId());
-        assertEquals(-3, mediaRequestEntity.getRequestor());
-        assertEquals(OPEN, mediaRequestEntity.getStatus());
-        assertEquals(DOWNLOAD, mediaRequestEntity.getRequestType());
-        assertEquals(OffsetDateTime.parse("2023-06-26T13:00:00Z"), mediaRequestEntity.getStartTime());
-        assertEquals(OffsetDateTime.parse("2023-06-26T13:45:00Z"), mediaRequestEntity.getEndTime());
-        assertNotNull(mediaRequestEntity.getCreatedDateTime());
-        assertNotNull(mediaRequestEntity.getLastUpdatedDateTime());
-    }
-
-    @Test
-    @Order(3)
-    void shouldThrowExceptionWhenGetMediaRequestByIdInvalid() {
-        assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(-3));
-    }
-
-    @Test
-    @Order(4)
-    void shouldUpdateStatusToProcessing() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(-1, PROCESSING);
-
-        assertEquals(PROCESSING, mediaRequestEntity.getStatus());
-    }
-
-    @Test
-    @Order(5)
     void shouldSaveAudioRequestWithZuluTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -98,9 +52,9 @@ class MediaRequestServiceTest {
         var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
-        assertTrue(mediaRequestEntity.getRequestId() > 0);
+        assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
-        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearingId());
+        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
@@ -108,7 +62,7 @@ class MediaRequestServiceTest {
     }
 
     @Test
-    @Order(6)
+    @Order(2)
     void shouldSaveAudioRequestWithOffsetTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
@@ -116,9 +70,9 @@ class MediaRequestServiceTest {
         var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
-        assertTrue(mediaRequestEntity.getRequestId() > 0);
+        assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
-        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearingId());
+        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(OffsetDateTime.parse(T_09_00_00_Z), mediaRequestEntity.getStartTime());
         assertEquals(OffsetDateTime.parse(T_12_00_00_Z), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
@@ -126,7 +80,7 @@ class MediaRequestServiceTest {
     }
 
     @Test
-    @Order(7)
+    @Order(3)
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeStarts() {
         // In the UK the clocks go forward 1 hour at 1am on the last Sunday in March.
         // The period when the clocks are 1 hour ahead is called British Summer Time (BST).
@@ -136,9 +90,9 @@ class MediaRequestServiceTest {
         var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
-        assertTrue(mediaRequestEntity.getRequestId() > 0);
+        assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
-        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearingId());
+        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
@@ -146,7 +100,7 @@ class MediaRequestServiceTest {
     }
 
     @Test
-    @Order(8)
+    @Order(4)
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeEnds() {
         // In the UK the clocks go back 1 hour at 2am on the last Sunday in October.
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
@@ -155,13 +109,27 @@ class MediaRequestServiceTest {
         var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
-        assertTrue(mediaRequestEntity.getRequestId() > 0);
+        assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
-        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearingId());
+        assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
         assertNotNull(mediaRequestEntity.getCreatedDateTime());
         assertNotNull(mediaRequestEntity.getLastUpdatedDateTime());
+    }
+
+    @Test
+    @Order(5)
+    void shouldUpdateStatusToProcessing() {
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(1, PROCESSING);
+
+        assertEquals(PROCESSING, mediaRequestEntity.getStatus());
+    }
+
+    @Test
+    @Order(6)
+    void shouldThrowExceptionWhenGetMediaRequestByIdInvalid() {
+        assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(-3));
     }
 
 }
