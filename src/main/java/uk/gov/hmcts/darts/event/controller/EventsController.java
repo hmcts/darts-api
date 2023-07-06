@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.event.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AddDocumentResponse;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.event.service.EventsService;
+import uk.gov.hmcts.darts.event.service.EventDispatcher;
 
 import javax.validation.Valid;
 
@@ -26,7 +26,7 @@ import javax.validation.Valid;
 @RestController
 public class EventsController implements EventApi {
 
-    private final EventsService eventsService;
+    private final EventDispatcher eventDispatcher;
 
     @Operation(
         operationId = "eventsPost",
@@ -50,9 +50,7 @@ public class EventsController implements EventApi {
     public ResponseEntity<AddDocumentResponse> eventsPost(
         @Parameter(name = "DartsEvent", description = "") @Valid @RequestBody(required = false) DartsEvent dartsEvent
     ) {
-
-        // send to darts-gateway for DAR PC Notify
-        eventsService.darNotify(dartsEvent);
+        eventDispatcher.receive(dartsEvent);
 
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
 

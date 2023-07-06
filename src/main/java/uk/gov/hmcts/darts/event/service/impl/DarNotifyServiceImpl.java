@@ -7,21 +7,19 @@ import uk.gov.hmcts.darts.event.client.DartsGatewayClient;
 import uk.gov.hmcts.darts.event.enums.DarNotifyType;
 import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.event.service.EventsService;
+import uk.gov.hmcts.darts.event.service.DarNotifyService;
 
-@RequiredArgsConstructor
 @Service
 @Slf4j
-public class EventsServiceImpl implements EventsService {
+@RequiredArgsConstructor
+public class DarNotifyServiceImpl implements DarNotifyService {
 
     private final DartsGatewayClient dartsGatewayClient;
 
-    private static final String NOTIFICATION_TYPE = DarNotifyType.CASE_UPDATE.getNotificationType();
-
     @Override
-    public void darNotify(DartsEvent dartsEvent) {
+    public void darNotify(DartsEvent dartsEvent, DarNotifyType darNotifyType) {
         DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
-            .notificationType(NOTIFICATION_TYPE)
+            .notificationType(darNotifyType.getNotificationType())
             .timestamp(dartsEvent.getDateTime())
             .courthouse(dartsEvent.getCourthouse())
             .courtroom(dartsEvent.getCourtroom())
@@ -30,5 +28,4 @@ public class EventsServiceImpl implements EventsService {
 
         dartsGatewayClient.darNotify(darNotifyEvent);
     }
-
 }

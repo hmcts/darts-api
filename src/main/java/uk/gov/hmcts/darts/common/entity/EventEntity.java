@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -48,7 +47,7 @@ public class EventEntity extends VersionedEntity {
     @Column(name = "c_time_stamp")
     private OffsetDateTime timestamp;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "moj_ctr_id")
     private CourtroomEntity courtroom;
 
