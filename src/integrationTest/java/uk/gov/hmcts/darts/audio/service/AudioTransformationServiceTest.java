@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
@@ -25,12 +26,15 @@ import uk.gov.hmcts.darts.common.repository.HearingMediaRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -90,6 +94,9 @@ class AudioTransformationServiceTest {
     private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
 
     @Autowired
+    private AudioConfigurationProperties audioConfigurationProperties;
+
+    @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     @MockBean
@@ -97,6 +104,9 @@ class AudioTransformationServiceTest {
 
     @MockBean
     private TransientObjectDirectoryService mockTransientObjectDirectoryService;
+
+    @MockBean
+    FileOperationService mockFileOperationService;
 
     private MediaRequestEntity savedMediaRequestEntity;
     private HearingEntity hearingEntityWithMedia1;
@@ -337,6 +347,27 @@ class AudioTransformationServiceTest {
             hearingMediaEntity2,
             hearingMediaEntity3
         ));
+    }
+
+    @Test
+    void shouldSaveAudioBlobDataUsingTempWorkSpace() throws IOException {
+        String fileName = "caseAudioFile.pdf";
+        String tempWorkspace = audioConfigurationProperties.getTempBlobWorkspace();
+        Path filePath = Path.of(tempWorkspace).resolve(fileName);
+
+        when(mockFileOperationService.saveFileToTempWorkspace(
+            BINARY_DATA,
+            fileName
+        )).thenReturn(filePath);
+
+        Path actualFilePath = audioTransformationService.saveBlobDataToTempWorkspace(BINARY_DATA, fileName);
+
+        assertEquals(filePath, actualFilePath);
+        verify(mockFileOperationService).saveFileToTempWorkspace(
+            eq(BINARY_DATA),
+            eq(fileName)
+        );
+        verifyNoMoreInteractions(mockFileOperationService);
     }
 
 }
