@@ -156,7 +156,7 @@ class AudioTransformationServiceTest {
 
     @Test
     void shouldSaveAudioBlobData() {
-        String containerName = dataManagementConfiguration.getUnstructuredContainerName();
+        String containerName = dataManagementConfiguration.getOutboundContainerName();
 
         when(mockDataManagementService.saveBlobData(
             containerName,
