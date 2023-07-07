@@ -226,19 +226,3 @@ INSERT INTO moj_hearing VALUES (159,31,4,'{Judge4}','2023-06-24','15:00:00',TRUE
 INSERT INTO moj_hearing VALUES (160,32,4,'{Judge4}','2023-06-24','16:00:00',TRUE, NULL);
 ALTER SEQUENCE moj_hea_seq RESTART WITH 200;
 
-
-
-INSERT INTO moj_media_request (moj_mer_id, moj_hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_updated_ts)
-VALUES (-1, -2, -3, 'OPEN', 'DOWNLOAD', TIMESTAMP WITH TIME ZONE '2023-06-26 13:00:00+00:00', TIMESTAMP WITH TIME ZONE '2023-06-26 13:45:00+00:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO moj_media_request (moj_mer_id, moj_hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_updated_ts)
-VALUES (-2, -2, -3, 'OPEN', 'DOWNLOAD', TIMESTAMP WITH TIME ZONE '2023-06-26 14:00:00+01:00', TIMESTAMP WITH TIME ZONE '2023-06-26 14:45:00+01:00', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-INSERT INTO transient_object_directory (tod_id, moj_mer_id, moj_ods_id, external_location, checksum, created_ts, modified_ts)
-VALUES (-1, -1, 1, 'f744a74f-83c0-47e4-8bb2-2fd4d2b68647', NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
-INSERT INTO moj_media (moj_med_id, moj_ctr_id, c_channel, c_total_channels, c_start, c_end, i_version)
-VALUES (-1, 1, 1, 4, TIMESTAMP WITH TIME ZONE '2023-07-03 17:00:00+00:00', TIMESTAMP WITH TIME ZONE '2023-07-03 17:30:00+00:00', 0);
-
-INSERT INTO external_object_directory (eod_id, moj_med_id, moj_ods_id, external_location, external_location_type, created_ts, modified_ts)
-VALUES(-1, -1, 2, 'a7ad5828-6a20-4bd0-adb1-bf1496a2622a', 'unstructured', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-

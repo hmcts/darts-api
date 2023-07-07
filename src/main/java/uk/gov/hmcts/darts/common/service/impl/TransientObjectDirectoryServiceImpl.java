@@ -28,6 +28,7 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
         transientObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(NEW.getId()));
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setChecksum(null);
+        transientObjectDirectoryEntity.setTransferAttempts(null);
 
         return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
     }

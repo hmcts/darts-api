@@ -1,14 +1,17 @@
 package uk.gov.hmcts.darts.common.util;
 
 import lombok.experimental.UtilityClass;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -96,15 +99,31 @@ public class CommonTestDataUtil {
 
     public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
                                                                        ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
-                                                                       String externalLocationType,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                        UUID externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setMedia(mediaEntity);
         externalObjectDirectory.setStatus(objectDirectoryStatusEntity);
-        externalObjectDirectory.setExternalLocationType(externalLocationType);
+        externalObjectDirectory.setExternalLocationType(externalLocationTypeEntity);
         externalObjectDirectory.setExternalLocation(externalLocation);
+        externalObjectDirectory.setChecksum(null);
+        externalObjectDirectory.setTransferAttempts(null);
 
         return externalObjectDirectory;
+    }
+
+    public TransientObjectDirectoryEntity createTransientObjectDirectory(MediaRequestEntity mediaRequestEntity,
+                                                                         ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                         UUID externalLocation) {
+
+        var transientObjectDirectory = new TransientObjectDirectoryEntity();
+        transientObjectDirectory.setMediaRequest(mediaRequestEntity);
+        transientObjectDirectory.setStatus(objectDirectoryStatusEntity);
+        transientObjectDirectory.setExternalLocation(externalLocation);
+        transientObjectDirectory.setChecksum(null);
+        transientObjectDirectory.setTransferAttempts(null);
+
+        return transientObjectDirectory;
     }
 
 }
