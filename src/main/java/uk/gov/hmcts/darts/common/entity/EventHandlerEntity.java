@@ -11,21 +11,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "moj_event_type")
+@Table(name = "event_handler")
 @Getter
 @Setter
-public class EventTypeEntity {
+public class EventHandlerEntity {
 
     @Id
-    @Column(name = "moj_evt_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_evt_gen")
-    @SequenceGenerator(name = "moj_evt_gen", sequenceName = "moj_evt_seq", allocationSize = 1)
+    @Column(name = "evh_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "evh_gen")
+    @SequenceGenerator(name = "evh_gen", sequenceName = "evh_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "evt_type", nullable = false)
+    @Column(name = "event_type", nullable = false)
     private String type;
 
-    @Column(name = "sub_type")
+    @Column(name = "event_sub_type")
     private String subType;
 
     @Column(name = "event_name", nullable = false)

@@ -20,6 +20,9 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import static jakarta.persistence.CascadeType.MERGE;
+import static jakarta.persistence.CascadeType.PERSIST;
+
 @Entity
 @Table(name = "transient_object_directory")
 @Data
@@ -57,7 +60,8 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
     @Column(name = "modified_ts")
     private OffsetDateTime modifiedTimestamp;
 
-    @Column(name = "modified_by")
-    private Integer modifiedBy;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @JoinColumn(name = "modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
+    private UserAccount modifiedBy;
 
 }

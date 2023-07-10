@@ -15,3 +15,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: true
+  flyway:
+    enabled: ${ENABLE_DB_MIGRATE:true}
+    locations: classpath:db/migration/common,db/migration/h2

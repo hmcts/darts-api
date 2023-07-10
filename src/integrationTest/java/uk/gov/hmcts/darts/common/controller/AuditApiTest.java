@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.controller;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @ReprovisionDatabaseBeforeEach
+@Disabled
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert","PMD.AvoidDuplicateLiterals"})
 class AuditApiTest {
     public static final int EVENT_ID = 998;

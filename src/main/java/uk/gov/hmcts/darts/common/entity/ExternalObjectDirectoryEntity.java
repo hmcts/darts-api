@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -68,7 +69,8 @@ public class ExternalObjectDirectoryEntity implements JpaAuditing {
     @Column(name = "modified_ts")
     private OffsetDateTime modifiedTimestamp;
 
-    @Column(name = "modified_by")
-    private Integer modifiedBy;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "modified_by", foreignKey = @ForeignKey(name = "eod_modified_by_fk"))
+    private UserAccount modifiedBy;
 
 }

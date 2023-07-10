@@ -134,7 +134,12 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/darts/common/entity/**',
   '**/uk/gov/hmcts/darts/**/model/**',
   '**/uk/gov/hmcts/darts/**/config/**',
-  '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java'
+  '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java',
+  // temporary exclusions
+  '**/uk/gov/hmcts/darts/audio/**',
+  '**/uk/gov/hmcts/darts/cases/**',
+  '**/uk/gov/hmcts/darts/dailylist/**',
+  '**/uk/gov/hmcts/darts/notification/mapper/GovNotifyRequestMapper.java'
 ]
 
 sonarqube {

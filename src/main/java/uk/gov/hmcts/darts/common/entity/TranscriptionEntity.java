@@ -18,32 +18,32 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "moj_transcription")
+@Table(name = "transcription")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class TranscriptionEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_tra_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_tra_gen")
-    @SequenceGenerator(name = "moj_tra_gen", sequenceName = "moj_tra_seq", allocationSize = 1)
+    @Column(name = "tra_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tra_gen")
+    @SequenceGenerator(name = "tra_gen", sequenceName = "tra_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "moj_cas_id", nullable = false)
+    @JoinColumn(name = "cas_id", nullable = false)
     private CaseEntity courtCase;
 
-    @Column(name = "moj_ctr_id", nullable = false)
+    @Column(name = "ctr_id", nullable = false)
     private Integer courtroomId;
 
-    @Column(name = "moj_trt_id", nullable = false)
+    @Column(name = "trt_id", nullable = false)
     private Integer transcriptionTypeId;
 
-    @Column(name = "moj_urg_id")
+    @Column(name = "urg_id")
     private Integer transcriptionUrgencyId;
 
-    @Column(name = "moj_hea_id")
+    @Column(name = "hea_id")
     private Integer hearingId;
 
     @Column(name = "r_transcription_object_id", length = 16)

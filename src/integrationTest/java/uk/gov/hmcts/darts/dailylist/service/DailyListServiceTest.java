@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +39,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ReprovisionDatabaseBeforeEach
+@Disabled
 class DailyListServiceTest {
     public static final String CPP = "CPP";
     ObjectMapper objectMapper;

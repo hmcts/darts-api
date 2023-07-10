@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audio.util.AudioTestDataUtil;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -124,6 +125,7 @@ class AudioTransformationServiceTest {
     private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
 
     @Test
+    @Transactional
     void shouldProcessAudioRequest() {
         createAndLoadMediaRequestEntity();
 
@@ -172,6 +174,7 @@ class AudioTransformationServiceTest {
     }
 
     @Test
+    @Transactional
     void shouldSaveTransientDataLocation() {
         createAndLoadMediaRequestEntity();
 
@@ -210,6 +213,7 @@ class AudioTransformationServiceTest {
     }
 
     @Test
+    @Transactional
     void getMediaMetadataShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
         createAndLoadMediaEntityGraph();
 
@@ -221,6 +225,7 @@ class AudioTransformationServiceTest {
     }
 
     @Test
+    @Transactional
     void getMediaMetadataShouldReturnEmptyListWhenHearingIdDoesNotExist() {
         createAndLoadMediaEntityGraph();
 
@@ -230,6 +235,7 @@ class AudioTransformationServiceTest {
     }
 
     @Test
+    @Transactional
     void shouldGetMediaLocation() {
         createAndLoadMediaEntityGraph();
 
@@ -241,10 +247,8 @@ class AudioTransformationServiceTest {
 
     @Test
     void shouldGetEmptyOptionalMediaLocationWhenNoExternalObjectDirectoryExists() {
-        CourtroomEntity courtroom = courtroomRepository.getReferenceById(1);
-
         MediaEntity newMedia = new MediaEntity();
-        newMedia.setCourtroom(courtroom);
+        newMedia.setCourtroom(somePersistedCourtroom());
         newMedia.setChannel(1);
         newMedia.setTotalChannels(4);
         newMedia.setStart(OffsetDateTime.parse("2023-07-04T10:00:00Z"));
@@ -257,10 +261,8 @@ class AudioTransformationServiceTest {
     @Test
     void shouldGetMediaLocationWithWarningThatMultipleExistByStatusAndType() {
 
-        CourtroomEntity courtroom = courtroomRepository.getReferenceById(1);
-
         MediaEntity newMedia = new MediaEntity();
-        newMedia.setCourtroom(courtroom);
+        newMedia.setCourtroom(somePersistedCourtroom());
         newMedia.setChannel(1);
         newMedia.setTotalChannels(4);
         newMedia.setStart(OffsetDateTime.parse("2023-07-04T16:00:00Z"));
@@ -295,6 +297,14 @@ class AudioTransformationServiceTest {
 
     }
 
+    private CourtroomEntity somePersistedCourtroom() {
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("some-courthouse");
+        CourtroomEntity courtroom = CommonTestDataUtil.createCourtroom("some-room");
+        courtroom.setCourthouse(courthouse);
+        courtroomRepository.saveAndFlush(courtroom);
+        return courtroom;
+    }
+
     private void createAndLoadMediaRequestEntity() {
 
         var caseEntity = CommonTestDataUtil.createCase("2");
@@ -319,7 +329,8 @@ class AudioTransformationServiceTest {
 
     private void createAndLoadMediaEntityGraph() {
         var caseEntity = CommonTestDataUtil.createCase("1");
-        caseRepository.saveAndFlush(caseEntity);
+        var courthouse = CommonTestDataUtil.createCourthouse("some-courthouse");
+        caseEntity.setCourthouse(courthouse);
 
         var courtroomEntity = CommonTestDataUtil.createCourtroom("Int Test Courtroom");
         courtroomRepository.saveAndFlush(courtroomEntity);

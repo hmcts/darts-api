@@ -70,7 +70,7 @@ class TransientObjectDirectoryServiceTest {
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));
         assertTrue(transientObjectDirectoryEntity.getModifiedTimestamp()
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
-        assertNull(transientObjectDirectoryEntity.getModifiedBy());
+        assertNotNull(transientObjectDirectoryEntity.getModifiedBy());
     }
 
     private void createAndLoadMediaRequestEntity() {
