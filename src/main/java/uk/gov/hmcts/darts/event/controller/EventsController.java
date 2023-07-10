@@ -48,12 +48,15 @@ public class EventsController implements EventApi {
     )
     @Override
     public ResponseEntity<AddDocumentResponse> eventsPost(
-        @Parameter(name = "DartsEvent", description = "") @Valid @RequestBody(required = false) DartsEvent dartsEvent
+          @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
         eventDispatcher.receive(dartsEvent);
 
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        var addDocumentResponse = new AddDocumentResponse();
+        addDocumentResponse.setCode("200");
+        addDocumentResponse.setMessage("OK");
 
+        return new ResponseEntity<>(addDocumentResponse, HttpStatus.CREATED);
     }
 
 }

@@ -42,12 +42,18 @@ class EventsControllerTest {
               ],
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
+
+        String expectedResponse = """
+            {
+              "code": "200",
+              "message": "OK"
+            }""";
         MockHttpServletRequestBuilder requestBuilder = post("/events")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
-        assertThat(response.getResponse().getContentAsString()).isEqualTo("");
+        assertThat(response.getResponse().getContentAsString()).isEqualToIgnoringWhitespace(expectedResponse);
 
         verify(eventDispatcher).receive(any(DartsEvent.class));
     }
