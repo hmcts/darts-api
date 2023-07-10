@@ -16,26 +16,26 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "moj_event")
+@Table(name = "event")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class EventEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_eve_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_eve_gen")
-    @SequenceGenerator(name = "moj_eve_gen", sequenceName = "moj_eve_seq", allocationSize = 1)
+    @Column(name = "eve_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "eve_gen")
+    @SequenceGenerator(name = "eve_gen", sequenceName = "eve_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "r_event_object_id", unique = true, length = 16)
+    @Column(name = "event_object_id", unique = true, length = 16)
     private String legacyObjectId;
 
     @ManyToOne
-    @JoinColumn(name = "moj_evt_id")
-    private EventTypeEntity eventType;
+    @JoinColumn(name = "evh_id")
+    private EventHandlerEntity eventType;
 
-    @Column(name = "c_event_id")
+    @Column(name = "event_id")
     private Integer legacyEventId;
 
     @Column(name = "event_name")
@@ -44,20 +44,20 @@ public class EventEntity extends VersionedEntity {
     @Column(name = "event_text")
     private String eventText;
 
-    @Column(name = "c_time_stamp")
+    @Column(name = "event_ts")
     private OffsetDateTime timestamp;
 
     @ManyToOne
-    @JoinColumn(name = "moj_ctr_id")
+    @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
-    @Column(name = "r_version_label", length = 32)
+    @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
     @Column(name = "message_id")
     private String messageId;
 
-    @Column(name = "i_superseded")
+    @Column(name = "superseded")
     private Boolean superseded;
 
 }

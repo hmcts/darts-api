@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -10,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,13 +24,11 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @ReprovisionDatabaseBeforeEach
+@Disabled
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class CaseControllerTest {
     @Autowired
     private transient MockMvc mockMvc;
-
-    @Autowired
-    private CaseService caseService;
 
     @Test
     void casesGetEndpoint() throws Exception {

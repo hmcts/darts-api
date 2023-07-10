@@ -15,15 +15,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "moj_courthouse")
+@Table(name = "courthouse")
 @Getter
 @Setter
 public class CourthouseEntity {
 
     @Id
-    @Column(name = "moj_cth_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_cth_gen")
-    @SequenceGenerator(name = "moj_cth_gen", sequenceName = "moj_cth_seq", allocationSize = 1)
+    @Column(name = "cth_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cth_gen")
+    @SequenceGenerator(name = "cth_gen", sequenceName = "cth_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = "courthouse_code", unique = true)

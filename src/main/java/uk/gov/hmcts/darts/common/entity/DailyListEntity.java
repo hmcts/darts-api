@@ -25,8 +25,8 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = false)
 public class DailyListEntity extends VersionedEntity {
 
-    public static final String ID = "moj_dal_id";
-    public static final String COURTHOUSE_ID = "moj_cth_id";
+    public static final String ID = "dal_id";
+    public static final String COURTHOUSE_ID = "cth_id";
     public static final String DAILY_LIST_OBJECT_ID = "r_daily_list_object_id";
     public static final String UNIQUE_ID = "c_unique_id";
     public static final String JOB_STATUS = "c_job_status";
@@ -41,13 +41,13 @@ public class DailyListEntity extends VersionedEntity {
     public static final String LEGACY_COURTHOUSE_OBJECT_ID = "r_courthouse_object_id";
     public static final String LEGACY_VERSION_LABEL = "r_version_label";
     public static final String SUPERSEDED = "i_superseded";
-    public static final String TABLE_NAME = "moj_daily_list";
+    public static final String TABLE_NAME = "daily_list";
     public static final String DAILY_LIST_CONTENT = "daily_list_content";
 
     @Id
     @Column(name = ID)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_dal_gen")
-    @SequenceGenerator(name = "moj_dal_gen", sequenceName = "moj_dal_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dal_gen")
+    @SequenceGenerator(name = "dal_gen", sequenceName = "dal_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne

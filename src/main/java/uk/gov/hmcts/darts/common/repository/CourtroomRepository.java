@@ -21,7 +21,7 @@ public interface CourtroomRepository extends JpaRepository<CourtroomEntity, Inte
 
     @Query(value = "SELECT * FROM {h-schema}" + TABLE_NAME + " cr " +
         "WHERE upper(cr." + CourtroomEntity.COURTROOM_NAME + ") = upper(:courtroom) " +
-        "AND cr." + CourtroomEntity.MOJ_CTH_ID + " = :courthouseId ", nativeQuery = true
+        "AND cr." + CourtroomEntity.CTH_ID + " = :courthouseId ", nativeQuery = true
     )
     CourtroomEntity findByNameAndId(int courthouseId, String courtroom);
 

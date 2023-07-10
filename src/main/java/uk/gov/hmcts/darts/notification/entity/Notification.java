@@ -2,9 +2,12 @@ package uk.gov.hmcts.darts.notification.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -12,8 +15,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import uk.gov.hmcts.darts.common.entity.CaseEntity;
 
 import java.time.OffsetDateTime;
+
+import static jakarta.persistence.CascadeType.MERGE;
+import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
 @Table(name = Notification.TABLE_NAME)
@@ -22,28 +29,29 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 public class Notification {
 
-    public static final String ID = "id";
-    public static final String EVENT_ID = "event_id";
-    public static final String CASE_ID = "case_id";
+    public static final String ID = "not_id";
+    public static final String EVENT_ID = "notification_event";
+    public static final String CASE_ID = "cas_id";
     public static final String EMAIL_ADDRESS = "email_address";
-    public static final String STATUS = "status";
-    public static final String ATTEMPTS = "attempts";
+    public static final String STATUS = "notification_status";
+    public static final String ATTEMPTS = "send_attempts";
     public static final String TEMPLATE_VALUES = "template_values";
-    public static final String CREATED_DATE_TIME = "created_date_time";
-    public static final String LAST_UPDATED_DATE_TIME = "last_updated_date_time";
+    public static final String CREATED_DATE_TIME = "created_ts";
+    public static final String LAST_UPDATED_DATE_TIME = "last_updated_ts";
     public static final String TABLE_NAME = "notification";
 
     @Id
     @Column(name = ID)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_gen")
-    @SequenceGenerator(name = "notification_gen", sequenceName = "notification_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "not_gen")
+    @SequenceGenerator(name = "not_gen", sequenceName = "not_seq", allocationSize = 1)
     private Integer id;
 
     @Column(name = EVENT_ID)
     private String eventId;
 
-    @Column(name = CASE_ID)
-    private String caseId;
+    @JoinColumn(name = CASE_ID)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    private CaseEntity courtCase;
 
     @Column(name = EMAIL_ADDRESS)
     private String emailAddress;

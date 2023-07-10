@@ -23,6 +23,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@SuppressWarnings("PMD.TooManyMethods")
 public class DartsDatabaseStub {
 
     CaseRepository caseRepository;
@@ -107,6 +108,15 @@ public class DartsDatabaseStub {
     public static CaseEntity minimalCaseEntity() {
         var caseEntity = new CaseEntity();
         caseEntity.setCaseNumber("1");
+        caseEntity.setCourthouse(minimalCourtHouse());
         return caseEntity;
     }
+
+    public static CourthouseEntity minimalCourtHouse() {
+        var courtHouse = new CourthouseEntity();
+        courtHouse.setCourthouseName("some-courthouse");
+        return courtHouse;
+    }
+
+
 }

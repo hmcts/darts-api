@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.EventTypeEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
@@ -48,7 +48,7 @@ public abstract class EventHandlerBase implements EventHandler {
         return event;
     }
 
-    private EventTypeEntity eventTypeReference(DartsEvent dartsEvent) {
+    private EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
         var key = buildKey(dartsEvent.getType(), dartsEvent.getSubType());
         return eventTypeRepository.getReferenceById(eventTypesToIdAndName.get(key).getLeft());
     }

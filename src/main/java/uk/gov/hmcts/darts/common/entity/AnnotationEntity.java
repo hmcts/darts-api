@@ -18,24 +18,24 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "moj_annotation")
+@Table(name = "annotation")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class AnnotationEntity extends VersionedEntity {
 
     @Id
-    @Column(name = "moj_ann_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_ann_gen")
-    @SequenceGenerator(name = "moj_ann_gen", sequenceName = "moj_ann_seq", allocationSize = 1)
+    @Column(name = "ann_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ann_gen")
+    @SequenceGenerator(name = "ann_gen", sequenceName = "ann_seq", allocationSize = 1)
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "moj_cas_id")
+    @JoinColumn(name = "cas_id")
     private CaseEntity courtCase;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "moj_ctr_id")
+    @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
     @Column(name = "r_annotation_object_id", length = 16)

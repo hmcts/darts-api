@@ -96,8 +96,9 @@ spring:
       ignore-missing-migrations: true
   flyway:
     enabled: ${ENABLE_DB_MIGRATE:true}
-    locations: classpath:db/migration
+    locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
+    mixed: true
 
 darts:
   audio:

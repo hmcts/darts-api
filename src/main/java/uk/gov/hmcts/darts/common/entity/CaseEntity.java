@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.entity;
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,57 +21,57 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "moj_case")
+@Table(name = "court_case")
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
 public class CaseEntity {
 
     @Id
-    @Column(name = "moj_cas_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "moj_cas_gen")
-    @SequenceGenerator(name = "moj_cas_gen", sequenceName = "moj_cas_seq", allocationSize = 1)
+    @Column(name = "cas_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cas_gen")
+    @SequenceGenerator(name = "cas_gen", sequenceName = "cas_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "moj_rer_id")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "rer_id")
     private ReportingRestrictionsEntity reportingRestrictions;
 
-    @Column(name = "r_case_object_id", length = 16)
+    @Column(name = "case_object_id", length = 16)
     private String legacyCaseObjectId;
 
-    @Column(name = "c_case_id")
+    @Column(name = "case_number")
     private String caseNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "moj_cth_id")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "cth_id")
     private CourthouseEntity courthouse;
 
-    @Column(name = "c_closed")
+    @Column(name = "case_closed")
     private Boolean closed;
 
-    @Column(name = "c_interpreter_used")
+    @Column(name = "interpreter_used")
     private Boolean interpreterUsed;
 
-    @Column(name = "c_case_closed_ts")
+    @Column(name = "case_closed_ts")
     private OffsetDateTime caseClosedTimestamp;
 
     @Type(ListArrayType.class)
-    @Column(name = "c_defendant")
+    @Column(name = "defendant_list")
     private List<String> defendants = new ArrayList<>();
 
     @Type(ListArrayType.class)
-    @Column(name = "c_prosecutor")
+    @Column(name = "prosecutor_list")
     private List<String> prosecutors = new ArrayList<>();
 
     @Type(ListArrayType.class)
-    @Column(name = "c_defence")
+    @Column(name = "defence_list")
     private List<String> defenders = new ArrayList<>();
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntilTimestamp;
 
-    @Column(name = "r_version_label", length = 32)
+    @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
     @OneToMany(mappedBy = "courtCase")

@@ -10,7 +10,7 @@ import lombok.Setter;
 public class VersionedEntity {
 
     @Version
-    @Column(name = "i_version")
+    @Column(name = "version")
     @Getter
     @Setter
     private Integer version;

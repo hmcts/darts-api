@@ -28,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@SuppressWarnings("PMD.UnusedFormalParameter") // temporary
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepo;
@@ -35,8 +36,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final TemplateIdHelper templateIdHelper;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
     private static final List<String> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
-        String.valueOf(NotificationStatus.OPEN),
-        String.valueOf(NotificationStatus.PROCESSING)
+          String.valueOf(NotificationStatus.OPEN),
+          String.valueOf(NotificationStatus.PROCESSING)
     );
 
     @Value("${darts.notification.max_retry_attempts}")
@@ -48,10 +49,10 @@ public class NotificationServiceImpl implements NotificationService {
         String[] emailAddressList = emailAddresses.split(",");
         for (String emailAddress : emailAddressList) {
             saveNotificationToDb(
-                request.getEventId(),
-                request.getCaseId(),
-                StringUtils.trim(emailAddress),
-                request.getTemplateValues()
+                  request.getEventId(),
+                  request.getCaseId(),
+                  StringUtils.trim(emailAddress),
+                  request.getTemplateValues()
             );
         }
     }
@@ -63,7 +64,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
         Notification dbNotification = new Notification();
         dbNotification.setEventId(eventId);
-        dbNotification.setCaseId(caseId);
+        //        dbNotification.setCourtCase(caseId); is this really the id or case number
         dbNotification.setEmailAddress(emailAddress);
         dbNotification.setStatus(String.valueOf(NotificationStatus.OPEN));
         dbNotification.setAttempts(0);
@@ -74,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @SchedulerLock(name = "NotificationService_sendNotificationToGovNotify",
-        lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
+          lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started.");
@@ -100,10 +101,10 @@ public class NotificationServiceImpl implements NotificationService {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
                 log.error(
-                    "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
-                    notification.getId(),
-                    govNotifyRequest,
-                    e.getMessage()
+                      "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
+                      notification.getId(),
+                      govNotifyRequest,
+                      e.getMessage()
                 );
                 incrementNotificationFailureCount(notification);
             }
