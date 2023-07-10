@@ -1,0 +1,71 @@
+openapi: 3.0.1
+
+info:
+
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /courtlogs:
+    get:
+      tags:
+        - CourtLogs
+      summary: An Endpoint which allows users to request courtlogs
+      description: |-
+        An Endpoint which allows users to request courtlogs using courthouse, casenumber, startdate and enddate
+      parameters:
+        - in: query
+          name: Courthouse
+          schema:
+            type: string
+        - in: query
+          name: caseNumber
+          schema:
+            type: string
+        - in: query
+          name: startDateTime
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endDateTime
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourtLogs'
+
+        '500':
+          description: Internal Server Error
+
+components:
+
+  #-----------------#
+  #----------------------------------#
+  #-----------------#
+
+  schemas:
+    CourtLogs:
+      type: object
+      properties:
+        courthouse:
+          type: string
+        caseNumber:
+          type: string
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
