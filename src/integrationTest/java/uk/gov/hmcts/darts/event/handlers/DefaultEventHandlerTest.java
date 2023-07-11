@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.event.handlers;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.impl.DefaultEventHandler;
@@ -18,8 +16,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.DartsDatabaseStub.minimalCaseEntity;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @SuppressWarnings("PMD.TooManyMethods")
 class DefaultEventHandlerTest extends IntegrationBase {
 

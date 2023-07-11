@@ -23,6 +23,11 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.LocalDate.now;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCase;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCourtroom;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createHearing;
+
 @Service
 @AllArgsConstructor
 @SuppressWarnings("PMD.TooManyMethods")
@@ -37,7 +42,6 @@ public class DartsDatabaseStub {
     private final MediaRepository mediaRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final NotificationRepository notificationRepository;
-
 
     public void clearDatabase() {
         notificationRepository.deleteAll();
@@ -122,11 +126,35 @@ public class DartsDatabaseStub {
         return courtHouse;
     }
 
+    public static HearingEntity minimalHearing() {
+        var courtroom = minimalCourtroom();
+        var caseEntity = minimalCaseEntity();
+        caseEntity.setCourthouse(courtroom.getCourthouse());
+
+        HearingEntity hearing = new HearingEntity();
+        hearing.setCourtCase(caseEntity);
+        hearing.setCourtroom(courtroom);
+        hearing.setHearingDate(now());
+        return hearing;
+    }
+
+    public static CourtroomEntity minimalCourtroom() {
+        CourtroomEntity courtroom = new CourtroomEntity();
+        courtroom.setCourthouse(minimalCourtHouse());
+        courtroom.setName("some-court-room");
+        return courtroom;
+    }
+
     public CaseEntity hasSomeCourtCase() {
         return caseRepository.save(minimalCaseEntity());
     }
 
     public List<NotificationEntity> getNotificationsForCase(Integer caseId) {
         return notificationRepository.findByCourtCase_Id(caseId);
+    }
+
+    @Transactional
+    public HearingEntity hasSomeHearing() {
+        return hearingRepository.saveAndFlush(createHearing(createCase("c1"), createCourtroom("r1"), now()));
     }
 }
