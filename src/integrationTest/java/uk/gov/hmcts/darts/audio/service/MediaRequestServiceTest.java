@@ -1,23 +1,17 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.time.OffsetDateTime;
 import java.util.NoSuchElementException;
 
-import static java.time.LocalDate.now;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,21 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCase;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCourtroom;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createHearing;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
-@TestInstance(Lifecycle.PER_CLASS)
-@Disabled
-class MediaRequestServiceTest {
+class MediaRequestServiceTest extends IntegrationPerClassBase {
 
     private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
-
-    @Autowired
-    private HearingRepository hearingRepository;
 
     @Autowired
     private MediaRequestService mediaRequestService;
@@ -48,8 +32,7 @@ class MediaRequestServiceTest {
 
     @BeforeAll
     void beforeAll() {
-        HearingEntity hearing = hearingRepository.saveAndFlush(
-              createHearing(createCase("c1"), createCourtroom("r1"), now()));
+        HearingEntity hearing = dartsDatabase.hasSomeHearing();
 
         requestDetails = new AudioRequestDetails(null, null, null, null, null);
         requestDetails.setHearingId(hearing.getId());
