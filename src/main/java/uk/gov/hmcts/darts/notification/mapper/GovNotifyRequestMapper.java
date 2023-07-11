@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.notification.NotificationConstants;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
-import uk.gov.hmcts.darts.notification.entity.Notification;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class GovNotifyRequestMapper {
 
-    public GovNotifyRequest map(Notification notification, String templateId) throws JsonProcessingException {
+    public GovNotifyRequest map(NotificationEntity notification, String templateId) throws JsonProcessingException {
         GovNotifyRequest request = new GovNotifyRequest();
         request.setTemplateId(templateId);
         request.setEmailAddress(notification.getEmailAddress());
@@ -26,9 +26,11 @@ public class GovNotifyRequestMapper {
         return request;
     }
 
-    private Map<String, String> createParameterMap(Notification notification) throws JsonProcessingException {
+    private Map<String, String> createParameterMap(NotificationEntity notification) throws JsonProcessingException {
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
-        parameterMap.put(NotificationConstants.ParameterMapValues.CASE_ID, notification.getCourtCase().getCaseNumber());
+        parameterMap.put(
+              NotificationConstants.ParameterMapValues.CASE_ID,
+              String.valueOf(notification.getCourtCase().getId()));
         String templateValuesStr = notification.getTemplateValues();
         if (StringUtils.isNotBlank(templateValuesStr)) {
             Map<String, String> keyValues;

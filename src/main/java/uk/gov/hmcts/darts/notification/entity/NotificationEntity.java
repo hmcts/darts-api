@@ -23,11 +23,11 @@ import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
-@Table(name = Notification.TABLE_NAME)
+@Table(name = NotificationEntity.TABLE_NAME)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Notification {
+public class NotificationEntity {
 
     public static final String ID = "not_id";
     public static final String EVENT_ID = "notification_event";

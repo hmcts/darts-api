@@ -139,7 +139,6 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/darts/audio/**',
   '**/uk/gov/hmcts/darts/cases/**',
   '**/uk/gov/hmcts/darts/dailylist/**',
-  '**/uk/gov/hmcts/darts/notification/mapper/GovNotifyRequestMapper.java'
 ]
 
 sonarqube {

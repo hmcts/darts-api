@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,8 +37,11 @@ public class DartsDatabaseStub {
     MediaRepository mediaRepository;
     ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
+    NotificationRepository notificationRepository;
+
 
     public void clearDatabase() {
+        notificationRepository.deleteAll();
         hearingRepository.deleteAll();
         eventRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
@@ -58,7 +63,7 @@ public class DartsDatabaseStub {
         return hearingRepository.findByCourthouseCourtroomAndDate(someCourthouse, someRoom, toLocalDate);
     }
 
-    public List<EventEntity> findAll() {
+    public List<EventEntity> getAllEvents() {
         return eventRepository.findAll();
     }
 
@@ -118,5 +123,11 @@ public class DartsDatabaseStub {
         return courtHouse;
     }
 
+    public CaseEntity hasSomeCourtCase() {
+        return caseRepository.save(minimalCaseEntity());
+    }
 
+    public List<NotificationEntity> getNotificationsForCase(Integer caseId) {
+        return notificationRepository.findByCourtCase_Id(caseId);
+    }
 }
