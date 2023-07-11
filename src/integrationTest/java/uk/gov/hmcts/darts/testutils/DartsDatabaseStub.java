@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.testutils;
+package uk.gov.hmcts.darts.testutils;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,8 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,17 +28,19 @@ import java.util.Optional;
 @SuppressWarnings("PMD.TooManyMethods")
 public class DartsDatabaseStub {
 
-    CaseRepository caseRepository;
-    EventRepository eventRepository;
-    ReportingRestrictionsRepository reportingRestrictionsRepository;
-    CourthouseRepository courthouseRepository;
-    HearingRepository hearingRepository;
-    CourtroomRepository courtroomRepository;
-    MediaRepository mediaRepository;
-    ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final CaseRepository caseRepository;
+    private final EventRepository eventRepository;
+    private final ReportingRestrictionsRepository reportingRestrictionsRepository;
+    private final CourthouseRepository courthouseRepository;
+    private final HearingRepository hearingRepository;
+    private final CourtroomRepository courtroomRepository;
+    private final MediaRepository mediaRepository;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final NotificationRepository notificationRepository;
 
 
     public void clearDatabase() {
+        notificationRepository.deleteAll();
         hearingRepository.deleteAll();
         eventRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
@@ -58,7 +62,7 @@ public class DartsDatabaseStub {
         return hearingRepository.findByCourthouseCourtroomAndDate(someCourthouse, someRoom, toLocalDate);
     }
 
-    public List<EventEntity> findAll() {
+    public List<EventEntity> getAllEvents() {
         return eventRepository.findAll();
     }
 
@@ -118,5 +122,11 @@ public class DartsDatabaseStub {
         return courtHouse;
     }
 
+    public CaseEntity hasSomeCourtCase() {
+        return caseRepository.save(minimalCaseEntity());
+    }
 
+    public List<NotificationEntity> getNotificationsForCase(Integer caseId) {
+        return notificationRepository.findByCourtCase_Id(caseId);
+    }
 }

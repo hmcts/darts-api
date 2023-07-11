@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class SaveNotificationToDbRequest {
     String eventId;
-    String caseId;
+    Integer caseId;
     String emailAddresses;
     String templateValues;
 }

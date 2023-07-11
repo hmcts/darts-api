@@ -9,9 +9,11 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
-import uk.gov.hmcts.darts.notification.entity.Notification;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
@@ -28,10 +30,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@SuppressWarnings("PMD.UnusedFormalParameter") // temporary
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepo;
+
+    private final CaseRepository caseRepository;
     private final GovNotifyService govNotifyService;
     private final TemplateIdHelper templateIdHelper;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
@@ -44,6 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
     private int maxRetry;
 
     @Override
+    @Transactional
     public void scheduleNotification(SaveNotificationToDbRequest request) {
         String emailAddresses = request.getEmailAddresses();
         String[] emailAddressList = emailAddresses.split(",");
@@ -57,20 +61,20 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private Notification saveNotificationToDb(String eventId, String caseId, String emailAddress, String templateValues) {
+    private NotificationEntity saveNotificationToDb(String eventId, Integer caseId, String emailAddress, String templateValues) {
         if (!emailValidator.isValid(emailAddress)) {
             log.warn("The supplied email address, {}, is not valid, and so has been ignored.", emailAddress);
             return null;
         }
-        Notification dbNotification = new Notification();
+        NotificationEntity dbNotification = new NotificationEntity();
         dbNotification.setEventId(eventId);
-        //        dbNotification.setCourtCase(caseId); is this really the id or case number
+        dbNotification.setCourtCase(caseRepository.getReferenceById(caseId));
         dbNotification.setEmailAddress(emailAddress);
         dbNotification.setStatus(String.valueOf(NotificationStatus.OPEN));
         dbNotification.setAttempts(0);
         dbNotification.setTemplateValues(templateValues);
 
-        return notificationRepo.saveAndFlush(dbNotification);
+        return notificationRepo.save(dbNotification);
     }
 
     @Override
@@ -80,9 +84,9 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started.");
 
-        List<Notification> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
+        List<NotificationEntity> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
         int notificationCounter = 0;
-        for (Notification notification : notificationEntries) {
+        for (NotificationEntity notification : notificationEntries) {
             log.trace("Processing {} of {}, Id {}.", ++notificationCounter, notificationEntries.size(), notification.getId());
             String templateId;
             try {
@@ -111,12 +115,12 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private void updateNotificationStatus(Notification notification, NotificationStatus status) {
+    private void updateNotificationStatus(NotificationEntity notification, NotificationStatus status) {
         notification.setStatus(String.valueOf(status));
         notificationRepo.saveAndFlush(notification);
     }
 
-    private void incrementNotificationFailureCount(Notification notification) {
+    private void incrementNotificationFailureCount(NotificationEntity notification) {
         int attempts = notification.getAttempts();
         attempts++;
         if (attempts <= maxRetry) {

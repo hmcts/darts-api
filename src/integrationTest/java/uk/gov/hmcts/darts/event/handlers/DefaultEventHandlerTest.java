@@ -3,12 +3,11 @@ package uk.gov.hmcts.darts.event.handlers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.impl.DefaultEventHandler;
-import uk.gov.hmcts.darts.event.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,11 +16,10 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.event.testutils.DartsDatabaseStub.minimalCaseEntity;
+import static uk.gov.hmcts.darts.testutils.DartsDatabaseStub.minimalCaseEntity;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
-@AutoConfigureWireMock(port = 8070)
 @SuppressWarnings("PMD.TooManyMethods")
 class DefaultEventHandlerTest extends IntegrationBase {
 
@@ -72,7 +70,7 @@ class DefaultEventHandlerTest extends IntegrationBase {
               SOME_ROOM,
               today.toLocalDate());
 
-        var persistedEvent = dartsDatabase.findAll().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
@@ -103,7 +101,7 @@ class DefaultEventHandlerTest extends IntegrationBase {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
               SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
-        var persistedEvent = dartsDatabase.findAll().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
@@ -136,7 +134,7 @@ class DefaultEventHandlerTest extends IntegrationBase {
         var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
               SOME_COURTHOUSE, SOME_OTHER_ROOM, today.toLocalDate());
 
-        var persistedEvent = dartsDatabase.findAll().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
@@ -171,7 +169,7 @@ class DefaultEventHandlerTest extends IntegrationBase {
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
               SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
-        var persistedEvent = dartsDatabase.findAll().get(0);
+        var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
