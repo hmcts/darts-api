@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.testutils;
+package uk.gov.hmcts.darts.testutils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

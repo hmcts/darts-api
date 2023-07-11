@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.testutils;
+package uk.gov.hmcts.darts.testutils;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,16 +28,15 @@ import java.util.Optional;
 @SuppressWarnings("PMD.TooManyMethods")
 public class DartsDatabaseStub {
 
-    CaseRepository caseRepository;
-    EventRepository eventRepository;
-    ReportingRestrictionsRepository reportingRestrictionsRepository;
-    CourthouseRepository courthouseRepository;
-    HearingRepository hearingRepository;
-    CourtroomRepository courtroomRepository;
-    MediaRepository mediaRepository;
-    ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
-    NotificationRepository notificationRepository;
+    private final CaseRepository caseRepository;
+    private final EventRepository eventRepository;
+    private final ReportingRestrictionsRepository reportingRestrictionsRepository;
+    private final CourthouseRepository courthouseRepository;
+    private final HearingRepository hearingRepository;
+    private final CourtroomRepository courtroomRepository;
+    private final MediaRepository mediaRepository;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final NotificationRepository notificationRepository;
 
 
     public void clearDatabase() {

@@ -5,12 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.darts.event.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.List;

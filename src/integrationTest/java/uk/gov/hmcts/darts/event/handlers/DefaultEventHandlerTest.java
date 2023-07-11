@@ -7,7 +7,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.impl.DefaultEventHandler;
-import uk.gov.hmcts.darts.event.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -16,7 +16,7 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.event.testutils.DartsDatabaseStub.minimalCaseEntity;
+import static uk.gov.hmcts.darts.testutils.DartsDatabaseStub.minimalCaseEntity;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
