@@ -12,9 +12,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -42,12 +43,18 @@ class EventsControllerTest {
               ],
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
+
+        String expectedResponse = """
+            {
+              "code": "200",
+              "message": "OK"
+            }""";
         MockHttpServletRequestBuilder requestBuilder = post("/events")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
 
-        assertThat(response.getResponse().getContentAsString()).isEqualTo("");
+        assertEquals(expectedResponse, response.getResponse().getContentAsString(), NON_EXTENSIBLE);
 
         verify(eventDispatcher).receive(any(DartsEvent.class));
     }
