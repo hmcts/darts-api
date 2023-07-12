@@ -1,0 +1,2 @@
+INSERT INTO darts.audit_activities VALUES (998, 'test name', 'test description');
+INSERT INTO darts.audit VALUES (999, 2, 998, 4, '2023-06-13T08:13:09.688537759Z', 'application_server', 'additional_data');
