@@ -10,6 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.time.OffsetDateTime;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,7 +30,14 @@ class CourtLogsControllerTest {
     @Test
     void courtLogsGet() throws Exception {
 
+        String time
+            = OffsetDateTime.now().toString();
+
         MockHttpServletRequestBuilder requestBuilder = get("/courtlogs")
+            .queryParam("courthouse","String")
+            .queryParam("caseNumber","String")
+            .queryParam("startDateTime",time)
+            .queryParam("endDateTime",time)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented());
 
