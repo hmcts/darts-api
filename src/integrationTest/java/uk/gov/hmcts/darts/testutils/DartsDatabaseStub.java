@@ -24,9 +24,12 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.LocalDate.now;
+import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCase;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCourtroom;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createHearing;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCase;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtHouseWithName;
 
 @Service
 @AllArgsConstructor
@@ -52,10 +55,6 @@ public class DartsDatabaseStub {
         courtroomRepository.deleteAll();
         caseRepository.deleteAll();
         courthouseRepository.deleteAll();
-    }
-
-    public void save(CaseEntity minimalCaseEntity) {
-        caseRepository.save(minimalCaseEntity);
     }
 
     public Optional<CaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
@@ -94,7 +93,7 @@ public class DartsDatabaseStub {
     @Transactional
     public CaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
         var courtroom = givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
-        var caseEntity = minimalCaseEntity();
+        var caseEntity = aCase();
         caseEntity.setCaseNumber(caseNumber);
         caseEntity.setCourthouse(courtroom.getCourthouse());
         return caseRepository.saveAndFlush(caseEntity);
@@ -113,40 +112,8 @@ public class DartsDatabaseStub {
         return courtroom;
     }
 
-    public static CaseEntity minimalCaseEntity() {
-        var caseEntity = new CaseEntity();
-        caseEntity.setCaseNumber("1");
-        caseEntity.setCourthouse(minimalCourtHouse());
-        return caseEntity;
-    }
-
-    public static CourthouseEntity minimalCourtHouse() {
-        var courtHouse = new CourthouseEntity();
-        courtHouse.setCourthouseName("some-courthouse");
-        return courtHouse;
-    }
-
-    public static HearingEntity minimalHearing() {
-        var courtroom = minimalCourtroom();
-        var caseEntity = minimalCaseEntity();
-        caseEntity.setCourthouse(courtroom.getCourthouse());
-
-        HearingEntity hearing = new HearingEntity();
-        hearing.setCourtCase(caseEntity);
-        hearing.setCourtroom(courtroom);
-        hearing.setHearingDate(now());
-        return hearing;
-    }
-
-    public static CourtroomEntity minimalCourtroom() {
-        CourtroomEntity courtroom = new CourtroomEntity();
-        courtroom.setCourthouse(minimalCourtHouse());
-        courtroom.setName("some-court-room");
-        return courtroom;
-    }
-
     public CaseEntity hasSomeCourtCase() {
-        return caseRepository.save(minimalCaseEntity());
+        return caseRepository.save(aCase());
     }
 
     public List<NotificationEntity> getNotificationsForCase(Integer caseId) {
@@ -156,5 +123,21 @@ public class DartsDatabaseStub {
     @Transactional
     public HearingEntity hasSomeHearing() {
         return hearingRepository.saveAndFlush(createHearing(createCase("c1"), createCourtroom("r1"), now()));
+    }
+
+    public void saveAll(HearingEntity... hearingEntities) {
+        hearingRepository.saveAll(asList(hearingEntities));
+    }
+
+    public void createCourthouseWithoutCourtrooms(String courthouseName) {
+        courthouseRepository.save(aCourtHouseWithName(courthouseName));
+    }
+
+    public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
+        return courtroomRepository.findByNames(courthouseName, courtroomName);
+    }
+
+    public void save(CaseEntity minimalCaseEntity) {
+        caseRepository.save(minimalCaseEntity);
     }
 }

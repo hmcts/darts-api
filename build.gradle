@@ -137,8 +137,8 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java',
   // temporary exclusions
   '**/uk/gov/hmcts/darts/audio/**',
-  '**/uk/gov/hmcts/darts/cases/**',
   '**/uk/gov/hmcts/darts/dailylist/**',
+  '**/uk/gov/hmcts/darts/audit/**',
 ]
 
 sonarqube {
@@ -412,6 +412,7 @@ flyway {
   baselineOnMigrate = true
   baselineVersion = '000'
   cleanDisabled = false
+  locations = ["db/migration/common", "db/migration/postgres"]
 }
 
 task cleanPostgresDatabase(type: org.flywaydb.gradle.task.FlywayCleanTask) {
