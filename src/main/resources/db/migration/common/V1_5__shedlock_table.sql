@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS shedlock(
+CREATE TABLE IF NOT EXISTS darts.shedlock(
 
 name VARCHAR(64) NOT NULL
 , lock_until TIMESTAMP NOT NULL
