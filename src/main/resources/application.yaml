@@ -37,7 +37,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/"
+            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
             provider: external-azure-ad-provider
           internal-azure-ad:
             client-id: ${AAD_B2C_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}
@@ -49,7 +49,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/"
+            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
             provider: internal-azure-ad-provider
         provider:
           external-azure-ad-provider:
