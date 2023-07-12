@@ -397,6 +397,7 @@ flyway {
   baselineOnMigrate = true
   baselineVersion = '000'
   cleanDisabled = false
+  locations = ["db/migration/common", "db/migration/postgres"]
 }
 
 task cleanPostgresDatabase(type: org.flywaydb.gradle.task.FlywayCleanTask) {
