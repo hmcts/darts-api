@@ -28,19 +28,18 @@ public class DailyListEntity extends VersionedEntity {
     public static final String ID = "dal_id";
     public static final String COURTHOUSE_ID = "cth_id";
     public static final String DAILY_LIST_OBJECT_ID = "r_daily_list_object_id";
-    public static final String UNIQUE_ID = "c_unique_id";
-    public static final String JOB_STATUS = "c_job_status";
-    public static final String TIMESTAMP = "c_timestamp";
-    public static final String DAILY_LIST_ID = "c_daily_list_id";
-    public static final String START_DATE = "c_start_date";
-    public static final String END_DATE = "c_end_date";
-    public static final String DAILY_LIST_ID_STRING = "c_daily_list_id_s";
-    public static final String DAILY_LIST_SOURCE = "c_daily_list_source";
+    public static final String UNIQUE_ID = "unique_id";
+    public static final String JOB_STATUS = "job_status";
+    public static final String TIMESTAMP = "published_ts";
+    public static final String DAILY_LIST_ID = "daily_list_id";
+    public static final String START_DATE = "start_dt";
+    public static final String END_DATE = "end_dt";
+    public static final String DAILY_LIST_ID_STRING = "daily_list_id_s";
+    public static final String DAILY_LIST_SOURCE = "daily_list_source";
     public static final String CREATED_DATE_TIME = "created_ts";
     public static final String LAST_UPDATED_DATE_TIME = "last_modified_ts";
-    public static final String LEGACY_COURTHOUSE_OBJECT_ID = "r_courthouse_object_id";
-    public static final String LEGACY_VERSION_LABEL = "r_version_label";
-    public static final String SUPERSEDED = "i_superseded";
+    public static final String LEGACY_VERSION_LABEL = "version_label";
+    public static final String SUPERSEDED = "superseded";
     public static final String TABLE_NAME = "daily_list";
     public static final String DAILY_LIST_CONTENT = "daily_list_content";
 
@@ -64,7 +63,7 @@ public class DailyListEntity extends VersionedEntity {
     private String status;
 
     @Column(name = TIMESTAMP)
-    private OffsetDateTime timestamp;
+    private OffsetDateTime publishedTimestamp;
 
     @Column(name = DAILY_LIST_ID)
     private Integer dailyListId;
@@ -83,9 +82,6 @@ public class DailyListEntity extends VersionedEntity {
 
     @Column(name = DAILY_LIST_CONTENT)
     private String content;
-
-    @Column(name = LEGACY_COURTHOUSE_OBJECT_ID)
-    private String legacyCourthouseObjectId;
 
     @Column(name = LEGACY_VERSION_LABEL)
     private String legacyVersionLabel;
