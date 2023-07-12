@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
@@ -27,7 +28,7 @@ public class GetCasesMapper {
         scheduledCase.setCourtroom(hearing.getCourtroom().getName());
         scheduledCase.setHearingDate(hearing.getHearingDate());
         scheduledCase.setCaseNumber(hearingCourtCase.getCaseNumber());
-        scheduledCase.setScheduledStart(hearing.getScheduledStartTime().toString());
+        scheduledCase.setScheduledStart(toStringOrDefaultTo(hearing.getScheduledStartTime(), ""));
         scheduledCase.setDefendants(hearingCourtCase.getDefendants());
         scheduledCase.setJudges(hearing.getJudges());
         scheduledCase.setProsecutors(hearingCourtCase.getProsecutors());
@@ -35,5 +36,10 @@ public class GetCasesMapper {
         return scheduledCase;
     }
 
-
+    private String toStringOrDefaultTo(Object obj, String defaultStr) {
+        if (Objects.isNull(obj)) {
+            return defaultStr;
+        }
+        return obj.toString();
+    }
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class CaseServiceImpl implements CaseService {
     private final CommonApi commonApi;
 
     @Override
+    @Transactional
     public List<ScheduledCase> getCases(GetCasesRequest request) {
 
         List<HearingEntity> hearings = hearingRepository.findByCourthouseCourtroomAndDate(
