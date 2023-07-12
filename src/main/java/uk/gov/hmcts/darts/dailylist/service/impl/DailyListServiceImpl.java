@@ -36,7 +36,6 @@ public class DailyListServiceImpl implements DailyListService {
     public void processIncomingDailyList(DailyListPostRequest postRequest) {
         DailyList dailyList = postRequest.getDailyList();
 
-        dailyList.getCrownCourt().getCourtHouseName();
         CourthouseEntity courthouse = retrieveCourtHouse(dailyList);
         String uniqueId = dailyList.getDocumentId().getUniqueId();
         Optional<DailyListEntity> existingRecordOpt = dailyListRepository.findByUniqueId(uniqueId);
@@ -53,7 +52,6 @@ public class DailyListServiceImpl implements DailyListService {
             );
             dailyListRepository.saveAndFlush(dailyListEntity);
         }
-
     }
 
     private CourthouseEntity retrieveCourtHouse(DailyList dailyList) {
