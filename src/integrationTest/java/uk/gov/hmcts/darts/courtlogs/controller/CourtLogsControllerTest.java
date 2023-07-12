@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
 class CourtLogsControllerTest {
 
     @Autowired

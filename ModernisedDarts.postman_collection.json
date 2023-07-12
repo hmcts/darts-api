@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "27d5e4c7-e24f-4e3c-bf18-9aedb6547703",
+		"_postman_id": "1a7d458b-6305-4f1e-908d-933d767a1bd3",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27582460"
 	},
 	"item": [
 		{
@@ -60,56 +61,44 @@
 			]
 		},
 		{
-			"name": "Cases",
+			"name": "CourtlogsAPI",
 			"item": [
 				{
-					"name": "getCases",
-					"item": [
-						{
-							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "default"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{}"
+					"name": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4550",
+							"path": [
+								"courtlogs"
+							],
+							"query": [
+								{
+									"key": "courthouse",
+									"value": "\"String\""
 								},
-								"url": {
-									"raw": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "4550",
-									"path": [
-										"event",
-										"addDocument"
-									],
-									"query": [
-										{
-											"key": "message_id",
-											"value": "100"
-										},
-										{
-											"key": "type",
-											"value": "string"
-										},
-										{
-											"key": "sub_type",
-											"value": "string"
-										}
-									]
+								{
+									"key": "caseNumber",
+									"value": "\"String\""
+								},
+								{
+									"key": "startDateTime",
+									"value": "\"String\""
+								},
+								{
+									"key": "endDateTime",
+									"value": "\"String\""
 								}
-							},
-							"response": []
+							]
 						}
-					]
+					},
+					"response": []
 				}
 			]
 		}
