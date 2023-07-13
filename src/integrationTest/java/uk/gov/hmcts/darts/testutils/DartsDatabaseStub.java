@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
@@ -45,6 +46,7 @@ public class DartsDatabaseStub {
     private final MediaRepository mediaRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final NotificationRepository notificationRepository;
+    private final DailyListRepository dailyListRepository;
 
     public void clearDatabase() {
         notificationRepository.deleteAll();
@@ -54,6 +56,7 @@ public class DartsDatabaseStub {
         mediaRepository.deleteAll();
         courtroomRepository.deleteAll();
         caseRepository.deleteAll();
+        dailyListRepository.deleteAll();
         courthouseRepository.deleteAll();
     }
 
@@ -129,15 +132,30 @@ public class DartsDatabaseStub {
         hearingRepository.saveAll(asList(hearingEntities));
     }
 
-    public void createCourthouseWithoutCourtrooms(String courthouseName) {
-        courthouseRepository.save(aCourtHouseWithName(courthouseName));
+    public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
+        return courthouseRepository.save(aCourtHouseWithName(courthouseName));
     }
+
+    public CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code) {
+        var courthouse = aCourtHouseWithName(name);
+        courthouse.setCode(code);
+        return courthouseRepository.save(courthouse);
+    }
+
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
         return courtroomRepository.findByNames(courthouseName, courtroomName);
     }
 
-    public void save(CaseEntity minimalCaseEntity) {
-        caseRepository.save(minimalCaseEntity);
+    public void save(CaseEntity caseEntity) {
+        caseRepository.save(caseEntity);
+    }
+
+    public void save(CourthouseEntity courthouseEntity) {
+        courthouseRepository.save(courthouseEntity);
+    }
+
+    public CourthouseEntity findCourthouseWithName(String name) {
+        return courthouseRepository.findByCourthouseName(name).get();
     }
 }
