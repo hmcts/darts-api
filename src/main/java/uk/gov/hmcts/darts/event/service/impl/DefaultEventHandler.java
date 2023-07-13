@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
@@ -14,8 +15,8 @@ import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.event.exception.EventError;
+import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.event.service.DarNotifyService;
 
 import java.time.OffsetDateTime;
 
@@ -36,16 +37,16 @@ public class DefaultEventHandler extends EventHandlerBase {
     private final EventRepository eventRepository;
     private final CourtroomRepository courtroomRepository;
     private final HearingRepository hearingRepository;
-    private final DarNotifyService darNotifyService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
     public void handle(final DartsEvent dartsEvent) {
         final var actualCourtRoomEntity = courtroomRepository
-            .findByCourthouseNameAndCourtroomName(dartsEvent.getCourthouse(), dartsEvent.getCourtroom())
-            .orElseThrow(() -> new DartsApiException(
-                  EventError.EVENT_DATA_NOT_FOUND,
-                  format(NOT_FOUND_MESSAGE, dartsEvent.getCourthouse(), dartsEvent.getCourtroom())));
+              .findByCourthouseNameAndCourtroomName(dartsEvent.getCourthouse(), dartsEvent.getCourtroom())
+              .orElseThrow(() -> new DartsApiException(
+                    EventError.EVENT_DATA_NOT_FOUND,
+                    format(NOT_FOUND_MESSAGE, dartsEvent.getCourthouse(), dartsEvent.getCourtroom())));
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {
@@ -56,12 +57,12 @@ public class DefaultEventHandler extends EventHandlerBase {
         final var actualEventDate = dartsEvent.getDateTime();
 
         var actualCourtCaseEntity = caseRepository
-            .findByCaseNumberAndCourthouse_CourthouseName(actualEventCaseNumber, actualCourtHouse.getCourthouseName())
-            .orElseGet(() -> createNewCaseAt(actualCourtHouse, actualEventCaseNumber));
+              .findByCaseNumberAndCourthouse_CourthouseName(actualEventCaseNumber, actualCourtHouse.getCourthouseName())
+              .orElseGet(() -> createNewCaseAt(actualCourtHouse, actualEventCaseNumber));
 
         var actualHearingEntity = actualCourtCaseEntity.getHearings().stream()
-            .filter(hearingEntity -> hearingEntity.isFor(actualEventDate))
-            .findFirst().orElseGet(() -> newCaseHearing(actualCourtRoomEntity, actualEventDate, actualCourtCaseEntity));
+              .filter(hearingEntity -> hearingEntity.isFor(actualEventDate))
+              .findFirst().orElseGet(() -> newCaseHearing(actualCourtRoomEntity, actualEventDate, actualCourtCaseEntity));
 
         actualHearingEntity.setHearingIsActual(true);
 
@@ -71,7 +72,8 @@ public class DefaultEventHandler extends EventHandlerBase {
 
         if (eitherTheHearingIsNewOrTheCourtroomIsDifferent(actualCourtRoomEntity, actualHearingEntity)) {
             actualHearingEntity.setCourtroom(actualCourtRoomEntity);
-            darNotifyService.darNotify(dartsEvent, CASE_UPDATE);
+            var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE);
+            eventPublisher.publishEvent(notifyEvent);
         }
 
         caseRepository.save(actualCourtCaseEntity);
