@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.NEW;
+import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -63,7 +63,7 @@ class TransientObjectDirectoryServiceTest {
         assertNotNull(transientObjectDirectoryEntity);
         assertTrue(transientObjectDirectoryEntity.getId() > 0);
         assertEquals(mediaRequestEntity1.getId(), transientObjectDirectoryEntity.getMediaRequest().getId());
-        assertEquals(NEW.getId(), transientObjectDirectoryEntity.getStatus().getId());
+        assertEquals(STORED.getId(), transientObjectDirectoryEntity.getStatus().getId());
         assertEquals(externalLocation, transientObjectDirectoryEntity.getExternalLocation());
         assertNull(transientObjectDirectoryEntity.getChecksum());
         assertTrue(transientObjectDirectoryEntity.getCreatedTimestamp()
