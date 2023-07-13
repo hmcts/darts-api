@@ -7,6 +7,7 @@ bin/integrationTest/
 bin/main/
 bin/smokeTest/
 bin/test/
+bin/generated-sources/
 
 ### STS ###
 .apt_generated

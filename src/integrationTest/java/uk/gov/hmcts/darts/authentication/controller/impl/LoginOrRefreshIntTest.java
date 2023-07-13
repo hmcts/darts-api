@@ -43,7 +43,7 @@ class LoginOrRefreshIntTest {
 
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void loginOrRefreshShouldReturnRedirectWhenNoSessionIdQueryParamIsSent() throws Exception {
+    void loginOrRefreshShouldReturnRedirectWhenNoAuthHeaderIsSent() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT);
 
         mockMvc.perform(requestBuilder)

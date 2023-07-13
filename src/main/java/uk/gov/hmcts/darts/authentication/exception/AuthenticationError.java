@@ -15,11 +15,7 @@ public enum AuthenticationError implements DartsApiError {
 
     FAILED_TO_VALIDATE_ACCESS_TOKEN("101",
                                   HttpStatus.INTERNAL_SERVER_ERROR,
-                                  "Failed to validate access token"),
-
-    LOGOUT_ATTEMPTED_FOR_INACTIVE_SESSION("102",
-                                    HttpStatus.INTERNAL_SERVER_ERROR,
-                                    "Logout was attempted for a session that was inactive");
+                                  "Failed to validate access token");
 
     private static final String ERROR_TYPE_PREFIX = "AUTHENTICATION";
 
