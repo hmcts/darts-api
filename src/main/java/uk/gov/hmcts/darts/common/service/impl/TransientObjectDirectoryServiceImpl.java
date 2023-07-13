@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.NEW;
+import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
 
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setMediaRequest(mediaRequest);
-        transientObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(NEW.getId()));
+        transientObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(STORED.getId()));
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setChecksum(null);
         transientObjectDirectoryEntity.setTransferAttempts(null);

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
@@ -66,7 +67,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @Override
     public UUID saveAudioBlobData(BinaryData binaryData) {
         return dataManagementService.saveBlobData(
-            dataManagementConfiguration.getUnstructuredContainerName(),
+            dataManagementConfiguration.getOutboundContainerName(),
             binaryData
         );
     }
@@ -114,4 +115,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         return fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
     }
+
+    @Override
+    @Transactional
+    public void saveProcessedData(MediaRequestEntity mediaRequest, BinaryData binaryData) {
+        saveTransientDataLocation(mediaRequest, saveAudioBlobData(binaryData));
+        mediaRequestService.updateAudioRequestStatus(mediaRequest.getId(), COMPLETED);
+    }
+
 }

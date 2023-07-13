@@ -27,4 +27,6 @@ public interface AudioTransformationService {
 
     Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
 
+    void saveProcessedData(MediaRequestEntity mediaRequest, BinaryData binaryData);
+
 }
