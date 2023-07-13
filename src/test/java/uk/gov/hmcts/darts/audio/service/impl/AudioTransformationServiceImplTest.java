@@ -94,10 +94,10 @@ class AudioTransformationServiceImplTest {
 
     @Test
     void saveProcessedDataShouldSaveBlobAndSetStatus() {
-        String containerName = "ContainerName";
+        final String containerName = "ContainerName";
 
-        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
-        MediaRequestEntity mediaRequestEntityUpdated = new MediaRequestEntity();
+        final MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        final MediaRequestEntity mediaRequestEntityUpdated = new MediaRequestEntity();
         mediaRequestEntityUpdated.setStatus(COMPLETED);
 
         when(mockDataManagementConfiguration.getOutboundContainerName()).thenReturn(containerName);
