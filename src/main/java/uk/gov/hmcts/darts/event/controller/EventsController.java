@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.event.api.EventApi;
 import uk.gov.hmcts.darts.event.model.AddDocumentResponse;
+import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
+import uk.gov.hmcts.darts.event.model.CourtLogsPostResponseBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 
@@ -48,7 +50,7 @@ public class EventsController implements EventApi {
     )
     @Override
     public ResponseEntity<AddDocumentResponse> eventsPost(
-          @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
+        @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
         eventDispatcher.receive(dartsEvent);
 
@@ -57,6 +59,11 @@ public class EventsController implements EventApi {
         addDocumentResponse.setMessage("OK");
 
         return new ResponseEntity<>(addDocumentResponse, HttpStatus.CREATED);
+    }
+
+    @Override
+    public ResponseEntity<CourtLogsPostResponseBody> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
+        return EventApi.super.courtlogsPost(courtLogsPostRequestBody);
     }
 
 }
