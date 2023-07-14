@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -18,6 +19,7 @@ import java.time.LocalTime;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
@@ -38,6 +40,7 @@ class CaseControllerTest extends IntegrationBase {
 
     public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
     public static final String HEARING_DATE = "2023-06-20";
+    public static final String BASE_PATH = "/cases";
     @Autowired
     private transient MockMvc mockMvc;
 
@@ -60,7 +63,7 @@ class CaseControllerTest extends IntegrationBase {
     @Test
     void casesGetEndpoint() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get("/cases")
+        MockHttpServletRequestBuilder requestBuilder = get(BASE_PATH)
             .queryParam(COURTHOUSE, "SWANSEA")
             .queryParam(COURTROOM, "1")
             .queryParam(DATE, HEARING_DATE);
@@ -69,6 +72,51 @@ class CaseControllerTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = getContentsFromFile(EXPECTED_RESPONSE_FILE);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesPost() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponse.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+
+    @Test
+    void casesPostCourthouseMissing() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCourthouseMissing.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCourthouseMissing_400.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesPostOnlyCourthouseProvided() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyOnlyCourthouseProvided.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseOnlyCourthouseProvided.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

@@ -3,8 +3,11 @@ package uk.gov.hmcts.darts.cases.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.cases.mapper.GetCasesMapper;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
+import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
+import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
@@ -12,17 +15,27 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.api.CommonApi;
+import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CaseServiceImpl implements CaseService {
 
     private final HearingRepository hearingRepository;
+    private final CaseRepository caseRepository;
+    private final CourtroomRepository courtroomRepository;
+    private final CourthouseRepository courthouseRepository;
     private final CommonApi commonApi;
 
     @Override
@@ -35,9 +48,61 @@ public class CaseServiceImpl implements CaseService {
             request.getDate()
         );
         createCourtroomIfMissing(hearings, request);
-        return GetCasesMapper.mapToCourtCases(hearings);
-
+        return CasesMapper.mapToCourtCases(hearings);
     }
+
+    @Override
+    public ScheduledCase addCaseOrUpdate(AddCaseRequest addCaseRequest) {
+        CaseEntity caseEntity = saveNewCaseEntity(addCaseRequest);
+        HearingEntity savedHearingEntity = saveNewHearingEntity(addCaseRequest, caseEntity);
+        return CasesMapper.mapToCourtCase(savedHearingEntity, caseEntity);
+    }
+
+    private HearingEntity saveNewHearingEntity(AddCaseRequest addCaseRequest, CaseEntity caseEntity) {
+        return hearingRepository.saveAndFlush(mapToHearingEntity(addCaseRequest, caseEntity, new HearingEntity()));
+    }
+
+    private CaseEntity saveNewCaseEntity(AddCaseRequest addCaseRequest) {
+        CaseEntity caseEntity = mapAddCaseRequestToCaseEntity(addCaseRequest, new CaseEntity());
+        return caseRepository.saveAndFlush(caseEntity);
+    }
+
+    private HearingEntity mapToHearingEntity(AddCaseRequest addCaseRequest, CaseEntity caseEntity, HearingEntity hearingEntity) {
+        if (!StringUtils.isBlank(addCaseRequest.getCourtroom())) {
+            CourtroomEntity courtroomEntity = getExistingCourtroom(addCaseRequest);
+            if (courtroomEntity == null) {
+                throw new DartsApiException(CaseApiError.COURTROOM_PROVIDED_DOES_NOT_EXIST);
+            }
+            hearingEntity.setCourtroom(courtroomEntity);
+        }
+
+        hearingEntity.setCourtCase(caseEntity);
+        Optional.ofNullable(addCaseRequest.getJudges())
+            .ifPresentOrElse(l -> hearingEntity.getJudges().addAll(l), () -> hearingEntity.setJudges(null));
+        return hearingEntity;
+    }
+
+    private CourtroomEntity getExistingCourtroom(AddCaseRequest addCaseRequest) {
+        CourtroomEntity courtroomEntity;
+        courtroomEntity = courtroomRepository.findByNames(
+            addCaseRequest.getCourthouse(),
+            addCaseRequest.getCourtroom()
+        );
+        return courtroomEntity;
+    }
+
+    private CaseEntity mapAddCaseRequestToCaseEntity(AddCaseRequest addCaseRequest, CaseEntity caseEntity) {
+        caseEntity.setCaseNumber(addCaseRequest.getCaseNumber());
+        Optional.ofNullable(addCaseRequest.getDefendants()).ifPresent(l -> caseEntity.getDefendants().addAll(l));
+        Optional.ofNullable(addCaseRequest.getProsecutors()).ifPresent(l -> caseEntity.getProsecutors().addAll(l));
+        Optional.ofNullable(addCaseRequest.getDefenders()).ifPresent(l -> caseEntity.getDefenders().addAll(l));
+
+        Optional<CourthouseEntity> foundEntity = courthouseRepository.findByCourthouseName(addCaseRequest.getCourthouse());
+        foundEntity.ifPresentOrElse(caseEntity::setCourthouse, () -> {
+            throw new DartsApiException(CaseApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST);
+        });
+
+        return caseEntity;
 
     @Override
     public List<Hearing> getCaseHearings(Integer caseId) {
