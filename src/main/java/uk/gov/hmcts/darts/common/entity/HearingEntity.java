@@ -24,10 +24,12 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "hearing")
+@Table(name = HearingEntity.TABLE_NAME)
 @Getter
 @Setter
 public class HearingEntity {
+
+    public static final String TABLE_NAME = "hearing";
 
     @Id
     @Column(name = "hea_id")

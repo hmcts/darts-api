@@ -21,11 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "court_case")
+@Table(name = CaseEntity.TABLE_NAME)
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
 public class CaseEntity {
+
+
+    public static final String TABLE_NAME = "court_case";
 
     @Id
     @Column(name = "cas_id")
