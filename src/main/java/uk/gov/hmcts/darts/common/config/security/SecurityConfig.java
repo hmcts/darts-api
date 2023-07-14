@@ -17,7 +17,6 @@ import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationF
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uk.gov.hmcts.darts.authentication.component.UriProvider;
-import uk.gov.hmcts.darts.authentication.service.SessionService;
 
 import java.io.IOException;
 
@@ -29,8 +28,6 @@ import java.io.IOException;
 public class SecurityConfig {
 
     private final UriProvider uriProvider;
-
-    private final SessionService sessionService;
 
     @Bean
     @Order(1)

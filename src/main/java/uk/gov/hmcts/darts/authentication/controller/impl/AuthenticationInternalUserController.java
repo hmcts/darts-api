@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,29 +15,24 @@ public class AuthenticationInternalUserController implements AuthenticationContr
     private static final String INTERNAL_USERS_NOT_SUPPORTED_MESSAGE = "Internal users not yet supported";
 
     @Override
-    public ModelAndView loginOrRefresh(HttpSession session) {
+    public ModelAndView loginOrRefresh(String authHeaderValue) {
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
     @Override
-    public String handleOauthCode(HttpSession session, String code) {
+    public String handleOauthCode(String code) {
         log.info("Authorization Token received successfully");
 
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
     @Override
-    public ModelAndView logout(HttpSession httpSession) {
+    public ModelAndView logout(String authHeaderValue) {
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
     @Override
-    public void invalidateSession(HttpSession session) {
-        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public ModelAndView resetPassword(HttpSession session) {
+    public ModelAndView resetPassword() {
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 

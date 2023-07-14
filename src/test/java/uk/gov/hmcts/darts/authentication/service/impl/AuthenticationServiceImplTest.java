@@ -11,13 +11,11 @@ import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
-import uk.gov.hmcts.darts.authentication.model.Session;
 import uk.gov.hmcts.darts.authentication.service.SessionService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -26,7 +24,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AuthenticationServiceImplTest {
 
-    private static final String DUMMY_SESSION_ID = "9D65049E1787A924E269747222F60CAA";
     private static final URI DUMMY_AUTH_URI = URI.create("DUMMY_AUTH_URI");
     private static final URI DUMMY_LOGOUT_URI = URI.create("DUMMY_LOGOUT_URI");
     private static final URI DUMMY_LANDING_PAGE_URI = URI.create("DUMMY_LANDING_PAGE_URI");
@@ -49,25 +46,35 @@ class AuthenticationServiceImplTest {
     private UriProvider uriProvider;
 
     @Test
-    void loginOrRefreshShouldReturnAuthUriWhenNoExistingSessionExists() {
-        when(sessionService.getSession(anyString()))
-            .thenReturn(null);
+    void loginOrRefreshShouldReturnAuthUriWhenNoAuthHeaderExists() {
         when(uriProvider.getLoginUri())
             .thenReturn(DUMMY_AUTH_URI);
 
-        URI uri = authenticationService.loginOrRefresh(DUMMY_SESSION_ID);
+        URI uri = authenticationService.loginOrRefresh(null);
 
         assertEquals(DUMMY_AUTH_URI, uri);
     }
 
     @Test
-    void loginOrRefreshShouldReturnLandingPageUriWhenSessionExists() {
-        when(sessionService.getSession(anyString()))
-            .thenReturn(new Session(null, null, 0));
+    void loginOrRefreshShouldReturnAuthUriWhenInvalidAccessTokenExists() {
+        when(uriProvider.getLoginUri())
+            .thenReturn(DUMMY_AUTH_URI);
+        when(tokenValidator.validate(DUMMY_ID_TOKEN))
+            .thenReturn(new JwtValidationResult(false, "Invalid token"));
+
+        URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN);
+
+        assertEquals(DUMMY_AUTH_URI, uri);
+    }
+
+    @Test
+    void loginOrRefreshShouldReturnLandingPageUriWhenValidAccessTokenExists() {
         when(uriProvider.getLandingPageUri())
             .thenReturn(DUMMY_LANDING_PAGE_URI);
+        when(tokenValidator.validate(DUMMY_ID_TOKEN))
+            .thenReturn(new JwtValidationResult(true, null));
 
-        URI uri = authenticationService.loginOrRefresh(DUMMY_SESSION_ID);
+        URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN);
 
         assertEquals(DUMMY_LANDING_PAGE_URI, uri);
     }
@@ -79,7 +86,7 @@ class AuthenticationServiceImplTest {
         when(tokenValidator.validate(anyString()))
             .thenReturn(new JwtValidationResult(true, null));
 
-        String token = authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE);
+        String token = authenticationService.handleOauthCode(DUMMY_CODE);
 
         assertEquals(DUMMY_ID_TOKEN, token);
     }
@@ -91,7 +98,7 @@ class AuthenticationServiceImplTest {
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
-            () -> authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE)
+            () -> authenticationService.handleOauthCode(DUMMY_CODE)
         );
 
         assertEquals("100", exception.getError().getErrorTypeNumeric());
@@ -106,51 +113,20 @@ class AuthenticationServiceImplTest {
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
-            () -> authenticationService.handleOauthCode(DUMMY_SESSION_ID, DUMMY_CODE)
+            () -> authenticationService.handleOauthCode(DUMMY_CODE)
         );
 
         assertEquals("101", exception.getError().getErrorTypeNumeric());
     }
 
     @Test
-    void logoutShouldThrowExceptionWhenNoExistingSessionExists() {
-        when(sessionService.getSession(anyString()))
-            .thenReturn(null);
-
-        DartsApiException exception = assertThrows(
-            DartsApiException.class,
-            () -> authenticationService.logout(DUMMY_SESSION_ID)
-        );
-
-        assertEquals("102", exception.getError().getErrorTypeNumeric());
-    }
-
-    @Test
     void logoutShouldReturnLogoutPageUriWhenSessionExists() {
-        when(sessionService.getSession(anyString()))
-            .thenReturn(new Session(null, null, 0));
         when(uriProvider.getLogoutUri(anyString()))
             .thenReturn(DUMMY_LOGOUT_URI);
 
-        URI uri = authenticationService.logout(DUMMY_SESSION_ID);
+        URI uri = authenticationService.logout(DUMMY_ID_TOKEN);
 
         assertEquals(DUMMY_LOGOUT_URI, uri);
-    }
-
-    @Test
-    void invalidateSessionShouldShouldCompleteWithoutExceptionWhenSessionDoesNotExist() {
-        when(sessionService.dropSession(anyString()))
-            .thenReturn(null);
-
-        assertDoesNotThrow(() -> authenticationService.invalidateSession(DUMMY_SESSION_ID));
-    }
-
-    @Test
-    void invalidateSessionShouldCompleteWithoutExceptionWhenSessionExists() {
-        when(sessionService.dropSession(anyString()))
-            .thenReturn(new Session(null, null, 0));
-
-        assertDoesNotThrow(() -> authenticationService.invalidateSession(DUMMY_SESSION_ID));
     }
 
     @Test
@@ -158,7 +134,7 @@ class AuthenticationServiceImplTest {
         when(uriProvider.getResetPasswordUri())
             .thenReturn(DUMMY_AUTH_URI);
 
-        URI uri = authenticationService.resetPassword(DUMMY_SESSION_ID);
+        URI uri = authenticationService.resetPassword();
 
         assertEquals(DUMMY_AUTH_URI, uri);
     }

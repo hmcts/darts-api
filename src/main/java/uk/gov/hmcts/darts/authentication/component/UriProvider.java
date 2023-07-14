@@ -8,7 +8,7 @@ public interface UriProvider {
 
     URI getLandingPageUri();
 
-    URI getLogoutUri(String sessionId);
+    URI getLogoutUri(String accessToken);
 
     URI getResetPasswordUri();
 
