@@ -61,6 +61,7 @@ INSERT INTO court_case VALUES (29,null,null,'Case0000029',null,null,null,ARRAY [
 INSERT INTO court_case VALUES (30,null,null,'Case0000030',null,null,null,ARRAY ['Mr Defendant0000030 Bloggs1','Mr Defendant0000030 Bloggs2'],ARRAY ['Prosecutor00000301','Prosecutor00000302'],ARRAY ['Defence00000301','Defence00000302'],null,null,null);
 INSERT INTO court_case VALUES (31,null,null,'Case0000031',null,null,null,ARRAY ['Mr Defendant0000031 Bloggs1','Mr Defendant0000031 Bloggs2'],ARRAY ['Prosecutor00000311','Prosecutor00000312'],ARRAY ['Defence00000311','Defence00000312'],null,null,null);
 INSERT INTO court_case VALUES (32,null,null,'Case0000032',null,null,null,ARRAY ['Mr Defendant0000032 Bloggs1','Mr Defendant0000032 Bloggs2'],ARRAY ['Prosecutor00000321','Prosecutor00000322'],ARRAY ['Defence00000321','Defence00000322'],null,null,null);
+INSERT INTO court_case VALUES (33,null,null,'Case0000033',null,null,null,ARRAY ['Mr Defendant0000033 Bloggs1','Mr Defendant0000033 Bloggs2'],ARRAY ['Prosecutor00000331','Prosecutor00000332'],ARRAY ['Defence00000331','Defence00000332'],null,null,1);
 ALTER SEQUENCE cas_seq RESTART WITH 50;
 
 INSERT INTO hearing VALUES (1,1,1,'{Judge1}','2023-06-20','09:00:00',TRUE, NULL);
@@ -223,6 +224,7 @@ INSERT INTO hearing VALUES (157,29,4,'{Judge4}','2023-06-24','13:00:00',TRUE, NU
 INSERT INTO hearing VALUES (158,30,4,'{Judge4}','2023-06-24','14:00:00',TRUE, NULL);
 INSERT INTO hearing VALUES (159,31,4,'{Judge4}','2023-06-24','15:00:00',TRUE, NULL);
 INSERT INTO hearing VALUES (160,32,4,'{Judge4}','2023-06-24','16:00:00',TRUE, NULL);
+INSERT INTO hearing VALUES (161,33,4,'{Judge4}','2023-06-24','16:00:00',TRUE, NULL);
 ALTER SEQUENCE hea_seq RESTART WITH 200;
 
 INSERT INTO darts.event (eve_id, ctr_id, evh_id, event_object_id, event_id, event_name, event_text, event_ts, case_number, version_label, message_id, superseded, version) VALUES (1, 1, 1, 'LOG', 1, 'LOG', 'TEST', '2023-07-01 10:00:00+00', '{1,2}', 'test', 'test', true, 1);
