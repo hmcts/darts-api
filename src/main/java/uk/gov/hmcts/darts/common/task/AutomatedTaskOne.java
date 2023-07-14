@@ -2,15 +2,16 @@ package uk.gov.hmcts.darts.common.task;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Calendar;
+import java.util.Date;
 
 @Slf4j
-public class TestAutomatedTaskOne implements AutomatedTask {
+public class AutomatedTaskOne implements AutomatedTask {
 
-    public static final String TASKNAME = "TestAutomatedTaskOne";
+    public static final String TASKNAME = "AutomatedTaskOne";
 
     public static final String DEFAULT_CRON_EXPRESSION = "*/30 * * * * *";
 
+    @Override
     public String getTaskName() {
         return TASKNAME;
     }
@@ -22,6 +23,6 @@ public class TestAutomatedTaskOne implements AutomatedTask {
 
     @Override
     public void run() {
-        log.info("Task: {} running at: {}", getTaskName(), Calendar.getInstance().getTime());
+        log.info("Task: {} running at: {}", getTaskName(), new Date().getTime());
     }
 }

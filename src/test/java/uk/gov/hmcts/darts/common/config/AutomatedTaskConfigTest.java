@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.config;
 
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,9 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import uk.gov.hmcts.darts.common.service.AutomatedTaskService;
-import uk.gov.hmcts.darts.common.task.TestAutomatedTaskOne;
+import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
 
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Slf4j
@@ -33,22 +34,23 @@ class AutomatedTaskConfigTest {
 
     @Test
     void configureTasks() throws InterruptedException {
-        Thread.sleep(35000);
+        Thread.sleep(35_000);
 
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
         log.info("----- About to cancel task 1");
-        automatedTaskService.cancelTaskTrigger(TestAutomatedTaskOne.TASKNAME);
+        boolean taskCancelled = automatedTaskService.cancelTask(AutomatedTaskOne.TASKNAME);
+        assertTrue(taskCancelled);
         log.info("----- Current tasks");
         displayTasks(scheduledTasks);
 
-        Thread.sleep(21000);
+        Thread.sleep(21_000);
         log.info("----- Tasks after sleep");
         displayTasks(scheduledTasks);
         log.info("----- About to add task 1");
         automatedTaskService.loadAutomatedTaskOne(taskScheduler);
-        Thread.sleep(31000);
+        Thread.sleep(31_000);
         displayTasks(scheduledTasks);
     }
 

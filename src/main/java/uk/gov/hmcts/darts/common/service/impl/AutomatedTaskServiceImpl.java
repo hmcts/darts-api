@@ -16,12 +16,12 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.common.task.AutomatedTask;
-import uk.gov.hmcts.darts.common.task.TestAutomatedTaskOne;
-import uk.gov.hmcts.darts.common.task.TestAutomatedTaskTwo;
+import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
+import uk.gov.hmcts.darts.common.task.AutomatedTaskTwo;
 
 import java.time.Instant;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -35,7 +35,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     @Autowired
     private ScheduledTaskHolder taskHolder;
 
-    private Map<String, Trigger> taskTriggers = new ConcurrentHashMap<>();
+    private final Map<String, Trigger> taskTriggers = new ConcurrentHashMap<>();
 
     @Override
     public void loadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -59,25 +59,25 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     @Override
     public void loadAutomatedTaskOne(TaskScheduler taskScheduler) {
-        TestAutomatedTaskOne taskOne = new TestAutomatedTaskOne();
+        AutomatedTaskOne taskOne = new AutomatedTaskOne();
         Trigger trigger = createAutomatedTaskTrigger(taskOne);
         taskScheduler.schedule(taskOne, trigger);
     }
 
     private void loadAutomatedTaskOne(ScheduledTaskRegistrar taskRegistrar) {
-        TestAutomatedTaskOne taskOne = new TestAutomatedTaskOne();
+        AutomatedTaskOne taskOne = new AutomatedTaskOne();
         Trigger trigger = createAutomatedTaskTrigger(taskOne);
         taskRegistrar.addTriggerTask(taskOne, trigger);
     }
 
     public void loadAutomatedTaskTwo(TaskScheduler taskScheduler) {
-        TestAutomatedTaskTwo taskTwo = new TestAutomatedTaskTwo();
+        AutomatedTaskTwo taskTwo = new AutomatedTaskTwo();
         Trigger trigger = createAutomatedTaskTrigger(taskTwo);
         taskScheduler.schedule(taskTwo, trigger);
     }
 
     private void loadAutomatedTaskTwo(ScheduledTaskRegistrar taskRegistrar) {
-        TestAutomatedTaskTwo taskTwo = new TestAutomatedTaskTwo();
+        AutomatedTaskTwo taskTwo = new AutomatedTaskTwo();
         Trigger trigger = createAutomatedTaskTrigger(taskTwo);
         taskRegistrar.addTriggerTask(taskTwo, trigger);
     }
@@ -89,7 +89,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     @Override
-    public boolean cancelTaskTrigger(String taskName) {
+    public boolean cancelTask(String taskName) {
         boolean result = false;
         if (taskTriggers.containsKey(taskName)) {
             Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
@@ -97,17 +97,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 Task task = scheduledTask.getTask();
                 if (task instanceof TriggerTask) {
                     TriggerTask triggerTask = (TriggerTask) task;
-
-                    if (triggerTask.getRunnable() instanceof AutomatedTask) {
-                        AutomatedTask automatedTask = (AutomatedTask) triggerTask.getRunnable();
-                        if (automatedTask.getTaskName().equals(taskName)) {
-                            log.info("About to cancel task: " + taskName);
-                            scheduledTask.cancel(false);
-                            result = true;
-                            taskTriggers.remove(taskName);
-                            break;
-                        }
-                    }
+                    result = cancelTriggerTask(taskName, scheduledTask, triggerTask);
+                    break;
                 }
             }
         } else {
@@ -118,8 +109,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         return result;
     }
 
+    private boolean cancelTriggerTask(String taskName, ScheduledTask scheduledTask, TriggerTask triggerTask) {
+        boolean result = false;
+        if (triggerTask.getRunnable() instanceof AutomatedTask) {
+            AutomatedTask automatedTask = (AutomatedTask) triggerTask.getRunnable();
+            if (automatedTask.getTaskName().equals(taskName)) {
+                log.info("About to cancel task: " + taskName);
+                scheduledTask.cancel(false);
+                result = true;
+                taskTriggers.remove(taskName);
+
+            }
+        }
+        return result;
+    }
+
     private Trigger createCronTrigger(AutomatedTask automatedTask) {
-        Trigger trigger = new Trigger() {
+        return new Trigger() {
             @Override
             public Instant nextExecution(TriggerContext triggerContext) {
                 String cronExpression = getAutomatedTaskCronExpression(automatedTask);
@@ -127,7 +133,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 return crontrigger.nextExecution(triggerContext);
             }
         };
-        return trigger;
+
     }
 
 }
