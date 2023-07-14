@@ -54,15 +54,25 @@
 --    adding suffix of _list where [] is used on datatype to denote an array
 --    rename event_type to event_handler
 --    added external_location_type table
+--v30 added standing data for reporting restrictions
+--    added region table and associative entity to courthouse
+--    added device_register table ( equivalent to legacy tbl_moj_node)
+--    added unique constraint on court_case(cth_id, case_number
+--    standardised the use of "last_modified_ts" , where previously using "modified_ts" or "last_updated_ts"
+--    standardised the use of "last_modified_by" , where previously using "modified_by"
+--    reduced number of Documentum columns on user_account table, while adding a few others
+
  
 
 
 -- List of Table Aliases
 -- annotation                 ANN
--- case                       CAS
+-- court_case                 CAS
 -- courthouse                 CTH
+-- courthouse_region_ae       CRA
 -- courtroom                  CTR
 -- daily_list                 DAL
+-- device_register            DER
 -- event                      EVE
 -- event_handler              EVH
 -- external_object_directory  EOD
@@ -73,13 +83,14 @@
 -- media_request              MER
 -- notification               NOT
 -- object_directory_status    ODS
+-- region                     REG
 -- report                     REP
 -- reporting_restrictions     RER
 -- transcription              TRA
 -- transcription_type         TRT
 -- transient_object_directory TOD
 -- urgency                    URG
--- user                       USR
+-- user_account               USR
 
 CREATE SCHEMA DARTS;
 CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
@@ -92,9 +103,7 @@ CREATE TABLE DARTS.annotation
 ,ctr_id                   INTEGER
 ,annotation_text          CHARACTER VARYING
 ,annotation_ts            TIMESTAMP WITH TIME ZONE
-,case_number              CHARACTER VARYING(32)    --this is a placeholder for moj_case_document_r.c_case_id, known to be singular for moj_annotation object types
 ,annotation_object_id     CHARACTER VARYING(16)		
-,case_object_id           CHARACTER VARYING(16)	   --this is a placeholder for moj_case_s.r_object_id, and must be derived from moj_case_document_r.c_case_id	
 ,version_label            CHARACTER VARYING(32)
 ,superseded               BOOLEAN
 ,version                  INTEGER
@@ -117,9 +126,6 @@ IS 'directly sourced from moj_annotation_s.c_text';
 
 COMMENT ON COLUMN DARTS.annotation.annotation_ts
 IS 'directly sourced from moj_annotation_s';
-
-COMMENT ON COLUMN DARTS.annotation.case_object_id
-IS 'internal Documentum id from moj_case_s acting as foreign key';
 
 COMMENT ON COLUMN DARTS.annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
@@ -198,6 +204,12 @@ IS 'corresponds to the c_crown_court_code found in daily lists';
 COMMENT ON COLUMN DARTS.courthouse.courthouse_name
 IS 'directly sourced from moj_courthouse_s.c_id';
 
+CREATE TABLE DARTS.courthouse_region_ae
+(cra_id                     INTEGER                  NOT NULL
+,cth_id                     INTEGER                  NOT NULL
+,reg_id                     INTEGER                  NOT NULL
+) TABLESPACE darts_tables;
+
 CREATE TABLE DARTS.courtroom
 (ctr_id                     INTEGER                  NOT NULL
 ,cth_id                     INTEGER                  NOT NULL
@@ -214,12 +226,11 @@ IS 'foreign key to courthouse';
 CREATE TABLE DARTS.daily_list
 (dal_id                     INTEGER					 NOT NULL
 ,cth_id                     INTEGER					 NOT NULL
-,r_daily_list_object_id     CHARACTER VARYING(16)
+,daily_list_object_id       CHARACTER VARYING(16)
 ,unique_id                  CHARACTER VARYING
 --,c_crown_court_name       CHARACTER VARYING        -- removed, normalised to courthouses, but note that in legacy there is mismatch between moj_courthouse_s.c_id and moj_daily_list_s.c_crown_court_name to be resolved
 ,job_status                 CHARACTER VARYING        -- one of "New","Partially Processed","Processed","Ignored","Invalid"
 ,published_ts               TIMESTAMP WITH TIME ZONE 
-,daily_list_id              NUMERIC                  -- all 0
 ,start_dt                   DATE   
 ,end_dt                     DATE -- all values match c_start_date
 ,daily_list_id_s            CHARACTER VARYING        -- non unique integer in legacy
@@ -238,7 +249,7 @@ IS 'primary key of daily_list';
 COMMENT ON COLUMN DARTS.daily_list.cth_id
 IS 'foreign key from courthouse';
 
-COMMENT ON COLUMN DARTS.daily_list.r_daily_list_object_id
+COMMENT ON COLUMN DARTS.daily_list.daily_list_object_id
 IS 'internal Documentum primary key from moj_daily_list_s';
 
 COMMENT ON COLUMN DARTS.daily_list.unique_id
@@ -249,9 +260,6 @@ IS 'directly sourced from moj_daily_list_s';
 
 COMMENT ON COLUMN DARTS.daily_list.published_ts
 IS 'directly sourced from moj_daily_list_s.c_timestamp';
-
-COMMENT ON COLUMN DARTS.daily_list.daily_list_id
-IS 'directly sourced from moj_daily_list_s';
 
 COMMENT ON COLUMN DARTS.daily_list.start_dt
 IS 'directly sourced from moj_daily_list_s.c_start_date';
@@ -267,6 +275,27 @@ IS 'directly sourced from moj_daily_list_s';
 
 COMMENT ON COLUMN DARTS.daily_list.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_daily_list';
+
+CREATE TABLE DARTS.device_register
+(der_id                     INTEGER                  NOT NULL
+,ctr_id                     INTEGER                  NOT NULL
+,node_id                    INTEGER                  
+,hostname                   CHARACTER VARYING
+,ip_address                 CHARACTER VARYING
+,mac_address                CHARACTER VARYING
+) TABLESPACE darts_tables;
+
+COMMENT ON TABLE DARTS.device_register
+IS 'corresponds to tbl_moj_node from legacy';
+
+COMMENT ON COLUMN DARTS.device_register.der_id
+IS 'primary key of device_register';
+
+COMMENT ON COLUMN DARTS.device_register.ctr_id 
+IS 'foreign key from moj_courtroom, legacy stored courthouse and courtroon un-normalised';
+
+
+
 
 CREATE TABLE DARTS.event
 (eve_id                     INTEGER					 NOT NULL
@@ -322,8 +351,8 @@ CREATE TABLE DARTS.event_handler
 ,event_name                  CHARACTER VARYING           NOT NULL
 ,handler                     CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE    NOT NULL
-,modified_ts                 TIMESTAMP WITH TIME ZONE    NOT NULL
-,modified_by                 INTEGER                     NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE    NOT NULL
+,last_modified_by            INTEGER                     NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON TABLE DARTS.event_handler
@@ -357,8 +386,8 @@ CREATE TABLE DARTS.external_object_directory
 ,checksum	                 CHARACTER VARYING
 ,transfer_attempts           INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE    NOT NULL
-,modified_ts                 TIMESTAMP WITH TIME ZONE    NOT NULL
-,modified_by                 INTEGER                     NOT NULL  -- FK to moj_user.moj_usr_id
+,last_modified_ts            TIMESTAMP WITH TIME ZONE    NOT NULL
+,last_modified_by            INTEGER                     NOT NULL  -- FK to moj_user.moj_usr_id
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN DARTS.external_object_directory.eod_id
@@ -449,7 +478,6 @@ IS 'foreign key from media, part of composite natural key';
 CREATE TABLE DARTS.media
 (med_id                     INTEGER					 NOT NULL
 ,ctr_id                     INTEGER
-,media_id                   INTEGER
 ,media_object_id            CHARACTER VARYING(16)
 ,channel                    INTEGER
 ,total_channels             INTEGER                  --99.9% are "4" in legacy 
@@ -457,7 +485,6 @@ CREATE TABLE DARTS.media
 ,start_ts                   TIMESTAMP WITH TIME ZONE 
 ,end_ts                     TIMESTAMP WITH TIME ZONE
 ,case_number                CHARACTER VARYING(32)[]  --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
-,case_object_id             CHARACTER VARYING(16)[]  --this is a placeholder for moj_case_s.r_object_id, and must be derived from moj_case_document_r.c_case_id
 ,version_label              CHARACTER VARYING(32)
 ,superseded                 BOOLEAN
 ,version                    INTEGER
@@ -500,7 +527,7 @@ CREATE TABLE DARTS.media_request
 ,start_ts                   TIMESTAMP WITH TIME ZONE
 ,end_ts                     TIMESTAMP WITH TIME ZONE
 ,created_ts                 TIMESTAMP WITH TIME ZONE
-,last_updated_ts            TIMESTAMP WITH TIME ZONE
+,last_modified_ts            TIMESTAMP WITH TIME ZONE
 ,last_accessed_ts           TIMESTAMP WITH TIME ZONE
 ,output_filename            CHARACTER VARYING
 ,output_format              CHARACTER VARYING
@@ -544,7 +571,7 @@ CREATE TABLE DARTS.notification
 ,send_attempts              INTEGER
 ,template_values            CHARACTER VARYING
 ,created_ts                 TIMESTAMP WITH TIME ZONE   NOT NULL
-,last_updated_ts            TIMESTAMP WITH TIME ZONE   NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE   NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN DARTS.notification.not_id
@@ -576,6 +603,11 @@ CREATE TABLE DARTS.object_directory_status
 
 COMMENT ON TABLE DARTS.object_directory_status
 IS 'used to record acceptable statuses found in [external/transient]_object_directory';
+
+CREATE TABLE DARTS.region
+(reg_id                     INTEGER
+,region_name                CHARACTER VARYING
+) TABLESPACE darts_tables;
 
 
 CREATE TABLE DARTS.report               
@@ -740,8 +772,8 @@ CREATE TABLE DARTS.transient_object_directory
 ,checksum	                 CHARACTER VARYING
 ,transfer_attempts           INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE    NOT NULL
-,modified_ts                 TIMESTAMP WITH TIME ZONE    NOT NULL
-,modified_by                 INTEGER                     NOT NULL  -- FK to moj_user.moj_usr_id
+,last_modified_ts            TIMESTAMP WITH TIME ZONE    NOT NULL
+,last_modified_by            INTEGER                     NOT NULL  -- FK to moj_user.moj_usr_id
 ) TABLESPACE darts_tables;
 
 CREATE TABLE DARTS.urgency
@@ -762,20 +794,13 @@ CREATE TABLE DARTS.user_account
 (usr_id                  INTEGER
 ,dm_user_s_object_id     CHARACTER VARYING(16)
 ,user_name               CHARACTER VARYING
-,user_os_name            CHARACTER VARYING
-,user_address            CHARACTER VARYING
-,user_privileges         NUMERIC
-,user_db_name            CHARACTER VARYING
+,user_email_address      CHARACTER VARYING
 ,description             CHARACTER VARYING
 ,user_state              NUMERIC
-,modify_ts               TIMESTAMP WITH TIME ZONE
-,workflow_disabled       NUMERIC
-,user_source             CHARACTER VARYING
-,user_ldap_cn            CHARACTER VARYING
-,user_global_unique_id   CHARACTER VARYING
-,user_login_name         CHARACTER VARYING
-,user_login_domain       CHARACTER VARYING
-,last_login_utc_time     TIMESTAMP WITH TIME ZONE
+,created_ts              TIMESTAMP WITH TIME ZONE
+,last_modified_ts        TIMESTAMP WITH TIME ZONE
+,last_login_ts           TIMESTAMP WITH TIME ZONE
+,last_modified_by        INTEGER
 ) TABLESPACE darts_tables;
 
 COMMENT ON TABLE DARTS.user_account 
@@ -796,11 +821,17 @@ ALTER  TABLE DARTS.court_case              ADD PRIMARY KEY USING INDEX court_cas
 CREATE UNIQUE INDEX courthouse_pk ON DARTS.courthouse(cth_id) TABLESPACE darts_indexes;
 ALTER  TABLE DARTS.courthouse              ADD PRIMARY KEY USING INDEX courthouse_pk;
 
+CREATE UNIQUE INDEX courthouse_region_ae_pk ON DARTS.courthouse_region_ae(cra_id) TABLESPACE darts_indexes;
+ALTER  TABLE DARTS.courthouse_region_ae    ADD PRIMARY KEY USING INDEX courthouse_region_ae_pk;
+
 CREATE UNIQUE INDEX courtroom_pk ON DARTS.courtroom(ctr_id) TABLESPACE darts_indexes;
 ALTER  TABLE DARTS.courtroom               ADD PRIMARY KEY USING INDEX courtroom_pk;
 
 CREATE UNIQUE INDEX daily_list_pk ON DARTS.daily_list(dal_id) TABLESPACE darts_indexes;
 ALTER  TABLE DARTS.daily_list              ADD PRIMARY KEY USING INDEX daily_list_pk;
+
+CREATE UNIQUE INDEX device_register_pk ON DARTS.device_register(der_id) TABLESPACE darts_indexes;
+ALTER  TABLE DARTS.device_register              ADD PRIMARY KEY USING INDEX device_register_pk;
 
 CREATE UNIQUE INDEX event_pk ON DARTS.event(eve_id) TABLESPACE darts_indexes;
 ALTER  TABLE DARTS.event                   ADD PRIMARY KEY USING INDEX event_pk;
@@ -835,6 +866,9 @@ ALTER  TABLE DARTS.notification            ADD PRIMARY KEY USING INDEX notificat
 CREATE UNIQUE INDEX object_directory_status_pk ON DARTS.object_directory_status(ods_id) TABLESPACE darts_indexes;
 ALTER  TABLE DARTS.object_directory_status ADD PRIMARY KEY USING INDEX object_directory_status_pk;
 
+CREATE UNIQUE INDEX region_pk ON DARTS.region(reg_id) TABLESPACE darts_indexes;
+ALTER  TABLE DARTS.region                  ADD PRIMARY KEY USING INDEX region_pk;
+
 CREATE UNIQUE INDEX report_pk ON DARTS.report(rep_id) TABLESPACE darts_indexes;
 ALTER  TABLE DARTS.report                  ADD PRIMARY KEY USING INDEX report_pk;
 
@@ -863,8 +897,10 @@ ALTER  TABLE DARTS.user_account            ADD PRIMARY KEY USING INDEX user_acco
 CREATE SEQUENCE DARTS.ann_seq CACHE 20;
 CREATE SEQUENCE DARTS.cas_seq CACHE 20;
 CREATE SEQUENCE DARTS.cth_seq CACHE 20;
+CREATE SEQUENCE DARTS.cra_seq CACHE 20;
 CREATE SEQUENCE DARTS.ctr_seq CACHE 20;
 CREATE SEQUENCE DARTS.dal_seq CACHE 20;
+CREATE SEQUENCE DARTS.der_seq CACHE 20;
 CREATE SEQUENCE DARTS.eve_seq CACHE 20;
 CREATE SEQUENCE DARTS.evh_seq CACHE 20;
 CREATE SEQUENCE DARTS.eod_seq CACHE 20;
@@ -876,6 +912,7 @@ CREATE SEQUENCE DARTS.med_seq CACHE 20;
 CREATE SEQUENCE DARTS.mer_seq CACHE 20;
 CREATE SEQUENCE DARTS.not_seq CACHE 20;
 CREATE SEQUENCE DARTS.ods_seq CACHE 20;
+CREATE SEQUENCE DARTS.reg_seq CACHE 20;
 CREATE SEQUENCE DARTS.rep_seq CACHE 20;
 CREATE SEQUENCE DARTS.rer_seq CACHE 20;
 CREATE SEQUENCE DARTS.tra_seq CACHE 20;
@@ -903,6 +940,14 @@ ALTER TABLE DARTS.court_case
 ADD CONSTRAINT court_case_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES DARTS.courthouse(cth_id);
 
+ALTER TABLE DARTS.courthouse_region_ae                        
+ADD CONSTRAINT courthouse__region_courthouse_fk
+FOREIGN KEY (cth_id) REFERENCES DARTS.courthouse(cth_id);
+
+ALTER TABLE DARTS.courthouse_region_ae                        
+ADD CONSTRAINT courthouse__region_region_fk
+FOREIGN KEY (reg_id) REFERENCES DARTS.region(reg_id);
+
 ALTER TABLE DARTS.hearing                     
 ADD CONSTRAINT hearing_case_fk
 FOREIGN KEY (cas_id) REFERENCES DARTS.court_case(cas_id);
@@ -914,6 +959,10 @@ FOREIGN KEY (cth_id) REFERENCES DARTS.courthouse(cth_id);
 ALTER TABLE DARTS.daily_list                  
 ADD CONSTRAINT daily_list_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES DARTS.courthouse(cth_id);
+
+ALTER TABLE DARTS.device_register
+ADD CONSTRAINT device_register_courtroom_fk
+FOREIGN KEY (ctr_id) REFERENCES DARTS.courtroom(ctr_id);
 
 ALTER TABLE DARTS.event                       
 ADD CONSTRAINT event_courtroom_fk
@@ -937,7 +986,7 @@ FOREIGN KEY (ann_id) REFERENCES DARTS.annotation(ann_id);
 
 ALTER TABLE DARTS.external_object_directory   
 ADD CONSTRAINT eod_modified_by_fk
-FOREIGN KEY (modified_by) REFERENCES DARTS.user_account(usr_id);
+FOREIGN KEY (last_modified_by) REFERENCES DARTS.user_account(usr_id);
 
 ALTER TABLE DARTS.external_object_directory   
 ADD CONSTRAINT eod_object_directory_status_fk
@@ -1021,7 +1070,7 @@ FOREIGN KEY (author) REFERENCES DARTS.user_account(usr_id);
 
 ALTER TABLE DARTS.transient_object_directory  
 ADD CONSTRAINT tod_modified_by_fk
-FOREIGN KEY (modified_by) REFERENCES DARTS.user_account(usr_id);
+FOREIGN KEY (last_modified_by) REFERENCES DARTS.user_account(usr_id);
 
 ALTER TABLE DARTS.transient_object_directory  
 ADD CONSTRAINT tod_media_request_fk
@@ -1041,6 +1090,10 @@ ALTER  TABLE DARTS.courtroom ADD UNIQUE USING INDEX ctr_chr_crn_unq;
 CREATE UNIQUE INDEX hea_cas_ctr_hd_unq ON DARTS.hearing( cas_id, ctr_id,hearing_date) TABLESPACE darts_indexes;
 ALTER  TABLE DARTS.hearing ADD UNIQUE USING INDEX hea_cas_ctr_hd_unq;
 
+--,UNIQUE(cth_id, case_number)
+CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON DARTS.court_case(case_number,cth_id) TABLESPACE darts_indexes;
+ALTER TABLE DARTS.court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
+
 INSERT INTO DARTS.object_directory_status (ods_id,ods_description) VALUES (nextval('DARTS.ods_seq'),'New');
 INSERT INTO DARTS.object_directory_status (ods_id,ods_description) VALUES (nextval('DARTS.ods_seq'),'Stored');
 INSERT INTO DARTS.object_directory_status (ods_id,ods_description) VALUES (nextval('DARTS.ods_seq'),'Failure');
@@ -1052,4 +1105,23 @@ INSERT INTO DARTS.object_directory_status (ods_id,ods_description) VALUES (nextv
 INSERT INTO DARTS.object_directory_status (ods_id,ods_description) VALUES (nextval('DARTS.ods_seq'),'Awaiting Verification');
 INSERT INTO DARTS.object_directory_status (ods_id,ods_description) VALUES (nextval('DARTS.ods_seq'),'marked for Deletion');
 INSERT INTO DARTS.object_directory_status (ods_id,ods_description) VALUES (nextval('DARTS.ods_seq'),'Deleted');
+
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (1,'Section 39 of the Children and Young Persons Act 1999');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (2,'An order made under s45 of the Youth Justice and Criminal Evidence Act 1999');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (3,'Section 4(2) of the Contempt of Court Act 1981');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (4,'Restrictions Lifted');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (5,'Section 2 of the Sexual Offenders (Amendment) Act 1992');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (6,'Section 11 of the Contempt of Court Act 1981');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (7,'An order made under s45a of the Youth Justice and Criminal Evidence Act 1999');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (8,'An order made under s46 of the Youth Justice and Criminal Evidence Act 1999');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES  (9,'Section 4 of the Sexual Offenders (Amendment) Act 1976');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES (10,'Judge directed on reporting restrictions');
+INSERT INTO DARTS.reporting_restrictions (rer_id,rer_description) VALUES (11,'An order made under s49 of the Children and Young Persons Act 1933');
+
+
+
+
+
+
+
 
