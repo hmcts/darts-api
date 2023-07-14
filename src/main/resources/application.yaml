@@ -141,7 +141,8 @@ darts:
         outbound: darts-outbound
   portal:
     url: https://darts-portal.staging.platform.hmcts.net
-
+  automated_tasks:
+    thread_pool_size: 5
 
 dbMigration:
   # When true, the app will run DB migration on startup.
