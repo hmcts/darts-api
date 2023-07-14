@@ -11,13 +11,14 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class DartsGatewayStub {
 
     public static final String DAR_NOTIFY_PATH = "/events/dar-notify";
 
     public void darNotifyIsUp() {
         stubFor(post(urlEqualTo(DAR_NOTIFY_PATH))
-            .willReturn(aResponse().withStatus(200).withBody("")));
+              .willReturn(aResponse().withStatus(200).withBody("")));
     }
 
     public void verifyDoesntReceiveDarEvent() {
@@ -26,12 +27,21 @@ public class DartsGatewayStub {
 
     public void verifyReceivedNotificationType(int type) {
         var notificationType = "\"notification_type\":\"" + type + "\"";
-
+        wait(1000);
         verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-            .withRequestBody(containing(notificationType)));
+              .withRequestBody(containing(notificationType)));
+
     }
 
     public void clearStubs() {
         WireMock.reset();
+    }
+
+    private static void wait(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
