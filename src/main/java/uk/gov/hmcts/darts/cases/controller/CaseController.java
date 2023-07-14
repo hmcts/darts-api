@@ -42,7 +42,7 @@ public class CaseController implements CasesApi {
     private final CaseService caseService;
 
     @Override
-    /**
+    /*
      * GET /cases : Allows the retrieval of all cases for a given courthouse, courtroom and date
      * Retrieves all cases for a given courthouse, courtroom and date
      *

@@ -3,6 +3,31 @@
     "courthouse": "SWANSEA",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
+<<<<<<<< HEAD:src/test/resources/Tests/cases/CaseServiceTest/getCasesOk1/expectedResponse.json
+========
+    "case_number": "caseNum_3",
+    "scheduled_start": "04:00",
+    "defendants": [
+      "defendant_caseNum_3_1",
+      "defendant_caseNum_3_2"
+    ],
+    "judges": [
+      "Judge1"
+    ],
+    "prosecutors": [
+      "Prosecutor_caseNum_3_1",
+      "Prosecutor_caseNum_3_2"
+    ],
+    "defenders": [
+      "defender_caseNum_3_1",
+      "defender_caseNum_3_2"
+    ]
+  },
+  {
+    "courthouse": "SWANSEA",
+    "courtroom": "1",
+    "hearing_date": "2023-06-20",
+>>>>>>>> 09148b8 (DMP-458):src/test/resources/Tests/cases/CasesMapperTest/testOrderedByTime/expectedResponse.json
     "case_number": "caseNum_1",
     "scheduled_start": "09:00",
     "defendants": [
@@ -34,6 +59,9 @@
     "judges": [
       "Judge1"
     ],
+    "judges": [
+      "Judge1"
+    ],
     "prosecutors": [
       "Prosecutor_caseNum_2_1",
       "Prosecutor_caseNum_2_2"
@@ -52,6 +80,9 @@
     "defendants": [
       "defendant_caseNum_3_1",
       "defendant_caseNum_3_2"
+    ],
+    "judges": [
+      "Judge1"
     ],
     "judges": [
       "Judge1"
@@ -162,6 +193,9 @@
     "defendants": [
       "defendant_caseNum_8_1",
       "defendant_caseNum_8_2"
+    ],
+    "judges": [
+      "Judge1"
     ],
     "judges": [
       "Judge1"
