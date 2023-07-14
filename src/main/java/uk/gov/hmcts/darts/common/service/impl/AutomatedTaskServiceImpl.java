@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
+    @Autowired
     private AutomatedTaskRepository automatedTaskRepository;
 
     @Autowired
