@@ -15,10 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.event.api.EventApi;
-import uk.gov.hmcts.darts.event.model.AddDocumentResponse;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
-import uk.gov.hmcts.darts.event.model.CourtLogsPostResponseBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.EventsResponse;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 
 import javax.validation.Valid;
@@ -37,7 +36,7 @@ public class EventsController implements EventApi {
         tags = {"Event"},
         responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = AddDocumentResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = EventsResponse.class))
             }),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
         }
@@ -49,12 +48,12 @@ public class EventsController implements EventApi {
         consumes = {"application/json"}
     )
     @Override
-    public ResponseEntity<AddDocumentResponse> eventsPost(
+    public ResponseEntity<EventsResponse> eventsPost(
         @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
         eventDispatcher.receive(dartsEvent);
 
-        var addDocumentResponse = new AddDocumentResponse();
+        var addDocumentResponse = new EventsResponse();
         addDocumentResponse.setCode("200");
         addDocumentResponse.setMessage("OK");
 
@@ -62,7 +61,7 @@ public class EventsController implements EventApi {
     }
 
     @Override
-    public ResponseEntity<CourtLogsPostResponseBody> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
+    public ResponseEntity<EventsResponse> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
         return EventApi.super.courtlogsPost(courtLogsPostRequestBody);
     }
 

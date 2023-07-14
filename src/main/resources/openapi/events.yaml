@@ -73,7 +73,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AddDocumentResponse'
+                $ref: '#/components/schemas/EventsResponse'
 
         '500':
           description: Internal Server Error
@@ -119,11 +119,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CourtLogsPostResponseBody'
-              example:
-                log_entry_date_time: '2023-05-23T09:15:25Z'
-                courthouse: CARDIFF
-                case_number: CASE1001
+                $ref: '#/components/schemas/EventsResponse'
 
 components:
   schemas:
@@ -131,14 +127,6 @@ components:
     ###################################################################################################################
     # TOP-LEVEL MODELS
     ###################################################################################################################
-
-    AddDocumentResponse:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
 
     CourtLogsPostRequestBody:
       type: object
@@ -164,21 +152,6 @@ components:
         - courtroom
         - case_numbers
         - text
-
-    CourtLogsPostResponseBody:
-      type: object
-      properties:
-        log_entry_date_time:
-          type: string
-          format: date-time
-        courthouse:
-          $ref: '#/components/schemas/Courthouse'
-        case_number:
-          $ref: '#/components/schemas/CaseNumber'
-      required:
-        - log_entry_date_time
-        - courthouse
-        - case_number
 
     DartsEvent:
       type: object
@@ -211,6 +184,14 @@ components:
               type: string
             case_total_sentence:
               type: string
+
+    EventsResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
 
     ###################################################################################################################
     # PRIMITIVES
