@@ -1,28 +1,31 @@
-package uk.gov.hmcts.darts.common.config;
+package uk.gov.hmcts.darts.common.service;
 
-import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.config.CronTask;
+import org.springframework.scheduling.config.FixedDelayTask;
+import org.springframework.scheduling.config.FixedRateTask;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import uk.gov.hmcts.darts.common.service.AutomatedTaskService;
+import org.springframework.test.context.ActiveProfiles;
+
 import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@ActiveProfiles({"intTest", "h2db"})
 @Slf4j
-@ContextConfiguration(classes = {AutomatedTaskConfig.class}, loader = AnnotationConfigContextLoader.class)
-class AutomatedTaskConfigTest {
-
+public class AutomatedTaskServiceTest extends IntegrationBase {
     @Autowired
     private AutomatedTaskService automatedTaskService;
 
@@ -56,25 +59,24 @@ class AutomatedTaskConfigTest {
 
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
-        log.info("Checking scheduled tasks " + scheduledTasks.size());
-
-        /*List<Task> result = new ArrayList<Task>();
-        result.addAll(this.scheduledTaskRegistrar.getTriggerTaskList());
-        result.addAll(this.scheduledTaskRegistrar.getCronTaskList());
-        result.addAll(this.scheduledTaskRegistrar.getFixedRateTaskList());
-        result.addAll(this.scheduledTaskRegistrar.getFixedDelayTaskList());*/
-
+        log.info("Number of scheduled tasks " + scheduledTasks.size());
         scheduledTasks.forEach(
             scheduledTask -> {
                 Task task = scheduledTask.getTask();
                 if (task instanceof CronTask) {
                     CronTask cronTask = (CronTask) task;
-                    log.info("Cron expression: " + cronTask.getExpression());
+                    log.info("Cron expression: {}", cronTask.getExpression());
                 } else if (task instanceof TriggerTask) {
                     TriggerTask triggerTask = (TriggerTask) task;
-                    log.info("TriggerTask runnable: " + triggerTask.getRunnable());
+                    log.info("TriggerTask runnable: {}", triggerTask.getRunnable());
+                } else if (task instanceof FixedRateTask) {
+                    FixedRateTask fixedRateTask = (FixedRateTask) task;
+                    log.info("FixedRateTask initial delay duration: {}", fixedRateTask.getInitialDelayDuration());
+                } else if (task instanceof FixedDelayTask) {
+                    FixedDelayTask fixedDelayTask = (FixedDelayTask) task;
+                    log.info("FixedDelayTask initial delay duration: {}", fixedDelayTask.getInitialDelayDuration());
                 } else {
-                    log.info("not cron: " + task);
+                    log.info("Unknown task type: " + task);
                 }
             }
         );

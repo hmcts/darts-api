@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 @Service
 @Slf4j
 public class AutomatedTaskServiceImpl implements AutomatedTaskService {
@@ -70,12 +69,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(taskOne, trigger);
     }
 
-    public void loadAutomatedTaskTwo(TaskScheduler taskScheduler) {
-        AutomatedTaskTwo taskTwo = new AutomatedTaskTwo();
-        Trigger trigger = createAutomatedTaskTrigger(taskTwo);
-        taskScheduler.schedule(taskTwo, trigger);
-    }
-
     private void loadAutomatedTaskTwo(ScheduledTaskRegistrar taskRegistrar) {
         AutomatedTaskTwo taskTwo = new AutomatedTaskTwo();
         Trigger trigger = createAutomatedTaskTrigger(taskTwo);
@@ -91,21 +84,17 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     @Override
     public boolean cancelTask(String taskName) {
         boolean result = false;
-        if (taskTriggers.containsKey(taskName)) {
-            Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
-            for (ScheduledTask  scheduledTask: scheduledTasks) {
-                Task task = scheduledTask.getTask();
-                if (task instanceof TriggerTask) {
-                    TriggerTask triggerTask = (TriggerTask) task;
-                    result = cancelTriggerTask(taskName, scheduledTask, triggerTask);
+        Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
+        for (ScheduledTask  scheduledTask: scheduledTasks) {
+            Task task = scheduledTask.getTask();
+            if (task instanceof TriggerTask) {
+                TriggerTask triggerTask = (TriggerTask) task;
+                result = cancelTriggerTask(taskName, scheduledTask, triggerTask);
+                if (result == true) {
                     break;
                 }
             }
-        } else {
-            //TODO Throw some kind of exception
-            log.error("Unable to cancel task: {}", taskName);
         }
-
         return result;
     }
 
@@ -118,7 +107,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 scheduledTask.cancel(false);
                 result = true;
                 taskTriggers.remove(taskName);
-
             }
         }
         return result;
@@ -133,7 +121,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 return crontrigger.nextExecution(triggerContext);
             }
         };
-
     }
 
 }

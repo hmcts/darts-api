@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.common.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -12,7 +11,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import uk.gov.hmcts.darts.common.service.AutomatedTaskService;
 
 @Configuration
-@ComponentScan("uk.gov.hmcts.darts")
 @EnableScheduling
 public class AutomatedTaskConfig implements SchedulingConfigurer {
 

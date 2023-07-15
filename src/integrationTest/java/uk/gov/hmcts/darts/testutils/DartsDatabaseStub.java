@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -42,6 +43,7 @@ public class DartsDatabaseStub {
     private final MediaRepository mediaRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final NotificationRepository notificationRepository;
+    private final AutomatedTaskRepository automatedTaskRepository;
 
     public void clearDatabase() {
         notificationRepository.deleteAll();
@@ -52,6 +54,7 @@ public class DartsDatabaseStub {
         courtroomRepository.deleteAll();
         caseRepository.deleteAll();
         courthouseRepository.deleteAll();
+        automatedTaskRepository.deleteAll();
     }
 
     public void save(CaseEntity minimalCaseEntity) {
