@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AutomatedTaskTwo implements AutomatedTask {
-    private static final String TASKNAME = "AutomatedTaskTwo";
+    public static final String TASKNAME = "AutomatedTaskTwo";
 
     public static final String DEFAULT_CRON_EXPRESSION = "*/20 * * * * *";
 

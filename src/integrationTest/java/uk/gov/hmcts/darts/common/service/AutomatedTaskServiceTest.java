@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @Slf4j
-public class AutomatedTaskServiceTest extends IntegrationBase {
+public class AutomatedTaskServiceTest {//extends IntegrationBase {
     @Autowired
     private AutomatedTaskService automatedTaskService;
 

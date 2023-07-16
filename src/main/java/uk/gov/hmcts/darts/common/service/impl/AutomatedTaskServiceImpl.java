@@ -52,7 +52,6 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     @Override
     public AutomatedTaskEntity getAutomatedTaskEntityByTaskName(String taskName) {
         return automatedTaskRepository.findByTaskName(taskName);
-        //return automatedTaskRepository.getByTaskName(taskName);
     }
 
     public String getAutomatedTaskCronExpression(AutomatedTask automatedTask) {
