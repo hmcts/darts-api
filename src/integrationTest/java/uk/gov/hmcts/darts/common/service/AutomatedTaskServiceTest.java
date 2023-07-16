@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.service;
 
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,9 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,20 +47,37 @@ public class AutomatedTaskServiceTest extends IntegrationBase {
         displayTasks(scheduledTasks);
 
         log.info("----- About to cancel task 1");
-        boolean taskCancelled = automatedTaskService.cancelTask(AutomatedTaskOne.TASKNAME);
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(AutomatedTaskOne.TASKNAME);
         assertTrue(taskCancelled);
-        log.info("----- Current tasks");
-        displayTasks(scheduledTasks);
 
-        Thread.sleep(21_000);
+        Thread.sleep(31_000);
         log.info("----- Tasks after sleep");
+        scheduledTasks = taskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
+        automatedTaskService.updateAutomatedTaskCronExpression(AutomatedTaskOne.TASKNAME, getRandomCronExpression());
         log.info("----- About to add task 1");
         automatedTaskService.loadAutomatedTaskOne(taskScheduler);
-        Thread.sleep(31_000);
+        Thread.sleep(25_000);
+        scheduledTasks = taskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
     }
 
+    private String getRandomCronExpression() {
+        List<String> cronExpressions = Arrays.asList(
+            "*/20 * * * * *",
+            "*/6 * * * * *",
+            "*/8 * * * * *",
+            "*/5 * * * * *",
+            "*/4 * * * * *",
+            "*/7 * * * * *"
+        );
+        Random random = new Random();
+        int index = random.nextInt(5);
+        String cronExpression = cronExpressions.get(index);
+
+        log.info("Changing cronExpression: {}", cronExpression);
+        return cronExpression;
+    }
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());

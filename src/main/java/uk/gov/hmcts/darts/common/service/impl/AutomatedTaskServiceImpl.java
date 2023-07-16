@@ -1,5 +1,11 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
@@ -12,17 +18,13 @@ import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.common.task.AutomatedTask;
 import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
 import uk.gov.hmcts.darts.common.task.AutomatedTaskTwo;
-
-import java.time.Instant;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -43,17 +45,50 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     @Override
-    public AutomatedTaskEntity getAutomatedTask(String taskName) {
+    public List<AutomatedTaskEntity> getAutomatedTaskEntitiesByTaskName(String taskName) {
+        return automatedTaskRepository.findAllByTaskName(taskName);
+    }
+
+    @Override
+    public AutomatedTaskEntity getAutomatedTaskEntityByTaskName(String taskName) {
         return automatedTaskRepository.findByTaskName(taskName);
+        //return automatedTaskRepository.getByTaskName(taskName);
     }
 
     public String getAutomatedTaskCronExpression(AutomatedTask automatedTask) {
-        String cronExpression = automatedTask.getDefaultCronExpression();
-        AutomatedTaskEntity automatedTaskEntity = getAutomatedTask(automatedTask.getTaskName());
-        if (automatedTaskEntity != null) {
-            cronExpression = automatedTaskEntity.getCronExpression();
+        String cronExpression = getAutomatedTaskCronExpression(automatedTask.getTaskName());
+        if (cronExpression == null) {
+            log.info("Unable to find cron expression for task: {}. Using default: {}",
+                     automatedTask.getTaskName(), automatedTask.getDefaultCronExpression());
+            cronExpression = automatedTask.getDefaultCronExpression();
+        }
+
+        return cronExpression;
+    }
+
+    public String getAutomatedTaskCronExpression(String taskName) {
+        String cronExpression = null;
+        List<AutomatedTaskEntity> automatedTaskEntities = getAutomatedTaskEntitiesByTaskName(taskName);
+        //AutomatedTaskEntity automatedTaskEntities = getAutomatedTaskEntityByTaskName(taskName);
+        if (automatedTaskEntities != null && !automatedTaskEntities.isEmpty()) {
+            cronExpression = automatedTaskEntities.get(0).getCronExpression();
+            //cronExpression = automatedTaskEntities.getCronExpression();
+            log.info("{} cron expression: {}", taskName, cronExpression);
         }
         return cronExpression;
+    }
+
+    @Override
+    public void updateAutomatedTaskCronExpression(String taskName, String cronExpression) {
+        List<AutomatedTaskEntity> automatedTaskEntities = getAutomatedTaskEntitiesByTaskName(taskName);
+        if (automatedTaskEntities != null) {
+//            automatedTaskEntity.setCronExpression(cronExpression);
+//            automatedTaskRepository.saveAndFlush(automatedTaskEntity);
+            for (AutomatedTaskEntity automatedTaskEntity: automatedTaskEntities) {
+                automatedTaskEntity.setCronExpression(cronExpression);
+                automatedTaskRepository.saveAndFlush(automatedTaskEntity);
+            }
+        }
     }
 
     @Override
@@ -82,7 +117,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     @Override
-    public boolean cancelTask(String taskName) {
+    public boolean cancelAutomatedTask(String taskName) {
         boolean result = false;
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask  scheduledTask: scheduledTasks) {

@@ -1,8 +1,7 @@
 package uk.gov.hmcts.darts.common.task;
 
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Date;
 
 @Slf4j
 public class AutomatedTaskTwo implements AutomatedTask {
@@ -22,6 +21,6 @@ public class AutomatedTaskTwo implements AutomatedTask {
 
     @Override
     public void run() {
-        log.info("Task: {} running at: {}", getTaskName(), new Date().getTime());
+        log.info("Task: {} running at: {}", getTaskName(), LocalDateTime.now());
     }
 }
