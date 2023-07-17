@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import jakarta.annotation.PostConstruct;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -39,7 +40,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     protected EventEntity eventEntityFrom(DartsEvent dartsEvent) {
         var event = new EventEntity();
-        event.setLegacyEventId(Integer.valueOf(dartsEvent.getEventId()));
+        event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
         event.setTimestamp(dartsEvent.getDateTime());
         event.setEventName(eventNameFor(dartsEvent));
         event.setEventText(dartsEvent.getEventText());

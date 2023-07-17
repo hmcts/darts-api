@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.event.api.EventApi;
+import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.EventsResponse;
@@ -28,6 +29,7 @@ import javax.validation.Valid;
 public class EventsController implements EventApi {
 
     private final EventDispatcher eventDispatcher;
+    private final DartsEventMapper dartsEventMapper;
 
     @Operation(
         operationId = "eventsPost",
@@ -54,15 +56,19 @@ public class EventsController implements EventApi {
         eventDispatcher.receive(dartsEvent);
 
         var addDocumentResponse = new EventsResponse();
-        addDocumentResponse.setCode("200");
-        addDocumentResponse.setMessage("OK");
 
-        return new ResponseEntity<>(addDocumentResponse, HttpStatus.CREATED);
+        var status = HttpStatus.CREATED;
+        addDocumentResponse.setCode(String.valueOf(status.value()));
+        addDocumentResponse.setMessage(status.name());
+
+        return new ResponseEntity<>(addDocumentResponse, status);
     }
 
     @Override
     public ResponseEntity<EventsResponse> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
-        return EventApi.super.courtlogsPost(courtLogsPostRequestBody);
+        DartsEvent dartsEvent = dartsEventMapper.toDartsEvent(courtLogsPostRequestBody);
+
+        return eventsPost(dartsEvent);
     }
 
 }
