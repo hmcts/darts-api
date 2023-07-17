@@ -7,9 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.component.impl.SystemCommandExecutorImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
-import uk.gov.hmcts.darts.audio.util.AudioUtil;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -42,7 +42,7 @@ class AudioOperationServiceImplTest {
     private AudioConfigurationProperties audioConfigurationProperties;
 
     @Mock
-    private AudioUtil audioUtil;
+    private SystemCommandExecutorImpl systemCommandExecutor;
 
     @BeforeEach
     void beforeEach() {
@@ -85,7 +85,7 @@ class AudioOperationServiceImplTest {
     void shouldReturnConcatenatedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
         when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn("/tempDir/concatenate");
-        when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
+        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse(T_09_00_00_Z),
@@ -106,7 +106,7 @@ class AudioOperationServiceImplTest {
     void shouldReturnMergedAudioFileInfoWhenValidInputAudioFiles() throws Exception {
         when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
         when(audioConfigurationProperties.getMergeWorkspace()).thenReturn("/tempDir/merge");
-        when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
+        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse(T_09_00_00_Z),
@@ -127,7 +127,7 @@ class AudioOperationServiceImplTest {
     void shouldReturnTrimmedAudioFileWhenValidInputAudioFile() throws ExecutionException, InterruptedException {
         when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
         when(audioConfigurationProperties.getTrimWorkspace()).thenReturn("/tempDir/trim");
-        when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
+        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse("2023-04-28T09:45:00Z"),
@@ -199,7 +199,7 @@ class AudioOperationServiceImplTest {
     void shouldReturnReEncodedAudioFileInfoWhenValidInputAudioFile() throws ExecutionException, InterruptedException {
         when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
         when(audioConfigurationProperties.getReEncodeWorkspace()).thenReturn("/tempDir/encode");
-        when(audioUtil.execute(any())).thenReturn(Boolean.TRUE);
+        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
         AudioFileInfo expectedAudio = new AudioFileInfo(
             Instant.parse(T_09_00_00_Z),

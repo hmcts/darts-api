@@ -54,7 +54,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 
@@ -123,17 +122,6 @@ class AudioTransformationServiceTest {
 
     @Mock
     private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
-
-    @Test
-    @Transactional
-    void shouldProcessAudioRequest() {
-        createAndLoadMediaRequestEntity();
-
-        MediaRequestEntity processingMediaRequestEntity = audioTransformationService.processAudioRequest(
-            mediaRequestEntity1.getId());
-
-        assertEquals(PROCESSING, processingMediaRequestEntity.getStatus());
-    }
 
     @Test
     void shouldGetAudioBlobDataUsingLocation() {

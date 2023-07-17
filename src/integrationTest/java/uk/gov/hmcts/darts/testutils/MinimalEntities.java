@@ -4,6 +4,9 @@ import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+
+import java.time.OffsetDateTime;
 
 import static java.time.LocalDate.now;
 
@@ -70,4 +73,14 @@ public class MinimalEntities {
         hearing.setHearingDate(now());
         return hearing;
     }
+
+    public static MediaEntity aMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setStart(startTime);
+        mediaEntity.setEnd(endTime);
+        mediaEntity.setChannel(channel);
+
+        return mediaEntity;
+    }
+
 }

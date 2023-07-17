@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.util;
+package uk.gov.hmcts.darts.audio.component.impl;
 
 import org.apache.commons.exec.CommandLine;
 import org.junit.jupiter.api.Test;
@@ -10,18 +10,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-class AudioUtilTest {
+class SystemCommandExecutorImplTest {
 
     @InjectMocks
-    private AudioUtil audioUtil;
+    private SystemCommandExecutorImpl systemCommandExecutor;
 
     @Test
     void shouldExecuteCommandsWhenCommandIsValid() throws Exception {
-        assertTrue(audioUtil.execute(new CommandLine("hostname")));
+        assertTrue(systemCommandExecutor.execute(new CommandLine("hostname")));
     }
 
     @Test
     void shouldThrowExceptionWhenCommandIsInValid() {
-        assertThrows(Exception.class, () -> audioUtil.execute(new CommandLine("Dummy Command")));
+        assertThrows(Exception.class, () -> systemCommandExecutor.execute(new CommandLine("Dummy Command")));
     }
 }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,30 +19,30 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     private final AuthenticationService authenticationService;
 
     @Override
-    public ModelAndView loginOrRefresh(HttpSession session) {
-        URI url = authenticationService.loginOrRefresh(session.getId());
+    public ModelAndView loginOrRefresh(String authHeaderValue) {
+        String accessToken = null;
+        if (authHeaderValue != null) {
+            accessToken = authHeaderValue.replace("Bearer ", "");
+        }
+        URI url = authenticationService.loginOrRefresh(accessToken);
         return new ModelAndView("redirect:" + url.toString());
     }
 
     @Override
-    public String handleOauthCode(HttpSession session, String code) {
-        return authenticationService.handleOauthCode(session.getId(), code);
+    public String handleOauthCode(String code) {
+        return authenticationService.handleOauthCode(code);
     }
 
     @Override
-    public ModelAndView logout(HttpSession session) {
-        URI url = authenticationService.logout(session.getId());
+    public ModelAndView logout(String authHeaderValue) {
+        String accessToken = authHeaderValue.replace("Bearer ", "");
+        URI url = authenticationService.logout(accessToken);
         return new ModelAndView("redirect:" + url.toString());
     }
 
     @Override
-    public void invalidateSession(HttpSession session) {
-        authenticationService.invalidateSession(session.getId());
-    }
-
-    @Override
-    public ModelAndView resetPassword(HttpSession session) {
-        URI url = authenticationService.resetPassword(session.getId());
+    public ModelAndView resetPassword() {
+        URI url = authenticationService.resetPassword();
         return new ModelAndView("redirect:" + url.toString());
     }
 

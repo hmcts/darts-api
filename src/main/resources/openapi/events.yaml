@@ -67,25 +67,92 @@ paths:
                     CaseRetentionFixedPolicy: 4
                     CaseTotalSentence: 26Y0M0D
 
-
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AddDocumentResponse'
+                $ref: '#/components/schemas/EventsResponse'
 
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+  /courtlogs:
+    post:
+      tags:
+        - Event
+      summary: An Endpoint which allows users to create a court log event.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourtLogsPostRequestBody'
+            examples:
+              example1:
+                summary: Request with single case
+                value:
+                  log_entry_date_time: '2023-05-23T09:15:25Z'
+                  courthouse: CARDIFF
+                  courtroom: '1'
+                  case_numbers:
+                    - CASE1001
+                  text: 'System : Start Recording : Record: Case Code:0008, New Case'
+              example2:
+                summary: Request with multiple cases
+                value:
+                  log_entry_date_time: '2023-05-23T09:15:25Z'
+                  courthouse: CARDIFF
+                  courtroom: '1'
+                  case_numbers:
+                    - CASE1001
+                    - CASE1002
+                  text: 'System : Start Recording : Record: Case Code:0008, New Case'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsResponse'
 
 components:
-
-  #-----------------#
-  #----------------------------------#
-  #-----------------#
-
   schemas:
+
+    ###################################################################################################################
+    # TOP-LEVEL MODELS
+    ###################################################################################################################
+
+    CourtLogsPostRequestBody:
+      type: object
+      properties:
+        log_entry_date_time:
+          type: string
+          format: date-time
+        courthouse:
+          $ref: '#/components/schemas/Courthouse'
+        courtroom:
+          $ref: '#/components/schemas/Courtroom'
+        case_numbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseNumber'
+          minItems: 1
+        text:
+          type: string
+          maxLength: 250
+      required:
+        - log_entry_date_time
+        - courthouse
+        - courtroom
+        - case_numbers
+        - text
+
     DartsEvent:
       type: object
       properties:
@@ -98,13 +165,13 @@ components:
         event_id:
           type: string
         courthouse:
-          type: string
+          $ref: '#/components/schemas/Courthouse'
         courtroom:
-          type: string
+          $ref: '#/components/schemas/Courtroom'
         case_numbers:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/CaseNumber'
         event_text:
           type: string
         date_time:
@@ -118,11 +185,26 @@ components:
             case_total_sentence:
               type: string
 
-
-    AddDocumentResponse:
+    EventsResponse:
       type: object
       properties:
         code:
           type: string
         message:
           type: string
+
+    ###################################################################################################################
+    # PRIMITIVES
+    ###################################################################################################################
+
+    CaseNumber:
+      type: string
+      maxLength: 25
+
+    Courthouse:
+      type: string
+      maxLength: 50
+
+    Courtroom:
+      type: string
+      maxLength: 25

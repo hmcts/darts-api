@@ -5,18 +5,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,13 +30,11 @@ class AuthenticationExternalUserControllerTest {
     private AuthenticationService authenticationService;
 
     @Test
-    void loginAndRefreshShouldReturnLoginPageAsRedirectWhenTokenDoesntExistsInSession() {
-        MockHttpSession session = new MockHttpSession();
-
-        when(authenticationService.loginOrRefresh(anyString()))
+    void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
+        when(authenticationService.loginOrRefresh(null))
             .thenReturn(DUMMY_AUTHORIZATION_URI);
 
-        ModelAndView modelAndView = controller.loginOrRefresh(session);
+        ModelAndView modelAndView = controller.loginOrRefresh(null);
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
@@ -47,46 +42,31 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturned() {
-        MockHttpSession session = new MockHttpSession();
-
-        when(authenticationService.handleOauthCode(any(), anyString()))
+        when(authenticationService.handleOauthCode(anyString()))
             .thenReturn(DUMMY_TOKEN);
 
-        String accessToken = controller.handleOauthCode(session, "code");
+        String accessToken = controller.handleOauthCode("code");
 
         assertNotNull(accessToken);
     }
 
     @Test
     void logoutShouldReturnLogoutPageUriAsRedirectWhenTokenExistsInSession() {
-        MockHttpSession session = new MockHttpSession();
-
         when(authenticationService.logout(any()))
             .thenReturn(DUMMY_LOGOUT_URI);
 
-        ModelAndView modelAndView = controller.logout(session);
+        ModelAndView modelAndView = controller.logout(anyString());
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/logout?param=value", modelAndView.getViewName());
     }
 
     @Test
-    void invalidateSessionShouldCompleteWithoutExceptionWhenSessionIsInvalidated() {
-        doNothing().when(authenticationService).invalidateSession(anyString());
-
-        MockHttpSession session = new MockHttpSession();
-
-        assertDoesNotThrow(() -> controller.invalidateSession(session));
-    }
-
-    @Test
     void resetPasswordShouldReturnResetPageAsRedirect() {
-        MockHttpSession session = new MockHttpSession();
-
-        when(authenticationService.resetPassword(anyString()))
+        when(authenticationService.resetPassword())
             .thenReturn(DUMMY_AUTHORIZATION_URI);
 
-        ModelAndView modelAndView = controller.resetPassword(session);
+        ModelAndView modelAndView = controller.resetPassword();
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());

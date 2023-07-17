@@ -1,26 +1,39 @@
 package uk.gov.hmcts.darts.testutils;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.repository.ReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingMediaRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,10 +44,13 @@ import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCourtroom;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createHearing;
 import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCase;
 import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtHouseWithName;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aMediaEntity;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.ExcessiveImports"})
+@Getter
+@Slf4j
 public class DartsDatabaseStub {
 
     private final CaseRepository caseRepository;
@@ -44,16 +60,24 @@ public class DartsDatabaseStub {
     private final HearingRepository hearingRepository;
     private final CourtroomRepository courtroomRepository;
     private final MediaRepository mediaRepository;
+    private final MediaRequestRepository mediaRequestRepository;
+    private final HearingMediaRepository hearingMediaRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final NotificationRepository notificationRepository;
+    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final DailyListRepository dailyListRepository;
+    private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
 
     public void clearDatabase() {
-        notificationRepository.deleteAll();
-        hearingRepository.deleteAll();
-        eventRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
+        hearingMediaRepository.deleteAll();
         mediaRepository.deleteAll();
+        transientObjectDirectoryRepository.deleteAll();
+        mediaRequestRepository.deleteAll();
+        hearingRepository.deleteAll();
+        notificationRepository.deleteAll();
+        eventRepository.deleteAll();
         courtroomRepository.deleteAll();
         caseRepository.deleteAll();
         dailyListRepository.deleteAll();
@@ -142,6 +166,10 @@ public class DartsDatabaseStub {
         return courthouseRepository.save(courthouse);
     }
 
+    public MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        return mediaRepository.saveAndFlush(aMediaEntity(startTime, endTime, channel));
+    }
+
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
         return courtroomRepository.findByNames(courthouseName, courtroomName);
@@ -158,4 +186,13 @@ public class DartsDatabaseStub {
     public CourthouseEntity findCourthouseWithName(String name) {
         return courthouseRepository.findByCourthouseName(name).get();
     }
+
+    public ExternalLocationTypeEntity getExternalLocationTypeEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {
+        return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
+    }
+
+    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
+        return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
+    }
+
 }

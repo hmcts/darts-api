@@ -26,14 +26,14 @@ public class DartsApiException extends RuntimeException {
     }
 
     public DartsApiException(DartsApiError error, String detail) {
-        super(error.getTitle());
+        super(String.format("%s. %s", error.getTitle(), detail));
 
         this.error = error;
         this.detail = detail;
     }
 
     public DartsApiException(DartsApiError error, String detail, Throwable throwable) {
-        super(error.getTitle(), throwable);
+        super(String.format("%s. %s", error.getTitle(), detail), throwable);
 
         this.error = error;
         this.detail = detail;
