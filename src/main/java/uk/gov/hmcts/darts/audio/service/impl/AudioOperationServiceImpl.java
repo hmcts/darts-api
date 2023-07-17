@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.util.AudioConstants;
 import uk.gov.hmcts.darts.audio.util.AudioConstants.AudioOperationTypes;
-import uk.gov.hmcts.darts.audio.util.AudioUtil;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -29,7 +29,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     private static final String STRING_SLASH_STRING_FORMAT = "%s/%s";
 
     private final AudioConfigurationProperties audioConfigurationProperties;
-    private final AudioUtil audioUtil;
+    private final SystemCommandExecutor systemCommandExecutor;
 
     CommandLine generateConcatenateCommand(final Integer channel, final List<AudioFileInfo> audioFileInfos,
                                            final String outputFilename) {
@@ -67,7 +67,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
                                                        channel, AudioConstants.AudioFileFormats.MP2
         );
         CommandLine command = generateConcatenateCommand(channel, audioFileInfos, outputFilename);
-        audioUtil.execute(command);
+        systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             getEarliestStartTime(audioFileInfos),
@@ -100,7 +100,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             .addArgument(String.format("amix=inputs=%d:duration=longest", numberOfChannels))
             .addArgument(outputFilename);
 
-        audioUtil.execute(command);
+        systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             getEarliestStartTime(audioFilesInfo),
@@ -130,7 +130,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         command.addArgument("-to").addArgument(endTime);
         command.addArgument("-c").addArgument("copy").addArgument(outputFilename);
 
-        audioUtil.execute(command);
+        systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             adjustTimeDuration(audioFileInfo.getStartTime(), startTime),
@@ -158,7 +158,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         command.addArgument(outputFilename);
 
-        audioUtil.execute(command);
+        systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             audioFileInfo.getStartTime(),
