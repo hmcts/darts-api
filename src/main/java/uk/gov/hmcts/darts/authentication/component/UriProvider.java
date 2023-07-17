@@ -10,6 +10,4 @@ public interface UriProvider {
 
     URI getLogoutUri(String accessToken);
 
-    URI getResetPasswordUri();
-
 }

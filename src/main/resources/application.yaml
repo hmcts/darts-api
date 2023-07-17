@@ -57,13 +57,11 @@ spring:
             token-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/token
             jwk-set-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/discovery/v2.0/keys
             logout-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
-            reset-password-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
           internal-azure-ad-provider:
             authorization-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/authorize
             token-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/token
             jwk-set-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/discovery/v2.0/keys
             logout-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
-            reset-password-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
 
   datasource:
     driver-class-name: org.postgresql.Driver

@@ -40,14 +40,6 @@ public class UriProviderImpl implements UriProvider {
             .build();
     }
 
-    @Override
-    @SneakyThrows(URISyntaxException.class)
-    public URI getResetPasswordUri() {
-        return buildCommonAuthUri(authConfig.getExternalADresetPasswordUri())
-            .addParameter("response_type", "id_token")
-            .build();
-    }
-
     @SneakyThrows(URISyntaxException.class)
     private URIBuilder buildCommonAuthUri(String uri) {
         return new URIBuilder(uri)

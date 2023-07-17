@@ -40,10 +40,4 @@ public class AuthenticationExternalUserController implements AuthenticationContr
         return new ModelAndView("redirect:" + url.toString());
     }
 
-    @Override
-    public ModelAndView resetPassword() {
-        URI url = authenticationService.resetPassword();
-        return new ModelAndView("redirect:" + url.toString());
-    }
-
 }

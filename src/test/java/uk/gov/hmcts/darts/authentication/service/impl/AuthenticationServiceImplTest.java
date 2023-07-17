@@ -129,14 +129,4 @@ class AuthenticationServiceImplTest {
         assertEquals(DUMMY_LOGOUT_URI, uri);
     }
 
-    @Test
-    void resetPasswordShouldReturnResetPasswordUri() {
-        when(uriProvider.getResetPasswordUri())
-            .thenReturn(DUMMY_AUTH_URI);
-
-        URI uri = authenticationService.resetPassword();
-
-        assertEquals(DUMMY_AUTH_URI, uri);
-    }
-
 }

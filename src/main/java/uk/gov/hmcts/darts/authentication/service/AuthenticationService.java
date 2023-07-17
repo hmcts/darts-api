@@ -10,6 +10,4 @@ public interface AuthenticationService {
 
     URI logout(String accessToken);
 
-    URI resetPassword();
-
 }
