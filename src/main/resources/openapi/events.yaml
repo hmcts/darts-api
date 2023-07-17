@@ -83,6 +83,42 @@ paths:
                 $ref: './problem.yaml'
 
   /courtlogs:
+    get:
+      tags:
+        - Event
+      summary: An Endpoint which allows users to request courtlogs
+      description: |-
+        An Endpoint which allows users to request courtlogs using courthouse, casenumber, startdate and enddate
+      parameters:
+        - in: query
+          name: Courthouse
+          schema:
+            type: string
+        - in: query
+          name: caseNumber
+          schema:
+            type: string
+        - in: query
+          name: startDateTime
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: endDateTime
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventsResponse'
+
+        '500':
+          description: Internal Server Error
+
     post:
       tags:
         - Event
@@ -121,6 +157,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
 
+
 components:
   schemas:
 
@@ -152,6 +189,30 @@ components:
         - courtroom
         - case_numbers
         - text
+
+    CourtLog:
+      type: object
+      properties:
+        courthouse:
+          $ref: '#/components/schemas/Courthouse'
+        caseNumber:
+          type: string
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
+      required:
+        - courthouse
+        - caseNumber
+        - startDateTime
+        - endDateTime
+    CourtLogs:
+      type: array
+      items:
+        $ref: '#/components/schemas/CourtLog'
+
 
     DartsEvent:
       type: object

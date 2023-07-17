@@ -3,16 +3,19 @@ package uk.gov.hmcts.darts.event.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.event.api.EventApi;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
@@ -20,7 +23,9 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.model.EventsResponse;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 
+import java.time.OffsetDateTime;
 import javax.validation.Valid;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,5 +69,17 @@ public class EventsController implements EventApi {
     public ResponseEntity<EventsResponse> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
         return EventApi.super.courtlogsPost(courtLogsPostRequestBody);
     }
+
+    @Override
+    public ResponseEntity<EventsResponse> courtlogsGet(
+        @Parameter(name = "courthouse", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse,
+        @Parameter(name = "caseNumber", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "caseNumber", required = true) String caseNumber,
+        @Parameter(name = "startDateTime", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "startDateTime", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDateTime,
+        @Parameter(name = "endDateTime", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "endDateTime", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDateTime
+    ) {
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
 
 }
