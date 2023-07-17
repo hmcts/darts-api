@@ -65,7 +65,7 @@ public class AdvancedSearchRequestMapper {
         if (StringUtils.isNotBlank(request.getCaseNumber())) {
             String parameterName = "caseNumber";
             sqlModel.addWhereCriteria("upper(court_case.case_number) like upper(:" + parameterName + ")");
-            sqlModel.addParameter(parameterName, surroundValue(request.getCaseNumber(), "%"));
+            sqlModel.addParameter(parameterName, surroundWithPercent(request.getCaseNumber()));
         }
     }
 
@@ -79,7 +79,7 @@ public class AdvancedSearchRequestMapper {
             joinHearing = true;
             String parameterName = "courtroom";
             sqlModel.addWhereCriteria("upper(courtroom.courtroom_name) like upper(:" + parameterName + ")");
-            sqlModel.addParameter(parameterName, surroundValue(request.getCourtroom(), "%"));
+            sqlModel.addParameter(parameterName, surroundWithPercent(request.getCourtroom()));
         }
     }
 
@@ -88,8 +88,12 @@ public class AdvancedSearchRequestMapper {
             joinCourthouse = true;
             String parameterName = "courthouse";
             sqlModel.addWhereCriteria("upper(courthouse.courthouse_name) like upper(:" + parameterName + ")");
-            sqlModel.addParameter(parameterName, surroundValue(request.getCourthouse(), "%"));
+            sqlModel.addParameter(parameterName, surroundWithPercent(request.getCourthouse()));
         }
+    }
+
+    private String surroundWithPercent(String value) {
+        return surroundValue(value, "%");
     }
 
     private void addHearingCriteria(GetCasesSearchRequest request) {
@@ -99,7 +103,7 @@ public class AdvancedSearchRequestMapper {
 
             String parameterName = "judge";
             sqlModel.addWhereCriteria("upper(judges.judge) like upper(:" + parameterName + ")");
-            sqlModel.addParameter(parameterName, surroundValue(request.getJudgeName(), "%"));
+            sqlModel.addParameter(parameterName, surroundWithPercent(request.getJudgeName()));
         }
         addHearingDateCriteria(request);
 
@@ -112,7 +116,7 @@ public class AdvancedSearchRequestMapper {
 
             String parameterName = "defendant";
             sqlModel.addWhereCriteria("upper(defendants.defendant) like upper(:" + parameterName + ")");
-            sqlModel.addParameter(parameterName, surroundValue(request.getDefendantName(), "%"));
+            sqlModel.addParameter(parameterName, surroundWithPercent(request.getDefendantName()));
         }
     }
 
@@ -123,7 +127,7 @@ public class AdvancedSearchRequestMapper {
 
             String parameterName = "keyword";
             sqlModel.addWhereCriteria("upper(defendants.defendant) like upper(:" + parameterName + ")");
-            sqlModel.addParameter(parameterName, surroundValue(request.getKeywords(), "%"));
+            sqlModel.addParameter(parameterName, surroundWithPercent(request.getKeywords()));
         }
     }
 
@@ -133,12 +137,12 @@ public class AdvancedSearchRequestMapper {
             if (request.getDateFrom() != null) {
                 String parameterName = "dateFrom";
                 sqlModel.addWhereCriteria("hearing.hearing_date >= date(:" + parameterName + ")");
-                sqlModel.addParameter(parameterName, surroundValue(request.getDateFrom().toString(), "%"));
+                sqlModel.addParameter(parameterName, surroundWithPercent(request.getDateFrom().toString()));
             }
             if (request.getDateTo() != null) {
                 String parameterName = "dateTo";
                 sqlModel.addWhereCriteria("hearing.hearing_date <= date(:" + parameterName + ")");
-                sqlModel.addParameter(parameterName, surroundValue(request.getDateTo().toString(), "%"));
+                sqlModel.addParameter(parameterName, surroundWithPercent(request.getDateTo().toString()));
             }
         }
     }
