@@ -43,6 +43,20 @@ class AutomatedTaskServiceImplTest {
     }
 
     @Test
+    void getAutomatedTaskCronExpression() {
+        AutomatedTaskTwo automatedTaskTwo = new AutomatedTaskTwo();
+        List<AutomatedTaskEntity> automatedTaskEntities1 = new ArrayList<>();
+        automatedTaskEntities1.add(createAutomatedTaskEntity(automatedTaskTwo));
+        when(mockAutomatedTaskRepository.findAllByTaskName(automatedTaskTwo.getTaskName()))
+            .thenReturn(automatedTaskEntities1);
+
+        String cronExpression = automatedTaskService.getAutomatedTaskCronExpression(
+            automatedTaskTwo.getDefaultCronExpression());
+        String expectedCronExpression = "*/12 * * * * *";
+        assertEquals(expectedCronExpression, cronExpression);
+    }
+
+    @Test
     void createAutomatedTaskTrigger() {
         Trigger taskTrigger = automatedTaskService.createAutomatedTaskTrigger(new AutomatedTaskOne());
         assertNotNull(taskTrigger);
