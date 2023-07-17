@@ -117,7 +117,8 @@ public class CaseController implements CasesApi {
             .dateTo(dateTo)
             .keywords(StringUtils.trimToNull(keywords))
             .build();
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
+        return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
 
     }
 }

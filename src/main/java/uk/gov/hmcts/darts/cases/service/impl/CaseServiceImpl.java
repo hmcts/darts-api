@@ -1,13 +1,19 @@
 package uk.gov.hmcts.darts.cases.service.impl;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchRequestMapper;
+import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.GetCasesMapper;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.SQLQueryModel;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
@@ -24,6 +30,9 @@ public class CaseServiceImpl implements CaseService {
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
     private final CommonApi commonApi;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -48,15 +57,20 @@ public class CaseServiceImpl implements CaseService {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
-        /*select *
-from court_case, hearing, courthouse, courtroom
-where courtroom.ctr_id = hearing.ctr_id
-and court_case.cth_id = courthouse.cth_id
-and hearing.cas_id = court_case.cas_id
-and hearing.ctr_id = courtroom.ctr_id*/
-        return null;
-        
+        AdvancedSearchRequestMapper mapper = new AdvancedSearchRequestMapper();
+        SQLQueryModel getCaseIdsQueryModel = mapper.mapToSQL(request);
+        Query caseIdQuery
+            = entityManager.createNativeQuery(getCaseIdsQueryModel.toString(), String.class);
+        getCaseIdsQueryModel.populateParameters(caseIdQuery);
+        List<String> caseIdsStr = caseIdQuery.getResultList();
+        List<Integer> caseIds = caseIdsStr.stream().map(caseId -> Integer.parseInt(caseId)).toList();
+        List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
+        List<AdvancedSearchResult> advancedSearchResults = AdvancedSearchResponseMapper.mapResponse(hearings);
+
+        return advancedSearchResults;
+
     }
 
 

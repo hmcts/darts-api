@@ -12,7 +12,7 @@ class AdvancedSearchRequestMapperTest {
         GetCasesSearchRequest request = new GetCasesSearchRequest();
         request.setCaseNumber("Test");
         AdvancedSearchRequestMapper mapper = new AdvancedSearchRequestMapper();
-        String result = mapper.mapToSQL(request);
+        String result = mapper.mapToSQL(request).toString();
         System.out.println("Result = " + result);
     }
 
@@ -21,7 +21,7 @@ class AdvancedSearchRequestMapperTest {
         GetCasesSearchRequest request = new GetCasesSearchRequest();
         request.setDateFrom(LocalDate.of(2023, 5, 6));
         AdvancedSearchRequestMapper mapper = new AdvancedSearchRequestMapper();
-        String result = mapper.mapToSQL(request);
+        String result = mapper.mapToSQL(request).toString();
         System.out.println("Result = " + result);
     }
 
@@ -30,7 +30,7 @@ class AdvancedSearchRequestMapperTest {
         GetCasesSearchRequest request = new GetCasesSearchRequest();
         request.setJudgeName("judgesTest");
         AdvancedSearchRequestMapper mapper = new AdvancedSearchRequestMapper();
-        String result = mapper.mapToSQL(request);
+        String result = mapper.mapToSQL(request).toString();
         System.out.println("Result = " + result);
     }
 
@@ -39,7 +39,7 @@ class AdvancedSearchRequestMapperTest {
         GetCasesSearchRequest request = new GetCasesSearchRequest();
         request.setKeywords("keywordsTest");
         AdvancedSearchRequestMapper mapper = new AdvancedSearchRequestMapper();
-        String result = mapper.mapToSQL(request);
+        String result = mapper.mapToSQL(request).toString();
         System.out.println("Result = " + result);
     }
 
@@ -48,7 +48,7 @@ class AdvancedSearchRequestMapperTest {
         GetCasesSearchRequest request = new GetCasesSearchRequest();
         request.setKeywords("keywordsTest1 keywordsTest2 keywordsTest3 keywordsTest4 keywordsTest5");
         AdvancedSearchRequestMapper mapper = new AdvancedSearchRequestMapper();
-        String result = mapper.mapToSQL(request);
+        String result = mapper.mapToSQL(request).toString();
         System.out.println("Result = " + result);
     }
 

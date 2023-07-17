@@ -19,4 +19,10 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         "AND cr.courthouse = ch"
     )
     List<HearingEntity> findByCourthouseCourtroomAndDate(String courthouse, String courtroom, LocalDate date);
+
+    @Query("SELECT h FROM HearingEntity h, CaseEntity case " +
+        "WHERE case.id in :caseIds " +
+        "AND h.courtCase = case"
+    )
+    List<HearingEntity> findByCaseIds(List<Integer> caseIds);
 }
