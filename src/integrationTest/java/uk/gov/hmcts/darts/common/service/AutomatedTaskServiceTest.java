@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.common.service;
 
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,9 +13,7 @@ import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.test.context.ActiveProfiles;
-
 import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @Slf4j
-public class AutomatedTaskServiceTest {//extends IntegrationBase {
+public class AutomatedTaskServiceTest {
     @Autowired
     private AutomatedTaskService automatedTaskService;
 
@@ -40,13 +36,13 @@ public class AutomatedTaskServiceTest {//extends IntegrationBase {
     private TaskScheduler taskScheduler;
 
     @Test
-    void configureTasks() throws InterruptedException {
+    void givenConfiguredTasksCancelTaskAndAddTaskBackWithRandomCronExpression() throws InterruptedException {
         Thread.sleep(35_000);
 
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         displayTasks(scheduledTasks);
 
-        log.info("----- About to cancel task 1");
+        log.info("----- About to cancel task {}", AutomatedTaskOne.TASKNAME);
         boolean taskCancelled = automatedTaskService.cancelAutomatedTask(AutomatedTaskOne.TASKNAME);
         assertTrue(taskCancelled);
 
@@ -86,7 +82,7 @@ public class AutomatedTaskServiceTest {//extends IntegrationBase {
                 Task task = scheduledTask.getTask();
                 if (task instanceof CronTask) {
                     CronTask cronTask = (CronTask) task;
-                    log.info("Cron expression: {}", cronTask.getExpression());
+                    log.info("CronTask expression: {}", cronTask.getExpression());
                 } else if (task instanceof TriggerTask) {
                     TriggerTask triggerTask = (TriggerTask) task;
                     log.info("TriggerTask runnable: {}", triggerTask.getRunnable());

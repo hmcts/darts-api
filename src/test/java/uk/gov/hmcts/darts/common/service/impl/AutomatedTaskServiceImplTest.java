@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.common.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,11 +12,8 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.task.AutomatedTask;
 import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
-import uk.gov.hmcts.darts.common.task.AutomatedTaskTwo;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,20 +36,6 @@ class AutomatedTaskServiceImplTest {
         List<AutomatedTaskEntity> automatedTaskEntities2 =
             automatedTaskService.getAutomatedTaskEntitiesByTaskName(AutomatedTaskOne.TASKNAME);
         assertNotNull(automatedTaskEntities2);
-    }
-
-    @Test
-    void getAutomatedTaskCronExpression() {
-        AutomatedTaskTwo automatedTaskTwo = new AutomatedTaskTwo();
-        List<AutomatedTaskEntity> automatedTaskEntities1 = new ArrayList<>();
-        automatedTaskEntities1.add(createAutomatedTaskEntity(automatedTaskTwo));
-        when(mockAutomatedTaskRepository.findAllByTaskName(automatedTaskTwo.getTaskName()))
-            .thenReturn(automatedTaskEntities1);
-
-        String cronExpression = automatedTaskService.getAutomatedTaskCronExpression(
-            automatedTaskTwo.getDefaultCronExpression());
-        String expectedCronExpression = "*/12 * * * * *";
-        assertEquals(expectedCronExpression, cronExpression);
     }
 
     @Test

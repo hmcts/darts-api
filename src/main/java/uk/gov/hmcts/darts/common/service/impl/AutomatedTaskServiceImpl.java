@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.darts.common.task.AutomatedTaskTwo;
 
 @Service
 @Slf4j
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"})
 public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     @Autowired
@@ -67,26 +69,20 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     public String getAutomatedTaskCronExpression(String taskName) {
         String cronExpression = null;
-        List<AutomatedTaskEntity> automatedTaskEntities = getAutomatedTaskEntitiesByTaskName(taskName);
-        //AutomatedTaskEntity automatedTaskEntities = getAutomatedTaskEntityByTaskName(taskName);
-        if (automatedTaskEntities != null && !automatedTaskEntities.isEmpty()) {
-            cronExpression = automatedTaskEntities.get(0).getCronExpression();
-            //cronExpression = automatedTaskEntities.getCronExpression();
-            log.info("{} cron expression: {}", taskName, cronExpression);
+        AutomatedTaskEntity automatedTaskEntity = getAutomatedTaskEntityByTaskName(taskName);
+        if (automatedTaskEntity != null) {
+            cronExpression = automatedTaskEntity.getCronExpression();
+            log.debug("{} cron expression: {}", taskName, cronExpression);
         }
         return cronExpression;
     }
 
     @Override
     public void updateAutomatedTaskCronExpression(String taskName, String cronExpression) {
-        List<AutomatedTaskEntity> automatedTaskEntities = getAutomatedTaskEntitiesByTaskName(taskName);
-        if (automatedTaskEntities != null) {
-//            automatedTaskEntity.setCronExpression(cronExpression);
-//            automatedTaskRepository.saveAndFlush(automatedTaskEntity);
-            for (AutomatedTaskEntity automatedTaskEntity: automatedTaskEntities) {
-                automatedTaskEntity.setCronExpression(cronExpression);
-                automatedTaskRepository.saveAndFlush(automatedTaskEntity);
-            }
+        AutomatedTaskEntity automatedTaskEntity = getAutomatedTaskEntityByTaskName(taskName);
+        if (automatedTaskEntity != null) {
+            automatedTaskEntity.setCronExpression(cronExpression);
+            automatedTaskRepository.saveAndFlush(automatedTaskEntity);
         }
     }
 
@@ -123,8 +119,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             Task task = scheduledTask.getTask();
             if (task instanceof TriggerTask) {
                 TriggerTask triggerTask = (TriggerTask) task;
-                result = cancelTriggerTask(taskName, scheduledTask, triggerTask);
-                if (result == true) {
+                if (cancelTriggerTask(taskName, scheduledTask, triggerTask)) {
+                    result = true;
                     break;
                 }
             }
