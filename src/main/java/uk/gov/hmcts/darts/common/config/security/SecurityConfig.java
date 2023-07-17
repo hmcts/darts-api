@@ -47,7 +47,6 @@ public class SecurityConfig {
                 "/metrics/**",
                 "/external-user/login-or-refresh",
                 "/external-user/handle-oauth-code",
-                "/external-user/reset-password",
                 "/"
             )
             .authorizeHttpRequests().anyRequest().permitAll();

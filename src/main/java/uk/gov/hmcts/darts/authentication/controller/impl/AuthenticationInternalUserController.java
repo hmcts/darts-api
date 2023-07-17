@@ -31,9 +31,4 @@ public class AuthenticationInternalUserController implements AuthenticationContr
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
-    @Override
-    public ModelAndView resetPassword() {
-        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
-    }
-
 }
