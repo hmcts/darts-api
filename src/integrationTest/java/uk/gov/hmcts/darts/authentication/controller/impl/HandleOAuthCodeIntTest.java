@@ -17,14 +17,10 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -43,13 +39,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-@AutoConfigureWireMock
-@ActiveProfiles({"intTest", "h2db"})
-@ReprovisionDatabaseBeforeEach
+//@AutoConfigureWireMock
 @SuppressWarnings("PMD.ExcessiveImports")
-class HandleOAuthCodeIntTest {
+class HandleOAuthCodeIntTest extends IntegrationBase {
 
     private static final String EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE =
         "/external-user/handle-oauth-code?code=abc";
