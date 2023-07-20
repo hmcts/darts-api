@@ -192,7 +192,7 @@ ext {
 }
 
 ext['snakeyaml.version'] = '2.0'
-ext['spring-security.version'] = '6.0.3' // https://spring.io/security/cve-2023-20862
+ext['spring-security.version'] = '6.0.5' // https://spring.io/security/cve-2023-20862
 
 task generateDailyListApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
   generatorName = "spring"
