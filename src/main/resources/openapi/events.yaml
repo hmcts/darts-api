@@ -94,27 +94,33 @@ paths:
           name: Courthouse
           schema:
             type: string
+          required: true
         - in: query
           name: caseNumber
           schema:
             type: string
+          required: true
         - in: query
           name: startDateTime
           schema:
             type: string
             format: date-time
+          required: true
         - in: query
           name: endDateTime
           schema:
             type: string
             format: date-time
+          required: true
+
+
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EventsResponse'
+                $ref: '#/components/schemas/CourtLogs'
 
         '500':
           description: Internal Server Error
@@ -197,17 +203,16 @@ components:
           $ref: '#/components/schemas/Courthouse'
         caseNumber:
           type: string
-        startDateTime:
+        timestamp:
           type: string
           format: date-time
-        endDateTime:
+        eventText:
           type: string
-          format: date-time
       required:
         - courthouse
         - caseNumber
-        - startDateTime
-        - endDateTime
+        - timestamp
+        - eventText
     CourtLogs:
       type: array
       items:

@@ -12,10 +12,18 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -25,9 +33,12 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -35,6 +46,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class EventsControllerCourtLogsTest extends IntegrationBase {
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
+    private CaseRepository caseRepository;
+
+    @Autowired
+    private CourtroomRepository courtroomRepository;
+
+    @Autowired
+    private CourthouseRepository courthouseRepository;
+
+    @Autowired
+    private HearingRepository hearingRepository;
 
     private static final URI ENDPOINT = URI.create("/courtlogs");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
@@ -96,12 +122,12 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtLogsPostShouldReturnBadRequestWhenNoRequestBodyIsProvided() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json");
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT).header("Content-Type", "application/json");
 
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
-            .andExpect(header().string("Content-Type", "application/problem+json"));
+        mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andExpect(header().string(
+            "Content-Type",
+            "application/problem+json"
+        ));
     }
 
     private CourtLogsPostRequestBody createRequestBody() {
@@ -125,17 +151,51 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Test
     void courtLogsGet() throws Exception {
 
-        String time
-            = OffsetDateTime.now().toString();
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam("Courthouse", "Swansea")
+            .queryParam("caseNumber", "Case0000001")
+            .queryParam("startDateTime", String.valueOf(CommonTestDataUtil.createOffsetDateTime("2022-07-01T09:00:00")))
+            .queryParam("endDateTime", String.valueOf(CommonTestDataUtil.createOffsetDateTime("2022-07-01T11:00:00")))
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+    }
+
+    @Test
+    void courtLogsGetNoParametersPassed() throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT).contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andExpect(header().string(
+            "Content-Type",
+            "application/problem+json"
+        ));
+    }
+
+    @Test
+    @Transactional
+    void courtLogsGetResultMatch() throws Exception {
+
+        var hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
+        hearingRepository.saveAndFlush(hearingEntity);
+
+        var event = CommonTestDataUtil.createEvent("LOG", "test", hearingEntity);
+        eventRepository.saveAndFlush(event);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("courthouse","String")
-            .queryParam("caseNumber","String")
-            .queryParam("startDateTime",time)
-            .queryParam("endDateTime",time)
+            .queryParam("Courthouse", "NEWCASTLE")
+            .queryParam("caseNumber", "Case0000001")
+            .queryParam("startDateTime", "2022-07-01T09:00:00+01")
+            .queryParam("endDateTime", "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented());
 
+        System.out.println(mockMvc.perform(requestBuilder).andReturn().getResponse().getContentAsString());
+
+       mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].courthouse", is("NEWCASTLE")))
+            .andExpect(jsonPath("$[0].caseNumber", is("Case0000001")))
+            .andExpect(jsonPath("$[0].timestamp", is(notNullValue())))
+            .andExpect(jsonPath("$[0].eventText", is("test")));
     }
 
 }
