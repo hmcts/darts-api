@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.cases.util.RequestValidator;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -78,33 +79,16 @@ public class CaseController implements CasesApi {
 
     }
 
-
-    @Operation(
-        operationId = "casesSearchGet",
-        summary = "Advanced Search",
-        description = "Allows cases to be searched for using partial case numbers, defendant names, etc. All string can be partial matches, and case insensitive.",
-        tags = {"Cases"},
-        responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {
-                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = AdvancedSearchResult.class)))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/cases/search",
-        produces = {"application/json"}
-    )
+    @Override
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchGet(
         @Parameter(name = "case_number", description = "Full or partial Case Number", in = ParameterIn.QUERY) @Valid @RequestParam(value = "case_number", required = false) String caseNumber,
         @Parameter(name = "courthouse", description = "Full or partial Courthouse name", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = false) String courthouse,
         @Parameter(name = "courtroom", description = "Full or partial Courtroom name", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courtroom", required = false) String courtroom,
         @Parameter(name = "judge_name", description = "Full or partial Judge name", in = ParameterIn.QUERY) @Valid @RequestParam(value = "judge_name", required = false) String judgeName,
-        @Parameter(name = "defendant_name", description = "Full or partial Defendant name", in = ParameterIn.QUERY) @Valid @RequestParam(value = "defendant_name", required = false) String defendantName,
+        @Parameter(name = "defendant_name4324", description = "Full or partial Defendant name", in = ParameterIn.QUERY) @Valid @RequestParam(value = "defendant_name", required = false) String defendantName,
         @Parameter(name = "date_from", description = "DateFrom to search for the hearings in.", in = ParameterIn.QUERY) @Valid @RequestParam(value = "date_from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
         @Parameter(name = "date_to", description = "DateTo to search for the hearings in.", in = ParameterIn.QUERY) @Valid @RequestParam(value = "date_to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo,
-        @Parameter(name = "keywords", description = "Full or partial event_name and event_text", in = ParameterIn.QUERY) @Valid @RequestParam(value = "keywords", required = false) String keywords
+        @Parameter(name = "event_text_contains", description = "Full or partial event_text", in = ParameterIn.QUERY) @Valid @RequestParam(value = "event_text_contains", required = false) String eventTextContains
     ) {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
@@ -115,8 +99,9 @@ public class CaseController implements CasesApi {
             .defendantName(StringUtils.trimToNull(defendantName))
             .dateFrom(dateFrom)
             .dateTo(dateTo)
-            .keywords(StringUtils.trimToNull(keywords))
+            .eventTextContains(StringUtils.trimToNull(eventTextContains))
             .build();
+        RequestValidator.validate(request);
         List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
         return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
 

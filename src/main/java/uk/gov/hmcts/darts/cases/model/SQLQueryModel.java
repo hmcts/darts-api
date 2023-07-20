@@ -37,7 +37,7 @@ public class SQLQueryModel {
     public String toString() {
         return "SELECT " + String.join(", ", selectColumns) + "\n" +
             "FROM " + String.join(", ", fromTables.stream().distinct().toList()) + "\n" +
-            "WHERE " + String.join("\r\nAND ", whereCriteria);
+            "WHERE " + String.join("\nAND ", whereCriteria);
     }
 
     public void populateParameters(Query caseIdQuery) {

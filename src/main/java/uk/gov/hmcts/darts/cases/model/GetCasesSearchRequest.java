@@ -20,6 +20,6 @@ public class GetCasesSearchRequest {
     String defendantName;
     LocalDate dateFrom;
     LocalDate dateTo;
-    String keywords;
+    String eventTextContains;
 
 }

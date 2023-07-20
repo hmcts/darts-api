@@ -107,10 +107,10 @@ paths:
           description: "DateTo to search for the hearings in."
           example: 2023-06-22
         - in: query
-          name: keywords
+          name: event_text_contains
           schema:
             type: string
-          description: "Full or partial event_name and event_text"
+          description: "Full or partial event_text"
           example: ""
       responses:
         '200':

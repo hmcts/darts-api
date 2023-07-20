@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.cases.exception.CaseError;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchRequestMapper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.GetCasesMapper;
@@ -15,20 +16,22 @@ import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.SQLQueryModel;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
-import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.api.CommonApi;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static uk.gov.hmcts.darts.common.CommonConstants.MAX_POSTGRES_RESULTS;
 
 @Service
 @RequiredArgsConstructor
 public class CaseServiceImpl implements CaseService {
 
     private final HearingRepository hearingRepository;
-    private final CaseRepository caseRepository;
     private final CommonApi commonApi;
 
     @PersistenceContext
@@ -59,13 +62,18 @@ public class CaseServiceImpl implements CaseService {
     @Override
     @SuppressWarnings("unchecked")
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
-        AdvancedSearchRequestMapper mapper = new AdvancedSearchRequestMapper();
-        SQLQueryModel getCaseIdsQueryModel = mapper.mapToSQL(request);
+        SQLQueryModel getCaseIdsQueryModel = AdvancedSearchRequestMapper.mapToSQLQueryModel(request);
         Query caseIdQuery
             = entityManager.createNativeQuery(getCaseIdsQueryModel.toString(), String.class);
         getCaseIdsQueryModel.populateParameters(caseIdQuery);
         List<String> caseIdsStr = caseIdQuery.getResultList();
-        List<Integer> caseIds = caseIdsStr.stream().map(caseId -> Integer.parseInt(caseId)).toList();
+        if (caseIdsStr.size() > MAX_POSTGRES_RESULTS) {
+            throw new DartsApiException(CaseError.TOO_MANY_RESULTS);
+        }
+        if (caseIdsStr.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Integer> caseIds = caseIdsStr.stream().map(Integer::parseInt).toList();
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
         List<AdvancedSearchResult> advancedSearchResults = AdvancedSearchResponseMapper.mapResponse(hearings);
 
