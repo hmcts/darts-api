@@ -1,10 +1,11 @@
-package uk.gov.hmcts.darts.event.handler;
+package uk.gov.hmcts.darts.event.model;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

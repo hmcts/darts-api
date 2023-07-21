@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.event.exception.EventError;
-import uk.gov.hmcts.darts.event.handler.CourtroomCourthouseCourtcase;
+import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 
