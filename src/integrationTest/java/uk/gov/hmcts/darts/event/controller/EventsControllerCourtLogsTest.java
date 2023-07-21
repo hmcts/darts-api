@@ -44,9 +44,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
+    public static final String CASE_0000001 = "Case0000001";
     @Autowired
     private EventRepository eventRepository;
 
@@ -122,7 +123,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtLogsPostShouldReturnBadRequestWhenNoRequestBodyIsProvided() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT).header("Content-Type", "application/json");
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andExpect(header().string(
             "Content-Type",
@@ -153,7 +155,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("Courthouse", "Swansea")
-            .queryParam("caseNumber", "Case0000001")
+            .queryParam("caseNumber", CASE_0000001)
             .queryParam("startDateTime", String.valueOf(CommonTestDataUtil.createOffsetDateTime("2022-07-01T09:00:00")))
             .queryParam("endDateTime", String.valueOf(CommonTestDataUtil.createOffsetDateTime("2022-07-01T11:00:00")))
             .contentType(MediaType.APPLICATION_JSON_VALUE);
@@ -176,7 +178,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Transactional
     void courtLogsGetResultMatch() throws Exception {
 
-        var hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
+        var hearingEntity = CommonTestDataUtil.createHearing(CASE_0000001, LocalTime.of(10, 0));
         hearingRepository.saveAndFlush(hearingEntity);
 
         var event = CommonTestDataUtil.createEvent("LOG", "test", hearingEntity);
@@ -184,16 +186,14 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("Courthouse", "NEWCASTLE")
-            .queryParam("caseNumber", "Case0000001")
+            .queryParam("caseNumber", CASE_0000001)
             .queryParam("startDateTime", "2022-07-01T09:00:00+01")
             .queryParam("endDateTime", "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
-        System.out.println(mockMvc.perform(requestBuilder).andReturn().getResponse().getContentAsString());
-
-       mockMvc.perform(requestBuilder).andExpect(status().isOk())
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].courthouse", is("NEWCASTLE")))
-            .andExpect(jsonPath("$[0].caseNumber", is("Case0000001")))
+            .andExpect(jsonPath("$[0].caseNumber", is(CASE_0000001)))
             .andExpect(jsonPath("$[0].timestamp", is(notNullValue())))
             .andExpect(jsonPath("$[0].eventText", is("test")));
     }

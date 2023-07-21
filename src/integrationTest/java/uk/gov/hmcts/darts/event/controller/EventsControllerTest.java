@@ -32,6 +32,9 @@ class EventsControllerTest {
     private EventDispatcher eventDispatcher;
 
     @MockBean
+    private CourtLogsService courtLogsService;
+
+    @MockBean
     private DartsEventMapper dartsEventMapper;
 
     @Test

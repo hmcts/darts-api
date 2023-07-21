@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.event.mapper;
 
 import lombok.experimental.UtilityClass;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.event.model.CourtLog;
 
