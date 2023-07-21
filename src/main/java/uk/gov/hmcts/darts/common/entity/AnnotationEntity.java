@@ -52,7 +52,4 @@ public class AnnotationEntity extends VersionedEntity {
 
     @Column(name = "superseded")
     private Boolean superseded;
-
-    @Column(name = "version")
-    private Integer version;
 }
