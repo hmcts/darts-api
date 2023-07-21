@@ -23,6 +23,6 @@ public class ReportingRestrictionsEntity {
     private Integer id;
 
     @Column(name = "rer_description")
-    private Integer description;
+    private String description;
 
 }

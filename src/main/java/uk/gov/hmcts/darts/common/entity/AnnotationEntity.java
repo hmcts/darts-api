@@ -38,28 +38,21 @@ public class AnnotationEntity extends VersionedEntity {
     @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
-    @Column(name = "r_annotation_object_id", length = 16)
-    private String legacyObjectId;
-
-    @Column(name = "c_text")
+    @Column(name = "annotation_text")
     private String text;
 
-    @Column(name = "c_time_stamp")
+    @Column(name = "annotation_ts")
     private OffsetDateTime timestamp;
 
-    @Column(name = "c_start")
-    private OffsetDateTime start;
+    @Column(name = "annotation_object_id")
+    private String legacyObjectId;
 
-    @Column(name = "c_end")
-    private OffsetDateTime end;
-
-    @Column(name = "r_case_object_id", length = 16)
-    private String legacyCaseObjectId;
-
-    @Column(name = "r_version_label", length = 32)
+    @Column(name = "version_label")
     private String legacyVersionLabel;
 
-    @Column(name = "i_superseded")
+    @Column(name = "superseded")
     private Boolean superseded;
 
+    @Column(name = "version")
+    private Integer version;
 }

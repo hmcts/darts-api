@@ -41,7 +41,7 @@ public class MediaRequestEntity {
     public static final String OUTPUT_FILENAME = "output_filename";
     public static final String LAST_ACCESSED_DATE_TIME = "last_accessed_ts";
     public static final String CREATED_DATE_TIME = "created_ts";
-    public static final String LAST_UPDATED_DATE_TIME = "last_updated_ts";
+    public static final String LAST_MODIFIED_TS = "last_modified_ts";
     public static final String TABLE_NAME = "media_request";
 
     @Id
@@ -75,6 +75,7 @@ public class MediaRequestEntity {
     private OffsetDateTime endTime;
 
     @Column(name = OUTPUT_FORMAT)
+    @Enumerated(EnumType.STRING)
     private AudioRequestOutputFormat outputFormat;
 
     @Column(name = OUTPUT_FILENAME)
@@ -88,8 +89,8 @@ public class MediaRequestEntity {
     private OffsetDateTime createdDateTime;
 
     @UpdateTimestamp
-    @Column(name = LAST_UPDATED_DATE_TIME)
-    private OffsetDateTime lastUpdatedDateTime;
+    @Column(name = LAST_MODIFIED_TS)
+    private OffsetDateTime lastUpdated;
 
 }
 

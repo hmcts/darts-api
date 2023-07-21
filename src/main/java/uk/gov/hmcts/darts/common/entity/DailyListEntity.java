@@ -27,11 +27,10 @@ public class DailyListEntity extends VersionedEntity {
 
     public static final String ID = "dal_id";
     public static final String COURTHOUSE_ID = "cth_id";
-    public static final String DAILY_LIST_OBJECT_ID = "r_daily_list_object_id";
+    public static final String DAILY_LIST_OBJECT_ID = "daily_list_object_id";
     public static final String UNIQUE_ID = "unique_id";
     public static final String JOB_STATUS = "job_status";
     public static final String TIMESTAMP = "published_ts";
-    public static final String DAILY_LIST_ID = "daily_list_id";
     public static final String START_DATE = "start_dt";
     public static final String END_DATE = "end_dt";
     public static final String DAILY_LIST_ID_STRING = "daily_list_id_s";
@@ -64,9 +63,6 @@ public class DailyListEntity extends VersionedEntity {
 
     @Column(name = TIMESTAMP)
     private OffsetDateTime publishedTimestamp;
-
-    @Column(name = DAILY_LIST_ID)
-    private Integer dailyListId;
 
     @Column(name = START_DATE)
     private LocalDate startDate;

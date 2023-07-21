@@ -57,11 +57,11 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
     private OffsetDateTime createdTimestamp;
 
     @UpdateTimestamp
-    @Column(name = "modified_ts")
+    @Column(name = "last_modified_ts")
     private OffsetDateTime modifiedTimestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
-    @JoinColumn(name = "modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
+    @JoinColumn(name = "last_modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
     private UserAccount modifiedBy;
 
 }

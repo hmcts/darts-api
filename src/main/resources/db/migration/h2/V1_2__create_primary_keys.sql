@@ -24,4 +24,5 @@ ALTER TABLE darts.transcription_type ADD CONSTRAINT transcription_type_pk PRIMAR
 ALTER TABLE darts.transient_object_directory ADD CONSTRAINT transient_object_directory_pk PRIMARY KEY(tod_id);
 ALTER TABLE darts.urgency ADD CONSTRAINT urgency_pk PRIMARY KEY(urg_id);
 ALTER TABLE darts.user_account ADD CONSTRAINT user_account_pk PRIMARY KEY(usr_id);
+ALTER TABLE darts.region ADD CONSTRAINT region_pk PRIMARY KEY(reg_id);
 
