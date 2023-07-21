@@ -46,32 +46,29 @@ public class TranscriptionEntity extends VersionedEntity {
     @Column(name = "hea_id")
     private Integer hearingId;
 
-    @Column(name = "r_transcription_object_id", length = 16)
+    @Column(name = "transcription_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_company")
+    @Column(name = "company")
     private String company;
 
-    @Column(name = "c_requestor")
+    @Column(name = "requestor")
     private String requestor;
 
-    @Column(name = "c_current_state")
+    @Column(name = "current_state")
     private String currentState;
 
-    @Column(name = "i_current_state_ts")
+    @Column(name = "current_state_ts")
     private OffsetDateTime currentStateTimestamp;
 
-    @Column(name = "c_hearing_date")
+    @Column(name = "hearing_date")
     private OffsetDateTime hearingDate;
 
-    @Column(name = "c_start")
+    @Column(name = "start_ts")
     private OffsetDateTime start;
 
-    @Column(name = "c_end")
+    @Column(name = "end_ts")
     private OffsetDateTime end;
-
-    @Column(name = "c_courtroom")
-    private String courtroom;
 
     @Column(name = "created_ts")
     private OffsetDateTime createdTimestamp;
@@ -94,10 +91,10 @@ public class TranscriptionEntity extends VersionedEntity {
     @Column(name = "transcribed_by")
     private Integer transcribedByUserId;
 
-    @Column(name = "r_version_label", length = 32)
+    @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
-    @Column(name = "i_superseded")
+    @Column(name = "superseded")
     private Boolean superseded;
 
     @OneToMany(mappedBy = "transcription")

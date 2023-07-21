@@ -37,7 +37,7 @@ public class NotificationEntity {
     public static final String ATTEMPTS = "send_attempts";
     public static final String TEMPLATE_VALUES = "template_values";
     public static final String CREATED_DATE_TIME = "created_ts";
-    public static final String LAST_UPDATED_DATE_TIME = "last_updated_ts";
+    public static final String LAST_MODIFIED_TS = "last_modified_ts";
     public static final String TABLE_NAME = "notification";
 
     @Id
@@ -70,7 +70,7 @@ public class NotificationEntity {
     private OffsetDateTime createdDateTime;
 
     @UpdateTimestamp
-    @Column(name = LAST_UPDATED_DATE_TIME)
-    private OffsetDateTime lastUpdatedDateTime;
+    @Column(name = LAST_MODIFIED_TS)
+    private OffsetDateTime lastUpdated;
 
 }

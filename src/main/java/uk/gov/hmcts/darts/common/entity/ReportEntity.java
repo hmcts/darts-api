@@ -25,28 +25,28 @@ public class ReportEntity extends VersionedEntity {
     @SequenceGenerator(name = "rep_gen", sequenceName = "rep_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "r_report_object_id", length = 16)
+    @Column(name = "report_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "c_name")
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "c_subject")
+    @Column(name = "subject")
     private String subject;
 
-    @Column(name = "c_text")
+    @Column(name = "report_text")
     private String text;
 
-    @Column(name = "c_query")
+    @Column(name = "query")
     private String query;
 
-    @Column(name = "c_recipients")
+    @Column(name = "recipients")
     private String recipients;
 
-    @Column(name = "r_version_label", length = 32)
+    @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
-    @Column(name = "i_superseded")
+    @Column(name = "superseded")
     private Boolean superseded;
 
 }

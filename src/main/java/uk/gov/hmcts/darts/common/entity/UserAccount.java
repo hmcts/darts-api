@@ -9,6 +9,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
 
@@ -31,17 +32,8 @@ public class UserAccount {
     @Column(name = "user_name")
     private String username;
 
-    @Column(name = "user_os_name")
-    private String osName;
-
-    @Column(name = "user_address")
-    private String address;
-
-    @Column(name = "user_privileges")
-    private String privileges;
-
-    @Column(name = "user_db_name")
-    private String dbName;
+    @Column(name = "user_email_address")
+    private String emailAddress;
 
     @Column(name = "description")
     private String userDescription;
@@ -49,27 +41,16 @@ public class UserAccount {
     @Column(name = "user_state")
     private Integer state;
 
-    @Column(name = "modify_ts")
-    private OffsetDateTime modifyTime;
+    @Column(name = "created_ts")
+    @CreationTimestamp
+    private OffsetDateTime created;
 
-    @Column(name = "workflow_disabled", length = 32)
-    private Integer workflowDisabled;
+    @Column(name = "last_modified_ts")
+    private OffsetDateTime lastUpdated;
 
-    @Column(name = "user_source")
-    private String source;
+    @Column(name = "last_login_ts")
+    private OffsetDateTime lastLoginTime;
 
-    @Column(name = "user_ldap_cn")
-    private String ldapCn;
-
-    @Column(name = "user_global_unique_id")
-    private String globalUniqueId;
-
-    @Column(name = "user_login_name")
-    private String loginName;
-
-    @Column(name = "user_login_domain")
-    private String loginDomain;
-
-    @Column(name = "last_login_utc_time")
-    private OffsetDateTime lastLoginUtcTime;
+    @Column(name = "last_modified_by")
+    private Integer lastModifiedBy;
 }
