@@ -34,8 +34,8 @@ public class CaseEntity {
     private Integer id;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "rer_id")
-    private ReportingRestrictionsEntity reportingRestrictions;
+    @JoinColumn(name = "evh_id")
+    private EventHandlerEntity reportingRestrictions;
 
     @Column(name = "case_object_id", length = 16)
     private String legacyCaseObjectId;

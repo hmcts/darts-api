@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
-import uk.gov.hmcts.darts.cases.repository.ReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -55,7 +54,6 @@ public class DartsDatabaseStub {
 
     private final CaseRepository caseRepository;
     private final EventRepository eventRepository;
-    private final ReportingRestrictionsRepository reportingRestrictionsRepository;
     private final CourthouseRepository courthouseRepository;
     private final HearingRepository hearingRepository;
     private final CourtroomRepository courtroomRepository;
