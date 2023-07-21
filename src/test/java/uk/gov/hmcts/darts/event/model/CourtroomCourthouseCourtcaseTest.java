@@ -5,7 +5,6 @@ import org.mockito.Mock;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
