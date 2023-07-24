@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = CaseEntity.TABLE_NAME)
+@Table(name = CourtCaseEntity.TABLE_NAME)
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
-public class CaseEntity {
+public class CourtCaseEntity {
 
     public static final String COURT_CASE = "courtCase";
     public static final String VERSION_LABEL = "version_label";

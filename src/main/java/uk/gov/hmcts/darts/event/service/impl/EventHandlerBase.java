@@ -6,7 +6,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -122,7 +122,10 @@ public abstract class EventHandlerBase implements EventHandler {
 
         saveEvent(dartsEvent, actualCourtRoomEntity);
 
-        boolean isCourtroomDifferentFromHearing = isCourtroomDifferentFromHearingCourtroom(actualCourtRoomEntity, actualHearingEntity);
+        boolean isCourtroomDifferentFromHearing = isCourtroomDifferentFromHearingCourtroom(
+            actualCourtRoomEntity,
+            actualHearingEntity
+        );
 
         if (isTheHearingNewOrTheCourtroomIsDifferent(hearingIsNew, isCourtroomDifferentFromHearing)) {
             actualHearingEntity.setCourtroom(actualCourtRoomEntity);
@@ -134,7 +137,7 @@ public abstract class EventHandlerBase implements EventHandler {
         return CourtroomCourthouseCourtcase.builder()
             .courthouseEntity(actualCourtHouse)
             .courtroomEntity(actualCourtRoomEntity)
-            .caseEntity(actualCourtCaseEntity)
+            .courtCaseEntity(actualCourtCaseEntity)
             .isHearingNew(hearingIsNew)
             .isCourtroomDifferentFromHearing(isCourtroomDifferentFromHearing)
             .build();
@@ -145,11 +148,12 @@ public abstract class EventHandlerBase implements EventHandler {
             .findByCourthouseNameAndCourtroomName(dartsEvent.getCourthouse(), dartsEvent.getCourtroom())
             .orElseThrow(() -> new DartsApiException(
                 EventError.EVENT_DATA_NOT_FOUND,
-                format(COURTHOUSE_COURTROOM_NOT_FOUND_MESSAGE, dartsEvent.getCourthouse(), dartsEvent.getCourtroom())));
+                format(COURTHOUSE_COURTROOM_NOT_FOUND_MESSAGE, dartsEvent.getCourthouse(), dartsEvent.getCourtroom())
+            ));
 
     }
 
-    protected CaseEntity getCourtCaseEntityOrCreate(CourthouseEntity courtHouse, String eventCaseNumber) {
+    protected CourtCaseEntity getCourtCaseEntityOrCreate(CourthouseEntity courtHouse, String eventCaseNumber) {
         return caseRepository
             .findByCaseNumberAndCourthouse_CourthouseName(eventCaseNumber, courtHouse.getCourthouseName())
             .orElseGet(() -> createNewCaseAt(courtHouse, eventCaseNumber));
@@ -169,19 +173,19 @@ public abstract class EventHandlerBase implements EventHandler {
         return !hearingEntity.getCourtroom().equals(courtroomEntity);
     }
 
-    protected Optional<HearingEntity> getHearingEntity(OffsetDateTime eventDate, CaseEntity courtCaseEntity) {
+    protected Optional<HearingEntity> getHearingEntity(OffsetDateTime eventDate, CourtCaseEntity courtCaseEntity) {
         return courtCaseEntity.getHearings().stream()
             .filter(hearingEntity -> hearingEntity.isFor(eventDate))
             .findFirst();
     }
 
-    protected HearingEntity getHearingEntityOrCreate(CourtroomEntity courtRoomEntity, OffsetDateTime eventDate, CaseEntity courtCaseEntity) {
+    protected HearingEntity getHearingEntityOrCreate(CourtroomEntity courtRoomEntity, OffsetDateTime eventDate, CourtCaseEntity courtCaseEntity) {
         return courtCaseEntity.getHearings().stream()
             .filter(hearingEntity -> hearingEntity.isFor(eventDate))
             .findFirst().orElseGet(() -> newCaseHearing(courtRoomEntity, eventDate, courtCaseEntity));
     }
 
-    protected static HearingEntity newCaseHearing(CourtroomEntity actualCourtRoom, OffsetDateTime actualEventDate, CaseEntity courtCase) {
+    protected static HearingEntity newCaseHearing(CourtroomEntity actualCourtRoom, OffsetDateTime actualEventDate, CourtCaseEntity courtCase) {
         var newHearing = new HearingEntity();
         newHearing.setHearingDate(actualEventDate.toLocalDate());
         newHearing.setCourtroom(actualCourtRoom);
@@ -191,8 +195,8 @@ public abstract class EventHandlerBase implements EventHandler {
         return newHearing;
     }
 
-    protected static CaseEntity createNewCaseAt(CourthouseEntity actualCourtHouse, String caseNumber) {
-        var newCourtCase = new CaseEntity();
+    protected static CourtCaseEntity createNewCaseAt(CourthouseEntity actualCourtHouse, String caseNumber) {
+        var newCourtCase = new CourtCaseEntity();
         newCourtCase.setCourthouse(actualCourtHouse);
         newCourtCase.setCaseNumber(caseNumber);
         return newCourtCase;

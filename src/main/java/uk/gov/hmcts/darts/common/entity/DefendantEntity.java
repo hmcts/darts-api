@@ -33,7 +33,7 @@ public class DefendantEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = CAS_ID)
-    private CaseEntity courtCase;
+    private CourtCaseEntity courtCase;
 
     @Column(name = DEFENDANT_NAME)
     private String name;

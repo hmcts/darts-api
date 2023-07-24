@@ -33,7 +33,7 @@ public class ProsecutorEntity {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = CAS_ID)
-    private CaseEntity courtCase;
+    private CourtCaseEntity courtCase;
 
     @Column(name = PROSECUTOR_NAME)
     private String name;

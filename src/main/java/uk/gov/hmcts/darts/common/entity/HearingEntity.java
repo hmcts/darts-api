@@ -62,7 +62,7 @@ public class HearingEntity {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "cas_id")
-    private CaseEntity courtCase;
+    private CourtCaseEntity courtCase;
 
     public boolean isFor(OffsetDateTime dateTime) {
         return hearingDate.equals(dateTime.toLocalDate());

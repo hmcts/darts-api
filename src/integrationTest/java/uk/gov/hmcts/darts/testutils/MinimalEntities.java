@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -13,15 +13,15 @@ import static java.time.LocalDate.now;
 @SuppressWarnings({"MethodName", "HideUtilityClassConstructor"})
 public class MinimalEntities {
 
-    public static CaseEntity aCase() {
-        var caseEntity = new CaseEntity();
+    public static CourtCaseEntity aCase() {
+        var caseEntity = new CourtCaseEntity();
         caseEntity.setCaseNumber("1");
         caseEntity.setCourthouse(aCourtHouse());
         return caseEntity;
     }
 
-    public static CaseEntity aCaseEntityAt(CourthouseEntity courthouse) {
-        var caseEntity = new CaseEntity();
+    public static CourtCaseEntity aCaseEntityAt(CourthouseEntity courthouse) {
+        var caseEntity = new CourtCaseEntity();
         caseEntity.setCaseNumber("1");
         caseEntity.setCourthouse(courthouse);
         return caseEntity;
@@ -65,7 +65,7 @@ public class MinimalEntities {
         return hearing;
     }
 
-    public static HearingEntity aHearingForCaseInRoom(CaseEntity courtCase, CourtroomEntity room) {
+    public static HearingEntity aHearingForCaseInRoom(CourtCaseEntity courtCase, CourtroomEntity room) {
         courtCase.setCourthouse(room.getCourthouse());
         HearingEntity hearing = new HearingEntity();
         hearing.setCourtCase(courtCase);

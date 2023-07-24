@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.event.model;
 
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 public class CourtroomCourthouseCourtcase {
     private final CourthouseEntity courthouseEntity;
     private final CourtroomEntity courtroomEntity;
-    private final CaseEntity caseEntity;
+    private final CourtCaseEntity courtCaseEntity;
 
     private boolean isHearingNew;
     private boolean isCourtroomDifferentFromHearing;
