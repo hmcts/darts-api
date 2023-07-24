@@ -11,9 +11,13 @@ import java.util.concurrent.ExecutionException;
 
 public interface OutboundFileProcessor {
 
-    List<List<AudioFileInfo>> processAudio(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
-                                           OffsetDateTime overallStartTime,
-                                           OffsetDateTime overallEndTime)
+    List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
+                                                      OffsetDateTime overallStartTime,
+                                                      OffsetDateTime overallEndTime)
+        throws ExecutionException, InterruptedException;
+
+    AudioFileInfo processAudioForPlayback(Map<MediaEntity, Path> mediaEntityToDownloadLocation, OffsetDateTime startTime,
+                                          OffsetDateTime endTime)
         throws ExecutionException, InterruptedException;
 
 }

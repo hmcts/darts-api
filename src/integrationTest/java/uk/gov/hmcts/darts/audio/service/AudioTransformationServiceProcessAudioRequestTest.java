@@ -46,8 +46,8 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         assertNotNull(blobId);
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
-              .findById(mediaRequestId)
-              .orElseThrow();
+            .findById(mediaRequestId)
+            .orElseThrow();
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
     }
@@ -56,15 +56,15 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     void processAudioRequestShouldFailAndUpdateRequestStatusToFailed() {
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
         var exception = assertThrows(
-              DartsApiException.class,
-              () -> audioTransformationService.processAudioRequest(mediaRequestId)
+            DartsApiException.class,
+            () -> audioTransformationService.processAudioRequest(mediaRequestId)
         );
 
         assertEquals("Failed to process audio request", exception.getMessage());
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
-              .findById(mediaRequestId)
-              .orElseThrow();
+            .findById(mediaRequestId)
+            .orElseThrow();
         assertEquals(FAILED, mediaRequestEntity.getStatus());
     }
 }
