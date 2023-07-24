@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.cases.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.util.Comparator;
@@ -21,7 +21,7 @@ public class GetCasesMapper {
     }
 
     public ScheduledCase mapToCourtCase(HearingEntity hearing) {
-        CaseEntity hearingCourtCase = hearing.getCourtCase();
+        CourtCaseEntity hearingCourtCase = hearing.getCourtCase();
 
         ScheduledCase scheduledCase = new ScheduledCase();
         scheduledCase.setCourthouse(hearing.getCourtroom().getCourthouse().getCourthouseName());
@@ -29,10 +29,10 @@ public class GetCasesMapper {
         scheduledCase.setHearingDate(hearing.getHearingDate());
         scheduledCase.setCaseNumber(hearingCourtCase.getCaseNumber());
         scheduledCase.setScheduledStart(toStringOrDefaultTo(hearing.getScheduledStartTime(), ""));
-        scheduledCase.setDefendants(hearingCourtCase.getDefendants());
-        scheduledCase.setJudges(hearing.getJudges());
-        scheduledCase.setProsecutors(hearingCourtCase.getProsecutors());
-        scheduledCase.setDefenders(hearingCourtCase.getDefenders());
+        scheduledCase.setDefendantList(hearingCourtCase.getDefendantStringList());
+        scheduledCase.setJudgeList(hearing.getJudgesStringList());
+        scheduledCase.setProsecutorList(hearingCourtCase.getProsecutorsStringList());
+        scheduledCase.setDefenceList(hearingCourtCase.getDefenceStringList());
         return scheduledCase;
     }
 

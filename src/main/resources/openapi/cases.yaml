@@ -88,22 +88,22 @@ components:
         upload_priority:
           type: string
           example:
-        defendants:
+        defendantList:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
-        judges:
+        judgeList:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-        prosecutors:
+        prosecutorList:
           type: array
           items:
             $ref: '#/components/schemas/prosecutor'
-        defenders:
+        defenceList:
           type: array
           items:
-            $ref: '#/components/schemas/defender'
+            $ref: '#/components/schemas/defence'
 
     defendant:
       type: string
@@ -114,7 +114,7 @@ components:
     prosecutor:
       type: string
       example: Mrs Prosecutor
-    defender:
+    defence:
       type: string
       example: Mr Defender
 

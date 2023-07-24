@@ -5,20 +5,20 @@
     "hearing_date": "2023-06-20",
     "case_number": "Case0000001",
     "scheduled_start": "09:00",
-    "defendants": [
-      "Mr Defendant0000001 Bloggs1",
-      "Mr Defendant0000001 Bloggs2"
+    "defendantList": [
+      "defendant_Case0000001_1",
+      "defendant_Case0000001_2"
     ],
-    "judges": [
-      "{Judge1}"
+    "judgeList": [
+      "Judge1"
     ],
-    "prosecutors": [
-      "Prosecutor00000011",
-      "Prosecutor00000012"
+    "prosecutorList": [
+      "prosecutor_Case0000001_1",
+      "prosecutor_Case0000001_2"
     ],
-    "defenders": [
-      "Defence00000011",
-      "Defence00000012"
+    "defenceList": [
+      "defence_Case0000001_1",
+      "defence_Case0000001_2"
     ]
   },
   {
@@ -27,20 +27,20 @@
     "hearing_date": "2023-06-20",
     "case_number": "Case0000002",
     "scheduled_start": "10:00",
-    "defendants": [
-      "Mr Defendant0000002 Bloggs1",
-      "Mr Defendant0000002 Bloggs2"
+    "defendantList": [
+      "defendant_Case0000002_1",
+      "defendant_Case0000002_2"
     ],
-    "judges": [
-      "{Judge1}"
+    "judgeList": [
+      "Judge1"
     ],
-    "prosecutors": [
-      "Prosecutor00000021",
-      "Prosecutor00000022"
+    "prosecutorList": [
+      "prosecutor_Case0000002_1",
+      "prosecutor_Case0000002_2"
     ],
-    "defenders": [
-      "Defence00000021",
-      "Defence00000022"
+    "defenceList": [
+      "defence_Case0000002_1",
+      "defence_Case0000002_2"
     ]
   },
   {
@@ -49,20 +49,20 @@
     "hearing_date": "2023-06-20",
     "case_number": "Case0000003",
     "scheduled_start": "11:00",
-    "defendants": [
-      "Mr Defendant0000003 Bloggs1",
-      "Mr Defendant0000003 Bloggs2"
+    "defendantList": [
+      "defendant_Case0000003_1",
+      "defendant_Case0000003_2"
     ],
-    "judges": [
-      "{Judge1}"
+    "judgeList": [
+      "Judge1"
     ],
-    "prosecutors": [
-      "Prosecutor00000031",
-      "Prosecutor00000032"
+    "prosecutorList": [
+      "prosecutor_Case0000003_1",
+      "prosecutor_Case0000003_2"
     ],
-    "defenders": [
-      "Defence00000031",
-      "Defence00000032"
+    "defenceList": [
+      "defence_Case0000003_1",
+      "defence_Case0000003_2"
     ]
   }
 ]

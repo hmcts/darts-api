@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -82,7 +82,7 @@ public class DartsDatabaseStub {
         courthouseRepository.deleteAll();
     }
 
-    public Optional<CaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
+    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
         return caseRepository.findByCaseNumberAndCourthouse_CourthouseName(someCaseNumber, someCourthouse);
     }
 
@@ -104,8 +104,12 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-          String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
-        var caseEntity = givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(caseNumber, courthouseName, courtroomName);
+        String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
+        var caseEntity = givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
+            caseNumber,
+            courthouseName,
+            courtroomName
+        );
         var courtroomEntity = courtroomRepository.findByNames(courthouseName, courtroomName);
         var hearingEntity = new HearingEntity();
         hearingEntity.setHearingIsActual(true);
@@ -116,7 +120,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public CaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
+    public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
         var courtroom = givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
         var caseEntity = aCase();
         caseEntity.setCaseNumber(caseNumber);
@@ -137,7 +141,7 @@ public class DartsDatabaseStub {
         return courtroom;
     }
 
-    public CaseEntity hasSomeCourtCase() {
+    public CourtCaseEntity hasSomeCourtCase() {
         return caseRepository.save(aCase());
     }
 
@@ -173,8 +177,8 @@ public class DartsDatabaseStub {
         return courtroomRepository.findByNames(courthouseName, courtroomName);
     }
 
-    public void save(CaseEntity caseEntity) {
-        caseRepository.save(caseEntity);
+    public void save(CourtCaseEntity courtCaseEntity) {
+        caseRepository.save(courtCaseEntity);
     }
 
     public void save(CourthouseEntity courthouseEntity) {

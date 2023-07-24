@@ -32,7 +32,7 @@ public class AnnotationEntity extends VersionedEntity {
 
     @OneToOne
     @JoinColumn(name = "cas_id")
-    private CaseEntity courtCase;
+    private CourtCaseEntity courtCase;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ctr_id")

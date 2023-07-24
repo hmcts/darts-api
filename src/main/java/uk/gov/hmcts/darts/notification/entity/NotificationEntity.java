@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -51,7 +51,7 @@ public class NotificationEntity {
 
     @JoinColumn(name = CASE_ID)
     @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
-    private CaseEntity courtCase;
+    private CourtCaseEntity courtCase;
 
     @Column(name = EMAIL_ADDRESS)
     private String emailAddress;
