@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 
-@AutoConfigureWireMock(port = 8070)
+@AutoConfigureWireMock
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 public class IntegrationBase {
