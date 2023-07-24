@@ -5,17 +5,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_3",
     "scheduled_start": "04:00",
-    "defendants": [
+    "defendantList": [
       "defendant_caseNum_3_1",
       "defendant_caseNum_3_2"
     ],
-    "prosecutors": [
-      "Prosecutor_caseNum_3_1",
-      "Prosecutor_caseNum_3_2"
+    "judgeList": [],
+    "prosecutorList": [
+      "prosecutor_caseNum_3_1",
+      "prosecutor_caseNum_3_2"
     ],
-    "defenders": [
-      "defender_caseNum_3_1",
-      "defender_caseNum_3_2"
+    "defenceList": [
+      "defence_caseNum_3_1",
+      "defence_caseNum_3_2"
     ]
   },
   {
@@ -24,17 +25,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_1",
     "scheduled_start": "09:00",
-    "defendants": [
+    "defendantList": [
       "defendant_caseNum_1_1",
       "defendant_caseNum_1_2"
     ],
-    "prosecutors": [
-      "Prosecutor_caseNum_1_1",
-      "Prosecutor_caseNum_1_2"
+    "judgeList": [],
+    "prosecutorList": [
+      "prosecutor_caseNum_1_1",
+      "prosecutor_caseNum_1_2"
     ],
-    "defenders": [
-      "defender_caseNum_1_1",
-      "defender_caseNum_1_2"
+    "defenceList": [
+      "defence_caseNum_1_1",
+      "defence_caseNum_1_2"
     ]
   },
   {
@@ -43,17 +45,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_6",
     "scheduled_start": "10:00",
-    "defendants": [
+    "defendantList": [
       "defendant_caseNum_6_1",
       "defendant_caseNum_6_2"
     ],
-    "prosecutors": [
-      "Prosecutor_caseNum_6_1",
-      "Prosecutor_caseNum_6_2"
+    "judgeList": [],
+    "prosecutorList": [
+      "prosecutor_caseNum_6_1",
+      "prosecutor_caseNum_6_2"
     ],
-    "defenders": [
-      "defender_caseNum_6_1",
-      "defender_caseNum_6_2"
+    "defenceList": [
+      "defence_caseNum_6_1",
+      "defence_caseNum_6_2"
     ]
   },
   {
@@ -62,17 +65,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_5",
     "scheduled_start": "12:00",
-    "defendants": [
+    "defendantList": [
       "defendant_caseNum_5_1",
       "defendant_caseNum_5_2"
     ],
-    "prosecutors": [
-      "Prosecutor_caseNum_5_1",
-      "Prosecutor_caseNum_5_2"
+    "judgeList": [],
+    "prosecutorList": [
+      "prosecutor_caseNum_5_1",
+      "prosecutor_caseNum_5_2"
     ],
-    "defenders": [
-      "defender_caseNum_5_1",
-      "defender_caseNum_5_2"
+    "defenceList": [
+      "defence_caseNum_5_1",
+      "defence_caseNum_5_2"
     ]
   },
   {
@@ -81,17 +85,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_4",
     "scheduled_start": "15:00",
-    "defendants": [
+    "defendantList": [
       "defendant_caseNum_4_1",
       "defendant_caseNum_4_2"
     ],
-    "prosecutors": [
-      "Prosecutor_caseNum_4_1",
-      "Prosecutor_caseNum_4_2"
+    "judgeList": [],
+    "prosecutorList": [
+      "prosecutor_caseNum_4_1",
+      "prosecutor_caseNum_4_2"
     ],
-    "defenders": [
-      "defender_caseNum_4_1",
-      "defender_caseNum_4_2"
+    "defenceList": [
+      "defence_caseNum_4_1",
+      "defence_caseNum_4_2"
     ]
   },
   {
@@ -100,17 +105,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_7",
     "scheduled_start": "16:00",
-    "defendants": [
+    "defendantList": [
       "defendant_caseNum_7_1",
       "defendant_caseNum_7_2"
     ],
-    "prosecutors": [
-      "Prosecutor_caseNum_7_1",
-      "Prosecutor_caseNum_7_2"
+    "judgeList": [],
+    "prosecutorList": [
+      "prosecutor_caseNum_7_1",
+      "prosecutor_caseNum_7_2"
     ],
-    "defenders": [
-      "defender_caseNum_7_1",
-      "defender_caseNum_7_2"
+    "defenceList": [
+      "defence_caseNum_7_1",
+      "defence_caseNum_7_2"
     ]
   },
   {
@@ -119,17 +125,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_2",
     "scheduled_start": "18:00",
-    "defendants": [
+    "defendantList": [
       "defendant_caseNum_2_1",
       "defendant_caseNum_2_2"
     ],
-    "prosecutors": [
-      "Prosecutor_caseNum_2_1",
-      "Prosecutor_caseNum_2_2"
+    "judgeList": [],
+    "prosecutorList": [
+      "prosecutor_caseNum_2_1",
+      "prosecutor_caseNum_2_2"
     ],
-    "defenders": [
-      "defender_caseNum_2_1",
-      "defender_caseNum_2_2"
+    "defenceList": [
+      "defence_caseNum_2_1",
+      "defence_caseNum_2_2"
     ]
   }
 ]

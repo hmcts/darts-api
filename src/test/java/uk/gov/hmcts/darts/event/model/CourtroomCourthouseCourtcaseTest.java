@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.event.model;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 
@@ -17,7 +17,7 @@ class CourtroomCourthouseCourtcaseTest {
     @Mock
     private CourtroomEntity mockCourtroomEntity;
     @Mock
-    private CaseEntity mockCaseEntity;
+    private CourtCaseEntity mockCourtCaseEntity;
 
     @Test
     void getCourthouseEntity() {
@@ -40,10 +40,10 @@ class CourtroomCourthouseCourtcaseTest {
     @Test
     void getCaseEntity() {
         courtroomCourthouseCourtcase = CourtroomCourthouseCourtcase.builder()
-            .caseEntity(mockCaseEntity)
+            .courtCaseEntity(mockCourtCaseEntity)
             .build();
 
-        assertEquals(mockCaseEntity, courtroomCourthouseCourtcase.getCaseEntity());
+        assertEquals(mockCourtCaseEntity, courtroomCourthouseCourtcase.getCourtCaseEntity());
     }
 
     @Test
