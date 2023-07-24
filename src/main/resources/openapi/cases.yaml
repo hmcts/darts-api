@@ -197,23 +197,18 @@ components:
         courthouse:
           type: string
           example: SWANSEA
-        courtrooms:
-          type: array
-          items:
-            type: string
-          example: [1]
         defendants:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
-        hearings:
-          type: array
-          items:
-            $ref: '#/components/schemas/advancedSearchResultHearing'
         reportingRestriction:
           type: string
           example: C20220620001
           description: 'Any reporting restrictions associated with the case.'
+        hearings:
+          type: array
+          items:
+            $ref: '#/components/schemas/advancedSearchResultHearing'
     advancedSearchResultHearing:
       type: object
       properties:
