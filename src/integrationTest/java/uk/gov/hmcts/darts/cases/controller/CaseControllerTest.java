@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,18 +24,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
-import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.someMinimalCourtRoom;
-import static uk.gov.hmcts.darts.testutils.data.DefenceTestData.createListOfDefenceForCase;
-import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createListOfDefendantsForCase;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createListOfJudgesForHearing;
-import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createListOfProsecutor;
+import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCaseEntityAt;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtHouse;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtroom;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aHearingForCaseInRoom;
 
 @AutoConfigureMockMvc
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.TooManyMethods"})
 class CaseControllerTest extends IntegrationBase {
 
     public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
@@ -108,6 +103,21 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
+    void casesPostCaseNumberMissing() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseNumberMissing.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseNumberMissing_400.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
     void casesPostCourthouseMissing() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -151,6 +161,7 @@ class CaseControllerTest extends IntegrationBase {
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseOnlyCourthouseProvided.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
+
     @Test
     void casesPostWithExistingCaseButNoHearing() throws Exception {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom("case1", "EDINBURGH", "1");

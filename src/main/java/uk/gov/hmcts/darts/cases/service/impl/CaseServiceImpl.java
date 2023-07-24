@@ -34,6 +34,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.TooManyMethods")
 public class CaseServiceImpl implements CaseService {
 
     private final HearingRepository hearingRepository;
