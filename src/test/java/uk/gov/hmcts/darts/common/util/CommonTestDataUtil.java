@@ -4,15 +4,46 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @UtilityClass
 public class CommonTestDataUtil {
+
+    public static EventEntity createEvent(String eventName, String eventText, HearingEntity hearingEntity) {
+        EventEntity event = new EventEntity();
+        event.setHearingEntities(List.of(hearingEntity));
+        event.setCourtroom(hearingEntity.getCourtroom());
+        event.setEventName(eventName);
+        event.setEventText(eventText);
+        event.setId(1);
+        event.setTimestamp(createOffsetDateTime("2023-07-01T10:00:00"));
+
+        return event;
+
+    }
+
+    public static OffsetDateTime createOffsetDateTime(String timestamp) {
+
+        ZoneId zoneId = ZoneId.of("UTC");   // Or another geographic: Europe/Paris
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime start = LocalDateTime.parse(timestamp, formatter);
+
+        ZoneOffset offset = zoneId.getRules().getOffset(start);
+
+        return OffsetDateTime.of(start, offset);
+    }
 
     public CourthouseEntity createCourthouse(String name) {
         CourthouseEntity courthouse = new CourthouseEntity();

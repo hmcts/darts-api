@@ -10,7 +10,6 @@ info:
 servers:
   - url: http://localhost:4550/
 
-
 paths:
   /events:
     post:
@@ -83,6 +82,48 @@ paths:
                 $ref: './problem.yaml'
 
   /courtlogs:
+    get:
+      tags:
+        - Event
+      summary: An Endpoint which allows users to request event courtlogs
+      description: |-
+        An Endpoint which allows users to request courtlogs using courthouse, casenumber, startdate and enddate
+      parameters:
+        - in: query
+          name: courthouse
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: caseNumber
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: startDateTime
+          schema:
+            type: string
+            format: date-time
+          required: true
+        - in: query
+          name: endDateTime
+          schema:
+            type: string
+            format: date-time
+          required: true
+
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourtLogs'
+
+        '500':
+          description: Internal Server Error
+
     post:
       tags:
         - Event
@@ -121,6 +162,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
 
+
 components:
   schemas:
 
@@ -152,6 +194,29 @@ components:
         - courtroom
         - case_numbers
         - text
+
+    CourtLog:
+      type: object
+      properties:
+        courthouse:
+          $ref: '#/components/schemas/Courthouse'
+        caseNumber:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        eventText:
+          type: string
+      required:
+        - courthouse
+        - caseNumber
+        - timestamp
+        - eventText
+    CourtLogs:
+      type: array
+      items:
+        $ref: '#/components/schemas/CourtLog'
+
 
     DartsEvent:
       type: object

@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "27d5e4c7-e24f-4e3c-bf18-9aedb6547703",
+		"_postman_id": "c07483de-cc36-4031-8885-bf3ec49731c3",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27582460"
 	},
 	"item": [
 		{
@@ -103,6 +104,53 @@
 										{
 											"key": "sub_type",
 											"value": "string"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "CourtLogsAPI",
+			"item": [
+				{
+					"name": "courtLogs",
+					"item": [
+						{
+							"name": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4550",
+									"path": [
+										"courtlogs"
+									],
+									"query": [
+										{
+											"key": "courthouse",
+											"value": "\"String\""
+										},
+										{
+											"key": "caseNumber",
+											"value": "\"String\""
+										},
+										{
+											"key": "startDateTime",
+											"value": "\"String\""
+										},
+										{
+											"key": "endDateTime",
+											"value": "\"String\""
 										}
 									]
 								}

@@ -75,9 +75,9 @@ public class DartsDatabaseStub {
         mediaRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         mediaRequestRepository.deleteAll();
+        eventRepository.deleteAll();
         hearingRepository.deleteAll();
         notificationRepository.deleteAll();
-        eventRepository.deleteAll();
         courtroomRepository.deleteAll();
         caseRepository.deleteAll();
         dailyListRepository.deleteAll();
