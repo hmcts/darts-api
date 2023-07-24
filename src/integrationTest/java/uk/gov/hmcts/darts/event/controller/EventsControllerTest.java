@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 
 import static org.mockito.Mockito.any;
@@ -29,6 +30,9 @@ class EventsControllerTest {
 
     @MockBean
     private EventDispatcher eventDispatcher;
+
+    @MockBean
+    private CourtLogsService courtLogsService;
 
     @MockBean
     private DartsEventMapper dartsEventMapper;

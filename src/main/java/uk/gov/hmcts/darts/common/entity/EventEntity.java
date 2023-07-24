@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -14,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "event")
@@ -59,5 +62,11 @@ public class EventEntity extends VersionedEntity {
 
     @Column(name = "superseded")
     private Boolean superseded;
+
+    @ManyToMany
+    @JoinTable(name = "hearing_event_ae",
+        joinColumns = {@JoinColumn(name = "eve_id")},
+        inverseJoinColumns = {@JoinColumn(name = "hea_id")})
+    private List<HearingEntity> hearingEntities;
 
 }
