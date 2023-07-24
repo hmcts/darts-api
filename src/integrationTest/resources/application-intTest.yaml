@@ -29,6 +29,8 @@ spring:
     - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 
 darts:
+  gateway:
+    url: ${DARTS_GATEWAY_URL:http://localhost:8080}
   audio:
     concat-workspace: ${java.io.tmpdir}/audiotransform/concatenate
     merge-workspace: ${java.io.tmpdir}/audiotransform/merge

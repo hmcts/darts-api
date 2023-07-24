@@ -3,37 +3,19 @@ package uk.gov.hmcts.darts.authentication.controller.impl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
-import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles({"intTest", "h2db"})
-@ReprovisionDatabaseBeforeEach
-class LogoutIntTest {
+class LogoutIntTest extends IntegrationBase {
 
     private static final String EXTERNAL_USER_LOGOUT_ENDPOINT = "/external-user/logout";
-
-    @MockBean
-    private NotificationRepository notificationRepository;
-
-    @MockBean
-    private MediaRequestRepository mediaRequestRepository;
-
-    @MockBean
-    private CourthouseRepository courthouseRepository;
 
     @Autowired
     private MockMvc mockMvc;

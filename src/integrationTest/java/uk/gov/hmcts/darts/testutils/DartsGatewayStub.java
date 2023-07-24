@@ -22,6 +22,7 @@ public class DartsGatewayStub {
     }
 
     public void verifyDoesntReceiveDarEvent() {
+        wait(1000);
         verify(exactly(0), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH)));
     }
 

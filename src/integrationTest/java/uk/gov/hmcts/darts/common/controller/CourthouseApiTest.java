@@ -6,16 +6,12 @@ import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
-import uk.gov.hmcts.darts.courthouse.service.CourthouseService;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -33,27 +29,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@ReprovisionDatabaseBeforeEach
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
-class CourthouseApiTest {
+class CourthouseApiTest extends IntegrationBase {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
     public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
     private static final String REQUEST_BODY_TEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyTest.json";
-    @Autowired
-    private CourthouseService courthouseService;
-
-    @Autowired
-    private CourthouseRepository courthouseRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    private transient MockMvc mockMvc;
+    private MockMvc mockMvc;
 
     @Test
     void courthousesGet() throws Exception {
@@ -136,30 +124,12 @@ class CourthouseApiTest {
     }
 
     @Test
-    void courthousesPosWithtMissingCourthouseName() throws Exception {
+    void courthousesPostWithMissingCourthouseName() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
         assertEquals("{\"code\":\"400 BAD_REQUEST\",\"message\":\"courthouseName must not be null\"}", response.getResponse().getContentAsString());
-    }
-
-    /**
-     * Test utility method used to add courthouse to database.
-     *
-     * @param fileLocation location of file that contains courthouse to be added.
-     * @return response for successful add
-     */
-    private MvcResult makeRequestToAddCourthouseToDatabase(String fileLocation) throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(getContentsFromFile(fileLocation));
-        return mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andDo(print()).andReturn();
-    }
-
-    private Integer addCourthouseAndGetId(String fileLocation) throws Exception {
-        MvcResult addedCourthouseResponse = makeRequestToAddCourthouseToDatabase(fileLocation);
-        return JsonPath.read(addedCourthouseResponse.getResponse().getContentAsString(), "$.id");
     }
 
     @Test
@@ -203,6 +173,24 @@ class CourthouseApiTest {
         requestBuilder = get("/courthouses/{courthouse_id}", addedEntityId)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+    }
+
+    /**
+     * Test utility method used to add courthouse to database.
+     *
+     * @param fileLocation location of file that contains courthouse to be added.
+     * @return response for successful add
+     */
+    private MvcResult makeRequestToAddCourthouseToDatabase(String fileLocation) throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
+              .contentType(MediaType.APPLICATION_JSON_VALUE)
+              .content(getContentsFromFile(fileLocation));
+        return mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andDo(print()).andReturn();
+    }
+
+    private Integer addCourthouseAndGetId(String fileLocation) throws Exception {
+        MvcResult addedCourthouseResponse = makeRequestToAddCourthouseToDatabase(fileLocation);
+        return JsonPath.read(addedCourthouseResponse.getResponse().getContentAsString(), "$.id");
     }
 }
 
