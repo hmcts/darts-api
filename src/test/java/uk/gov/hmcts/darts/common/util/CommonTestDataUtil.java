@@ -84,7 +84,7 @@ public class CommonTestDataUtil {
     public static DefenceEntity createDefence(CaseEntity courtCase, String number) {
         DefenceEntity defenceEntity = new DefenceEntity();
         defenceEntity.setCourtCase(courtCase);
-        defenceEntity.setName("defender_" + courtCase.getCaseNumber() + "_" + number);
+        defenceEntity.setName("defence_" + courtCase.getCaseNumber() + "_" + number);
         return defenceEntity;
     }
 
@@ -97,7 +97,7 @@ public class CommonTestDataUtil {
     public static DefendantEntity createDefendant(CaseEntity courtCase, String number) {
         DefendantEntity defendantEntity = new DefendantEntity();
         defendantEntity.setCourtCase(courtCase);
-        defendantEntity.setName("defender_" + courtCase.getCaseNumber() + "_" + number);
+        defendantEntity.setName("defendant_" + courtCase.getCaseNumber() + "_" + number);
         return defendantEntity;
     }
 
@@ -110,7 +110,7 @@ public class CommonTestDataUtil {
     public static ProsecutorEntity createProsecutor(CaseEntity courtCase, String number) {
         ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
         prosecutorEntity.setCourtCase(courtCase);
-        prosecutorEntity.setName("defender_" + courtCase.getCaseNumber() + "_" + number);
+        prosecutorEntity.setName("prosecutor_" + courtCase.getCaseNumber() + "_" + number);
         return prosecutorEntity;
     }
 
