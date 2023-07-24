@@ -1,10 +1,9 @@
-package uk.gov.hmcts.darts.event.handlers;
+package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
-import uk.gov.hmcts.darts.event.service.impl.DefaultEventHandler;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -17,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCase;
 
 @SuppressWarnings("PMD.TooManyMethods")
-class DefaultEventHandlerTest extends IntegrationBase {
+class StandardEventHandlerTest extends IntegrationBase {
 
     public static final String UNKNOWN_COURTROOM = "unknown-courtroom";
     public static final String UNKNOWN_COURTHOUSE = "unknown-courthouse";
@@ -28,7 +27,7 @@ class DefaultEventHandlerTest extends IntegrationBase {
     private final OffsetDateTime today = now();
 
     @Autowired
-    DefaultEventHandler eventHandler;
+    StandardEventHandler eventHandler;
 
     @Test
     void throwsOnUnknownCourtroom() {
