@@ -35,11 +35,7 @@ class EventEntityToCourtLogMapperTest {
         var hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
         List<EventEntity> event = List.of(CommonTestDataUtil.createEvent("LOG", "Test", hearingEntity));
 
-        List<CourtLog> courtLogs = EventEntityToCourtLogMapper.mapFromEntityToCourtLogs(
-            event,
-            hearingEntity.getCourtroom().getCourthouse().getCourthouseName(),
-            hearingEntity.getCourtCase().getCaseNumber()
-        );
+        List<CourtLog> courtLogs = EventEntityToCourtLogMapper.mapToCourtLogsList(event);
 
         String actualResponse = objectMapper.writeValueAsString(courtLogs);
         String expectedResponse = getContentsFromFile(
@@ -63,11 +59,7 @@ class EventEntityToCourtLogMapperTest {
         entities.add(event);
         entities.add(event2);
 
-        List<CourtLog> courtLogs = EventEntityToCourtLogMapper.mapFromEntityToCourtLogs(
-            entities,
-            hearingEntity.getCourtroom().getCourthouse().getCourthouseName(),
-            hearingEntity.getCourtCase().getCaseNumber()
-        );
+        List<CourtLog> courtLogs = EventEntityToCourtLogMapper.mapToCourtLogsList(entities);
 
         String actualResponse = objectMapper.writeValueAsString(courtLogs);
 

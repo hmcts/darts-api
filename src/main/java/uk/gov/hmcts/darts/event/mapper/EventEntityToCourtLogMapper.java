@@ -10,25 +10,25 @@ import java.util.List;
 @UtilityClass
 public class EventEntityToCourtLogMapper {
 
-    public List<CourtLog> mapFromEntityToCourtLogs(List<EventEntity> entities, String courthouse, String caseNumber) {
+    public List<CourtLog> mapToCourtLogsList(List<EventEntity> eventEntities) {
 
         List<CourtLog> logs = new ArrayList<>();
 
-        for (EventEntity entity : entities) {
-            logs.add(mapSingleEntityToCourtLog(entity));
+        for (EventEntity entity : eventEntities) {
+            logs.add(mapToCourtLog(entity));
         }
 
         return logs;
     }
 
-    private CourtLog mapSingleEntityToCourtLog(EventEntity entity) {
+    private CourtLog mapToCourtLog(EventEntity eventEntity) {
 
         CourtLog log = new CourtLog();
 
-        log.setCourthouse(entity.getHearingEntities().get(0).getCourtroom().getCourthouse().getCourthouseName());
-        log.setCaseNumber(entity.getHearingEntities().get(0).getCourtCase().getCaseNumber());
-        log.setEventText(entity.getEventText());
-        log.setTimestamp(entity.getTimestamp());
+        log.setCourthouse(eventEntity.getHearingEntities().get(0).getCourtroom().getCourthouse().getCourthouseName());
+        log.setCaseNumber(eventEntity.getHearingEntities().get(0).getCourtCase().getCaseNumber());
+        log.setEventText(eventEntity.getEventText());
+        log.setTimestamp(eventEntity.getTimestamp());
 
         return log;
 

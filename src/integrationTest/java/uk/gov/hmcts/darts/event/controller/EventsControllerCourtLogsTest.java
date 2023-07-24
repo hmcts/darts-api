@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -176,7 +175,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
-        var event = CommonTestDataUtil.createEvent("LOG", "test", hearingEntity);
+        var event = CommonTestDataUtil.createEvent(LOG, "test", hearingEntity);
         eventRepository.saveAndFlush(event);
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
@@ -190,10 +189,42 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", is(courthouseName)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", is(caseNumber)))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", is(notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", is("test")));
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(caseNumber)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.is("test")));
+    }
+
+    @Test
+    void courtlogsGetOnlyExpectedResults() throws Exception {
+
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+
+
+        var event = CommonTestDataUtil.createEvent(LOG, "test", hearingEntity);
+        var event2 = CommonTestDataUtil.createEvent(LOG, "Tester", hearingEntity);
+        var event3 = CommonTestDataUtil.createEvent("Event", "ShouldNotShow", hearingEntity);
+        var event4 = CommonTestDataUtil.createEvent("Event", "ShouldAlsoNotShow", hearingEntity);
+
+        eventRepository.saveAndFlush(event);
+        eventRepository.saveAndFlush(event2);
+        eventRepository.saveAndFlush(event3);
+        eventRepository.saveAndFlush(event4);
+
+        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
+        String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam("Courthouse", courthouseName)
+            .queryParam("caseNumber", caseNumber)
+            .queryParam("startDateTime", "2022-07-01T09:00:00+01")
+            .queryParam("endDateTime", "2024-07-01T12:00:00+01")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
+
+
     }
 
 }

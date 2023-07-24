@@ -26,7 +26,7 @@ public class CourtLogsServiceImpl implements CourtLogsService {
             caseNumber,
             start,
             end);
-        return EventEntityToCourtLogMapper.mapFromEntityToCourtLogs(entities, courtHouse, caseNumber);
+        return EventEntityToCourtLogMapper.mapToCourtLogsList(entities);
 
     }
 }

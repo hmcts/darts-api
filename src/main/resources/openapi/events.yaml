@@ -10,7 +10,6 @@ info:
 servers:
   - url: http://localhost:4550/
 
-
 paths:
   /events:
     post:
@@ -86,12 +85,12 @@ paths:
     get:
       tags:
         - Event
-      summary: An Endpoint which allows users to request courtlogs
+      summary: An Endpoint which allows users to request event courtlogs
       description: |-
         An Endpoint which allows users to request courtlogs using courthouse, casenumber, startdate and enddate
       parameters:
         - in: query
-          name: Courthouse
+          name: courthouse
           schema:
             type: string
           required: true
