@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @UtilityClass
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class CommonTestDataUtil {
 
     public static EventEntity createEvent(String eventName, String eventText, HearingEntity hearingEntity) {
