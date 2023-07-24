@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.IOException;
@@ -101,12 +102,12 @@ class CaseServiceTest extends IntegrationBase {
     private static HearingEntity setupCase1(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case1 = aCaseEntityAt(swanseaCourthouse);
         case1.setCaseNumber("Case0000001");
-        case1.setDefendants(List.of("Mr Defendant0000001 Bloggs1", "Mr Defendant0000001 Bloggs2"));
-        case1.setDefenders(List.of("Defence00000011", "Defence00000012"));
-        case1.setProsecutors(List.of("Prosecutor00000011", "Prosecutor00000012"));
+        case1.setDefendantList(CommonTestDataUtil.createDefendantList(case1));
+        case1.setDefenceList(CommonTestDataUtil.createDefenceList(case1));
+        case1.setProsecutorList(CommonTestDataUtil.createProsecutorList(case1));
 
         var hearingForCase1 = aHearingForCaseInRoom(case1, swanseaCourtroom1);
-        hearingForCase1.setJudges(List.of("{Judge1}"));
+        hearingForCase1.setJudgeList(List.of(CommonTestDataUtil.createJudge(hearingForCase1, "Judge1")));
         hearingForCase1.setHearingDate(LocalDate.parse("2023-06-20"));
         hearingForCase1.setScheduledStartTime(LocalTime.parse("09:00"));
         return hearingForCase1;
@@ -116,12 +117,12 @@ class CaseServiceTest extends IntegrationBase {
     private static HearingEntity setupCase2(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case2 = aCaseEntityAt(swanseaCourthouse);
         case2.setCaseNumber("Case0000002");
-        case2.setDefendants(List.of("Mr Defendant0000002 Bloggs1", "Mr Defendant0000002 Bloggs2"));
-        case2.setDefenders(List.of("Defence00000021", "Defence00000022"));
-        case2.setProsecutors(List.of("Prosecutor00000021", "Prosecutor00000022"));
+        case2.setDefendantList(CommonTestDataUtil.createDefendantList(case2));
+        case2.setDefenceList(CommonTestDataUtil.createDefenceList(case2));
+        case2.setProsecutorList(CommonTestDataUtil.createProsecutorList(case2));
 
         var hearingForCase2 = aHearingForCaseInRoom(case2, swanseaCourtroom1);
-        hearingForCase2.setJudges(List.of("{Judge1}"));
+        hearingForCase2.setJudgeList(List.of(CommonTestDataUtil.createJudge(hearingForCase2, "Judge1")));
         hearingForCase2.setHearingDate(LocalDate.parse("2023-06-20"));
         hearingForCase2.setScheduledStartTime(LocalTime.parse("10:00"));
         return hearingForCase2;
@@ -131,12 +132,12 @@ class CaseServiceTest extends IntegrationBase {
     private static HearingEntity setupCase3(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case3 = aCaseEntityAt(swanseaCourthouse);
         case3.setCaseNumber("Case0000003");
-        case3.setDefendants(List.of("Mr Defendant0000003 Bloggs1", "Mr Defendant0000003 Bloggs2"));
-        case3.setDefenders(List.of("Defence00000031", "Defence00000032"));
-        case3.setProsecutors(List.of("Prosecutor00000031", "Prosecutor00000032"));
+        case3.setDefendantList(CommonTestDataUtil.createDefendantList(case3));
+        case3.setDefenceList(CommonTestDataUtil.createDefenceList(case3));
+        case3.setProsecutorList(CommonTestDataUtil.createProsecutorList(case3));
 
         var hearingForCase3 = aHearingForCaseInRoom(case3, swanseaCourtroom1);
-        hearingForCase3.setJudges(List.of("{Judge1}"));
+        hearingForCase3.setJudgeList(List.of(CommonTestDataUtil.createJudge(hearingForCase3, "Judge1")));
         hearingForCase3.setHearingDate(LocalDate.parse("2023-06-20"));
         hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
         return hearingForCase3;

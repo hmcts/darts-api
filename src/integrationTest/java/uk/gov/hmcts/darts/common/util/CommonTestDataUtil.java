@@ -2,16 +2,20 @@ package uk.gov.hmcts.darts.common.util;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccount;
 
@@ -26,7 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/*
+deprecated, in favour of IntegrationBase / DartsDatabaseStub
+ */
 @UtilityClass
+@Deprecated()
 @SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
 public class CommonTestDataUtil {
 
@@ -76,10 +84,49 @@ public class CommonTestDataUtil {
         CaseEntity courtCase = new CaseEntity();
         courtCase.setCourthouse(createCourthouse("some-courthouse"));
         courtCase.setCaseNumber(caseNumber);
-        courtCase.setDefenders(List.of("defender_" + caseNumber + "_1", "defender_" + caseNumber + "_2"));
-        courtCase.setDefendants(List.of("defendant_" + caseNumber + "_1", "defendant_" + caseNumber + "_2"));
-        courtCase.setProsecutors(List.of("Prosecutor_" + caseNumber + "_1", "Prosecutor_" + caseNumber + "_2"));
+        courtCase.setDefenceList(createDefenceList(courtCase));
+        courtCase.setDefendantList(createDefendantList(courtCase));
+        courtCase.setProsecutorList(createProsecutorList(courtCase));
         return courtCase;
+    }
+
+    public static List<DefenceEntity> createDefenceList(CaseEntity courtCase) {
+        DefenceEntity defence1 = createDefence(courtCase, "1");
+        DefenceEntity defence2 = createDefence(courtCase, "2");
+        return List.of(defence1, defence2);
+    }
+
+    public static DefenceEntity createDefence(CaseEntity courtCase, String number) {
+        DefenceEntity defenceEntity = new DefenceEntity();
+        defenceEntity.setCourtCase(courtCase);
+        defenceEntity.setName("defence_" + courtCase.getCaseNumber() + "_" + number);
+        return defenceEntity;
+    }
+
+    public static List<DefendantEntity> createDefendantList(CaseEntity courtCase) {
+        DefendantEntity defendant1 = createDefendant(courtCase, "1");
+        DefendantEntity defendant2 = createDefendant(courtCase, "2");
+        return List.of(defendant1, defendant2);
+    }
+
+    public static DefendantEntity createDefendant(CaseEntity courtCase, String number) {
+        DefendantEntity defendantEntity = new DefendantEntity();
+        defendantEntity.setCourtCase(courtCase);
+        defendantEntity.setName("defendant_" + courtCase.getCaseNumber() + "_" + number);
+        return defendantEntity;
+    }
+
+    public static List<ProsecutorEntity> createProsecutorList(CaseEntity courtCase) {
+        ProsecutorEntity prosecutor1 = createProsecutor(courtCase, "1");
+        ProsecutorEntity prosecutor2 = createProsecutor(courtCase, "2");
+        return List.of(prosecutor1, prosecutor2);
+    }
+
+    public static ProsecutorEntity createProsecutor(CaseEntity courtCase, String number) {
+        ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
+        prosecutorEntity.setCourtCase(courtCase);
+        prosecutorEntity.setName("prosecutor_" + courtCase.getCaseNumber() + "_" + number);
+        return prosecutorEntity;
     }
 
     public static HearingEntity createHearing(CaseEntity courtCase, CourtroomEntity courtroom, LocalDate date) {
@@ -131,9 +178,9 @@ public class CommonTestDataUtil {
     }
 
     public static ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
-                                                                       ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
-                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                              ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              UUID externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setMedia(mediaEntity);
         externalObjectDirectory.setStatus(objectDirectoryStatusEntity);
@@ -150,8 +197,8 @@ public class CommonTestDataUtil {
     }
 
     public static TransientObjectDirectoryEntity createTransientObjectDirectory(MediaRequestEntity mediaRequestEntity,
-                                                                         ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
-                                                                         UUID externalLocation) {
+                                                                                ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                                UUID externalLocation) {
 
         var transientObjectDirectory = new TransientObjectDirectoryEntity();
         transientObjectDirectory.setMediaRequest(mediaRequestEntity);
@@ -161,6 +208,13 @@ public class CommonTestDataUtil {
         transientObjectDirectory.setTransferAttempts(null);
 
         return transientObjectDirectory;
+    }
+
+    public static JudgeEntity createJudge(HearingEntity hearingEntity, String name) {
+        JudgeEntity judge = new JudgeEntity();
+        judge.setHearing(hearingEntity);
+        judge.setName(name);
+        return judge;
     }
 
 }

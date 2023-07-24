@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.common.entity;
 
-import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,11 +11,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Type;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,9 +39,8 @@ public class HearingEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
 
-    @Type(ListArrayType.class)
-    @Column(name = "judge_list")
-    private List<String> judges;
+    @OneToMany(mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<JudgeEntity> judgeList;
 
     @Column(name = "hearing_date")
     private LocalDate hearingDate;
@@ -67,5 +66,9 @@ public class HearingEntity {
 
     public boolean isFor(OffsetDateTime dateTime) {
         return hearingDate.equals(dateTime.toLocalDate());
+    }
+
+    public List<String> getJudgesStringList() {
+        return CollectionUtils.emptyIfNull(judgeList).stream().map(JudgeEntity::getName).toList();
     }
 }

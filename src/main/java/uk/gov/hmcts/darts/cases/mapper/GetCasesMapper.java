@@ -29,10 +29,10 @@ public class GetCasesMapper {
         scheduledCase.setHearingDate(hearing.getHearingDate());
         scheduledCase.setCaseNumber(hearingCourtCase.getCaseNumber());
         scheduledCase.setScheduledStart(toStringOrDefaultTo(hearing.getScheduledStartTime(), ""));
-        scheduledCase.setDefendants(hearingCourtCase.getDefendants());
-        scheduledCase.setJudges(hearing.getJudges());
-        scheduledCase.setProsecutors(hearingCourtCase.getProsecutors());
-        scheduledCase.setDefenders(hearingCourtCase.getDefenders());
+        scheduledCase.setDefendantList(hearingCourtCase.getDefendantStringList());
+        scheduledCase.setJudgeList(hearing.getJudgesStringList());
+        scheduledCase.setProsecutorList(hearingCourtCase.getProsecutorsStringList());
+        scheduledCase.setDefenceList(hearingCourtCase.getDefenceStringList());
         return scheduledCase;
     }
 

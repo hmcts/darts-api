@@ -4,8 +4,11 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,12 +67,51 @@ public class CommonTestDataUtil {
     }
 
     public CaseEntity createCase(String caseNumber) {
-        CaseEntity courtcase = new CaseEntity();
-        courtcase.setCaseNumber(caseNumber);
-        courtcase.setDefenders(List.of("defender_" + caseNumber + "_1", "defender_" + caseNumber + "_2"));
-        courtcase.setDefendants(List.of("defendant_" + caseNumber + "_1", "defendant_" + caseNumber + "_2"));
-        courtcase.setProsecutors(List.of("Prosecutor_" + caseNumber + "_1", "Prosecutor_" + caseNumber + "_2"));
-        return courtcase;
+        CaseEntity courtCase = new CaseEntity();
+        courtCase.setCaseNumber(caseNumber);
+        courtCase.setDefenceList(createDefenceList(courtCase));
+        courtCase.setDefendantList(createDefendantList(courtCase));
+        courtCase.setProsecutorList(createProsecutorList(courtCase));
+        return courtCase;
+    }
+
+    public static List<DefenceEntity> createDefenceList(CaseEntity courtCase) {
+        DefenceEntity defence1 = createDefence(courtCase, "1");
+        DefenceEntity defence2 = createDefence(courtCase, "2");
+        return List.of(defence1, defence2);
+    }
+
+    public static DefenceEntity createDefence(CaseEntity courtCase, String number) {
+        DefenceEntity defenceEntity = new DefenceEntity();
+        defenceEntity.setCourtCase(courtCase);
+        defenceEntity.setName("defender_" + courtCase.getCaseNumber() + "_" + number);
+        return defenceEntity;
+    }
+
+    public static List<DefendantEntity> createDefendantList(CaseEntity courtCase) {
+        DefendantEntity defendant1 = createDefendant(courtCase, "1");
+        DefendantEntity defendant2 = createDefendant(courtCase, "2");
+        return List.of(defendant1, defendant2);
+    }
+
+    public static DefendantEntity createDefendant(CaseEntity courtCase, String number) {
+        DefendantEntity defendantEntity = new DefendantEntity();
+        defendantEntity.setCourtCase(courtCase);
+        defendantEntity.setName("defender_" + courtCase.getCaseNumber() + "_" + number);
+        return defendantEntity;
+    }
+
+    public static List<ProsecutorEntity> createProsecutorList(CaseEntity courtCase) {
+        ProsecutorEntity prosecutor1 = createProsecutor(courtCase, "1");
+        ProsecutorEntity prosecutor2 = createProsecutor(courtCase, "2");
+        return List.of(prosecutor1, prosecutor2);
+    }
+
+    public static ProsecutorEntity createProsecutor(CaseEntity courtCase, String number) {
+        ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
+        prosecutorEntity.setCourtCase(courtCase);
+        prosecutorEntity.setName("defender_" + courtCase.getCaseNumber() + "_" + number);
+        return prosecutorEntity;
     }
 
     public HearingEntity createHearing(CaseEntity courtcase, CourtroomEntity courtroom, LocalDate date) {
