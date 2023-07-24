@@ -202,24 +202,35 @@ components:
           items:
             type: string
           example: [1]
-        judges:
-          type: array
-          items:
-            $ref: '#/components/schemas/judge'
         defendants:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
-        hearingDates:
+        hearings:
           type: array
           items:
-            type: string
-            format: date
+            $ref: '#/components/schemas/advancedSearchResultHearing'
         reportingRestriction:
           type: string
           example: C20220620001
           description: 'Any reporting restrictions associated with the case.'
-
+    advancedSearchResultHearing:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        date:
+          type: string
+          format: date
+          example: 2022-05-20
+        courtroom:
+          type: string
+          example: 1
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
     defendant:
       type: string
       example: Joe Bloggs
