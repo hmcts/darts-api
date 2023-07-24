@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -56,8 +57,10 @@ class CaseControllerTest extends IntegrationBase {
         HearingEntity hearingForCase1 = setupCase1(swanseaCourthouse, swanseaCourtroom1);
         HearingEntity hearingForCase2 = setupCase2(swanseaCourthouse, swanseaCourtroom1);
         HearingEntity hearingForCase3 = setupCase3(swanseaCourthouse, swanseaCourtroom1);
+        HearingEntity hearingForCase4 = setupCase4(swanseaCourthouse, swanseaCourtroom1);
 
-        dartsDatabase.saveAll(hearingForCase1, hearingForCase2, hearingForCase3);
+
+        dartsDatabase.saveAll(hearingForCase1, hearingForCase2, hearingForCase3, hearingForCase4);
     }
 
     @Test
@@ -76,7 +79,7 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    void casesPost() throws Exception {
+    void casesPostWithoutExistingCase() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
@@ -89,6 +92,20 @@ class CaseControllerTest extends IntegrationBase {
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void casesPostWithoutExistingCaseAndCourtroomMissing() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithoutCourtroom.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseWithoutCourtroomAndJudge.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
 
     @Test
     void casesPostCourthouseMissing() throws Exception {
@@ -106,7 +123,22 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    void casesPostOnlyCourthouseProvided() throws Exception {
+    void casesPostWithNonExistingCourtroom() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithNonExistingCourtroom.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNonExistingCourtroom.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesPostOnlyCaseNumberAndCourthouseProvided() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
@@ -118,6 +150,36 @@ class CaseControllerTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseOnlyCourthouseProvided.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+    @Test
+    void casesPostWithExistingCaseButNoHearing() throws Exception {
+        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom("case1", "EDINBURGH", "1");
+        MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyForCaseWithoutHearing.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseNoHearing.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesPostUpdateExistingCase() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post("/cases")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(
+                "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseUpdate.json"));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     // To be replaced by something more reusable as the last PR in this ticket

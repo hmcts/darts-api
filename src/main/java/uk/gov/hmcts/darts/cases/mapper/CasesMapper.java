@@ -20,6 +20,15 @@ public class CasesMapper {
             .toList();
     }
 
+    public ScheduledCase mapToCourtCase(CaseEntity caseEntity) {
+        ScheduledCase scheduledCase = new ScheduledCase(caseEntity.getCourthouse().getCourthouseName());
+        scheduledCase.setCaseNumber(caseEntity.getCaseNumber());
+        scheduledCase.setDefendants(caseEntity.getDefendants());
+        scheduledCase.setProsecutors(caseEntity.getProsecutors());
+        scheduledCase.setDefenders(caseEntity.getDefenders());
+        return scheduledCase;
+    }
+
     public ScheduledCase mapToCourtCase(HearingEntity hearing, CaseEntity caseEntity) {
         CourtCaseEntity hearingCourtCase = hearing.getCourtCase();
 

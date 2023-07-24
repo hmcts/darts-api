@@ -1,0 +1,23 @@
+{
+  "courthouse": "SWANSEA",
+  "courtroom": "1",
+  "hearing_date": "2023-07-24",
+  "case_number": "Case0000004",
+  "scheduled_start": "11:00",
+  "defendants": [
+    "Mr Defendant0000003 Bloggs1",
+    "Mr Defendant0000003 Bloggs2"
+  ],
+  "judges": [
+    "{Judge1}",
+    "Test Judge"
+  ],
+  "prosecutors": [
+    "Prosecutor00000031",
+    "Prosecutor00000032"
+  ],
+  "defenders": [
+    "Defence00000031",
+    "Defence00000032"
+  ]
+}
