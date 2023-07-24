@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-//@AutoConfigureWireMock
 @SuppressWarnings("PMD.ExcessiveImports")
 class HandleOAuthCodeIntTest extends IntegrationBase {
 
