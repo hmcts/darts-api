@@ -11,18 +11,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class CaseControllerGetCaseHearingsTest extends IntegrationBase {
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Autowired
     private transient MockMvc mockMvc;
 
     private static String pathVariable = "25";
-    private static String ENDPOINT_URL = "/cases/" + pathVariable + "/hearings";
+    private static String endpointUrl = "/cases/" + pathVariable + "/hearings";
 
     @Test
     void casesSearchGetEndpoint() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL);
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl);
         mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented());
     }
 

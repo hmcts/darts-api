@@ -21,16 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.cases.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
-import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 @RestController
 @RequiredArgsConstructor
