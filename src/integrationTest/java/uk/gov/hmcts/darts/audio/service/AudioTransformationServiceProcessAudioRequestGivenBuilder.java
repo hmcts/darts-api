@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
 import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
@@ -46,12 +45,8 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
               1
         );
 
-        var hearingMediaEntity = new HearingMediaEntity();
-        hearingMediaEntity.setMedia(mediaEntity);
-        hearingMediaEntity.setHearing(dartsDatabase.getHearingRepository().getReferenceById(hearingEntity.getId()));
-
-        dartsDatabase.getHearingMediaRepository()
-              .saveAndFlush(hearingMediaEntity);
+        hearingEntity.addMedia(mediaEntity);
+        dartsDatabase.getHearingRepository().saveAndFlush(hearingEntity);
 
         var externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
               ExternalLocationTypeEnum.UNSTRUCTURED);

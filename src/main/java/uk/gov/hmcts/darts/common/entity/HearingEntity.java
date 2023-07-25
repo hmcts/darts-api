@@ -20,7 +20,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Objects.isNull;
 
 @Entity
 @Table(name = "hearing")
@@ -65,6 +68,13 @@ public class HearingEntity {
 
     public boolean isFor(OffsetDateTime dateTime) {
         return hearingDate.equals(dateTime.toLocalDate());
+    }
+
+    public void addMedia(MediaEntity mediaEntity) {
+        if (isNull(mediaList)) {
+            mediaList = new ArrayList<>();
+        }
+        mediaList.add(mediaEntity);
     }
 
     public List<String> getJudgesStringList() {

@@ -21,8 +21,8 @@ import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingMediaTestData.createMedia;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
+import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
 
 @Transactional
 @Service
@@ -49,10 +49,10 @@ public class AudioTransformationServiceGivenBuilder {
         hearingEntityWithMedia2 = dartsDatabase.save(createHearingWith(courtCase, courtroomAtNewcastle));
         hearingEntityWithoutMedia = dartsDatabase.save(createHearingWith(courtCase, courtroomAtNewcastle));
 
-        mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMedia(courtroomAtNewcastle)).getMedia();
-        mediaEntity2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMedia(courtroomAtNewcastle)).getMedia();
+        mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
+        mediaEntity2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
 
-        mediaEntity3 = createMedia(courtroomAtNewcastle);
+        mediaEntity3 = createMediaFor(courtroomAtNewcastle);
     }
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {

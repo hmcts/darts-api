@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
@@ -26,7 +25,6 @@ import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.HearingMediaRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
@@ -47,7 +45,6 @@ import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseN
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingMediaTestData.createHearingMedia;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
@@ -66,7 +63,6 @@ public class DartsDatabaseStub {
     private final CourtroomRepository courtroomRepository;
     private final MediaRepository mediaRepository;
     private final MediaRequestRepository mediaRequestRepository;
-    private final HearingMediaRepository hearingMediaRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final NotificationRepository notificationRepository;
@@ -76,12 +72,11 @@ public class DartsDatabaseStub {
 
     public void clearDatabase() {
         externalObjectDirectoryRepository.deleteAll();
-        hearingMediaRepository.deleteAll();
-        mediaRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
+        mediaRepository.deleteAll();
         notificationRepository.deleteAll();
         courtroomRepository.deleteAll();
         caseRepository.deleteAll();
@@ -208,8 +203,11 @@ public class DartsDatabaseStub {
                     OffsetDateTime.parse("2023-06-26T13:45:00Z")));
     }
 
-    public HearingMediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
-        return hearingMediaRepository.save(createHearingMedia(hearing, mediaEntity));
+    public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
+        mediaRepository.save(mediaEntity);
+        hearing.addMedia(mediaEntity);
+        hearingRepository.save(hearing);
+        return mediaEntity;
     }
 
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
