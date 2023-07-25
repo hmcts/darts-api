@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,15 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.cases.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
+import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,28 +50,9 @@ public class CaseController implements CasesApi {
      * @return OK (status code 200)
      *         or Internal Server Error (status code 500)
      */
-    @Operation(
-        operationId = "casesGet",
-        summary = "Allows the retrieval of all cases for a given courthouse, courtroom and date",
-        description = "Retrieves all cases for a given courthouse, courtroom and date",
-        tags = {"Cases"},
-        responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {
-                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ScheduledCase.class)))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/cases",
-        produces = {"application/json"}
-    )
-    public ResponseEntity<List<ScheduledCase>> casesGet(
-        @NotNull @Parameter(name = "courthouse", description = "The name of the courthouse", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse,
-        @NotNull @Parameter(name = "courtroom", description = "The name of the courtroom", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "courtroom", required = true) String courtroom,
-        @NotNull @Parameter(name = "date", description = "The date to get the cases for. Normally today", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "date", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
-    ) {
+    @Operation(operationId = "casesGet", summary = "Allows the retrieval of all cases for a given courthouse, courtroom and date", description = "Retrieves all cases for a given courthouse, courtroom and date", tags = {"Cases"}, responses = {@ApiResponse(responseCode = "200", description = "OK", content = {@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = ScheduledCase.class)))}), @ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    @RequestMapping(method = RequestMethod.GET, value = "/cases", produces = {"application/json"})
+    public ResponseEntity<List<ScheduledCase>> casesGet(@NotNull @Parameter(name = "courthouse", description = "The name of the courthouse", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse, @NotNull @Parameter(name = "courtroom", description = "The name of the courtroom", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "courtroom", required = true) String courtroom, @NotNull @Parameter(name = "date", description = "The date to get the cases for. Normally today", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "date", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         GetCasesRequest request = new GetCasesRequest();
         request.setCourthouse(courthouse.toUpperCase(Locale.ROOT));
         request.setCourtroom(courtroom.toUpperCase(Locale.ROOT));
@@ -107,4 +90,15 @@ public class CaseController implements CasesApi {
         return new ResponseEntity<>(advancedSearchResults, HttpStatus.NOT_IMPLEMENTED);
 
     }
+
+    @Override
+    public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(
+        @Parameter(name = "caseId", description = "caseId is the internal cas_id of the case.", required = true, in = ParameterIn.PATH)
+        @PathVariable("caseId") String caseId) {
+
+        caseService.getCaseHearings(caseId);
+
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
 }

@@ -52,6 +52,30 @@ paths:
 
         '500':
           description: Internal Server Error
+  /cases/{caseId}/hearings:
+    get:
+      tags:
+        - Cases
+      summary: Allows the retrieval of all cases for a given courthouse, courtroom and date
+      description: |-
+        Retrieves all cases for a given courthouse, courtroom and date
+      parameters:
+        - in: path
+          name: caseId
+          schema:
+            type: string
+          description: "caseId is the internal cas_id of the case."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hearings'
+
+        '500':
+          description: Internal Server Error
 
   /cases/search:
     get:
@@ -238,4 +262,21 @@ components:
     defence:
       type: string
       example: Mr Defender
-
+    hearings:
+      type: array
+      items:
+        $ref: '#/components/schemas/hearing'
+    hearing:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+          format: date-time
+        judgeList:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        courtroom:
+          type: string

@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases.service;
 
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
+import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 
@@ -12,4 +13,7 @@ public interface CaseService {
     List<ScheduledCase> getCases(GetCasesRequest request);
 
     List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request);
+
+    List<Hearing> getCaseHearings(String caseId);
+
 }
