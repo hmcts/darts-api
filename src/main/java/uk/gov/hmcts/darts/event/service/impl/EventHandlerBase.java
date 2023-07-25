@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -38,10 +39,12 @@ public abstract class EventHandlerBase implements EventHandler {
 
     protected final Map<String, Pair<Integer, String>> eventTypesToIdAndName = new ConcurrentHashMap<>();
 
+    @Getter
     @Autowired
     private EventTypeRepository eventTypeRepository;
     @Autowired
     private CourtroomRepository courtroomRepository;
+    @Getter
     @Autowired
     private CaseRepository caseRepository;
     @Autowired
@@ -78,7 +81,7 @@ public abstract class EventHandlerBase implements EventHandler {
         return event;
     }
 
-    private EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
+    protected EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
         var key = buildKey(dartsEvent.getType(), dartsEvent.getSubType());
         return eventTypeRepository.getReferenceById(eventTypesToIdAndName.get(key).getLeft());
     }
@@ -177,12 +180,6 @@ public abstract class EventHandlerBase implements EventHandler {
         return courtCaseEntity.getHearings().stream()
             .filter(hearingEntity -> hearingEntity.isFor(eventDate))
             .findFirst();
-    }
-
-    protected HearingEntity getHearingEntityOrCreate(CourtroomEntity courtRoomEntity, OffsetDateTime eventDate, CourtCaseEntity courtCaseEntity) {
-        return courtCaseEntity.getHearings().stream()
-            .filter(hearingEntity -> hearingEntity.isFor(eventDate))
-            .findFirst().orElseGet(() -> newCaseHearing(courtRoomEntity, eventDate, courtCaseEntity));
     }
 
     protected static HearingEntity newCaseHearing(CourtroomEntity actualCourtRoom, OffsetDateTime actualEventDate, CourtCaseEntity courtCase) {

@@ -35,7 +35,7 @@ public class CourtCaseEntity {
     public static final String CTH_ID = "cth_id";
     public static final String CASE_NUMBER = "case_number";
     public static final String CASE_OBJECT_ID = "case_object_id";
-    public static final String RER_ID = "rer_id";
+    public static final String EVH_ID = "evh_id";
     public static final String CAS_ID = "cas_id";
     public static final String TABLE_NAME = "court_case";
 
@@ -45,9 +45,12 @@ public class CourtCaseEntity {
     @SequenceGenerator(name = "cas_gen", sequenceName = "cas_seq", allocationSize = 1)
     private Integer id;
 
+    /**
+     * The reporting restriction maps to the EventHandlerEntity.event_name
+     */
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = RER_ID)
-    private ReportingRestrictionsEntity reportingRestrictions;
+    @JoinColumn(name = EVH_ID)
+    private EventHandlerEntity reportingRestrictions;
 
     @Column(name = CASE_OBJECT_ID, length = 16)
     private String legacyCaseObjectId;

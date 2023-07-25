@@ -9,7 +9,6 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audio.util.AudioTestDataUtil;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
-import uk.gov.hmcts.darts.cases.repository.ReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -57,7 +56,6 @@ public class DartsDatabaseStub {
 
     private final CaseRepository caseRepository;
     private final EventRepository eventRepository;
-    private final ReportingRestrictionsRepository reportingRestrictionsRepository;
     private final CourthouseRepository courthouseRepository;
     private final HearingRepository hearingRepository;
     private final CourtroomRepository courtroomRepository;

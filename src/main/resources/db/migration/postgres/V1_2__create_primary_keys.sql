@@ -60,9 +60,6 @@ ALTER  TABLE darts.region                  ADD PRIMARY KEY USING INDEX region_pk
 CREATE UNIQUE INDEX report_pk ON darts.report(rep_id);
 ALTER  TABLE darts.report                  ADD PRIMARY KEY USING INDEX report_pk;
 
-CREATE UNIQUE INDEX reporting_restrictons_pk ON darts.reporting_restrictions(rer_id);
-ALTER  TABLE darts.reporting_restrictions  ADD PRIMARY KEY USING INDEX reporting_restrictons_pk;
-
 CREATE UNIQUE INDEX transcription_pk ON darts.transcription(tra_id);
 ALTER  TABLE darts.transcription           ADD PRIMARY KEY USING INDEX transcription_pk;
 

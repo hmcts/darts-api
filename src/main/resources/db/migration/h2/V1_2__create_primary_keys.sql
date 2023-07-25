@@ -17,7 +17,6 @@ ALTER TABLE darts.media_request ADD CONSTRAINT media_request_pk PRIMARY KEY(mer_
 ALTER TABLE darts.notification ADD CONSTRAINT notification_pk PRIMARY KEY(not_id);
 ALTER TABLE darts.object_directory_status ADD CONSTRAINT object_directory_status_pk PRIMARY KEY(ods_id);
 ALTER TABLE darts.report ADD CONSTRAINT report_pk PRIMARY KEY(rep_id);
-ALTER TABLE darts.reporting_restrictions ADD CONSTRAINT reporting_restrictons_pk PRIMARY KEY(rer_id);
 ALTER TABLE darts.transcription ADD CONSTRAINT transcription_pk PRIMARY KEY(tra_id);
 ALTER TABLE darts.transcription_comment ADD CONSTRAINT transcription_comment_pk PRIMARY KEY(trc_id);
 ALTER TABLE darts.transcription_type ADD CONSTRAINT transcription_type_pk PRIMARY KEY(trt_id);
