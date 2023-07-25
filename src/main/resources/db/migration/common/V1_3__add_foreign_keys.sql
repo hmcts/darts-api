@@ -9,7 +9,7 @@ ADD CONSTRAINT annotation_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES darts.courtroom(ctr_id);
 
 ALTER TABLE darts.court_case
-ADD CONSTRAINT court_case_event_handler_fk
+ADD CONSTRAINT court_case_reporting_restriction_fk
 FOREIGN KEY (evh_id) REFERENCES darts.event_handler(evh_id);
 
 ALTER TABLE darts.court_case

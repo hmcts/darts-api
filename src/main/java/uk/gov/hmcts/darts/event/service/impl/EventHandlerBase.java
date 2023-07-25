@@ -182,12 +182,6 @@ public abstract class EventHandlerBase implements EventHandler {
             .findFirst();
     }
 
-    protected HearingEntity getHearingEntityOrCreate(CourtroomEntity courtRoomEntity, OffsetDateTime eventDate, CourtCaseEntity courtCaseEntity) {
-        return courtCaseEntity.getHearings().stream()
-            .filter(hearingEntity -> hearingEntity.isFor(eventDate))
-            .findFirst().orElseGet(() -> newCaseHearing(courtRoomEntity, eventDate, courtCaseEntity));
-    }
-
     protected static HearingEntity newCaseHearing(CourtroomEntity actualCourtRoom, OffsetDateTime actualEventDate, CourtCaseEntity courtCase) {
         var newHearing = new HearingEntity();
         newHearing.setHearingDate(actualEventDate.toLocalDate());

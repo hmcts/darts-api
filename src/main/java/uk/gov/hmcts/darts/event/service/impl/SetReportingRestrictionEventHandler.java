@@ -16,12 +16,9 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
     @Override
     public void handle(DartsEvent dartsEvent) {
         CourtroomCourthouseCourtcase courtroomCourthouseCourtcase = getOrCreateCourtroomCourtHouseAndCases(dartsEvent);
-        CourtCaseEntity caseEntity = courtroomCourthouseCourtcase.getCourtCaseEntity();
+        CourtCaseEntity courtCaseEntity = courtroomCourthouseCourtcase.getCourtCaseEntity();
         EventHandlerEntity eventHandlerEntity = eventTypeReference(dartsEvent);
-        caseEntity.setReportingRestrictions(eventHandlerEntity);
-        getCaseRepository().saveAndFlush(caseEntity);
+        courtCaseEntity.setReportingRestrictions(eventHandlerEntity);
+        getCaseRepository().saveAndFlush(courtCaseEntity);
     }
-
-
-
 }
