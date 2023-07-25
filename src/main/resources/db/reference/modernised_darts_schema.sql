@@ -68,12 +68,16 @@
 --    add not null constraint to PK columnms on region and user_account ( should be inferrable, but hibernate likes it explicitly defined)
 --    amend NUMERIC to INTEGER on user_account and event tables
 --v33 remove synthetic PK from associative entities hearing_events_ae and hearing_media_as, replace with PK on natural key
+--v34 add case_retention, retention_policy & case_retention_event tables
+--v35 remove reporting_restrictions table, replace with foreign key on case to event_handler and add boolean to event_handler
 
  
 
 
 -- List of Table Aliases
 -- annotation                 ANN
+-- case_retention             CAR
+-- case_retention_event       CRE
 -- court_case                 CAS
 -- courthouse                 CTH
 -- courthouse_region_ae       CRA
@@ -94,7 +98,7 @@
 -- prosecutor_name            PRN
 -- region                     REG
 -- report                     REP
--- reporting_restrictions     RER
+-- retention_policy           RTP
 -- transcription              TRA
 -- transcription_type         TRT
 -- transient_object_directory TOD
@@ -162,10 +166,45 @@ IS 'directly sourced from moj_annotation_s';
 COMMENT ON COLUMN annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 
+CREATE TABLE case_retention
+(car_id                    INTEGER                   NOT NULL
+,cas_id                    INTEGER                   NOT NULL
+,rtp_id                    INTEGER                   NOT NULL
+,retain_until_ts           TIMESTAMP WITH TIME ZONE
+,manual_override           BOOLEAN                   NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON COLUMN case_retention.car_id
+IS 'primary key of case_retention';
+
+COMMENT ON COLUMN case_retention.cas_id
+IS 'foreign key from court_case';
+
+COMMENT ON COLUMN case_retention.rtp_id
+IS 'foreign key from retention_policy';
+
+CREATE TABLE case_retention_event
+(cre_id                    INTEGER                   NOT NULL
+,car_id                    INTEGER                   NOT NULL
+,sentencing_type           INTEGER                   NOT NULL
+,total_sentencing          CHARACTER VARYING
+,last_processed_event_ts   TIMESTAMP WITH TIME ZONE  NOT NULL
+,submitted_by              INTEGER
+,user_comment              CHARACTER VARYING
+) TABLESPACE darts_tables;
+
+COMMENT ON COLUMN case_retention_event.cre_id
+IS 'primary key of case_retention_event';
+
+COMMENT ON COLUMN case_retention_event.car_id
+IS 'foreign key from case_retention';
+
+
+
 CREATE TABLE court_case
 (cas_id                    INTEGER					 NOT NULL
 ,cth_id                    INTEGER                   NOT NULL
-,rer_id                    INTEGER
+,evh_id                    INTEGER               -- must map to one of the reporting restriction elements
 ,case_object_id            CHARACTER VARYING(16)
 ,case_number               CHARACTER VARYING     -- maps to c_case_id in legacy                    
 ,case_closed               BOOLEAN
@@ -182,9 +221,6 @@ IS 'primary key of court_case';
 
 COMMENT ON COLUMN court_case.cth_id
 IS 'foreign key to courthouse';
-
-COMMENT ON COLUMN court_case.rer_id
-IS 'foreign key to reporting_restrictions';
 
 COMMENT ON COLUMN court_case.case_object_id
 IS 'internal Documentum primary key from moj_case_s';
@@ -391,6 +427,7 @@ CREATE TABLE event_handler
 ,event_sub_type              CHARACTER VARYING
 ,event_name                  CHARACTER VARYING           NOT NULL
 ,handler                     CHARACTER VARYING
+,active                      BOOLEAN                     NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE    NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE    NOT NULL
 ,last_modified_by            INTEGER                     NOT NULL
@@ -699,16 +736,14 @@ IS 'directly sourced from moj_report_s';
 COMMENT ON COLUMN report.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_report';
 
-CREATE TABLE reporting_restriction
-(rer_id                     INTEGER                  NOT NULL
-,rer_description            CHARACTER VARYING
+CREATE TABLE retention_policy
+(rtp_id                   INTEGER                  NOT NULL
+,policy_name              CHARACTER VARYING        NOT NULL
+,retention_period         INTEGER                  NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN reporting_restriction.rer_id
-IS 'primary key of reporting_restriction';
-
-COMMENT ON COLUMN reporting_restriction.rer_description
-IS 'text of the relevant legislation, to be populated from moj_case_s.c_reporting_restrictions';
+COMMENT ON COLUMN retention_policy.rtp_id
+IS 'primary key of retention_policy';
 
 CREATE TABLE transcription
 (tra_id                   INTEGER				   NOT NULL
@@ -867,6 +902,12 @@ IS 'internal Documentum primary key from dm_user_s';
 CREATE UNIQUE INDEX annotation_pk ON annotation(ann_id) TABLESPACE darts_indexes;
 ALTER TABLE annotation              ADD PRIMARY KEY USING INDEX annotation_pk;
 
+CREATE UNIQUE INDEX case_retention_pk ON case_retention(car_id) TABLESPACE darts_indexes; 
+ALTER TABLE case_retention          ADD PRIMARY KEY USING INDEX case_retention_pk;
+
+CREATE UNIQUE INDEX case_retention_event_pk ON case_retention_event(cre_id) TABLESPACE darts_indexes; 
+ALTER TABLE case_retention_event    ADD PRIMARY KEY USING INDEX case_retention_event_pk;
+
 CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE darts_indexes; 
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
 
@@ -889,13 +930,13 @@ CREATE UNIQUE INDEX defendant_name_pk ON defendant_name(dfd_id) TABLESPACE darts
 ALTER TABLE defendant_name          ADD PRIMARY KEY USING INDEX defendant_name_pk;
 
 CREATE UNIQUE INDEX device_register_pk ON device_register(der_id) TABLESPACE darts_indexes;
-ALTER TABLE device_register              ADD PRIMARY KEY USING INDEX device_register_pk;
+ALTER TABLE device_register         ADD PRIMARY KEY USING INDEX device_register_pk;
 
 CREATE UNIQUE INDEX event_pk ON event(eve_id) TABLESPACE darts_indexes;
 ALTER TABLE event                   ADD PRIMARY KEY USING INDEX event_pk;
 
 CREATE UNIQUE INDEX event_handler_pk ON event_handler(evh_id) TABLESPACE darts_indexes;
-ALTER TABLE event_handler              ADD PRIMARY KEY USING INDEX event_handler_pk;
+ALTER TABLE event_handler            ADD PRIMARY KEY USING INDEX event_handler_pk;
 
 CREATE UNIQUE INDEX external_object_directory_pk ON external_object_directory(eod_id) TABLESPACE darts_indexes;
 ALTER TABLE external_object_directory   ADD PRIMARY KEY USING INDEX external_object_directory_pk;
@@ -936,8 +977,8 @@ ALTER TABLE region                  ADD PRIMARY KEY USING INDEX region_pk;
 CREATE UNIQUE INDEX report_pk ON report(rep_id) TABLESPACE darts_indexes;
 ALTER TABLE report                  ADD PRIMARY KEY USING INDEX report_pk;
 
-CREATE UNIQUE INDEX reporting_restriction_pk ON reporting_restriction(rer_id) TABLESPACE darts_indexes;
-ALTER TABLE reporting_restriction  ADD PRIMARY KEY USING INDEX reporting_restriction_pk;
+CREATE UNIQUE INDEX retention_policy_pk ON retention_policy(rtp_id) TABLESPACE darts_indexes;
+ALTER TABLE retention_policy           ADD PRIMARY KEY USING INDEX retention_policy_pk;
 
 CREATE UNIQUE INDEX transcription_pk ON transcription(tra_id) TABLESPACE darts_indexes;
 ALTER TABLE transcription           ADD PRIMARY KEY USING INDEX transcription_pk;
@@ -959,6 +1000,8 @@ ALTER TABLE user_account            ADD PRIMARY KEY USING INDEX user_account_pk;
 
 -- defaults for postgres sequences, datatype->bigint, increment->1, nocycle is default, owned by none
 CREATE SEQUENCE ann_seq CACHE 20;
+CREATE SEQUENCE car_seq CACHE 20;
+CREATE SEQUENCE cre_seq CACHE 20;
 CREATE SEQUENCE cas_seq CACHE 20;
 CREATE SEQUENCE cth_seq CACHE 20;
 CREATE SEQUENCE cra_seq CACHE 20;
@@ -980,7 +1023,7 @@ CREATE SEQUENCE ods_seq CACHE 20;
 CREATE SEQUENCE prn_seq CACHE 20;
 CREATE SEQUENCE reg_seq CACHE 20;
 CREATE SEQUENCE rep_seq CACHE 20;
-CREATE SEQUENCE rer_seq CACHE 20;
+CREATE SEQUENCE rtp_seq CACHE 20;
 CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
 CREATE SEQUENCE trt_seq CACHE 20;
@@ -998,9 +1041,21 @@ ALTER TABLE annotation
 ADD CONSTRAINT annotation_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
+ALTER TABLE case_retention                
+ADD CONSTRAINT case_retention_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE case_retention                
+ADD CONSTRAINT case_retention_retention_policy_fk
+FOREIGN KEY (rtp_id) REFERENCES retention_policy(rtp_id);
+
+ALTER TABLE case_retention_event               
+ADD CONSTRAINT case_retention_event_case_retention_fk
+FOREIGN KEY (car_id) REFERENCES case_retention(car_id);
+
 ALTER TABLE court_case                        
-ADD CONSTRAINT court_case_reporting_restriction_fk
-FOREIGN KEY (rer_id) REFERENCES reporting_restriction(rer_id);
+ADD CONSTRAINT court_case_event_handler_fk
+FOREIGN KEY (evh_id) REFERENCES event_handler(evh_id);
 
 ALTER TABLE court_case                        
 ADD CONSTRAINT court_case_courthouse_fk
@@ -1178,6 +1233,8 @@ ALTER TABLE court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
 
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention_event TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;
@@ -1201,7 +1258,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON object_directory_status TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON prosecutor_name TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON region TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON report TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON reporting_restriction TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON retention_policy TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_comment TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_type TO darts_user;
@@ -1210,8 +1267,10 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON urgency TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON user_account TO darts_user;
 
 GRANT SELECT,UPDATE ON  ann_seq TO darts_user;
+GRANT SELECT,UPDATE ON  car_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cas_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cra_seq TO darts_user;
+GRANT SELECT,UPDATE ON  cre_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cth_seq TO darts_user;
 GRANT SELECT,UPDATE ON  ctr_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dal_seq TO darts_user;
@@ -1231,7 +1290,7 @@ GRANT SELECT,UPDATE ON  ods_seq TO darts_user;
 GRANT SELECT,UPDATE ON  prn_seq TO darts_user;
 GRANT SELECT,UPDATE ON  reg_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rep_seq TO darts_user;
-GRANT SELECT,UPDATE ON  rer_seq TO darts_user;
+GRANT SELECT,UPDATE ON  rtp_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trc_seq TO darts_user;
@@ -1256,18 +1315,6 @@ INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('od
 INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Awaiting Verification');
 INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'marked for Deletion');
 INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Deleted');
-
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (1,'Section 39 of the Children and Young Persons Act 1999');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (2,'An order made under s45 of the Youth Justice and Criminal Evidence Act 1999');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (3,'Section 4(2) of the Contempt of Court Act 1981');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (4,'Restrictions Lifted');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (5,'Section 2 of the Sexual Offenders (Amendment) Act 1992');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (6,'Section 11 of the Contempt of Court Act 1981');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (7,'An order made under s45a of the Youth Justice and Criminal Evidence Act 1999');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (8,'An order made under s46 of the Youth Justice and Criminal Evidence Act 1999');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES  (9,'Section 4 of the Sexual Offenders (Amendment) Act 1976');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES (10,'Judge directed on reporting restrictions');
-INSERT INTO reporting_restriction (rer_id,rer_description) VALUES (11,'An order made under s49 of the Children and Young Persons Act 1933');
 
 
 
