@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '4.2.1.3168'
   id "io.freefair.lombok" version "8.1.0"
   id "org.openapi.generator" version "6.6.0"
-  id "org.flywaydb.flyway" version "9.20.0"
+  id "org.flywaydb.flyway" version "9.21.0"
 }
 
 group = 'uk.gov.hmcts'
