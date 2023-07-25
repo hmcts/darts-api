@@ -17,14 +17,15 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    private static String pathVariable = "25";
-    private static String endpointUrl = "/cases/" + pathVariable + "/hearings";
+    private static String endpointUrl = "/cases/{caseId}/hearings";
 
     @Test
     void casesSearchGetEndpoint() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl);
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
+
         mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented());
+
     }
 
 }

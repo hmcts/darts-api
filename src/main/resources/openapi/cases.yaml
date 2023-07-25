@@ -56,14 +56,14 @@ paths:
     get:
       tags:
         - Cases
-      summary: Allows the retrieval of all cases for a given courthouse, courtroom and date
+      summary: Allows the retrieval of hearings for a given caseId
       description: |-
-        Retrieves all cases for a given courthouse, courtroom and date
+        Retrieves all hearings for a caseId.
       parameters:
         - in: path
           name: caseId
           schema:
-            type: string
+            type: integer
           description: "caseId is the internal cas_id of the case."
           required: true
       responses:
@@ -270,7 +270,7 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
         date:
           type: string
           format: date-time

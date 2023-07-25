@@ -14,6 +14,6 @@ public interface CaseService {
 
     List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request);
 
-    List<Hearing> getCaseHearings(String caseId);
+    List<Hearing> getCaseHearings(Integer caseId);
 
 }

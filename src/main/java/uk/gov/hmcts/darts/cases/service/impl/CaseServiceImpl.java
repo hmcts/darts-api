@@ -40,7 +40,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
-    public List<Hearing> getCaseHearings(String caseId) {
+    public List<Hearing> getCaseHearings(Integer caseId) {
 
         return new ArrayList<>();
     }

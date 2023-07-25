@@ -94,7 +94,7 @@ public class CaseController implements CasesApi {
     @Override
     public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(
         @Parameter(name = "caseId", description = "caseId is the internal cas_id of the case.", required = true, in = ParameterIn.PATH)
-        @PathVariable("caseId") String caseId) {
+        @PathVariable("caseId") Integer caseId) {
 
         caseService.getCaseHearings(caseId);
 
