@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.cases.mapper.GetCasesMapper;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
+import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.api.CommonApi;
@@ -38,6 +39,11 @@ public class CaseServiceImpl implements CaseService {
 
     }
 
+    @Override
+    public List<Hearing> getCaseHearings(Integer caseId) {
+
+        return new ArrayList<>();
+    }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
         if (CollectionUtils.isEmpty(hearings)) {
