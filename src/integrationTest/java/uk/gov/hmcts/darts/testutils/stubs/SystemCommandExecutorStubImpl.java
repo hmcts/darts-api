@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.testutils;
+package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;

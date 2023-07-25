@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
@@ -39,7 +40,7 @@ public class CourtroomEntity {
     @Column(name = COURTROOM_NAME)
     private String name;
 
-    @ManyToOne(cascade = PERSIST)
+    @ManyToOne(cascade = {PERSIST, MERGE})
     @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
 

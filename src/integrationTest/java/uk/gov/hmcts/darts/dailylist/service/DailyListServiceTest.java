@@ -27,8 +27,8 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtHouseWithName;
+import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -99,7 +99,7 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Test
     void updateCourthouseOk() throws IOException {
-        dartsDatabase.save(aCourtHouseWithName("TEMP"));
+        dartsDatabase.save(createCourthouse("TEMP"));
         String requestBody = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/update_courthouse_ok/DailyListRequest.json");
         DailyList dailyList = MAPPER.readValue(requestBody, DailyList.class);

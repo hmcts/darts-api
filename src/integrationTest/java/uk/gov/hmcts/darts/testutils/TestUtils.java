@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.common.util;
+package uk.gov.hmcts.darts.testutils;
 
 import org.apache.commons.io.FileUtils;
 
