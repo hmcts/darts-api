@@ -228,7 +228,8 @@ task generateCasesApi(type: org.openapitools.generator.gradle.plugin.tasks.Gener
   configOptions = [
     dateLibrary: "java8",
     interfaceOnly: "true",
-    useTags: "true"
+    useTags: "true",
+    useSpringBoot3: "true"
   ]
 }
 
