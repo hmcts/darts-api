@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.cases.util.RequestValidator;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -94,8 +95,9 @@ public class CaseController implements CasesApi {
             .eventTextContains(StringUtils.trimToNull(eventTextContains))
             .build();
 
+        RequestValidator.validate(request);
         List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
-        return new ResponseEntity<>(advancedSearchResults, HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
 
     }
 

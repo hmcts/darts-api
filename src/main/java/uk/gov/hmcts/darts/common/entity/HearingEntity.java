@@ -62,6 +62,12 @@ public class HearingEntity {
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "hearing_event_ae",
+        joinColumns = {@JoinColumn(name = "hea_id")},
+        inverseJoinColumns = {@JoinColumn(name = "eve_id")})
+    private List<EventEntity> eventList;
+
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;

@@ -100,14 +100,14 @@ public class CourtCaseEntity {
     }
 
     public List<String> getDefendantStringList() {
-        return CollectionUtils.emptyIfNull(defendantList).stream().map(DefendantEntity::getName).toList();
+        return CollectionUtils.emptyIfNull(defendantList).stream().map(DefendantEntity::getName).sorted().toList();
     }
 
     public List<String> getDefenceStringList() {
-        return CollectionUtils.emptyIfNull(defenceList).stream().map(DefenceEntity::getName).toList();
+        return CollectionUtils.emptyIfNull(defenceList).stream().map(DefenceEntity::getName).sorted().toList();
     }
 
     public List<String> getProsecutorsStringList() {
-        return CollectionUtils.emptyIfNull(prosecutorList).stream().map(ProsecutorEntity::getName).toList();
+        return CollectionUtils.emptyIfNull(prosecutorList).stream().map(ProsecutorEntity::getName).sorted().toList();
     }
 }
