@@ -13,17 +13,6 @@ public enum CaseApiError implements DartsApiError {
         "100",
         HttpStatus.BAD_REQUEST,
         "Provided courthouse does not exist"
-    ),
-
-    COURTROOM_PROVIDED_DOES_NOT_EXIST(
-        "101",
-        HttpStatus.BAD_REQUEST,
-        "Provided courtroom does not exist"
-    ),
-    HEARING_MISMATCH(
-        "102",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "Could not find the correct hearing for provided case"
     );
 
     private static final String ERROR_TYPE_PREFIX = "SERVICE";

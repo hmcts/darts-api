@@ -20,6 +20,11 @@ import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.common.util.TestUtils.substituteHearingDateWithToday;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCaseEntityAt;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtHouse;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtroom;
+import static uk.gov.hmcts.darts.testutils.MinimalEntities.aHearingForCaseInRoom;
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.TooManyMethods"})
@@ -43,7 +48,7 @@ class CaseControllerTest extends IntegrationBase {
         HearingEntity hearingForCase1 = setupCase1(swanseaCourthouse, swanseaCourtroom1);
         HearingEntity hearingForCase2 = setupCase2(swanseaCourthouse, swanseaCourtroom1);
         HearingEntity hearingForCase3 = setupCase3(swanseaCourthouse, swanseaCourtroom1);
-        HearingEntity hearingForCase4 = setupCase4(swanseaCourthouse, swanseaCourtroom1);
+        HearingEntity hearingForCase4 = createCaseWithHearingToday(swanseaCourthouse, swanseaCourtroom1);
 
 
         dartsDatabase.saveAll(hearingForCase1, hearingForCase2, hearingForCase3, hearingForCase4);
@@ -73,8 +78,8 @@ class CaseControllerTest extends IntegrationBase {
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponse.json");
+        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponse.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -129,12 +134,12 @@ class CaseControllerTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithNonExistingCourtroom.json"));
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNonExistingCourtroom.json");
+        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNonExistingCourtroom.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -164,8 +169,8 @@ class CaseControllerTest extends IntegrationBase {
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseNoHearing.json");
+        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseNoHearing.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -179,8 +184,8 @@ class CaseControllerTest extends IntegrationBase {
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = getContentsFromFile(
-            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json");
+        String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }
