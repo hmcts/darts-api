@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +20,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Objects.isNull;
 
 @Entity
 @Table(name = "hearing")
@@ -36,7 +38,7 @@ public class HearingEntity {
     private Integer id;
 
     @JoinColumn(name = "ctr_id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
 
     @OneToMany(mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -66,6 +68,13 @@ public class HearingEntity {
 
     public boolean isFor(OffsetDateTime dateTime) {
         return hearingDate.equals(dateTime.toLocalDate());
+    }
+
+    public void addMedia(MediaEntity mediaEntity) {
+        if (isNull(mediaList)) {
+            mediaList = new ArrayList<>();
+        }
+        mediaList.add(mediaEntity);
     }
 
     public List<String> getJudgesStringList() {
