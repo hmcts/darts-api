@@ -45,7 +45,7 @@ public class HearingEntity {
     private List<JudgeEntity> judgeList;
 
     @Column(name = "hearing_date")
-    private LocalDate hearingDate;
+    private LocalDate hearingDate = LocalDate.now();
 
     @Column(name = "scheduled_start_time")
     private LocalTime scheduledStartTime;

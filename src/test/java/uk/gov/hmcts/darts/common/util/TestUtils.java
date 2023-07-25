@@ -9,6 +9,7 @@ import org.zalando.problem.jackson.ProblemModule;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases"})
 public final class TestUtils {
@@ -33,5 +34,9 @@ public final class TestUtils {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         return objectMapper;
+    }
+
+    public static String substituteHearingDateWithToday(String expectedResponse) {
+        return expectedResponse.replace("todays_date", LocalDate.now().toString());
     }
 }
