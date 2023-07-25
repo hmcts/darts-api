@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.cases.mapper;
+package uk.gov.hmcts.darts.cases.helper;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,11 +25,15 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Component
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class AdvancedSearchRequestHelper {
     @PersistenceContext
     private EntityManager entityManager;
@@ -53,6 +57,7 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addCourthouseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addCourtroomCriteria(request, criteriaBuilder, caseRoot));
+        CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
         return predicates;
@@ -71,7 +76,7 @@ public class AdvancedSearchRequestHelper {
     }
 
     private String surroundWithPercentagesUpper(String value) {
-        return surroundValue(value.toUpperCase(), "%");
+        return surroundValue(value.toUpperCase(Locale.ROOT), "%");
     }
 
     private String surroundValue(String value, String surroundWith) {
@@ -129,6 +134,18 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
+    private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+        List<Predicate> predicateList = new ArrayList<>();
+        if (StringUtils.isNotBlank(request.getJudgeName())) {
+            Join<CourtCaseEntity, JudgeEntity> judgeJoin = joinJudge(caseRoot);
+            predicateList.add(criteriaBuilder.like(
+                criteriaBuilder.upper(judgeJoin.get(JudgeEntity_.NAME)),
+                surroundWithPercentagesUpper(request.getJudgeName())
+            ));
+        }
+        return predicateList;
+    }
+
     private List<Predicate> addHearingDateCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (request.getDateFrom() != null || request.getDateTo() != null) {
@@ -153,6 +170,11 @@ public class AdvancedSearchRequestHelper {
 
     private Join<CourtCaseEntity, HearingEntity> joinHearing(Root<CourtCaseEntity> caseRoot) {
         return caseRoot.join(CourtCaseEntity_.HEARINGS, JoinType.INNER);
+    }
+
+    private Join<CourtCaseEntity, JudgeEntity> joinJudge(Root<CourtCaseEntity> caseRoot) {
+        Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
+        return hearingJoin.join(HearingEntity_.JUDGE_LIST, JoinType.INNER);
     }
 
     private Join<CourtCaseEntity, CourtroomEntity> joinCourtroom(Root<CourtCaseEntity> caseRoot) {

@@ -37,7 +37,7 @@ import java.util.Locale;
 
 @RestController
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI", "checkstyle.LineLengthCheck"})
 public class CaseController implements CasesApi {
 
     private final CaseService caseService;

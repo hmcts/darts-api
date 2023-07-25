@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,14 +39,14 @@ public class HearingEntity {
     private Integer id;
 
     @JoinColumn(name = "ctr_id")
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
 
-    @OneToMany(mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<JudgeEntity> judgeList = new ArrayList<>();
 
     @Column(name = "hearing_date")
-    private LocalDate hearingDate = LocalDate.now();
+    private LocalDate hearingDate;
 
     @Column(name = "scheduled_start_time")
     private LocalTime scheduledStartTime;

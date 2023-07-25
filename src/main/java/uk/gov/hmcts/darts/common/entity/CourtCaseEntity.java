@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -71,13 +72,13 @@ public class CourtCaseEntity {
     @Column(name = CASE_CLOSED_TS)
     private OffsetDateTime caseClosedTimestamp;
 
-    @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefendantEntity> defendantList = new ArrayList<>();
 
-    @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
 
-    @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefenceEntity> defenceList = new ArrayList<>();
 
     @Column(name = RETAIN_UNTIL_TS)

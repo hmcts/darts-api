@@ -26,6 +26,11 @@ public final class TestUtils {
 
     }
 
+    public static String removeIds(String input) {
+        return input.replaceAll("\"caseID\".{1,6},", "")
+            .replaceAll("\"id\".{1,6},", "");
+    }
+
     public static String substituteHearingDateWithToday(String expectedResponse) {
         return expectedResponse.replace("todays_date", LocalDate.now().toString());
     }

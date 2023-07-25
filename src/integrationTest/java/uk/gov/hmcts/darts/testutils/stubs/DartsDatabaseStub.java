@@ -167,6 +167,10 @@ public class DartsDatabaseStub {
             ));
     }
 
+    public void saveAll(EventEntity... eventEntities) {
+        eventRepository.saveAll(asList(eventEntities));
+    }
+
     public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
         return courthouseRepository.save(createCourthouse(courthouseName));
     }

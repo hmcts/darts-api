@@ -1,0 +1,22 @@
+[
+  {
+    "caseID": 101,
+    "caseNumber": "test1",
+    "courthouse": "case_courthouse",
+    "defendants": [
+      "defendant_test1_1",
+      "defendant_test1_2"
+    ],
+    "hearings": [
+      {
+        "id": 102,
+        "date": "2023-06-20",
+        "courtroom": "1",
+        "judges": [
+          "Judge_1",
+          "Judge_2"
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,77 @@
+[
+  {
+    "caseID": 101,
+    "caseNumber": "test1",
+    "courthouse": "case_courthouse",
+    "defendants": [
+      "defendant_test1_1",
+      "defendant_test1_2"
+    ],
+    "hearings": [
+      {
+        "id": 201,
+        "date": "2023-06-20",
+        "courtroom": "1",
+        "judges": [
+          "Judge_1",
+          "Judge_2"
+        ]
+      },
+      {
+        "id": 202,
+        "date": "2023-06-21",
+        "courtroom": "2",
+        "judges": [
+          "Judge_1",
+          "Judge_2",
+          "Judge_3"
+        ]
+      }
+    ]
+  },
+  {
+    "caseID": 102,
+    "caseNumber": "test2",
+    "courthouse": "case_courthouse",
+    "defendants": [
+      "defendant_test2_1",
+      "defendant_test2_2"
+    ],
+    "hearings": [
+      {
+        "id": 203,
+        "date": "2023-06-22",
+        "courtroom": "2",
+        "judges": [
+          "Judge_1",
+          "Judge_2",
+          "Judge_3",
+          "Judge_4"
+        ]
+      }
+    ]
+  },
+  {
+    "caseID": 103,
+    "caseNumber": "test3",
+    "courthouse": "case_courthouse",
+    "defendants": [
+      "defendant_test3_1",
+      "defendant_test3_2"
+    ],
+    "hearings": [
+      {
+        "id": 204,
+        "date": "2023-06-23",
+        "courtroom": "2",
+        "judges": [
+          "Judge_1",
+          "Judge_2",
+          "Judge_3",
+          "Judge_4",
+          "Judge_5"
+        ]
+      }
+    ]
+  }
+]

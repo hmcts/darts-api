@@ -7,7 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.cases.exception.CaseError;
-import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchRequestHelper;
+import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.GetCasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
@@ -177,9 +177,7 @@ public class CaseServiceImpl implements CaseService {
         }
         List<Integer> caseIds = CourtCaseUtil.getCaseIdList(courtCaseEntities);
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
-        List<AdvancedSearchResult> advancedSearchResults = AdvancedSearchResponseMapper.mapResponse(hearings);
-
-        return advancedSearchResults;
+        return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
 
