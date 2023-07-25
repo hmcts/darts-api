@@ -1,11 +1,13 @@
-package uk.gov.hmcts.darts.testutils;
+package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.audio.util.AudioTestDataUtil;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.repository.ReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -14,7 +16,9 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.HearingMediaEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
@@ -39,12 +43,13 @@ import java.util.Optional;
 
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCase;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createCourtroom;
-import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createHearing;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCase;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtHouseWithName;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aMediaEntity;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseNumber;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
+import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.HearingMediaTestData.createHearingMedia;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
+import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Service
 @AllArgsConstructor
@@ -124,7 +129,7 @@ public class DartsDatabaseStub {
     @Transactional
     public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
         var courtroom = givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
-        var caseEntity = aCase();
+        var caseEntity = someMinimalCase();
         caseEntity.setCaseNumber(caseNumber);
         caseEntity.setCourthouse(courtroom.getCourthouse());
         return caseRepository.saveAndFlush(caseEntity);
@@ -143,48 +148,36 @@ public class DartsDatabaseStub {
         return courtroom;
     }
 
-    public CourtCaseEntity hasSomeCourtCase() {
-        return caseRepository.save(aCase());
-    }
-
     public List<NotificationEntity> getNotificationsForCase(Integer caseId) {
         return notificationRepository.findByCourtCase_Id(caseId);
     }
 
     @Transactional
     public HearingEntity hasSomeHearing() {
-        return hearingRepository.saveAndFlush(createHearing(createCase("c1"), createCourtroom("r1"), now()));
-    }
-
-    public void saveAll(HearingEntity... hearingEntities) {
-        hearingRepository.saveAll(asList(hearingEntities));
+        return hearingRepository.saveAndFlush(
+              createHearingWith(
+                    createCaseWithCaseNumber("c1"),
+                    createCourtRoomWithNameAtCourthouse(
+                          createCourthouse("NEWCASTLE"), "r1"), now()));
     }
 
     public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
-        return courthouseRepository.save(aCourtHouseWithName(courthouseName));
+        return courthouseRepository.save(createCourthouse(courthouseName));
     }
 
     public CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code) {
-        var courthouse = aCourtHouseWithName(name);
+        var courthouse = createCourthouse(name);
         courthouse.setCode(code);
         return courthouseRepository.save(courthouse);
     }
 
     public MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return mediaRepository.saveAndFlush(aMediaEntity(startTime, endTime, channel));
+        return mediaRepository.saveAndFlush(createMediaWith(startTime, endTime, channel));
     }
 
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
         return courtroomRepository.findByNames(courthouseName, courtroomName);
-    }
-
-    public void save(CourtCaseEntity courtCaseEntity) {
-        caseRepository.save(courtCaseEntity);
-    }
-
-    public void save(CourthouseEntity courthouseEntity) {
-        courthouseRepository.save(courthouseEntity);
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {
@@ -197,6 +190,61 @@ public class DartsDatabaseStub {
 
     public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
         return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
+    }
+
+    @Transactional
+    public MediaRequestEntity createAndLoadMediaRequestEntity() {
+
+        var caseEntity = save(createCaseWithCaseNumber("2"));
+        var courtroomEntity = save(
+              createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
+        var hearingEntityWithMediaRequest1 = save(createHearingWith(caseEntity, courtroomEntity));
+
+        return save(
+              AudioTestDataUtil.createMediaRequest(
+                    hearingEntityWithMediaRequest1,
+                    -2,
+                    OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                    OffsetDateTime.parse("2023-06-26T13:45:00Z")));
+    }
+
+    public HearingMediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
+        return hearingMediaRepository.save(createHearingMedia(hearing, mediaEntity));
+    }
+
+    public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        return externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+    }
+
+    public CourtCaseEntity save(CourtCaseEntity courtCaseEntity) {
+        return caseRepository.save(courtCaseEntity);
+    }
+
+    public CourthouseEntity save(CourthouseEntity courthouseEntity) {
+        return courthouseRepository.save(courthouseEntity);
+    }
+
+    public CourtroomEntity save(CourtroomEntity courtroom) {
+        return courtroomRepository.save(courtroom);
+    }
+
+    public MediaRequestEntity save(MediaRequestEntity mediaRequestEntity) {
+        return mediaRequestRepository.save(mediaRequestEntity);
+    }
+
+    public MediaEntity save(MediaEntity media) {
+        return mediaRepository.save(media);
+    }
+
+    @Transactional
+    public HearingEntity save(HearingEntity hearingEntity) {
+        CourtroomEntity referenceById = courtroomRepository.getReferenceById(hearingEntity.getCourtroom().getId());
+        hearingEntity.setCourtroom(referenceById);
+        return hearingRepository.save(hearingEntity);
+    }
+
+    public void saveAll(HearingEntity... hearingEntities) {
+        hearingRepository.saveAll(asList(hearingEntities));
     }
 
 }

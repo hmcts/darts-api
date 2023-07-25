@@ -7,21 +7,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -33,9 +26,9 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateTime;
+import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
@@ -44,18 +37,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Autowired
     private EventRepository eventRepository;
-
-    @Autowired
-    private CaseRepository caseRepository;
-
-    @Autowired
-    private CourtroomRepository courtroomRepository;
-
-    @Autowired
-    private CourthouseRepository courthouseRepository;
-
-    @Autowired
-    private HearingRepository hearingRepository;
 
     private static final URI ENDPOINT = URI.create("/courtlogs");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
@@ -151,8 +132,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("Courthouse", "Swansea")
             .queryParam("caseNumber", CASE_0000001)
-            .queryParam("startDateTime", String.valueOf(CommonTestDataUtil.createOffsetDateTime("2022-07-01T09:00:00")))
-            .queryParam("endDateTime", String.valueOf(CommonTestDataUtil.createOffsetDateTime("2022-07-01T11:00:00")))
+            .queryParam("startDateTime", String.valueOf(createOffsetDateTime("2022-07-01T09:00:00")))
+            .queryParam("endDateTime", String.valueOf(createOffsetDateTime("2022-07-01T11:00:00")))
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -175,7 +156,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
-        var event = CommonTestDataUtil.createEvent(LOG, "test", hearingEntity);
+        var event = createEventWith(LOG, "test", hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
         eventRepository.saveAndFlush(event);
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
@@ -200,11 +181,11 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
-
-        var event = CommonTestDataUtil.createEvent(LOG, "test", hearingEntity);
-        var event2 = CommonTestDataUtil.createEvent(LOG, "Tester", hearingEntity);
-        var event3 = CommonTestDataUtil.createEvent("Event", "ShouldNotShow", hearingEntity);
-        var event4 = CommonTestDataUtil.createEvent("Event", "ShouldAlsoNotShow", hearingEntity);
+        var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
+        var event = createEventWith(LOG, "test", hearingEntity, eventTime);
+        var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
+        var event3 = createEventWith("Event", "ShouldNotShow", hearingEntity, eventTime);
+        var event4 = createEventWith("Event", "ShouldAlsoNotShow", hearingEntity, eventTime);
 
         eventRepository.saveAndFlush(event);
         eventRepository.saveAndFlush(event2);
@@ -223,8 +204,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
-
-
     }
 
 }

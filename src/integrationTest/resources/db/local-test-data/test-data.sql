@@ -1,3 +1,5 @@
+SET search_path TO darts;
+
 INSERT INTO courthouse (cth_id, courthouse_name, courthouse_code, created_ts, last_modified_ts) VALUES (1, 'SWANSEA', 457, '2023-05-06 00:00:00+00', '2023-06-14 16:45:09.998033+00');
 INSERT INTO courthouse (cth_id, courthouse_name, courthouse_code, created_ts, last_modified_ts) VALUES (2, 'CARDIFF', 458, '2023-05-06 00:00:00+00', '2023-06-14 16:45:09.998033+00');
 INSERT INTO courthouse (cth_id, courthouse_name, courthouse_code, created_ts, last_modified_ts) VALUES (3, 'BIRMINGHAM', 459, '2023-05-06 00:00:00+00', '2023-06-14 16:45:09.998033+00');
@@ -7,9 +9,6 @@ ALTER SEQUENCE cth_seq RESTART WITH 20;
 
 INSERT INTO audit_activities VALUES (998, 'test name', 'test description');
 INSERT INTO audit VALUES (999, 2, 998, 4, '2023-06-13T08:13:09.688537759Z', 'application_server', 'additional_data');
-
-
-
 
 INSERT INTO courtroom VALUES (1, 1, '1');
 INSERT INTO courtroom VALUES (2, 1, '2');
@@ -226,3 +225,6 @@ INSERT INTO hearing VALUES (159,31,4,'{Judge4}','2023-06-24','15:00:00',TRUE, NU
 INSERT INTO hearing VALUES (160,32,4,'{Judge4}','2023-06-24','16:00:00',TRUE, NULL);
 ALTER SEQUENCE hea_seq RESTART WITH 200;
 
+INSERT INTO darts.event (eve_id, ctr_id, evh_id, event_object_id, event_id, event_name, event_text, event_ts, case_number, version_label, message_id, superseded, version) VALUES (1, 1, 1, 'LOG', 1, 'LOG', 'TEST', '2023-07-01 10:00:00+00', '{1,2}', 'test', 'test', true, 1);
+
+INSERT INTO darts.hearing_event_ae (hev_id, hea_id, eve_id) VALUES (1, 1, 1);

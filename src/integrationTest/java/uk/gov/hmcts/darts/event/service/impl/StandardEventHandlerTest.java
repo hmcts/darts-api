@@ -13,7 +13,7 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCase;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings("PMD.TooManyMethods")
 class StandardEventHandlerTest extends IntegrationBase {
@@ -31,14 +31,14 @@ class StandardEventHandlerTest extends IntegrationBase {
 
     @Test
     void throwsOnUnknownCourtroom() {
-        dartsDatabase.save(aCase());
+        dartsDatabase.save(someMinimalCase());
         assertThatThrownBy(() -> eventHandler.handle(someMinimalDartsEvent().courtroom(UNKNOWN_COURTROOM)))
               .isInstanceOf(DartsApiException.class);
     }
 
     @Test
     void throwsOnUnknownCourthouse() {
-        dartsDatabase.save(aCase());
+        dartsDatabase.save(someMinimalCase());
         assertThatThrownBy(() -> eventHandler.handle(someMinimalDartsEvent().courthouse(UNKNOWN_COURTHOUSE)))
               .isInstanceOf(DartsApiException.class);
     }

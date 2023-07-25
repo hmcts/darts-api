@@ -2,67 +2,48 @@ package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.audio.util.AudioTestDataUtil;
-import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.HearingMediaRepository;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
-import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
-import uk.gov.hmcts.darts.common.util.ReprovisionDatabaseBeforeEach;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.data.CourtroomTestData;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData.createExternalObjectDirectory;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
-@ReprovisionDatabaseBeforeEach
-@TestInstance(Lifecycle.PER_CLASS)
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"})
-class AudioTransformationServiceTest {
+class AudioTransformationServiceTest extends IntegrationBase {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
@@ -75,34 +56,10 @@ class AudioTransformationServiceTest {
     private DataManagementConfiguration dataManagementConfiguration;
 
     @Autowired
-    private MediaRequestRepository mediaRequestRepository;
-
-    @Autowired
-    private CaseRepository caseRepository;
-
-    @Autowired
-    private MediaRepository mediaRepository;
-
-    @Autowired
-    private CourtroomRepository courtroomRepository;
-
-    @Autowired
-    private HearingRepository hearingRepository;
-
-    @Autowired
-    private HearingMediaRepository hearingMediaRepository;
-
-    @Autowired
-    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
-
-    @Autowired
     private AudioConfigurationProperties audioConfigurationProperties;
 
     @Autowired
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
-    @Autowired
-    private ExternalLocationTypeRepository externalLocationTypeRepository;
+    private AudioTransformationServiceGivenBuilder given;
 
     @MockBean
     private DataManagementService mockDataManagementService;
@@ -113,13 +70,6 @@ class AudioTransformationServiceTest {
     @MockBean
     FileOperationService mockFileOperationService;
 
-    private MediaRequestEntity mediaRequestEntity1;
-    private HearingEntity hearingEntityWithMedia1;
-    private HearingEntity hearingEntityWithoutMedia;
-    private MediaEntity mediaEntity1;
-    private MediaEntity mediaEntity2;
-    private MediaEntity mediaEntity3;
-
     @Mock
     private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
 
@@ -128,16 +78,16 @@ class AudioTransformationServiceTest {
         String containerName = dataManagementConfiguration.getUnstructuredContainerName();
 
         when(mockDataManagementService.getBlobData(
-            containerName,
-            BLOB_LOCATION
+              containerName,
+              BLOB_LOCATION
         )).thenReturn(BINARY_DATA);
 
         BinaryData binaryData = audioTransformationService.getAudioBlobData(BLOB_LOCATION);
 
         assertEquals(BINARY_DATA, binaryData);
         verify(mockDataManagementService).getBlobData(
-            eq(containerName),
-            eq(BLOB_LOCATION)
+              eq(containerName),
+              eq(BLOB_LOCATION)
         );
         verifyNoMoreInteractions(mockDataManagementService);
     }
@@ -147,65 +97,64 @@ class AudioTransformationServiceTest {
         String containerName = dataManagementConfiguration.getOutboundContainerName();
 
         when(mockDataManagementService.saveBlobData(
-            containerName,
-            BINARY_DATA
+              containerName,
+              BINARY_DATA
         )).thenReturn(BLOB_LOCATION);
 
         UUID externalLocation = audioTransformationService.saveAudioBlobData(BINARY_DATA);
 
         assertEquals(BLOB_LOCATION, externalLocation);
         verify(mockDataManagementService).saveBlobData(
-            eq(containerName),
-            eq(BINARY_DATA)
+              eq(containerName),
+              eq(BINARY_DATA)
         );
         verifyNoMoreInteractions(mockDataManagementService);
     }
 
     @Test
-    @Transactional
     void shouldSaveTransientDataLocation() {
-        createAndLoadMediaRequestEntity();
+        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadMediaRequestEntity();
 
         when(mockTransientObjectDirectoryService.saveTransientDataLocation(
-            mediaRequestEntity1,
-            BLOB_LOCATION
+              mediaRequestEntity,
+              BLOB_LOCATION
         )).thenReturn(mockTransientObjectDirectoryEntity);
 
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = audioTransformationService.saveTransientDataLocation(
-            mediaRequestEntity1,
-            BLOB_LOCATION
+              mediaRequestEntity,
+              BLOB_LOCATION
         );
 
         assertNotNull(transientObjectDirectoryEntity);
         verify(mockTransientObjectDirectoryService).saveTransientDataLocation(
-            eq(mediaRequestEntity1),
-            eq(BLOB_LOCATION)
+              eq(mediaRequestEntity),
+              eq(BLOB_LOCATION)
         );
         verifyNoMoreInteractions(mockTransientObjectDirectoryService);
     }
 
     @Test
-    @Transactional
     void getMediaMetadataShouldReturnExpectedMediaEntitiesWhenHearingIdHasRelatedMedia() {
-        createAndLoadMediaEntityGraph();
+        given.setupTest();
+        given.externalObjectDirForMedia(given.getMediaEntity1());
+        Integer hearingIdWithMedia = given.getHearingEntityWithMedia1().getId();
 
-        Integer hearingIdWithMedia = hearingEntityWithMedia1.getId();
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithMedia);
 
         assertEquals(2, mediaEntities.size());
 
-        assertThat(mediaEntities, hasItem(mediaEntity1));
-        assertThat(mediaEntities, hasItem(mediaEntity2));
+        List<Integer> mediaIds = mediaEntities.stream().map(MediaEntity::getId).collect(toList());
+        assertTrue(mediaIds.contains(given.getMediaEntity1().getId()));
+        assertTrue(mediaIds.contains(given.getMediaEntity2().getId()));
 
-        assertThat(mediaEntities, not(hasItem(mediaEntity3)));
+        assertFalse(mediaIds.contains(given.getMediaEntity3().getId()));
     }
 
     @Test
-    @Transactional
     void getMediaMetadataShouldReturnEmptyListWhenHearingIdHasNoRelatedMedia() {
-        createAndLoadMediaEntityGraph();
-
-        Integer hearingIdWithNoRelatedMedia = hearingEntityWithoutMedia.getId();
+        given.setupTest();
+        given.externalObjectDirForMedia(given.getMediaEntity1());
+        Integer hearingIdWithNoRelatedMedia = given.getHearingEntityWithoutMedia().getId();
 
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingIdWithNoRelatedMedia);
 
@@ -213,9 +162,9 @@ class AudioTransformationServiceTest {
     }
 
     @Test
-    @Transactional
     void getMediaMetadataShouldReturnEmptyListWhenHearingIdDoesNotExist() {
-        createAndLoadMediaEntityGraph();
+        given.setupTest();
+        given.externalObjectDirForMedia(given.getMediaEntity1());
 
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(123_456);
 
@@ -223,13 +172,14 @@ class AudioTransformationServiceTest {
     }
 
     @Test
-    @Transactional
     void shouldGetMediaLocation() {
-        createAndLoadMediaEntityGraph();
+        given.setupTest();
+        var externalObjectDirectoryEntity =
+              given.externalObjectDirForMedia(given.getMediaEntity1());
 
         assertEquals(
-            Optional.of(UUID.fromString("a7ad5828-6a20-4bd0-adb1-bf1496a2622a")),
-            audioTransformationService.getMediaLocation(mediaEntity1)
+              externalObjectDirectoryEntity.getExternalLocation(),
+              audioTransformationService.getMediaLocation(given.getMediaEntity1()).get()
         );
     }
 
@@ -241,7 +191,7 @@ class AudioTransformationServiceTest {
         newMedia.setTotalChannels(4);
         newMedia.setStart(OffsetDateTime.parse("2023-07-04T10:00:00Z"));
         newMedia.setEnd(OffsetDateTime.parse("2023-07-04T11:00:00Z"));
-        newMedia = mediaRepository.saveAndFlush(newMedia);
+        newMedia = dartsDatabase.save(newMedia);
 
         assertEquals(Optional.empty(), audioTransformationService.getMediaLocation(newMedia));
     }
@@ -255,117 +205,43 @@ class AudioTransformationServiceTest {
         newMedia.setTotalChannels(4);
         newMedia.setStart(OffsetDateTime.parse("2023-07-04T16:00:00Z"));
         newMedia.setEnd(OffsetDateTime.parse("2023-07-04T17:00:00Z"));
-        newMedia = mediaRepository.saveAndFlush(newMedia);
+        newMedia = dartsDatabase.save(newMedia);
 
-        ExternalLocationTypeEntity externalLocationTypeEntity = externalLocationTypeRepository.getReferenceById(
-            UNSTRUCTURED.getId());
-        ObjectDirectoryStatusEntity objectDirectoryStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
+        ExternalLocationTypeEntity externalLocationTypeEntity =
+              dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
+        ObjectDirectoryStatusEntity objectDirectoryStatus =
+              dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId());
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();
-        ExternalObjectDirectoryEntity externalObjectDirectory1 = CommonTestDataUtil.createExternalObjectDirectory(
-            newMedia,
-            objectDirectoryStatus,
-            externalLocationTypeEntity,
-            externalLocation1
+        ExternalObjectDirectoryEntity externalObjectDirectory1 = createExternalObjectDirectory(
+              newMedia,
+              objectDirectoryStatus,
+              externalLocationTypeEntity,
+              externalLocation1
         );
-        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory1);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory1);
 
-        ExternalObjectDirectoryEntity externalObjectDirectory2 = CommonTestDataUtil.createExternalObjectDirectory(
-            newMedia,
-            objectDirectoryStatus,
-            externalLocationTypeEntity,
-            externalLocation2
+        ExternalObjectDirectoryEntity externalObjectDirectory2 = createExternalObjectDirectory(
+              newMedia,
+              objectDirectoryStatus,
+              externalLocationTypeEntity,
+              externalLocation2
         );
-        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory2);
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory2);
 
         assertEquals(
-            Optional.of(externalLocation1),
-            audioTransformationService.getMediaLocation(newMedia)
+              Optional.of(externalLocation1),
+              audioTransformationService.getMediaLocation(newMedia)
         );
 
     }
 
     private CourtroomEntity somePersistedCourtroom() {
-        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("some-courthouse");
-        CourtroomEntity courtroom = CommonTestDataUtil.createCourtroom("some-room");
+        CourthouseEntity courthouse = createCourthouse("some-courthouse");
+        CourtroomEntity courtroom = CourtroomTestData.createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "some-room");
         courtroom.setCourthouse(courthouse);
-        courtroomRepository.saveAndFlush(courtroom);
+        dartsDatabase.save(courtroom);
         return courtroom;
-    }
-
-    private void createAndLoadMediaRequestEntity() {
-
-        var caseEntity = CommonTestDataUtil.createCase("2");
-        caseRepository.saveAndFlush(caseEntity);
-
-        var courtroomEntity = CommonTestDataUtil.createCourtroom("Int Test Courtroom 2");
-        courtroomRepository.saveAndFlush(courtroomEntity);
-
-        var hearingEntityWithMediaRequest1 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
-        hearingEntityWithMediaRequest1 = hearingRepository.saveAndFlush(hearingEntityWithMediaRequest1);
-
-        mediaRequestEntity1 = AudioTestDataUtil.createMediaRequest(
-            hearingEntityWithMediaRequest1,
-            -2,
-            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-            OffsetDateTime.parse("2023-06-26T13:45:00Z")
-        );
-
-        mediaRequestEntity1 = mediaRequestRepository.saveAndFlush(mediaRequestEntity1);
-        assertNotNull(mediaRequestEntity1);
-    }
-
-    private void createAndLoadMediaEntityGraph() {
-        var caseEntity = CommonTestDataUtil.createCase("1");
-        var courthouse = CommonTestDataUtil.createCourthouse("some-courthouse");
-        caseEntity.setCourthouse(courthouse);
-
-        var courtroomEntity = CommonTestDataUtil.createCourtroom("Int Test Courtroom");
-        courtroomRepository.saveAndFlush(courtroomEntity);
-
-        hearingEntityWithMedia1 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
-        var hearingEntityWithMedia2 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
-        hearingEntityWithoutMedia = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
-        hearingRepository.saveAllAndFlush(Arrays.asList(
-            hearingEntityWithMedia1,
-            hearingEntityWithMedia2,
-            hearingEntityWithoutMedia
-        ));
-
-        mediaEntity1 = CommonTestDataUtil.createMedia(courtroomEntity);
-        mediaEntity2 = CommonTestDataUtil.createMedia(courtroomEntity);
-        mediaEntity3 = CommonTestDataUtil.createMedia(courtroomEntity);
-        mediaRepository.saveAllAndFlush(Arrays.asList(
-            mediaEntity1,
-            mediaEntity2,
-            mediaEntity3
-        ));
-
-        var hearingMediaEntity1 = CommonTestDataUtil.createHearingMedia(
-            hearingEntityWithMedia1,
-            mediaEntity1
-        );
-        var hearingMediaEntity2 = CommonTestDataUtil.createHearingMedia(
-            hearingEntityWithMedia1,
-            mediaEntity2
-        );
-        var hearingMediaEntity3 = CommonTestDataUtil.createHearingMedia(
-            hearingEntityWithMedia2,
-            mediaEntity3
-        );
-        hearingMediaRepository.saveAllAndFlush(Arrays.asList(
-            hearingMediaEntity1,
-            hearingMediaEntity2,
-            hearingMediaEntity3
-        ));
-
-        var externalObjectDirectoryEntity1 = CommonTestDataUtil.createExternalObjectDirectory(
-            mediaEntity1,
-            objectDirectoryStatusRepository.getReferenceById(STORED.getId()),
-            externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId()),
-            UUID.fromString("a7ad5828-6a20-4bd0-adb1-bf1496a2622a")
-        );
-        externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectoryEntity1);
     }
 
     @Test
@@ -375,16 +251,16 @@ class AudioTransformationServiceTest {
         Path filePath = Path.of(tempWorkspace).resolve(fileName);
 
         when(mockFileOperationService.saveFileToTempWorkspace(
-            BINARY_DATA,
-            fileName
+              BINARY_DATA,
+              fileName
         )).thenReturn(filePath);
 
         Path actualFilePath = audioTransformationService.saveBlobDataToTempWorkspace(BINARY_DATA, fileName);
 
         assertEquals(filePath, actualFilePath);
         verify(mockFileOperationService).saveFileToTempWorkspace(
-            eq(BINARY_DATA),
-            eq(fileName)
+              eq(BINARY_DATA),
+              eq(fileName)
         );
         verifyNoMoreInteractions(mockFileOperationService);
     }

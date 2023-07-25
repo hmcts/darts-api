@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.testutils;
+package uk.gov.hmcts.darts.testutils.stubs;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 

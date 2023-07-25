@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 class NotificationServiceTest extends IntegrationBase {
 
@@ -33,7 +34,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void scheduleNotificationOkConfirmEntryInDb() {
-        Integer caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
@@ -52,7 +53,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void saveNotificationToDbMultipleEmails() {
-        var caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
@@ -70,7 +71,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void scheduleNotificationInvalidEmail() {
-        var caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
@@ -86,7 +87,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotify() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)).thenReturn(
             "976bf288-705d-4cbb-b24f-c5529abf14cf");
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
@@ -115,7 +116,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyInvalidTemplateId() throws TemplateNotFoundException, NotificationClientException {
-        var caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME))
               .thenReturn("INVALID-TEMPLATE-ID");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
@@ -138,7 +139,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyFailureRetryExceeded() throws TemplateNotFoundException, NotificationClientException {
-        var caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME))
               .thenReturn("976bf288-1234-1234-1234-c5529abf14cf");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
@@ -164,7 +165,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyInvalidJson() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)).thenReturn(
             "976bf288-1234-1234-1234-c5529abf14cf");//invalid template number
 
@@ -185,7 +186,7 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationToGovNotifyInvalidTemplateName() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.hasSomeCourtCase().getId();
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId("invalid"))
               .thenThrow(new TemplateNotFoundException("oh no"));
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()

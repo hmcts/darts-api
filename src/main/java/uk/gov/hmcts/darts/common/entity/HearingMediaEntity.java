@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,11 +36,11 @@ public class HearingMediaEntity {
     private Integer id;
 
     @JoinColumn(name = HEARING_ID)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private HearingEntity hearing;
 
     @JoinColumn(name = MEDIA_ID)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private MediaEntity media;
 
 }
