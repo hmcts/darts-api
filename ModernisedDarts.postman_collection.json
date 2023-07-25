@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c07483de-cc36-4031-8885-bf3ec49731c3",
+		"_postman_id": "fcb40111-fcaf-4022-bc0a-69e90cbd8a92",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "27582460"
@@ -172,6 +172,45 @@
 											"value": "test",
 											"disabled": true
 										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CaseHearings",
+					"item": [
+						{
+							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string Copy 2",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
+								"url": {
+									"raw": "http://localhost:4550/cases/{{caseId}}/hearings",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4550",
+									"path": [
+										"cases",
+										"{{caseId}}",
+										"hearings"
 									]
 								}
 							},
