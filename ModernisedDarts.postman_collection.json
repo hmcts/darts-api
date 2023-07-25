@@ -57,6 +57,54 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "CourtLogs",
+					"item": [
+						{
+							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string Copy",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "http://localhost:4550/courtlogs?Courthouse=swansea&caseNumber=Case0000001&startDateTime=2023-07-01T11:00:00+01&endDateTime=2023-07-01T12%3A00%3A00%2B01",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4550",
+									"path": [
+										"courtlogs"
+									],
+									"query": [
+										{
+											"key": "Courthouse",
+											"value": "swansea"
+										},
+										{
+											"key": "caseNumber",
+											"value": "Case0000001"
+										},
+										{
+											"key": "startDateTime",
+											"value": "2023-07-01T11:00:00+01"
+										},
+										{
+											"key": "endDateTime",
+											"value": "2023-07-01T12%3A00%3A00%2B01"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -69,7 +117,7 @@
 						{
 							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
 							"request": {
-								"method": "GET",
+								"method": "POST",
 								"header": [
 									{
 										"key": "Content-Type",
@@ -77,28 +125,33 @@
 										"type": "default"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
 								"url": {
-									"raw": "http://localhost:4550/cases?courthouse=SWANSEA&courtroom=1&date=2023-06-22",
+									"raw": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
 									"protocol": "http",
 									"host": [
 										"localhost"
 									],
 									"port": "4550",
 									"path": [
-										"cases"
+										"event",
+										"addDocument"
 									],
 									"query": [
 										{
-											"key": "courthouse",
-											"value": "SWANSEA"
+											"key": "message_id",
+											"value": "100"
 										},
 										{
-											"key": "courtroom",
-											"value": "1"
+											"key": "type",
+											"value": "string"
 										},
 										{
-											"key": "date",
-											"value": "2023-06-22"
+											"key": "sub_type",
+											"value": "string"
 										}
 									]
 								}
@@ -108,10 +161,13 @@
 					]
 				},
 				{
-					"name": "Advanced search",
+					"name": "CaseHearings",
 					"item": [
 						{
-							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
+							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string Copy 2",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
 							"request": {
 								"method": "GET",
 								"header": [
@@ -121,8 +177,12 @@
 										"type": "default"
 									}
 								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
 								"url": {
-									"raw": "http://localhost:4550/cases/search?case_number=001",
+									"raw": "http://localhost:4550/cases/{{caseId}}/hearings",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -130,95 +190,8 @@
 									"port": "4550",
 									"path": [
 										"cases",
-										"search"
-									],
-									"query": [
-										{
-											"key": "case_number",
-											"value": "001"
-										},
-										{
-											"key": "courthouse",
-											"value": "swansea",
-											"disabled": true
-										},
-										{
-											"key": "courtroom",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "judge_name",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "defendant_name",
-											"value": "1",
-											"disabled": true
-										},
-										{
-											"key": "date_from",
-											"value": "2022-05-20",
-											"disabled": true
-										},
-										{
-											"key": "date_to",
-											"value": "2024-05-20",
-											"disabled": true
-										},
-										{
-											"key": "event_text_contains",
-											"value": "test",
-											"disabled": true
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "CourtLogsAPI",
-			"item": [
-				{
-					"name": "courtLogs",
-					"item": [
-						{
-							"name": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "4550",
-									"path": [
-										"courtlogs"
-									],
-									"query": [
-										{
-											"key": "courthouse",
-											"value": "\"String\""
-										},
-										{
-											"key": "caseNumber",
-											"value": "\"String\""
-										},
-										{
-											"key": "startDateTime",
-											"value": "\"String\""
-										},
-										{
-											"key": "endDateTime",
-											"value": "\"String\""
-										}
+										"{{caseId}}",
+										"hearings"
 									]
 								}
 							},
