@@ -10,11 +10,11 @@ import java.util.List;
 @Repository
 public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
 
-    @Query(
-        value = "SELECT med.* FROM darts.media med "
-              + "INNER JOIN darts.hearing_media_ae hma on med.med_id = hma.med_id "
-              + "INNER JOIN darts.hearing hea on hea.hea_id = hma.hea_id "
-              + "WHERE hma.hea_id = :hearingId", nativeQuery = true)
+    @Query("""
+           SELECT me FROM MediaEntity me, HearingEntity he
+           JOIN he.mediaList
+           WHERE he.id = :hearingId
+        """)
     List<MediaEntity> findAllByHearingId(Integer hearingId);
 
 }
