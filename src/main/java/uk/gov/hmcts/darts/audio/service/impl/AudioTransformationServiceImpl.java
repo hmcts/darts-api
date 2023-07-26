@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
@@ -12,11 +13,11 @@ import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audiorequest.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -66,11 +67,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final OutboundFileZipGenerator outboundFileZipGenerator;
 
     /**
-     * For all audio related to a given AudioRequest, download, trim, concatenate, structure into a zip file, and upload
-     * the zip file to outbound storage.
+     * For all audio related to a given AudioRequest, download, process and upload the processed file to outbound
+     * storage.
      *
      * @param requestId The id of the AudioRequest to be processed.
-     * @return The blob storage id representing the location/name of the zip file uploaded to the outbound data store.
+     * @return The blob storage id representing the location/name of the file uploaded to the outbound data store.
      */
     @Override
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidRethrowingException"})
@@ -105,22 +106,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 downloadedMedias.put(mediaEntity, downloadPath);
             }
 
-            List<List<AudioFileInfo>> processedAudio;
+            Path generatedFilePath;
             try {
-                processedAudio = outboundFileProcessor.processAudio(
-                    downloadedMedias,
-                    mediaRequestEntity.getStartTime(),
-                    mediaRequestEntity.getEndTime()
-                );
+                generatedFilePath = generateFileForRequestType(mediaRequestEntity, downloadedMedias);
             } catch (ExecutionException | InterruptedException e) {
                 // For Sonar rule S2142
                 throw e;
             }
 
-            Path zipPath = outboundFileZipGenerator.generateAndWriteZip(processedAudio);
-
             UUID blobId;
-            try (InputStream inputStream = Files.newInputStream(zipPath)) {
+            try (InputStream inputStream = Files.newInputStream(generatedFilePath)) {
                 blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
             }
 
@@ -140,6 +135,23 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
+        }
+    }
+
+    @SuppressWarnings("PMD.LawOfDemeter")
+    private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
+                                            Map<MediaEntity, Path> downloadedMedias)
+        throws ExecutionException, InterruptedException {
+
+        var requestType = mediaRequestEntity.getRequestType();
+
+        if (AudioRequestType.DOWNLOAD.equals(requestType)) {
+            return handleDownload(downloadedMedias, mediaRequestEntity);
+        } else if (AudioRequestType.PLAYBACK.equals(requestType)) {
+            return handlePlayback(downloadedMedias, mediaRequestEntity);
+        } else {
+            throw new NotImplementedException(
+                String.format("No handler exists for request type %s", requestType));
         }
     }
 
@@ -171,7 +183,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public Optional<UUID> getMediaLocation(MediaEntity media) {
         Optional<UUID> externalLocation = Optional.empty();
 
-        ObjectDirectoryStatusEnum statusEnum = STORED;
         ObjectDirectoryStatusEntity objectDirectoryStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
         ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
@@ -184,7 +195,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                     "Only one External Object Directory expected, but found {} for mediaId={}, statusEnum={}, externalLocationTypeId={}",
                     externalObjectDirectoryEntityList.size(),
                     media.getId(),
-                    statusEnum,
+                    STORED,
                     externalLocationType.getId()
                 );
             }
@@ -209,6 +220,31 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         mediaRequestService.updateAudioRequestStatus(mediaRequest.getId(), COMPLETED);
 
         return blobId;
+    }
+
+    private Path handleDownload(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
+        throws ExecutionException, InterruptedException {
+
+        List<List<AudioFileInfo>> processedAudio;
+        processedAudio = outboundFileProcessor.processAudioForDownload(
+            downloadedMedias,
+            mediaRequestEntity.getStartTime(),
+            mediaRequestEntity.getEndTime()
+        );
+
+        return outboundFileZipGenerator.generateAndWriteZip(processedAudio);
+    }
+
+    private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
+        throws ExecutionException, InterruptedException {
+
+        AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(
+            downloadedMedias,
+            mediaRequestEntity.getStartTime(),
+            mediaRequestEntity.getEndTime()
+        );
+
+        return Path.of(audioFileInfo.getFileName());
     }
 
 }

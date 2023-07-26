@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("PMD.TooManyMethods")
 public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private final AudioOperationService audioOperationService;
@@ -38,9 +40,9 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
      *     audio files that belong to a continuous recording session.
      */
     @Override
-    public List<List<AudioFileInfo>> processAudio(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
-                                                  OffsetDateTime overallStartTime,
-                                                  OffsetDateTime overallEndTime)
+    public List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
+                                                             OffsetDateTime overallStartTime,
+                                                             OffsetDateTime overallEndTime)
         throws ExecutionException, InterruptedException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
@@ -52,7 +54,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         List<List<AudioFileInfo>> finalisedAudioSessions = new ArrayList<>();
         for (List<AudioFileInfo> audioSession : groupedAudioSessions) {
             List<AudioFileInfo> concatenatedAudios = concatenateByChannel(audioSession);
-            List<AudioFileInfo> trimmedAudios = trimToPeriod(
+            List<AudioFileInfo> trimmedAudios = trimAllToPeriod(
                 concatenatedAudios,
                 overallStartTime,
                 overallEndTime
@@ -61,6 +63,20 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         }
 
         return finalisedAudioSessions;
+    }
+
+    @Override
+    public AudioFileInfo processAudioForPlayback(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
+                                                 OffsetDateTime startTime,
+                                                 OffsetDateTime endTime)
+        throws ExecutionException, InterruptedException {
+        List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
+
+        List<AudioFileInfo> concatenatedAudios = concatenateByChannel(audioFileInfos);
+        AudioFileInfo mergedAudio = merge(concatenatedAudios);
+        AudioFileInfo trimmedAudio = trimToPeriod(mergedAudio, startTime, endTime);
+
+        return reEncode(trimmedAudio);
     }
 
     private List<AudioFileInfo> mapToAudioFileInfos(Map<MediaEntity, Path> mediaEntityPathMap) {
@@ -136,20 +152,49 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return processedAudios;
     }
 
-    private List<AudioFileInfo> trimToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,
-                                             OffsetDateTime end) throws ExecutionException, InterruptedException {
+    private AudioFileInfo merge(List<AudioFileInfo> audioFileInfos)
+        throws ExecutionException, InterruptedException {
+
+        return audioOperationService.merge(audioFileInfos, StringUtils.EMPTY);
+    }
+
+    private AudioFileInfo trimToPeriod(AudioFileInfo audioFileInfo, OffsetDateTime trimPeriodStart,
+                                       OffsetDateTime trimPeriodEnd) throws ExecutionException, InterruptedException {
+        var audioFileStartTime = audioFileInfo.getStartTime();
+
+        var trimStartDuration = Duration.between(audioFileStartTime, trimPeriodStart);
+        var trimEndDuration = Duration.between(audioFileStartTime, trimPeriodEnd);
+
+        return audioOperationService.trim(
+            StringUtils.EMPTY,
+            audioFileInfo,
+            toTimeString(trimStartDuration),
+            toTimeString(trimEndDuration)
+        );
+    }
+
+    private String toTimeString(Duration duration) {
+        // Format per http://ffmpeg.org/ffmpeg-utils.html#Time-duration
+        return String.format("%s%02d:%02d:%02d",
+                                   duration.isNegative() ? "-" : StringUtils.EMPTY,
+                                   Math.abs(duration.toHours()),
+                                   Math.abs(duration.toMinutesPart()),
+                                   Math.abs(duration.toSecondsPart()));
+    }
+
+    private List<AudioFileInfo> trimAllToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,
+                                                OffsetDateTime end) throws ExecutionException, InterruptedException {
         List<AudioFileInfo> processedAudios = new ArrayList<>();
         for (AudioFileInfo audioFileInfo : audioFileInfos) {
-            AudioFileInfo trimmedAudio = audioOperationService.trim(
-                StringUtils.EMPTY,
-                audioFileInfo,
-                start.toLocalTime().toString(),
-                end.toLocalTime().toString()
-            );
+            AudioFileInfo trimmedAudio = trimToPeriod(audioFileInfo, start, end);
             processedAudios.add(trimmedAudio);
         }
 
         return processedAudios;
+    }
+
+    private AudioFileInfo reEncode(AudioFileInfo audioFileInfo) throws ExecutionException, InterruptedException {
+        return audioOperationService.reEncode(StringUtils.EMPTY, audioFileInfo);
     }
 
 }

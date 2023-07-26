@@ -11,12 +11,14 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,20 +45,21 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioShouldReturnOneSessionWithOneAudioWhenProvidedWithOneAudio()
+    void processAudioForDownloadShouldReturnOneSessionWithOneAudioWhenProvidedWithOneAudio()
         throws ExecutionException, InterruptedException {
 
         AudioFileInfo trimmedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.trim(any(), any(), any(), any()))
             .thenReturn(trimmedAudioFileInfo);
 
-        var mediaEntity = createMediaEntity(TIME_12_00,
-                                            TIME_12_10,
-                                            1
+        var mediaEntity = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1
         );
         var mediaEntityToDownloadLocation = Map.of(mediaEntity, SOME_DOWNLOAD_PATH);
 
-        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudio(
+        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
             mediaEntityToDownloadLocation,
             TIME_12_00,
             TIME_13_00
@@ -73,10 +76,13 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioShouldReturnOneSessionWithOneAudioWhenProvidedWithTwoContinuousAudios()
+    void processAudioForDownloadShouldReturnOneSessionWithOneAudioWhenProvidedWithTwoContinuousAudios()
         throws ExecutionException, InterruptedException {
 
-        var concatenatedAudioFileInfo = new AudioFileInfo();
+        var concatenatedAudioFileInfo = new AudioFileInfo(TIME_12_00.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          null);
         when(audioOperationService.concatenate(any(), any()))
             .thenReturn(concatenatedAudioFileInfo);
 
@@ -98,7 +104,7 @@ class OutboundFileProcessorImplTest {
                                                    mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
-        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudio(
+        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
             mediaEntityToDownloadLocation,
             TIME_12_00,
             TIME_13_00
@@ -115,7 +121,7 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioShouldReturnOneSessionWithTwoAudioWhenProvidedWithTwoNonContinuousAudiosWithDifferentChannelsAndSameTimestamp()
+    void processAudioForDownloadShouldReturnOneSessionWithTwoAudioWhenProvidedWithTwoNonContinuousAudiosWithDifferentChannelsAndSameTimestamp()
         throws ExecutionException, InterruptedException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
@@ -138,7 +144,7 @@ class OutboundFileProcessorImplTest {
                                                    mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
-        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudio(
+        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
             mediaEntityToDownloadLocation,
             TIME_12_00,
             TIME_13_00
@@ -156,7 +162,7 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioShouldReturnTwoSessionsEachWithOneAudioWhenProvidedWithTwoNonContinuousAudios()
+    void processAudioForDownloadShouldReturnTwoSessionsEachWithOneAudioWhenProvidedWithTwoNonContinuousAudios()
         throws ExecutionException, InterruptedException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
@@ -179,7 +185,7 @@ class OutboundFileProcessorImplTest {
                                                    mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
-        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudio(
+        List<List<AudioFileInfo>> sessions = outboundFileProcessor.processAudioForDownload(
             mediaEntityToDownloadLocation,
             TIME_12_00,
             TIME_13_00
@@ -197,6 +203,137 @@ class OutboundFileProcessorImplTest {
 
         verify(audioOperationService, never()).concatenate(any(), any());
         verify(audioOperationService, times(2)).trim(any(), any(), any(), any());
+    }
+
+    @Test
+    void processAudioForPlaybackShouldPerformExpectedAudioOperations() throws ExecutionException, InterruptedException {
+        var concatenatedAudioFileInfo = new AudioFileInfo();
+        when(audioOperationService.concatenate(any(), any()))
+            .thenReturn(concatenatedAudioFileInfo);
+
+        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          1);
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile);
+
+        var trimmedAudioFileInfo = new AudioFileInfo();
+        when(audioOperationService.trim(any(), any(), any(), any()))
+            .thenReturn(trimmedAudioFileInfo);
+
+        var reEncodedAudioFileInfo = new AudioFileInfo();
+        when(audioOperationService.reEncode(any(), any()))
+            .thenReturn(reEncodedAudioFileInfo);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_12_10,
+            TIME_12_20,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+        );
+
+        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+
+        verify(audioOperationService, times(1)).concatenate(
+            any(),
+            any()
+        );
+        verify(audioOperationService, times(1)).merge(
+            eq(Collections.singletonList(concatenatedAudioFileInfo)),
+            any()
+        );
+        verify(audioOperationService, times(1)).trim(
+            any(),
+            eq(mergedAudioFile),
+            eq("00:00:00"),
+            eq("01:00:00")
+        );
+        verify(audioOperationService, times(1)).reEncode(
+            any(),
+            eq(trimmedAudioFileInfo)
+        );
+    }
+
+    @Test
+    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive() throws ExecutionException, InterruptedException {
+        var concatenatedAudioFileInfo = new AudioFileInfo();
+        when(audioOperationService.concatenate(any(), any()))
+            .thenReturn(concatenatedAudioFileInfo);
+
+        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          1);
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_12_10,
+            TIME_12_20,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+        );
+
+        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+
+        verify(audioOperationService, times(1)).trim(
+            any(),
+            eq(mergedAudioFile),
+            eq("00:00:00"),
+            eq("01:00:00")
+        );
+    }
+
+    @Test
+    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationIsNegative() throws ExecutionException, InterruptedException {
+        var concatenatedAudioFileInfo = new AudioFileInfo();
+        when(audioOperationService.concatenate(any(), any()))
+            .thenReturn(concatenatedAudioFileInfo);
+
+        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_10.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          1);
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_12_10,
+            TIME_12_20,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+        );
+
+        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+
+        verify(audioOperationService, times(1)).trim(
+            any(),
+            eq(mergedAudioFile),
+            eq("-00:10:00"),
+            eq("00:50:00")
+        );
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {

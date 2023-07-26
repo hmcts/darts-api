@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audiorequest.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
@@ -73,13 +74,15 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
         return hearingEntity;
     }
 
-    public void aMediaRequestEntityFor(HearingEntity hearing) {
+    public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
+        mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setRequestor(SOME_REQUESTOR);
         mediaRequestEntity.setStartTime(TIME_12_00);
         mediaRequestEntity.setEndTime(TIME_13_00);
 
         dartsDatabase.getMediaRequestRepository().saveAndFlush(mediaRequestEntity);
     }
+
 }
