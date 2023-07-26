@@ -89,7 +89,7 @@ class CaseControllerSearchGetTest extends IntegrationBase {
 
         HearingEntity hearing3a = createHearingWith(case3, courtroom1);
         hearing3a.setHearingDate(LocalDate.of(2023, 7, 20));
-        hearing3a.setJudgeList(Arrays.asList(createJudgeWithNameForHearing("Judge3a", hearing3a)));
+        hearing3a.addJudge(createJudgeWithNameForHearing("Judge3a", hearing3a));
 
         HearingEntity hearing3b = createHearingWith(case3, courtroom1);
         hearing3b.setHearingDate(LocalDate.of(2023, 7, 21));
@@ -105,7 +105,7 @@ class CaseControllerSearchGetTest extends IntegrationBase {
 
         HearingEntity hearing4c = createHearingWith(case4, courtroom1);
         hearing4c.setHearingDate(LocalDate.of(2023, 8, 22));
-        hearing4c.setJudgeList(Arrays.asList(createJudgeWithNameForHearing("Judge6b", hearing3a)));
+        hearing4c.addJudge(createJudgeWithNameForHearing("Judge6b", hearing3a));
 
         HearingEntity hearing5a = createHearingWith(case5, courtroom2);
         hearing5a.setHearingDate(LocalDate.of(2023, 9, 20));
@@ -121,7 +121,7 @@ class CaseControllerSearchGetTest extends IntegrationBase {
 
         HearingEntity hearing6b = createHearingWith(case6, courtroom3);
         hearing6b.setHearingDate(LocalDate.of(2023, 9, 21));
-        hearing6b.setJudgeList(Arrays.asList(createJudgeWithNameForHearing("Judge6b", hearing6b)));
+        hearing6b.addJudge(createJudgeWithNameForHearing("Judge6b", hearing6b));
 
         HearingEntity hearing6c = createHearingWith(case6, courtroom1);
         hearing6c.setHearingDate(LocalDate.of(2023, 9, 22));

@@ -84,6 +84,10 @@ public class HearingEntity {
         mediaList.add(mediaEntity);
     }
 
+    public void addJudge(JudgeEntity judgeEntity) {
+        judgeList.add(judgeEntity);
+    }
+
     public List<String> getJudgesStringList() {
         return CollectionUtils.emptyIfNull(judgeList).stream().map(JudgeEntity::getName).toList();
     }

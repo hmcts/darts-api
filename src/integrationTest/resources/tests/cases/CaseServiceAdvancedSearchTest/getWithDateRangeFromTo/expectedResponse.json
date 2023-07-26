@@ -40,6 +40,7 @@
         "date": "2023-07-20",
         "courtroom": "courtroom1",
         "judges": [
+          "aJudge",
           "Judge3a",
           "Judge6b"
         ]

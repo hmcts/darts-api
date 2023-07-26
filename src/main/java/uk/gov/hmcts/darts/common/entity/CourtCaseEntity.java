@@ -100,6 +100,18 @@ public class CourtCaseEntity {
         this.hearings.add(hearing);
     }
 
+    public void addDefence(DefenceEntity defence) {
+        this.defenceList.add(defence);
+    }
+
+    public void addDefendant(DefendantEntity defendant) {
+        this.defendantList.add(defendant);
+    }
+
+    public void addProsecutor(ProsecutorEntity prosecutor) {
+        this.prosecutorList.add(prosecutor);
+    }
+
     public List<String> getDefendantStringList() {
         return CollectionUtils.emptyIfNull(defendantList).stream().map(DefendantEntity::getName).sorted().toList();
     }

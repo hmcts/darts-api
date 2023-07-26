@@ -10,6 +10,7 @@
         "date": "2023-07-20",
         "courtroom": "courtroom1",
         "judges": [
+          "aJudge",
           "Judge3a",
           "Judge6b"
         ]
@@ -54,7 +55,9 @@
       {
         "date": "2023-08-22",
         "courtroom": "courtroom1",
-        "judges": []
+        "judges": [
+          "aJudge"
+        ]
       }
     ]
   },
@@ -106,6 +109,7 @@
         "date": "2023-09-21",
         "courtroom": "courtroom3",
         "judges": [
+          "aJudge",
           "Judge6b"
         ]
       },

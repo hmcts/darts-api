@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.testutils.TestUtils;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
@@ -66,7 +67,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         CourtCaseEntity case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case2");
-        case2.setDefendantList(List.of(createDefendantForCaseWithName(case2, "Defendant2")));
+        case2.setDefendantList(Arrays.asList(createDefendantForCaseWithName(case2, "Defendant2")));
 
         CourtCaseEntity case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case3");
@@ -96,7 +97,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         HearingEntity hearing3a = createHearingWith(case3, courtroom1);
         hearing3a.setHearingDate(LocalDate.of(2023, 7, 20));
-        hearing3a.setJudgeList(List.of(createJudgeWithNameForHearing("Judge3a", hearing3a)));
+        hearing3a.addJudge(createJudgeWithNameForHearing("Judge3a", hearing3a));
 
         HearingEntity hearing3b = createHearingWith(case3, courtroom1);
         hearing3b.setHearingDate(LocalDate.of(2023, 7, 21));
@@ -112,7 +113,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         HearingEntity hearing4c = createHearingWith(case4, courtroom1);
         hearing4c.setHearingDate(LocalDate.of(2023, 8, 22));
-        hearing4c.setJudgeList(List.of(createJudgeWithNameForHearing("Judge6b", hearing3a)));
+        hearing4c.addJudge(createJudgeWithNameForHearing("Judge6b", hearing3a));
 
         HearingEntity hearing5a = createHearingWith(case5, courtroom2);
         hearing5a.setHearingDate(LocalDate.of(2023, 9, 20));
@@ -128,7 +129,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         HearingEntity hearing6b = createHearingWith(case6, courtroom3);
         hearing6b.setHearingDate(LocalDate.of(2023, 9, 21));
-        hearing6b.setJudgeList(List.of(createJudgeWithNameForHearing("Judge6b", hearing6b)));
+        hearing6b.addJudge(createJudgeWithNameForHearing("Judge6b", hearing6b));
 
         HearingEntity hearing6c = createHearingWith(case6, courtroom1);
         hearing6c.setHearingDate(LocalDate.of(2023, 9, 22));
