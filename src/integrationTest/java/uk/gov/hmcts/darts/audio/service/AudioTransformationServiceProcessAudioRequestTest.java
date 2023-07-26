@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.audiorequest.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
+import uk.gov.hmcts.darts.testutils.SystemCommandExecutorStubImpl;
 
 import java.util.UUID;
 

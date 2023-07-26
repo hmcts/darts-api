@@ -1,23 +1,23 @@
 {
   "courthouse": "SWANSEA",
   "courtroom": "1",
-  "hearing_date": "todays_date",
+  "hearing_date": "2023-07-26",
   "case_number": "Case0000004",
   "scheduled_start": "11:00",
-  "defendants": [
-    "Mr Defendant0000003 Bloggs1",
-    "Mr Defendant0000003 Bloggs2"
+  "defendantList": [
+    "defendant_Case0000004_1",
+    "defendant_Case0000004_2"
   ],
-  "judges": [
-    "{Judge4}",
+  "judgeList": [
+    "Judge1",
     "Test Judge"
   ],
-  "prosecutors": [
-    "Prosecutor00000031",
-    "Prosecutor00000032"
+  "prosecutorList": [
+    "prosecutor_Case0000004_1",
+    "prosecutor_Case0000004_2"
   ],
-  "defenders": [
-    "Defence00000031",
-    "Defence00000032"
+  "defenceList": [
+    "defence_Case0000004_1",
+    "defence_Case0000004_2"
   ]
 }
