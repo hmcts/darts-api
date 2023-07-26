@@ -21,6 +21,7 @@ public class HearingTestData {
         var hearing = new HearingEntity();
         hearing.setCourtroom(someMinimalCourtRoom());
         hearing.setCourtCase(someMinimalCase());
+        //hearing.setJudgeList(Arrays.asList(createJudgeWithNameForHearing("aJudge", hearing)));
         return hearing;
     }
 
@@ -35,7 +36,10 @@ public class HearingTestData {
     public static HearingEntity createHearingWith(String caseNumber, LocalTime scheduledStartTime) {
         HearingEntity hearing1 = someMinimalHearing();
         hearing1.setCourtCase(createCaseWithCaseNumber(caseNumber));
-        hearing1.setCourtroom(CourtroomTestData.createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "1"));
+        hearing1.setCourtroom(CourtroomTestData.createCourtRoomWithNameAtCourthouse(
+            createCourthouse("NEWCASTLE"),
+            "1"
+        ));
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(scheduledStartTime);
         return hearing1;

@@ -167,10 +167,6 @@ public class DartsDatabaseStub {
             ));
     }
 
-    public void saveAll(EventEntity... eventEntities) {
-        eventRepository.saveAll(asList(eventEntities));
-    }
-
     public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
         return courthouseRepository.save(createCourthouse(courthouseName));
     }
@@ -259,6 +255,10 @@ public class DartsDatabaseStub {
 
     public void saveAll(HearingEntity... hearingEntities) {
         hearingRepository.saveAllAndFlush(asList(hearingEntities));
+    }
+
+    public void saveAll(EventEntity... eventEntities) {
+        eventRepository.saveAll(asList(eventEntities));
     }
 
 }
