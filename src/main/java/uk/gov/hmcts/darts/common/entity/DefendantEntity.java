@@ -20,10 +20,10 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 public class DefendantEntity {
 
-    public static final String TABLE_NAME = "defendants";
+    public static final String TABLE_NAME = "defendant_name";
     public static final String ID = "dfd_id";
     public static final String CAS_ID = "cas_id";
-    public static final String DEFENDANT_NAME = "defendant_name";
+    public static final String DEFENDANT_NAME = "defendant";
 
     @Id
     @Column(name = ID)

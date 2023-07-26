@@ -20,15 +20,15 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = false)
 public class ProsecutorEntity {
 
-    public static final String TABLE_NAME = "prosecutors";
-    public static final String ID = "pro_id";
+    public static final String TABLE_NAME = "prosecutor_name";
+    public static final String ID = "prn_id";
     public static final String CAS_ID = "cas_id";
-    public static final String PROSECUTOR_NAME = "prosecutor_name";
+    public static final String PROSECUTOR_NAME = "prosecutor";
 
     @Id
     @Column(name = ID)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pro_gen")
-    @SequenceGenerator(name = "pro_gen", sequenceName = "pro_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "prn_gen")
+    @SequenceGenerator(name = "prn_gen", sequenceName = "prn_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne(optional = false)
