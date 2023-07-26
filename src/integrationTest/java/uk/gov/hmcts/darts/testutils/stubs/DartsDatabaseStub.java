@@ -21,12 +21,16 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.DefenceRepository;
+import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
@@ -67,16 +71,24 @@ public class DartsDatabaseStub {
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final DailyListRepository dailyListRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+    private final JudgeRepository judgeRepository;
+    private final ProsecutorRepository prosecutorRepository;
+    private final DefenceRepository defenceRepository;
+    private final DefendantRepository defendantRepository;
 
     public void clearDatabase() {
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
+        judgeRepository.deleteAll();
         hearingRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
         courtroomRepository.deleteAll();
+        defenceRepository.deleteAll();
+        defendantRepository.deleteAll();
+        prosecutorRepository.deleteAll();
         caseRepository.deleteAll();
         dailyListRepository.deleteAll();
         courthouseRepository.deleteAll();
@@ -148,10 +160,11 @@ public class DartsDatabaseStub {
     @Transactional
     public HearingEntity hasSomeHearing() {
         return hearingRepository.saveAndFlush(
-              createHearingWith(
-                    createCaseWithCaseNumber("c1"),
-                    createCourtRoomWithNameAtCourthouse(
-                          createCourthouse("NEWCASTLE"), "r1"), now()));
+            createHearingWith(
+                createCaseWithCaseNumber("c1"),
+                createCourtRoomWithNameAtCourthouse(
+                    createCourthouse("NEWCASTLE"), "r1"), now()
+            ));
     }
 
     public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
@@ -190,15 +203,16 @@ public class DartsDatabaseStub {
 
         var caseEntity = save(createCaseWithCaseNumber("2"));
         var courtroomEntity = save(
-              createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
+            createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
         var hearingEntityWithMediaRequest1 = save(createHearingWith(caseEntity, courtroomEntity));
 
         return save(
-              AudioTestDataUtil.createMediaRequest(
-                    hearingEntityWithMediaRequest1,
-                    -2,
-                    OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                    OffsetDateTime.parse("2023-06-26T13:45:00Z")));
+            AudioTestDataUtil.createMediaRequest(
+                hearingEntityWithMediaRequest1,
+                -2,
+                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-06-26T13:45:00Z")
+            ));
     }
 
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {

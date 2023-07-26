@@ -61,42 +61,51 @@
 --    standardised the use of "last_modified_ts" , where previously using "modified_ts" or "last_updated_ts"
 --    standardised the use of "last_modified_by" , where previously using "modified_by"
 --    reduced number of Documentum columns on user_account table, while adding a few others
+--v31 add darts_owner and darts_user accounts and amend security accordingly
+--v32 introduce defendant, prosecutor, defence tables to remove the need for character varying arrays on court_case, and add foreign keys to court_case
+--    introduce judge table to remove the need for character varying array on hearing, and add foreign key to hearing
+--    correct name of reporting_restriction_pk and case of the table name from pleural to singular
+--    add not null constraint to PK columnms on region and user_account ( should be inferrable, but hibernate likes it explicitly defined)
+--    amend NUMERIC to INTEGER on user_account and event tables
+--v33 remove synthetic PK from associative entities hearing_events_ae and hearing_media_as, replace with PK on natural key
+--v34 add case_retention, retention_policy & case_retention_event tables
 --v35 remove reporting_restrictions table, replace with foreign key on case to event_handler and add boolean to event_handler
-
 
 
 
 
 -- List of Table Aliases
 -- annotation                 ANN
+-- case_retention             CAR
+-- case_retention_event       CRE
 -- court_case                 CAS
 -- courthouse                 CTH
 -- courthouse_region_ae       CRA
 -- courtroom                  CTR
 -- daily_list                 DAL
+-- defence_name               DFC
+-- defendant_name             DFD
 -- device_register            DER
 -- event                      EVE
 -- event_handler              EVH
 -- external_object_directory  EOD
 -- hearing                    HEA
--- hearing_event_ae           HEV
--- hearing_media_ae           HMA
+-- judge_name                 JUD
 -- media                      MED
 -- media_request              MER
 -- notification               NOT
 -- object_directory_status    ODS
+-- prosecutor_name            PRN
 -- region                     REG
 -- report                     REP
--- reporting_restrictions     RER
+-- retention_policy           RTP
 -- transcription              TRA
 -- transcription_type         TRT
 -- transient_object_directory TOD
 -- urgency                    URG
 -- user_account               USR
 
-
-
-CREATE TABLE darts.annotation
+CREATE TABLE annotation
 (ann_id                   INTEGER					 NOT NULL
 ,cas_id                   INTEGER					 NOT NULL
 ,ctr_id                   INTEGER
@@ -108,85 +117,105 @@ CREATE TABLE darts.annotation
 ,version                  INTEGER
 );
 
-COMMENT ON COLUMN darts.annotation.ann_id
+COMMENT ON COLUMN annotation.ann_id
 IS 'primary key of annotation';
 
-COMMENT ON COLUMN darts.annotation.cas_id
+COMMENT ON COLUMN annotation.cas_id
 IS 'foreign key from court_case';
 
-COMMENT ON COLUMN darts.annotation.ctr_id
+COMMENT ON COLUMN annotation.ctr_id
 IS 'foreign key from courtroom';
 
-COMMENT ON COLUMN darts.annotation.annotation_object_id
+COMMENT ON COLUMN annotation.annotation_object_id
 IS 'internal Documentum primary key from moj_annotation_s';
 
-COMMENT ON COLUMN darts.annotation.annotation_text
+COMMENT ON COLUMN annotation.annotation_text
 IS 'directly sourced from moj_annotation_s.c_text';
 
-COMMENT ON COLUMN darts.annotation.annotation_ts
+COMMENT ON COLUMN annotation.annotation_ts
 IS 'directly sourced from moj_annotation_s';
 
-COMMENT ON COLUMN darts.annotation.version_label
+COMMENT ON COLUMN annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 
-CREATE TABLE darts.court_case
+CREATE TABLE case_retention
+(car_id                    INTEGER                   NOT NULL
+,cas_id                    INTEGER                   NOT NULL
+,rtp_id                    INTEGER                   NOT NULL
+,retain_until_ts           TIMESTAMP WITH TIME ZONE
+,manual_override           BOOLEAN                   NOT NULL
+);
+
+COMMENT ON COLUMN case_retention.car_id
+IS 'primary key of case_retention';
+
+COMMENT ON COLUMN case_retention.cas_id
+IS 'foreign key from court_case';
+
+COMMENT ON COLUMN case_retention.rtp_id
+IS 'foreign key from retention_policy';
+
+CREATE TABLE case_retention_event
+(cre_id                    INTEGER                   NOT NULL
+,car_id                    INTEGER                   NOT NULL
+,sentencing_type           INTEGER                   NOT NULL
+,total_sentencing          CHARACTER VARYING
+,last_processed_event_ts   TIMESTAMP WITH TIME ZONE  NOT NULL
+,submitted_by              INTEGER
+,user_comment              CHARACTER VARYING
+);
+
+COMMENT ON COLUMN case_retention_event.cre_id
+IS 'primary key of case_retention_event';
+
+COMMENT ON COLUMN case_retention_event.car_id
+IS 'foreign key from case_retention';
+
+
+
+CREATE TABLE court_case
 (cas_id                    INTEGER					 NOT NULL
 ,cth_id                    INTEGER                   NOT NULL
-,evh_id                    INTEGER               -- must map to one of the event handler elements for reporting restrictions
+,evh_id                    INTEGER               -- must map to one of the reporting restriction elements
 ,case_object_id            CHARACTER VARYING(16)
 ,case_number               CHARACTER VARYING     -- maps to c_case_id in legacy
 ,case_closed               BOOLEAN
 ,interpreter_used          BOOLEAN
 ,case_closed_ts            TIMESTAMP WITH TIME ZONE
-,defendant_list            CHARACTER VARYING array
-,prosecutor_list           CHARACTER VARYING array
-,defence_list              CHARACTER VARYING array
 ,retain_until_ts           TIMESTAMP WITH TIME ZONE
 ,version_label             CHARACTER VARYING(32)
 ,superseded                BOOLEAN
 ,version                   INTEGER
 );
 
-COMMENT ON COLUMN darts.court_case.cas_id
+COMMENT ON COLUMN court_case.cas_id
 IS 'primary key of court_case';
 
-COMMENT ON COLUMN darts.court_case.cth_id
+COMMENT ON COLUMN court_case.cth_id
 IS 'foreign key to courthouse';
 
-COMMENT ON COLUMN darts.court_case.evh_id
-IS 'foreign key to event handler where name is reporting_restriction';
-
-COMMENT ON COLUMN darts.court_case.case_object_id
+COMMENT ON COLUMN court_case.case_object_id
 IS 'internal Documentum primary key from moj_case_s';
 
-COMMENT ON COLUMN darts.court_case.case_number
+COMMENT ON COLUMN court_case.case_number
 IS 'directly sourced from moj_case_s.c_case_id';
 
-COMMENT ON COLUMN darts.court_case.case_closed
+COMMENT ON COLUMN court_case.case_closed
 IS 'migrated from moj_case_s, converted from numeric to boolean';
 
-COMMENT ON COLUMN darts.court_case.interpreter_used
+COMMENT ON COLUMN court_case.interpreter_used
 IS 'migrated from moj_case_s, converted from numeric to boolean';
 
-COMMENT ON COLUMN darts.court_case.case_closed_ts
+COMMENT ON COLUMN court_case.case_closed_ts
 IS 'directly sourced from moj_case_s.c_case_closed_date';
 
-COMMENT ON COLUMN darts.court_case.defendant_list
-IS 'directly sourced from moj_case_r';
-
-COMMENT ON COLUMN darts.court_case.prosecutor_list
-IS 'directly sourced from moj_case_r';
-
-COMMENT ON COLUMN darts.court_case.defence_list
-IS 'directly sourced from moj_case_r';
-
-COMMENT ON COLUMN darts.court_case.version_label
+COMMENT ON COLUMN court_case.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_case, containing the version record';
 
-COMMENT ON COLUMN darts.court_case.version
+COMMENT ON COLUMN court_case.version
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_case, set according to the current flag';
 
-CREATE TABLE darts.courthouse
+CREATE TABLE courthouse
 (cth_id                    INTEGER					 NOT NULL
 ,courthouse_code           INTEGER                                     UNIQUE
 ,courthouse_name           CHARACTER VARYING         NOT NULL          UNIQUE
@@ -194,35 +223,35 @@ CREATE TABLE darts.courthouse
 ,last_modified_ts          TIMESTAMP WITH TIME ZONE  NOT NULL
 );
 
-COMMENT ON COLUMN darts.courthouse.cth_id
+COMMENT ON COLUMN courthouse.cth_id
 IS 'primary key of courthouse';
 
-COMMENT ON COLUMN darts.courthouse.courthouse_code
+COMMENT ON COLUMN courthouse.courthouse_code
 IS 'corresponds to the c_crown_court_code found in daily lists';
 
-COMMENT ON COLUMN darts.courthouse.courthouse_name
+COMMENT ON COLUMN courthouse.courthouse_name
 IS 'directly sourced from moj_courthouse_s.c_id';
 
-CREATE TABLE darts.courthouse_region_ae
+CREATE TABLE courthouse_region_ae
 (cra_id                     INTEGER                  NOT NULL
 ,cth_id                     INTEGER                  NOT NULL
 ,reg_id                     INTEGER                  NOT NULL
 );
 
-CREATE TABLE darts.courtroom
+CREATE TABLE courtroom
 (ctr_id                     INTEGER                  NOT NULL
 ,cth_id                     INTEGER                  NOT NULL
 ,courtroom_name             CHARACTER VARYING        NOT NULL
 --,UNIQUE(moj_cth_id,courtroom_name)
 );
 
-COMMENT ON COLUMN darts.courtroom.ctr_id
+COMMENT ON COLUMN courtroom.ctr_id
 IS 'primary key of courtroom';
 
-COMMENT ON COLUMN darts.courtroom.cth_id
+COMMENT ON COLUMN courtroom.cth_id
 IS 'foreign key to courthouse';
 
-CREATE TABLE darts.daily_list
+CREATE TABLE daily_list
 (dal_id                     INTEGER					 NOT NULL
 ,cth_id                     INTEGER					 NOT NULL
 ,daily_list_object_id       CHARACTER VARYING(16)
@@ -242,40 +271,64 @@ CREATE TABLE darts.daily_list
 ,version                    INTEGER
 );
 
-COMMENT ON COLUMN darts.daily_list.dal_id
+COMMENT ON COLUMN daily_list.dal_id
 IS 'primary key of daily_list';
 
-COMMENT ON COLUMN darts.daily_list.cth_id
+COMMENT ON COLUMN daily_list.cth_id
 IS 'foreign key from courthouse';
 
-COMMENT ON COLUMN darts.daily_list.daily_list_object_id
+COMMENT ON COLUMN daily_list.daily_list_object_id
 IS 'internal Documentum primary key from moj_daily_list_s';
 
-COMMENT ON COLUMN darts.daily_list.unique_id
+COMMENT ON COLUMN daily_list.unique_id
 IS 'directly sourced from moj_daily_list_s, received as part of the XML, used to find duplicate daily lists';
 
-COMMENT ON COLUMN darts.daily_list.job_status
+COMMENT ON COLUMN daily_list.job_status
 IS 'directly sourced from moj_daily_list_s';
 
-COMMENT ON COLUMN darts.daily_list.published_ts
+COMMENT ON COLUMN daily_list.published_ts
 IS 'directly sourced from moj_daily_list_s.c_timestamp';
 
-COMMENT ON COLUMN darts.daily_list.start_dt
+COMMENT ON COLUMN daily_list.start_dt
 IS 'directly sourced from moj_daily_list_s.c_start_date';
 
-COMMENT ON COLUMN darts.daily_list.end_dt
+COMMENT ON COLUMN daily_list.end_dt
 IS 'directly sourced from moj_daily_list_s.c_end_date';
 
-COMMENT ON COLUMN darts.daily_list.daily_list_id_s
+COMMENT ON COLUMN daily_list.daily_list_id_s
 IS 'directly sourced from moj_daily_list_s';
 
-COMMENT ON COLUMN darts.daily_list.daily_list_source
+COMMENT ON COLUMN daily_list.daily_list_source
 IS 'directly sourced from moj_daily_list_s';
 
-COMMENT ON COLUMN darts.daily_list.version_label
+COMMENT ON COLUMN daily_list.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_daily_list';
 
-CREATE TABLE darts.device_register
+CREATE TABLE defence_name
+(dfc_id                     INTEGER                 NOT NULL
+,cas_id                     INTEGER                 NOT NULL
+,defence                    CHARACTER VARYING       NOT NULL
+);
+
+COMMENT ON COLUMN defence_name.dfc_id
+IS 'primary key of defence_name';
+
+COMMENT ON COLUMN defence_name.cas_id
+IS 'foreign key from court_case';
+
+CREATE TABLE defendant_name
+(dfd_id                     INTEGER                 NOT NULL
+,cas_id                     INTEGER                 NOT NULL
+,defence                    CHARACTER VARYING       NOT NULL
+);
+
+COMMENT ON COLUMN defendant_name.dfd_id
+IS 'primary key of defendant_name';
+
+COMMENT ON COLUMN defendant_name.cas_id
+IS 'foreign key from court_case';
+
+CREATE TABLE device_register
 (der_id                     INTEGER                  NOT NULL
 ,ctr_id                     INTEGER                  NOT NULL
 ,node_id                    INTEGER
@@ -284,96 +337,94 @@ CREATE TABLE darts.device_register
 ,mac_address                CHARACTER VARYING
 );
 
-COMMENT ON TABLE darts.device_register
+COMMENT ON TABLE device_register
 IS 'corresponds to tbl_moj_node from legacy';
 
-COMMENT ON COLUMN darts.device_register.der_id
+COMMENT ON COLUMN device_register.der_id
 IS 'primary key of device_register';
 
-COMMENT ON COLUMN darts.device_register.ctr_id
+COMMENT ON COLUMN device_register.ctr_id
 IS 'foreign key from moj_courtroom, legacy stored courthouse and courtroon un-normalised';
 
 
-
-
-CREATE TABLE darts.event
+CREATE TABLE event
 (eve_id                     INTEGER					 NOT NULL
 ,ctr_id                     INTEGER
 ,evh_id                     INTEGER
 ,event_object_id            CHARACTER VARYING(16)
-,event_id                   NUMERIC
+,event_id                   INTEGER
 ,event_name                 CHARACTER VARYING -- details of the handler, at point in time the event arose
 ,event_text                 CHARACTER VARYING
 ,event_ts                   TIMESTAMP WITH TIME ZONE
-,case_number                CHARACTER VARYING(32) array
+,case_number                CHARACTER VARYING(32) ARRAY
 ,version_label              CHARACTER VARYING(32)
 ,message_id                 CHARACTER VARYING
 ,superseded                 BOOLEAN
 ,version                    INTEGER
 );
 
-COMMENT ON COLUMN darts.event.eve_id
+COMMENT ON COLUMN event.eve_id
 IS 'primary key of moj_event';
 
-COMMENT ON COLUMN darts.event.ctr_id
+COMMENT ON COLUMN event.ctr_id
 IS 'foreign key from moj_courtroom';
 
-COMMENT ON COLUMN darts.event.evh_id
+COMMENT ON COLUMN event.evh_id
 IS 'foreign key for the moj_event_handler table';
 
-COMMENT ON COLUMN darts.event.event_object_id
+COMMENT ON COLUMN event.event_object_id
 IS 'internal Documentum primary key from moj_event_s';
 
-COMMENT ON COLUMN darts.event.event_id
+COMMENT ON COLUMN event.event_id
 IS 'directly sourced from moj_event_s';
 
-COMMENT ON COLUMN darts.event.event_name
+COMMENT ON COLUMN event.event_name
 IS 'inherited from dm_sysobect_s.object_name';
 
-COMMENT ON COLUMN darts.event.event_text
+COMMENT ON COLUMN event.event_text
 IS 'inherited from moj_annotation_s.c_text';
 
-COMMENT ON COLUMN darts.event.event_ts
+COMMENT ON COLUMN event.event_ts
 IS 'inherited from moj_annotation_s';
 
-COMMENT ON COLUMN darts.event.version_label
+COMMENT ON COLUMN event.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_event';
 
-COMMENT ON COLUMN darts.event.message_id
+COMMENT ON COLUMN event.message_id
 IS 'no migration element, records the id of the message that gave rise to this event';
 
-
-CREATE TABLE darts.event_handler
+CREATE TABLE event_handler
 (evh_id                      INTEGER					 NOT NULL
 ,event_type                  CHARACTER VARYING           NOT NULL
 ,event_sub_type              CHARACTER VARYING
 ,event_name                  CHARACTER VARYING           NOT NULL
 ,handler                     CHARACTER VARYING
+,active                      BOOLEAN                     NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE    NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE    NOT NULL
 ,last_modified_by            INTEGER                     NOT NULL
 );
 
-COMMENT ON TABLE darts.event_handler
+COMMENT ON TABLE event_handler
 IS 'content will be derived from TBL_MOJ_DOC_HANDLER in the legacy database, but currently has no primary key and 6 fully duplicated rows';
 
-COMMENT ON COLUMN darts.event_handler.evh_id
+COMMENT ON COLUMN event_handler.evh_id
 IS 'primary key of moj_event_type';
 
-COMMENT ON COLUMN darts.event_handler.event_type
+COMMENT ON COLUMN event_handler.event_type
 IS 'directly sourced from doc_type';
 
-COMMENT ON COLUMN darts.event_handler.event_sub_type
+COMMENT ON COLUMN event_handler.event_sub_type
 IS 'directly sourced from doc_sub_type';
 
-COMMENT ON COLUMN darts.event_handler.event_name
+COMMENT ON COLUMN event_handler.event_name
 IS 'directly sourced from event_name';
 
-COMMENT ON COLUMN darts.event_handler.handler
+COMMENT ON COLUMN event_handler.handler
 IS 'directly sourced from doc_handler';
 
 
-CREATE TABLE darts.external_object_directory
+CREATE TABLE external_object_directory
 (eod_id                      INTEGER			 		 NOT NULL
 ,med_id                      INTEGER
 ,tra_id                      INTEGER
@@ -389,36 +440,35 @@ CREATE TABLE darts.external_object_directory
 ,last_modified_by            INTEGER                     NOT NULL  -- FK to moj_user.moj_usr_id
 );
 
-COMMENT ON COLUMN darts.external_object_directory.eod_id
+COMMENT ON COLUMN external_object_directory.eod_id
 IS 'primary key of external_object_directory';
 
-COMMENT ON COLUMN darts.external_object_directory.elt_id
+COMMENT ON COLUMN external_object_directory.elt_id
 IS 'foreign key from external_location_type';
 
 -- added two foreign key columns, but there will be as many FKs as there are distinct objects with externally stored components
 
-COMMENT ON COLUMN darts.external_object_directory.med_id
+COMMENT ON COLUMN external_object_directory.med_id
 IS 'foreign key from media';
 
-COMMENT ON COLUMN darts.external_object_directory.tra_id
+COMMENT ON COLUMN external_object_directory.tra_id
 IS 'foreign key from transcription';
 
-COMMENT ON COLUMN darts.external_object_directory.ann_id
+COMMENT ON COLUMN external_object_directory.ann_id
 IS 'foreign key from annotation';
 
-CREATE TABLE darts.external_location_type
+CREATE TABLE external_location_type
 (elt_id                     INTEGER                  NOT NULL
 ,elt_description            CHARACTER VARYING
 );
 
-COMMENT ON TABLE darts.external_location_type
+COMMENT ON TABLE external_location_type
 IS 'used to record acceptable external locations, found in external_object_directory';
 
-CREATE TABLE darts.hearing
+CREATE TABLE hearing
 (hea_id                     INTEGER					   NOT NULL
 ,cas_id                     INTEGER                    NOT NULL
 ,ctr_id                     INTEGER                    NOT NULL
-,judge_list                 CHARACTER VARYING array
 ,hearing_date               DATE     -- to record only DATE component of hearings, both scheduled and actual
 ,scheduled_start_time       TIME     -- to record only TIME component of hearings, while they are scheduled only
 ,hearing_is_actual          BOOLEAN  -- TRUE for actual hearings, FALSE for scheduled hearings
@@ -426,55 +476,56 @@ CREATE TABLE darts.hearing
 --,UNIQUE(moj_cas_id,moj_ctr,c_hearing_date)
 );
 
-COMMENT ON COLUMN darts.hearing.hea_id
+COMMENT ON COLUMN hearing.hea_id
 IS 'primary key of hearing';
 
-COMMENT ON COLUMN darts.hearing.cas_id
+COMMENT ON COLUMN hearing.cas_id
 IS 'foreign key from case';
 
-COMMENT ON COLUMN darts.hearing.ctr_id
+COMMENT ON COLUMN hearing.ctr_id
 IS 'foreign key from courtroom';
 
-COMMENT ON COLUMN darts.hearing.judge_list
+COMMENT ON COLUMN hearing.hearing_date
 IS 'directly sourced from moj_case_r';
 
-COMMENT ON COLUMN darts.hearing.hearing_date
+COMMENT ON COLUMN hearing.judge_hearing_date
 IS 'directly sourced from moj_case_r';
 
-COMMENT ON COLUMN darts.hearing.judge_hearing_date
-IS 'directly sourced from moj_case_r';
-
-CREATE TABLE darts.hearing_event_ae
-(hev_id                     INTEGER							 NOT NULL
-,hea_id                     INTEGER							 NOT NULL
+CREATE TABLE hearing_event_ae
+(hea_id                     INTEGER							 NOT NULL
 ,eve_id                     INTEGER							 NOT NULL
 );
 
-COMMENT ON COLUMN darts.hearing_event_ae.hev_id
-IS 'primary key of hearing_event_ae';
+COMMENT ON COLUMN hearing_event_ae.hea_id
+IS 'foreign key from hearing, part of composite natural key and PK';
 
-COMMENT ON COLUMN darts.hearing_event_ae.hea_id
-IS 'foreign key from hearing, part of composite natural key';
+COMMENT ON COLUMN hearing_event_ae.eve_id
+IS 'foreign key from event, part of composite natural key and PK';
 
-COMMENT ON COLUMN darts.hearing_event_ae.eve_id
-IS 'foreign key from event, part of composite natural key';
-
-CREATE TABLE darts.hearing_media_ae
-(hma_id                     INTEGER 						 NOT NULL
-,hea_id                     INTEGER							 NOT NULL
+CREATE TABLE hearing_media_ae
+(hea_id                     INTEGER							 NOT NULL
 ,med_id                     INTEGER							 NOT NULL
 );
 
-COMMENT ON COLUMN darts.hearing_media_ae.hma_id
-IS 'primary key of hearing_media_ae';
+COMMENT ON COLUMN hearing_media_ae.hea_id
+IS 'foreign key from case, part of composite natural key and PK';
 
-COMMENT ON COLUMN darts.hearing_media_ae.hea_id
-IS 'foreign key from case, part of composite natural key';
+COMMENT ON COLUMN hearing_media_ae.med_id
+IS 'foreign key from media, part of composite natural key and PK';
 
-COMMENT ON COLUMN darts.hearing_media_ae.med_id
-IS 'foreign key from media, part of composite natural key';
+CREATE TABLE judge_name
+(jud_id                     INTEGER                 NOT NULL
+,hea_id                     INTEGER                 NOT NULL
+,judge                      CHARACTER VARYING       NOT NULL
+);
 
-CREATE TABLE darts.media
+COMMENT ON COLUMN judge_name.jud_id
+IS 'primary key of judge_name';
+
+COMMENT ON COLUMN judge_name.hea_id
+IS 'foreign key from hearing';
+
+CREATE TABLE media
 (med_id                     INTEGER					 NOT NULL
 ,ctr_id                     INTEGER
 ,media_object_id            CHARACTER VARYING(16)
@@ -483,40 +534,40 @@ CREATE TABLE darts.media
 ,reference_id               CHARACTER VARYING        --all nulls in legacy
 ,start_ts                   TIMESTAMP WITH TIME ZONE
 ,end_ts                     TIMESTAMP WITH TIME ZONE
-,case_number                CHARACTER VARYING(32) array  --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
+,case_number                CHARACTER VARYING(32) ARRAY  --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label              CHARACTER VARYING(32)
 ,superseded                 BOOLEAN
 ,version                    INTEGER
 );
 
-COMMENT ON COLUMN darts.media.med_id
+COMMENT ON COLUMN media.med_id
 IS 'primary key of media';
 
-COMMENT ON COLUMN darts.media.ctr_id
+COMMENT ON COLUMN media.ctr_id
 IS 'foreign key from courtroom';
 
-COMMENT ON COLUMN darts.media.media_object_id
+COMMENT ON COLUMN media.media_object_id
 IS 'internal Documentum primary key from moj_media_s';
 
-COMMENT ON COLUMN darts.media.channel
+COMMENT ON COLUMN media.channel
 IS 'directly sourced from moj_media_s';
 
-COMMENT ON COLUMN darts.media.total_channels
+COMMENT ON COLUMN media.total_channels
 IS 'directly sourced from moj_media_s';
 
-COMMENT ON COLUMN darts.media.reference_id
+COMMENT ON COLUMN media.reference_id
 IS 'directly sourced from moj_media_s';
 
-COMMENT ON COLUMN darts.media.start_ts
+COMMENT ON COLUMN media.start_ts
 IS 'inherited from moj_case_document_s';
 
-COMMENT ON COLUMN darts.media.end_ts
+COMMENT ON COLUMN media.end_ts
 IS 'inherited from moj_case_document_s';
 
-COMMENT ON COLUMN darts.media.version_label
+COMMENT ON COLUMN media.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_media';
 
-CREATE TABLE darts.media_request
+CREATE TABLE media_request
 (mer_id                     INTEGER                    NOT NULL
 ,hea_id                     INTEGER                    NOT NULL
 ,requestor                  INTEGER                    NOT NULL  -- FK to moj_user.moj_usr_id
@@ -532,36 +583,35 @@ CREATE TABLE darts.media_request
 ,output_format              CHARACTER VARYING
 );
 
-COMMENT ON COLUMN darts.media_request.mer_id
+COMMENT ON COLUMN media_request.mer_id
 IS 'primary key of media_request';
 
-COMMENT ON COLUMN darts.media_request.hea_id
+COMMENT ON COLUMN media_request.hea_id
 IS 'foreign key of hearing';
 
-COMMENT ON COLUMN darts.media_request.requestor
+COMMENT ON COLUMN media_request.requestor
 IS 'requestor of the media request, possibly migrated from moj_transformation_request_s';
 
-COMMENT ON COLUMN darts.media_request.request_status
+COMMENT ON COLUMN media_request.request_status
 IS 'status of the migration request';
 
-COMMENT ON COLUMN darts.media_request.req_proc_attempts
+COMMENT ON COLUMN media_request.req_proc_attempts
 IS 'number of attempts by ATS to process the request';
 
-COMMENT ON COLUMN darts.media_request.start_ts
+COMMENT ON COLUMN media_request.start_ts
 IS 'start time in the search criteria for request, possibly migrated from moj_cached_media_s or moj_transformation_request_s';
 
-COMMENT ON COLUMN darts.media_request.end_ts
+COMMENT ON COLUMN media_request.end_ts
 IS 'end time in the search criteria for request, possibly migrated from moj_cached_media_s or moj_transformation_request_s';
 
-COMMENT ON COLUMN darts.media_request.output_filename
+COMMENT ON COLUMN media_request.output_filename
 IS 'filename of the requested media object, possibly migrated from moj_transformation_request_s';
 
-COMMENT ON COLUMN darts.media_request.output_format
+COMMENT ON COLUMN media_request.output_format
 IS 'format of the requested media object, possibly migrated from moj_transformation_s';
 
 
-
-CREATE TABLE darts.notification
+CREATE TABLE notification
 (not_id                     INTEGER                    NOT NULL
 ,cas_id                     INTEGER                    NOT NULL
 ,notification_event   		CHARACTER VARYING          NOT NULL
@@ -573,43 +623,55 @@ CREATE TABLE darts.notification
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE   NOT NULL
 );
 
-COMMENT ON COLUMN darts.notification.not_id
+COMMENT ON COLUMN notification.not_id
 IS 'primary key of notification';
 
-COMMENT ON COLUMN darts.notification.cas_id
+COMMENT ON COLUMN notification.cas_id
 IS 'foreign key to case';
 
-COMMENT ON COLUMN darts.notification.notification_event
+COMMENT ON COLUMN notification.notification_event
 IS 'event giving rise to the need for outgoing notification';
 
-COMMENT ON COLUMN darts.notification.notification_status
+COMMENT ON COLUMN notification.notification_status
 IS 'status of the notification, expected to be one of [O]pen, [P]rocessing, [S]end, [F]ailed';
 
-COMMENT ON COLUMN darts.notification.email_address
+COMMENT ON COLUMN notification.email_address
 IS 'recipient of the notification';
 
-COMMENT ON COLUMN darts.notification.send_attempts
+COMMENT ON COLUMN notification.send_attempts
 IS 'number of outgoing requests to gov.uk';
 
-COMMENT ON COLUMN darts.notification.template_values
+COMMENT ON COLUMN notification.template_values
 IS 'any extra fields not already covered or inferred from the case, in JSON format';
 
 
-CREATE TABLE darts.object_directory_status
+CREATE TABLE object_directory_status
 (ods_id                     INTEGER                  NOT NULL
 ,ods_description            CHARACTER VARYING
 );
 
-COMMENT ON TABLE darts.object_directory_status
+COMMENT ON TABLE object_directory_status
 IS 'used to record acceptable statuses found in [external/transient]_object_directory';
 
-CREATE TABLE darts.region
-(reg_id                     INTEGER not null
-,region_name                CHARACTER VARYING
+CREATE TABLE prosecutor_name
+(prn_id                     INTEGER                 NOT NULL
+,cas_id                     INTEGER                 NOT NULL
+,prosecutor                 CHARACTER VARYING       NOT NULL
+);
+
+COMMENT ON COLUMN prosecutor_name.prn_id
+IS 'primary key of prosecutor_name';
+
+COMMENT ON COLUMN prosecutor_name.cas_id
+IS 'foreign key from court_case';
+
+CREATE TABLE region
+(reg_id                     INTEGER                 NOT NULL
+,region_name                CHARACTER VARYING       NOT NULL
 );
 
 
-CREATE TABLE darts.report
+CREATE TABLE report
 (rep_id                     INTEGER					 NOT NULL
 ,report_object_id           CHARACTER VARYING(16)
 ,name                       CHARACTER VARYING
@@ -622,42 +684,40 @@ CREATE TABLE darts.report
 ,version                    INTEGER
 );
 
-COMMENT ON COLUMN darts.report.rep_id
+COMMENT ON COLUMN report.rep_id
 IS 'primary key of report';
 
-COMMENT ON COLUMN darts.report.report_object_id
+COMMENT ON COLUMN report.report_object_id
 IS 'internal Documentum primary key from moj_report_s';
 
-COMMENT ON COLUMN darts.report.name
+COMMENT ON COLUMN report.name
 IS 'directly sourced from moj_report_s';
 
-COMMENT ON COLUMN darts.report.subject
+COMMENT ON COLUMN report.subject
 IS 'directly sourced from moj_report_s';
 
-COMMENT ON COLUMN darts.report.report_text
+COMMENT ON COLUMN report.report_text
 IS 'directly sourced from moj_report_s';
 
-COMMENT ON COLUMN darts.report.query
+COMMENT ON COLUMN report.query
 IS 'directly sourced from moj_report_s';
 
-COMMENT ON COLUMN darts.report.recipients
+COMMENT ON COLUMN report.recipients
 IS 'directly sourced from moj_report_s';
 
-COMMENT ON COLUMN darts.report.version_label
+COMMENT ON COLUMN report.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_report';
 
-CREATE TABLE darts.reporting_restrictions
-(rer_id                     INTEGER                  NOT NULL
-,rer_description            CHARACTER VARYING
+CREATE TABLE retention_policy
+(rtp_id                   INTEGER                  NOT NULL
+,policy_name              CHARACTER VARYING        NOT NULL
+,retention_period         INTEGER                  NOT NULL
 );
 
-COMMENT ON COLUMN darts.reporting_restrictions.rer_id
-IS 'primary key of reporting_restrictions';
+COMMENT ON COLUMN retention_policy.rtp_id
+IS 'primary key of retention_policy';
 
-COMMENT ON COLUMN darts.reporting_restrictions.rer_description
-IS 'text of the relevant legislation, to be populated from moj_case_s.c_reporting_restrictions';
-
-CREATE TABLE darts.transcription
+CREATE TABLE transcription
 (tra_id                   INTEGER				   NOT NULL
 ,cas_id                   INTEGER                  NOT NULL
 ,ctr_id                   INTEGER                  NOT NULL
@@ -684,46 +744,46 @@ CREATE TABLE darts.transcription
 ,version                  INTEGER
 );
 
-COMMENT ON COLUMN darts.transcription.tra_id
+COMMENT ON COLUMN transcription.tra_id
 IS 'primary key of transcription';
 
-COMMENT ON COLUMN darts.transcription.cas_id
+COMMENT ON COLUMN transcription.cas_id
 IS 'foreign key from case';
 
-COMMENT ON COLUMN darts.transcription.ctr_id
+COMMENT ON COLUMN transcription.ctr_id
 IS 'foreign key from courtroom';
 
-COMMENT ON COLUMN darts.transcription.urg_id
+COMMENT ON COLUMN transcription.urg_id
 IS 'foreign key from urgency';
 
-COMMENT ON COLUMN darts.transcription.trt_id
+COMMENT ON COLUMN transcription.trt_id
 IS 'foreign key to transcription_type, sourced from moj_transcription_s.c_type';
 
-COMMENT ON COLUMN darts.transcription.transcription_object_id
+COMMENT ON COLUMN transcription.transcription_object_id
 IS 'internal Documentum primary key from moj_transcription_s';
 
-COMMENT ON COLUMN darts.transcription.company
+COMMENT ON COLUMN transcription.company
 IS 'directly sourced from moj_transcription_s';
 
-COMMENT ON COLUMN darts.transcription.requestor
+COMMENT ON COLUMN transcription.requestor
 IS 'directly sourced from moj_transcription_s';
 
-COMMENT ON COLUMN darts.transcription.current_state
+COMMENT ON COLUMN transcription.current_state
 IS 'directly sourced from moj_transcription_s';
 
-COMMENT ON COLUMN darts.transcription.hearing_date
+COMMENT ON COLUMN transcription.hearing_date
 IS 'directly sourced from moj_transcription_s';
 
-COMMENT ON COLUMN darts.transcription.start_ts
+COMMENT ON COLUMN transcription.start_ts
 IS 'inherited from moj_case_document_s';
 
-COMMENT ON COLUMN darts.transcription.end_ts
+COMMENT ON COLUMN transcription.end_ts
 IS 'inherited from moj_case_document_s';
 
-COMMENT ON COLUMN darts.transcription.version_label
+COMMENT ON COLUMN transcription.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_transcription';
 
-CREATE TABLE darts.transcription_comment
+CREATE TABLE transcription_comment
 (trc_id                            INTEGER					 NOT NULL
 ,tra_id                            INTEGER
 ,transcription_object_id           CHARACTER VARYING(16)     -- this is a placeholder for moj_transcription_s.r_object_id
@@ -737,33 +797,33 @@ CREATE TABLE darts.transcription_comment
 ,version                           INTEGER
 );
 
-COMMENT ON COLUMN darts.transcription_comment.trc_id
+COMMENT ON COLUMN transcription_comment.trc_id
 IS 'primary key of transcription_comment';
 
-COMMENT ON COLUMN darts.transcription_comment.tra_id
+COMMENT ON COLUMN transcription_comment.tra_id
 IS 'foreign key from transcription';
 
-COMMENT ON COLUMN darts.transcription_comment.transcription_object_id
+COMMENT ON COLUMN transcription_comment.transcription_object_id
 IS 'internal Documentum primary key from moj_transcription_s';
 
-COMMENT ON COLUMN darts.transcription_comment.transcription_comment
+COMMENT ON COLUMN transcription_comment.transcription_comment
 IS 'directly sourced from moj_transcription_r';
 
-COMMENT ON COLUMN darts.transcription_comment.transcription_object_id
+COMMENT ON COLUMN transcription_comment.transcription_object_id
 IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 
-CREATE TABLE darts.transcription_type
+CREATE TABLE transcription_type
 (trt_id                            INTEGER                   NOT NULL
 ,description                       CHARACTER VARYING
 );
 
-COMMENT ON TABLE darts.transcription_type
+COMMENT ON TABLE transcription_type
 IS 'standing data table, migrated from tbl_moj_transcription_type';
 
-COMMENT ON COLUMN darts.transcription_type.trt_id
+COMMENT ON COLUMN transcription_type.trt_id
 IS 'primary key, but not sequence generated';
 
-CREATE TABLE darts.transient_object_directory
+CREATE TABLE transient_object_directory
 (tod_id                      INTEGER			 		 NOT NULL
 ,mer_id                      INTEGER                     NOT NULL
 ,ods_id                      INTEGER                     NOT NULL  -- FK to moj_object_directory_status.moj_ods_id
@@ -775,82 +835,91 @@ CREATE TABLE darts.transient_object_directory
 ,last_modified_by            INTEGER                     NOT NULL  -- FK to moj_user.moj_usr_id
 );
 
-CREATE TABLE darts.urgency
+CREATE TABLE urgency
 (urg_id                            INTEGER                 NOT NULL
 ,description                       CHARACTER VARYING
 );
 
-COMMENT ON TABLE darts.urgency
+COMMENT ON TABLE urgency
 IS 'will be migrated from tbl_moj_urgency';
 
-COMMENT ON COLUMN darts.urgency.urg_id
+COMMENT ON COLUMN urgency.urg_id
 IS 'inherited from tbl_moj_urgency.urgency_id';
 
-COMMENT ON COLUMN darts.urgency.description
+COMMENT ON COLUMN urgency.description
 IS 'inherited from tbl_moj_urgency.description';
 
-CREATE TABLE darts.user_account
-(usr_id                  INTEGER NOT NULL
+CREATE TABLE user_account
+(usr_id                  INTEGER                          NOT NULL
 ,dm_user_s_object_id     CHARACTER VARYING(16)
 ,user_name               CHARACTER VARYING
 ,user_email_address      CHARACTER VARYING
 ,description             CHARACTER VARYING
-,user_state              NUMERIC
+,user_state              INTEGER
 ,created_ts              TIMESTAMP WITH TIME ZONE
 ,last_modified_ts        TIMESTAMP WITH TIME ZONE
 ,last_login_ts           TIMESTAMP WITH TIME ZONE
 ,last_modified_by        INTEGER
 );
 
-COMMENT ON TABLE darts.user_account
+COMMENT ON TABLE user_account
 IS 'migration columns all sourced directly from dm_user_s, but only for rows where r_is_group = 0';
-COMMENT ON COLUMN darts.user_account.usr_id
+COMMENT ON COLUMN user_account.usr_id
 IS 'primary key of user_account';
-COMMENT ON COLUMN darts.user_account.dm_user_s_object_id
+COMMENT ON COLUMN user_account.dm_user_s_object_id
 IS 'internal Documentum primary key from dm_user_s';
 
 
 -- defaults for postgres sequences, datatype->bigint, increment->1, nocycle is default, owned by none
-CREATE SEQUENCE darts.ann_seq CACHE 20;
-CREATE SEQUENCE darts.cas_seq CACHE 20;
-CREATE SEQUENCE darts.cth_seq CACHE 20;
-CREATE SEQUENCE darts.cra_seq CACHE 20;
-CREATE SEQUENCE darts.ctr_seq CACHE 20;
-CREATE SEQUENCE darts.dal_seq CACHE 20;
-CREATE SEQUENCE darts.der_seq CACHE 20;
-CREATE SEQUENCE darts.eve_seq CACHE 20;
-CREATE SEQUENCE darts.evh_seq CACHE 20;
-CREATE SEQUENCE darts.eod_seq CACHE 20;
-CREATE SEQUENCE darts.elt_seq CACHE 20;
-CREATE SEQUENCE darts.hea_seq CACHE 20;
-CREATE SEQUENCE darts.hev_seq CACHE 20;
-CREATE SEQUENCE darts.hma_seq CACHE 20;
-CREATE SEQUENCE darts.med_seq CACHE 20;
-CREATE SEQUENCE darts.mer_seq CACHE 20;
-CREATE SEQUENCE darts.not_seq CACHE 20;
-CREATE SEQUENCE darts.ods_seq CACHE 20;
-CREATE SEQUENCE darts.reg_seq CACHE 20;
-CREATE SEQUENCE darts.rep_seq CACHE 20;
-CREATE SEQUENCE darts.rer_seq CACHE 20;
-CREATE SEQUENCE darts.tra_seq CACHE 20;
-CREATE SEQUENCE darts.trc_seq CACHE 20;
-CREATE SEQUENCE darts.trt_seq CACHE 20;
-CREATE SEQUENCE darts.tod_seq CACHE 20;
-CREATE SEQUENCE darts.urg_seq CACHE 20;
-CREATE SEQUENCE darts.usr_seq CACHE 20;
+CREATE SEQUENCE ann_seq CACHE 20;
+CREATE SEQUENCE car_seq CACHE 20;
+CREATE SEQUENCE cre_seq CACHE 20;
+CREATE SEQUENCE cas_seq CACHE 20;
+CREATE SEQUENCE cth_seq CACHE 20;
+CREATE SEQUENCE cra_seq CACHE 20;
+CREATE SEQUENCE ctr_seq CACHE 20;
+CREATE SEQUENCE dal_seq CACHE 20;
+CREATE SEQUENCE dfc_seq CACHE 20;
+CREATE SEQUENCE dfd_seq CACHE 20;
+CREATE SEQUENCE der_seq CACHE 20;
+CREATE SEQUENCE eve_seq CACHE 20;
+CREATE SEQUENCE evh_seq CACHE 20;
+CREATE SEQUENCE eod_seq CACHE 20;
+CREATE SEQUENCE elt_seq CACHE 20;
+CREATE SEQUENCE jud_seq CACHE 20;
+CREATE SEQUENCE hea_seq CACHE 20;
+CREATE SEQUENCE med_seq CACHE 20;
+CREATE SEQUENCE mer_seq CACHE 20;
+CREATE SEQUENCE not_seq CACHE 20;
+CREATE SEQUENCE ods_seq CACHE 20;
+CREATE SEQUENCE prn_seq CACHE 20;
+CREATE SEQUENCE reg_seq CACHE 20;
+CREATE SEQUENCE rep_seq CACHE 20;
+CREATE SEQUENCE rtp_seq CACHE 20;
+CREATE SEQUENCE tra_seq CACHE 20;
+CREATE SEQUENCE trc_seq CACHE 20;
+CREATE SEQUENCE trt_seq CACHE 20;
+CREATE SEQUENCE tod_seq CACHE 20;
+CREATE SEQUENCE urg_seq CACHE 20;
+CREATE SEQUENCE usr_seq CACHE 20;
+
+
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'New');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Stored');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Failure');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Failure - File not found');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Failure - File size check failed');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Failure - File type check failed');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Failure - Checksum failed');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Failure - ARM ingestion failed');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Awaiting Verification');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'marked for Deletion');
+INSERT INTO object_directory_status (ods_id,ods_description) VALUES (nextval('ods_seq'),'Deleted');
 
 
 
 
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'New');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Stored');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Failure');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Failure - File not found');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Failure - File size check failed');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Failure - File type check failed');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Failure - Checksum failed');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Failure - ARM ingestion failed');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Awaiting Verification');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'marked for Deletion');
-INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Deleted');
+
+
+
 
