@@ -78,6 +78,7 @@ public class CommonTestDataUtil {
         courtCase.setProsecutorList(createProsecutorList(courtCase));
         return courtCase;
     }
+
     public CourtCaseEntity createCase(String caseNumber) {
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
