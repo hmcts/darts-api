@@ -45,6 +45,7 @@ public class HearingTestData {
         HearingEntity hearingEntity = someMinimalHearing();
         hearingEntity.setCourtCase(caseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
+        hearingEntity.setHearingDate(null);
         return hearingEntity;
     }
 

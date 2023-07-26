@@ -250,11 +250,11 @@ public class DartsDatabaseStub {
     public HearingEntity save(HearingEntity hearingEntity) {
         CourtroomEntity referenceById = courtroomRepository.getReferenceById(hearingEntity.getCourtroom().getId());
         hearingEntity.setCourtroom(referenceById);
-        return hearingRepository.save(hearingEntity);
+        return hearingRepository.saveAndFlush(hearingEntity);
     }
 
     public void saveAll(HearingEntity... hearingEntities) {
-        hearingRepository.saveAll(asList(hearingEntities));
+        hearingRepository.saveAllAndFlush(asList(hearingEntities));
     }
 
 }

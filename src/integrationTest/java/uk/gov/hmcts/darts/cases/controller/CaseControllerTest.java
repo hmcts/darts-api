@@ -85,7 +85,7 @@ class CaseControllerTest extends IntegrationBase {
 
         var hearingForCase3 = createHearingWith(case3, swanseaCourtroom1);
         hearingForCase3.setJudgeList(createListOfJudgesForHearing(1, hearingForCase3));
-        hearingForCase3.setHearingDate(LocalDate.parse("2023-06-20"));
+        hearingForCase3.setHearingDate(LocalDate.parse(HEARING_DATE));
         hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
         return hearingForCase3;
     }
