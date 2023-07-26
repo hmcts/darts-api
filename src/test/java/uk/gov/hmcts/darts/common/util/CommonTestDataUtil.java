@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.common.util;
 
+import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
+import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -67,6 +69,15 @@ public class CommonTestDataUtil {
         return createCourtroom(createCourthouse("SWANSEA"), name);
     }
 
+    public CourtCaseEntity createCase(String caseNumber, CourthouseEntity courthouseEntity) {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCourthouse(courthouseEntity);
+        courtCase.setCaseNumber(caseNumber);
+        courtCase.setDefenceList(createDefenceList(courtCase));
+        courtCase.setDefendantList(createDefendantList(courtCase));
+        courtCase.setProsecutorList(createProsecutorList(courtCase));
+        return courtCase;
+    }
     public CourtCaseEntity createCase(String caseNumber) {
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
@@ -79,7 +90,7 @@ public class CommonTestDataUtil {
     public static List<DefenceEntity> createDefenceList(CourtCaseEntity courtCase) {
         DefenceEntity defence1 = createDefence(courtCase, "1");
         DefenceEntity defence2 = createDefence(courtCase, "2");
-        return List.of(defence1, defence2);
+        return new ArrayList<>(List.of(defence1, defence2));
     }
 
     public static DefenceEntity createDefence(CourtCaseEntity courtCase, String number) {
@@ -92,7 +103,7 @@ public class CommonTestDataUtil {
     public static List<DefendantEntity> createDefendantList(CourtCaseEntity courtCase) {
         DefendantEntity defendant1 = createDefendant(courtCase, "1");
         DefendantEntity defendant2 = createDefendant(courtCase, "2");
-        return List.of(defendant1, defendant2);
+        return new ArrayList<>(List.of(defendant1, defendant2));
     }
 
     public static DefendantEntity createDefendant(CourtCaseEntity courtCase, String number) {
@@ -105,7 +116,7 @@ public class CommonTestDataUtil {
     public static List<ProsecutorEntity> createProsecutorList(CourtCaseEntity courtCase) {
         ProsecutorEntity prosecutor1 = createProsecutor(courtCase, "1");
         ProsecutorEntity prosecutor2 = createProsecutor(courtCase, "2");
-        return List.of(prosecutor1, prosecutor2);
+        return new ArrayList<>(List.of(prosecutor1, prosecutor2));
     }
 
     public static ProsecutorEntity createProsecutor(CourtCaseEntity courtCase, String number) {
@@ -142,4 +153,28 @@ public class CommonTestDataUtil {
         return returnList;
     }
 
+    public AddCaseRequest createAddCaseRequest(String courtroom) {
+
+        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        request.setCourtroom(courtroom);
+        request.setCaseNumber("2");
+        request.setDefendants(Lists.newArrayList("Defendant1"));
+        request.setJudges(Lists.newArrayList("Judge1"));
+        request.setProsecutors(Lists.newArrayList("Prosecutor1"));
+        request.setDefenders(Lists.newArrayList("Defender1"));
+        return request;
+    }
+
+
+    public AddCaseRequest createUpdateCaseRequest(String courtroom) {
+
+        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        request.setCourtroom(courtroom);
+        request.setCaseNumber("case1");
+        request.setDefendants(Lists.newArrayList("UpdatedDefendant1"));
+        request.setJudges(Lists.newArrayList("UpdateJudge1"));
+        request.setProsecutors(Lists.newArrayList("UpdateProsecutor1"));
+        request.setDefenders(Lists.newArrayList("UpdateDefender1"));
+        return request;
+    }
 }

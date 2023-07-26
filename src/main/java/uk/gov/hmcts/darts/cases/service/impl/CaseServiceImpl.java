@@ -16,15 +16,18 @@ import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.api.CommonApi;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Service
 @RequiredArgsConstructor
@@ -56,20 +59,20 @@ public class CaseServiceImpl implements CaseService {
 
 
     private ScheduledCase addCase(AddCaseRequest addCaseRequest) {
-        CaseEntity caseEntity = saveNewCaseEntity(addCaseRequest);
+        CourtCaseEntity caseEntity = saveNewCaseEntity(addCaseRequest);
         HearingEntity savedHearingEntity;
         if (StringUtils.isNotBlank(addCaseRequest.getCourtroom())) {
             savedHearingEntity = saveNewHearingEntity(addCaseRequest, caseEntity);
             return casesMapper.mapToCourtCase(savedHearingEntity, caseEntity);
         } else {
-            return CasesMapper.mapToCourtCase(caseEntity);
+            return casesMapper.mapToCourtCase(caseEntity);
         }
     }
 
     @Transactional
     @Override
     public ScheduledCase addCaseOrUpdate(AddCaseRequest addCaseRequest) {
-        Optional<CaseEntity> existingCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
+        Optional<CourtCaseEntity> existingCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
             addCaseRequest.getCaseNumber(), addCaseRequest.getCourthouse());
         if (existingCase.isPresent()) {
             return updateCase(addCaseRequest, existingCase.get());
@@ -78,8 +81,8 @@ public class CaseServiceImpl implements CaseService {
         }
     }
 
-    private ScheduledCase updateCase(AddCaseRequest addCaseRequest, CaseEntity existingCase) {
-        CaseEntity updatedCaseEntity = updateCaseEntity(addCaseRequest, existingCase);
+    private ScheduledCase updateCase(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
+        CourtCaseEntity updatedCaseEntity = updateCaseEntity(addCaseRequest, existingCase);
 
         if (StringUtils.isNotBlank(addCaseRequest.getCourtroom())) {
             HearingEntity hearingEntity = updateOrCreateHearingEntity(addCaseRequest, updatedCaseEntity);
@@ -89,7 +92,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
 
-    private HearingEntity updateOrCreateHearingEntity(AddCaseRequest addCaseRequest, CaseEntity caseEntity) {
+    private HearingEntity updateOrCreateHearingEntity(AddCaseRequest addCaseRequest, CourtCaseEntity caseEntity) {
 
         Optional<HearingEntity> hearing = hearingRepository.findAll().stream()
             .filter(hearingEntity -> caseEntity.getId().equals(hearingEntity.getCourtCase().getId())
@@ -105,20 +108,20 @@ public class CaseServiceImpl implements CaseService {
         ))).orElseGet(() -> saveNewHearingEntity(addCaseRequest, caseEntity));
     }
 
-    private CaseEntity updateCaseEntity(AddCaseRequest addCaseRequest, CaseEntity existingCase) {
+    private CourtCaseEntity updateCaseEntity(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
         return caseRepository.saveAndFlush(casesMapper.mapAddCaseRequestToCaseEntity(addCaseRequest, existingCase));
     }
 
-    private HearingEntity saveNewHearingEntity(AddCaseRequest addCaseRequest, CaseEntity caseEntity) {
+    private HearingEntity saveNewHearingEntity(AddCaseRequest addCaseRequest, CourtCaseEntity caseEntity) {
         return hearingRepository.saveAndFlush(mapToHearingEntity(addCaseRequest, caseEntity, new HearingEntity()));
     }
 
-    private CaseEntity saveNewCaseEntity(AddCaseRequest addCaseRequest) {
-        CaseEntity caseEntity = casesMapper.mapAddCaseRequestToCaseEntity(addCaseRequest, new CaseEntity());
+    private CourtCaseEntity saveNewCaseEntity(AddCaseRequest addCaseRequest) {
+        CourtCaseEntity caseEntity = casesMapper.mapAddCaseRequestToCaseEntity(addCaseRequest, new CourtCaseEntity());
         return caseRepository.saveAndFlush(caseEntity);
     }
 
-    private HearingEntity mapToHearingEntity(AddCaseRequest addCaseRequest, CaseEntity caseEntity, HearingEntity hearingEntity) {
+    private HearingEntity mapToHearingEntity(AddCaseRequest addCaseRequest, CourtCaseEntity caseEntity, HearingEntity hearingEntity) {
         if (!StringUtils.isBlank(addCaseRequest.getCourtroom())) {
             CourtroomEntity courtroomEntity = commonApi.retrieveOrCreateCourtroom(
                 addCaseRequest.getCourthouse(),
@@ -128,23 +131,29 @@ public class CaseServiceImpl implements CaseService {
         }
 
         hearingEntity.setCourtCase(caseEntity);
-        Optional.ofNullable(addCaseRequest.getJudges())
-            .ifPresentOrElse(judges -> hearingEntity.getJudges().addAll(judges), () -> hearingEntity.setJudges(null));
+
+        emptyIfNull(addCaseRequest.getJudges()).forEach(newJudge -> {
+            Optional<JudgeEntity> found = emptyIfNull(hearingEntity.getJudgeList()).stream()
+                .filter(j -> j.getName().equals(newJudge)).findAny();
+            if (found.isEmpty()) {
+                found.ifPresentOrElse(j -> { },
+                                      () -> hearingEntity.getJudgeList().add(createNewJudge(newJudge, hearingEntity)));
+            }
+        });
+
         return hearingEntity;
     }
 
+    private JudgeEntity createNewJudge(String newJudge, HearingEntity hearing) {
+        JudgeEntity defence = new JudgeEntity();
+        defence.setHearing(hearing);
+        defence.setName(newJudge);
+        return defence;
+    }
 
     @Override
     public List<Hearing> getCaseHearings(Integer caseId) {
-
         return new ArrayList<>();
-    }
-
-    private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
-        if (CollectionUtils.isEmpty(hearings)) {
-            //find out if courthouse or courtroom are missing.
-            commonApi.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
-        }
     }
 
 
