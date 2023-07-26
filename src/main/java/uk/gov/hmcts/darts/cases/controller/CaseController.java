@@ -15,8 +15,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -67,7 +67,7 @@ public class CaseController implements CasesApi {
 
     @Override
     public ResponseEntity<ScheduledCase> casesPost(@Parameter(name = "AddCaseRequest", description = "", required = true)
-                                                       @Valid @RequestBody AddCaseRequest addCaseRequest) {
+                                                   @Valid @RequestBody AddCaseRequest addCaseRequest) {
         return new ResponseEntity<>(caseService.addCaseOrUpdate(addCaseRequest), HttpStatus.CREATED);
     }
 
