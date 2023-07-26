@@ -13,9 +13,12 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
@@ -31,6 +34,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefenceList;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefendantList;
+import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createProsecutorList;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -69,11 +75,12 @@ class CasesMapperTest {
 
     @Test
     void testOkWithCase() throws IOException {
-        CaseEntity caseEntity = new CaseEntity();
+        CourtCaseEntity caseEntity = new CourtCaseEntity();
         caseEntity.setCourthouse(CommonTestDataUtil.createCourthouse("Test house"));
 
         HearingEntity hearing = CommonTestDataUtil.createHearing(caseEntity, null,
-                                                                 LocalDate.of(2023, Month.JULY, 7));
+                                                                 LocalDate.of(2023, Month.JULY, 7)
+        );
 
         ScheduledCase scheduledCases = caseMapper.mapToCourtCase(hearing, caseEntity);
 
@@ -88,7 +95,7 @@ class CasesMapperTest {
     void testMapAddCaseRequestToCaseEntityWithNonExistingCourthouse() {
         Mockito.when(courthouseRepository.findByCourthouseName(any())).thenReturn(Optional.empty());
 
-        CaseEntity caseEntity = new CaseEntity();
+        CourtCaseEntity caseEntity = new CourtCaseEntity();
 
         AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER);
 
@@ -107,12 +114,12 @@ class CasesMapperTest {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
         Mockito.when(courthouseRepository.findByCourthouseName(any())).thenReturn(Optional.of(courthouseEntity));
 
-        CaseEntity caseEntity = new CaseEntity();
+        CourtCaseEntity caseEntity = new CourtCaseEntity();
         caseEntity.setCaseNumber(CASE_NUMBER);
         caseEntity.setCourthouse(courthouseEntity);
-        caseEntity.setProsecutors(new ArrayList<>(List.of("Existing Prosecutor")));
-        caseEntity.setDefenders(new ArrayList<>(List.of("Existing Defenders")));
-        caseEntity.setDefendants(new ArrayList<>(List.of("Existing Defendants")));
+        caseEntity.setProsecutorList(createProsecutorList(caseEntity));
+        caseEntity.setDefenceList(createDefenceList(caseEntity));
+        caseEntity.setDefendantList(createDefendantList(caseEntity));
 
 
         AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER);
@@ -120,13 +127,39 @@ class CasesMapperTest {
         request.setDefenders(new ArrayList<>(List.of("New Defenders")));
         request.setDefendants(new ArrayList<>(List.of("New Defendants")));
 
-        CaseEntity scheduledCases = caseMapper.mapAddCaseRequestToCaseEntity(request, caseEntity);
+        CourtCaseEntity scheduledCases = caseMapper.mapAddCaseRequestToCaseEntity(request, caseEntity);
         assertEquals(CASE_NUMBER, scheduledCases.getCaseNumber());
         assertEquals(SWANSEA, scheduledCases.getCourthouse().getCourthouseName());
-        assertEquals(2, scheduledCases.getProsecutors().size());
-        assertEquals(2, scheduledCases.getDefenders().size());
-        assertEquals(2, scheduledCases.getDefendants().size());
+        assertEquals(3, scheduledCases.getProsecutorList().size());
+        assertEquals(3, scheduledCases.getDefenceList().size());
+        assertEquals(3, scheduledCases.getDefendantList().size());
 
+    }
+
+    @Test
+    void testMapAddCaseRequestToCaseEntityWithExistingDetails() {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        Mockito.when(courthouseRepository.findByCourthouseName(any())).thenReturn(Optional.of(courthouseEntity));
+
+        CourtCaseEntity caseEntity = new CourtCaseEntity();
+        caseEntity.setCaseNumber(CASE_NUMBER);
+        caseEntity.setCourthouse(courthouseEntity);
+
+        caseEntity.setProsecutorList(createProsecutorList(caseEntity));
+        caseEntity.setDefenceList(createDefenceList(caseEntity));
+        caseEntity.setDefendantList(createDefendantList(caseEntity));
+
+        AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER);
+        request.setProsecutors(new ArrayList<>(List.of("prosecutor_casenumber1_1")));
+        request.setDefenders(new ArrayList<>(List.of("defence_casenumber1_1")));
+        request.setDefendants(new ArrayList<>(List.of("defendant_casenumber1_1")));
+
+        CourtCaseEntity scheduledCases = caseMapper.mapAddCaseRequestToCaseEntity(request, caseEntity);
+        assertEquals(CASE_NUMBER, scheduledCases.getCaseNumber());
+        assertEquals(SWANSEA, scheduledCases.getCourthouse().getCourthouseName());
+        assertEquals(2, scheduledCases.getProsecutorList().size());
+        assertEquals(2, scheduledCases.getDefenceList().size());
+        assertEquals(2, scheduledCases.getDefendantList().size());
 
     }
 

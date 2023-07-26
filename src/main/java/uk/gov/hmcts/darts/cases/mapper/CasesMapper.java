@@ -5,9 +5,12 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
@@ -30,16 +33,16 @@ public class CasesMapper {
             .toList();
     }
 
-    public ScheduledCase mapToCourtCase(CaseEntity caseEntity) {
+    public ScheduledCase mapToCourtCase(CourtCaseEntity caseEntity) {
         ScheduledCase scheduledCase = new ScheduledCase(caseEntity.getCourthouse().getCourthouseName());
         scheduledCase.setCaseNumber(caseEntity.getCaseNumber());
-        scheduledCase.setDefendants(caseEntity.getDefendants());
-        scheduledCase.setProsecutors(caseEntity.getProsecutors());
-        scheduledCase.setDefenders(caseEntity.getDefenders());
+        scheduledCase.setDefendantList(caseEntity.getDefendantStringList());
+        scheduledCase.setProsecutorList(caseEntity.getProsecutorsStringList());
+        scheduledCase.setDefenceList(caseEntity.getDefenceStringList());
         return scheduledCase;
     }
 
-    public ScheduledCase mapToCourtCase(HearingEntity hearing, CaseEntity caseEntity) {
+    public ScheduledCase mapToCourtCase(HearingEntity hearing, CourtCaseEntity caseEntity) {
         CourtCaseEntity hearingCourtCase = hearing.getCourtCase();
 
         ScheduledCase scheduledCase = new ScheduledCase();
@@ -63,11 +66,9 @@ public class CasesMapper {
         return mapToCourtCase(hearing, null);
     }
 
-    public CaseEntity mapAddCaseRequestToCaseEntity(AddCaseRequest addCaseRequest, CaseEntity caseEntity) {
+    public CourtCaseEntity mapAddCaseRequestToCaseEntity(AddCaseRequest addCaseRequest, CourtCaseEntity caseEntity) {
         caseEntity.setCaseNumber(addCaseRequest.getCaseNumber());
-        Optional.ofNullable(addCaseRequest.getDefendants()).ifPresent(l -> caseEntity.getDefendants().addAll(l));
-        Optional.ofNullable(addCaseRequest.getProsecutors()).ifPresent(l -> caseEntity.getProsecutors().addAll(l));
-        Optional.ofNullable(addCaseRequest.getDefenders()).ifPresent(l -> caseEntity.getDefenders().addAll(l));
+        mapDefendantProsecutorDefender(caseEntity, addCaseRequest);
 
         Optional<CourthouseEntity> foundEntity = courthouseRepository.findByCourthouseName(addCaseRequest.getCourthouse());
         foundEntity.ifPresentOrElse(caseEntity::setCourthouse, () -> {
@@ -76,6 +77,57 @@ public class CasesMapper {
 
         return caseEntity;
     }
+
+    private void mapDefendantProsecutorDefender(CourtCaseEntity caseEntity, AddCaseRequest caseRequest) {
+
+        emptyIfNull(caseRequest.getDefendants()).forEach(newDefendant -> {
+            Optional<DefendantEntity> found = emptyIfNull(caseEntity.getDefendantList())
+                .stream().filter(d -> d.getName().equals(newDefendant)).findAny();
+            found.ifPresentOrElse(
+                d -> { }, () -> caseEntity.getDefendantList().add(createNewDefendant(newDefendant, caseEntity))
+            );
+        });
+
+        emptyIfNull(caseRequest.getProsecutors()).forEach(newProsecutor -> {
+            Optional<ProsecutorEntity> found = emptyIfNull(caseEntity.getProsecutorList())
+                .stream().filter(d -> d.getName().equals(newProsecutor)).findAny();
+            found.ifPresentOrElse(
+                p -> { }, () -> caseEntity.getProsecutorList().add(createNewProsecutor(newProsecutor, caseEntity))
+            );
+        });
+
+        emptyIfNull(caseRequest.getDefenders()).forEach(newDefender -> {
+            Optional<DefenceEntity> found = emptyIfNull(caseEntity.getDefenceList())
+                .stream().filter(d -> d.getName().equals(newDefender)).findAny();
+            found.ifPresentOrElse(
+                d -> { },
+                () -> caseEntity.getDefenceList().add(createNewDefence(newDefender, caseEntity))
+            );
+        });
+    }
+
+
+    private DefenceEntity createNewDefence(String newProsecutor, CourtCaseEntity caseEntity) {
+        DefenceEntity defence = new DefenceEntity();
+        defence.setCourtCase(caseEntity);
+        defence.setName(newProsecutor);
+        return defence;
+    }
+
+    private ProsecutorEntity createNewProsecutor(String newProsecutor, CourtCaseEntity caseEntity) {
+        ProsecutorEntity prosecutor = new ProsecutorEntity();
+        prosecutor.setCourtCase(caseEntity);
+        prosecutor.setName(newProsecutor);
+        return prosecutor;
+    }
+
+    private DefendantEntity createNewDefendant(String newDefendant, CourtCaseEntity caseEntity) {
+        DefendantEntity defendant = new DefendantEntity();
+        defendant.setCourtCase(caseEntity);
+        defendant.setName(newDefendant);
+        return defendant;
+    }
+
 
     private String toStringOrDefaultTo(Object obj, String defaultStr) {
         if (Objects.isNull(obj)) {

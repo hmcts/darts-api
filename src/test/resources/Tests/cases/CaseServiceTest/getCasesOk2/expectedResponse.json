@@ -4,21 +4,17 @@
     "courtroom": "2",
     "hearing_date": "2023-07-20",
     "case_number": "Case0000009",
-    "scheduled_start": "09:00",
-    "defendants": [
+    "defendantList": [
       "defendant_Case0000009_1",
       "defendant_Case0000009_2"
     ],
-    "judges": [
-      "Judge2"
+    "prosecutorList": [
+      "prosecutor_Case0000009_1",
+      "prosecutor_Case0000009_2"
     ],
-    "prosecutors": [
-      "Prosecutor_Case0000009_1",
-      "Prosecutor_Case0000009_2"
-    ],
-    "defenders": [
-      "defender_Case0000009_1",
-      "defender_Case0000009_2"
+    "defenceList": [
+      "defence_Case0000009_1",
+      "defence_Case0000009_2"
     ]
   }
 ]
