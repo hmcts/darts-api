@@ -61,6 +61,8 @@
 --    standardised the use of "last_modified_ts" , where previously using "modified_ts" or "last_updated_ts"
 --    standardised the use of "last_modified_by" , where previously using "modified_by"
 --    reduced number of Documentum columns on user_account table, while adding a few others
+--v35 remove reporting_restrictions table, replace with foreign key on case to event_handler and add boolean to event_handler
+
 
 
 
@@ -130,7 +132,7 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 CREATE TABLE darts.court_case
 (cas_id                    INTEGER					 NOT NULL
 ,cth_id                    INTEGER                   NOT NULL
-,rer_id                    INTEGER
+,evh_id                    INTEGER               -- must map to one of the event handler elements for reporting restrictions
 ,case_object_id            CHARACTER VARYING(16)
 ,case_number               CHARACTER VARYING     -- maps to c_case_id in legacy
 ,case_closed               BOOLEAN
@@ -151,8 +153,8 @@ IS 'primary key of court_case';
 COMMENT ON COLUMN darts.court_case.cth_id
 IS 'foreign key to courthouse';
 
-COMMENT ON COLUMN darts.court_case.rer_id
-IS 'foreign key to reporting_restrictions';
+COMMENT ON COLUMN darts.court_case.evh_id
+IS 'foreign key to event handler where name is reporting_restriction';
 
 COMMENT ON COLUMN darts.court_case.case_object_id
 IS 'internal Documentum primary key from moj_case_s';
@@ -851,23 +853,4 @@ INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextv
 INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Awaiting Verification');
 INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'marked for Deletion');
 INSERT INTO darts.object_directory_status (ods_id,ods_description) VALUES (nextval('darts.ods_seq'),'Deleted');
-
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (1,'Section 39 of the Children and Young Persons Act 1999');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (2,'An order made under s45 of the Youth Justice and Criminal Evidence Act 1999');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (3,'Section 4(2) of the Contempt of Court Act 1981');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (4,'Restrictions Lifted');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (5,'Section 2 of the Sexual Offenders (Amendment) Act 1992');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (6,'Section 11 of the Contempt of Court Act 1981');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (7,'An order made under s45a of the Youth Justice and Criminal Evidence Act 1999');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (8,'An order made under s46 of the Youth Justice and Criminal Evidence Act 1999');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES  (9,'Section 4 of the Sexual Offenders (Amendment) Act 1976');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES (10,'Judge directed on reporting restrictions');
-INSERT INTO darts.reporting_restrictions (rer_id,rer_description) VALUES (11,'An order made under s49 of the Children and Young Persons Act 1933');
-
-
-
-
-
-
-
 
