@@ -56,7 +56,7 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
                     SOME_CASE_NUMBER,
                     createCourthouseWithRoom(SOME_COURTHOUSE, SOME_ROOM)));
 
-        dartsGateway.darNotifyEventIsListening();
+        dartsGateway.darNotificationReturnsSuccess();
 
         interpreterUsedHandler.handle(someMinimalDartsEvent()
               .caseNumbers(List.of(SOME_CASE_NUMBER))
@@ -78,7 +78,7 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
               SOME_CASE_NUMBER,
               SOME_COURTHOUSE,
               SOME_ROOM);
-        dartsGateway.darNotifyEventIsListening();
+        dartsGateway.darNotificationReturnsSuccess();
 
         interpreterUsedHandler.handle(someMinimalDartsEvent()
               .caseNumbers(List.of(SOME_CASE_NUMBER))
@@ -113,7 +113,7 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
               SOME_ROOM);
 
         dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
-        dartsGateway.darNotifyEventIsListening();
+        dartsGateway.darNotificationReturnsSuccess();
 
         interpreterUsedHandler.handle(someMinimalDartsEvent()
               .caseNumbers(List.of(SOME_CASE_NUMBER))
@@ -150,7 +150,7 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
               SOME_COURTHOUSE,
               SOME_ROOM,
               today.toLocalDate());
-        dartsGateway.darNotifyEventIsListening();
+        dartsGateway.darNotificationReturnsSuccess();
 
         interpreterUsedHandler.handle(someMinimalDartsEvent()
               .caseNumbers(List.of(SOME_CASE_NUMBER))

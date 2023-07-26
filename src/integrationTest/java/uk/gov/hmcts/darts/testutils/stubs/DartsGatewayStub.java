@@ -16,7 +16,7 @@ public class DartsGatewayStub {
 
     public static final String DAR_NOTIFY_PATH = "/events/dar-notify";
 
-    public void darNotifyEventIsListening() {
+    public void darNotificationReturnsSuccess() {
         stubFor(post(urlEqualTo(DAR_NOTIFY_PATH))
               .willReturn(aResponse().withStatus(200).withBody("")));
     }
