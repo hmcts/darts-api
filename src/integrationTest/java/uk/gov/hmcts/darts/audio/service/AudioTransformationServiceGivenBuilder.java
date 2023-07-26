@@ -57,18 +57,18 @@ public class AudioTransformationServiceGivenBuilder {
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity1 = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
-            mediaEntity,
-            dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId()),
-            dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()),
-            UUID.randomUUID()
+              mediaEntity,
+              dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId()),
+              dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()),
+              UUID.randomUUID()
         );
         return dartsDatabase.save(externalObjectDirectoryEntity1);
     }
 
     private CourtroomEntity getCourtroomAtNewcastle() {
         return dartsDatabase.save(
-            createCourtRoomAtCourthouse(
-                createCourthouse("NEWCASTLE")));
+              createCourtRoomAtCourthouse(
+                    createCourthouse("NEWCASTLE")));
 
     }
 }
