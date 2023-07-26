@@ -35,14 +35,13 @@ import java.util.Optional;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
-import static uk.gov.hmcts.darts.common.CommonConstants.MAX_POSTGRES_RESULTS;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 @SuppressWarnings("PMD.TooManyMethods")
 public class CaseServiceImpl implements CaseService {
 
+    private static final int MAX_RESULTS = 500;
     private final CasesMapper casesMapper;
 
     private final HearingRepository hearingRepository;
@@ -169,7 +168,7 @@ public class CaseServiceImpl implements CaseService {
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
         List<CourtCaseEntity> courtCaseEntities = advancedSearchRequestHelper.getMatchingCourtCases(request);
-        if (courtCaseEntities.size() > MAX_POSTGRES_RESULTS) {
+        if (courtCaseEntities.size() > MAX_RESULTS) {
             throw new DartsApiException(CaseError.TOO_MANY_RESULTS);
         }
         if (courtCaseEntities.isEmpty()) {

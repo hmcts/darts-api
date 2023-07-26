@@ -4,8 +4,8 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResultHearing;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.ReportingRestrictionsEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +44,9 @@ public class AdvancedSearchResponseMapper {
 
         advancedSearchResult.addHearingsItem(mapToAdvancedSearchResultHearing(hearing));
 
-        ReportingRestrictionsEntity reportingRestrictions = hearing.getCourtCase().getReportingRestrictions();
+        EventHandlerEntity reportingRestrictions = hearing.getCourtCase().getReportingRestrictions();
         if (reportingRestrictions != null) {
-            advancedSearchResult.setReportingRestriction(reportingRestrictions.getDescription());
+            advancedSearchResult.setReportingRestriction(reportingRestrictions.getEventName());
         }
         return advancedSearchResult;
     }
