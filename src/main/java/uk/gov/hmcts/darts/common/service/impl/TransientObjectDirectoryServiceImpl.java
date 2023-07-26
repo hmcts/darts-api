@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccount;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
@@ -30,7 +30,7 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setChecksum(null);
         transientObjectDirectoryEntity.setTransferAttempts(null);
-        transientObjectDirectoryEntity.setModifiedBy(new UserAccount());
+        transientObjectDirectoryEntity.setModifiedBy(new UserAccountEntity());
 
         return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
     }

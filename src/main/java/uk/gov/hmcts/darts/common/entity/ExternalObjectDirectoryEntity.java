@@ -71,6 +71,6 @@ public class ExternalObjectDirectoryEntity implements JpaAuditing {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "last_modified_by", foreignKey = @ForeignKey(name = "eod_modified_by_fk"))
-    private UserAccount modifiedBy;
+    private UserAccountEntity modifiedBy;
 
 }
