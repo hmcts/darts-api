@@ -9,8 +9,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,12 +24,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.common.util.TestUtils.substituteHearingDateWithToday;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCaseEntityAt;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtHouse;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aCourtroom;
-import static uk.gov.hmcts.darts.testutils.MinimalEntities.aHearingForCaseInRoom;
+import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.testutils.TestUtils.substituteHearingDateWithToday;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
+import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.someMinimalCourtRoom;
+import static uk.gov.hmcts.darts.testutils.data.DefenceTestData.createListOfDefenceForCase;
+import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createListOfDefendantsForCase;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
+import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createListOfJudgesForHearing;
+import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createListOfProsecutor;
 
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.TooManyMethods"})
@@ -35,6 +44,65 @@ class CaseControllerTest extends IntegrationBase {
     public static final String BASE_PATH = "/cases";
     @Autowired
     private transient MockMvc mockMvc;
+
+    // To be replaced by something more reusable as the last PR in this ticket
+    private HearingEntity setupCase1(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case1 = createCaseAt(swanseaCourthouse);
+        case1.setCaseNumber("Case0000001");
+        case1.setDefendantList(createListOfDefendantsForCase(2, case1));
+        case1.setDefenceList(createListOfDefenceForCase(2, case1));
+        case1.setProsecutorList(createListOfProsecutor(2, case1));
+
+        var hearingForCase1 = createHearingWith(case1, swanseaCourtroom1);
+        hearingForCase1.setJudgeList(createListOfJudgesForHearing(1, hearingForCase1));
+        hearingForCase1.setHearingDate(LocalDate.parse("2023-06-20"));
+        hearingForCase1.setScheduledStartTime(LocalTime.parse("09:00"));
+        return hearingForCase1;
+    }
+
+    // To be replaced by something more reusable as the last PR in this ticket
+    private HearingEntity setupCase2(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case2 = createCaseAt(swanseaCourthouse);
+        case2.setCaseNumber("Case0000002");
+        case2.setDefendantList(createListOfDefendantsForCase(2, case2));
+        case2.setDefenceList(createListOfDefenceForCase(2, case2));
+        case2.setProsecutorList(createListOfProsecutor(2, case2));
+
+        var hearingForCase2 = createHearingWith(case2, swanseaCourtroom1);
+        hearingForCase2.setJudgeList(createListOfJudgesForHearing(1, hearingForCase2));
+        hearingForCase2.setHearingDate(LocalDate.parse("2023-06-20"));
+        hearingForCase2.setScheduledStartTime(LocalTime.parse("10:00"));
+        return hearingForCase2;
+    }
+
+    // To be replaced by something more reusable as the last PR in this ticket
+    private HearingEntity setupCase3(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case3 = createCaseAt(swanseaCourthouse);
+        case3.setCaseNumber("Case0000003");
+        case3.setDefendantList(createListOfDefendantsForCase(2, case3));
+        case3.setDefenceList(createListOfDefenceForCase(2, case3));
+        case3.setProsecutorList(createListOfProsecutor(2, case3));
+
+        var hearingForCase3 = createHearingWith(case3, swanseaCourtroom1);
+        hearingForCase3.setJudgeList(createListOfJudgesForHearing(1, hearingForCase3));
+        hearingForCase3.setHearingDate(LocalDate.parse("2023-06-20"));
+        hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
+        return hearingForCase3;
+    }
+
+    private HearingEntity createCaseWithHearingToday(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
+        var case4 = createCaseAt(swanseaCourthouse);
+        case4.setCaseNumber("Case0000004");
+        case4.setDefendantList(createListOfDefendantsForCase(2, case4));
+        case4.setDefenceList(createListOfDefenceForCase(2, case4));
+        case4.setProsecutorList(createListOfProsecutor(2, case4));
+
+        var hearingForCase3 = createHearingWith(case4, swanseaCourtroom1);
+        hearingForCase3.setJudgeList(createListOfJudgesForHearing(1, hearingForCase3));
+        hearingForCase3.setHearingDate(LocalDate.now());
+        hearingForCase3.setScheduledStartTime(LocalTime.parse("11:00"));
+        return hearingForCase3;
+    }
 
     @BeforeEach
     void setupData() {

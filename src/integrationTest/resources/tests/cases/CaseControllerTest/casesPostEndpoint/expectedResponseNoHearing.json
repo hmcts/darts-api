@@ -3,16 +3,16 @@
   "courthouse": "EDINBURGH",
   "courtroom": "1",
   "case_number": "case1",
-  "defendants": [
+  "defendantList": [
     "Jow Bloggs"
   ],
-  "judges": [
+  "judgeList": [
     "Mr Judge"
   ],
-  "prosecutors": [
+  "prosecutorList": [
     "Mrs Prosecutor"
   ],
-  "defenders": [
+  "defenceList": [
     "Mr Defender"
   ]
 }
