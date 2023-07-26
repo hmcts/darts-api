@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -157,14 +158,28 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return audioOperationService.merge(audioFileInfos, StringUtils.EMPTY);
     }
 
-    private AudioFileInfo trimToPeriod(AudioFileInfo audioFileInfo, OffsetDateTime start,
-                                       OffsetDateTime end) throws ExecutionException, InterruptedException {
+    private AudioFileInfo trimToPeriod(AudioFileInfo audioFileInfo, OffsetDateTime trimPeriodStart,
+                                       OffsetDateTime trimPeriodEnd) throws ExecutionException, InterruptedException {
+        var audioFileStartTime = audioFileInfo.getStartTime();
+
+        var trimStartDuration = Duration.between(audioFileStartTime, trimPeriodStart);
+        var trimEndDuration = Duration.between(audioFileStartTime, trimPeriodEnd);
+
         return audioOperationService.trim(
             StringUtils.EMPTY,
             audioFileInfo,
-            start.toLocalTime().toString(),
-            end.toLocalTime().toString()
+            toTimeString(trimStartDuration),
+            toTimeString(trimEndDuration)
         );
+    }
+
+    private String toTimeString(Duration duration) {
+        // Format per http://ffmpeg.org/ffmpeg-utils.html#Time-duration
+        return String.format("%s%02d:%02d:%02d",
+                                   duration.isNegative() ? "-" : StringUtils.EMPTY,
+                                   Math.abs(duration.toHours()),
+                                   Math.abs(duration.toMinutesPart()),
+                                   Math.abs(duration.toSecondsPart()));
     }
 
     private List<AudioFileInfo> trimAllToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,

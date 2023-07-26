@@ -7,6 +7,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import uk.gov.hmcts.darts.audio.service.impl.AudioTransformationServiceImpl;
+import uk.gov.hmcts.darts.audiorequest.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
@@ -30,15 +32,34 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     @Autowired
     private AudioTransformationServiceImpl audioTransformationService;
 
+    private HearingEntity hearing;
+
     @BeforeEach
     void setUp() {
-        var hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom");
-        given.aMediaRequestEntityFor(hearing);
+        hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom");
     }
 
     @Test
-    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompleted() {
+    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedForDownloadRequestType() {
         given.databaseIsProvisionedForHappyPath();
+        given.aMediaRequestEntityForHearingWithRequestType(hearing, AudioRequestType.DOWNLOAD);
+
+        Integer mediaRequestId = given.getMediaRequestEntity().getId();
+
+        UUID blobId = audioTransformationService.processAudioRequest(mediaRequestId);
+        assertNotNull(blobId);
+
+        var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
+            .findById(mediaRequestId)
+            .orElseThrow();
+
+        assertEquals(COMPLETED, mediaRequestEntity.getStatus());
+    }
+
+    @Test
+    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedForPlaybackRequestType() {
+        given.databaseIsProvisionedForHappyPath();
+        given.aMediaRequestEntityForHearingWithRequestType(hearing, AudioRequestType.PLAYBACK);
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
 
@@ -54,6 +75,8 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
 
     @Test
     void processAudioRequestShouldFailAndUpdateRequestStatusToFailed() {
+        given.aMediaRequestEntityForHearingWithRequestType(hearing, AudioRequestType.DOWNLOAD);
+
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
         var exception = assertThrows(
             DartsApiException.class,

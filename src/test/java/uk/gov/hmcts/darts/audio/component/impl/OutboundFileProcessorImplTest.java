@@ -79,7 +79,10 @@ class OutboundFileProcessorImplTest {
     void processAudioForDownloadShouldReturnOneSessionWithOneAudioWhenProvidedWithTwoContinuousAudios()
         throws ExecutionException, InterruptedException {
 
-        var concatenatedAudioFileInfo = new AudioFileInfo();
+        var concatenatedAudioFileInfo = new AudioFileInfo(TIME_12_00.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          null);
         when(audioOperationService.concatenate(any(), any()))
             .thenReturn(concatenatedAudioFileInfo);
 
@@ -205,11 +208,13 @@ class OutboundFileProcessorImplTest {
     @Test
     void processAudioForPlaybackShouldPerformExpectedAudioOperations() throws ExecutionException, InterruptedException {
         var concatenatedAudioFileInfo = new AudioFileInfo();
-
         when(audioOperationService.concatenate(any(), any()))
             .thenReturn(concatenatedAudioFileInfo);
 
-        AudioFileInfo mergedAudioFile = new AudioFileInfo();
+        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          1);
         when(audioOperationService.merge(any(), any()))
             .thenReturn(mergedAudioFile);
 
@@ -248,12 +253,86 @@ class OutboundFileProcessorImplTest {
         verify(audioOperationService, times(1)).trim(
             any(),
             eq(mergedAudioFile),
-            eq(TIME_12_00.toLocalTime().toString()),
-            eq(TIME_13_00.toLocalTime().toString())
+            eq("00:00:00"),
+            eq("01:00:00")
         );
         verify(audioOperationService, times(1)).reEncode(
             any(),
             eq(trimmedAudioFileInfo)
+        );
+    }
+
+    @Test
+    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive() throws ExecutionException, InterruptedException {
+        var concatenatedAudioFileInfo = new AudioFileInfo();
+        when(audioOperationService.concatenate(any(), any()))
+            .thenReturn(concatenatedAudioFileInfo);
+
+        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          1);
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_12_10,
+            TIME_12_20,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+        );
+
+        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+
+        verify(audioOperationService, times(1)).trim(
+            any(),
+            eq(mergedAudioFile),
+            eq("00:00:00"),
+            eq("01:00:00")
+        );
+    }
+
+    @Test
+    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationIsNegative() throws ExecutionException, InterruptedException {
+        var concatenatedAudioFileInfo = new AudioFileInfo();
+        when(audioOperationService.concatenate(any(), any()))
+            .thenReturn(concatenatedAudioFileInfo);
+
+        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_10.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          "",
+                                                          1);
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_12_10,
+            TIME_12_20,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+        );
+
+        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+
+        verify(audioOperationService, times(1)).trim(
+            any(),
+            eq(mergedAudioFile),
+            eq("-00:10:00"),
+            eq("00:50:00")
         );
     }
 
