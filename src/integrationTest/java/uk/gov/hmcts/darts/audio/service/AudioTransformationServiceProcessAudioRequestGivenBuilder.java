@@ -41,34 +41,34 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
 
     public void databaseIsProvisionedForHappyPath() {
         var mediaEntity = dartsDatabase.createMediaEntity(
-              TIME_12_00,
-              TIME_12_10,
-              1
+            TIME_12_00,
+            TIME_12_10,
+            1
         );
 
         hearingEntity.addMedia(mediaEntity);
         dartsDatabase.getHearingRepository().saveAndFlush(hearingEntity);
 
         var externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
-              ExternalLocationTypeEnum.UNSTRUCTURED);
+            ExternalLocationTypeEnum.UNSTRUCTURED);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
 
         var externalObjectDirectoryEntity = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
-              mediaEntity,
-              objectDirectoryStatusEntity,
-              externalLocationTypeEntity,
-              UUID.randomUUID()
+            mediaEntity,
+            objectDirectoryStatusEntity,
+            externalLocationTypeEntity,
+            UUID.randomUUID()
         );
         dartsDatabase.getExternalObjectDirectoryRepository()
-              .saveAndFlush(externalObjectDirectoryEntity);
+            .saveAndFlush(externalObjectDirectoryEntity);
     }
 
     public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName) {
         hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-              caseNumber,
-              courthouseName,
-              courtroomName,
-              LocalDate.now()
+            caseNumber,
+            courthouseName,
+            courtroomName,
+            LocalDate.now()
         );
 
         return hearingEntity;
