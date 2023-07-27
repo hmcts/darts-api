@@ -1,0 +1,18 @@
+{
+  "hearing_date": "todays_date",
+  "courthouse": "SWANSEA",
+  "courtroom": "1",
+  "case_number": "2",
+  "defendantList": [
+    "Defendant1"
+  ],
+  "judgeList": [
+    "Judge1"
+  ],
+  "prosecutorList": [
+    "Prosecutor1"
+  ],
+  "defenceList": [
+    "Defender1"
+  ]
+}

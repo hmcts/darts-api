@@ -52,6 +52,30 @@ paths:
 
         '500':
           description: Internal Server Error
+    post:
+      tags:
+        - Cases
+      summary: Allows user to add case or if the case exists overwrite the details.
+      description: |-
+        Allows user to add case or if the case exists overwrite the details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/add_case_request'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scheduled_case'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '500':
+          description: Internal Server Error
+
   /cases/{caseId}/hearings:
     get:
       tags:
@@ -157,18 +181,46 @@ paths:
 
 
 components:
-
-  #-----------------#
-  #----------------------------------#
-  #-----------------#
-
   schemas:
+    add_case_request:
+      type: object
+      required:
+        - courthouse
+        - case_number
+      properties:
+        courthouse:
+          type: string
+          example: SWANSEA
+        courtroom:
+          type: string
+          example: 1
+        case_number:
+          type: string
+          example: CASE1001
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        prosecutors:
+          type: array
+          items:
+            $ref: '#/components/schemas/prosecutor'
+        defenders:
+          type: array
+          items:
+            $ref: '#/components/schemas/defence'
     cases:
       type: array
       items:
         $ref: '#/components/schemas/scheduled_case'
     scheduled_case:
       type: object
+      required:
+        - courthouse
       properties:
         courthouse:
           type: string

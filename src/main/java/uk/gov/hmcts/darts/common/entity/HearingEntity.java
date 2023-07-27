@@ -42,10 +42,10 @@ public class HearingEntity {
     private CourtroomEntity courtroom;
 
     @OneToMany(mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<JudgeEntity> judgeList;
+    private List<JudgeEntity> judgeList = new ArrayList<>();
 
     @Column(name = "hearing_date")
-    private LocalDate hearingDate;
+    private LocalDate hearingDate = LocalDate.now();
 
     @Column(name = "scheduled_start_time")
     private LocalTime scheduledStartTime;

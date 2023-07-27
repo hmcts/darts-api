@@ -72,13 +72,13 @@ public class CourtCaseEntity {
     private OffsetDateTime caseClosedTimestamp;
 
     @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<DefendantEntity> defendantList;
+    private List<DefendantEntity> defendantList = new ArrayList<>();
 
     @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<ProsecutorEntity> prosecutorList;
+    private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
 
     @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<DefenceEntity> defenceList;
+    private List<DefenceEntity> defenceList = new ArrayList<>();
 
     @Column(name = RETAIN_UNTIL_TS)
     private OffsetDateTime retainUntilTimestamp;

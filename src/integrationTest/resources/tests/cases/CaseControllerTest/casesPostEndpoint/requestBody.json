@@ -1,0 +1,17 @@
+{
+  "courthouse": "SWANSEA",
+  "courtroom": "1",
+  "case_number": "CASE1001",
+  "defendants": [
+    "Jow Bloggs"
+  ],
+  "judges": [
+    "Mr Judge"
+  ],
+  "prosecutors": [
+    "Mrs Prosecutor"
+  ],
+  "defenders": [
+    "Mr Defender"
+  ]
+}
