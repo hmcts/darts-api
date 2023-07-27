@@ -73,8 +73,6 @@ paths:
                 $ref: '#/components/schemas/scheduled_case'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
-        '409':
-          description: Resource already exists.
         '500':
           description: Internal Server Error
 
