@@ -84,7 +84,7 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             printWriter.println(format(END_TIME_README_LABEL + README_FORMAT, viqMetaData.getEndTime()));
             printWriter.print(format(REQUEST_TYPE_README_LABEL + README_FORMAT, viqMetaData.getType()));
         } catch (IOException exception) {
-            log.error("Unable to generate readme.tx file: {}", exception.getMessage());
+            log.error("Unable to generate readme.txt file: {}", exception.getMessage());
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
         return readmeFile.getAbsolutePath();
