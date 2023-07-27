@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.common.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -71,13 +72,13 @@ public class CourtCaseEntity {
     @Column(name = CASE_CLOSED_TS)
     private OffsetDateTime caseClosedTimestamp;
 
-    @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefendantEntity> defendantList = new ArrayList<>();
 
-    @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
 
-    @OneToMany(mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefenceEntity> defenceList = new ArrayList<>();
 
     @Column(name = RETAIN_UNTIL_TS)
@@ -99,15 +100,27 @@ public class CourtCaseEntity {
         this.hearings.add(hearing);
     }
 
+    public void addDefence(DefenceEntity defence) {
+        this.defenceList.add(defence);
+    }
+
+    public void addDefendant(DefendantEntity defendant) {
+        this.defendantList.add(defendant);
+    }
+
+    public void addProsecutor(ProsecutorEntity prosecutor) {
+        this.prosecutorList.add(prosecutor);
+    }
+
     public List<String> getDefendantStringList() {
-        return CollectionUtils.emptyIfNull(defendantList).stream().map(DefendantEntity::getName).toList();
+        return CollectionUtils.emptyIfNull(defendantList).stream().map(DefendantEntity::getName).sorted().toList();
     }
 
     public List<String> getDefenceStringList() {
-        return CollectionUtils.emptyIfNull(defenceList).stream().map(DefenceEntity::getName).toList();
+        return CollectionUtils.emptyIfNull(defenceList).stream().map(DefenceEntity::getName).sorted().toList();
     }
 
     public List<String> getProsecutorsStringList() {
-        return CollectionUtils.emptyIfNull(prosecutorList).stream().map(ProsecutorEntity::getName).toList();
+        return CollectionUtils.emptyIfNull(prosecutorList).stream().map(ProsecutorEntity::getName).sorted().toList();
     }
 }

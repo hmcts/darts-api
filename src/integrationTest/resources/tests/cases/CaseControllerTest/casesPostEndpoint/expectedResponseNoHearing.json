@@ -1,18 +1,21 @@
 {
-  "hearing_date": "todays_date",
   "courthouse": "EDINBURGH",
   "courtroom": "1",
+  "hearing_date": "2023-07-27",
   "case_number": "case1",
   "defendantList": [
-    "Jow Bloggs"
+    "Jow Bloggs",
+    "aDefendant"
   ],
   "judgeList": [
     "Mr Judge"
   ],
   "prosecutorList": [
-    "Mrs Prosecutor"
+    "Mrs Prosecutor",
+    "aProsecutor"
   ],
   "defenceList": [
-    "Mr Defender"
+    "Mr Defender",
+    "aDefence"
   ]
 }

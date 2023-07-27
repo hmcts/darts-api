@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 
 import java.time.LocalDate;
@@ -80,11 +81,17 @@ public class CommonTestDataUtil {
     }
 
     public CourtCaseEntity createCase(String caseNumber) {
+        return createCaseWithId(caseNumber, 101);
+    }
+
+    public CourtCaseEntity createCaseWithId(String caseNumber, Integer id) {
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
         courtCase.setDefenceList(createDefenceList(courtCase));
         courtCase.setDefendantList(createDefendantList(courtCase));
         courtCase.setProsecutorList(createProsecutorList(courtCase));
+        courtCase.setCourthouse(createCourthouse("case_courthouse"));
+        courtCase.setId(id);
         return courtCase;
     }
 
@@ -141,7 +148,23 @@ public class CommonTestDataUtil {
         hearing1.setCourtroom(createCourtroom("1"));
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
+        hearing1.setId(102);
+        hearing1.setJudgeList(createJudges(2));
         return hearing1;
+    }
+
+    public List<JudgeEntity> createJudges(int numOfJudges) {
+        List<JudgeEntity> returnList = new ArrayList<>();
+        for (int counter = 1; counter <= numOfJudges; counter++) {
+            returnList.add(createJudge("Judge_" + counter));
+        }
+        return returnList;
+    }
+
+    public JudgeEntity createJudge(String name) {
+        JudgeEntity judgeEntity = new JudgeEntity();
+        judgeEntity.setName(name);
+        return judgeEntity;
     }
 
     public List<HearingEntity> createHearings(int numOfHearings) {

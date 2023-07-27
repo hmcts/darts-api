@@ -23,16 +23,23 @@ public class ProsecutorTestData {
 
     public static List<ProsecutorEntity> createListOfProsecutor(int quantity, CourtCaseEntity courtCase) {
         return rangeClosed(1, quantity)
-              .mapToObj(index -> {
-                  var defendant = createProsecutorWithCaseBasedName(index, courtCase);
-                  defendant.setCourtCase(courtCase);
-                  return defendant;
-              }).collect(toList());
+            .mapToObj(index -> {
+                var defendant = createProsecutorWithCaseBasedName(index, courtCase);
+                defendant.setCourtCase(courtCase);
+                return defendant;
+            }).collect(toList());
     }
 
     private static ProsecutorEntity createProsecutorWithCaseBasedName(int index, CourtCaseEntity courtCase) {
         var prosecutor = someMinimalProsecutor();
         prosecutor.setName("prosecutor_" + courtCase.getCaseNumber() + "_" + index);
+        return prosecutor;
+    }
+
+    public static ProsecutorEntity createProsecutorForCaseWithName(CourtCaseEntity courtCase, String name) {
+        var prosecutor = new ProsecutorEntity();
+        prosecutor.setCourtCase(courtCase);
+        prosecutor.setName(name);
         return prosecutor;
     }
 }
