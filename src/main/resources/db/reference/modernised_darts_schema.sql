@@ -70,9 +70,17 @@
 --v33 remove synthetic PK from associative entities hearing_events_ae and hearing_media_as, replace with PK on natural key
 --v34 add case_retention, retention_policy & case_retention_event tables
 --v35 remove reporting_restrictions table, replace with foreign key on case to event_handler and add boolean to event_handler
-
+--v36 amend defence to defendant on defendant_name table
+--    remove foreign key on transcription table to hearing
+--v37 reinstate hea_id on transcription and FK to hearing
+--    add courthouse fk on transcription 
+--    add originating_courtroom on court_case
+--    amend names of judge, prosecutor, defence, defendant  
+--    add associative entity hearing_judge_ae and amend FKs accordingly
+--v38 add cas_id to judge table and foreign key
+--    add unique constraint on jud.judge_name
+--v39 remove origating_courtroom from court_case
  
-
 
 -- List of Table Aliases
 -- annotation                 ANN
@@ -90,6 +98,9 @@
 -- event_handler              EVH
 -- external_object_directory  EOD
 -- hearing                    HEA
+-- hearing_event_ae           HEE
+-- hearing_media_ae           HEM
+-- hearing_judge_ae           HEJ
 -- judge_name                 JUD
 -- media                      MED
 -- media_request              MER
@@ -332,28 +343,28 @@ IS 'directly sourced from moj_daily_list_s';
 COMMENT ON COLUMN daily_list.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_daily_list';
 
-CREATE TABLE defence_name
+CREATE TABLE defence
 (dfc_id                     INTEGER                 NOT NULL
 ,cas_id                     INTEGER                 NOT NULL
-,defence                    CHARACTER VARYING       NOT NULL
+,defence_name               CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN defence_name.dfc_id 
+COMMENT ON COLUMN defence.dfc_id 
 IS 'primary key of defence_name';
 
-COMMENT ON COLUMN defence_name.cas_id
+COMMENT ON COLUMN defence.cas_id
 IS 'foreign key from court_case';
 
-CREATE TABLE defendant_name
+CREATE TABLE defendant
 (dfd_id                     INTEGER                 NOT NULL
 ,cas_id                     INTEGER                 NOT NULL
-,defence                    CHARACTER VARYING       NOT NULL
+,defendant_name             CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN defendant_name.dfd_id 
+COMMENT ON COLUMN defendant.dfd_id 
 IS 'primary key of defendant_name';
 
-COMMENT ON COLUMN defendant_name.cas_id
+COMMENT ON COLUMN defendant.cas_id
 IS 'foreign key from court_case';
 
 CREATE TABLE device_register
@@ -530,6 +541,17 @@ IS 'foreign key from hearing, part of composite natural key and PK';
 COMMENT ON COLUMN hearing_event_ae.eve_id
 IS 'foreign key from event, part of composite natural key and PK';
 
+CREATE TABLE hearing_judge_ae
+(hea_id                     INTEGER                          NOT NULL
+,jud_id                     INTEGER                          NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON COLUMN hearing_judge_ae.hea_id
+IS 'foreign key from case, part of composite natural key and PK';
+
+COMMENT ON COLUMN hearing_judge_ae.jud_id
+IS 'foreign key from judge, part of composite natural key and PK';
+
 CREATE TABLE hearing_media_ae
 (hea_id                     INTEGER							 NOT NULL
 ,med_id                     INTEGER							 NOT NULL
@@ -541,17 +563,17 @@ IS 'foreign key from case, part of composite natural key and PK';
 COMMENT ON COLUMN hearing_media_ae.med_id
 IS 'foreign key from media, part of composite natural key and PK';
 
-CREATE TABLE judge_name
+CREATE TABLE judge
 (jud_id                     INTEGER                 NOT NULL
-,hea_id                     INTEGER                 NOT NULL
-,judge                      CHARACTER VARYING       NOT NULL
+,cas_id                     INTEGER                 NOT NULL
+,judge_name                 CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN judge_name.jud_id 
+COMMENT ON COLUMN judge.jud_id 
 IS 'primary key of judge_name';
 
-COMMENT ON COLUMN judge_name.hea_id
-IS 'foreign key from hearing';
+COMMENT ON COLUMN judge.cas_id
+IS 'foreign key from court_case';
 
 CREATE TABLE media
 (med_id                     INTEGER					 NOT NULL
@@ -681,16 +703,16 @@ CREATE TABLE object_directory_status
 COMMENT ON TABLE object_directory_status
 IS 'used to record acceptable statuses found in [external/transient]_object_directory';
 
-CREATE TABLE prosecutor_name
+CREATE TABLE prosecutor
 (prn_id                     INTEGER                 NOT NULL
 ,cas_id                     INTEGER                 NOT NULL
-,prosecutor                 CHARACTER VARYING       NOT NULL
+,prosecutor_name            CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN prosecutor_name.prn_id 
+COMMENT ON COLUMN prosecutor.prn_id 
 IS 'primary key of prosecutor_name';
 
-COMMENT ON COLUMN prosecutor_name.cas_id
+COMMENT ON COLUMN prosecutor.cas_id
 IS 'foreign key from court_case';
 
 CREATE TABLE region
@@ -748,7 +770,7 @@ IS 'primary key of retention_policy';
 CREATE TABLE transcription
 (tra_id                   INTEGER				   NOT NULL
 ,cas_id                   INTEGER                  NOT NULL
-,ctr_id                   INTEGER                  NOT NULL
+,ctr_id                   INTEGER                  
 ,trt_id                   INTEGER                  NOT NULL  
 ,urg_id                   INTEGER                  -- remains nullable, as nulls present in source data ( c_urgency)       
 ,hea_id                   INTEGER                  -- remains nullable, until migration is complete
@@ -923,11 +945,11 @@ ALTER TABLE courtroom               ADD PRIMARY KEY USING INDEX courtroom_pk;
 CREATE UNIQUE INDEX daily_list_pk ON daily_list(dal_id) TABLESPACE darts_indexes;
 ALTER TABLE daily_list              ADD PRIMARY KEY USING INDEX daily_list_pk;
 
-CREATE UNIQUE INDEX defence_name_pk ON defence_name(dfc_id) TABLESPACE darts_indexes;
-ALTER TABLE defence_name            ADD PRIMARY KEY USING INDEX defence_name_pk;
+CREATE UNIQUE INDEX defence_pk    ON defence(dfc_id) TABLESPACE darts_indexes;
+ALTER TABLE defence               ADD PRIMARY KEY USING INDEX defence_pk;
 
-CREATE UNIQUE INDEX defendant_name_pk ON defendant_name(dfd_id) TABLESPACE darts_indexes;
-ALTER TABLE defendant_name          ADD PRIMARY KEY USING INDEX defendant_name_pk;
+CREATE UNIQUE INDEX defendant_pk ON defendant(dfd_id) TABLESPACE darts_indexes;
+ALTER TABLE defendant             ADD PRIMARY KEY USING INDEX defendant_pk;
 
 CREATE UNIQUE INDEX device_register_pk ON device_register(der_id) TABLESPACE darts_indexes;
 ALTER TABLE device_register         ADD PRIMARY KEY USING INDEX device_register_pk;
@@ -950,11 +972,14 @@ ALTER TABLE hearing                 ADD PRIMARY KEY USING INDEX hearing_pk;
 CREATE UNIQUE INDEX hearing_event_ae_pk ON hearing_event_ae(hea_id,eve_id) TABLESPACE darts_indexes;
 ALTER TABLE hearing_event_ae        ADD PRIMARY KEY USING INDEX hearing_event_ae_pk;
 
+CREATE UNIQUE INDEX hearing_judge_ae_pk ON hearing_judge_ae(hea_id,jud_id) TABLESPACE darts_indexes;
+ALTER TABLE hearing_judge_ae        ADD PRIMARY KEY USING INDEX hearing_judge_ae_pk;
+
 CREATE UNIQUE INDEX hearing_media_ae_pk ON hearing_media_ae(hea_id,med_id) TABLESPACE darts_indexes;
 ALTER TABLE hearing_media_ae        ADD PRIMARY KEY USING INDEX hearing_media_ae_pk;
 
-CREATE UNIQUE INDEX judge_name_pk ON judge_name(jud_id) TABLESPACE darts_indexes;
-ALTER TABLE judge_name          ADD PRIMARY KEY USING INDEX judge_name_pk;
+CREATE UNIQUE INDEX judge_pk     ON judge(jud_id) TABLESPACE darts_indexes;
+ALTER TABLE judge                ADD PRIMARY KEY USING INDEX judge_pk;
 
 CREATE UNIQUE INDEX media_pk ON media(med_id) TABLESPACE darts_indexes;
 ALTER TABLE media                   ADD PRIMARY KEY USING INDEX media_pk;
@@ -968,8 +993,8 @@ ALTER TABLE notification            ADD PRIMARY KEY USING INDEX notification_pk;
 CREATE UNIQUE INDEX object_directory_status_pk ON object_directory_status(ods_id) TABLESPACE darts_indexes;
 ALTER TABLE object_directory_status ADD PRIMARY KEY USING INDEX object_directory_status_pk;
 
-CREATE UNIQUE INDEX prosecutor_name_pk ON prosecutor_name(prn_id) TABLESPACE darts_indexes;
-ALTER TABLE prosecutor_name          ADD PRIMARY KEY USING INDEX prosecutor_name_pk;
+CREATE UNIQUE INDEX prosecutor_pk ON prosecutor(prn_id) TABLESPACE darts_indexes;
+ALTER TABLE prosecutor          ADD PRIMARY KEY USING INDEX prosecutor_pk;
 
 CREATE UNIQUE INDEX region_pk ON region(reg_id) TABLESPACE darts_indexes;
 ALTER TABLE region                  ADD PRIMARY KEY USING INDEX region_pk;
@@ -1081,12 +1106,12 @@ ALTER TABLE daily_list
 ADD CONSTRAINT daily_list_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
-ALTER TABLE defence_name                
-ADD CONSTRAINT defence_name_case_fk
+ALTER TABLE defence                
+ADD CONSTRAINT defence_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE defendant_name                
-ADD CONSTRAINT defendant_name_case_fk
+ALTER TABLE defendant                
+ADD CONSTRAINT defendant_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE device_register
@@ -1137,6 +1162,14 @@ ALTER TABLE hearing_event_ae
 ADD CONSTRAINT hearing_event_ae_event_fk
 FOREIGN KEY (eve_id) REFERENCES event(eve_id);
 
+ALTER TABLE hearing_judge_ae            
+ADD CONSTRAINT hearing_judge_ae_hearing_fk
+FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
+
+ALTER TABLE hearing_judge_ae            
+ADD CONSTRAINT hearing_judge_ae_judge_fk
+FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
+
 ALTER TABLE hearing_media_ae            
 ADD CONSTRAINT hearing_media_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
@@ -1145,9 +1178,9 @@ ALTER TABLE hearing_media_ae
 ADD CONSTRAINT hearing_media_ae_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
-ALTER TABLE judge_name                
-ADD CONSTRAINT judge_name_hearing_fk
-FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
+ALTER TABLE judge
+ADD CONSTRAINT judge_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE media                       
 ADD CONSTRAINT media_courtroom_fk
@@ -1161,8 +1194,8 @@ ALTER TABLE notification
 ADD CONSTRAINT notification_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE prosecutor_name                
-ADD CONSTRAINT prosecutor_name_case_fk
+ALTER TABLE prosecutor               
+ADD CONSTRAINT prosecutor_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE transcription               
@@ -1176,6 +1209,10 @@ FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 ALTER TABLE transcription               
 ADD CONSTRAINT transcription_urgency_fk
 FOREIGN KEY (urg_id) REFERENCES urgency(urg_id);
+
+ALTER TABLE transcription               
+ADD CONSTRAINT transcription_hearing_fk
+FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
 ALTER TABLE transcription               
 ADD CONSTRAINT transcription_last_modified_by_fk
@@ -1231,6 +1268,10 @@ ALTER TABLE hearing ADD UNIQUE USING INDEX hea_cas_ctr_hd_unq;
 CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id) TABLESPACE darts_indexes;
 ALTER TABLE court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
 
+-- UNIQUE (judge_name)
+CREATE UNIQUE INDEX jud_judge_name_unq ON judge( judge_name) TABLESPACE darts_indexes;
+ALTER TABLE judge ADD UNIQUE USING INDEX jud_judge_name_unq;
+
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;
@@ -1240,8 +1281,8 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courtroom TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON daily_list TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON defence_name TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON defendant_name TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON defence TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON defendant TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON device_register TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON event TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON event_handler TO darts_user;
@@ -1250,12 +1291,12 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON external_object_directory TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_event_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_media_ae TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON judge_name TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON judge TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media_request TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON notification TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON object_directory_status TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON prosecutor_name TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON prosecutor TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON region TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON report TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON retention_policy TO darts_user;
