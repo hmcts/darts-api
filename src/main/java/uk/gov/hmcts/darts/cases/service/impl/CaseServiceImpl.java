@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.cases.exception.CaseError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
-import uk.gov.hmcts.darts.cases.mapper.GetCasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
@@ -24,8 +23,8 @@ import uk.gov.hmcts.darts.common.api.CommonApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.time.LocalDate;
@@ -139,13 +138,17 @@ public class CaseServiceImpl implements CaseService {
         }
 
         hearingEntity.setCourtCase(caseEntity);
+        hearingEntity.setHearingDate(LocalDate.now());
 
         emptyIfNull(addCaseRequest.getJudges()).forEach(newJudge -> {
             Optional<JudgeEntity> found = emptyIfNull(hearingEntity.getJudgeList()).stream()
                 .filter(j -> j.getName().equals(newJudge)).findAny();
             if (found.isEmpty()) {
-                found.ifPresentOrElse(j -> { },
-                                      () -> hearingEntity.getJudgeList().add(createNewJudge(newJudge, hearingEntity)));
+                found.ifPresentOrElse(
+                    j -> {
+                    },
+                    () -> hearingEntity.getJudgeList().add(createNewJudge(newJudge, hearingEntity))
+                );
             }
         });
 
