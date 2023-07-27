@@ -62,6 +62,6 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
     @JoinColumn(name = "last_modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
-    private UserAccount modifiedBy;
+    private UserAccountEntity modifiedBy;
 
 }

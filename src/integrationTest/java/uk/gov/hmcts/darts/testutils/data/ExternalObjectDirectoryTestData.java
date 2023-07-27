@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
-import uk.gov.hmcts.darts.common.entity.UserAccount;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.UUID;
 
@@ -31,9 +31,9 @@ public class ExternalObjectDirectoryTestData {
     }
 
     public static ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
-                                                                       ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
-                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                       UUID externalLocation) {
+                                                                              ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                              UUID externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setMedia(mediaEntity);
         externalObjectDirectory.setStatus(objectDirectoryStatusEntity);
@@ -42,7 +42,7 @@ public class ExternalObjectDirectoryTestData {
         externalObjectDirectory.setChecksum(null);
         externalObjectDirectory.setTransferAttempts(null);
 
-        UserAccount user = new UserAccount();
+        UserAccountEntity user = new UserAccountEntity();
         externalObjectDirectory.setModifiedBy(user);
 
         return externalObjectDirectory;
