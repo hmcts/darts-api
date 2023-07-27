@@ -23,6 +23,11 @@ public enum CaseError implements DartsApiError {
         "102",
         HttpStatus.BAD_REQUEST,
         "Search criteria is too broad, please add at least 1 more criteria to search for."
+    ),
+    INVALID_REQUEST(
+        "103",
+        HttpStatus.BAD_REQUEST,
+        "The request is not valid.."
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";

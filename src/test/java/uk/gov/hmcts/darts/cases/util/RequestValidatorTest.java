@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -61,6 +63,23 @@ class RequestValidatorTest {
         );
         assertEquals(
             "Search criteria is too broad, please add at least 1 more criteria to search for.",
+            exception.getMessage()
+        );
+    }
+
+    @Test
+    void fromDateAfterToDate() {
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .dateFrom(LocalDate.of(2023, 6, 20))
+            .dateTo(LocalDate.of(2023, 6, 19))
+            .build();
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> RequestValidator.validate(request)
+        );
+        assertEquals(
+            "The request is not valid... The 'From' date cannot be after the 'To' date.",
             exception.getMessage()
         );
     }

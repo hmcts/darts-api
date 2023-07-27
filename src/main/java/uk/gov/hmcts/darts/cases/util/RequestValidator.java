@@ -49,5 +49,9 @@ public class RequestValidator {
         })) {
             throw new DartsApiException(CaseError.CRITERIA_TOO_BROAD);
         }
+
+        if (request.getDateFrom().isAfter(request.getDateTo())) {
+            throw new DartsApiException(CaseError.INVALID_REQUEST, "The 'From' date cannot be after the 'To' date.");
+        }
     }
 }
