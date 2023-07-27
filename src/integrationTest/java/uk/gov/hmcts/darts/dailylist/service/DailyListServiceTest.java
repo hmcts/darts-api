@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.io.IOException;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -129,6 +130,7 @@ class DailyListServiceTest extends IntegrationBase {
             dailyListEntity.setCreatedDate(null);
             dailyListEntity.setModifiedDateTime(null);
             dailyListEntity.setId(null);
+            dailyListEntity.getCourthouse().setCourtrooms(emptyList());
             dailyListEntity.getCourthouse().setId(null);
             dailyListEntity.getCourthouse().setCreatedDateTime(null);
             dailyListEntity.getCourthouse().setLastModifiedDateTime(null);
