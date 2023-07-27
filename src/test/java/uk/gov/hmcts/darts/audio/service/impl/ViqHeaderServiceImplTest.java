@@ -10,13 +10,16 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
+import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.COURTHOUSE_README_LABEL;
+import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.END_TIME_README_LABEL;
+import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_BY_README_LABEL;
+import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.README_TXT_FILENAME;
+import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.REQUEST_TYPE_README_LABEL;
+import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.START_TIME_README_LABEL;
 
 
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand"})
@@ -84,10 +93,44 @@ class ViqHeaderServiceImplTest {
     }
 
     @Test
-    void generateReadme() {
-        assertThrows(NotImplementedException.class, () ->
-            viqHeaderService.generateReadme(null));
+    void generateReadmeCreatesReadmeWithContent() throws IOException {
+        String courthouse = "Trainwell Crown Court";
+        String startTime = "Fri Mar 24 09:00:00 GMT 2023";
+        String endTime = "Fri Mar 24 12:00:00 GMT 2023";
+        String raisedBy = "User";
+        String requestType = "Download";
+
+        ViqMetaData viqMetaData = ViqMetaData.builder()
+            .courthouse(courthouse)
+            .startTime(startTime)
+            .endTime(endTime)
+            .raisedBy(raisedBy)
+            .type(requestType)
+            .build();
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        String readmeFile = viqHeaderService.generateReadme(viqMetaData, fileLocation);
+        assertNotNull(readmeFile);
+        log.debug("Reading file " + readmeFile);
+        assertTrue(readmeFile.endsWith(README_TXT_FILENAME));
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(readmeFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith(COURTHOUSE_README_LABEL)) {
+                    assertEquals("Courthouse: Trainwell Crown Court", line);
+                } else if (line.startsWith(START_TIME_README_LABEL)) {
+                    assertEquals("Start Time: Fri Mar 24 09:00:00 GMT 2023", line);
+                } else if (line.startsWith(END_TIME_README_LABEL)) {
+                    assertEquals("End Time: Fri Mar 24 12:00:00 GMT 2023", line);
+                }  else if (line.startsWith(RAISED_BY_README_LABEL)) {
+                    assertEquals("Raised by: User", line);
+                } else if (line.startsWith(REQUEST_TYPE_README_LABEL)) {
+                    assertEquals("Type: Download", line);
+                }
+            }
+        }
     }
+
 
     private PlaylistInfo createPlaylistInfo1() {
         return PlaylistInfo.builder()
