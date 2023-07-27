@@ -84,4 +84,14 @@ class RequestValidatorTest {
         );
     }
 
+    @Test
+    void fromDateEqualsToDate() {
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .dateFrom(LocalDate.of(2023, 6, 20))
+            .dateTo(LocalDate.of(2023, 6, 20))
+            .build();
+
+        RequestValidator.validate(request);
+    }
+
 }
