@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import java.time.OffsetDateTime;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
 
 @UtilityClass
 public class AudioTestDataUtil {

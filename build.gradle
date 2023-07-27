@@ -250,12 +250,12 @@ task generateCourtHousesApi(type: org.openapitools.generator.gradle.plugin.tasks
   ]
 }
 
-task generateAudioRequestApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+task generateAudioApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
   generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/audioRequest.yaml".toString()
+  inputSpec = "$rootDir/src/main/resources/openapi/audio.yaml".toString()
   outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.audiorequest.api"
-  modelPackage = "uk.gov.hmcts.darts.audiorequest.model"
+  apiPackage = "uk.gov.hmcts.darts.audio.api"
+  modelPackage = "uk.gov.hmcts.darts.audio.model"
 
   skipOperationExample = true
   configOptions = [
@@ -354,7 +354,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.3'
   testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.3")
-  compileJava.dependsOn = [ 'generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioRequestApi', 'generateCourtHousesApi', 'generateCasesApi' ]
+  compileJava.dependsOn = [ 'generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioApi', 'generateCourtHousesApi', 'generateCasesApi' ]
 }
 
 mainClassName = 'uk.gov.hmcts.darts.Application'
