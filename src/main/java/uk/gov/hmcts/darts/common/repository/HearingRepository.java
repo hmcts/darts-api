@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface HearingRepository extends JpaRepository<HearingEntity, Integer> {
@@ -29,4 +30,17 @@ public interface HearingRepository extends JpaRepository<HearingEntity, Integer>
         """
     )
     List<HearingEntity> findByCaseIds(List<Integer> caseIds);
+
+    @Query("""
+        SELECT h FROM HearingEntity h, CourthouseEntity ch, CourtroomEntity cr, CourtCaseEntity case
+        WHERE upper(ch.courthouseName) = upper(:courthouse)
+        AND upper(cr.name) = upper(:courtroom)
+        AND h.hearingDate = :date
+        AND h.courtroom = cr
+        AND cr.courthouse = ch
+        and case.caseNumber = :caseNumber
+        and h.courtCase = case
+        """
+    )
+    Optional<HearingEntity> findHearing(String courthouse, String courtroom, String caseNumber, LocalDate date);
 }

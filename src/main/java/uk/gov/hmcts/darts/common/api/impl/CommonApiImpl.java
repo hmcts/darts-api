@@ -4,39 +4,51 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.api.CommonApi;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.exception.DartsException;
-import uk.gov.hmcts.darts.common.repository.CommonCourthouseRepository;
-import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.common.service.CommonTransactionalService;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
-import java.text.MessageFormat;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CommonApiImpl implements CommonApi {
 
-    private final CourtroomRepository courtroomRepository;
-    private final CommonCourthouseRepository courthouseRepository;
-    private final CommonTransactionalService commonTransactionalService;
+    private final RetrieveCoreObjectService retrieveCoreObjectService;
 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName) {
-        CourtroomEntity courtroom = courtroomRepository.findByNames(courthouseName, courtroomName);
-        if (courtroom == null) {
-            //make sure courthouse exists
-            CourthouseEntity courthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName);
-            if (courthouse == null) {
-                //Courthouses need to be created manually in the screens. throw an error.
-                String message = MessageFormat.format("Courthouse ''{0}'' not found.", courthouseName);
-                log.error(message);
-                throw new DartsException(message);
-            } else {
-                courtroom = commonTransactionalService.createCourtroom(courthouse, courtroomName);
-            }
-        }
-        return courtroom;
+        return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouseName, courtroomName);
     }
+
+    @Override
+    public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName) {
+        return retrieveCoreObjectService.retrieveOrCreateCourtroom(courthouse, courtroomName);
+    }
+
+    @Override
+    public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
+        return retrieveCoreObjectService.retrieveOrCreateHearing(
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
+        );
+    }
+
+
+    @Override
+    public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
+        return retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber);
+    }
+
+    @Override
+    public CourthouseEntity retrieveCourthouse(String courthouseName) {
+        return retrieveCoreObjectService.retrieveCourthouse(courthouseName);
+    }
+
+
 }

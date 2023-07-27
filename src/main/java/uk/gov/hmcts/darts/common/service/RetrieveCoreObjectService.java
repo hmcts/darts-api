@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.common.api;
+package uk.gov.hmcts.darts.common.service;
 
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -7,13 +7,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.time.LocalDate;
 
-public interface CommonApi {
+public interface RetrieveCoreObjectService {
 
-    CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName);
+    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate);
 
     CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName);
 
-    HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate);
+    CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName);
 
     CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber);
 

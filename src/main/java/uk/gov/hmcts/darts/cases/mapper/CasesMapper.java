@@ -70,7 +70,7 @@ public class CasesMapper {
         caseEntity.setCaseNumber(addCaseRequest.getCaseNumber());
         mapDefendantProsecutorDefender(caseEntity, addCaseRequest);
 
-        Optional<CourthouseEntity> foundEntity = courthouseRepository.findByCourthouseName(addCaseRequest.getCourthouse());
+        Optional<CourthouseEntity> foundEntity = courthouseRepository.findByCourthouseNameIgnoreCase(addCaseRequest.getCourthouse());
         foundEntity.ifPresentOrElse(caseEntity::setCourthouse, () -> {
             throw new DartsApiException(CaseApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST);
         });
@@ -84,7 +84,8 @@ public class CasesMapper {
             Optional<DefendantEntity> found = emptyIfNull(caseEntity.getDefendantList())
                 .stream().filter(d -> d.getName().equals(newDefendant)).findAny();
             found.ifPresentOrElse(
-                d -> { }, () -> caseEntity.getDefendantList().add(createNewDefendant(newDefendant, caseEntity))
+                d -> {
+                }, () -> caseEntity.getDefendantList().add(createNewDefendant(newDefendant, caseEntity))
             );
         });
 
@@ -92,7 +93,8 @@ public class CasesMapper {
             Optional<ProsecutorEntity> found = emptyIfNull(caseEntity.getProsecutorList())
                 .stream().filter(d -> d.getName().equals(newProsecutor)).findAny();
             found.ifPresentOrElse(
-                p -> { }, () -> caseEntity.getProsecutorList().add(createNewProsecutor(newProsecutor, caseEntity))
+                p -> {
+                }, () -> caseEntity.getProsecutorList().add(createNewProsecutor(newProsecutor, caseEntity))
             );
         });
 
@@ -100,7 +102,8 @@ public class CasesMapper {
             Optional<DefenceEntity> found = emptyIfNull(caseEntity.getDefenceList())
                 .stream().filter(d -> d.getName().equals(newDefender)).findAny();
             found.ifPresentOrElse(
-                d -> { },
+                d -> {
+                },
                 () -> caseEntity.getDefenceList().add(createNewDefence(newDefender, caseEntity))
             );
         });
