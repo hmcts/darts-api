@@ -11,5 +11,5 @@ public interface ViqHeaderService {
 
     String generateAnnotation(Integer hearingId, String startTime, String endTime);
 
-    String generateReadme(ViqMetaData viqMetaData);
+    String generateReadme(ViqMetaData viqMetaData, String fileLocation);
 }
