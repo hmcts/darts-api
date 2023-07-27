@@ -1,8 +1,8 @@
 CREATE TABLE security_group
 (grp_id                  INTEGER                    NOT NULL
-,rol_id                  INTEGER
+,rol_id                  INTEGER                    NOT NULL
 ,r_dm_group_s_object_id  CHARACTER VARYING(16)
-,group_name              CHARACTER VARYING
+,group_name              CHARACTER VARYING          NOT NULL
 ,is_private              BOOLEAN
 ,description             CHARACTER VARYING
 ,r_modify_date           TIMESTAMP WITH TIME ZONE
