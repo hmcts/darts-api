@@ -42,7 +42,7 @@ public class HearingEntity {
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<JudgeEntity> judgeList = new ArrayList<>();
 
     @Column(name = "hearing_date")

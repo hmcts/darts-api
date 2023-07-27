@@ -72,13 +72,13 @@ public class CourtCaseEntity {
     @Column(name = CASE_CLOSED_TS)
     private OffsetDateTime caseClosedTimestamp;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefendantEntity> defendantList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ProsecutorEntity> prosecutorList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefenceEntity> defenceList = new ArrayList<>();
 
     @Column(name = RETAIN_UNTIL_TS)
