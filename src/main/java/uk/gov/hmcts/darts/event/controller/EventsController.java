@@ -33,6 +33,7 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@SuppressWarnings({"checkstyle.LineLengthCheck"})
 public class EventsController implements EventApi {
 
     private final CourtLogsService courtLogsService;

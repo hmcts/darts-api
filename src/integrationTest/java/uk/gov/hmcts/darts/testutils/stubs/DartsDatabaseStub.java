@@ -257,4 +257,8 @@ public class DartsDatabaseStub {
         hearingRepository.saveAllAndFlush(asList(hearingEntities));
     }
 
+    public void saveAll(EventEntity... eventEntities) {
+        eventRepository.saveAll(asList(eventEntities));
+    }
+
 }

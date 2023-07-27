@@ -122,14 +122,14 @@ paths:
           schema:
             type: string
             maxLength: 30
-          description: "Full or partial Courthouse name"
+          description: "Full or partial Courthouse name. If this is used, then at least 1 more criteria should be added."
           example: "Swansea"
         - in: query
           name: courtroom
           schema:
             type: string
             maxLength: 30
-          description: "Full or partial Courtroom name"
+          description: "Full or partial Courtroom name. If this is used, then at least 1 more criteria should be added."
           example: "1"
         - in: query
           name: judge_name
@@ -157,7 +157,7 @@ paths:
           schema:
             type: string
             format: date
-          description: "DateTo to search for the hearings in."
+          description: "DateTo to search for the hearings in. This should be on or after the date_from if both have been provided."
           example: 2023-06-22
         - in: query
           name: event_text_contains
@@ -176,6 +176,8 @@ paths:
                 items:
                   $ref: '#/components/schemas/advancedSearchResult'
 
+        '400':
+          description: A required parameter is missing or an invalid.
         '500':
           description: Internal Server Error
 

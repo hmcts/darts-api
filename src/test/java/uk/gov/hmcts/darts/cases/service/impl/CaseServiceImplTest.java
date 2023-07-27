@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
@@ -68,6 +69,9 @@ class CaseServiceImplTest {
     @Mock
     CommonApi commonApi;
 
+    @Mock
+    AdvancedSearchRequestHelper advancedSearchRequestHelper;
+
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
@@ -79,7 +83,13 @@ class CaseServiceImplTest {
     @BeforeEach
     void setUp() {
         mapper = new CasesMapper(courthouseRepository);
-        service = new CaseServiceImpl(mapper, hearingRepository, caseRepository, commonApi);
+        service = new CaseServiceImpl(
+            mapper,
+            hearingRepository,
+            caseRepository,
+            commonApi,
+            advancedSearchRequestHelper
+        );
         this.objectMapper = TestUtils.getObjectMapper();
     }
 
@@ -351,7 +361,10 @@ class CaseServiceImplTest {
             return args[0];
         });
 
-        Mockito.when(commonApi.retrieveOrCreateCourtroom(anyString(), anyString())).thenReturn(CommonTestDataUtil.createCourtroom(courthouseEntity, "2"));
+        Mockito.when(commonApi.retrieveOrCreateCourtroom(
+            anyString(),
+            anyString()
+        )).thenReturn(CommonTestDataUtil.createCourtroom(courthouseEntity, "2"));
         List<HearingEntity> existingHearings = Lists.newArrayList(CommonTestDataUtil.createHearing(
             existingCaseEntity,
             courtroomEntity,

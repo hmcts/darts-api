@@ -6,6 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.cases.exception.CaseError;
+import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
+import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
@@ -15,11 +18,13 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.cases.util.CourtCaseUtil;
 import uk.gov.hmcts.darts.common.api.CommonApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.time.LocalDate;
@@ -35,11 +40,13 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @SuppressWarnings("PMD.TooManyMethods")
 public class CaseServiceImpl implements CaseService {
 
+    private static final int MAX_RESULTS = 500;
     private final CasesMapper casesMapper;
 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
     private final CommonApi commonApi;
+    private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
 
     @Override
     @Transactional
@@ -131,13 +138,17 @@ public class CaseServiceImpl implements CaseService {
         }
 
         hearingEntity.setCourtCase(caseEntity);
+        hearingEntity.setHearingDate(LocalDate.now());
 
         emptyIfNull(addCaseRequest.getJudges()).forEach(newJudge -> {
             Optional<JudgeEntity> found = emptyIfNull(hearingEntity.getJudgeList()).stream()
                 .filter(j -> j.getName().equals(newJudge)).findAny();
             if (found.isEmpty()) {
-                found.ifPresentOrElse(j -> { },
-                                      () -> hearingEntity.getJudgeList().add(createNewJudge(newJudge, hearingEntity)));
+                found.ifPresentOrElse(
+                    j -> {
+                    },
+                    () -> hearingEntity.getJudgeList().add(createNewJudge(newJudge, hearingEntity))
+                );
             }
         });
 
@@ -159,6 +170,17 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
-        return new ArrayList<>();
+        List<CourtCaseEntity> courtCaseEntities = advancedSearchRequestHelper.getMatchingCourtCases(request);
+        if (courtCaseEntities.size() > MAX_RESULTS) {
+            throw new DartsApiException(CaseError.TOO_MANY_RESULTS);
+        }
+        if (courtCaseEntities.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Integer> caseIds = CourtCaseUtil.getCaseIdList(courtCaseEntities);
+        List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
+        return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
+
+
 }
