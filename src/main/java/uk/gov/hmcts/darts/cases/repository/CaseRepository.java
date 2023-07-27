@@ -4,14 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("PMD.MethodNamingConventions")
 @Repository
 public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
-
-    List<CourtCaseEntity> findByCaseNumber(String caseNumber);
 
     Optional<CourtCaseEntity> findByCaseNumberAndCourthouse_CourthouseName(String caseNumber, String courthouseName);
 }
