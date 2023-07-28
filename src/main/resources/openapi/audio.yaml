@@ -12,7 +12,7 @@ paths:
   /audio/request:
     post:
       tags:
-        - AudioRequests
+        - Audio
       summary: Users can request audio for specific cases and date/time periods
       operationId: addAudioRequest
       description: Adds a user audio request for processing
@@ -29,6 +29,42 @@ paths:
             schema:
               $ref: '#/components/schemas/AudioRequestDetails'
         description: Audio Request item to add
+
+  /audio/download:
+    get:
+      tags:
+        - Audio
+      summary: Download audio
+      operationId: download
+      description: Download audio
+      parameters:
+        - in: query
+          name: audioRequestId
+          required: true
+          schema:
+            $ref: '#/components/schemas/AudioRequestId'
+      responses:
+        200:
+          description: OK
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        500:
+          description: The requested data cannot be located
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_101"
+                title: "The requested data cannot be located"
+                status: 500
 
 components:
   schemas:
@@ -63,3 +99,7 @@ components:
           example: '2023-05-31T12:00:00Z'
         requestType:
           $ref: '#/components/schemas/AudioRequestType'
+
+    AudioRequestId:
+      type: integer
+      example: 12345
