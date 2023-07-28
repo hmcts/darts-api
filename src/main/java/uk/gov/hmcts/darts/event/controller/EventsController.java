@@ -83,10 +83,10 @@ public class EventsController implements EventApi {
 
     @Override
     public ResponseEntity<List<CourtLog>> courtlogsGet(
-        @Parameter(name = "Courthouse", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "Courthouse", required = true) String courthouse,
-        @Parameter(name = "caseNumber", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "caseNumber", required = true) String caseNumber,
-        @Parameter(name = "startDateTime", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "startDateTime", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDateTime,
-        @Parameter(name = "endDateTime", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "endDateTime", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDateTime
+        @Parameter(name = "courthouse", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse,
+        @Parameter(name = "case_number", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "case_number", required = true) String caseNumber,
+        @Parameter(name = "start_date_time", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "start_date_time", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startDateTime,
+        @Parameter(name = "end_date_time", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "end_date_time", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime endDateTime
     ) {
 
         List<CourtLog> courtLogs = courtLogsService.getCourtLogs(courthouse, caseNumber, startDateTime, endDateTime);
