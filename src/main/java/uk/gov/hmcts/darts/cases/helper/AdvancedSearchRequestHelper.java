@@ -47,7 +47,6 @@ public class AdvancedSearchRequestHelper {
         Predicate finalAndPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         criteriaQuery.where(finalAndPredicate);
         TypedQuery<CourtCaseEntity> query = entityManager.createQuery(criteriaQuery);
-
         return query.getResultList();
     }
 

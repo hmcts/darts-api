@@ -14,8 +14,10 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,6 +25,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
+@Slf4j
 public class EventEntity extends VersionedEntity {
 
     @Id
@@ -67,6 +70,10 @@ public class EventEntity extends VersionedEntity {
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = "eve_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
-    private List<HearingEntity> hearingEntities;
+    private List<HearingEntity> hearingEntities = new ArrayList<>();
 
+    public void addHearing(HearingEntity hearingEntity) {
+        log.debug("Adding Hearing with ID {}, eventID={}", hearingEntity.getId(), getId());
+        hearingEntities.add(hearingEntity);
+    }
 }

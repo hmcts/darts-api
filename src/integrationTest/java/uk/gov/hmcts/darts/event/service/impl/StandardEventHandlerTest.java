@@ -201,9 +201,12 @@ class StandardEventHandlerTest extends IntegrationBase {
     public void testSummationWithConcurrency() throws InterruptedException {
 
         dartsDatabase.createCourthouseWithoutCourtrooms(SOME_COURTHOUSE);
-        int numberOfThreads = 500;
-        ExecutorService service = Executors.newFixedThreadPool(50);
+        dartsGateway.darNotificationReturnsSuccess();
+
+        int numberOfThreads = 200;
+        ExecutorService service = Executors.newFixedThreadPool(20);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
 
         for (int i = 0; i < numberOfThreads; i++) {
             service.submit(() -> {

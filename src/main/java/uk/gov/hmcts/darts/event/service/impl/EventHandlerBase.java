@@ -113,9 +113,10 @@ public abstract class EventHandlerBase implements EventHandler {
         );
 
         EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity.getCourtroom());
+        eventEntity.addHearing(hearingEntity);
+        eventRepository.saveAndFlush(eventEntity);
         hearingEntity.setHearingIsActual(true);
-        hearingEntity.addEvent(eventEntity);
-        hearingRepository.save(hearingEntity);
+        hearingRepository.saveAndFlush(hearingEntity);
 
 
         return CourtroomCourthouseCourtcase.builder()
@@ -130,7 +131,7 @@ public abstract class EventHandlerBase implements EventHandler {
     protected EventEntity saveEvent(DartsEvent dartsEvent, CourtroomEntity courtroomEntity) {
         var eventEntity = eventEntityFrom(dartsEvent);
         eventEntity.setCourtroom(courtroomEntity);
-        eventRepository.save(eventEntity);
+        eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }
 

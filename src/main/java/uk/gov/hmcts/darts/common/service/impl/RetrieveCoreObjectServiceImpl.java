@@ -1,7 +1,11 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
@@ -31,7 +35,11 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     private final int MAX_RETRIES = 3;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Override
+    @Transactional
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
         int retryCount = 0;
         while (true) {
@@ -43,7 +51,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
                     hearingDate
                 );
                 if (foundHearing.isPresent()) {
-                    System.out.println(Thread.currentThread().getName() + " Found a hearing with id " + foundHearing.get().getId());
+                    log.debug("Found a hearing with id " + foundHearing.get().getId());
                 }
 
                 return foundHearing.orElseGet(() -> createHearing(
@@ -56,6 +64,9 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
                 if (++retryCount >= MAX_RETRIES) {
                     throw e;
                 }
+                randomSleep();
+                Session session = entityManager.unwrap(Session.class);
+                session.clear();
             }
         }
     }
@@ -73,6 +84,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     }
 
     @Override
+    @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(
             courthouse.getId(),
@@ -84,6 +96,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
 
     @Override
+    @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNames(courthouseName, courtroomName);
         if (foundCourtroom.isPresent()) {
@@ -114,37 +127,44 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     }
 
     @Override
+    @Transactional
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
         int retryCount = 0;
         while (true) {
             try {
-                System.out.println(Thread.currentThread().getName() + " looking for existing case");
+                log.debug("looking for existing case");
                 Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
                     caseNumber,
                     courthouseName
                 );
                 if (foundCase.isPresent()) {
-                    System.out.println(Thread.currentThread().getName() + " Found a case with id " + foundCase.get().getId());
+                    log.debug("Found a case with id " + foundCase.get().getId());
                 } else {
-                    System.out.println(Thread.currentThread().getName() + " not found a case");
+                    log.debug("not found a case");
                 }
 
                 return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber));
             } catch (DataIntegrityViolationException e) {
-                try {
-                    long millis = (long) (Math.random() * 400) + 100;
-                    System.out.println(Thread.currentThread().getName() + " sleeping for " + millis);
-                    Thread.sleep(millis);
-                } catch (InterruptedException ex) {
-                    System.out.println(Thread.currentThread().getName() + " Runtime exception thrown = " + ex.toString());
-                    throw new RuntimeException(ex);
-                }
+                randomSleep();
                 if (++retryCount >= MAX_RETRIES) {
-                    System.out.println(Thread.currentThread().getName() + " max retries reached, throwing create case exception");
+                    log.debug("max retries reached, throwing create case exception");
                     throw e;
                 }
+                Session session = entityManager.unwrap(Session.class);
+                session.clear();
             }
         }
+    }
+
+    private static void randomSleep() {
+//        try {
+//            long millis = (long) (Math.random() * 400) + 100;
+//            log.debug("sleeping for " + millis);
+//            Thread.currentThread().sleep(millis);
+//        } catch (InterruptedException ex) {
+//            log.debug("Runtime exception thrown = " + ex.toString());
+//            throw new RuntimeException(ex);
+//        }
     }
 
     private CourtCaseEntity createCase(String courthouseName, String caseNumber) {
@@ -153,7 +173,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         courtCase.setCaseNumber(caseNumber);
         courtCase.setCourthouse(foundCourthouse);
         caseRepository.saveAndFlush(courtCase);
-        System.out.println(Thread.currentThread().getName() + " Created case with ID " + courtCase.getId());
+        log.debug("Created case with ID " + courtCase.getId());
         return courtCase;
     }
 
