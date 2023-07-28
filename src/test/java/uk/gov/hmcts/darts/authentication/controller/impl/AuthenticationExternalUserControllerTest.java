@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.ModelAndView;
+import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 
 import java.net.URI;
@@ -45,8 +46,9 @@ class AuthenticationExternalUserControllerTest {
         when(authenticationService.handleOauthCode(anyString()))
             .thenReturn(DUMMY_TOKEN);
 
-        String accessToken = controller.handleOauthCode("code");
-
+        SecurityToken securityToken = controller.handleOauthCode("code");
+        assertNotNull(securityToken);
+        String accessToken = securityToken.getAccessToken();
         assertNotNull(accessToken);
     }
 

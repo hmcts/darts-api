@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
+import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 
 @Slf4j
 @RestController
@@ -20,9 +21,8 @@ public class AuthenticationInternalUserController implements AuthenticationContr
     }
 
     @Override
-    public String handleOauthCode(String code) {
+    public SecurityToken handleOauthCode(String code) {
         log.info("Authorization Token received successfully");
-
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 

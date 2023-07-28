@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
+import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 
 import java.net.URI;
@@ -29,8 +30,10 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     }
 
     @Override
-    public String handleOauthCode(String code) {
-        return authenticationService.handleOauthCode(code);
+    public SecurityToken handleOauthCode(String code) {
+        return SecurityToken.builder()
+            .accessToken(authenticationService.handleOauthCode(code))
+            .build();
     }
 
     @Override
