@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
@@ -44,8 +45,8 @@ import java.util.Optional;
 
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseNumber;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
@@ -106,6 +107,16 @@ public class DartsDatabaseStub {
         return eventRepository.findAll();
     }
 
+    public JudgeEntity createSimpleJudges(HearingEntity hearing) {
+
+        var judgesEntity = new JudgeEntity();
+        judgesEntity.setId(1);
+        judgesEntity.setName("judge1");
+        judgesEntity.setHearing(hearing);
+
+        return judgeRepository.saveAndFlush(judgesEntity);
+    }
+
     @Transactional
     public void givenTheCourtHouseHasRoom(CourthouseEntity courthouse, String roomName) {
         var courtroom = new CourtroomEntity();
@@ -122,29 +133,70 @@ public class DartsDatabaseStub {
             courthouseName,
             courtroomName
         );
+
         var courtroomEntity = courtroomRepository.findByNames(courthouseName, courtroomName);
         var hearingEntity = new HearingEntity();
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setHearingDate(hearingDate);
         hearingEntity.setCourtCase(caseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
+        //hearingEntity.setJudgeList(List.of(createSimpleJudges(hearingEntity)));
         return hearingRepository.saveAndFlush(hearingEntity);
     }
 
     @Transactional
     public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
-        var courtroom = givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
-        var caseEntity = someMinimalCase();
-        caseEntity.setCaseNumber(caseNumber);
-        caseEntity.setCourthouse(courtroom.getCourthouse());
+        givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
+        var caseEntity = createCaseUnlessExists(caseNumber, courthouseName);
+
         return caseRepository.saveAndFlush(caseEntity);
     }
 
     @Transactional
+    public CourtCaseEntity createCaseUnlessExists(String caseNumber, String courthouseName) {
+
+        Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
+            caseNumber,
+            courthouseName
+        );
+
+        if (caseEntity.isPresent()) {
+            return caseEntity.get();
+        }
+
+        return createCase(caseNumber, courthouseName);
+
+    }
+
+    @Transactional
+    public CourtCaseEntity createCase(String caseNumber, String courthouseName) {
+
+        CourthouseEntity courthouse = createCourthouseUnlessExists(courthouseName);
+
+        return caseRepository.save(createCaseAtCourthouse(caseNumber, courthouse));
+
+    }
+
+    @Transactional
+    public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
+
+        Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseName(courthouseName);
+
+        CourthouseEntity courthouseEntity;
+
+        if (courthouseEntityOptional.isEmpty()) {
+            courthouseEntity = createCourthouseWithoutCourtrooms(courthouseName);
+        } else {
+            courthouseEntity = courthouseEntityOptional.get();
+        }
+
+        return courthouseEntity;
+    }
+
+    @Transactional
     public CourtroomEntity givenTheDatabaseContainsCourthouseWithRoom(String courthouseName, String courtroomName) {
-        var courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName(courthouseName);
-        var persistedCourthouse = courthouseRepository.saveAndFlush(courthouse);
+
+        var persistedCourthouse = createCourthouseUnlessExists(courthouseName);
 
         var courtroom = new CourtroomEntity();
         courtroom.setName(courtroomName);

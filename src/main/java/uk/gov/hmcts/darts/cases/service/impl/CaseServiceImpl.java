@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.cases.exception.CaseError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
+import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
@@ -57,11 +58,26 @@ public class CaseServiceImpl implements CaseService {
             request.getCourtroom(),
             request.getDate()
         );
+        createCourtroomIfMissing(hearings, request);
+        return casesMapper.mapToCourtCases(hearings);
+
+    }
+
+    @Override
+    public List<Hearing> getCaseHearings(Integer caseId) {
+
+        List<HearingEntity> hearingList = hearingRepository.findByCaseIds(List.of(caseId));
+
+        return HearingEntityToCaseHearing.mapToHearingList(hearingList);
+
+    }
+
+    private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
         if (CollectionUtils.isEmpty(hearings)) {
             //find out if courthouse or courtroom are missing.
             commonApi.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
         }
-        return casesMapper.mapToCourtCases(hearings);
+        // return casesMapper.mapToCourtCases(hearings);
     }
 
 
@@ -161,12 +177,6 @@ public class CaseServiceImpl implements CaseService {
         defence.setName(newJudge);
         return defence;
     }
-
-    @Override
-    public List<Hearing> getCaseHearings(Integer caseId) {
-        return new ArrayList<>();
-    }
-
 
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {

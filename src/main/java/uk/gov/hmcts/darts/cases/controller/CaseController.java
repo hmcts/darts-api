@@ -106,9 +106,7 @@ public class CaseController implements CasesApi {
         @Parameter(name = "caseId", description = "caseId is the internal cas_id of the case.", required = true, in = ParameterIn.PATH)
         @PathVariable("caseId") Integer caseId) {
 
-        caseService.getCaseHearings(caseId);
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
     }
 
 }
