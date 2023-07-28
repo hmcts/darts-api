@@ -45,7 +45,6 @@ class CaseControllerTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    // To be replaced by something more reusable as the last PR in this ticket
     private HearingEntity setupCase1(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case1 = createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case0000001");
@@ -60,7 +59,6 @@ class CaseControllerTest extends IntegrationBase {
         return hearingForCase1;
     }
 
-    // To be replaced by something more reusable as the last PR in this ticket
     private HearingEntity setupCase2(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case2 = createCaseAt(swanseaCourthouse);
         case2.setCaseNumber("Case0000002");
@@ -75,7 +73,6 @@ class CaseControllerTest extends IntegrationBase {
         return hearingForCase2;
     }
 
-    // To be replaced by something more reusable as the last PR in this ticket
     private HearingEntity setupCase3(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case3 = createCaseAt(swanseaCourthouse);
         case3.setCaseNumber("Case0000003");
