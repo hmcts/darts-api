@@ -27,7 +27,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class RetrieveHearingRelatedObjectsHelperTest {
+class RetrieveCoreObjectServiceImplTest {
 
     private static final String COURTHOUSE_1 = "courthouse1";
     private static final String COURTROOM_1 = "courtroom1";

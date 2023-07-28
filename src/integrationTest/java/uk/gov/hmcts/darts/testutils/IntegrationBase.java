@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsGatewayStub;
 
 @AutoConfigureWireMock
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"local"})
 public class IntegrationBase {
 
     protected DartsGatewayStub dartsGateway = new DartsGatewayStub();

@@ -7,25 +7,20 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.api.CommonApi;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.event.exception.EventError;
 import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 
-import java.time.OffsetDateTime;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
@@ -51,6 +46,9 @@ public abstract class EventHandlerBase implements EventHandler {
     private EventRepository eventRepository;
     @Autowired
     private HearingRepository hearingRepository;
+
+    @Autowired
+    private CommonApi commonApi;
 
     private static final String COURTHOUSE_COURTROOM_NOT_FOUND_MESSAGE = "Courthouse: %s & Courtroom: %s combination not found in database";
     private static final String MULTIPLE_CASE_NUMBERS = "Event: %s contains multiple caseNumbers: %s";
@@ -100,103 +98,45 @@ public abstract class EventHandlerBase implements EventHandler {
     }
 
     protected CourtroomCourthouseCourtcase getOrCreateCourtroomCourtHouseAndCases(DartsEvent dartsEvent) {
-        final var actualCourtRoomEntity = getCourtRoom(dartsEvent);
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {
             log.warn(format(MULTIPLE_CASE_NUMBERS, dartsEvent.getEventId(), join(", ", caseNumbers)));
         }
-        final var actualCourtHouse = actualCourtRoomEntity.getCourthouse();
-        final var actualEventCaseNumber = caseNumbers.get(0);
-        final var actualEventDate = dartsEvent.getDateTime();
 
-        var actualCourtCaseEntity = getCourtCaseEntityOrCreate(actualCourtHouse, actualEventCaseNumber);
-
-        boolean hearingIsNew = false;
-        HearingEntity actualHearingEntity;
-        var optionalHearingEntity = getHearingEntity(actualEventDate, actualCourtCaseEntity);
-        if (optionalHearingEntity.isPresent()) {
-            actualHearingEntity = optionalHearingEntity.get();
-        } else {
-            actualHearingEntity = newCaseHearing(actualCourtRoomEntity, actualEventDate, actualCourtCaseEntity);
-            hearingIsNew = true;
-        }
-        actualHearingEntity.setHearingIsActual(true);
-
-        saveEvent(dartsEvent, actualCourtRoomEntity);
-
-        boolean isCourtroomDifferentFromHearing = isCourtroomDifferentFromHearingCourtroom(
-            actualCourtRoomEntity,
-            actualHearingEntity
+        String caseNumber = caseNumbers.get(0);
+        HearingEntity hearingEntity = commonApi.retrieveOrCreateHearing(
+            dartsEvent.getCourthouse(),
+            dartsEvent.getCourtroom(),
+            caseNumber,
+            dartsEvent.getDateTime().toLocalDate()
         );
 
-        if (isTheHearingNewOrTheCourtroomIsDifferent(hearingIsNew, isCourtroomDifferentFromHearing)) {
-            actualHearingEntity.setCourtroom(actualCourtRoomEntity);
-        }
+        EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity.getCourtroom());
+        hearingEntity.setHearingIsActual(true);
+        hearingEntity.addEvent(eventEntity);
+        hearingRepository.save(hearingEntity);
 
-        caseRepository.save(actualCourtCaseEntity);
-        hearingRepository.save(actualHearingEntity);
 
         return CourtroomCourthouseCourtcase.builder()
-            .courthouseEntity(actualCourtHouse)
-            .courtroomEntity(actualCourtRoomEntity)
-            .courtCaseEntity(actualCourtCaseEntity)
-            .isHearingNew(hearingIsNew)
-            .isCourtroomDifferentFromHearing(isCourtroomDifferentFromHearing)
+            .courthouseEntity(hearingEntity.getCourtroom().getCourthouse())
+            .courtroomEntity(hearingEntity.getCourtroom())
+            .courtCaseEntity(hearingEntity.getCourtCase())
+            .isHearingNew(hearingEntity.isNew())
+            .isCourtroomDifferentFromHearing(false)//for now always creating a new one
             .build();
     }
 
-    protected CourtroomEntity getCourtRoom(DartsEvent dartsEvent) {
-        return courtroomRepository
-            .findByCourthouseNameAndCourtroomName(dartsEvent.getCourthouse(), dartsEvent.getCourtroom())
-            .orElseThrow(() -> new DartsApiException(
-                EventError.EVENT_DATA_NOT_FOUND,
-                format(COURTHOUSE_COURTROOM_NOT_FOUND_MESSAGE, dartsEvent.getCourthouse(), dartsEvent.getCourtroom())
-            ));
-
-    }
-
-    protected CourtCaseEntity getCourtCaseEntityOrCreate(CourthouseEntity courtHouse, String eventCaseNumber) {
-        return caseRepository
-            .findByCaseNumberAndCourthouse_CourthouseName(eventCaseNumber, courtHouse.getCourthouseName())
-            .orElseGet(() -> createNewCaseAt(courtHouse, eventCaseNumber));
-    }
-
-    protected void saveEvent(DartsEvent dartsEvent, CourtroomEntity courtroomEntity) {
+    protected EventEntity saveEvent(DartsEvent dartsEvent, CourtroomEntity courtroomEntity) {
         var eventEntity = eventEntityFrom(dartsEvent);
         eventEntity.setCourtroom(courtroomEntity);
         eventRepository.save(eventEntity);
+        return eventEntity;
     }
 
     protected boolean isTheHearingNewOrTheCourtroomIsDifferent(boolean hearingIsNew, boolean isCourtroomDifferentFromHearing) {
         return hearingIsNew || isCourtroomDifferentFromHearing;
     }
 
-    protected static boolean isCourtroomDifferentFromHearingCourtroom(CourtroomEntity courtroomEntity, HearingEntity hearingEntity) {
-        return !hearingEntity.getCourtroom().equals(courtroomEntity);
-    }
-
-    protected Optional<HearingEntity> getHearingEntity(OffsetDateTime eventDate, CourtCaseEntity courtCaseEntity) {
-        return courtCaseEntity.getHearings().stream()
-            .filter(hearingEntity -> hearingEntity.isFor(eventDate))
-            .findFirst();
-    }
-
-    protected static HearingEntity newCaseHearing(CourtroomEntity actualCourtRoom, OffsetDateTime actualEventDate, CourtCaseEntity courtCase) {
-        var newHearing = new HearingEntity();
-        newHearing.setHearingDate(actualEventDate.toLocalDate());
-        newHearing.setCourtroom(actualCourtRoom);
-        newHearing.setCourtCase(courtCase);
-        newHearing.setHearingIsActual(true);
-        courtCase.addHearing(newHearing);
-        return newHearing;
-    }
-
-    protected static CourtCaseEntity createNewCaseAt(CourthouseEntity actualCourtHouse, String caseNumber) {
-        var newCourtCase = new CourtCaseEntity();
-        newCourtCase.setCourthouse(actualCourtHouse);
-        newCourtCase.setCaseNumber(caseNumber);
-        return newCourtCase;
-    }
 
 }
