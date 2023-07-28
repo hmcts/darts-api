@@ -2,7 +2,7 @@
   "courthouse": "EDINBURGH",
   "courtroom": "1",
   "hearing_date": "todays_date",
-  "case_number":"case1",
+  "case_number": "case1",
   "defendantList": [
     "Jow Bloggs",
     "aDefendant"
