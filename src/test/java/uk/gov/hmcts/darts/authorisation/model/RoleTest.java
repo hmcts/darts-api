@@ -2,11 +2,15 @@ package uk.gov.hmcts.darts.authorisation.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_CLERK;
+import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.JUDGE;
 
 class RoleTest {
 
@@ -37,13 +41,40 @@ class RoleTest {
         role = Role.builder().build();
         assertNull(role.getRoleName());
 
-        List<Permission> newPermissions = new ArrayList<>();
-        newPermissions.add(Permission.builder().build());
-        newPermissions.add(Permission.builder().build());
+        Set<Permission> newPermissions = new HashSet<>();
+        newPermissions.add(Permission.builder()
+                               .permissionId(2)
+                               .permissionName("Approve/Reject Transcription Request")
+                               .build());
+        newPermissions.add(Permission.builder()
+                               .permissionId(4)
+                               .permissionName("Listen to Audio for Playback")
+                               .build());
         role.setPermissions(newPermissions);
 
-        List<Permission> permissionsResult = role.getPermissions();
+        Set<Permission> permissionsResult = role.getPermissions();
         assertEquals(newPermissions, permissionsResult);
         assertEquals(2, permissionsResult.size());
     }
+
+    @Test
+    void shouldEqualsJudgeRole() {
+        role = Role.builder()
+            .roleId(JUDGE.getId())
+            .roleName(JUDGE.toString())
+            .build();
+
+        assertEquals(role, new Role(JUDGE.getId(), JUDGE.toString(), Collections.emptySet()));
+    }
+
+    @Test
+    void shouldNotEqualsJudgeRole() {
+        role = Role.builder()
+            .roleId(JUDGE.getId())
+            .roleName(JUDGE.toString())
+            .build();
+
+        assertNotEquals(role, new Role(COURT_CLERK.getId(), COURT_CLERK.toString(), Collections.emptySet()));
+    }
+
 }

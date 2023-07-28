@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.authorisation.model;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class PermissionTest {
 
@@ -10,21 +12,21 @@ class PermissionTest {
     @Test
     void getAndSetPermissionId() {
         permission = Permission.builder().build();
-        Assertions.assertNull(permission.getPermissionId());
+        assertNull(permission.getPermissionId());
 
         int newPermissionId = 10;
         permission.setPermissionId(newPermissionId);
-        Assertions.assertEquals(newPermissionId, permission.getPermissionId());
+        assertEquals(newPermissionId, permission.getPermissionId());
     }
 
     @Test
     void getAndSetPermissionName() {
         permission = Permission.builder().build();
-        Assertions.assertNull(permission.getPermissionName());
+        assertNull(permission.getPermissionName());
 
         String newPermissionName = "Permission";
         permission.setPermissionName(newPermissionName);
-        Assertions.assertEquals(newPermissionName, permission.getPermissionName());
+        assertEquals(newPermissionName, permission.getPermissionName());
     }
 
     @Test
@@ -36,7 +38,7 @@ class PermissionTest {
             .permissionName(permissionName)
             .build();
 
-        Assertions.assertEquals(permissionId, permission.getPermissionId());
-        Assertions.assertEquals(permissionName, permission.getPermissionName());
+        assertEquals(permissionId, permission.getPermissionId());
+        assertEquals(permissionName, permission.getPermissionName());
     }
 }

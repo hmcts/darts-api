@@ -2,11 +2,13 @@ package uk.gov.hmcts.darts.authorisation.model;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_CLERK;
+import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_MANAGER;
 
 class UserStateTest {
 
@@ -37,13 +39,20 @@ class UserStateTest {
         userState = UserState.builder().build();
         assertNull(userState.getRoles());
 
-        List<Role> newRoles = new ArrayList<>();
-        newRoles.add(Role.builder().build());
-        newRoles.add(Role.builder().build());
+        Set<Role> newRoles = new HashSet<>();
+        newRoles.add(Role.builder()
+                         .roleId(COURT_MANAGER.getId())
+                         .roleName(COURT_MANAGER.toString())
+                         .build());
+        newRoles.add(Role.builder()
+                         .roleId(COURT_CLERK.getId())
+                         .roleName(COURT_CLERK.toString())
+                         .build());
         userState.setRoles(newRoles);
 
-        List<Role> roles = userState.getRoles();
+        Set<Role> roles = userState.getRoles();
         assertEquals(newRoles, roles);
         assertEquals(2, roles.size());
     }
+
 }
