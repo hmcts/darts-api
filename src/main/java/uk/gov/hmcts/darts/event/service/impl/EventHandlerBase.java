@@ -7,7 +7,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.api.CommonApi;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
@@ -48,7 +48,7 @@ public abstract class EventHandlerBase implements EventHandler {
     private HearingRepository hearingRepository;
 
     @Autowired
-    private CommonApi commonApi;
+    private RetrieveCoreObjectService retrieveCoreObjectService;
 
     private static final String MULTIPLE_CASE_NUMBERS = "Event: %s contains multiple caseNumbers: %s";
 
@@ -104,7 +104,7 @@ public abstract class EventHandlerBase implements EventHandler {
         }
 
         String caseNumber = caseNumbers.get(0);
-        HearingEntity hearingEntity = commonApi.retrieveOrCreateHearing(
+        HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
             dartsEvent.getCourthouse(),
             dartsEvent.getCourtroom(),
             caseNumber,

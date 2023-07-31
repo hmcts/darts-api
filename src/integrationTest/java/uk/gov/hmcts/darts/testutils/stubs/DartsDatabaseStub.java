@@ -137,7 +137,7 @@ public class DartsDatabaseStub {
             courtroomName
         );
 
-        var courtroomEntity = courtroomRepository.findByNames(courthouseName, courtroomName);
+        var courtroomEntity = courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName);
         var hearingEntity = new HearingEntity();
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setHearingDate(hearingDate);
@@ -238,7 +238,7 @@ public class DartsDatabaseStub {
 
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
-        return courtroomRepository.findByNames(courthouseName, courtroomName).get();
+        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).get();
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {

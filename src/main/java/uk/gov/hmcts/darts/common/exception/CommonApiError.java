@@ -14,7 +14,7 @@ public enum CommonApiError implements DartsApiError {
         "Provided courthouse does not exist"
     );
 
-    private static final String ERROR_TYPE_PREFIX = "SERVICE";
+    private static final String ERROR_TYPE_PREFIX = "COMMON";
 
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;

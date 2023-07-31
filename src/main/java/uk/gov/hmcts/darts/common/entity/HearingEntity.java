@@ -65,7 +65,7 @@ public class HearingEntity {
     private List<MediaEntity> mediaList;
 
     @Transient
-    boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
+    private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "hearing_event_ae",

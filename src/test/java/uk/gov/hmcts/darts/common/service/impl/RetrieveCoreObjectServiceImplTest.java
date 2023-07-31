@@ -83,7 +83,7 @@ class RetrieveCoreObjectServiceImplTest {
     @Test
     void courtroomCreate() {
         mockCourthouse();
-        when(courtroomRepository.findByNames(anyString(), anyString())).thenReturn(
+        when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
             Optional.empty());
 
         CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
@@ -99,7 +99,7 @@ class RetrieveCoreObjectServiceImplTest {
     void courtroomRetrieve() {
 
         CourtroomEntity courtroom = CommonTestDataUtil.createCourtroom(COURTROOM_1);
-        when(courtroomRepository.findByNames(anyString(), anyString())).thenReturn(
+        when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(
             Optional.of(courtroom));
 
         CourtroomEntity response = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
