@@ -1,18 +1,18 @@
---v12 remove synthetic primary key from associative entity security_group_membership
---    remove columns users_names and r_dm_group_s_object_id from security_group_membership
---    change name of security_group_membership to security_group_ae
---    remove synthetic primary key from security_role_permission and add _ae suffix 
---    remove synthetci primary key from security_group_courthouse and add _ae suffix
---    explicitly create indexes for primary keys with storage clauses, then utilise those indexes to define PKs
---    add sequences for remaining synthetic primary keys
---    amend type of r_modify_date to timestamp with time ZONE
---    amend is_private to BOOLEAN
+--V13 change name of security_group_membership_ae to security_group_user_account_ae
+--    added NOT NULL to all PK columns and "name" columns
+--    added tablespaces to table creation (index ones already existed)
 
+-- assuming this already exists:
+-- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
+-- CREATE TABLESPACE darts_indexes location 'E:/PostgreSQL/Indexes';
+
+-- GRANT ALL ON TABLESPACE darts_tables TO darts_owner;
+-- GRANT ALL ON TABLESPACE darts_indexes TO darts_owner;
 
 -- List of Table Aliases
 
 --security_group                       GRP
---security_group_membership_ae         GRM
+--security_group_user_account_ae       GUA
 --security_role                        ROL
 --security_permission                  PER
 --security_role_permission_ae          ROP
@@ -22,66 +22,66 @@ SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
 
 CREATE TABLE security_group
-(grp_id                  INTEGER
-,rol_id                  INTEGER
+(grp_id                  INTEGER                         NOT NULL
+,rol_id                  INTEGER                         NOT NULL
 ,r_dm_group_s_object_id  CHARACTER VARYING(16)
-,group_name              CHARACTER VARYING
+,group_name              CHARACTER VARYING               NOT NULL
 ,is_private              BOOLEAN
 ,description             CHARACTER VARYING
 ,r_modify_date           TIMESTAMP WITH TIME ZONE
 ,group_class             CHARACTER VARYING
 ,group_global_unique_id  CHARACTER VARYING
 ,group_display_name      CHARACTER VARYING
-);
+) TABLESPACE darts_tables;
 
-COMMENT ON TABLE security_group 
+COMMENT ON TABLE security_group
 IS 'migration columns all sourced directly from dm_group_s, additional attributes may be required from dm_user_s, but data only where dm_user_s.r_is_group=1';
 COMMENT ON COLUMN security_group.grp_id
 IS 'primary key of security_group';
 COMMENT ON COLUMN security_group.r_dm_group_s_object_id
 IS 'internal Documentum primary key from dm_group_s';
 
-CREATE TABLE security_group_membership_ae
-(usr_id                 INTEGER
-,grp_id                  INTEGER
-);
+CREATE TABLE security_group_user_account_ae
+(usr_id                 INTEGER                         NOT NULL
+,grp_id                 INTEGER                         NOT NULL
+) TABLESPACE darts_tables;
 
-COMMENT ON TABLE security_group_membership_ae 
+COMMENT ON TABLE security_group_user_account_ae
 IS 'is the associative entity mapping users to groups, content will be defined by dm_group_r';
-COMMENT ON COLUMN security_group_membership_ae.usr_id
+COMMENT ON COLUMN security_group_user_account_ae.usr_id
 IS 'foreign key from user_account';
-COMMENT ON COLUMN security_group_membership_ae.grp_id
+COMMENT ON COLUMN security_group_user_account_ae.grp_id
 IS 'foreign key from security_group';
 
 
 
 CREATE TABLE security_role
-(rol_id                  INTEGER
-,role_name               CHARACTER VARYING
-);
+(rol_id                  INTEGER                         NOT NULL
+,role_name               CHARACTER VARYING               NOT NULL
+) TABLESPACE darts_tables;
 
 CREATE TABLE security_permission
-(per_id                  INTEGER
-,permission_name         CHARACTER VARYING
-);
+(per_id                  INTEGER                         NOT NULL
+,permission_name         CHARACTER VARYING               NOT NULL
+) TABLESPACE darts_tables;
 
 CREATE TABLE security_role_permission_ae
-(rol_id                  INTEGER
-,per_id                  INTEGER
-);
+(rol_id                  INTEGER                         NOT NULL
+,per_id                  INTEGER                         NOT NULL
+) TABLESPACE darts_tables;
 
 CREATE TABLE security_group_courthouse_ae
-(grp_id                  INTEGER
-,cth_id                  INTEGER
-);
+(grp_id                  INTEGER                         NOT NULL
+,cth_id                  INTEGER                         NOT NULL
+) TABLESPACE darts_tables;
 
-CREATE UNIQUE INDEX security_group_pk               ON security_group(grp_id) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX security_group_pk               ON security_group(grp_id) TABLESPACE darts_indexes;
 ALTER TABLE security_group                          ADD PRIMARY KEY USING INDEX security_group_pk;
 
-CREATE UNIQUE INDEX security_group_membership_ae_pk ON security_group_membership_ae(usr_id,grp_id) TABLESPACE darts_indexes;
-ALTER TABLE security_group_membership_ae            ADD PRIMARY KEY USING INDEX security_group_membership_ae_pk;
+CREATE UNIQUE INDEX security_group_user_account_ae_pk ON security_group_user_account_ae(usr_id,grp_id) TABLESPACE darts_indexes;
+ALTER TABLE security_group_user_account_ae            ADD PRIMARY KEY USING INDEX security_group_user_account_ae_pk;
 
-CREATE UNIQUE INDEX security_role_pk                ON security_role(rol_id) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX security_role_pk                ON security_role(rol_id) TABLESPACE darts_indexes;
 ALTER TABLE security_role                           ADD PRIMARY KEY USING INDEX security_role_pk;
 
 CREATE UNIQUE INDEX security_permission_pk          ON security_permission(per_id) TABLESPACE darts_indexes;
@@ -98,31 +98,31 @@ CREATE SEQUENCE grp_seq CACHE 20;
 CREATE SEQUENCE rol_seq CACHE 20;
 CREATE SEQUENCE per_seq CACHE 20;
 
-ALTER TABLE security_group_membership_ae         
-ADD CONSTRAINT security_group_membership_ae_user_fk
+ALTER TABLE security_group_user_account_ae
+ADD CONSTRAINT security_group_user_account_ae_user_fk
 FOREIGN KEY (usr_id) REFERENCES user_account(usr_id);
 
-ALTER TABLE security_group_membership_ae         
-ADD CONSTRAINT security_group_membership_ae_group_fk
+ALTER TABLE security_group_user_account_ae
+ADD CONSTRAINT security_group_user_account_ae_group_fk
 FOREIGN KEY (grp_id) REFERENCES security_group(grp_id);
 
-ALTER TABLE security_group                    
+ALTER TABLE security_group
 ADD CONSTRAINT security_group_role_fk
 FOREIGN KEY (rol_id) REFERENCES security_role(rol_id);
 
-ALTER TABLE security_role_permission_ae          
+ALTER TABLE security_role_permission_ae
 ADD CONSTRAINT security_role_permission_ae_role_fk
 FOREIGN KEY (rol_id) REFERENCES security_role(rol_id);
 
-ALTER TABLE security_role_permission_ae          
+ALTER TABLE security_role_permission_ae
 ADD CONSTRAINT security_role_permission_permission_fk
 FOREIGN KEY (per_id) REFERENCES security_permission(per_id);
 
-ALTER TABLE security_group_courthouse_ae         
+ALTER TABLE security_group_courthouse_ae
 ADD CONSTRAINT security_group_courthouse_group_fk
 FOREIGN KEY (grp_id) REFERENCES security_group(grp_id);
 
-ALTER TABLE security_group_courthouse_ae         
+ALTER TABLE security_group_courthouse_ae
 ADD CONSTRAINT security_group_courthouse_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
@@ -322,43 +322,43 @@ insert into security_group_courthouse_ae(grp_id,cth_id) values (37,13);
 insert into security_group_courthouse_ae(grp_id,cth_id) values (37,14);
 insert into security_group_courthouse_ae(grp_id,cth_id) values (37,15);
 
-insert into security_group_membership_ae(usr_id,grp_id) values ( 1,12);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 1,13);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 2,22);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 2,23);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 3,26);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 4,27);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 5,27);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 6,28);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 6,29);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 6,21);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 8,13);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 8,14);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 8,28);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 9,16);
-insert into security_group_membership_ae(usr_id,grp_id) values (10,8);
-insert into security_group_membership_ae(usr_id,grp_id) values (10,9);
-insert into security_group_membership_ae(usr_id,grp_id) values (20,1);
-insert into security_group_membership_ae(usr_id,grp_id) values (18,5);
-insert into security_group_membership_ae(usr_id,grp_id) values (13,3);
-insert into security_group_membership_ae(usr_id,grp_id) values (17,2);
-insert into security_group_membership_ae(usr_id,grp_id) values (30,4);
-insert into security_group_membership_ae(usr_id,grp_id) values (12,37);
-insert into security_group_membership_ae(usr_id,grp_id) values (22,37);
-insert into security_group_membership_ae(usr_id,grp_id) values (24,36);
-insert into security_group_membership_ae(usr_id,grp_id) values (21,36);
-insert into security_group_membership_ae(usr_id,grp_id) values (19,36);
-insert into security_group_membership_ae(usr_id,grp_id) values (11,36);
-insert into security_group_membership_ae(usr_id,grp_id) values ( 7,36);
-insert into security_group_membership_ae(usr_id,grp_id) values (14,36);
-insert into security_group_membership_ae(usr_id,grp_id) values (15,1);
-insert into security_group_membership_ae(usr_id,grp_id) values (16,1);
-insert into security_group_membership_ae(usr_id,grp_id) values (23,1);
-insert into security_group_membership_ae(usr_id,grp_id) values (25,2);
-insert into security_group_membership_ae(usr_id,grp_id) values (26,2);
-insert into security_group_membership_ae(usr_id,grp_id) values (27,3);
-insert into security_group_membership_ae(usr_id,grp_id) values (28,3);
-insert into security_group_membership_ae(usr_id,grp_id) values (29,4);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 1,12);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 1,13);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 2,22);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 2,23);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 3,26);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 4,27);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 5,27);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 6,28);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 6,29);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 6,21);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 8,13);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 8,14);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 8,28);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 9,16);
+insert into security_group_user_account_ae(usr_id,grp_id) values (10,8);
+insert into security_group_user_account_ae(usr_id,grp_id) values (10,9);
+insert into security_group_user_account_ae(usr_id,grp_id) values (20,1);
+insert into security_group_user_account_ae(usr_id,grp_id) values (18,5);
+insert into security_group_user_account_ae(usr_id,grp_id) values (13,3);
+insert into security_group_user_account_ae(usr_id,grp_id) values (17,2);
+insert into security_group_user_account_ae(usr_id,grp_id) values (30,4);
+insert into security_group_user_account_ae(usr_id,grp_id) values (12,37);
+insert into security_group_user_account_ae(usr_id,grp_id) values (22,37);
+insert into security_group_user_account_ae(usr_id,grp_id) values (24,36);
+insert into security_group_user_account_ae(usr_id,grp_id) values (21,36);
+insert into security_group_user_account_ae(usr_id,grp_id) values (19,36);
+insert into security_group_user_account_ae(usr_id,grp_id) values (11,36);
+insert into security_group_user_account_ae(usr_id,grp_id) values ( 7,36);
+insert into security_group_user_account_ae(usr_id,grp_id) values (14,36);
+insert into security_group_user_account_ae(usr_id,grp_id) values (15,1);
+insert into security_group_user_account_ae(usr_id,grp_id) values (16,1);
+insert into security_group_user_account_ae(usr_id,grp_id) values (23,1);
+insert into security_group_user_account_ae(usr_id,grp_id) values (25,2);
+insert into security_group_user_account_ae(usr_id,grp_id) values (26,2);
+insert into security_group_user_account_ae(usr_id,grp_id) values (27,3);
+insert into security_group_user_account_ae(usr_id,grp_id) values (28,3);
+insert into security_group_user_account_ae(usr_id,grp_id) values (29,4);
 
 insert into security_role_permission_ae(rol_id,per_id) values (1,2);
 insert into security_role_permission_ae(rol_id,per_id) values (1,4);
@@ -411,7 +411,6 @@ insert into court_case(cas_id,cth_id,case_number,interpreter_used) values(3,1,'U
 insert into court_case(cas_id,cth_id,case_number,interpreter_used) values(4,2,'U01012023-00004',true);
 insert into court_case(cas_id,cth_id,case_number,interpreter_used) values(5,2,'U01012023-00005',false);
 insert into court_case(cas_id,cth_id,case_number,interpreter_used) values(6,3,'U01012023-00006',true);
-
 
 
 

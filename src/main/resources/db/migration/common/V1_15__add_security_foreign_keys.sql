@@ -1,9 +1,9 @@
-ALTER TABLE security_group_membership_ae
-ADD CONSTRAINT security_group_membership_ae_user_fk
+ALTER TABLE security_group_user_account_ae
+ADD CONSTRAINT security_group_user_account_ae_user_fk
 FOREIGN KEY (usr_id) REFERENCES user_account(usr_id);
 
-ALTER TABLE security_group_membership_ae
-ADD CONSTRAINT security_group_membership_ae_group_fk
+ALTER TABLE security_group_user_account_ae
+ADD CONSTRAINT security_group_user_account_ae_group_fk
 FOREIGN KEY (grp_id) REFERENCES security_group(grp_id);
 
 ALTER TABLE security_group

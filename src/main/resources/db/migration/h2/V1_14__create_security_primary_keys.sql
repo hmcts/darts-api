@@ -1,6 +1,6 @@
 ALTER TABLE security_group ADD CONSTRAINT security_group_pk PRIMARY KEY (grp_id);
 
-ALTER TABLE security_group_membership_ae ADD CONSTRAINT security_group_membership_ae_pk PRIMARY KEY (usr_id,grp_id);
+ALTER TABLE security_group_user_account_ae ADD CONSTRAINT security_group_user_account_ae_pk PRIMARY KEY (usr_id,grp_id);
 
 ALTER TABLE security_role ADD CONSTRAINT security_role_pk PRIMARY KEY (rol_id);
 
