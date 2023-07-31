@@ -182,7 +182,8 @@ public class DartsDatabaseStub {
     @Transactional
     public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
 
-        Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseName(courthouseName);
+        Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseNameIgnoreCase(
+            courthouseName);
 
         CourthouseEntity courthouseEntity;
 
