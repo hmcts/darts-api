@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
+import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.api.CommonApi;
@@ -343,6 +344,29 @@ class CaseServiceImplTest {
         assertEquals(1, updatedHearingEntity.getJudgeList().size());
         assertEquals(LocalDate.now(), updatedHearingEntity.getHearingDate());
         assertNotNull(updatedHearingEntity.getCourtCase());
+    }
+
+    @Test
+    void testGetCaseHearings() {
+        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
+        CourtCaseEntity existingCaseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
+        existingCaseEntity.setId(1);
+
+        List<HearingEntity> existingHearings = Lists.newArrayList(CommonTestDataUtil.createHearing(
+            existingCaseEntity,
+            courtroomEntity,
+            LocalDate.now()
+        ));
+
+        Mockito.when(hearingRepository.findByCaseIds(List.of(existingCaseEntity.getId()))).thenReturn(existingHearings);
+
+        List<Hearing> caseHearings = service.getCaseHearings(existingCaseEntity.getId());
+
+        assertEquals(existingHearings.get(0).getId(), caseHearings.get(0).getId());
+        assertEquals(existingHearings.get(0).getCourtroom().getName(), caseHearings.get(0).getCourtroom());
+        assertEquals(existingHearings.get(0).getHearingDate(), caseHearings.get(0).getDate());
+
     }
 
     @Test

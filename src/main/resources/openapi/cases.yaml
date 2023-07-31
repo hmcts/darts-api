@@ -327,7 +327,7 @@ components:
           type: integer
         date:
           type: string
-          format: date-time
+          format: date
         judgeList:
           type: array
           items:

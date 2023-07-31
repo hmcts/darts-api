@@ -136,6 +136,7 @@ public class CommonTestDataUtil {
 
     public HearingEntity createHearing(CourtCaseEntity courtcase, CourtroomEntity courtroom, LocalDate date) {
         HearingEntity hearing1 = new HearingEntity();
+        hearing1.setId(1);
         hearing1.setCourtCase(courtcase);
         hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);
