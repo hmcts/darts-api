@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
+import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 
@@ -110,7 +111,7 @@ public class CaseController implements CasesApi {
     }
 
     @Override
-    public ResponseEntity<ScheduledCase> casesCaseIdGet(
+    public ResponseEntity<SingleCase> casesCaseIdGet(
         @Parameter(name = "caseId", description = "caseId is the internal cas_id of the case.", required = true, in = ParameterIn.PATH) @PathVariable("caseId") Integer caseId
     ) {
 

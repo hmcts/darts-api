@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
+import uk.gov.hmcts.darts.cases.model.SingleCase;
 
 import java.util.List;
 
@@ -19,6 +20,6 @@ public interface CaseService {
 
     List<Hearing> getCaseHearings(Integer caseId);
 
-    ScheduledCase getCasesById(Integer caseId);
+    SingleCase getCasesById(Integer caseId);
 
 }

@@ -96,7 +96,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/scheduled_case'
+                $ref: '#/components/schemas/single_case'
 
         '500':
           description: Internal Server Error
@@ -269,6 +269,42 @@ components:
           type: string
           format: time
           example: 10:00
+        upload_priority:
+          type: string
+          example: 10
+        defendantList:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judgeList:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        prosecutorList:
+          type: array
+          items:
+            $ref: '#/components/schemas/prosecutor'
+        defenceList:
+          type: array
+          items:
+            $ref: '#/components/schemas/defence'
+        retain_until:
+          type: string
+          format: date-time
+    single_case:
+      type: object
+      required:
+        - courthouse
+      properties:
+        case_id:
+          type: integer
+          example: 1
+        courthouse:
+          type: string
+          example: SWANSEA
+        case_number:
+          type: string
+          example: CASE1001
         upload_priority:
           type: string
           example: 10
