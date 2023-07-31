@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '4.3.0.3225'
   id "io.freefair.lombok" version "8.1.0"
   id "org.openapi.generator" version "7.0.0-beta"
-  id "org.flywaydb.flyway" version "9.21.0"
+  id "org.flywaydb.flyway" version "9.21.1"
 }
 
 group = 'uk.gov.hmcts'
@@ -332,7 +332,7 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.21.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.21.1'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.5.1'
 
   //database
