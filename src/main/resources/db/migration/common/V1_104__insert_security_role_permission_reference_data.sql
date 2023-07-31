@@ -64,3 +64,6 @@ insert into security_role_permission_ae(rol_id,per_id) values (5,7);
 insert into security_role_permission_ae(rol_id,per_id) values (5,10);
 insert into security_role_permission_ae(rol_id,per_id) values (5,13);
 insert into security_role_permission_ae(rol_id,per_id) values (5,14);
+
+ALTER SEQUENCE rol_seq RESTART WITH 6;
+ALTER SEQUENCE per_seq RESTART WITH 16;
