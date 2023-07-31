@@ -73,7 +73,6 @@ public class EventEntity extends VersionedEntity {
     private List<HearingEntity> hearingEntities = new ArrayList<>();
 
     public void addHearing(HearingEntity hearingEntity) {
-        log.debug("Adding Hearing with ID {}, eventID={}", hearingEntity.getId(), getId());
         hearingEntities.add(hearingEntity);
     }
 }
