@@ -109,4 +109,13 @@ public class CaseController implements CasesApi {
         return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<ScheduledCase> casesCaseIdGet(
+        @Parameter(name = "caseId", description = "caseId is the internal cas_id of the case.", required = true, in = ParameterIn.PATH) @PathVariable("caseId") Integer caseId
+    ) {
+
+        return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
 }

@@ -72,6 +72,11 @@ public class CaseServiceImpl implements CaseService {
 
     }
 
+    @Override
+    public ScheduledCase getCasesById(Integer caseId) {
+        return new ScheduledCase();
+    }
+
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
         if (CollectionUtils.isEmpty(hearings)) {
             //find out if courthouse or courtroom are missing.

@@ -19,4 +19,6 @@ public interface CaseService {
 
     List<Hearing> getCaseHearings(Integer caseId);
 
+    ScheduledCase getCasesById(Integer caseId);
+
 }
