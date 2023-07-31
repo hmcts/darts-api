@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -76,10 +77,12 @@ public class DartsDatabaseStub {
     private final ProsecutorRepository prosecutorRepository;
     private final DefenceRepository defenceRepository;
     private final DefendantRepository defendantRepository;
+    private final UserAccountRepository userAccountRepository;
 
     public void clearDatabase() {
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
+        userAccountRepository.deleteAll();
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         judgeRepository.deleteAll();
