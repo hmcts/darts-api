@@ -40,7 +40,7 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
         dartsDatabase.save(someMinimalCase());
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
         event.setCaseNumbers(List.of("123"));
-        event.setDateTime(OffsetDateTime.now());
+        event.setDateTime(today);
         assertThatThrownBy(() -> interpreterUsedHandler.handle(event))
             .isInstanceOf(DartsApiException.class);
     }

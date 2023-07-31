@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.DoNotUseThreads"})
 class StandardEventHandlerTest extends IntegrationBase {
 
     public static final String UNKNOWN_COURTROOM = "unknown-courtroom";
@@ -40,7 +40,7 @@ class StandardEventHandlerTest extends IntegrationBase {
         dartsDatabase.save(someMinimalCase());
         DartsEvent dartsEvent = someMinimalDartsEvent().courthouse(UNKNOWN_COURTHOUSE);
         dartsEvent.setCaseNumbers(List.of("123"));
-        dartsEvent.setDateTime(OffsetDateTime.now());
+        dartsEvent.setDateTime(today);
         assertThatThrownBy(() -> eventHandler.handle(dartsEvent))
             .isInstanceOf(DartsApiException.class);
     }
@@ -198,7 +198,7 @@ class StandardEventHandlerTest extends IntegrationBase {
 
 
     @Test
-    public void testSummationWithConcurrency() throws InterruptedException {
+    void testSummationWithConcurrency() throws InterruptedException {
 
         dartsDatabase.createCourthouseWithoutCourtrooms(SOME_COURTHOUSE);
         dartsGateway.darNotificationReturnsSuccess();

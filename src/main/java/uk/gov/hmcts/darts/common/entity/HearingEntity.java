@@ -88,10 +88,6 @@ public class HearingEntity {
         mediaList.add(mediaEntity);
     }
 
-    public void addEvent(EventEntity eventEntity) {
-        eventList.add(eventEntity);
-    }
-
     public void addJudge(JudgeEntity judgeEntity) {
         judgeList.add(judgeEntity);
     }
