@@ -89,7 +89,6 @@ public class HearingEntity {
     }
 
     public void addEvent(EventEntity eventEntity) {
-        System.out.println("Adding Event with ID " + eventEntity.getId());
         eventList.add(eventEntity);
     }
 

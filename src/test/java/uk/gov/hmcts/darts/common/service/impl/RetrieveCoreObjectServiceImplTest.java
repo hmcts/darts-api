@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -22,7 +21,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -138,25 +136,6 @@ class RetrieveCoreObjectServiceImplTest {
         courthouse.setCourthouseName("Swansea");
         when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(
             Optional.of(courthouse));
-    }
-
-
-    @Test
-    void courtroomAlreadyExists() {
-        when(courtroomRepository.saveAndFlush(any(CourtroomEntity.class))).thenThrow(new DataIntegrityViolationException(
-            "already a courtroom"));
-        when(courtroomRepository.findByNameAndId(
-            anyInt(),
-            anyString()
-        )).thenReturn(Optional.empty()).thenReturn(Optional.of(CommonTestDataUtil.createCourtroom("existing courtroom")));
-
-        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("test");
-        courthouse.setId(100);
-        CourtroomEntity createdCourtroom = retrieveCoreObjectServiceImpl.retrieveOrCreateCourtroom(
-            courthouse,
-            "Courtroom Name 1"
-        );
-        assertEquals("existing courtroom", createdCourtroom.getName());
     }
 
 }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,7 +19,6 @@ public class StandardEventHandler extends EventHandlerBase {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    @Transactional
     public void handle(final DartsEvent dartsEvent) {
         CourtroomCourthouseCourtcase courtroomCourthouseCourtcase = getOrCreateCourtroomCourtHouseAndCases(dartsEvent);
 

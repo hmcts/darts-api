@@ -1,12 +1,7 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Session;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -33,42 +28,20 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
 
-    private final int MAX_RETRIES = 3;
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
     @Override
-    @Transactional
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
-        int retryCount = 0;
-        while (true) {
-            try {
-                Optional<HearingEntity> foundHearing = hearingRepository.findHearing(
-                    courthouseName,
-                    courtroomName,
-                    caseNumber,
-                    hearingDate
-                );
-                if (foundHearing.isPresent()) {
-                    log.debug("Found a hearing with id " + foundHearing.get().getId());
-                }
-
-                return foundHearing.orElseGet(() -> createHearing(
-                    courthouseName,
-                    courtroomName,
-                    caseNumber,
-                    hearingDate
-                ));
-            } catch (DataIntegrityViolationException e) {
-                if (++retryCount >= MAX_RETRIES) {
-                    throw e;
-                }
-                randomSleep();
-                Session session = entityManager.unwrap(Session.class);
-                session.clear();
-            }
-        }
+        Optional<HearingEntity> foundHearing = hearingRepository.findHearing(
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
+        );
+        return foundHearing.orElseGet(() -> createHearing(
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
+        ));
     }
 
     private HearingEntity createHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
@@ -84,19 +57,16 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     }
 
     @Override
-    @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(
             courthouse.getId(),
             courtroomName
         );
         return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomName));
-
     }
 
 
     @Override
-    @Transactional
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNames(courthouseName, courtroomName);
         if (foundCourtroom.isPresent()) {
@@ -112,59 +82,17 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         CourtroomEntity courtroom = new CourtroomEntity();
         courtroom.setCourthouse(courthouse);
         courtroom.setName(courtroomName);
-        try {
-            courtroomRepository.saveAndFlush(courtroom);
-        } catch (DataIntegrityViolationException e) {
-            log.warn(
-                "Trying to create a courtroom that already exists. courthouse={}, courtroom={}.",
-                courthouse.getCourthouseName(),
-                courtroom,
-                e
-            );
-            courtroom = courtroomRepository.findByNameAndId(courthouse.getId(), courtroomName).get();
-        }
+        courtroomRepository.saveAndFlush(courtroom);
         return courtroom;
     }
 
     @Override
-    @Transactional
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
-        int retryCount = 0;
-        while (true) {
-            try {
-                log.debug("looking for existing case");
-                Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
-                    caseNumber,
-                    courthouseName
-                );
-                if (foundCase.isPresent()) {
-                    log.debug("Found a case with id " + foundCase.get().getId());
-                } else {
-                    log.debug("not found a case");
-                }
-
-                return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber));
-            } catch (DataIntegrityViolationException e) {
-                randomSleep();
-                if (++retryCount >= MAX_RETRIES) {
-                    log.debug("max retries reached, throwing create case exception");
-                    throw e;
-                }
-                Session session = entityManager.unwrap(Session.class);
-                session.clear();
-            }
-        }
-    }
-
-    private static void randomSleep() {
-//        try {
-//            long millis = (long) (Math.random() * 400) + 100;
-//            log.debug("sleeping for " + millis);
-//            Thread.currentThread().sleep(millis);
-//        } catch (InterruptedException ex) {
-//            log.debug("Runtime exception thrown = " + ex.toString());
-//            throw new RuntimeException(ex);
-//        }
+        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
+            caseNumber,
+            courthouseName
+        );
+        return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber));
     }
 
     private CourtCaseEntity createCase(String courthouseName, String caseNumber) {
@@ -173,7 +101,6 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         courtCase.setCaseNumber(caseNumber);
         courtCase.setCourthouse(foundCourthouse);
         caseRepository.saveAndFlush(courtCase);
-        log.debug("Created case with ID " + courtCase.getId());
         return courtCase;
     }
 

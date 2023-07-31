@@ -50,7 +50,6 @@ public abstract class EventHandlerBase implements EventHandler {
     @Autowired
     private CommonApi commonApi;
 
-    private static final String COURTHOUSE_COURTROOM_NOT_FOUND_MESSAGE = "Courthouse: %s & Courtroom: %s combination not found in database";
     private static final String MULTIPLE_CASE_NUMBERS = "Event: %s contains multiple caseNumbers: %s";
 
     @PostConstruct
@@ -112,11 +111,8 @@ public abstract class EventHandlerBase implements EventHandler {
             dartsEvent.getDateTime().toLocalDate()
         );
 
-        EventEntity eventEntity = saveEvent(dartsEvent, hearingEntity.getCourtroom());
-        eventEntity.addHearing(hearingEntity);
-        eventRepository.saveAndFlush(eventEntity);
-        hearingEntity.setHearingIsActual(true);
-        hearingRepository.saveAndFlush(hearingEntity);
+        saveEvent(dartsEvent, hearingEntity.getCourtroom(), hearingEntity);
+        setHearingToActive(hearingEntity);
 
 
         return CourtroomCourthouseCourtcase.builder()
@@ -128,9 +124,16 @@ public abstract class EventHandlerBase implements EventHandler {
             .build();
     }
 
-    protected EventEntity saveEvent(DartsEvent dartsEvent, CourtroomEntity courtroomEntity) {
+    private void setHearingToActive(HearingEntity hearingEntity) {
+        hearingEntity.setHearingIsActual(true);
+        hearingRepository.saveAndFlush(hearingEntity);
+    }
+
+    protected EventEntity saveEvent(DartsEvent dartsEvent, CourtroomEntity courtroomEntity, HearingEntity hearingEntity) {
         var eventEntity = eventEntityFrom(dartsEvent);
         eventEntity.setCourtroom(courtroomEntity);
+        eventRepository.saveAndFlush(eventEntity);
+        eventEntity.addHearing(hearingEntity);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }

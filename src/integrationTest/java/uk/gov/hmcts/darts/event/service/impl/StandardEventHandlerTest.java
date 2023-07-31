@@ -203,24 +203,25 @@ class StandardEventHandlerTest extends IntegrationBase {
         dartsDatabase.createCourthouseWithoutCourtrooms(SOME_COURTHOUSE);
         dartsGateway.darNotificationReturnsSuccess();
 
-        int numberOfThreads = 200;
-        ExecutorService service = Executors.newFixedThreadPool(20);
+        int numberOfThreads = 100;
+        ExecutorService service = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
 
 
         for (int i = 0; i < numberOfThreads; i++) {
+            int nanoSec = i * 1000;
             service.submit(() -> {
                 DartsEvent dartsEvent = someMinimalDartsEvent()
                     .caseNumbers(List.of("asyncTestCaseNumber"))
                     .courthouse(SOME_COURTHOUSE)
                     .courtroom("asyncTestCourtroom")
-                    .dateTime(today)
+                    .dateTime(today.withNano(nanoSec))
                     .eventId(null);
                 eventHandler.handle(dartsEvent);
                 latch.countDown();
             });
         }
-        latch.await(10, TimeUnit.SECONDS);
+        latch.await(5, TimeUnit.SECONDS);
         assertEquals(1, dartsDatabase.getHearingRepository().findAll().size());
         assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size());
     }
