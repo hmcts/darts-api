@@ -95,18 +95,18 @@ paths:
             type: string
           required: true
         - in: query
-          name: caseNumber
+          name: case_number
           schema:
             type: string
           required: true
         - in: query
-          name: startDateTime
+          name: start_date_time
           schema:
             type: string
             format: date-time
           required: true
         - in: query
-          name: endDateTime
+          name: end_date_time
           schema:
             type: string
             format: date-time
