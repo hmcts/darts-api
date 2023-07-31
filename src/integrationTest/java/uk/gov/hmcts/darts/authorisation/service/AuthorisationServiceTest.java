@@ -76,7 +76,7 @@ class AuthorisationServiceTest {
 
     @Test
     void shouldGetAuthorisationForTestBristol() {
-        UserState userState = authorisationService.getAuthorisation("test.bristol@example.com");
+        UserState userState = authorisationService.getAuthorisation("Test.Bristol@Example.com");
 
         assertNotNull(userState);
         assertEquals(2, userState.getRoles().size());

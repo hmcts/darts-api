@@ -26,7 +26,7 @@ public class SecurityRoleEntity {
     private String roleName;
 
     @ManyToMany
-    @JoinTable(name = "security_role_permission",
+    @JoinTable(name = "security_role_permission_ae",
         joinColumns = {@JoinColumn(name = "rol_id")},
         inverseJoinColumns = {@JoinColumn(name = "per_id")})
     private List<SecurityPermissionEntity> securityPermissionEntities;

@@ -55,7 +55,7 @@ public class SecurityGroupEntity {
     private String groupDisplayName;
 
     @ManyToMany
-    @JoinTable(name = "security_group_courthouse",
+    @JoinTable(name = "security_group_courthouse_ae",
         joinColumns = {@JoinColumn(name = "grp_id")},
         inverseJoinColumns = {@JoinColumn(name = "cth_id")})
     private List<CourthouseEntity> courthouseEntities;

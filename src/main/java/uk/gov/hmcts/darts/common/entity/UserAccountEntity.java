@@ -64,7 +64,7 @@ public class UserAccountEntity implements JpaAuditing {
     private UserAccountEntity modifiedBy;
 
     @ManyToMany
-    @JoinTable(name = "security_group_membership",
+    @JoinTable(name = "security_group_membership_ae",
         joinColumns = {@JoinColumn(name = "usr_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private List<SecurityGroupEntity> securityGroupEntities;

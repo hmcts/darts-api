@@ -56,7 +56,10 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         );
 
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
-        criteriaQuery.where(criteriaBuilder.equal(root.get(UserAccountEntity_.emailAddress), paramEmailAddress));
+        criteriaQuery.where(criteriaBuilder.equal(
+            criteriaBuilder.lower(root.get(UserAccountEntity_.emailAddress)),
+            criteriaBuilder.lower(paramEmailAddress)
+        ));
 
         TypedQuery<GetAuthorisationResult> query = em.createQuery(criteriaQuery);
         query.setParameter(paramEmailAddress, emailAddress);
