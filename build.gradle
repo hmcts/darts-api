@@ -320,8 +320,8 @@ dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.1.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.3'
 
-  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.5.0'
-  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.5.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.6.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.6.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
