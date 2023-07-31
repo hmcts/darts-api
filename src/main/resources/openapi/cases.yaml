@@ -80,9 +80,9 @@ paths:
     get:
       tags:
         - Cases
-      summary: Allows the retrieval of hearings for a given caseId
+      summary: Allows the retrieval of a single case using a given caseId
       description: |-
-        Retrieves all hearings for a caseId.
+        Retrieves a single hearing for a single caseId
       parameters:
         - in: path
           name: caseId
