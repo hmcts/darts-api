@@ -82,7 +82,7 @@ paths:
         - Cases
       summary: Allows the retrieval of a single case using a given caseId
       description: |-
-        Retrieves a single case for a given caseId
+        Retrieves a single hearing for a single caseId
       parameters:
         - in: path
           name: caseId
