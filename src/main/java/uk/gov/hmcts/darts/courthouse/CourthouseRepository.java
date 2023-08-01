@@ -11,5 +11,5 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
 
     Optional<CourthouseEntity> findByCode(int code);
 
-    Optional<CourthouseEntity> findByCourthouseName(String name);
+    Optional<CourthouseEntity> findByCourthouseNameIgnoreCase(String name);
 }

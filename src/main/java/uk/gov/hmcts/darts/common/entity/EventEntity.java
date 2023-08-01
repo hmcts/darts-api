@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -67,6 +68,9 @@ public class EventEntity extends VersionedEntity {
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = "eve_id")},
         inverseJoinColumns = {@JoinColumn(name = "hea_id")})
-    private List<HearingEntity> hearingEntities;
+    private List<HearingEntity> hearingEntities = new ArrayList<>();
 
+    public void addHearing(HearingEntity hearingEntity) {
+        hearingEntities.add(hearingEntity);
+    }
 }

@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
@@ -63,11 +64,14 @@ public class HearingEntity {
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList;
 
+    @Transient
+    private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = "hea_id")},
         inverseJoinColumns = {@JoinColumn(name = "eve_id")})
-    private List<EventEntity> eventList;
+    private List<EventEntity> eventList = new ArrayList<>();
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "cas_id")

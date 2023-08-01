@@ -89,7 +89,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         Assertions.assertEquals(SOME_COURTROOM, persistedEvent.getCourtroom().getName());
         Assertions.assertEquals(SOME_COURTHOUSE, persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
         Assertions.assertDoesNotThrow(() -> UUID.fromString(persistedEvent.getMessageId()));
-        Assertions.assertEquals(0, persistedEvent.getVersion());
+        Assertions.assertEquals(1, persistedEvent.getVersion());
 
         Assertions.assertNull(persistedEvent.getLegacyEventId());
         Assertions.assertNull(persistedEvent.getLegacyVersionLabel());

@@ -137,13 +137,12 @@ public class DartsDatabaseStub {
             courtroomName
         );
 
-        var courtroomEntity = courtroomRepository.findByNames(courthouseName, courtroomName);
+        var courtroomEntity = courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName);
         var hearingEntity = new HearingEntity();
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setHearingDate(hearingDate);
         hearingEntity.setCourtCase(caseEntity);
-        hearingEntity.setCourtroom(courtroomEntity);
-        //hearingEntity.setJudgeList(List.of(createSimpleJudges(hearingEntity)));
+        hearingEntity.setCourtroom(courtroomEntity.get());
         return hearingRepository.saveAndFlush(hearingEntity);
     }
 
@@ -183,7 +182,8 @@ public class DartsDatabaseStub {
     @Transactional
     public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
 
-        Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseName(courthouseName);
+        Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseNameIgnoreCase(
+            courthouseName);
 
         CourthouseEntity courthouseEntity;
 
@@ -238,11 +238,11 @@ public class DartsDatabaseStub {
 
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
-        return courtroomRepository.findByNames(courthouseName, courtroomName);
+        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).get();
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {
-        return courthouseRepository.findByCourthouseName(name).get();
+        return courthouseRepository.findByCourthouseNameIgnoreCase(name).get();
     }
 
     public ExternalLocationTypeEntity getExternalLocationTypeEntity(ExternalLocationTypeEnum externalLocationTypeEnum) {
