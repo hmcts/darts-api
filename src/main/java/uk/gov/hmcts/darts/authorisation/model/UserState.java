@@ -1,22 +1,20 @@
 package uk.gov.hmcts.darts.authorisation.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.NonNull;
+import lombok.Value;
 
-import java.util.List;
+import java.util.Set;
 
-@Builder(toBuilder = true)
-@AllArgsConstructor
-@NoArgsConstructor
-@Setter
-@Getter
+@Builder
+@Value
 public class UserState {
 
+    @NonNull
     private Integer userId;
+    @NonNull
     private String userName;
-    private List<Role> roles;
+    @NonNull
+    private Set<Role> roles;
 
 }

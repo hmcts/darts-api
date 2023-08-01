@@ -2,7 +2,10 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,9 +18,11 @@ public class SecurityPermissionEntity {
 
     @Id
     @Column(name = "per_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "per_gen")
+    @SequenceGenerator(name = "per_gen", sequenceName = "per_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "permission_name")
+    @Column(name = "permission_name", nullable = false)
     private String permissionName;
 
 }
