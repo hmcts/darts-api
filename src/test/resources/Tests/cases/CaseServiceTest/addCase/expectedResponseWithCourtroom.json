@@ -12,7 +12,7 @@
   "prosecutorList": [
     "Prosecutor1"
   ],
-  "defenceList": [
+  "defenders": [
     "Defender1"
   ]
 }

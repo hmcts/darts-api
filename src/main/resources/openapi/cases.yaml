@@ -82,7 +82,7 @@ paths:
         - Cases
       summary: Allows the retrieval of a single case using a given caseId
       description: |-
-        Retrieves a single hearing for a single caseId
+        Retrieves a single case for a given caseId
       parameters:
         - in: path
           name: caseId
@@ -206,7 +206,6 @@ paths:
         '500':
           description: Internal Server Error
 
-
 components:
   schemas:
     add_case_request:
@@ -249,9 +248,6 @@ components:
       required:
         - courthouse
       properties:
-        case_id:
-          type: integer
-          example: 1
         courthouse:
           type: string
           example: SWANSEA
@@ -284,13 +280,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/prosecutor'
-        defenceList:
+        defenders:
           type: array
           items:
             $ref: '#/components/schemas/defence'
-        retain_until:
-          type: string
-          format: date-time
     single_case:
       type: object
       required:
@@ -320,14 +313,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/prosecutor'
-        defenceList:
+        defenders:
           type: array
           items:
             $ref: '#/components/schemas/defence'
         retain_until:
           type: string
           format: date-time
-
     advancedSearchResult:
       type: object
       properties:

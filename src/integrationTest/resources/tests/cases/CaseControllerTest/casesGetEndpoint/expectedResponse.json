@@ -16,7 +16,7 @@
       "prosecutor_Case0000001_1",
       "prosecutor_Case0000001_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_Case0000001_1",
       "defence_Case0000001_2"
     ]
@@ -38,7 +38,7 @@
       "prosecutor_Case0000002_1",
       "prosecutor_Case0000002_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_Case0000002_1",
       "defence_Case0000002_2"
     ]
@@ -60,7 +60,7 @@
       "prosecutor_Case0000003_1",
       "prosecutor_Case0000003_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_Case0000003_1",
       "defence_Case0000003_2"
     ]

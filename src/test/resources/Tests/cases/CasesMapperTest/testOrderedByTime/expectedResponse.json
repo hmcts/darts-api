@@ -17,7 +17,7 @@
       "prosecutor_caseNum_3_1",
       "prosecutor_caseNum_3_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_caseNum_3_1",
       "defence_caseNum_3_2"
     ]
@@ -40,7 +40,7 @@
       "prosecutor_caseNum_1_1",
       "prosecutor_caseNum_1_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_caseNum_1_1",
       "defence_caseNum_1_2"
     ]
@@ -63,7 +63,7 @@
       "prosecutor_caseNum_6_1",
       "prosecutor_caseNum_6_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_caseNum_6_1",
       "defence_caseNum_6_2"
     ]
@@ -86,7 +86,7 @@
       "prosecutor_caseNum_5_1",
       "prosecutor_caseNum_5_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_caseNum_5_1",
       "defence_caseNum_5_2"
     ]
@@ -109,7 +109,7 @@
       "prosecutor_caseNum_4_1",
       "prosecutor_caseNum_4_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_caseNum_4_1",
       "defence_caseNum_4_2"
     ]
@@ -132,7 +132,7 @@
       "prosecutor_caseNum_7_1",
       "prosecutor_caseNum_7_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_caseNum_7_1",
       "defence_caseNum_7_2"
     ]
@@ -155,7 +155,7 @@
       "prosecutor_caseNum_2_1",
       "prosecutor_caseNum_2_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_caseNum_2_1",
       "defence_caseNum_2_2"
     ]

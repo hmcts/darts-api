@@ -38,7 +38,7 @@ public class CasesMapper {
         scheduledCase.setCaseNumber(caseEntity.getCaseNumber());
         scheduledCase.setDefendantList(caseEntity.getDefendantStringList());
         scheduledCase.setProsecutorList(caseEntity.getProsecutorsStringList());
-        scheduledCase.setDefenceList(caseEntity.getDefenceStringList());
+        scheduledCase.setDefenders(caseEntity.getDefenceStringList());
         return scheduledCase;
     }
 
@@ -58,7 +58,7 @@ public class CasesMapper {
         scheduledCase.setDefendantList(hearingCourtCase.getDefendantStringList());
         scheduledCase.setJudgeList(hearing.getJudgesStringList());
         scheduledCase.setProsecutorList(hearingCourtCase.getProsecutorsStringList());
-        scheduledCase.setDefenceList(hearingCourtCase.getDefenceStringList());
+        scheduledCase.setDefenders(hearingCourtCase.getDefenceStringList());
         return scheduledCase;
     }
 
