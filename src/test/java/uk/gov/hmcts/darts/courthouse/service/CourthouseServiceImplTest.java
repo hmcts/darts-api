@@ -138,7 +138,7 @@ class CourthouseServiceImplTest {
 
     @Test
     void retrieveCourthouseUsingJustName() throws CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
-        Mockito.when(repository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(
+        Mockito.when(repository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
         CourthouseEntity courthouse = courthouseService.retrieveAndUpdateCourtHouse(null, SWANSEA_NAME);
         assertEquals(SWANSEA_NAME_UC, courthouse.getCourthouseName());
@@ -157,7 +157,7 @@ class CourthouseServiceImplTest {
     @Test
     void retrieveCourthouseUsingNameAndDifferentCode() {
         Mockito.when(repository.findByCode(458)).thenReturn(Optional.empty());
-        Mockito.when(repository.findByCourthouseName(SWANSEA_NAME_UC)).thenReturn(Optional.of(
+        Mockito.when(repository.findByCourthouseNameIgnoreCase(SWANSEA_NAME_UC)).thenReturn(Optional.of(
             createSwanseaCourthouseEntity()));
 
         CourthouseCodeNotMatchException thrownException = assertThrows(
@@ -173,7 +173,7 @@ class CourthouseServiceImplTest {
     @Test
     void retrieveCourthouseUsingInvalidName() {
         Mockito.when(repository.findByCode(Short.parseShort("458"))).thenReturn(Optional.empty());
-        Mockito.when(repository.findByCourthouseName("TEST")).thenReturn(Optional.empty());
+        Mockito.when(repository.findByCourthouseNameIgnoreCase("TEST")).thenReturn(Optional.empty());
 
         assertThrows(
             CourthouseNameNotFoundException.class,

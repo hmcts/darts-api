@@ -89,7 +89,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         Assertions.assertEquals(SOME_COURTROOM, persistedEvent.getCourtroom().getName());
         Assertions.assertEquals(SOME_COURTHOUSE, persistedEvent.getCourtroom().getCourthouse().getCourthouseName());
         Assertions.assertDoesNotThrow(() -> UUID.fromString(persistedEvent.getMessageId()));
-        Assertions.assertEquals(0, persistedEvent.getVersion());
+        Assertions.assertEquals(1, persistedEvent.getVersion());
 
         Assertions.assertNull(persistedEvent.getLegacyEventId());
         Assertions.assertNull(persistedEvent.getLegacyVersionLabel());
@@ -130,10 +130,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     void courtLogsGet() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("Courthouse", "Swansea")
-            .queryParam("caseNumber", CASE_0000001)
-            .queryParam("startDateTime", String.valueOf(createOffsetDateTime("2022-07-01T09:00:00")))
-            .queryParam("endDateTime", String.valueOf(createOffsetDateTime("2022-07-01T11:00:00")))
+            .queryParam("courthouse", "Swansea")
+            .queryParam("case_number", CASE_0000001)
+            .queryParam("start_date_time", String.valueOf(createOffsetDateTime("2022-07-01T09:00:00")))
+            .queryParam("end_date_time", String.valueOf(createOffsetDateTime("2022-07-01T11:00:00")))
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -163,10 +163,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("Courthouse", courthouseName)
-            .queryParam("caseNumber", caseNumber)
-            .queryParam("startDateTime", "2022-07-01T09:00:00+01")
-            .queryParam("endDateTime", "2024-07-01T12:00:00+01")
+            .queryParam("courthouse", courthouseName)
+            .queryParam("case_number", caseNumber)
+            .queryParam("start_date_time", "2022-07-01T09:00:00+01")
+            .queryParam("end_date_time", "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -196,10 +196,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("Courthouse", courthouseName)
-            .queryParam("caseNumber", caseNumber)
-            .queryParam("startDateTime", "2022-07-01T09:00:00+01")
-            .queryParam("endDateTime", "2024-07-01T12:00:00+01")
+            .queryParam("courthouse", courthouseName)
+            .queryParam("case_number", caseNumber)
+            .queryParam("start_date_time", "2022-07-01T09:00:00+01")
+            .queryParam("end_date_time", "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())

@@ -5,18 +5,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "Case0000001",
     "scheduled_start": "09:00",
-    "defendantList": [
+    "defendants": [
       "defendant_Case0000001_1",
       "defendant_Case0000001_2"
     ],
-    "judgeList": [
+    "judges": [
       "Judge1"
     ],
-    "prosecutorList": [
+    "prosecutors": [
       "prosecutor_Case0000001_1",
       "prosecutor_Case0000001_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_Case0000001_1",
       "defence_Case0000001_2"
     ]
@@ -27,18 +27,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "Case0000002",
     "scheduled_start": "10:00",
-    "defendantList": [
+    "defendants": [
       "defendant_Case0000002_1",
       "defendant_Case0000002_2"
     ],
-    "judgeList": [
+    "judges": [
       "Judge1"
     ],
-    "prosecutorList": [
+    "prosecutors": [
       "prosecutor_Case0000002_1",
       "prosecutor_Case0000002_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_Case0000002_1",
       "defence_Case0000002_2"
     ]
@@ -49,18 +49,18 @@
     "hearing_date": "2023-06-20",
     "case_number": "Case0000003",
     "scheduled_start": "11:00",
-    "defendantList": [
+    "defendants": [
       "defendant_Case0000003_1",
       "defendant_Case0000003_2"
     ],
-    "judgeList": [
+    "judges": [
       "Judge1"
     ],
-    "prosecutorList": [
+    "prosecutors": [
       "prosecutor_Case0000003_1",
       "prosecutor_Case0000003_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_Case0000003_1",
       "defence_Case0000003_2"
     ]

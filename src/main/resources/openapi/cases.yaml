@@ -76,6 +76,31 @@ paths:
         '500':
           description: Internal Server Error
 
+  /cases/{caseId}:
+    get:
+      tags:
+        - Cases
+      summary: Allows the retrieval of a single case using a given caseId
+      description: |-
+        Retrieves a single case for a given caseId
+      parameters:
+        - in: path
+          name: caseId
+          schema:
+            type: integer
+          description: "caseId is the internal cas_id of the case."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/single_case'
+
+        '500':
+          description: Internal Server Error
+
   /cases/{caseId}/hearings:
     get:
       tags:
@@ -181,7 +206,6 @@ paths:
         '500':
           description: Internal Server Error
 
-
 components:
   schemas:
     add_case_request:
@@ -243,24 +267,59 @@ components:
           example: 10:00
         upload_priority:
           type: string
-          example:
-        defendantList:
+          example: 10
+        defendants:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
-        judgeList:
+        judges:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-        prosecutorList:
+        prosecutors:
           type: array
           items:
             $ref: '#/components/schemas/prosecutor'
-        defenceList:
+        defenders:
           type: array
           items:
             $ref: '#/components/schemas/defence'
-
+    single_case:
+      type: object
+      required:
+        - courthouse
+      properties:
+        case_id:
+          type: integer
+          example: 1
+        courthouse:
+          type: string
+          example: SWANSEA
+        case_number:
+          type: string
+          example: CASE1001
+        upload_priority:
+          type: string
+          example: 10
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        prosecutors:
+          type: array
+          items:
+            $ref: '#/components/schemas/prosecutor'
+        defenders:
+          type: array
+          items:
+            $ref: '#/components/schemas/defence'
+        retain_until:
+          type: string
+          format: date-time
     advancedSearchResult:
       type: object
       properties:
@@ -327,8 +386,8 @@ components:
           type: integer
         date:
           type: string
-          format: date-time
-        judgeList:
+          format: date
+        judges:
           type: array
           items:
             $ref: '#/components/schemas/judge'

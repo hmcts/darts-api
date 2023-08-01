@@ -10,22 +10,24 @@ import uk.gov.hmcts.darts.cases.exception.CaseError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
+import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
+import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.CourtCaseUtil;
-import uk.gov.hmcts.darts.common.api.CommonApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -45,7 +47,7 @@ public class CaseServiceImpl implements CaseService {
 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
-    private final CommonApi commonApi;
+    private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
 
     @Override
@@ -57,11 +59,31 @@ public class CaseServiceImpl implements CaseService {
             request.getCourtroom(),
             request.getDate()
         );
+        createCourtroomIfMissing(hearings, request);
+        return casesMapper.mapToCourtCases(hearings);
+
+    }
+
+    @Override
+    public List<Hearing> getCaseHearings(Integer caseId) {
+
+        List<HearingEntity> hearingList = hearingRepository.findByCaseIds(List.of(caseId));
+
+        return HearingEntityToCaseHearing.mapToHearingList(hearingList);
+
+    }
+
+    @Override
+    public SingleCase getCasesById(Integer caseId) {
+        return new SingleCase();
+    }
+
+    private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
         if (CollectionUtils.isEmpty(hearings)) {
             //find out if courthouse or courtroom are missing.
-            commonApi.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
+            retrieveCoreObjectService.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
         }
-        return casesMapper.mapToCourtCases(hearings);
+        // return casesMapper.mapToCourtCases(hearings);
     }
 
 
@@ -130,7 +152,7 @@ public class CaseServiceImpl implements CaseService {
 
     private HearingEntity mapToHearingEntity(AddCaseRequest addCaseRequest, CourtCaseEntity caseEntity, HearingEntity hearingEntity) {
         if (!StringUtils.isBlank(addCaseRequest.getCourtroom())) {
-            CourtroomEntity courtroomEntity = commonApi.retrieveOrCreateCourtroom(
+            CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(
                 addCaseRequest.getCourthouse(),
                 addCaseRequest.getCourtroom()
             );
@@ -161,12 +183,6 @@ public class CaseServiceImpl implements CaseService {
         defence.setName(newJudge);
         return defence;
     }
-
-    @Override
-    public List<Hearing> getCaseHearings(Integer caseId) {
-        return new ArrayList<>();
-    }
-
 
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {

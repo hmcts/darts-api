@@ -825,7 +825,7 @@ IS 'primary key, but not sequence generated';
 
 CREATE TABLE transient_object_directory
 (tod_id                      INTEGER			 		 NOT NULL
-,mer_id                      INTEGER                     NOT NULL
+,mer_id                      INTEGER                     NOT NULL UNIQUE
 ,ods_id                      INTEGER                     NOT NULL  -- FK to moj_object_directory_status.moj_ods_id
 ,external_location           UUID                        NOT NULL
 ,checksum	                 CHARACTER VARYING
