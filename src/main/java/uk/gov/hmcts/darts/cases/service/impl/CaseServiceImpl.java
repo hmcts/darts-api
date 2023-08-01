@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
+import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.CourtCaseUtil;
@@ -70,6 +71,11 @@ public class CaseServiceImpl implements CaseService {
 
         return HearingEntityToCaseHearing.mapToHearingList(hearingList);
 
+    }
+
+    @Override
+    public SingleCase getCasesById(Integer caseId) {
+        return new SingleCase();
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {

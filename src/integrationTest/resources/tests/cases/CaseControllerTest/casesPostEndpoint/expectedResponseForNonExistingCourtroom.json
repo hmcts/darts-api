@@ -3,16 +3,16 @@
   "courthouse": "SWANSEA",
   "courtroom": "9999",
   "case_number": "CASE1001",
-  "defendantList": [
+  "defendants": [
     "Jow Bloggs"
   ],
-  "judgeList": [
+  "judges": [
     "Mr Judge"
   ],
-  "prosecutorList": [
+  "prosecutors": [
     "Mrs Prosecutor"
   ],
-  "defenceList": [
+  "defenders": [
     "Mr Defender"
   ]
 }

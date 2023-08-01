@@ -4,15 +4,15 @@
     "courtroom": "2",
     "hearing_date": "2023-07-20",
     "case_number": "Case0000009",
-    "defendantList": [
+    "defendants": [
       "defendant_Case0000009_1",
       "defendant_Case0000009_2"
     ],
-    "prosecutorList": [
+    "prosecutors": [
       "prosecutor_Case0000009_1",
       "prosecutor_Case0000009_2"
     ],
-    "defenceList": [
+    "defenders": [
       "defence_Case0000009_1",
       "defence_Case0000009_2"
     ]

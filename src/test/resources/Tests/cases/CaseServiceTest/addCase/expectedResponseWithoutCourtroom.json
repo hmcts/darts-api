@@ -1,13 +1,13 @@
 {
   "courthouse": "SWANSEA",
   "case_number": "2",
-  "defendantList": [
+  "defendants": [
     "Defendant1"
   ],
-  "prosecutorList": [
+  "prosecutors": [
     "Prosecutor1"
   ],
-  "defenceList": [
+  "defenders": [
     "Defender1"
   ]
 }
