@@ -1,8 +1,8 @@
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO DARTS;
 
-DROP TABLE security_group_courthouse;
-DROP TABLE security_role_permission;
+DROP TABLE security_group_courthouse_ae;
+DROP TABLE security_role_permission_ae;
 DROP TABLE security_group_user_account_ae;
 DROP TABLE security_permission;
 DROP TABLE security_group;
