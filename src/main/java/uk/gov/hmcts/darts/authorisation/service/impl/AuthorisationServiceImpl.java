@@ -70,14 +70,14 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private UserState getUserState(List<GetAuthorisationResult> getAuthorisationResultList) {
         UserState.UserStateBuilder userStateBuilder = UserState.builder();
-        Integer tmpRoleId = 0;
         Set<Role> roles = new LinkedHashSet<>();
-        Set<Permission> permissions = new LinkedHashSet<>();
+        userStateBuilder.roles(roles);
 
+        Integer tmpRoleId = 0;
+        Set<Permission> permissions = new LinkedHashSet<>();
         for (GetAuthorisationResult result : getAuthorisationResultList) {
             userStateBuilder.userId(result.userId());
             userStateBuilder.userName(result.userName());
-            userStateBuilder.roles(roles);
 
             if (!tmpRoleId.equals(result.roleId())) {
                 permissions = new LinkedHashSet<>();
