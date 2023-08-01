@@ -22,7 +22,7 @@ public class SecurityPermissionEntity {
     @SequenceGenerator(name = "per_gen", sequenceName = "per_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "permission_name")
+    @Column(name = "permission_name", nullable = false)
     private String permissionName;
 
 }

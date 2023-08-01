@@ -18,6 +18,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -67,6 +68,6 @@ public class UserAccountEntity implements JpaAuditing {
     @JoinTable(name = "security_group_user_account_ae",
         joinColumns = {@JoinColumn(name = "usr_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
-    private List<SecurityGroupEntity> securityGroupEntities;
+    private List<SecurityGroupEntity> securityGroupEntities = new ArrayList<>();
 
 }

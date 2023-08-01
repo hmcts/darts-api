@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,13 +33,13 @@ public class SecurityGroupEntity {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rol_id", foreignKey = @ForeignKey(name = "group_role_fk"))
+    @JoinColumn(name = "rol_id", nullable = false, foreignKey = @ForeignKey(name = "security_group_role_fk"))
     private SecurityRoleEntity securityRoleId;
 
     @Column(name = "r_dm_group_s_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "group_name")
+    @Column(name = "group_name", nullable = false)
     private String groupName;
 
     @Column(name = "is_private")
@@ -63,6 +64,6 @@ public class SecurityGroupEntity {
     @JoinTable(name = "security_group_courthouse_ae",
         joinColumns = {@JoinColumn(name = "grp_id")},
         inverseJoinColumns = {@JoinColumn(name = "cth_id")})
-    private List<CourthouseEntity> courthouseEntities;
+    private List<CourthouseEntity> courthouseEntities = new ArrayList<>();
 
 }

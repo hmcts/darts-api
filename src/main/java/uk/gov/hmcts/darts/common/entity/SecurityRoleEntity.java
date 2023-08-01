@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,13 +28,13 @@ public class SecurityRoleEntity {
     @SequenceGenerator(name = "rol_gen", sequenceName = "rol_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "role_name")
+    @Column(name = "role_name", nullable = false)
     private String roleName;
 
     @ManyToMany
     @JoinTable(name = "security_role_permission_ae",
         joinColumns = {@JoinColumn(name = "rol_id")},
         inverseJoinColumns = {@JoinColumn(name = "per_id")})
-    private List<SecurityPermissionEntity> securityPermissionEntities;
+    private List<SecurityPermissionEntity> securityPermissionEntities = new ArrayList<>();
 
 }
