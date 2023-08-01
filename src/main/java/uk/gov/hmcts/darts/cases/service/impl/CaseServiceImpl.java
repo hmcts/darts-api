@@ -21,13 +21,13 @@ import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.CourtCaseUtil;
-import uk.gov.hmcts.darts.common.api.CommonApi;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class CaseServiceImpl implements CaseService {
 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
-    private final CommonApi commonApi;
+    private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
 
     @Override
@@ -81,7 +81,7 @@ public class CaseServiceImpl implements CaseService {
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
         if (CollectionUtils.isEmpty(hearings)) {
             //find out if courthouse or courtroom are missing.
-            commonApi.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
+            retrieveCoreObjectService.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
         }
         // return casesMapper.mapToCourtCases(hearings);
     }
@@ -152,7 +152,7 @@ public class CaseServiceImpl implements CaseService {
 
     private HearingEntity mapToHearingEntity(AddCaseRequest addCaseRequest, CourtCaseEntity caseEntity, HearingEntity hearingEntity) {
         if (!StringUtils.isBlank(addCaseRequest.getCourtroom())) {
-            CourtroomEntity courtroomEntity = commonApi.retrieveOrCreateCourtroom(
+            CourtroomEntity courtroomEntity = retrieveCoreObjectService.retrieveOrCreateCourtroom(
                 addCaseRequest.getCourthouse(),
                 addCaseRequest.getCourtroom()
             );

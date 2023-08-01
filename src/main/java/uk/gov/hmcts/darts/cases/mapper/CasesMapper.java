@@ -70,7 +70,7 @@ public class CasesMapper {
         caseEntity.setCaseNumber(addCaseRequest.getCaseNumber());
         mapDefendantProsecutorDefender(caseEntity, addCaseRequest);
 
-        Optional<CourthouseEntity> foundEntity = courthouseRepository.findByCourthouseName(addCaseRequest.getCourthouse());
+        Optional<CourthouseEntity> foundEntity = courthouseRepository.findByCourthouseNameIgnoreCase(addCaseRequest.getCourthouse());
         foundEntity.ifPresentOrElse(caseEntity::setCourthouse, () -> {
             throw new DartsApiException(CaseApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST);
         });
@@ -81,28 +81,27 @@ public class CasesMapper {
     private void mapDefendantProsecutorDefender(CourtCaseEntity caseEntity, AddCaseRequest caseRequest) {
 
         emptyIfNull(caseRequest.getDefendants()).forEach(newDefendant -> {
-            Optional<DefendantEntity> found = emptyIfNull(caseEntity.getDefendantList())
-                .stream().filter(d -> d.getName().equals(newDefendant)).findAny();
-            found.ifPresentOrElse(
-                d -> { }, () -> caseEntity.getDefendantList().add(createNewDefendant(newDefendant, caseEntity))
-            );
+            boolean foundDefendant = emptyIfNull(caseEntity.getDefendantList())
+                .stream().anyMatch(d -> d.getName().equals(newDefendant));
+            if (!foundDefendant) {
+                caseEntity.addDefendant(createNewDefendant(newDefendant, caseEntity));
+            }
         });
 
         emptyIfNull(caseRequest.getProsecutors()).forEach(newProsecutor -> {
-            Optional<ProsecutorEntity> found = emptyIfNull(caseEntity.getProsecutorList())
-                .stream().filter(d -> d.getName().equals(newProsecutor)).findAny();
-            found.ifPresentOrElse(
-                p -> { }, () -> caseEntity.getProsecutorList().add(createNewProsecutor(newProsecutor, caseEntity))
-            );
+            boolean foundProsecutor = emptyIfNull(caseEntity.getProsecutorList())
+                .stream().anyMatch(d -> d.getName().equals(newProsecutor));
+            if (!foundProsecutor) {
+                caseEntity.addProsecutor(createNewProsecutor(newProsecutor, caseEntity));
+            }
         });
 
         emptyIfNull(caseRequest.getDefenders()).forEach(newDefender -> {
-            Optional<DefenceEntity> found = emptyIfNull(caseEntity.getDefenceList())
-                .stream().filter(d -> d.getName().equals(newDefender)).findAny();
-            found.ifPresentOrElse(
-                d -> { },
-                () -> caseEntity.getDefenceList().add(createNewDefence(newDefender, caseEntity))
-            );
+            boolean foundDefence = emptyIfNull(caseEntity.getDefenceList())
+                .stream().anyMatch(d -> d.getName().equals(newDefender));
+            if (!foundDefence) {
+                caseEntity.addDefence(createNewDefence(newDefender, caseEntity));
+            }
         });
     }
 

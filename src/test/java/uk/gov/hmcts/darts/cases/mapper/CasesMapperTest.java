@@ -90,7 +90,7 @@ class CasesMapperTest {
 
     @Test
     void testMapAddCaseRequestToCaseEntityWithNonExistingCourthouse() {
-        Mockito.when(courthouseRepository.findByCourthouseName(any())).thenReturn(Optional.empty());
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(any())).thenReturn(Optional.empty());
 
         CourtCaseEntity caseEntity = new CourtCaseEntity();
 
@@ -109,7 +109,7 @@ class CasesMapperTest {
     @Test
     void testMapAddCaseRequestToCaseEntityWithExistingCourthouse() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        Mockito.when(courthouseRepository.findByCourthouseName(any())).thenReturn(Optional.of(courthouseEntity));
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(any())).thenReturn(Optional.of(courthouseEntity));
 
         CourtCaseEntity caseEntity = new CourtCaseEntity();
         caseEntity.setCaseNumber(CASE_NUMBER);
@@ -136,7 +136,7 @@ class CasesMapperTest {
     @Test
     void testMapAddCaseRequestToCaseEntityWithExistingDetails() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        Mockito.when(courthouseRepository.findByCourthouseName(any())).thenReturn(Optional.of(courthouseEntity));
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(any())).thenReturn(Optional.of(courthouseEntity));
 
         CourtCaseEntity caseEntity = new CourtCaseEntity();
         caseEntity.setCaseNumber(CASE_NUMBER);
