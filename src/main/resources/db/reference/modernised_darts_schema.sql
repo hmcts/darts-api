@@ -1,34 +1,34 @@
---v6 add sequences,remove character/numeric size limits, change DATE to TIMESTAMP
+--v6 add sequences, remove character/numeric size limits, change DATE to TIMESTAMP
 --v7 consistently add the legacy primary and foreign keys
 --v8 3NF courthouses
 --v9 remove various legacy columns
 --v10 change some numeric columns to boolean, remove unused legacy column c_upload_priority
 --v11 introduce many:many case:hearing, removed version label & superceded from moj_hearing, as no source for migration, and assume unneeded by modernised
---v12 remove reporting_restrictions from annotation,cached_media,event,media,transcription,transformation_request
+--v12 remove reporting_restrictions from annotation, cached_media, event, media, transcription, transformation_request
 --    add message_id, event_type_id to moj_event
 --    add moj_event_type table and links to moj_event by FK
---v13 adding Not null to moj_transcription FK moj_cas_id & moj_crt_id, 
+--v13 adding Not null to moj_transcription FK moj_cas_id & moj_crt_id,
 --    adding moj_transcription_type table to replace c_type. Remove fields c_notification_type, c_urgent from transcription
 --    add event_name to moj_event
 --    add moj_urgency table and fk to moj_transcription
 --    added comment_ts and author to moj_transcription_comment
---v14 removing unneeded columns from moj_courthouse, normalising crown court code from daily list 
---    amending judge,defendant,defence, prosecutor on hearing to be 1-d array instead of scalar
+--v14 removing unneeded columns from moj_courthouse, normalising crown court code from daily list
+--    amending judge, defendant, defence, prosecutor on hearing to be 1-d array instead of scalar
 --    rename i_version_label to i_version
 --v15 remove moj_crt_id from case and corresponding FK
 --v16 add moj_hea_id to transcription and corresponding FK
 --    add moj_user to this script
---v17 further comments reagrding properties of live data
---v18 moving atributes from moj_hearing to moj_case, changing timestamps to ts with tz
+--v17 further comments regarding properties of live data
+--v18 moving attributes from moj_hearing to moj_case, changing timestamps to ts with tz
 --v19 amended courthouse_name to be unique, amended courthouse_code to be integer
 --    removing c_scheduled_start from moj_case, to be replaced by 2 columns on moj_hearing, scheduled_start_time and hearing_is_actual flag
---v20 moving moj_event and moj_media to link to moj_hearing rather than moj_case, resulting in moj_case_event_ae and 
+--v20 moving moj_event and moj_media to link to moj_hearing rather than moj_case, resulting in moj_case_event_ae and
 --    moj_case_media_ae changing name
 --v21 normalising c_reporting_restrictions into moj_reporting_restriction table
 --    change alias for courthouse from CRT to CTH, accommodate new COURTROOM table aliased to CTR
 --    add COURTROOM table, replace existing FKs to COURTHOUSE with ones to COURTROOM for event, media
---    rename moj_event_type.type to .evt_type 
---    remove c_courtroom from moj_annotation,,moj_cached_media, moj_event, moj_hearing, moj_media, 
+--    rename moj_event_type.type to .evt_type
+--    remove c_courtroom from moj_annotation, moj_cached_media, moj_event, moj_hearing, moj_media,
 --    moj_transcription, moj_transformation_request
 --    Remove associative entity case_hearing, replace with simple PK-FK relation
 --v22 updated all sequences to cache 20
@@ -56,8 +56,8 @@
 --    added external_location_type table
 --v30 added standing data for reporting restrictions
 --    added region table and associative entity to courthouse
---    added device_register table ( equivalent to legacy tbl_moj_node)
---    added unique constraint on court_case(cth_id, case_number
+--    added device_register table (equivalent to legacy tbl_moj_node)
+--    added unique constraint on court_case(cth_id, case_number)
 --    standardised the use of "last_modified_ts" , where previously using "modified_ts" or "last_updated_ts"
 --    standardised the use of "last_modified_by" , where previously using "modified_by"
 --    reduced number of Documentum columns on user_account table, while adding a few others
@@ -65,7 +65,7 @@
 --v32 introduce defendant, prosecutor, defence tables to remove the need for character varying arrays on court_case, and add foreign keys to court_case
 --    introduce judge table to remove the need for character varying array on hearing, and add foreign key to hearing
 --    correct name of reporting_restriction_pk and case of the table name from pleural to singular
---    add not null constraint to PK columnms on region and user_account ( should be inferrable, but hibernate likes it explicitly defined)
+--    add not null constraint to PK columns on region and user_account (should be inferable, but hibernate likes it explicitly defined)
 --    amend NUMERIC to INTEGER on user_account and event tables
 --v33 remove synthetic PK from associative entities hearing_events_ae and hearing_media_as, replace with PK on natural key
 --v34 add case_retention, retention_policy & case_retention_event tables
@@ -73,14 +73,16 @@
 --v36 amend defence to defendant on defendant_name table
 --    remove foreign key on transcription table to hearing
 --v37 reinstate hea_id on transcription and FK to hearing
---    add courthouse fk on transcription 
+--    add courthouse fk on transcription
 --    add originating_courtroom on court_case
---    amend names of judge, prosecutor, defence, defendant  
+--    amend names of judge, prosecutor, defence, defendant
 --    add associative entity hearing_judge_ae and amend FKs accordingly
 --v38 add cas_id to judge table and foreign key
 --    add unique constraint on jud.judge_name
 --v39 remove origating_courtroom from court_case
- 
+--v40 remove unique constraint on jud.judge_name
+--    add hea_id to judge and add FK to hearing
+
 
 -- List of Table Aliases
 -- annotation                 ANN
@@ -91,8 +93,8 @@
 -- courthouse_region_ae       CRA
 -- courtroom                  CTR
 -- daily_list                 DAL
--- defence_name               DFC
--- defendant_name             DFD
+-- defence                    DFC
+-- defendant                  DFD
 -- device_register            DER
 -- event                      EVE
 -- event_handler              EVH
@@ -101,12 +103,12 @@
 -- hearing_event_ae           HEE
 -- hearing_media_ae           HEM
 -- hearing_judge_ae           HEJ
--- judge_name                 JUD
+-- judge                      JUD
 -- media                      MED
 -- media_request              MER
 -- notification               NOT
 -- object_directory_status    ODS
--- prosecutor_name            PRN
+-- prosecutor                 PRN
 -- region                     REG
 -- report                     REP
 -- retention_policy           RTP
@@ -150,7 +152,7 @@ CREATE TABLE annotation
 ,ctr_id                   INTEGER
 ,annotation_text          CHARACTER VARYING
 ,annotation_ts            TIMESTAMP WITH TIME ZONE
-,annotation_object_id     CHARACTER VARYING(16)		
+,annotation_object_id     CHARACTER VARYING(16)
 ,version_label            CHARACTER VARYING(32)
 ,superseded               BOOLEAN
 ,version                  INTEGER
@@ -217,7 +219,7 @@ CREATE TABLE court_case
 ,cth_id                    INTEGER                   NOT NULL
 ,evh_id                    INTEGER               -- must map to one of the reporting restriction elements
 ,case_object_id            CHARACTER VARYING(16)
-,case_number               CHARACTER VARYING     -- maps to c_case_id in legacy                    
+,case_number               CHARACTER VARYING     -- maps to c_case_id in legacy
 ,case_closed               BOOLEAN
 ,interpreter_used          BOOLEAN
 ,case_closed_ts            TIMESTAMP WITH TIME ZONE
@@ -297,15 +299,15 @@ CREATE TABLE daily_list
 ,unique_id                  CHARACTER VARYING
 --,c_crown_court_name       CHARACTER VARYING        -- removed, normalised to courthouses, but note that in legacy there is mismatch between moj_courthouse_s.c_id and moj_daily_list_s.c_crown_court_name to be resolved
 ,job_status                 CHARACTER VARYING        -- one of "New","Partially Processed","Processed","Ignored","Invalid"
-,published_ts               TIMESTAMP WITH TIME ZONE 
-,start_dt                   DATE   
+,published_ts               TIMESTAMP WITH TIME ZONE
+,start_dt                   DATE
 ,end_dt                     DATE -- all values match c_start_date
 ,daily_list_id_s            CHARACTER VARYING        -- non unique integer in legacy
-,daily_list_source          CHARACTER VARYING        -- one of CPP,XHB ( live also sees nulls and spaces)   
+,daily_list_source          CHARACTER VARYING        -- one of CPP,XHB ( live also sees nulls and spaces)
 ,daily_list_content         CHARACTER VARYING
-,created_ts                 TIMESTAMP WITH TIME ZONE               
+,created_ts                 TIMESTAMP WITH TIME ZONE
 ,last_modified_ts           TIMESTAMP WITH TIME ZONE
-,version_label              CHARACTER VARYING(32)  
+,version_label              CHARACTER VARYING(32)
 ,superseded                 BOOLEAN
 ,version                    INTEGER
 ) TABLESPACE darts_tables;
@@ -349,8 +351,8 @@ CREATE TABLE defence
 ,defence_name               CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN defence.dfc_id 
-IS 'primary key of defence_name';
+COMMENT ON COLUMN defence.dfc_id
+IS 'primary key of defence';
 
 COMMENT ON COLUMN defence.cas_id
 IS 'foreign key from court_case';
@@ -361,8 +363,8 @@ CREATE TABLE defendant
 ,defendant_name             CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN defendant.dfd_id 
-IS 'primary key of defendant_name';
+COMMENT ON COLUMN defendant.dfd_id
+IS 'primary key of defendant';
 
 COMMENT ON COLUMN defendant.cas_id
 IS 'foreign key from court_case';
@@ -370,7 +372,7 @@ IS 'foreign key from court_case';
 CREATE TABLE device_register
 (der_id                     INTEGER                  NOT NULL
 ,ctr_id                     INTEGER                  NOT NULL
-,node_id                    INTEGER                  
+,node_id                    INTEGER
 ,hostname                   CHARACTER VARYING
 ,ip_address                 CHARACTER VARYING
 ,mac_address                CHARACTER VARYING
@@ -382,7 +384,7 @@ IS 'corresponds to tbl_moj_node from legacy';
 COMMENT ON COLUMN device_register.der_id
 IS 'primary key of device_register';
 
-COMMENT ON COLUMN device_register.ctr_id 
+COMMENT ON COLUMN device_register.ctr_id
 IS 'foreign key from moj_courtroom, legacy stored courthouse and courtroon un-normalised';
 
 
@@ -394,8 +396,8 @@ CREATE TABLE event
 ,event_id                   INTEGER
 ,event_name                 CHARACTER VARYING -- details of the handler, at point in time the event arose
 ,event_text                 CHARACTER VARYING
-,event_ts                   TIMESTAMP WITH TIME ZONE  
-,case_number                CHARACTER VARYING(32)[] 
+,event_ts                   TIMESTAMP WITH TIME ZONE
+,case_number                CHARACTER VARYING(32)[]
 ,version_label              CHARACTER VARYING(32)
 ,message_id                 CHARACTER VARYING
 ,superseded                 BOOLEAN
@@ -469,7 +471,7 @@ CREATE TABLE external_object_directory
 ,tra_id                      INTEGER
 ,ann_id                      INTEGER
 ,ods_id                      INTEGER                     NOT NULL  -- FK to moj_object_directory_status
-,elt_id                      INTEGER                     NOT NULL  -- one of inbound,unstructured,arm,tempstore,vodafone 
+,elt_id                      INTEGER                     NOT NULL  -- one of inbound,unstructured,arm,tempstore,vodafone
 -- additional optional FKs to other relevant internal objects would require columns here
 ,external_location           UUID                        NOT NULL
 ,checksum	                 CHARACTER VARYING
@@ -566,23 +568,27 @@ IS 'foreign key from media, part of composite natural key and PK';
 CREATE TABLE judge
 (jud_id                     INTEGER                 NOT NULL
 ,cas_id                     INTEGER                 NOT NULL
+,hea_id                     INTEGER
 ,judge_name                 CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN judge.jud_id 
-IS 'primary key of judge_name';
+COMMENT ON COLUMN judge.jud_id
+IS 'primary key of judge';
 
 COMMENT ON COLUMN judge.cas_id
 IS 'foreign key from court_case';
+
+COMMENT ON COLUMN judge.hea_id
+IS 'foreign key from hearing';
 
 CREATE TABLE media
 (med_id                     INTEGER					 NOT NULL
 ,ctr_id                     INTEGER
 ,media_object_id            CHARACTER VARYING(16)
 ,channel                    INTEGER
-,total_channels             INTEGER                  --99.9% are "4" in legacy 
+,total_channels             INTEGER                  --99.9% are "4" in legacy
 ,reference_id               CHARACTER VARYING        --all nulls in legacy
-,start_ts                   TIMESTAMP WITH TIME ZONE 
+,start_ts                   TIMESTAMP WITH TIME ZONE
 ,end_ts                     TIMESTAMP WITH TIME ZONE
 ,case_number                CHARACTER VARYING(32)[]  --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label              CHARACTER VARYING(32)
@@ -623,7 +629,7 @@ CREATE TABLE media_request
 ,requestor                  INTEGER                    NOT NULL  -- FK to moj_user.moj_usr_id
 ,request_status             CHARACTER VARYING
 ,request_type               CHARACTER VARYING
-,req_proc_attempts          INTEGER 
+,req_proc_attempts          INTEGER
 ,start_ts                   TIMESTAMP WITH TIME ZONE
 ,end_ts                     TIMESTAMP WITH TIME ZONE
 ,created_ts                 TIMESTAMP WITH TIME ZONE
@@ -709,8 +715,8 @@ CREATE TABLE prosecutor
 ,prosecutor_name            CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
-COMMENT ON COLUMN prosecutor.prn_id 
-IS 'primary key of prosecutor_name';
+COMMENT ON COLUMN prosecutor.prn_id
+IS 'primary key of prosecutor';
 
 COMMENT ON COLUMN prosecutor.cas_id
 IS 'foreign key from court_case';
@@ -721,7 +727,7 @@ CREATE TABLE region
 ) TABLESPACE darts_tables;
 
 
-CREATE TABLE report               
+CREATE TABLE report
 (rep_id                     INTEGER					 NOT NULL
 ,report_object_id           CHARACTER VARYING(16)
 ,name                       CHARACTER VARYING
@@ -770,9 +776,9 @@ IS 'primary key of retention_policy';
 CREATE TABLE transcription
 (tra_id                   INTEGER				   NOT NULL
 ,cas_id                   INTEGER                  NOT NULL
-,ctr_id                   INTEGER                  
-,trt_id                   INTEGER                  NOT NULL  
-,urg_id                   INTEGER                  -- remains nullable, as nulls present in source data ( c_urgency)       
+,ctr_id                   INTEGER
+,trt_id                   INTEGER                  NOT NULL
+,urg_id                   INTEGER                  -- remains nullable, as nulls present in source data ( c_urgency)
 ,hea_id                   INTEGER                  -- remains nullable, until migration is complete
 ,transcription_object_id  CHARACTER VARYING(16)    -- legacy pk from moj_transcription_s.r_object_id
 ,company                  CHARACTER VARYING        -- effectively unused in legacy, either null or "<this field will be completed by the system>"
@@ -782,7 +788,7 @@ CREATE TABLE transcription
 ,hearing_date             TIMESTAMP WITH TIME ZONE -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                 TIMESTAMP WITH TIME ZONE -- both c_start and c_end have time components
 ,end_ts                   TIMESTAMP WITH TIME ZONE -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
-,created_ts               TIMESTAMP WITH TIME ZONE               
+,created_ts               TIMESTAMP WITH TIME ZONE
 ,last_modified_ts         TIMESTAMP WITH TIME ZONE
 ,last_modified_by         INTEGER                  -- will need to be FK to users table
 ,requested_by             INTEGER                  -- will need to be FK to users table
@@ -796,7 +802,7 @@ CREATE TABLE transcription
 
 COMMENT ON COLUMN transcription.tra_id
 IS 'primary key of transcription';
-    
+
 COMMENT ON COLUMN transcription.cas_id
 IS 'foreign key from case';
 
@@ -811,7 +817,7 @@ IS 'foreign key to transcription_type, sourced from moj_transcription_s.c_type';
 
 COMMENT ON COLUMN transcription.transcription_object_id
 IS 'internal Documentum primary key from moj_transcription_s';
-    
+
 COMMENT ON COLUMN transcription.company
 IS 'directly sourced from moj_transcription_s';
 
@@ -840,7 +846,7 @@ CREATE TABLE transcription_comment
 ,transcription_comment             CHARACTER VARYING
 ,comment_ts                        TIMESTAMP WITH TIME ZONE
 ,author                            INTEGER                   -- will need to be FK to user table
-,created_ts                        TIMESTAMP WITH TIME ZONE               
+,created_ts                        TIMESTAMP WITH TIME ZONE
 ,last_modified_ts                  TIMESTAMP WITH TIME ZONE
 ,last_modified_by                  INTEGER                   -- will need to be FK to users table
 ,superseded                        BOOLEAN
@@ -848,13 +854,13 @@ CREATE TABLE transcription_comment
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN transcription_comment.trc_id
-IS 'primary key of transcription_comment'; 
+IS 'primary key of transcription_comment';
 
 COMMENT ON COLUMN transcription_comment.tra_id
-IS 'foreign key from transcription'; 
+IS 'foreign key from transcription';
 
 COMMENT ON COLUMN transcription_comment.transcription_object_id
-IS 'internal Documentum primary key from moj_transcription_s'; 
+IS 'internal Documentum primary key from moj_transcription_s';
 
 COMMENT ON COLUMN transcription_comment.transcription_comment
 IS 'directly sourced from moj_transcription_r';
@@ -864,7 +870,7 @@ IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 
 CREATE TABLE transcription_type
 (trt_id                            INTEGER                   NOT NULL
-,description                       CHARACTER VARYING        
+,description                       CHARACTER VARYING
 );
 
 COMMENT ON TABLE transcription_type
@@ -875,7 +881,7 @@ IS 'primary key, but not sequence generated';
 
 CREATE TABLE transient_object_directory
 (tod_id                      INTEGER			 		 NOT NULL
-,mer_id                      INTEGER                     NOT NULL 
+,mer_id                      INTEGER                     NOT NULL
 ,ods_id                      INTEGER                     NOT NULL  -- FK to moj_object_directory_status.moj_ods_id
 ,external_location           UUID                        NOT NULL
 ,checksum	                 CHARACTER VARYING
@@ -890,10 +896,10 @@ CREATE TABLE urgency
 ,description                       CHARACTER VARYING
 ) TABLESPACE darts_tables;
 
-COMMENT ON TABLE urgency 
+COMMENT ON TABLE urgency
 IS 'will be migrated from tbl_moj_urgency';
 
-COMMENT ON COLUMN urgency.urg_id 
+COMMENT ON COLUMN urgency.urg_id
 IS 'inherited from tbl_moj_urgency.urgency_id';
 
 COMMENT ON COLUMN urgency.description
@@ -912,7 +918,7 @@ CREATE TABLE user_account
 ,last_modified_by        INTEGER
 ) TABLESPACE darts_tables;
 
-COMMENT ON TABLE user_account 
+COMMENT ON TABLE user_account
 IS 'migration columns all sourced directly from dm_user_s, but only for rows where r_is_group = 0';
 COMMENT ON COLUMN user_account.usr_id
 IS 'primary key of user_account';
@@ -924,13 +930,13 @@ IS 'internal Documentum primary key from dm_user_s';
 CREATE UNIQUE INDEX annotation_pk ON annotation(ann_id) TABLESPACE darts_indexes;
 ALTER TABLE annotation              ADD PRIMARY KEY USING INDEX annotation_pk;
 
-CREATE UNIQUE INDEX case_retention_pk ON case_retention(car_id) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX case_retention_pk ON case_retention(car_id) TABLESPACE darts_indexes;
 ALTER TABLE case_retention          ADD PRIMARY KEY USING INDEX case_retention_pk;
 
-CREATE UNIQUE INDEX case_retention_event_pk ON case_retention_event(cre_id) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX case_retention_event_pk ON case_retention_event(cre_id) TABLESPACE darts_indexes;
 ALTER TABLE case_retention_event    ADD PRIMARY KEY USING INDEX case_retention_event_pk;
 
-CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE darts_indexes; 
+CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE darts_indexes;
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
 
 CREATE UNIQUE INDEX courthouse_pk ON courthouse(cth_id) TABLESPACE darts_indexes;
@@ -1058,59 +1064,59 @@ CREATE SEQUENCE usr_seq CACHE 20;
 
 -- foreign keys
 
-ALTER TABLE annotation                
+ALTER TABLE annotation
 ADD CONSTRAINT annotation_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE annotation                
+ALTER TABLE annotation
 ADD CONSTRAINT annotation_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE case_retention                
+ALTER TABLE case_retention
 ADD CONSTRAINT case_retention_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE case_retention                
+ALTER TABLE case_retention
 ADD CONSTRAINT case_retention_retention_policy_fk
 FOREIGN KEY (rtp_id) REFERENCES retention_policy(rtp_id);
 
-ALTER TABLE case_retention_event               
+ALTER TABLE case_retention_event
 ADD CONSTRAINT case_retention_event_case_retention_fk
 FOREIGN KEY (car_id) REFERENCES case_retention(car_id);
 
-ALTER TABLE court_case                        
+ALTER TABLE court_case
 ADD CONSTRAINT court_case_event_handler_fk
 FOREIGN KEY (evh_id) REFERENCES event_handler(evh_id);
 
-ALTER TABLE court_case                        
+ALTER TABLE court_case
 ADD CONSTRAINT court_case_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
-ALTER TABLE courthouse_region_ae                        
+ALTER TABLE courthouse_region_ae
 ADD CONSTRAINT courthouse__region_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
-ALTER TABLE courthouse_region_ae                        
+ALTER TABLE courthouse_region_ae
 ADD CONSTRAINT courthouse__region_region_fk
 FOREIGN KEY (reg_id) REFERENCES region(reg_id);
 
-ALTER TABLE hearing                     
+ALTER TABLE hearing
 ADD CONSTRAINT hearing_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE courtroom                   
+ALTER TABLE courtroom
 ADD CONSTRAINT courtroom_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
-ALTER TABLE daily_list                  
+ALTER TABLE daily_list
 ADD CONSTRAINT daily_list_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
-ALTER TABLE defence                
+ALTER TABLE defence
 ADD CONSTRAINT defence_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE defendant                
+ALTER TABLE defendant
 ADD CONSTRAINT defendant_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
@@ -1118,63 +1124,63 @@ ALTER TABLE device_register
 ADD CONSTRAINT device_register_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE event                       
+ALTER TABLE event
 ADD CONSTRAINT event_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE event                       
+ALTER TABLE event
 ADD CONSTRAINT event_event_handler_fk
 FOREIGN KEY (evh_id) REFERENCES event_handler(evh_id);
 
-ALTER TABLE external_object_directory   
+ALTER TABLE external_object_directory
 ADD CONSTRAINT eod_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
-ALTER TABLE external_object_directory   
+ALTER TABLE external_object_directory
 ADD CONSTRAINT eod_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
-ALTER TABLE external_object_directory   
+ALTER TABLE external_object_directory
 ADD CONSTRAINT eod_annotation_fk
 FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
 
-ALTER TABLE external_object_directory   
+ALTER TABLE external_object_directory
 ADD CONSTRAINT eod_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE external_object_directory   
+ALTER TABLE external_object_directory
 ADD CONSTRAINT eod_object_directory_status_fk
 FOREIGN KEY (ods_id) REFERENCES object_directory_status(ods_id);
 
-ALTER TABLE external_object_directory   
+ALTER TABLE external_object_directory
 ADD CONSTRAINT eod_external_location_type_fk
 FOREIGN KEY (elt_id) REFERENCES external_location_type(elt_id);
 
-ALTER TABLE hearing                     
+ALTER TABLE hearing
 ADD CONSTRAINT hearing_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE hearing_event_ae            
+ALTER TABLE hearing_event_ae
 ADD CONSTRAINT hearing_event_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_event_ae            
+ALTER TABLE hearing_event_ae
 ADD CONSTRAINT hearing_event_ae_event_fk
 FOREIGN KEY (eve_id) REFERENCES event(eve_id);
 
-ALTER TABLE hearing_judge_ae            
+ALTER TABLE hearing_judge_ae
 ADD CONSTRAINT hearing_judge_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_judge_ae            
+ALTER TABLE hearing_judge_ae
 ADD CONSTRAINT hearing_judge_ae_judge_fk
 FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
 
-ALTER TABLE hearing_media_ae            
+ALTER TABLE hearing_media_ae
 ADD CONSTRAINT hearing_media_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE hearing_media_ae            
+ALTER TABLE hearing_media_ae
 ADD CONSTRAINT hearing_media_ae_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
@@ -1182,75 +1188,79 @@ ALTER TABLE judge
 ADD CONSTRAINT judge_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE media                       
+ALTER TABLE judge
+ADD CONSTRAINT judge_hearing_fk
+FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
+
+ALTER TABLE media
 ADD CONSTRAINT media_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE media_request               
+ALTER TABLE media_request
 ADD CONSTRAINT media_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE notification                
+ALTER TABLE notification
 ADD CONSTRAINT notification_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE prosecutor               
+ALTER TABLE prosecutor
 ADD CONSTRAINT prosecutor_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_urgency_fk
 FOREIGN KEY (urg_id) REFERENCES urgency(urg_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_requested_by_fk
 FOREIGN KEY (requested_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_approved_by_fk
 FOREIGN KEY (approved_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_transcribed_by_fk
 FOREIGN KEY (transcribed_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transcription               
+ALTER TABLE transcription
 ADD CONSTRAINT transcription_transcription_type_fk
 FOREIGN KEY (trt_id) REFERENCES transcription_type(trt_id);
 
-ALTER TABLE transcription_comment       
+ALTER TABLE transcription_comment
 ADD CONSTRAINT transcription_comment_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
-ALTER TABLE transcription_comment       
+ALTER TABLE transcription_comment
 ADD CONSTRAINT transcription_comment_author_fk
 FOREIGN KEY (author) REFERENCES user_account(usr_id);
 
-ALTER TABLE transient_object_directory  
+ALTER TABLE transient_object_directory
 ADD CONSTRAINT tod_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE transient_object_directory  
+ALTER TABLE transient_object_directory
 ADD CONSTRAINT tod_media_request_fk
 FOREIGN KEY (mer_id) REFERENCES media_request(mer_id);
 
-ALTER TABLE transient_object_directory  
+ALTER TABLE transient_object_directory
 ADD CONSTRAINT tod_object_directory_status_fk
 FOREIGN KEY (ods_id) REFERENCES object_directory_status(ods_id);
 
@@ -1267,11 +1277,6 @@ ALTER TABLE hearing ADD UNIQUE USING INDEX hea_cas_ctr_hd_unq;
 --,UNIQUE(cth_id, case_number)
 CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id) TABLESPACE darts_indexes;
 ALTER TABLE court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
-
--- UNIQUE (judge_name)
-CREATE UNIQUE INDEX jud_judge_name_unq ON judge( judge_name) TABLESPACE darts_indexes;
-ALTER TABLE judge ADD UNIQUE USING INDEX jud_judge_name_unq;
-
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;

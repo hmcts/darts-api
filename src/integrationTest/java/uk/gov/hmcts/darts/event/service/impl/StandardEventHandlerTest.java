@@ -8,14 +8,19 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.DoNotUseThreads"})
 class StandardEventHandlerTest extends IntegrationBase {
 
     public static final String UNKNOWN_COURTROOM = "unknown-courtroom";
@@ -29,41 +34,41 @@ class StandardEventHandlerTest extends IntegrationBase {
     @Autowired
     StandardEventHandler eventHandler;
 
-    @Test
-    void throwsOnUnknownCourtroom() {
-        dartsDatabase.save(someMinimalCase());
-        assertThatThrownBy(() -> eventHandler.handle(someMinimalDartsEvent().courtroom(UNKNOWN_COURTROOM)))
-              .isInstanceOf(DartsApiException.class);
-    }
 
     @Test
     void throwsOnUnknownCourthouse() {
         dartsDatabase.save(someMinimalCase());
-        assertThatThrownBy(() -> eventHandler.handle(someMinimalDartsEvent().courthouse(UNKNOWN_COURTHOUSE)))
-              .isInstanceOf(DartsApiException.class);
+        DartsEvent dartsEvent = someMinimalDartsEvent().courthouse(UNKNOWN_COURTHOUSE);
+        dartsEvent.setCaseNumbers(List.of("123"));
+        dartsEvent.setDateTime(today);
+        assertThatThrownBy(() -> eventHandler.handle(dartsEvent))
+            .isInstanceOf(DartsApiException.class);
     }
 
     @Test
     void handlesScenarioWhereCourtCaseAndHearingDontExist() {
         dartsDatabase.givenTheDatabaseContainsCourthouseWithRoom(
-              SOME_COURTHOUSE,
-              SOME_ROOM);
+            SOME_COURTHOUSE,
+            SOME_ROOM
+        );
         dartsGateway.darNotificationReturnsSuccess();
 
         eventHandler.handle(someMinimalDartsEvent()
-              .caseNumbers(List.of(SOME_CASE_NUMBER))
-              .courthouse(SOME_COURTHOUSE)
-              .courtroom(SOME_ROOM)
-              .dateTime(today));
+                                .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                .courthouse(SOME_COURTHOUSE)
+                                .courtroom(SOME_ROOM)
+                                .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-              SOME_CASE_NUMBER,
-              SOME_COURTHOUSE).get();
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
+        ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-              SOME_COURTHOUSE,
-              SOME_ROOM,
-              today.toLocalDate());
+            SOME_COURTHOUSE,
+            SOME_ROOM,
+            today.toLocalDate()
+        );
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -78,23 +83,25 @@ class StandardEventHandlerTest extends IntegrationBase {
     @Test
     void handlesScenarioWhereHearingDoesntExist() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-              SOME_CASE_NUMBER,
-              SOME_COURTHOUSE,
-              SOME_ROOM);
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM
+        );
         dartsGateway.darNotificationReturnsSuccess();
 
         eventHandler.handle(someMinimalDartsEvent()
-              .caseNumbers(List.of(SOME_CASE_NUMBER))
-              .courthouse(SOME_COURTHOUSE)
-              .courtroom(SOME_ROOM)
-              .dateTime(today));
+                                .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                .courthouse(SOME_COURTHOUSE)
+                                .courtroom(SOME_ROOM)
+                                .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-              SOME_CASE_NUMBER,
-              SOME_COURTHOUSE).get();
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
+        ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-              SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -109,25 +116,27 @@ class StandardEventHandlerTest extends IntegrationBase {
     @Test
     void handlesScenarioWhereCaseAndHearingExistsButRoomNumberHasChanged() {
         var caseEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-              SOME_CASE_NUMBER,
-              SOME_COURTHOUSE,
-              SOME_ROOM);
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM
+        );
 
         dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
         dartsGateway.darNotificationReturnsSuccess();
 
         eventHandler.handle(someMinimalDartsEvent()
-              .caseNumbers(List.of(SOME_CASE_NUMBER))
-              .courthouse(SOME_COURTHOUSE)
-              .courtroom(SOME_OTHER_ROOM)
-              .dateTime(today));
+                                .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                .courthouse(SOME_COURTHOUSE)
+                                .courtroom(SOME_OTHER_ROOM)
+                                .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-              SOME_CASE_NUMBER,
-              SOME_COURTHOUSE).get();
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
+        ).get();
 
         var caseHearing = dartsDatabase.findByCourthouseCourtroomAndDate(
-              SOME_COURTHOUSE, SOME_OTHER_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_OTHER_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -137,7 +146,7 @@ class StandardEventHandlerTest extends IntegrationBase {
         assertThat(caseHearing.get(0).getHearingIsActual()).isEqualTo(true);
 
         assertTrue(
-              dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate()).isEmpty());
+            dartsDatabase.findByCourthouseCourtroomAndDate(SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate()).isEmpty());
 
         dartsGateway.verifyReceivedNotificationType(3);
     }
@@ -145,24 +154,26 @@ class StandardEventHandlerTest extends IntegrationBase {
     @Test
     void handlesScenarioWhereCaseAndHearingExistsAndHearingLevelDataHasntChanged() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-              SOME_CASE_NUMBER,
-              SOME_COURTHOUSE,
-              SOME_ROOM,
-              today.toLocalDate());
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE,
+            SOME_ROOM,
+            today.toLocalDate()
+        );
         dartsGateway.darNotificationReturnsSuccess();
 
         eventHandler.handle(someMinimalDartsEvent()
-              .caseNumbers(List.of(SOME_CASE_NUMBER))
-              .courthouse(SOME_COURTHOUSE)
-              .courtroom(SOME_ROOM)
-              .dateTime(today));
+                                .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                .courthouse(SOME_COURTHOUSE)
+                                .courtroom(SOME_ROOM)
+                                .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
-              SOME_CASE_NUMBER,
-              SOME_COURTHOUSE).get();
+            SOME_CASE_NUMBER,
+            SOME_COURTHOUSE
+        ).get();
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
-              SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
+            SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
 
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
@@ -176,13 +187,43 @@ class StandardEventHandlerTest extends IntegrationBase {
 
     private static DartsEvent someMinimalDartsEvent() {
         return new DartsEvent()
-              .type("1000")
-              .subType("1002")
-              .courtroom("unknown-room")
-              .courthouse("known-courthouse")
-              .eventId("1")
-              .eventText("some-text")
-              .messageId("some-message-id");
+            .type("1000")
+            .subType("1002")
+            .courtroom("unknown-room")
+            .courthouse("known-courthouse")
+            .eventId("1")
+            .eventText("some-text")
+            .messageId("some-message-id");
+    }
+
+
+    @Test
+    void testSummationWithConcurrency() throws InterruptedException {
+
+        dartsDatabase.createCourthouseWithoutCourtrooms(SOME_COURTHOUSE);
+        dartsGateway.darNotificationReturnsSuccess();
+
+        int numberOfThreads = 100;
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+
+
+        for (int i = 0; i < numberOfThreads; i++) {
+            int nanoSec = i * 1000;
+            service.submit(() -> {
+                DartsEvent dartsEvent = someMinimalDartsEvent()
+                    .caseNumbers(List.of("asyncTestCaseNumber"))
+                    .courthouse(SOME_COURTHOUSE)
+                    .courtroom("asyncTestCourtroom")
+                    .dateTime(today.withNano(nanoSec))
+                    .eventId(null);
+                eventHandler.handle(dartsEvent);
+                latch.countDown();
+            });
+        }
+        latch.await(5, TimeUnit.SECONDS);
+        assertEquals(1, dartsDatabase.getHearingRepository().findAll().size());
+        assertEquals(numberOfThreads, dartsDatabase.getAllEvents().size());
     }
 }
 
