@@ -84,7 +84,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                 roles.add(Role.builder()
                               .roleId(result.roleId())
                               .roleName(result.roleName())
-                              .permissions(permissions).build());
+                              .permissions(permissions)
+                              .build());
 
                 tmpRoleId = result.roleId();
             }

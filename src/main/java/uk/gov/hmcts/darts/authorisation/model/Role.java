@@ -1,32 +1,26 @@
 package uk.gov.hmcts.darts.authorisation.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.EqualsAndHashCode.Exclude;
 import lombok.EqualsAndHashCode.Include;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.NonNull;
+import lombok.Value;
 
 import java.util.Set;
 
-@Builder(toBuilder = true)
-@AllArgsConstructor
-@NoArgsConstructor
-@Setter
-@Getter
-@EqualsAndHashCode
-@ToString
+@Builder
+@Value
 @SuppressWarnings({"PMD.ShortClassName"})
 public class Role {
 
     @Include
+    @NonNull
     private Integer roleId;
     @Include
+    @NonNull
     private String roleName;
     @Exclude
-    Set<Permission> permissions;
+    @NonNull
+    private Set<Permission> permissions;
 
 }
