@@ -268,15 +268,15 @@ components:
         upload_priority:
           type: string
           example: 10
-        defendantList:
+        defendants:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
-        judgeList:
+        judges:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-        prosecutorList:
+        prosecutors:
           type: array
           items:
             $ref: '#/components/schemas/prosecutor'
@@ -301,15 +301,15 @@ components:
         upload_priority:
           type: string
           example: 10
-        defendantList:
+        defendants:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
-        judgeList:
+        judges:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-        prosecutorList:
+        prosecutors:
           type: array
           items:
             $ref: '#/components/schemas/prosecutor'
@@ -387,7 +387,7 @@ components:
         date:
           type: string
           format: date
-        judgeList:
+        judges:
           type: array
           items:
             $ref: '#/components/schemas/judge'

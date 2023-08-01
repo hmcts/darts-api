@@ -30,7 +30,7 @@ public class HearingEntityToCaseHearing {
 
         hearing.setId(entity.getId());
         hearing.setDate(entity.getHearingDate());
-        hearing.setJudgeList(entity.getJudgesStringList());
+        hearing.setJudges(entity.getJudgesStringList());
         hearing.setCourtroom(entity.getCourtroom().getName());
 
         return hearing;

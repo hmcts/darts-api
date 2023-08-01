@@ -3,14 +3,14 @@
   "courtroom": "1",
   "hearing_date": "todays_date",
   "case_number": "case1",
-  "defendantList": [
+  "defendants": [
     "Jow Bloggs",
     "aDefendant"
   ],
-  "judgeList": [
+  "judges": [
     "Mr Judge"
   ],
-  "prosecutorList": [
+  "prosecutors": [
     "Mrs Prosecutor",
     "aProsecutor"
   ],

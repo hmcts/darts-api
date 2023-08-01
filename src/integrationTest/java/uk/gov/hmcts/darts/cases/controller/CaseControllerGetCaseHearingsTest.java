@@ -62,7 +62,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judgeList", Matchers.is(Matchers.notNullValue())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)));
 
     }
@@ -81,17 +81,17 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         HearingEntity hearingEntity2 = dartsDatabase.getHearingRepository().findAll().get(1);
 
         hearingEntity.setJudgeList(List.of(dartsDatabase.createSimpleJudges(hearingEntity)));
-        hearingEntity2.setJudgeList(List.of(dartsDatabase.createSimpleJudges(hearingEntity2)));
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].id", Matchers.is(hearingEntity.getId())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].date", Matchers.is(Matchers.notNullValue())))
-            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judgeList", Matchers.is(Matchers.notNullValue())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].judges", Matchers.is(Matchers.notNullValue())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[0].courtroom", Matchers.is(SOME_COURTROOM)))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].id", Matchers.is(hearingEntity2.getId())))
             .andExpect(MockMvcResultMatchers.jsonPath("$[1].courtroom", Matchers.is("CR1")));
+
     }
 
     @Test

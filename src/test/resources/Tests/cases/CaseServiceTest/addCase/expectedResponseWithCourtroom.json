@@ -3,13 +3,13 @@
   "courthouse": "SWANSEA",
   "courtroom": "1",
   "case_number": "2",
-  "defendantList": [
+  "defendants": [
     "Defendant1"
   ],
-  "judgeList": [
+  "judges": [
     "Judge1"
   ],
-  "prosecutorList": [
+  "prosecutors": [
     "Prosecutor1"
   ],
   "defenders": [

@@ -564,7 +564,7 @@ class CaseServiceImplTest {
         assertEquals(3, updatedCaseEntity.getProsecutorList().size());
         assertEquals(3, updatedCaseEntity.getDefenceList().size());
 
-        assertNull(result.getJudgeList());
+        assertNull(result.getJudges());
 
     }
 

@@ -36,8 +36,8 @@ public class CasesMapper {
     public ScheduledCase mapToCourtCase(CourtCaseEntity caseEntity) {
         ScheduledCase scheduledCase = new ScheduledCase(caseEntity.getCourthouse().getCourthouseName());
         scheduledCase.setCaseNumber(caseEntity.getCaseNumber());
-        scheduledCase.setDefendantList(caseEntity.getDefendantStringList());
-        scheduledCase.setProsecutorList(caseEntity.getProsecutorsStringList());
+        scheduledCase.setDefendants(caseEntity.getDefendantStringList());
+        scheduledCase.setProsecutors(caseEntity.getProsecutorsStringList());
         scheduledCase.setDefenders(caseEntity.getDefenceStringList());
         return scheduledCase;
     }
@@ -55,9 +55,9 @@ public class CasesMapper {
         scheduledCase.setHearingDate(hearing.getHearingDate());
         scheduledCase.setCaseNumber(hearingCourtCase.getCaseNumber());
         scheduledCase.setScheduledStart(toStringOrDefaultTo(hearing.getScheduledStartTime(), ""));
-        scheduledCase.setDefendantList(hearingCourtCase.getDefendantStringList());
-        scheduledCase.setJudgeList(hearing.getJudgesStringList());
-        scheduledCase.setProsecutorList(hearingCourtCase.getProsecutorsStringList());
+        scheduledCase.setDefendants(hearingCourtCase.getDefendantStringList());
+        scheduledCase.setJudges(hearing.getJudgesStringList());
+        scheduledCase.setProsecutors(hearingCourtCase.getProsecutorsStringList());
         scheduledCase.setDefenders(hearingCourtCase.getDefenceStringList());
         return scheduledCase;
     }
