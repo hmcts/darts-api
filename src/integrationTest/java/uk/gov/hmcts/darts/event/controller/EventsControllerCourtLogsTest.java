@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -205,5 +206,52 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
     }
+
+    @Test
+    void courtLogsWrongCaseNumber() throws Exception {
+
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+
+        var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
+        var event = createEventWith(LOG, "test", hearingEntity, eventTime);
+        var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
+
+        HearingEntity hearingEntity1 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            "Case0000001",
+            "some-courthouse",
+            "CR1",
+            SOME_DATE_TIME.toLocalDate()
+        );
+
+        var event3 = createEventWith(LOG, "ShouldNotShow", hearingEntity1, eventTime);
+        var event4 = createEventWith(LOG, "ShouldAlsoNotShow", hearingEntity1, eventTime);
+
+
+        System.out.println(hearingEntity1.getCourtCase().getCaseNumber());
+
+        eventRepository.saveAndFlush(event);
+        eventRepository.saveAndFlush(event2);
+        eventRepository.saveAndFlush(event3);
+        eventRepository.saveAndFlush(event4);
+
+        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
+        String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam("courthouse", "some-courthouse")
+            .queryParam("case_number", "Case0000001")
+            .queryParam("start_date_time", "2022-07-01T09:00:00+01")
+            .queryParam("end_date_time", "2024-07-01T12:00:00+01")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+       MvcResult results = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is("Case0000001")))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.notNullValue())).andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2))).andReturn();
+
+       System.out.println(results.getResponse().getContentAsString());
+    }
+
 
 }
