@@ -9,10 +9,12 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
@@ -21,7 +23,8 @@ import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
+import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
 
 @Transactional
@@ -41,13 +44,30 @@ public class AudioTransformationServiceGivenBuilder {
     private MediaEntity mediaEntity3;
     private CourtroomEntity courtroomAtNewcastle;
     private CourtCaseEntity courtCase;
+    private JudgeEntity judge;
 
     public void setupTest() {
         courtroomAtNewcastle = getCourtroomAtNewcastle();
         courtCase = dartsDatabase.save(createCaseAtCourthouse("c1", courtroomAtNewcastle.getCourthouse()));
-        hearingEntityWithMedia1 = dartsDatabase.save(createHearingWith(courtCase, courtroomAtNewcastle));
-        hearingEntityWithMedia2 = dartsDatabase.save(createHearingWith(courtCase, courtroomAtNewcastle));
-        hearingEntityWithoutMedia = dartsDatabase.save(createHearingWith(courtCase, courtroomAtNewcastle));
+        judge = dartsDatabase.save(createJudgeWithName("aJudge"));
+        hearingEntityWithMedia1 = dartsDatabase.save(createHearingWithDefaults(
+            courtCase,
+            courtroomAtNewcastle,
+            LocalDate.of(2020, 06, 20),
+            judge
+        ));
+        hearingEntityWithMedia2 = dartsDatabase.save(createHearingWithDefaults(
+            courtCase,
+            courtroomAtNewcastle,
+            LocalDate.of(2020, 06, 21),
+            judge
+        ));
+        hearingEntityWithoutMedia = dartsDatabase.save(createHearingWithDefaults(
+            courtCase,
+            courtroomAtNewcastle,
+            LocalDate.of(2020, 06, 22),
+            judge
+        ));
 
         mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
         mediaEntity2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
@@ -57,18 +77,18 @@ public class AudioTransformationServiceGivenBuilder {
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity1 = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
-              mediaEntity,
-              dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId()),
-              dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()),
-              UUID.randomUUID()
+            mediaEntity,
+            dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId()),
+            dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()),
+            UUID.randomUUID()
         );
         return dartsDatabase.save(externalObjectDirectoryEntity1);
     }
 
     private CourtroomEntity getCourtroomAtNewcastle() {
         return dartsDatabase.save(
-              createCourtRoomAtCourthouse(
-                    createCourthouse("NEWCASTLE")));
+            createCourtRoomAtCourthouse(
+                createCourthouse("NEWCASTLE")));
 
     }
 }

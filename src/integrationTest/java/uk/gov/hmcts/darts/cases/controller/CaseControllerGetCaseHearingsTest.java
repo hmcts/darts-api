@@ -55,8 +55,6 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
 
-        hearingEntity.setJudgeList(List.of(dartsDatabase.createSimpleJudges(hearingEntity)));
-
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -80,7 +78,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
         HearingEntity hearingEntity2 = dartsDatabase.getHearingRepository().findAll().get(1);
 
-        hearingEntity.setJudgeList(List.of(dartsDatabase.createSimpleJudges(hearingEntity)));
+        hearingEntity.addJudge(dartsDatabase.createSimpleJudge("hearing1Judge"));
+        hearingEntity2.addJudge(dartsDatabase.createSimpleJudge("hearing2Judge"));
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
 
@@ -99,7 +98,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$[0]").doesNotExist());
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath(
+            "$[0]").doesNotExist());
 
     }
 

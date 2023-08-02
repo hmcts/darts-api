@@ -8,3 +8,6 @@ CREATE UNIQUE INDEX hea_cas_ctr_hd_unq ON darts.hearing (cas_id, ctr_id, hearing
 
 --,UNIQUE(cth_id, case_number)
 CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id);
+
+--,UNIQUE(judge_name)
+CREATE UNIQUE INDEX judge_name_unq ON judge(judge_name);

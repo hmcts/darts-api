@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 
 import java.time.LocalDate;
 
@@ -31,4 +32,7 @@ public interface RetrieveCoreObjectService {
 
     @Retryable(backoff = @Backoff(delay = 50), retryFor = DataIntegrityViolationException.class)
     CourthouseEntity retrieveCourthouse(String courthouseName);
+
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = DataIntegrityViolationException.class)
+    JudgeEntity retrieveJudge(String judgeName);
 }

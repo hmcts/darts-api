@@ -80,12 +80,13 @@
 --v38 add cas_id to judge table and foreign key
 --    add unique constraint on jud.judge_name
 --v39 remove origating_courtroom from court_case
---v40 remove unique constraint on jud.judge_name
---    add hea_id to judge and add FK to hearing
+--v40 changed judge table to contain only (jud_id integer PK, judge_name character varying UK)
+--    created table case_judge_ae to contain (cas_id, jud_id) composite PK
 
 
 -- List of Table Aliases
 -- annotation                 ANN
+-- case_judge_ae              CAJ
 -- case_retention             CAR
 -- case_retention_event       CRE
 -- court_case                 CAS
@@ -178,6 +179,18 @@ IS 'directly sourced from moj_annotation_s';
 
 COMMENT ON COLUMN annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
+
+CREATE TABLE case_judge_ae
+(cas_id                     INTEGER                          NOT NULL
+,jud_id                     INTEGER                          NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON COLUMN case_judge_ae.cas_id
+IS 'foreign key from case, part of composite natural key and PK';
+
+COMMENT ON COLUMN case_judge_ae.jud_id
+IS 'foreign key from judge, part of composite natural key and PK';
+
 
 CREATE TABLE case_retention
 (car_id                    INTEGER                   NOT NULL
@@ -567,19 +580,11 @@ IS 'foreign key from media, part of composite natural key and PK';
 
 CREATE TABLE judge
 (jud_id                     INTEGER                 NOT NULL
-,cas_id                     INTEGER                 NOT NULL
-,hea_id                     INTEGER
 ,judge_name                 CHARACTER VARYING       NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN judge.jud_id
 IS 'primary key of judge';
-
-COMMENT ON COLUMN judge.cas_id
-IS 'foreign key from court_case';
-
-COMMENT ON COLUMN judge.hea_id
-IS 'foreign key from hearing';
 
 CREATE TABLE media
 (med_id                     INTEGER					 NOT NULL
@@ -930,6 +935,9 @@ IS 'internal Documentum primary key from dm_user_s';
 CREATE UNIQUE INDEX annotation_pk ON annotation(ann_id) TABLESPACE darts_indexes;
 ALTER TABLE annotation              ADD PRIMARY KEY USING INDEX annotation_pk;
 
+CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id) TABLESPACE darts_indexes;
+ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
+
 CREATE UNIQUE INDEX case_retention_pk ON case_retention(car_id) TABLESPACE darts_indexes;
 ALTER TABLE case_retention          ADD PRIMARY KEY USING INDEX case_retention_pk;
 
@@ -1072,6 +1080,14 @@ ALTER TABLE annotation
 ADD CONSTRAINT annotation_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
+ALTER TABLE case_judge_ae
+ADD CONSTRAINT case_judge_ae_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE case_judge_ae
+ADD CONSTRAINT case_judge_ae_judge_fk
+FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
+
 ALTER TABLE case_retention
 ADD CONSTRAINT case_retention_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
@@ -1184,14 +1200,6 @@ ALTER TABLE hearing_media_ae
 ADD CONSTRAINT hearing_media_ae_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
-ALTER TABLE judge
-ADD CONSTRAINT judge_court_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
-
-ALTER TABLE judge
-ADD CONSTRAINT judge_hearing_fk
-FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
-
 ALTER TABLE media
 ADD CONSTRAINT media_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
@@ -1278,7 +1286,15 @@ ALTER TABLE hearing ADD UNIQUE USING INDEX hea_cas_ctr_hd_unq;
 CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id) TABLESPACE darts_indexes;
 ALTER TABLE court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
 
+-- additional unique single-column indexes and constraints
+
+--,UNIQUE(judge_name)
+CREATE UNIQUE INDEX judge_name_unq ON judge(judge_name) TABLESPACE darts_indexes;
+ALTER TABLE judge ADD UNIQUE USING INDEX judge_name_unq;
+
+
 GRANT SELECT,INSERT,UPDATE,DELETE ON annotation TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON case_judge_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention_event TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;

@@ -11,3 +11,9 @@ ALTER TABLE hearing ADD UNIQUE USING INDEX hea_cas_ctr_hd_unq;
 --,UNIQUE(cth_id, case_number)
 CREATE UNIQUE INDEX cas_case_number_cth_id_unq ON court_case(case_number,cth_id);
 ALTER TABLE court_case ADD UNIQUE USING INDEX cas_case_number_cth_id_unq;
+
+-- additional unique single-column indexes and constraints
+
+--,UNIQUE(judge_name)
+CREATE UNIQUE INDEX judge_name_unq ON judge(judge_name);
+ALTER TABLE judge ADD UNIQUE USING INDEX judge_name_unq;
