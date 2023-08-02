@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +15,10 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
@@ -24,10 +27,13 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
+import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
+import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,22 +55,39 @@ import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("PMD.ExcessiveImports")
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"}) // DMP-715 to resolve
 public class AudioTransformationServiceImpl implements AudioTransformationService {
 
     private final MediaRequestService mediaRequestService;
-    private final DataManagementService dataManagementService;
-    private final DataManagementConfiguration dataManagementConfiguration;
-    private final TransientObjectDirectoryService transientObjectDirectoryService;
+    private final OutboundFileProcessor outboundFileProcessor;
+    private final OutboundFileZipGenerator outboundFileZipGenerator;
 
+    private final TransientObjectDirectoryService transientObjectDirectoryService;
     private final FileOperationService fileOperationService;
 
     private final MediaRepository mediaRepository;
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final OutboundFileProcessor outboundFileProcessor;
-    private final OutboundFileZipGenerator outboundFileZipGenerator;
+    private final UserAccountRepository userAccountRepository;
+
+    private final DataManagementApi dataManagementApi;
+    private final NotificationApi notificationApi;
+
+    private String notificationSuccessTemplateId;
+    private String notificationFailureTemplateId;
+
+    @PostConstruct
+    void postConstruct() {
+        try {
+            notificationSuccessTemplateId = notificationApi.getNotificationTemplateIdByName(
+                "requested_audio_is_available");
+            notificationFailureTemplateId = notificationApi.getNotificationTemplateIdByName(
+                "error_processing_audio");
+        } catch (TemplateNotFoundException e) {
+            throw new IllegalStateException("Could not obtain required configuration from notification feature", e);
+        }
+    }
 
     /**
      * For all audio related to a given AudioRequest, download, process and upload the processed file to outbound
@@ -80,31 +103,21 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         log.debug("Starting processing for audio request id: {}", requestId);
         mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
 
-        try {
-            var mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+        MediaRequestEntity mediaRequestEntity = null;
+        HearingEntity hearingEntity = null;
+        UUID blobId;
 
-            Integer hearingId = mediaRequestEntity.getHearing().getId();
-            List<MediaEntity> mediaEntitiesForRequest = getMediaMetadata(hearingId);
+        try {
+            mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+            hearingEntity = mediaRequestEntity.getHearing();
+
+            List<MediaEntity> mediaEntitiesForRequest = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForRequest.isEmpty()) {
                 throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
             }
 
-            Map<MediaEntity, Path> downloadedMedias = new HashMap<>();
-            for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
-                UUID id = getMediaLocation(mediaEntity).orElseThrow(
-                    () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
-                    )));
-
-                log.debug("Downloading audio blob for {}", id);
-                BinaryData binaryData = getAudioBlobData(id);
-                log.debug("Download audio blob complete for {}", id);
-
-                Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());
-                log.debug("Saved audio blob {} to {}", id, downloadPath);
-
-                downloadedMedias.put(mediaEntity, downloadPath);
-            }
+            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(mediaEntitiesForRequest);
 
             Path generatedFilePath;
             try {
@@ -114,17 +127,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 throw e;
             }
 
-            UUID blobId;
             try (InputStream inputStream = Files.newInputStream(generatedFilePath)) {
                 blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
             }
-
-            log.debug(
-                "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
-                requestId,
-                blobId
-            );
-            return blobId;
 
         } catch (Exception e) {
             log.error(
@@ -134,38 +139,33 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             );
             mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
+            if (mediaRequestEntity != null && hearingEntity != null) {
+                notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), notificationFailureTemplateId);
+            }
+
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
-    }
 
-    @SuppressWarnings("PMD.LawOfDemeter")
-    private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
-                                            Map<MediaEntity, Path> downloadedMedias)
-        throws ExecutionException, InterruptedException {
+        mediaRequestService.updateAudioRequestStatus(mediaRequestEntity.getId(), COMPLETED);
+        log.debug(
+            "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
+            requestId,
+            blobId
+        );
 
-        var requestType = mediaRequestEntity.getRequestType();
+        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), notificationSuccessTemplateId);
 
-        if (AudioRequestType.DOWNLOAD.equals(requestType)) {
-            return handleDownload(downloadedMedias, mediaRequestEntity);
-        } else if (AudioRequestType.PLAYBACK.equals(requestType)) {
-            return handlePlayback(downloadedMedias, mediaRequestEntity);
-        } else {
-            throw new NotImplementedException(
-                String.format("No handler exists for request type %s", requestType));
-        }
+        return blobId;
     }
 
     @Override
     public BinaryData getAudioBlobData(UUID location) {
-        return dataManagementService.getBlobData(dataManagementConfiguration.getUnstructuredContainerName(), location);
+        return dataManagementApi.getBlobDataFromUnstructuredContainer(location);
     }
 
     @Override
     public UUID saveAudioBlobData(BinaryData binaryData) {
-        return dataManagementService.saveBlobData(
-            dataManagementConfiguration.getOutboundContainerName(),
-            binaryData
-        );
+        return dataManagementApi.saveBlobDataToOutboundContainer(binaryData);
     }
 
     @Override
@@ -217,9 +217,44 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         UUID blobId = saveAudioBlobData(binaryData);
         saveTransientDataLocation(mediaRequest, blobId);
 
-        mediaRequestService.updateAudioRequestStatus(mediaRequest.getId(), COMPLETED);
-
         return blobId;
+    }
+
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest) throws IOException {
+        Map<MediaEntity, Path> downloadedMedias = new HashMap<>();
+        for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
+            UUID id = getMediaLocation(mediaEntity).orElseThrow(
+                () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
+                )));
+
+            log.debug("Downloading audio blob for {}", id);
+            BinaryData binaryData = getAudioBlobData(id);
+            log.debug("Download audio blob complete for {}", id);
+
+            Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());
+            log.debug("Saved audio blob {} to {}", id, downloadPath);
+
+            downloadedMedias.put(mediaEntity, downloadPath);
+        }
+        return downloadedMedias;
+    }
+
+    @SuppressWarnings("PMD.LawOfDemeter")
+    private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
+                                            Map<MediaEntity, Path> downloadedMedias)
+        throws ExecutionException, InterruptedException {
+
+        var requestType = mediaRequestEntity.getRequestType();
+
+        if (AudioRequestType.DOWNLOAD.equals(requestType)) {
+            return handleDownload(downloadedMedias, mediaRequestEntity);
+        } else if (AudioRequestType.PLAYBACK.equals(requestType)) {
+            return handlePlayback(downloadedMedias, mediaRequestEntity);
+        } else {
+            throw new NotImplementedException(
+                String.format("No handler exists for request type %s", requestType));
+        }
     }
 
     private Path handleDownload(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
@@ -245,6 +280,29 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         );
 
         return Path.of(audioFileInfo.getFileName());
+    }
+
+    private void notifyUser(MediaRequestEntity mediaRequestEntity,
+                            CourtCaseEntity courtCase,
+                            String notificationTemplateId) {
+        log.debug("Scheduling notification for templateId: {}...", notificationTemplateId);
+
+        Integer requester = mediaRequestEntity.getRequestor();
+        var userAccountEntity = userAccountRepository.getUserAccountEntityById(requester)
+            .orElseThrow(() -> new DartsApiException(
+                AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST,
+                String.format("User record for id %s could not be obtained", requester)
+            ));
+
+        var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
+            .eventId(notificationTemplateId)
+            .caseId(courtCase.getId())
+            .emailAddresses(userAccountEntity.getEmailAddress())
+            .build();
+
+        notificationApi.scheduleNotification(saveNotificationToDbRequest);
+
+        log.debug("Notification scheduled successfully");
     }
 
 }
