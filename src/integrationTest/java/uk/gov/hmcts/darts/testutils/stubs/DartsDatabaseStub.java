@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -78,6 +79,7 @@ public class DartsDatabaseStub {
     private final DefenceRepository defenceRepository;
     private final DefendantRepository defendantRepository;
     private final UserAccountRepository userAccountRepository;
+    private final RetrieveCoreObjectService retrieveCoreObjectService;
 
     public void clearDatabase() {
         externalObjectDirectoryRepository.deleteAll();
@@ -85,7 +87,6 @@ public class DartsDatabaseStub {
         userAccountRepository.deleteAll();
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
-        judgeRepository.deleteAll();
         hearingRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
@@ -94,6 +95,7 @@ public class DartsDatabaseStub {
         defendantRepository.deleteAll();
         prosecutorRepository.deleteAll();
         caseRepository.deleteAll();
+        judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
         courthouseRepository.deleteAll();
     }
@@ -110,14 +112,8 @@ public class DartsDatabaseStub {
         return eventRepository.findAll();
     }
 
-    public JudgeEntity createSimpleJudges(HearingEntity hearing) {
-
-        var judgesEntity = new JudgeEntity();
-        judgesEntity.setId(1);
-        judgesEntity.setName("judge1");
-        judgesEntity.setHearing(hearing);
-
-        return judgeRepository.saveAndFlush(judgesEntity);
+    public JudgeEntity createSimpleJudge(String name) {
+        return retrieveCoreObjectService.retrieveJudge(name);
     }
 
     @Transactional
@@ -143,6 +139,7 @@ public class DartsDatabaseStub {
         hearingEntity.setHearingDate(hearingDate);
         hearingEntity.setCourtCase(caseEntity);
         hearingEntity.setCourtroom(courtroomEntity.get());
+        hearingEntity.addJudge(createSimpleJudge(caseNumber + "judge1"));
         return hearingRepository.saveAndFlush(hearingEntity);
     }
 
@@ -301,6 +298,10 @@ public class DartsDatabaseStub {
         return mediaRepository.save(media);
     }
 
+    public JudgeEntity save(JudgeEntity judge) {
+        return judgeRepository.save(judge);
+    }
+
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         CourtroomEntity referenceById = courtroomRepository.getReferenceById(hearingEntity.getCourtroom().getId());
@@ -310,6 +311,10 @@ public class DartsDatabaseStub {
 
     public void saveAll(HearingEntity... hearingEntities) {
         hearingRepository.saveAllAndFlush(asList(hearingEntities));
+    }
+
+    public void saveAll(CourtCaseEntity... courtCaseEntities) {
+        caseRepository.saveAll(asList(courtCaseEntities));
     }
 
     public void saveAll(EventEntity... eventEntities) {

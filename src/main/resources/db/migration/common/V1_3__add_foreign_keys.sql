@@ -8,6 +8,14 @@ ALTER TABLE annotation
 ADD CONSTRAINT annotation_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
+ALTER TABLE case_judge_ae
+ADD CONSTRAINT case_judge_ae_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE case_judge_ae
+ADD CONSTRAINT case_judge_ae_judge_fk
+FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
+
 ALTER TABLE case_retention
 ADD CONSTRAINT case_retention_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
@@ -48,12 +56,12 @@ ALTER TABLE daily_list
 ADD CONSTRAINT daily_list_courthouse_fk
 FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
-ALTER TABLE defence_name
-ADD CONSTRAINT defence_name_case_fk
+ALTER TABLE defence
+ADD CONSTRAINT defence_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE defendant_name
-ADD CONSTRAINT defendant_name_case_fk
+ALTER TABLE defendant
+ADD CONSTRAINT defendant_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE device_register
@@ -104,6 +112,14 @@ ALTER TABLE hearing_event_ae
 ADD CONSTRAINT hearing_event_ae_event_fk
 FOREIGN KEY (eve_id) REFERENCES event(eve_id);
 
+ALTER TABLE hearing_judge_ae
+ADD CONSTRAINT hearing_judge_ae_hearing_fk
+FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
+
+ALTER TABLE hearing_judge_ae
+ADD CONSTRAINT hearing_judge_ae_judge_fk
+FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
+
 ALTER TABLE hearing_media_ae
 ADD CONSTRAINT hearing_media_ae_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
@@ -111,10 +127,6 @@ FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 ALTER TABLE hearing_media_ae
 ADD CONSTRAINT hearing_media_ae_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
-
-ALTER TABLE judge_name
-ADD CONSTRAINT judge_name_hearing_fk
-FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
 ALTER TABLE media
 ADD CONSTRAINT media_courtroom_fk
@@ -128,8 +140,8 @@ ALTER TABLE notification
 ADD CONSTRAINT notification_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE prosecutor_name
-ADD CONSTRAINT prosecutor_name_case_fk
+ALTER TABLE prosecutor
+ADD CONSTRAINT prosecutor_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE transcription
@@ -143,6 +155,10 @@ FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 ALTER TABLE transcription
 ADD CONSTRAINT transcription_urgency_fk
 FOREIGN KEY (urg_id) REFERENCES urgency(urg_id);
+
+ALTER TABLE transcription
+ADD CONSTRAINT transcription_hearing_fk
+FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
 ALTER TABLE transcription
 ADD CONSTRAINT transcription_last_modified_by_fk
@@ -183,3 +199,4 @@ FOREIGN KEY (mer_id) REFERENCES media_request(mer_id);
 ALTER TABLE transient_object_directory
 ADD CONSTRAINT tod_object_directory_status_fk
 FOREIGN KEY (ods_id) REFERENCES object_directory_status(ods_id);
+

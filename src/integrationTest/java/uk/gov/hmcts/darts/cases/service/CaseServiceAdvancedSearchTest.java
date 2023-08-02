@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
@@ -33,8 +34,8 @@ import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCo
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createDefendantForCaseWithName;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNameForHearing;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
+import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -81,58 +82,45 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         CourtCaseEntity case6 = createCaseAt(swanseaCourthouse);
         case6.setCaseNumber("case6");
 
-        HearingEntity hearing1a = createHearingWith(case1, courtroom1, LocalDate.of(2023, 5, 20));
+        JudgeEntity judge = createJudgeWithName("aJudge");
+        HearingEntity hearing1a = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
 
-        HearingEntity hearing1b = createHearingWith(case1, courtroom1, LocalDate.of(2023, 5, 21));
+        HearingEntity hearing1b = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
 
-        HearingEntity hearing1c = createHearingWith(case1, courtroom1, LocalDate.of(2023, 5, 22));
+        HearingEntity hearing1c = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 22), judge);
 
-        HearingEntity hearing2a = createHearingWith(case2, courtroom1, LocalDate.of(2023, 6, 20));
+        HearingEntity hearing2a = createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 20), judge);
 
-        HearingEntity hearing2b = createHearingWith(case2, courtroom1);
-        hearing2b.setHearingDate(LocalDate.of(2023, 6, 21));
+        HearingEntity hearing2b = createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 21), judge);
 
-        HearingEntity hearing2c = createHearingWith(case2, courtroom1);
-        hearing2c.setHearingDate(LocalDate.of(2023, 6, 22));
+        HearingEntity hearing2c = createHearingWithDefaults(case2, courtroom1, LocalDate.of(2023, 6, 22), judge);
 
-        HearingEntity hearing3a = createHearingWith(case3, courtroom1);
-        hearing3a.setHearingDate(LocalDate.of(2023, 7, 20));
-        hearing3a.addJudge(createJudgeWithNameForHearing("Judge3a", hearing3a));
+        HearingEntity hearing3a = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 20), judge);
+        JudgeEntity judge3a = createJudgeWithName("Judge3a");
+        hearing3a.addJudge(judge3a);
 
-        HearingEntity hearing3b = createHearingWith(case3, courtroom1);
-        hearing3b.setHearingDate(LocalDate.of(2023, 7, 21));
+        HearingEntity hearing3b = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 21), judge);
 
-        HearingEntity hearing3c = createHearingWith(case3, courtroom1);
-        hearing3c.setHearingDate(LocalDate.of(2023, 7, 22));
+        HearingEntity hearing3c = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 22), judge);
 
-        HearingEntity hearing4a = createHearingWith(case4, courtroom2);
-        hearing4a.setHearingDate(LocalDate.of(2023, 8, 20));
+        HearingEntity hearing4a = createHearingWithDefaults(case4, courtroom2, LocalDate.of(2023, 8, 20), judge);
 
-        HearingEntity hearing4b = createHearingWith(case4, courtroom1);
-        hearing4b.setHearingDate(LocalDate.of(2023, 8, 21));
+        HearingEntity hearing4b = createHearingWithDefaults(case4, courtroom1, LocalDate.of(2023, 8, 21), judge);
 
-        HearingEntity hearing4c = createHearingWith(case4, courtroom1);
-        hearing4c.setHearingDate(LocalDate.of(2023, 8, 22));
-        hearing4c.addJudge(createJudgeWithNameForHearing("Judge6b", hearing3a));
+        HearingEntity hearing4c = createHearingWithDefaults(case4, courtroom1, LocalDate.of(2023, 8, 22), judge);
 
-        HearingEntity hearing5a = createHearingWith(case5, courtroom2);
-        hearing5a.setHearingDate(LocalDate.of(2023, 9, 20));
+        HearingEntity hearing5a = createHearingWithDefaults(case5, courtroom2, LocalDate.of(2023, 9, 20), judge);
 
-        HearingEntity hearing5b = createHearingWith(case5, courtroom1);
-        hearing5b.setHearingDate(LocalDate.of(2023, 9, 21));
+        HearingEntity hearing5b = createHearingWithDefaults(case5, courtroom1, LocalDate.of(2023, 9, 21), judge);
 
-        HearingEntity hearing5c = createHearingWith(case5, courtroom3);
-        hearing5c.setHearingDate(LocalDate.of(2023, 9, 22));
+        HearingEntity hearing5c = createHearingWithDefaults(case5, courtroom3, LocalDate.of(2023, 9, 22), judge);
 
-        HearingEntity hearing6a = createHearingWith(case6, courtroom2);
-        hearing6a.setHearingDate(LocalDate.of(2023, 9, 20));
+        HearingEntity hearing6a = createHearingWithDefaults(case6, courtroom2, LocalDate.of(2023, 9, 20), judge);
 
-        HearingEntity hearing6b = createHearingWith(case6, courtroom3);
-        hearing6b.setHearingDate(LocalDate.of(2023, 9, 21));
-        hearing6b.addJudge(createJudgeWithNameForHearing("Judge6b", hearing6b));
+        HearingEntity hearing6b = createHearingWithDefaults(case6, courtroom3, LocalDate.of(2023, 9, 21), judge);
+        hearing6b.addJudge(createJudgeWithName("Judge6b"));
 
-        HearingEntity hearing6c = createHearingWith(case6, courtroom1);
-        hearing6c.setHearingDate(LocalDate.of(2023, 9, 22));
+        HearingEntity hearing6c = createHearingWithDefaults(case6, courtroom1, LocalDate.of(2023, 9, 22), judge);
 
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,

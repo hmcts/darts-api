@@ -1,10 +1,10 @@
---v6 add sequences,remove character/numeric size limits, change DATE to TIMESTAMP
+--v6 add sequences, remove character/numeric size limits, change DATE to TIMESTAMP
 --v7 consistently add the legacy primary and foreign keys
 --v8 3NF courthouses
 --v9 remove various legacy columns
 --v10 change some numeric columns to boolean, remove unused legacy column c_upload_priority
 --v11 introduce many:many case:hearing, removed version label & superceded from moj_hearing, as no source for migration, and assume unneeded by modernised
---v12 remove reporting_restrictions from annotation,cached_media,event,media,transcription,transformation_request
+--v12 remove reporting_restrictions from annotation, cached_media, event, media, transcription, transformation_request
 --    add message_id, event_type_id to moj_event
 --    add moj_event_type table and links to moj_event by FK
 --v13 adding Not null to moj_transcription FK moj_cas_id & moj_crt_id,
@@ -13,13 +13,13 @@
 --    add moj_urgency table and fk to moj_transcription
 --    added comment_ts and author to moj_transcription_comment
 --v14 removing unneeded columns from moj_courthouse, normalising crown court code from daily list
---    amending judge,defendant,defence, prosecutor on hearing to be 1-d array instead of scalar
+--    amending judge, defendant, defence, prosecutor on hearing to be 1-d array instead of scalar
 --    rename i_version_label to i_version
 --v15 remove moj_crt_id from case and corresponding FK
 --v16 add moj_hea_id to transcription and corresponding FK
 --    add moj_user to this script
---v17 further comments reagrding properties of live data
---v18 moving atributes from moj_hearing to moj_case, changing timestamps to ts with tz
+--v17 further comments regarding properties of live data
+--v18 moving attributes from moj_hearing to moj_case, changing timestamps to ts with tz
 --v19 amended courthouse_name to be unique, amended courthouse_code to be integer
 --    removing c_scheduled_start from moj_case, to be replaced by 2 columns on moj_hearing, scheduled_start_time and hearing_is_actual flag
 --v20 moving moj_event and moj_media to link to moj_hearing rather than moj_case, resulting in moj_case_event_ae and
@@ -28,7 +28,7 @@
 --    change alias for courthouse from CRT to CTH, accommodate new COURTROOM table aliased to CTR
 --    add COURTROOM table, replace existing FKs to COURTHOUSE with ones to COURTROOM for event, media
 --    rename moj_event_type.type to .evt_type
---    remove c_courtroom from moj_annotation,,moj_cached_media, moj_event, moj_hearing, moj_media,
+--    remove c_courtroom from moj_annotation, moj_cached_media, moj_event, moj_hearing, moj_media,
 --    moj_transcription, moj_transformation_request
 --    Remove associative entity case_hearing, replace with simple PK-FK relation
 --v22 updated all sequences to cache 20
@@ -51,13 +51,13 @@
 --v29 removing c_, r_, i_ prefixes to column names, switching daily_list content back to character varying
 --    reinstating FK from case to courthouse
 --    amending start and end on daily_list to be DATE, no time component
---    adding suffix of _list where [] is used on datatype to denote an array
+--    adding suffix of _list where  ARRAY is used on datatype to denote an array
 --    rename event_type to event_handler
 --    added external_location_type table
 --v30 added standing data for reporting restrictions
 --    added region table and associative entity to courthouse
---    added device_register table ( equivalent to legacy tbl_moj_node)
---    added unique constraint on court_case(cth_id, case_number
+--    added device_register table (equivalent to legacy tbl_moj_node)
+--    added unique constraint on court_case(cth_id, case_number)
 --    standardised the use of "last_modified_ts" , where previously using "modified_ts" or "last_updated_ts"
 --    standardised the use of "last_modified_by" , where previously using "modified_by"
 --    reduced number of Documentum columns on user_account table, while adding a few others
@@ -65,17 +65,28 @@
 --v32 introduce defendant, prosecutor, defence tables to remove the need for character varying arrays on court_case, and add foreign keys to court_case
 --    introduce judge table to remove the need for character varying array on hearing, and add foreign key to hearing
 --    correct name of reporting_restriction_pk and case of the table name from pleural to singular
---    add not null constraint to PK columnms on region and user_account ( should be inferrable, but hibernate likes it explicitly defined)
+--    add not null constraint to PK columns on region and user_account (should be inferable, but hibernate likes it explicitly defined)
 --    amend NUMERIC to INTEGER on user_account and event tables
 --v33 remove synthetic PK from associative entities hearing_events_ae and hearing_media_as, replace with PK on natural key
 --v34 add case_retention, retention_policy & case_retention_event tables
 --v35 remove reporting_restrictions table, replace with foreign key on case to event_handler and add boolean to event_handler
-
-
+--v36 amend defence to defendant on defendant_name table
+--    remove foreign key on transcription table to hearing
+--v37 reinstate hea_id on transcription and FK to hearing
+--    add courthouse fk on transcription
+--    add originating_courtroom on court_case
+--    amend names of judge, prosecutor, defence, defendant
+--    add associative entity hearing_judge_ae and amend FKs accordingly
+--v38 add cas_id to judge table and foreign key
+--    add unique constraint on jud.judge_name
+--v39 remove origating_courtroom from court_case
+--v40 changed judge table to contain only (jud_id integer PK, judge_name character varying UK)
+--    created table case_judge_ae to contain (cas_id, jud_id) composite PK
 
 
 -- List of Table Aliases
 -- annotation                 ANN
+-- case_judge_ae              CAJ
 -- case_retention             CAR
 -- case_retention_event       CRE
 -- court_case                 CAS
@@ -83,19 +94,22 @@
 -- courthouse_region_ae       CRA
 -- courtroom                  CTR
 -- daily_list                 DAL
--- defence_name               DFC
--- defendant_name             DFD
+-- defence                    DFC
+-- defendant                  DFD
 -- device_register            DER
 -- event                      EVE
 -- event_handler              EVH
 -- external_object_directory  EOD
 -- hearing                    HEA
--- judge_name                 JUD
+-- hearing_event_ae           HEE
+-- hearing_media_ae           HEM
+-- hearing_judge_ae           HEJ
+-- judge                      JUD
 -- media                      MED
 -- media_request              MER
 -- notification               NOT
 -- object_directory_status    ODS
--- prosecutor_name            PRN
+-- prosecutor                 PRN
 -- region                     REG
 -- report                     REP
 -- retention_policy           RTP
@@ -137,6 +151,18 @@ IS 'directly sourced from moj_annotation_s';
 
 COMMENT ON COLUMN annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
+
+CREATE TABLE case_judge_ae
+(cas_id                     INTEGER                          NOT NULL
+,jud_id                     INTEGER                          NOT NULL
+);
+
+COMMENT ON COLUMN case_judge_ae.cas_id
+IS 'foreign key from case, part of composite natural key and PK';
+
+COMMENT ON COLUMN case_judge_ae.jud_id
+IS 'foreign key from judge, part of composite natural key and PK';
+
 
 CREATE TABLE case_retention
 (car_id                    INTEGER                   NOT NULL
@@ -304,28 +330,28 @@ IS 'directly sourced from moj_daily_list_s';
 COMMENT ON COLUMN daily_list.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_daily_list';
 
-CREATE TABLE defence_name
+CREATE TABLE defence
 (dfc_id                     INTEGER                 NOT NULL
 ,cas_id                     INTEGER                 NOT NULL
-,defence                    CHARACTER VARYING       NOT NULL
+,defence_name               CHARACTER VARYING       NOT NULL
 );
 
-COMMENT ON COLUMN defence_name.dfc_id
-IS 'primary key of defence_name';
+COMMENT ON COLUMN defence.dfc_id
+IS 'primary key of defence';
 
-COMMENT ON COLUMN defence_name.cas_id
+COMMENT ON COLUMN defence.cas_id
 IS 'foreign key from court_case';
 
-CREATE TABLE defendant_name
+CREATE TABLE defendant
 (dfd_id                     INTEGER                 NOT NULL
 ,cas_id                     INTEGER                 NOT NULL
-,defence                    CHARACTER VARYING       NOT NULL
+,defendant_name             CHARACTER VARYING       NOT NULL
 );
 
-COMMENT ON COLUMN defendant_name.dfd_id
-IS 'primary key of defendant_name';
+COMMENT ON COLUMN defendant.dfd_id
+IS 'primary key of defendant';
 
-COMMENT ON COLUMN defendant_name.cas_id
+COMMENT ON COLUMN defendant.cas_id
 IS 'foreign key from court_case';
 
 CREATE TABLE device_register
@@ -502,6 +528,17 @@ IS 'foreign key from hearing, part of composite natural key and PK';
 COMMENT ON COLUMN hearing_event_ae.eve_id
 IS 'foreign key from event, part of composite natural key and PK';
 
+CREATE TABLE hearing_judge_ae
+(hea_id                     INTEGER                          NOT NULL
+,jud_id                     INTEGER                          NOT NULL
+);
+
+COMMENT ON COLUMN hearing_judge_ae.hea_id
+IS 'foreign key from case, part of composite natural key and PK';
+
+COMMENT ON COLUMN hearing_judge_ae.jud_id
+IS 'foreign key from judge, part of composite natural key and PK';
+
 CREATE TABLE hearing_media_ae
 (hea_id                     INTEGER							 NOT NULL
 ,med_id                     INTEGER							 NOT NULL
@@ -513,17 +550,13 @@ IS 'foreign key from case, part of composite natural key and PK';
 COMMENT ON COLUMN hearing_media_ae.med_id
 IS 'foreign key from media, part of composite natural key and PK';
 
-CREATE TABLE judge_name
+CREATE TABLE judge
 (jud_id                     INTEGER                 NOT NULL
-,hea_id                     INTEGER                 NOT NULL
-,judge                      CHARACTER VARYING       NOT NULL
+,judge_name                 CHARACTER VARYING       NOT NULL
 );
 
-COMMENT ON COLUMN judge_name.jud_id
-IS 'primary key of judge_name';
-
-COMMENT ON COLUMN judge_name.hea_id
-IS 'foreign key from hearing';
+COMMENT ON COLUMN judge.jud_id
+IS 'primary key of judge';
 
 CREATE TABLE media
 (med_id                     INTEGER					 NOT NULL
@@ -653,16 +686,16 @@ CREATE TABLE object_directory_status
 COMMENT ON TABLE object_directory_status
 IS 'used to record acceptable statuses found in [external/transient]_object_directory';
 
-CREATE TABLE prosecutor_name
+CREATE TABLE prosecutor
 (prn_id                     INTEGER                 NOT NULL
 ,cas_id                     INTEGER                 NOT NULL
-,prosecutor                 CHARACTER VARYING       NOT NULL
+,prosecutor_name            CHARACTER VARYING       NOT NULL
 );
 
-COMMENT ON COLUMN prosecutor_name.prn_id
-IS 'primary key of prosecutor_name';
+COMMENT ON COLUMN prosecutor.prn_id
+IS 'primary key of prosecutor';
 
-COMMENT ON COLUMN prosecutor_name.cas_id
+COMMENT ON COLUMN prosecutor.cas_id
 IS 'foreign key from court_case';
 
 CREATE TABLE region
@@ -720,7 +753,7 @@ IS 'primary key of retention_policy';
 CREATE TABLE transcription
 (tra_id                   INTEGER				   NOT NULL
 ,cas_id                   INTEGER                  NOT NULL
-,ctr_id                   INTEGER                  NOT NULL
+,ctr_id                   INTEGER
 ,trt_id                   INTEGER                  NOT NULL
 ,urg_id                   INTEGER                  -- remains nullable, as nulls present in source data ( c_urgency)
 ,hea_id                   INTEGER                  -- remains nullable, until migration is complete
@@ -825,7 +858,7 @@ IS 'primary key, but not sequence generated';
 
 CREATE TABLE transient_object_directory
 (tod_id                      INTEGER			 		 NOT NULL
-,mer_id                      INTEGER                     NOT NULL UNIQUE
+,mer_id                      INTEGER                     NOT NULL
 ,ods_id                      INTEGER                     NOT NULL  -- FK to moj_object_directory_status.moj_ods_id
 ,external_location           UUID                        NOT NULL
 ,checksum	                 CHARACTER VARYING

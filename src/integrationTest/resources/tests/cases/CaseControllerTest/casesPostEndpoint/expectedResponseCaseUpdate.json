@@ -1,7 +1,6 @@
 {
   "courthouse": "SWANSEA",
   "courtroom": "1",
-  "hearing_date": "todays_date",
   "case_number": "Case0000004",
   "scheduled_start": "11:00",
   "defendants": [
