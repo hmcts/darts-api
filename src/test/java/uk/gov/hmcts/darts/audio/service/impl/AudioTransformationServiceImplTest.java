@@ -19,7 +19,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
@@ -99,14 +98,9 @@ class AudioTransformationServiceImplTest {
             BINARY_DATA
         );
 
-        verify(mockDataManagementApi).saveBlobDataToOutboundContainer(
-            eq(BINARY_DATA)
-        );
+        verify(mockDataManagementApi).saveBlobDataToOutboundContainer(BINARY_DATA);
 
-        verify(mockTransientObjectDirectoryService).saveTransientDataLocation(
-            eq(mediaRequestEntity),
-            eq(BLOB_LOCATION)
-        );
+        verify(mockTransientObjectDirectoryService).saveTransientDataLocation(mediaRequestEntity, BLOB_LOCATION);
     }
 
 }

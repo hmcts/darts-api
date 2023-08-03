@@ -288,7 +288,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         log.debug("Scheduling notification for templateId: {}...", notificationTemplateId);
 
         Integer requester = mediaRequestEntity.getRequestor();
-        var userAccountEntity = userAccountRepository.getUserAccountEntityById(requester)
+        var userAccountEntity = userAccountRepository.findById(requester)
             .orElseThrow(() -> new DartsApiException(
                 AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST,
                 String.format("User record for id %s could not be obtained", requester)
