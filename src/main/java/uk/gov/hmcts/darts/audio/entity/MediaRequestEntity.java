@@ -50,7 +50,7 @@ public class MediaRequestEntity {
     @SequenceGenerator(name = "media_request_gen", sequenceName = "mer_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = HEARING_ID)
     private HearingEntity hearing;
 
