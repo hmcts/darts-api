@@ -33,7 +33,11 @@ import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
-    public static final String CASE_0000001 = "Case0000001";
+    public static final String NEW_CASE = "Case0000001";
+    public static final String END_DATE_TIME = "end_date_time";
+    public static final String START_DATE_TIME = "start_date_time";
+    public static final String CASE_NUMBER = "case_number";
+    public static final String COURTHOUSE = "courthouse";
 
     @Autowired
     private EventRepository eventRepository;
@@ -130,10 +134,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     void courtLogsGet() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("courthouse", "Swansea")
-            .queryParam("case_number", CASE_0000001)
-            .queryParam("start_date_time", String.valueOf(createOffsetDateTime("2022-07-01T09:00:00")))
-            .queryParam("end_date_time", String.valueOf(createOffsetDateTime("2022-07-01T11:00:00")))
+            .queryParam(COURTHOUSE, "Swansea")
+            .queryParam(CASE_NUMBER, NEW_CASE)
+            .queryParam(START_DATE_TIME, String.valueOf(createOffsetDateTime("2022-07-01T09:00:00")))
+            .queryParam(END_DATE_TIME, String.valueOf(createOffsetDateTime("2022-07-01T11:00:00")))
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
 
@@ -163,10 +167,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("courthouse", courthouseName)
-            .queryParam("case_number", caseNumber)
-            .queryParam("start_date_time", "2022-07-01T09:00:00+01")
-            .queryParam("end_date_time", "2024-07-01T12:00:00+01")
+            .queryParam(COURTHOUSE, courthouseName)
+            .queryParam(CASE_NUMBER, caseNumber)
+            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -196,14 +200,56 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("courthouse", courthouseName)
-            .queryParam("case_number", caseNumber)
-            .queryParam("start_date_time", "2022-07-01T09:00:00+01")
-            .queryParam("end_date_time", "2024-07-01T12:00:00+01")
+            .queryParam(COURTHOUSE, courthouseName)
+            .queryParam(CASE_NUMBER, caseNumber)
+            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
     }
+
+    @Test
+    void courtLogsWrongCaseNumber() throws Exception {
+
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+
+        var eventTime = createOffsetDateTime("2023-07-01T10:00:00");
+        var event = createEventWith(LOG, "eventText", hearingEntity, eventTime);
+        var event2 = createEventWith(LOG, "Tester", hearingEntity, eventTime);
+
+        HearingEntity hearingEntity1 = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            NEW_CASE,
+            SOME_COURTHOUSE,
+            "CR1",
+            SOME_DATE_TIME.toLocalDate()
+        );
+
+        var eventHearing = createEventWith(LOG, "eventText", hearingEntity1, eventTime);
+        var eventHearing2 = createEventWith(LOG, "eventText2", hearingEntity1, eventTime);
+
+        eventRepository.saveAndFlush(event);
+        eventRepository.saveAndFlush(event2);
+        eventRepository.saveAndFlush(eventHearing);
+        eventRepository.saveAndFlush(eventHearing2);
+
+        String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam(COURTHOUSE, SOME_COURTHOUSE)
+            .queryParam(CASE_NUMBER, NEW_CASE)
+            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].courthouse", Matchers.is(courthouseName)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].caseNumber", Matchers.is(NEW_CASE)))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].timestamp", Matchers.is(Matchers.notNullValue())))
+            .andExpect(MockMvcResultMatchers.jsonPath("$[0].eventText", Matchers.notNullValue()))
+            .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
+    }
+
 
 }
