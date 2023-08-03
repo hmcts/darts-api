@@ -363,7 +363,7 @@ components:
             $ref: '#/components/schemas/judge'
         reportingRestriction:
           type: string
-          example: C20220620001
+          example: "Section 4(2) of the Contempt of Court Act 1981"
           description: 'Any reporting restrictions associated with the case.'
         hearings:
           type: array
