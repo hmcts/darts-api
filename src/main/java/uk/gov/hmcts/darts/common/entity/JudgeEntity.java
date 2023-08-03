@@ -15,7 +15,7 @@ import lombok.Setter;
 @Table(name = JudgeEntity.TABLE_NAME)
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 public class JudgeEntity {
 
     public static final String TABLE_NAME = "judge";
