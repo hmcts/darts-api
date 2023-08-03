@@ -1,13 +1,19 @@
 {
-  "courthouse": "SWANSEA",
-  "case_number": "2",
+  "courthouse": "case_courthouse",
+  "case_number": "testAddCase",
   "defendants": [
-    "Defendant1"
+    "Defendant1",
+    "defendant_testAddCase_1",
+    "defendant_testAddCase_2"
   ],
   "prosecutors": [
-    "Prosecutor1"
+    "Prosecutor1",
+    "prosecutor_testAddCase_1",
+    "prosecutor_testAddCase_2"
   ],
   "defenders": [
-    "Defender1"
+    "Defender1",
+    "defence_testAddCase_1",
+    "defence_testAddCase_2"
   ]
 }

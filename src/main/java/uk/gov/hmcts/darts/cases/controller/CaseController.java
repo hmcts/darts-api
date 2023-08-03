@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
+import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.service.CaseService;
@@ -38,7 +39,7 @@ import java.util.Locale;
 
 @RestController
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI", "checkstyle.LineLengthCheck"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI", "checkstyle.LineLengthCheck", "PMD.ExcessiveImports"})
 public class CaseController implements CasesApi {
 
     private final CaseService caseService;
@@ -68,8 +69,8 @@ public class CaseController implements CasesApi {
     }
 
     @Override
-    public ResponseEntity<ScheduledCase> casesPost(@Parameter(name = "AddCaseRequest", description = "", required = true)
-                                                   @Valid @RequestBody AddCaseRequest addCaseRequest) {
+    public ResponseEntity<PostCaseResponse> casesPost(@Parameter(name = "AddCaseRequest", description = "", required = true)
+                                                      @Valid @RequestBody AddCaseRequest addCaseRequest) {
         return new ResponseEntity<>(caseService.addCaseOrUpdate(addCaseRequest), HttpStatus.CREATED);
     }
 

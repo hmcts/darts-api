@@ -151,7 +151,7 @@ public class CommonTestDataUtil {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
-        hearing1.setJudges(createJudges(2));
+        hearing1.addJudges(createJudges(2));
         return hearing1;
     }
 
@@ -179,10 +179,9 @@ public class CommonTestDataUtil {
         return returnList;
     }
 
-    public AddCaseRequest createAddCaseRequest(String courtroom) {
+    public AddCaseRequest createAddCaseRequest() {
 
         AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
-        request.setCourtroom(courtroom);
         request.setCaseNumber("2");
         request.setDefendants(Lists.newArrayList("Defendant1"));
         request.setJudges(Lists.newArrayList("Judge1"));
@@ -192,10 +191,9 @@ public class CommonTestDataUtil {
     }
 
 
-    public AddCaseRequest createUpdateCaseRequest(String courtroom) {
+    public AddCaseRequest createUpdateCaseRequest() {
 
         AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
-        request.setCourtroom(courtroom);
         request.setCaseNumber("case1");
         request.setDefendants(Lists.newArrayList("UpdatedDefendant1"));
         request.setJudges(Lists.newArrayList("UpdateJudge1"));

@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
+import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
@@ -28,7 +29,6 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +54,7 @@ public class CaseServiceImpl implements CaseService {
             request.getDate()
         );
         createCourtroomIfMissing(hearings, request);
-        return casesMapper.mapToCourtCases(hearings);
+        return casesMapper.mapToScheduledCases(hearings);
 
     }
 
@@ -84,41 +84,25 @@ public class CaseServiceImpl implements CaseService {
             //find out if courthouse or courtroom are missing.
             retrieveCoreObjectService.retrieveOrCreateCourtroom(request.getCourthouse(), request.getCourtroom());
         }
-        // return casesMapper.mapToCourtCases(hearings);
-    }
-
-
-    private ScheduledCase addCase(AddCaseRequest addCaseRequest) {
-        CourtCaseEntity caseEntity = saveNewCaseEntity(addCaseRequest);
-        return casesMapper.mapToCourtCase(caseEntity);
     }
 
     @Transactional
     @Override
-    public ScheduledCase addCaseOrUpdate(AddCaseRequest addCaseRequest) {
-        Optional<CourtCaseEntity> existingCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
-            addCaseRequest.getCaseNumber(), addCaseRequest.getCourthouse());
-        if (existingCase.isPresent()) {
-            return updateCase(addCaseRequest, existingCase.get());
-        } else {
-            return addCase(addCaseRequest);
-        }
+    public PostCaseResponse addCaseOrUpdate(AddCaseRequest addCaseRequest) {
+        CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
+            addCaseRequest.getCourthouse(),
+            addCaseRequest.getCaseNumber()
+        );
+        return updateCase(addCaseRequest, courtCase);
     }
 
-    private ScheduledCase updateCase(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
-        CourtCaseEntity updatedCaseEntity = updateCaseEntity(addCaseRequest, existingCase);
-
-        return casesMapper.mapToCourtCase(updatedCaseEntity);
-    }
-
-
-    private CourtCaseEntity updateCaseEntity(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
-        return caseRepository.saveAndFlush(casesMapper.mapAddCaseRequestToCaseEntity(addCaseRequest, existingCase));
-    }
-
-    private CourtCaseEntity saveNewCaseEntity(AddCaseRequest addCaseRequest) {
-        CourtCaseEntity caseEntity = casesMapper.mapAddCaseRequestToCaseEntity(addCaseRequest, new CourtCaseEntity());
-        return caseRepository.saveAndFlush(caseEntity);
+    private PostCaseResponse updateCase(AddCaseRequest addCaseRequest, CourtCaseEntity existingCase) {
+        CourtCaseEntity updatedCaseEntity = casesMapper.addDefendantProsecutorDefenderJudge(
+            existingCase,
+            addCaseRequest
+        );
+        caseRepository.saveAndFlush(updatedCaseEntity);
+        return casesMapper.mapToPostCaseResponse(updatedCaseEntity);
     }
 
     @Override

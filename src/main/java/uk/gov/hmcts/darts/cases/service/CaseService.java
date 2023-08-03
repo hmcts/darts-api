@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
+import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 
@@ -14,7 +15,7 @@ public interface CaseService {
 
     List<ScheduledCase> getHearings(GetCasesRequest request);
 
-    ScheduledCase addCaseOrUpdate(AddCaseRequest addCaseRequest);
+    PostCaseResponse addCaseOrUpdate(AddCaseRequest addCaseRequest);
 
     List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request);
 

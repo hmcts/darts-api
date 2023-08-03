@@ -92,8 +92,12 @@ public class HearingEntity {
     }
 
     public void addJudge(JudgeEntity judgeEntity) {
+        if (judgeEntity == null) {
+            return;
+        }
         courtCase.addJudge(judgeEntity);
-        if (!judges.contains(judgeEntity)) {
+        if (!judges.contains(judgeEntity)
+            && judges.stream().noneMatch(judge -> judge.getName().equalsIgnoreCase(judgeEntity.getName()))) {
             judges.add(judgeEntity);
         }
     }

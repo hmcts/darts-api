@@ -113,7 +113,7 @@ public class DartsDatabaseStub {
     }
 
     public JudgeEntity createSimpleJudge(String name) {
-        return retrieveCoreObjectService.retrieveJudge(name);
+        return retrieveCoreObjectService.retrieveOrCreateJudge(name);
     }
 
     @Transactional

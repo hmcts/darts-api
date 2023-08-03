@@ -1,6 +1,6 @@
 [
   {
-    "courthouse": "SWANSEA",
+    "courthouse": "case_courthouse",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_3",
@@ -23,7 +23,7 @@
     ]
   },
   {
-    "courthouse": "SWANSEA",
+    "courthouse": "case_courthouse",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_1",
@@ -46,7 +46,7 @@
     ]
   },
   {
-    "courthouse": "SWANSEA",
+    "courthouse": "case_courthouse",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_6",
@@ -69,7 +69,7 @@
     ]
   },
   {
-    "courthouse": "SWANSEA",
+    "courthouse": "case_courthouse",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_5",
@@ -92,7 +92,7 @@
     ]
   },
   {
-    "courthouse": "SWANSEA",
+    "courthouse": "case_courthouse",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_4",
@@ -115,7 +115,7 @@
     ]
   },
   {
-    "courthouse": "SWANSEA",
+    "courthouse": "case_courthouse",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_7",
@@ -138,7 +138,7 @@
     ]
   },
   {
-    "courthouse": "SWANSEA",
+    "courthouse": "case_courthouse",
     "courtroom": "1",
     "hearing_date": "2023-06-20",
     "case_number": "caseNum_2",
