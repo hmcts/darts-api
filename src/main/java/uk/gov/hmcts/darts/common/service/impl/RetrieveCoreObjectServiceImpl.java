@@ -8,10 +8,12 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
@@ -25,6 +27,7 @@ import java.util.Optional;
 public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService {
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
+    private final JudgeRepository judgeRepository;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
 
@@ -119,4 +122,16 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         return foundCourthouse.get();
     }
 
+    @Override
+    public JudgeEntity retrieveJudge(String judgeName) {
+        Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
+        return foundJudge.orElseGet(() -> createJudge(judgeName));
+    }
+
+    private JudgeEntity createJudge(String judgeName) {
+        JudgeEntity judge = new JudgeEntity();
+        judge.setName(judgeName);
+        judgeRepository.saveAndFlush(judge);
+        return judge;
+    }
 }

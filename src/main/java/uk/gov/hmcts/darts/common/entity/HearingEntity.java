@@ -11,7 +11,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -33,8 +32,9 @@ import static java.util.Objects.isNull;
 @Setter
 public class HearingEntity {
 
+    public static final String HEA_ID = "hea_id";
     @Id
-    @Column(name = "hea_id")
+    @Column(name = HEA_ID)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hea_gen")
     @SequenceGenerator(name = "hea_gen", sequenceName = "hea_seq", allocationSize = 1)
     private Integer id;
@@ -42,9 +42,6 @@ public class HearingEntity {
     @JoinColumn(name = "ctr_id")
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
-
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = "hearing", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<JudgeEntity> judgeList = new ArrayList<>();
 
     @Column(name = "hearing_date")
     private LocalDate hearingDate;
@@ -58,9 +55,15 @@ public class HearingEntity {
     @Column(name = "judge_hearing_date")
     private String judgeHearingDate;
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "hearing_judge_ae",
+        joinColumns = {@JoinColumn(name = HEA_ID)},
+        inverseJoinColumns = {@JoinColumn(name = "jud_id")})
+    private List<JudgeEntity> judges = new ArrayList<>();
+
     @ManyToMany
     @JoinTable(name = "hearing_media_ae",
-        joinColumns = {@JoinColumn(name = "hea_id")},
+        joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList;
 
@@ -69,7 +72,7 @@ public class HearingEntity {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "hearing_event_ae",
-        joinColumns = {@JoinColumn(name = "hea_id")},
+        joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "eve_id")})
     private List<EventEntity> eventList = new ArrayList<>();
 
@@ -89,10 +92,19 @@ public class HearingEntity {
     }
 
     public void addJudge(JudgeEntity judgeEntity) {
-        judgeList.add(judgeEntity);
+        courtCase.addJudge(judgeEntity);
+        if (!judges.contains(judgeEntity)) {
+            judges.add(judgeEntity);
+        }
+    }
+
+    public void addJudges(List<JudgeEntity> judges) {
+        for (JudgeEntity judge : judges) {
+            addJudge(judge);
+        }
     }
 
     public List<String> getJudgesStringList() {
-        return CollectionUtils.emptyIfNull(judgeList).stream().map(JudgeEntity::getName).toList();
+        return CollectionUtils.emptyIfNull(judges).stream().map(JudgeEntity::getName).toList();
     }
 }

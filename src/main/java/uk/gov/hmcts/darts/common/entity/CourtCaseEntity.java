@@ -8,6 +8,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
@@ -96,6 +98,12 @@ public class CourtCaseEntity {
     @OneToMany(mappedBy = COURT_CASE)
     private List<HearingEntity> hearings = new ArrayList<>();
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "case_judge_ae",
+        joinColumns = {@JoinColumn(name = "cas_id")},
+        inverseJoinColumns = {@JoinColumn(name = "jud_id")})
+    private List<JudgeEntity> judges = new ArrayList<>();
+
     public void addHearing(HearingEntity hearing) {
         this.hearings.add(hearing);
     }
@@ -106,6 +114,12 @@ public class CourtCaseEntity {
 
     public void addDefendant(DefendantEntity defendant) {
         this.defendantList.add(defendant);
+    }
+
+    public void addJudge(JudgeEntity judge) {
+        if (!judges.contains(judge)) {
+            judges.add(judge);
+        }
     }
 
     public void addProsecutor(ProsecutorEntity prosecutor) {
@@ -122,5 +136,9 @@ public class CourtCaseEntity {
 
     public List<String> getProsecutorsStringList() {
         return CollectionUtils.emptyIfNull(prosecutorList).stream().map(ProsecutorEntity::getName).sorted().toList();
+    }
+
+    public List<String> getJudgeStringList() {
+        return CollectionUtils.emptyIfNull(judges).stream().map(JudgeEntity::getName).sorted().distinct().toList();
     }
 }
