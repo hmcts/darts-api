@@ -17,9 +17,13 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.darts.authorisation.model.Role;
+import uk.gov.hmcts.darts.authorisation.model.UserState;
+import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.security.KeyPair;
@@ -32,12 +36,17 @@ import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
 
 @AutoConfigureMockMvc
 @SuppressWarnings("PMD.ExcessiveImports")
@@ -50,27 +59,45 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     private static final String CONFIGURED_AUDIENCE_VALUE = "dummy_client_id";
     private static final String OAUTH_TOKEN_ENDPOINT = "/oauth2/v2.0/token";
     private static final String OAUTH_KEYS_ENDPOINT = "/discovery/v2.0/keys";
+    private static final String VALID_SUBJECT_VALUE = "VALID SUBJECT VALUE";
+    private static final String VALID_EMAIL_VALUE = "test.user@example.com";
+    private static final String EMAILS_CLAIM_NAME = "emails";
 
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private AuthorisationService authorisationService;
+
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void handOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
+    void handleOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
+        when(authorisationService.getAuthorisation(VALID_EMAIL_VALUE))
+            .thenReturn(UserState.builder()
+                            .userId(-1)
+                            .userName("Test User")
+                            .roles(Set.of(Role.builder()
+                                              .roleId(TRANSCRIPTION_COMPANY.getId())
+                                              .roleName(TRANSCRIPTION_COMPANY.toString())
+                                              .permissions(new HashSet<>())
+                                              .build()))
+                            .build()
+            );
+
         KeyPair keyPair = setTokenStub();
         setKeyStoreStub(keyPair);
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
         String token = response.getResponse().getContentAsString();
         assertThat(token).isNotNull();
 
+        verify(authorisationService).getAuthorisation(VALID_EMAIL_VALUE);
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void handleOAuthCodeShouldReturnErrorResponseWhenDownstreamCallToAzureFails() throws Exception {
         stubFor(
             WireMock.post(OAUTH_TOKEN_ENDPOINT)
@@ -79,7 +106,8 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
                 )
         );
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().isInternalServerError())
             .andReturn();
 
@@ -97,11 +125,11 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void handleOAuthCodeShouldReturnErrorResponseWhenTokenValidationFails() throws Exception {
         setTokenStub();
 
-        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+        MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
             .andExpect(status().isInternalServerError())
             .andReturn();
 
@@ -128,6 +156,9 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
             .audience(CONFIGURED_AUDIENCE_VALUE)
             .issuer(CONFIGURED_ISSUER_VALUE)
             .expirationTime(createDateInFuture())
+            .issueTime(Date.from(Instant.now()))
+            .subject(VALID_SUBJECT_VALUE)
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
             .build();
 
         KeyPair keyPair = createKeys();

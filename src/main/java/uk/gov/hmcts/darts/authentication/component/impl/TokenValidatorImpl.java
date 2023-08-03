@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
@@ -18,11 +19,15 @@ import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class TokenValidatorImpl implements TokenValidator {
+
+    private static final String EMAILS_CLAIM_NAME = "emails";
 
     private final JWKSource<SecurityContext> jwkSource;
     private final AuthenticationConfiguration authenticationConfiguration;
@@ -45,18 +50,25 @@ public class TokenValidatorImpl implements TokenValidator {
         var claimsVerifier = new DefaultJWTClaimsVerifier<>(
             authenticationConfiguration.getExternalADclientId(),
             jwtClaimsSet,
-            null
+            new HashSet<>(Arrays.asList(
+                JWTClaimNames.AUDIENCE,
+                JWTClaimNames.ISSUER,
+                JWTClaimNames.EXPIRATION_TIME,
+                JWTClaimNames.ISSUED_AT,
+                JWTClaimNames.SUBJECT,
+                EMAILS_CLAIM_NAME
+            ))
         );
         jwtProcessor.setJWTClaimsSetVerifier(claimsVerifier);
 
         try {
-            jwtProcessor.process(accessToken, null);
+            JWTClaimsSet claimsSet = jwtProcessor.process(accessToken, null);
+            log.debug("Validation successful - emailAddresses: {}", claimsSet.getStringListClaim(EMAILS_CLAIM_NAME));
         } catch (ParseException | JOSEException | BadJOSEException e) {
             log.debug("Validation failed", e);
             return new JwtValidationResult(false, e.getMessage());
         }
 
-        log.debug("Validation successful");
         return new JwtValidationResult(true, null);
     }
 

@@ -9,13 +9,23 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 @RequiredArgsConstructor
 public enum AuthenticationError implements DartsApiError {
 
-    FAILED_TO_OBTAIN_ACCESS_TOKEN("100",
-                                  HttpStatus.INTERNAL_SERVER_ERROR,
-                                  "Failed to obtain access token"),
+    FAILED_TO_OBTAIN_ACCESS_TOKEN(
+        "100",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to obtain access token"
+    ),
 
-    FAILED_TO_VALIDATE_ACCESS_TOKEN("101",
-                                  HttpStatus.INTERNAL_SERVER_ERROR,
-                                  "Failed to validate access token");
+    FAILED_TO_VALIDATE_ACCESS_TOKEN(
+        "101",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to validate access token"
+    ),
+
+    FAILED_TO_PARSE_ACCESS_TOKEN(
+        "102",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to parse access token"
+    );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHENTICATION";
 
