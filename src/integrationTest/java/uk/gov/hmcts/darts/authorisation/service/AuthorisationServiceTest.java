@@ -57,6 +57,11 @@ class AuthorisationServiceTest {
         bristolUserAccount.setEmailAddress("test.bristol@example.com");
         bristolUserAccount.setSecurityGroupEntities(List.of(bristolStaff, bristolAppr));
         userAccountRepository.saveAndFlush(bristolUserAccount);
+
+        UserAccountEntity newUser = new UserAccountEntity();
+        newUser.setUsername("Test New");
+        newUser.setEmailAddress("test.new@example.com");
+        userAccountRepository.saveAndFlush(newUser);
     }
 
     @Test
@@ -106,6 +111,16 @@ class AuthorisationServiceTest {
                                                        .permissionId(2)
                                                        .permissionName("Approve/Reject Transcription Request")
                                                        .build()));
+    }
+
+    @Test
+    void shouldGetAuthorisationForTestNewUserWithoutAnySecurityGroupRoles() {
+        UserState userState = authorisationService.getAuthorisation("test.new@example.com");
+
+        assertNotNull(userState);
+        assertTrue(userState.getUserId() > 0);
+        assertEquals("Test New", userState.getUserName());
+        assertEquals(0, userState.getRoles().size());
     }
 
 }
