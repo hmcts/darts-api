@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.audio.service.impl.AudioTransformationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
@@ -73,7 +74,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         var notificationEntity = scheduledNotifications.get(0);
         assertEquals(NOTIFICATION_TEMPLATE_ID_SUCCESS, notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
-        assertEquals("OPEN", notificationEntity.getStatus());
+        assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
@@ -105,7 +106,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         var notificationEntity = scheduledNotifications.get(0);
         assertEquals(NOTIFICATION_TEMPLATE_ID_FAILURE, notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
-        assertEquals("OPEN", notificationEntity.getStatus());
+        assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
