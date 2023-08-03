@@ -38,9 +38,9 @@ public class NotificationServiceImpl implements NotificationService {
     private final GovNotifyService govNotifyService;
     private final TemplateIdHelper templateIdHelper;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
-    private static final List<String> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
-          String.valueOf(NotificationStatus.OPEN),
-          String.valueOf(NotificationStatus.PROCESSING)
+    private static final List<NotificationStatus> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
+          NotificationStatus.OPEN,
+          NotificationStatus.PROCESSING
     );
 
     @Value("${darts.notification.max_retry_attempts}")
@@ -70,7 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
         dbNotification.setEventId(eventId);
         dbNotification.setCourtCase(caseRepository.getReferenceById(caseId));
         dbNotification.setEmailAddress(emailAddress);
-        dbNotification.setStatus(String.valueOf(NotificationStatus.OPEN));
+        dbNotification.setStatus(NotificationStatus.OPEN);
         dbNotification.setAttempts(0);
         dbNotification.setTemplateValues(templateValues);
 
@@ -116,7 +116,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void updateNotificationStatus(NotificationEntity notification, NotificationStatus status) {
-        notification.setStatus(String.valueOf(status));
+        notification.setStatus(status);
         notificationRepo.saveAndFlush(notification);
     }
 
@@ -125,7 +125,7 @@ public class NotificationServiceImpl implements NotificationService {
         attempts++;
         if (attempts <= maxRetry) {
             notification.setAttempts(attempts);
-            notification.setStatus(String.valueOf(NotificationStatus.PROCESSING));
+            notification.setStatus(NotificationStatus.PROCESSING);
             log.info("Notification has failed to send, retrying ID: {}", notification.getId());
         } else {
             updateNotificationStatus(notification, NotificationStatus.FAILED);

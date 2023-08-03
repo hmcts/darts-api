@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
@@ -29,17 +30,18 @@ import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 @SuppressWarnings("MethodName")
 public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
 
-    public static final int SOME_REQUESTOR = 666;
-    public static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
-    public static final OffsetDateTime TIME_12_10 = OffsetDateTime.parse("2023-01-01T12:10Z");
-    public static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
+    private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
+    private static final OffsetDateTime TIME_12_10 = OffsetDateTime.parse("2023-01-01T12:10Z");
+    private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
+
 
     private final DartsDatabaseStub dartsDatabase;
 
     private MediaRequestEntity mediaRequestEntity;
     private HearingEntity hearingEntity;
+    private UserAccountEntity userAccountEntity;
 
-    public void databaseIsProvisionedForHappyPath() {
+    public void aMediaEntityGraph() {
         var mediaEntity = dartsDatabase.createMediaEntity(
               TIME_12_00,
               TIME_12_10,
@@ -63,6 +65,16 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
               .saveAndFlush(externalObjectDirectoryEntity);
     }
 
+    public UserAccountEntity aUserAccount(String emailAddress) {
+        userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setEmailAddress(emailAddress);
+
+        dartsDatabase.getUserAccountRepository()
+            .saveAndFlush(userAccountEntity);
+
+        return userAccountEntity;
+    }
+
     public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName) {
         hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
               caseNumber,
@@ -74,15 +86,16 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
         return hearingEntity;
     }
 
-    public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType) {
+    public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType, UserAccountEntity userAccountEntity) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
         mediaRequestEntity.setRequestType(audioRequestType);
-        mediaRequestEntity.setRequestor(SOME_REQUESTOR);
+        mediaRequestEntity.setRequestor(userAccountEntity.getId());
         mediaRequestEntity.setStartTime(TIME_12_00);
         mediaRequestEntity.setEndTime(TIME_13_00);
 
-        dartsDatabase.getMediaRequestRepository().saveAndFlush(mediaRequestEntity);
+        dartsDatabase.getMediaRequestRepository()
+            .saveAndFlush(mediaRequestEntity);
     }
 
 }

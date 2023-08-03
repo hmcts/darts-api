@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -10,13 +11,17 @@ import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.impl.AudioTransformationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
@@ -25,6 +30,10 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 @Import(SystemCommandExecutorStubImpl.class)
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase {
+
+    private static final String NOTIFICATION_TEMPLATE_ID_SUCCESS = "66a1864f-24a6-469a-ac55-66bc57c7e4f6";
+    private static final String NOTIFICATION_TEMPLATE_ID_FAILURE = "cb5bc3f6-ae1f-4346-845a-622cf6ad2632";
+    private static final String EMAIL_ADDRESS = "test@test.com";
 
     @Autowired
     private AudioTransformationServiceProcessAudioRequestGivenBuilder given;
@@ -39,10 +48,14 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom");
     }
 
-    @Test
-    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedForDownloadRequestType() {
-        given.databaseIsProvisionedForHappyPath();
-        given.aMediaRequestEntityForHearingWithRequestType(hearing, AudioRequestType.DOWNLOAD);
+    @ParameterizedTest
+    @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
+    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(AudioRequestType audioRequestType) {
+        given.aMediaEntityGraph();
+        var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
+        given.aMediaRequestEntityForHearingWithRequestType(hearing,
+                                                           audioRequestType,
+                                                           userAccountEntity);
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
 
@@ -52,30 +65,26 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
             .findById(mediaRequestId)
             .orElseThrow();
-
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
+
+        List<NotificationEntity> scheduledNotifications = dartsDatabase.getNotificationRepository()
+            .findAll();
+        assertEquals(1, scheduledNotifications.size());
+
+        var notificationEntity = scheduledNotifications.get(0);
+        assertEquals(NOTIFICATION_TEMPLATE_ID_SUCCESS, notificationEntity.getEventId());
+        assertNull(notificationEntity.getTemplateValues());
+        assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
+        assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
 
-    @Test
-    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedForPlaybackRequestType() {
-        given.databaseIsProvisionedForHappyPath();
-        given.aMediaRequestEntityForHearingWithRequestType(hearing, AudioRequestType.PLAYBACK);
-
-        Integer mediaRequestId = given.getMediaRequestEntity().getId();
-
-        UUID blobId = audioTransformationService.processAudioRequest(mediaRequestId);
-        assertNotNull(blobId);
-
-        var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
-            .findById(mediaRequestId)
-            .orElseThrow();
-
-        assertEquals(COMPLETED, mediaRequestEntity.getStatus());
-    }
-
-    @Test
-    void processAudioRequestShouldFailAndUpdateRequestStatusToFailed() {
-        given.aMediaRequestEntityForHearingWithRequestType(hearing, AudioRequestType.DOWNLOAD);
+    @ParameterizedTest
+    @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
+    void processAudioRequestShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(AudioRequestType audioRequestType) {
+        var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
+        given.aMediaRequestEntityForHearingWithRequestType(hearing,
+                                                           audioRequestType,
+                                                           userAccountEntity);
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
         var exception = assertThrows(
@@ -89,5 +98,16 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
             .findById(mediaRequestId)
             .orElseThrow();
         assertEquals(FAILED, mediaRequestEntity.getStatus());
+
+        List<NotificationEntity> scheduledNotifications = dartsDatabase.getNotificationRepository()
+            .findAll();
+        assertEquals(1, scheduledNotifications.size());
+
+        var notificationEntity = scheduledNotifications.get(0);
+        assertEquals(NOTIFICATION_TEMPLATE_ID_FAILURE, notificationEntity.getEventId());
+        assertNull(notificationEntity.getTemplateValues());
+        assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
+        assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
+
 }
