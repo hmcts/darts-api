@@ -298,9 +298,6 @@ components:
         case_number:
           type: string
           example: CASE1001
-        upload_priority:
-          type: string
-          example: 10
         defendants:
           type: array
           items:

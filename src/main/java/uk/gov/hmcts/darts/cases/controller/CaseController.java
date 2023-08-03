@@ -111,11 +111,9 @@ public class CaseController implements CasesApi {
     }
 
     @Override
-    public ResponseEntity<SingleCase> casesCaseIdGet(
-        @Parameter(name = "caseId", description = "caseId is the internal cas_id of the case.", required = true, in = ParameterIn.PATH) @PathVariable("caseId") Integer caseId
-    ) {
+    public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
 
-        return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
 
     }
 

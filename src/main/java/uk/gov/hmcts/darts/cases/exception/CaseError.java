@@ -28,7 +28,13 @@ public enum CaseError implements DartsApiError {
         "103",
         HttpStatus.BAD_REQUEST,
         "The request is not valid.."
+    ),
+    CASE_NOT_FOUND(
+        "104",
+        HttpStatus.NOT_FOUND,
+        "The requested case cannot be found"
     );
+
 
     private static final String ERROR_TYPE_PREFIX = "CASE";
 

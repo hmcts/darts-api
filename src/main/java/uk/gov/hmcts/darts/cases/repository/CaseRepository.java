@@ -11,4 +11,9 @@ import java.util.Optional;
 public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
 
     Optional<CourtCaseEntity> findByCaseNumberAndCourthouse_CourthouseName(String caseNumber, String courthouseName);
+
+    @Override
+    Optional<CourtCaseEntity> findById(Integer id);
+
+
 }
