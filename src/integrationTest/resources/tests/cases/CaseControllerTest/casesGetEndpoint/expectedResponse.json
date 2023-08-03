@@ -10,7 +10,7 @@
       "defendant_Case0000001_2"
     ],
     "judges": [
-      "Judge1"
+      "JudgeCase0000001_1"
     ],
     "prosecutors": [
       "prosecutor_Case0000001_1",
@@ -32,7 +32,7 @@
       "defendant_Case0000002_2"
     ],
     "judges": [
-      "Judge1"
+      "JudgeCase0000002_1"
     ],
     "prosecutors": [
       "prosecutor_Case0000002_1",
@@ -54,7 +54,7 @@
       "defendant_Case0000003_2"
     ],
     "judges": [
-      "Judge1"
+      "JudgeCase0000003_1"
     ],
     "prosecutors": [
       "prosecutor_Case0000003_1",

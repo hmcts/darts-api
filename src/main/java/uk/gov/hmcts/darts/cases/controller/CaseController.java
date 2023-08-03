@@ -63,7 +63,7 @@ public class CaseController implements CasesApi {
         request.setDate(date);
 
 
-        return new ResponseEntity<>(caseService.getCases(request), HttpStatus.OK);
+        return new ResponseEntity<>(caseService.getHearings(request), HttpStatus.OK);
 
     }
 

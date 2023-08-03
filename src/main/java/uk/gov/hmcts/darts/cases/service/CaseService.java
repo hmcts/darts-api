@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface CaseService {
 
-    List<ScheduledCase> getCases(GetCasesRequest request);
+    List<ScheduledCase> getHearings(GetCasesRequest request);
 
     ScheduledCase addCaseOrUpdate(AddCaseRequest addCaseRequest);
 

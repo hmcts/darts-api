@@ -150,7 +150,7 @@ public class CommonTestDataUtil {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
-        hearing1.setJudgeList(createJudges(2));
+        hearing1.setJudges(createJudges(2));
         return hearing1;
     }
 
