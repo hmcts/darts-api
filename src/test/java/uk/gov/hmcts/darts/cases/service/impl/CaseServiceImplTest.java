@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -181,6 +182,8 @@ class CaseServiceImplTest {
         });
         CourtCaseEntity courtCase = CommonTestDataUtil.createCase("testAddCase");
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(courtCase);
+        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
 
         AddCaseRequest request = CommonTestDataUtil.createAddCaseRequest();
         PostCaseResponse result = service.addCaseOrUpdate(request);
@@ -251,6 +254,8 @@ class CaseServiceImplTest {
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
             existingCaseEntity);
+        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         Mockito.when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return args[0];
@@ -281,6 +286,8 @@ class CaseServiceImplTest {
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
             existingCaseEntity);
 
+        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         Mockito.when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return args[0];
@@ -309,6 +316,8 @@ class CaseServiceImplTest {
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
             existingCaseEntity);
 
+        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         Mockito.when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return args[0];
@@ -335,6 +344,8 @@ class CaseServiceImplTest {
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(anyString(), anyString())).thenReturn(
             existingCaseEntity);
+        JudgeEntity judge = CommonTestDataUtil.createJudge("Judge_1");
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
         Mockito.when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             Object[] args = invocation.getArguments();
             return args[0];
