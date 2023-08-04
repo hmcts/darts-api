@@ -104,7 +104,7 @@ class CaseServiceImplTest {
         String actualResponse = objectMapper.writeValueAsString(result);
 
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/getCaseById/expectedResponse.json");
+            "Tests/cases/CaseServiceTest/testGetCasesById/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
@@ -127,7 +127,8 @@ class CaseServiceImplTest {
 
         List<ScheduledCase> resultList = service.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
-        String expectedResponse = getContentsFromFile("Tests/cases/CaseServiceTest/getCasesOk1/expectedResponse.json");
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CaseServiceTest/testGetCasesWithMultipleHearing/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -148,7 +149,8 @@ class CaseServiceImplTest {
 
         List<ScheduledCase> resultList = service.getHearings(request);
         String actualResponse = objectMapper.writeValueAsString(resultList);
-        String expectedResponse = getContentsFromFile("Tests/cases/CaseServiceTest/getCasesOk2/expectedResponse.json");
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CaseServiceTest/testGetCasesWithSingleHearingAndDifferentCourtroom/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -201,7 +203,7 @@ class CaseServiceImplTest {
 
         String actualResponse = objectMapper.writeValueAsString(result);
         String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/addCase/expectedResponseWithoutCourtroom.json");
+            "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
