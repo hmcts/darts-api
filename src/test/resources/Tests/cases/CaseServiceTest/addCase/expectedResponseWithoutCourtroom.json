@@ -6,6 +6,10 @@
     "defendant_testAddCase_1",
     "defendant_testAddCase_2"
   ],
+  "judges": [
+    "Judge_1",
+    "Judge_2"
+  ],
   "prosecutors": [
     "Prosecutor1",
     "prosecutor_testAddCase_1",
