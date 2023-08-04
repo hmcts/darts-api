@@ -1,0 +1,21 @@
+{
+  "case_id": 101,
+  "courthouse": "case_courthouse",
+  "case_number": "1",
+  "defendants": [
+    "defendant_1_1",
+    "defendant_1_2"
+  ],
+  "judges": [
+    "Judge_1",
+    "Judge_2"
+  ],
+  "prosecutors": [
+    "prosecutor_1_1",
+    "prosecutor_1_2"
+  ],
+  "defenders": [
+    "defence_1_1",
+    "defence_1_2"
+  ]
+}

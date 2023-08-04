@@ -91,6 +91,7 @@ public class CommonTestDataUtil {
         courtCase.setDefendantList(createDefendantList(courtCase));
         courtCase.setProsecutorList(createProsecutorList(courtCase));
         courtCase.setCourthouse(createCourthouse("case_courthouse"));
+        courtCase.setJudges(createJudges(2));
         courtCase.setId(id);
         return courtCase;
     }
