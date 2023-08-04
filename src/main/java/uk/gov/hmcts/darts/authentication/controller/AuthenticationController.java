@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 
 public interface AuthenticationController {
 
@@ -12,7 +13,7 @@ public interface AuthenticationController {
     ModelAndView loginOrRefresh(@RequestHeader(value = "Authorization", required = false) String authHeaderValue);
 
     @PostMapping("/handle-oauth-code")
-    String handleOauthCode(@RequestParam("code") String code);
+    SecurityToken handleOauthCode(@RequestParam("code") String code);
 
     @GetMapping("/logout")
     ModelAndView logout(@RequestHeader("Authorization") String authHeaderValue);

@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
-import uk.gov.hmcts.darts.authentication.service.SessionService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
@@ -32,9 +31,6 @@ class AuthenticationServiceImplTest {
 
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
-
-    @Mock
-    private SessionService sessionService;
 
     @Mock
     private TokenValidator tokenValidator;

@@ -5,6 +5,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ParameterExpression;
 import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +39,18 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         CriteriaQuery<GetAuthorisationResult> criteriaQuery = criteriaBuilder.createQuery(GetAuthorisationResult.class);
 
         Root<UserAccountEntity> root = criteriaQuery.from(UserAccountEntity.class);
-        Join<UserAccountEntity, SecurityGroupEntity> securityGroup = root.join(UserAccountEntity_.securityGroupEntities);
+        Join<UserAccountEntity, SecurityGroupEntity> securityGroup = root.join(
+            UserAccountEntity_.securityGroupEntities,
+            JoinType.LEFT
+        );
         Join<SecurityGroupEntity, SecurityRoleEntity> securityRole = securityGroup.join(
-            SecurityGroupEntity_.securityRoleId);
+            SecurityGroupEntity_.securityRoleId,
+            JoinType.LEFT
+        );
         Join<SecurityRoleEntity, SecurityPermissionEntity> securityPermission = securityRole.join(
-            SecurityRoleEntity_.securityPermissionEntities);
+            SecurityRoleEntity_.securityPermissionEntities,
+            JoinType.LEFT
+        );
 
         criteriaQuery.select(criteriaBuilder.construct(
                                  GetAuthorisationResult.class,
@@ -59,6 +67,10 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         criteriaQuery.where(criteriaBuilder.equal(
             criteriaBuilder.lower(root.get(UserAccountEntity_.emailAddress)),
             criteriaBuilder.lower(paramEmailAddress)
+        ));
+        criteriaQuery.orderBy(List.of(
+            criteriaBuilder.asc(securityRole.get(SecurityRoleEntity_.id)),
+            criteriaBuilder.asc(securityPermission.get(SecurityPermissionEntity_.id))
         ));
 
         TypedQuery<GetAuthorisationResult> query = em.createQuery(criteriaQuery);
@@ -79,21 +91,25 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             userStateBuilder.userId(result.userId());
             userStateBuilder.userName(result.userName());
 
-            if (!tmpRoleId.equals(result.roleId())) {
+            Integer roleId = result.roleId();
+            if (roleId != null && !tmpRoleId.equals(roleId)) {
                 permissions = new LinkedHashSet<>();
                 roles.add(Role.builder()
-                              .roleId(result.roleId())
+                              .roleId(roleId)
                               .roleName(result.roleName())
                               .permissions(permissions)
                               .build());
 
-                tmpRoleId = result.roleId();
+                tmpRoleId = roleId;
             }
 
-            permissions.add(Permission.builder()
-                                .permissionId(result.permissionId())
-                                .permissionName(result.permissionName())
-                                .build());
+            Integer permissionId = result.permissionId();
+            if (permissionId != null) {
+                permissions.add(Permission.builder()
+                                    .permissionId(permissionId)
+                                    .permissionName(result.permissionName())
+                                    .build());
+            }
         }
 
         return userStateBuilder.build();

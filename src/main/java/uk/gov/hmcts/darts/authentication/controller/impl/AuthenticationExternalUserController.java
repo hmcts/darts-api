@@ -1,14 +1,21 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
+import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
+import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
+import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
+import java.text.ParseException;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -16,7 +23,10 @@ import java.net.URI;
 @RequiredArgsConstructor
 public class AuthenticationExternalUserController implements AuthenticationController {
 
+    private static final String EMAILS_CLAIM_NAME = "emails";
+
     private final AuthenticationService authenticationService;
+    private final AuthorisationApi authorisationApi;
 
     @Override
     public ModelAndView loginOrRefresh(String authHeaderValue) {
@@ -29,8 +39,16 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     }
 
     @Override
-    public String handleOauthCode(String code) {
-        return authenticationService.handleOauthCode(code);
+    public SecurityToken handleOauthCode(String code) {
+        String accessToken = authenticationService.handleOauthCode(code);
+        try {
+            return SecurityToken.builder()
+                .accessToken(accessToken)
+                .userState(authorisationApi.getAuthorisation(parseEmailAddressFromAccessToken(accessToken)))
+                .build();
+        } catch (ParseException e) {
+            throw new DartsApiException(AuthenticationError.FAILED_TO_PARSE_ACCESS_TOKEN, e);
+        }
     }
 
     @Override
@@ -40,4 +58,9 @@ public class AuthenticationExternalUserController implements AuthenticationContr
         return new ModelAndView("redirect:" + url.toString());
     }
 
+    private String parseEmailAddressFromAccessToken(String accessToken) throws ParseException {
+        SignedJWT jwt = SignedJWT.parse(accessToken);
+        final List<String> emailAddresses = jwt.getJWTClaimsSet().getStringListClaim(EMAILS_CLAIM_NAME);
+        return emailAddresses.get(0);
+    }
 }
