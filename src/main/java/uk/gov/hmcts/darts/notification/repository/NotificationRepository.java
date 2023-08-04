@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.notification.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 
 import java.util.List;
 
@@ -11,6 +12,6 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<NotificationEntity, Integer> {
     List<NotificationEntity> findByCourtCase_Id(Integer caseId);
 
-    List<NotificationEntity> findByStatusIn(List<String> status);
+    List<NotificationEntity> findByStatusIn(List<NotificationStatus> status);
 
 }

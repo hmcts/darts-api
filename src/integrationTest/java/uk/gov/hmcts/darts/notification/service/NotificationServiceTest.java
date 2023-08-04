@@ -6,6 +6,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -47,7 +48,7 @@ class NotificationServiceTest extends IntegrationBase {
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity notification = resultList.get(0);
         assertTrue(notification.getId() > 0);
-        assertEquals("OPEN", notification.getStatus());
+        assertEquals(NotificationStatus.OPEN, notification.getStatus());
         assertEquals(caseId, notification.getCourtCase().getId());
     }
 
@@ -111,7 +112,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
-        assertEquals("SENT", result.getStatus(), "Object may not have sent");
+        assertEquals(NotificationStatus.SENT, result.getStatus(), "Object may not have sent");
     }
 
     @Test
@@ -133,7 +134,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
-        assertEquals("PROCESSING", result.getStatus());
+        assertEquals(NotificationStatus.PROCESSING, result.getStatus());
         assertEquals(1, result.getAttempts());
     }
 
@@ -159,7 +160,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
-        assertEquals("FAILED", result.getStatus());
+        assertEquals(NotificationStatus.FAILED, result.getStatus());
         assertEquals(3, result.getAttempts());
     }
 
@@ -180,7 +181,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
-        assertEquals("FAILED", result.getStatus());
+        assertEquals(NotificationStatus.FAILED, result.getStatus());
         assertEquals(0, result.getAttempts());
     }
 
@@ -201,7 +202,7 @@ class NotificationServiceTest extends IntegrationBase {
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
-        assertEquals("FAILED", result.getStatus());
+        assertEquals(NotificationStatus.FAILED, result.getStatus());
         assertEquals(0, result.getAttempts());
         verify(templateIdHelper).findTemplateId(anyString());
     }

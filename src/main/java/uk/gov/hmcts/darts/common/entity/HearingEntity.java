@@ -65,12 +65,12 @@ public class HearingEntity {
     @JoinTable(name = "hearing_media_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
-    private List<MediaEntity> mediaList;
+    private List<MediaEntity> mediaList = new ArrayList<>();
 
     @Transient
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "eve_id")})
