@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
 import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
-import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
@@ -26,7 +26,7 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     private static final String EMAILS_CLAIM_NAME = "emails";
 
     private final AuthenticationService authenticationService;
-    private final AuthorisationService authorisationService;
+    private final AuthorisationApi authorisationApi;
 
     @Override
     public ModelAndView loginOrRefresh(String authHeaderValue) {
@@ -44,7 +44,7 @@ public class AuthenticationExternalUserController implements AuthenticationContr
         try {
             return SecurityToken.builder()
                 .accessToken(accessToken)
-                .userState(authorisationService.getAuthorisation(parseEmailAddressFromAccessToken(accessToken)))
+                .userState(authorisationApi.getAuthorisation(parseEmailAddressFromAccessToken(accessToken)))
                 .build();
         } catch (ParseException e) {
             throw new DartsApiException(AuthenticationError.FAILED_TO_PARSE_ACCESS_TOKEN, e);

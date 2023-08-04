@@ -16,9 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
-import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
 
 import java.net.URI;
 import java.util.Date;
@@ -47,7 +47,7 @@ class AuthenticationExternalUserControllerTest {
     @Mock
     private AuthenticationService authenticationService;
     @Mock
-    private AuthorisationService authorisationService;
+    private AuthorisationApi authorisationApi;
 
     @Test
     void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
@@ -65,7 +65,7 @@ class AuthenticationExternalUserControllerTest {
         when(authenticationService.handleOauthCode(anyString()))
             .thenReturn(createDummyAccessToken());
 
-        when(authorisationService.getAuthorisation(anyString())).thenReturn(
+        when(authorisationApi.getAuthorisation(anyString())).thenReturn(
             UserState.builder()
                 .userId(-1)
                 .userName("Test User")
@@ -83,7 +83,7 @@ class AuthenticationExternalUserControllerTest {
         assertNotNull(securityToken.getUserState());
 
         verify(authenticationService).handleOauthCode("code");
-        verify(authorisationService).getAuthorisation("test.user@example.com");
+        verify(authorisationApi).getAuthorisation("test.user@example.com");
     }
 
     @Test

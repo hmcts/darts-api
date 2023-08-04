@@ -21,9 +21,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
-import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.security.KeyPair;
@@ -67,11 +67,11 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @MockBean
-    private AuthorisationService authorisationService;
+    private AuthorisationApi authorisationApi;
 
     @Test
     void handleOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
-        when(authorisationService.getAuthorisation(VALID_EMAIL_VALUE))
+        when(authorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
             .thenReturn(UserState.builder()
                             .userId(-1)
                             .userName("Test User")
@@ -94,7 +94,7 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         String token = response.getResponse().getContentAsString();
         assertThat(token).isNotNull();
 
-        verify(authorisationService).getAuthorisation(VALID_EMAIL_VALUE);
+        verify(authorisationApi).getAuthorisation(VALID_EMAIL_VALUE);
     }
 
     @Test
