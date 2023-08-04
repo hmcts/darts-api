@@ -5,9 +5,9 @@ spring:
         enabled: false
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DARTS_API_DB_HOST:darts-api-stg.postgres.database.azure.com}:${DARTS_API_DB_PORT:5432}/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
-    username: ${DARTS_API_DB_USERNAME:pgadmin}
-    password: ${DARTS_API_DB_PASSWORD:PQuEyVaUAxqu0UeNUo8(}
+    url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:${DARTS_API_DB_PORT:6968}/${DARTS_API_DB_NAME:DARTS_API}${DARTS_API_DB_OPTIONS:}
+    username: ${DARTS_API_DB_USERNAME:darts}
+    password: ${DARTS_API_DB_PASSWORD:darts}
     type: com.zaxxer.hikari.HikariDataSource
   jpa:
     database: postgresql
