@@ -1,11 +1,12 @@
 package uk.gov.hmcts.darts.common.task;
 
-import java.time.LocalDateTime;
-
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 public class AutomatedTaskTwo implements AutomatedTask {
+
     public static final String TASKNAME = "AutomatedTaskTwo";
 
     public static final String DEFAULT_CRON_EXPRESSION = "*/20 * * * * *";

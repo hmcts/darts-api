@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.common.task;
 
-import java.time.LocalDateTime;
-
 import lombok.extern.slf4j.Slf4j;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 public class AutomatedTaskOne implements AutomatedTask {

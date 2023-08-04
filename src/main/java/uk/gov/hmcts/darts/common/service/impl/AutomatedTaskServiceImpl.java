@@ -1,13 +1,6 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -19,13 +12,18 @@ import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
-
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.common.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.common.task.AutomatedTask;
 import uk.gov.hmcts.darts.common.task.AutomatedTaskOne;
 import uk.gov.hmcts.darts.common.task.AutomatedTaskTwo;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -60,7 +58,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         String cronExpression = getAutomatedTaskCronExpression(automatedTask.getTaskName());
         if (cronExpression == null) {
             log.info("Unable to find cron expression for task: {}. Using default: {}",
-                     automatedTask.getTaskName(), automatedTask.getDefaultCronExpression());
+                     automatedTask.getTaskName(), automatedTask.getDefaultCronExpression()
+            );
             cronExpression = automatedTask.getDefaultCronExpression();
         }
 
@@ -115,7 +114,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     public boolean cancelAutomatedTask(String taskName) {
         boolean result = false;
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
-        for (ScheduledTask  scheduledTask: scheduledTasks) {
+        for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
             if (task instanceof TriggerTask) {
                 TriggerTask triggerTask = (TriggerTask) task;
