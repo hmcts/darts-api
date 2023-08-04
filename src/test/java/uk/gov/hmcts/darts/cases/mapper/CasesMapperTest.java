@@ -2,24 +2,24 @@ package uk.gov.hmcts.darts.cases.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -27,11 +27,8 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefenceList;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefendantList;
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createProsecutorList;
@@ -39,12 +36,15 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@ExtendWith(MockitoExtension.class)
 class CasesMapperTest {
     public static final String SWANSEA = "SWANSEA";
     public static final String CASE_NUMBER = "casenumber1";
     ObjectMapper objectMapper;
     @Mock
-    CourthouseRepository courthouseRepository;
+    RetrieveCoreObjectService retrieveCoreObjectService;
+
+    @InjectMocks
     private CasesMapper caseMapper;
 
     @BeforeAll
@@ -53,17 +53,11 @@ class CasesMapperTest {
         objectMapper = objectMapperConfig.objectMapper();
     }
 
-    @BeforeEach
-    void setUp() {
-        courthouseRepository = Mockito.mock(CourthouseRepository.class);
-        caseMapper = new CasesMapper(courthouseRepository);
-    }
-
     @Test
     void testOk() throws IOException {
         List<HearingEntity> hearings = CommonTestDataUtil.createHearings(5);
 
-        List<ScheduledCase> scheduledCases = caseMapper.mapToCourtCases(hearings);
+        List<ScheduledCase> scheduledCases = caseMapper.mapToScheduledCases(hearings);
 
         String actualResponse = objectMapper.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile("Tests/cases/CasesMapperTest/testOk/expectedResponse.json");
@@ -74,13 +68,16 @@ class CasesMapperTest {
     @Test
     void testOkWithCase() throws IOException {
         CourtCaseEntity caseEntity = new CourtCaseEntity();
-        caseEntity.setCourthouse(CommonTestDataUtil.createCourthouse("Test house"));
+        CourthouseEntity courthouse = CommonTestDataUtil.createCourthouse("Test house");
+        caseEntity.setCourthouse(courthouse);
 
-        HearingEntity hearing = CommonTestDataUtil.createHearing(caseEntity, null,
+        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouse, "1");
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity,
                                                                  LocalDate.of(2023, Month.JULY, 7)
         );
 
-        ScheduledCase scheduledCases = caseMapper.mapToCourtCase(hearing, caseEntity);
+        ScheduledCase scheduledCases = caseMapper.mapToScheduledCase(hearing);
 
         String actualResponse = objectMapper.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(
@@ -90,27 +87,8 @@ class CasesMapperTest {
     }
 
     @Test
-    void testMapAddCaseRequestToCaseEntityWithNonExistingCourthouse() {
-        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(any())).thenReturn(Optional.empty());
-
-        CourtCaseEntity caseEntity = new CourtCaseEntity();
-
-        AddCaseRequest request = new AddCaseRequest(SWANSEA, CASE_NUMBER);
-
-
-        DartsApiException exception = assertThrows(
-            DartsApiException.class,
-            () -> caseMapper.mapAddCaseRequestToCaseEntity(request, caseEntity)
-        );
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getError().getHttpStatus());
-        assertEquals("Provided courthouse does not exist", exception.getMessage());
-    }
-
-    @Test
     void testMapAddCaseRequestToCaseEntityWithExistingCourthouse() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(any())).thenReturn(Optional.of(courthouseEntity));
 
         CourtCaseEntity caseEntity = new CourtCaseEntity();
         caseEntity.setCaseNumber(CASE_NUMBER);
@@ -125,7 +103,7 @@ class CasesMapperTest {
         request.setDefenders(new ArrayList<>(List.of("New Defenders")));
         request.setDefendants(new ArrayList<>(List.of("New Defendants")));
 
-        CourtCaseEntity scheduledCases = caseMapper.mapAddCaseRequestToCaseEntity(request, caseEntity);
+        CourtCaseEntity scheduledCases = caseMapper.addDefendantProsecutorDefenderJudge(caseEntity, request);
         assertEquals(CASE_NUMBER, scheduledCases.getCaseNumber());
         assertEquals(SWANSEA, scheduledCases.getCourthouse().getCourthouseName());
         assertEquals(3, scheduledCases.getProsecutorList().size());
@@ -137,7 +115,6 @@ class CasesMapperTest {
     @Test
     void testMapAddCaseRequestToCaseEntityWithExistingDetails() {
         CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(any())).thenReturn(Optional.of(courthouseEntity));
 
         CourtCaseEntity caseEntity = new CourtCaseEntity();
         caseEntity.setCaseNumber(CASE_NUMBER);
@@ -152,7 +129,7 @@ class CasesMapperTest {
         request.setDefenders(new ArrayList<>(List.of("defence_casenumber1_1")));
         request.setDefendants(new ArrayList<>(List.of("defendant_casenumber1_1")));
 
-        CourtCaseEntity scheduledCases = caseMapper.mapAddCaseRequestToCaseEntity(request, caseEntity);
+        CourtCaseEntity scheduledCases = caseMapper.addDefendantProsecutorDefenderJudge(caseEntity, request);
         assertEquals(CASE_NUMBER, scheduledCases.getCaseNumber());
         assertEquals(SWANSEA, scheduledCases.getCourthouse().getCourthouseName());
         assertEquals(2, scheduledCases.getProsecutorList().size());
@@ -174,7 +151,7 @@ class CasesMapperTest {
         hearingList.add(CommonTestDataUtil.createHearing(caseNumString + counter++, LocalTime.of(10, 0, 0)));
         hearingList.add(CommonTestDataUtil.createHearing(caseNumString + counter, LocalTime.of(16, 0, 0)));
 
-        List<ScheduledCase> scheduledCases = caseMapper.mapToCourtCases(hearingList);
+        List<ScheduledCase> scheduledCases = caseMapper.mapToScheduledCases(hearingList);
 
         String actualResponse = objectMapper.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(

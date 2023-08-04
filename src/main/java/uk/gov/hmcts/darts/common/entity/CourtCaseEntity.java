@@ -109,21 +109,28 @@ public class CourtCaseEntity {
     }
 
     public void addDefence(DefenceEntity defence) {
-        this.defenceList.add(defence);
+        if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(defence.getName()))) {
+            defenceList.add(defence);
+        }
     }
 
     public void addDefendant(DefendantEntity defendant) {
-        this.defendantList.add(defendant);
+        if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(defendant.getName()))) {
+            defendantList.add(defendant);
+        }
     }
 
     public void addJudge(JudgeEntity judge) {
-        if (!judges.contains(judge)) {
+        if (judges.stream().noneMatch(judgeEntity -> judgeEntity.getName().equalsIgnoreCase(judge.getName()))) {
             judges.add(judge);
         }
     }
 
     public void addProsecutor(ProsecutorEntity prosecutor) {
-        this.prosecutorList.add(prosecutor);
+        if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
+            prosecutor.getName()))) {
+            prosecutorList.add(prosecutor);
+        }
     }
 
     public List<String> getDefendantStringList() {

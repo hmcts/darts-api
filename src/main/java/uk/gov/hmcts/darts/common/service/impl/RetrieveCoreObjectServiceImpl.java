@@ -123,7 +123,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     }
 
     @Override
-    public JudgeEntity retrieveJudge(String judgeName) {
+    public JudgeEntity retrieveOrCreateJudge(String judgeName) {
         Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
         return foundJudge.orElseGet(() -> createJudge(judgeName));
     }

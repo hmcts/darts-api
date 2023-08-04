@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.cases.controller;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +135,6 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Revisit after refactor")
     void casesPostWithoutExistingCase() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -196,7 +194,6 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Revisit after refactor")
     void casesPostWithNonExistingCourtroom() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -227,7 +224,6 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Revisit after refactor")
     void casesPostWithExistingCaseButNoHearing() throws Exception {
         dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom("case1", "EDINBURGH", "1");
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
@@ -244,7 +240,6 @@ class CaseControllerTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("Revisit after refactor")
     void casesPostUpdateExistingCase() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = post("/cases")
             .contentType(MediaType.APPLICATION_JSON_VALUE)

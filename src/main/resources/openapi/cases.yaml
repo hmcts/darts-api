@@ -16,9 +16,7 @@ paths:
     get:
       tags:
         - Cases
-      summary: Allows the retrieval of all cases for a given courthouse, courtroom and date
-      description: |-
-        Retrieves all cases for a given courthouse, courtroom and date
+      summary: Allows the retrieval of all scheduled cases/hearings for a given courthouse, courtroom and date
       parameters:
         - in: query
           name: courthouse
@@ -55,9 +53,9 @@ paths:
     post:
       tags:
         - Cases
-      summary: Allows user to add case or if the case exists overwrite the details.
+      summary: Allows user to add case or if the case exists update the details.
       description: |-
-        Allows user to add case or if the case exists overwrite the details.
+        Allows user to add case or if the case exists update the details.
       requestBody:
         required: true
         content:
@@ -70,7 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/scheduled_case'
+                $ref: '#/components/schemas/post_case_response'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
         '500':
@@ -217,9 +215,6 @@ components:
         courthouse:
           type: string
           example: SWANSEA
-        courtroom:
-          type: string
-          example: 1
         case_number:
           type: string
           example: CASE1001
@@ -265,9 +260,31 @@ components:
           type: string
           format: time
           example: 10:00
-        upload_priority:
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        prosecutors:
+          type: array
+          items:
+            $ref: '#/components/schemas/prosecutor'
+        defenders:
+          type: array
+          items:
+            $ref: '#/components/schemas/defence'
+    post_case_response:
+      type: object
+      properties:
+        courthouse:
           type: string
-          example: 10
+          example: SWANSEA
+        case_number:
+          type: string
+          example: CASE1001
         defendants:
           type: array
           items:
@@ -335,9 +352,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
         reportingRestriction:
           type: string
-          example: C20220620001
+          example: "Section 4(2) of the Contempt of Court Act 1981"
           description: 'Any reporting restrictions associated with the case.'
         hearings:
           type: array

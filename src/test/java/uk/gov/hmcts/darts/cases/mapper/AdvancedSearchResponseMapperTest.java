@@ -60,7 +60,7 @@ class AdvancedSearchResponseMapperTest {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(LocalTime.NOON);
         hearing1.setId(201);
-        hearing1.setJudges(CommonTestDataUtil.createJudges(2));
+        hearing1.addJudges(CommonTestDataUtil.createJudges(2));
 
         HearingEntity hearing2 = new HearingEntity();
         hearing2.setCourtCase(CommonTestDataUtil.createCase(TEST_1));
@@ -68,7 +68,7 @@ class AdvancedSearchResponseMapperTest {
         hearing2.setHearingDate(LocalDate.of(2023, 6, 21));
         hearing2.setScheduledStartTime(LocalTime.NOON);
         hearing2.setId(202);
-        hearing2.setJudges(CommonTestDataUtil.createJudges(3));
+        hearing2.addJudges(CommonTestDataUtil.createJudges(3));
 
 
         List<HearingEntity> hearings = new ArrayList<>();
@@ -91,7 +91,7 @@ class AdvancedSearchResponseMapperTest {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(LocalTime.of(11, 0));
         hearing1.setId(201);
-        hearing1.setJudges(CommonTestDataUtil.createJudges(2));
+        hearing1.addJudges(CommonTestDataUtil.createJudges(2));
 
         HearingEntity hearing2 = new HearingEntity();
         hearing2.setCourtCase(CommonTestDataUtil.createCaseWithId(TEST_1, 101));
@@ -99,7 +99,7 @@ class AdvancedSearchResponseMapperTest {
         hearing2.setHearingDate(LocalDate.of(2023, 6, 21));
         hearing2.setScheduledStartTime(LocalTime.of(9, 0));
         hearing2.setId(202);
-        hearing2.setJudges(CommonTestDataUtil.createJudges(3));
+        hearing2.addJudges(CommonTestDataUtil.createJudges(3));
 
 
         HearingEntity hearing3 = new HearingEntity();
@@ -108,7 +108,7 @@ class AdvancedSearchResponseMapperTest {
         hearing3.setHearingDate(LocalDate.of(2023, 6, 22));
         hearing3.setScheduledStartTime(LocalTime.of(10, 0));
         hearing3.setId(203);
-        hearing3.setJudges(CommonTestDataUtil.createJudges(4));
+        hearing3.addJudges(CommonTestDataUtil.createJudges(4));
 
 
         HearingEntity hearing4 = new HearingEntity();
@@ -117,7 +117,7 @@ class AdvancedSearchResponseMapperTest {
         hearing4.setHearingDate(LocalDate.of(2023, 6, 23));
         hearing4.setScheduledStartTime(LocalTime.of(13, 0));
         hearing4.setId(204);
-        hearing4.setJudges(CommonTestDataUtil.createJudges(5));
+        hearing4.addJudges(CommonTestDataUtil.createJudges(5));
 
 
         List<HearingEntity> hearings = new ArrayList<>();
