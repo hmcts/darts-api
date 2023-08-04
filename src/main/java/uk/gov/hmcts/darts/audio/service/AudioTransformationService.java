@@ -10,10 +10,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public interface AudioTransformationService {
 
-    MediaRequestEntity processAudioRequest(Integer requestId);
+    UUID processAudioRequest(Integer requestId) throws ExecutionException, InterruptedException;
 
     BinaryData getAudioBlobData(UUID location);
 
@@ -26,5 +27,7 @@ public interface AudioTransformationService {
     Optional<UUID> getMediaLocation(MediaEntity media);
 
     Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
+
+    UUID saveProcessedData(MediaRequestEntity mediaRequest, BinaryData binaryData);
 
 }

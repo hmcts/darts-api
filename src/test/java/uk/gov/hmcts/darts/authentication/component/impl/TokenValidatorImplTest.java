@@ -30,6 +30,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.StringJoiner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,6 +46,9 @@ class TokenValidatorImplTest {
     private static final String KEY_ID_VALUE = "123456";
     private static final String VALID_ISSUER_VALUE = "VALID ISSUER VALUE";
     private static final String VALID_AUDIENCE_VALUE = "VALID AUDIENCE VALUE";
+    private static final String VALID_SUBJECT_VALUE = "VALID SUBJECT VALUE";
+    private static final String VALID_EMAIL_VALUE = "test.user@example.com";
+    private static final String EMAILS_CLAIM_NAME = "emails";
 
     @Mock
     private AuthenticationConfiguration authenticationConfiguration;
@@ -70,6 +74,12 @@ class TokenValidatorImplTest {
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)
             .expirationTime(createInstantInFuture())
+            .issueTime(Date.from(Instant.now()))
+            .subject(VALID_SUBJECT_VALUE)
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
+            .claim("name", "Test User")
+            .claim("given_name", "Test")
+            .claim("family_name", "User")
             .build();
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
@@ -81,11 +91,68 @@ class TokenValidatorImplTest {
     }
 
     @Test
+    void validateShouldReturnNegativeResultWhenEmailsClaimIsMissing() {
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+            .audience(VALID_AUDIENCE_VALUE)
+            .issuer(VALID_ISSUER_VALUE)
+            .expirationTime(createInstantInFuture())
+            .issueTime(Date.from(Instant.now()))
+            .subject(VALID_SUBJECT_VALUE)
+            .build();
+
+        SignedJWT jwt = createSignedJwt(jwtClaimsSet);
+
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+
+        assertFalse(validationResult.valid());
+        assertEquals("JWT missing required claims: [emails]", validationResult.reason());
+    }
+
+    @Test
+    void validateShouldReturnNegativeResultWhenSubjectClaimIsMissing() {
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+            .audience(VALID_AUDIENCE_VALUE)
+            .issuer(VALID_ISSUER_VALUE)
+            .expirationTime(createInstantInFuture())
+            .issueTime(Date.from(Instant.now()))
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
+            .build();
+
+        SignedJWT jwt = createSignedJwt(jwtClaimsSet);
+
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+
+        assertFalse(validationResult.valid());
+        assertEquals("JWT missing required claims: [sub]", validationResult.reason());
+    }
+
+    @Test
+    void validateShouldReturnNegativeResultWhenIssuedAtClaimIsMissing() {
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+            .audience(VALID_AUDIENCE_VALUE)
+            .issuer(VALID_ISSUER_VALUE)
+            .expirationTime(createInstantInFuture())
+            .subject(VALID_SUBJECT_VALUE)
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
+            .build();
+
+        SignedJWT jwt = createSignedJwt(jwtClaimsSet);
+
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+
+        assertFalse(validationResult.valid());
+        assertEquals("JWT missing required claims: [iat]", validationResult.reason());
+    }
+
+    @Test
     void validateShouldReturnNegativeResultWhenInvalidAudienceIsPresented() {
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience("INVALID AUDIENCE VALUE")
             .issuer(VALID_ISSUER_VALUE)
             .expirationTime(createInstantInFuture())
+            .issueTime(Date.from(Instant.now()))
+            .subject(VALID_SUBJECT_VALUE)
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
             .build();
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
@@ -102,6 +169,9 @@ class TokenValidatorImplTest {
             .audience(VALID_AUDIENCE_VALUE)
             .issuer("INVALID ISSUER VALUE")
             .expirationTime(createInstantInFuture())
+            .issueTime(Date.from(Instant.now()))
+            .subject(VALID_SUBJECT_VALUE)
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
             .build();
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
@@ -121,6 +191,9 @@ class TokenValidatorImplTest {
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)
             .expirationTime(createInstantInPast())
+            .issueTime(Date.from(Instant.now()))
+            .subject(VALID_SUBJECT_VALUE)
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
             .build();
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
@@ -137,6 +210,9 @@ class TokenValidatorImplTest {
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)
             .expirationTime(createInstantInFuture())
+            .issueTime(Date.from(Instant.now()))
+            .subject(VALID_SUBJECT_VALUE)
+            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
             .build();
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);

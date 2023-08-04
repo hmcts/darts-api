@@ -28,6 +28,7 @@ import javax.validation.constraints.NotNull;
 /**
  * Default endpoints per application.
  */
+@SuppressWarnings({"checkstyle.LineLengthCheck"})
 @RestController
 public class DailyListController implements DailyListsApi {
 
@@ -87,7 +88,7 @@ public class DailyListController implements DailyListsApi {
         operationId = "dailylistsGetCasesGet",
         summary = "Retrieves the case list for the specified courthouse, courtroom and a hearing date.",
         description = "description",
-        tags = { "DailyLists" },
+        tags = {"DailyLists"},
         responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                 @Content(mediaType = "application/json", schema = @Schema(implementation = CourtList.class))
@@ -98,7 +99,7 @@ public class DailyListController implements DailyListsApi {
     @RequestMapping(
         method = RequestMethod.GET,
         value = "/dailylists/getCases",
-        produces = { "application/json" }
+        produces = {"application/json"}
     )
     public ResponseEntity<CourtList> dailylistsGetCasesGet(
         @NotNull @Parameter(name = "court_house_code", description = "The CourtHouseCode to get the daily list for.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "court_house_code", required = true) Integer courtHouseCode,

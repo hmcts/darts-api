@@ -7,8 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.audiorequest.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audiorequest.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
 
 @ExtendWith(MockitoExtension.class)
 class MediaRequestServiceImplTest {
@@ -54,7 +54,7 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setAttempts(0);
         OffsetDateTime now = OffsetDateTime.now();
         mockMediaRequestEntity.setCreatedDateTime(now);
-        mockMediaRequestEntity.setLastUpdatedDateTime(now);
+        mockMediaRequestEntity.setLastUpdated(now);
     }
 
     @Test

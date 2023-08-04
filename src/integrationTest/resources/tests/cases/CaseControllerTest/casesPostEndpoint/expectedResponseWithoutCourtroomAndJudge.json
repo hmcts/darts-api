@@ -1,0 +1,13 @@
+{
+  "courthouse": "SWANSEA",
+  "case_number": "CASE1001",
+  "defendants": [
+    "Jow Bloggs"
+  ],
+  "prosecutors": [
+    "Mrs Prosecutor"
+  ],
+  "defenders": [
+    "Mr Defender"
+  ]
+}

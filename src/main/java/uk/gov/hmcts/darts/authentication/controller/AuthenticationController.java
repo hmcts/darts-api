@@ -1,25 +1,20 @@
 package uk.gov.hmcts.darts.authentication.controller;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 
 public interface AuthenticationController {
 
     @GetMapping("/login-or-refresh")
-    ModelAndView loginOrRefresh(HttpSession session);
+    ModelAndView loginOrRefresh(@RequestHeader(value = "Authorization", required = false) String authHeaderValue);
 
     @PostMapping("/handle-oauth-code")
-    String handleOauthCode(HttpSession session, @RequestParam("code") String code);
+    SecurityToken handleOauthCode(@RequestParam("code") String code);
 
     @GetMapping("/logout")
-    ModelAndView logout(HttpSession session);
-
-    @PostMapping("/invalidate-session")
-    void invalidateSession(HttpSession session);
-
-    @GetMapping("/reset-password")
-    ModelAndView resetPassword(HttpSession session);
+    ModelAndView logout(@RequestHeader("Authorization") String authHeaderValue);
 }

@@ -27,9 +27,21 @@ spring:
     - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
     - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
     - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+
+darts:
+  gateway:
+    url: ${DARTS_GATEWAY_URL:http://localhost:8080}
+  audio:
+    concat-workspace: ${java.io.tmpdir}/audiotransform/concatenate
+    merge-workspace: ${java.io.tmpdir}/audiotransform/merge
+    trim-workspace: ${java.io.tmpdir}/audiotransform/trim
+    re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
+    temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
+
 logging:
   level:
     uk:
       gov:
         hmcts:
           darts: DEBUG
+

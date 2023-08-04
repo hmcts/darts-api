@@ -1,0 +1,8 @@
+{
+  "courthouse": "SWANSEA",
+  "courtroom": "1",
+  "case_number": "Case0000004",
+  "judges": [
+    "Test Judge"
+  ]
+}

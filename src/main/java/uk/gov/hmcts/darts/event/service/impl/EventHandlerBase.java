@@ -1,26 +1,56 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+@SuppressWarnings({"PMD.TooManyMethods"})
+@Slf4j
 public abstract class EventHandlerBase implements EventHandler {
 
     protected final Map<String, Pair<Integer, String>> eventTypesToIdAndName = new ConcurrentHashMap<>();
 
+    @Getter
     @Autowired
     private EventTypeRepository eventTypeRepository;
+    @Autowired
+    private CourtroomRepository courtroomRepository;
+    @Getter
+    @Autowired
+    private CaseRepository caseRepository;
+    @Autowired
+    private EventRepository eventRepository;
+    @Autowired
+    private HearingRepository hearingRepository;
+
+    @Autowired
+    private RetrieveCoreObjectService retrieveCoreObjectService;
+
+    private static final String MULTIPLE_CASE_NUMBERS = "Event: %s contains multiple caseNumbers: %s";
 
     @PostConstruct
     public void populateMessageTypes() {
@@ -39,7 +69,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     protected EventEntity eventEntityFrom(DartsEvent dartsEvent) {
         var event = new EventEntity();
-        event.setLegacyEventId(Integer.valueOf(dartsEvent.getEventId()));
+        event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
         event.setTimestamp(dartsEvent.getDateTime());
         event.setEventName(eventNameFor(dartsEvent));
         event.setEventText(dartsEvent.getEventText());
@@ -48,7 +78,7 @@ public abstract class EventHandlerBase implements EventHandler {
         return event;
     }
 
-    private EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
+    protected EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
         var key = buildKey(dartsEvent.getType(), dartsEvent.getSubType());
         return eventTypeRepository.getReferenceById(eventTypesToIdAndName.get(key).getLeft());
     }
@@ -65,4 +95,52 @@ public abstract class EventHandlerBase implements EventHandler {
         requireNonNull(type);
         return type + (isNull(subType) ? "" : subType);
     }
+
+    protected CourtroomCourthouseCourtcase getOrCreateCourtroomCourtHouseAndCases(DartsEvent dartsEvent) {
+
+        final var caseNumbers = dartsEvent.getCaseNumbers();
+        if (caseNumbers.size() > 1) {
+            log.warn(format(MULTIPLE_CASE_NUMBERS, dartsEvent.getEventId(), join(", ", caseNumbers)));
+        }
+
+        String caseNumber = caseNumbers.get(0);
+        HearingEntity hearingEntity = retrieveCoreObjectService.retrieveOrCreateHearing(
+            dartsEvent.getCourthouse(),
+            dartsEvent.getCourtroom(),
+            caseNumber,
+            dartsEvent.getDateTime().toLocalDate()
+        );
+
+        saveEvent(dartsEvent, hearingEntity.getCourtroom(), hearingEntity);
+        setHearingToActive(hearingEntity);
+
+
+        return CourtroomCourthouseCourtcase.builder()
+            .courthouseEntity(hearingEntity.getCourtroom().getCourthouse())
+            .courtroomEntity(hearingEntity.getCourtroom())
+            .courtCaseEntity(hearingEntity.getCourtCase())
+            .isHearingNew(hearingEntity.isNew())
+            .isCourtroomDifferentFromHearing(false)//for now always creating a new one
+            .build();
+    }
+
+    private void setHearingToActive(HearingEntity hearingEntity) {
+        hearingEntity.setHearingIsActual(true);
+        hearingRepository.saveAndFlush(hearingEntity);
+    }
+
+    protected EventEntity saveEvent(DartsEvent dartsEvent, CourtroomEntity courtroomEntity, HearingEntity hearingEntity) {
+        var eventEntity = eventEntityFrom(dartsEvent);
+        eventEntity.setCourtroom(courtroomEntity);
+        eventRepository.saveAndFlush(eventEntity);
+        eventEntity.addHearing(hearingEntity);
+        eventRepository.saveAndFlush(eventEntity);
+        return eventEntity;
+    }
+
+    protected boolean isTheHearingNewOrTheCourtroomIsDifferent(boolean hearingIsNew, boolean isCourtroomDifferentFromHearing) {
+        return hearingIsNew || isCourtroomDifferentFromHearing;
+    }
+
+
 }

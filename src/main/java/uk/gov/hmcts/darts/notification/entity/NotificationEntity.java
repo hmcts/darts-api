@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.notification.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,7 +17,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 
 import java.time.OffsetDateTime;
 
@@ -37,7 +40,7 @@ public class NotificationEntity {
     public static final String ATTEMPTS = "send_attempts";
     public static final String TEMPLATE_VALUES = "template_values";
     public static final String CREATED_DATE_TIME = "created_ts";
-    public static final String LAST_UPDATED_DATE_TIME = "last_updated_ts";
+    public static final String LAST_MODIFIED_TS = "last_modified_ts";
     public static final String TABLE_NAME = "notification";
 
     @Id
@@ -51,13 +54,14 @@ public class NotificationEntity {
 
     @JoinColumn(name = CASE_ID)
     @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
-    private CaseEntity courtCase;
+    private CourtCaseEntity courtCase;
 
     @Column(name = EMAIL_ADDRESS)
     private String emailAddress;
 
     @Column(name = STATUS)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus status;
 
     @Column(name = ATTEMPTS)
     private int attempts;
@@ -70,7 +74,7 @@ public class NotificationEntity {
     private OffsetDateTime createdDateTime;
 
     @UpdateTimestamp
-    @Column(name = LAST_UPDATED_DATE_TIME)
-    private OffsetDateTime lastUpdatedDateTime;
+    @Column(name = LAST_MODIFIED_TS)
+    private OffsetDateTime lastUpdated;
 
 }

@@ -13,8 +13,8 @@ import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.testutils.data.CourtroomTestData;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -23,7 +23,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.NEW;
+import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseNumber;
+import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -63,7 +66,7 @@ class TransientObjectDirectoryServiceTest {
         assertNotNull(transientObjectDirectoryEntity);
         assertTrue(transientObjectDirectoryEntity.getId() > 0);
         assertEquals(mediaRequestEntity1.getId(), transientObjectDirectoryEntity.getMediaRequest().getId());
-        assertEquals(NEW.getId(), transientObjectDirectoryEntity.getStatus().getId());
+        assertEquals(STORED.getId(), transientObjectDirectoryEntity.getStatus().getId());
         assertEquals(externalLocation, transientObjectDirectoryEntity.getExternalLocation());
         assertNull(transientObjectDirectoryEntity.getChecksum());
         assertTrue(transientObjectDirectoryEntity.getCreatedTimestamp()
@@ -75,16 +78,16 @@ class TransientObjectDirectoryServiceTest {
 
     private void createAndLoadMediaRequestEntity() {
 
-        var caseEntity = CommonTestDataUtil.createCase(UUID.randomUUID().toString());
+        var caseEntity = createCaseWithCaseNumber(UUID.randomUUID().toString());
         caseRepository.saveAndFlush(caseEntity);
 
-        var courthouseEntity = CommonTestDataUtil.createCourthouse("C1");
+        var courthouseEntity = createCourthouse("C1");
         courthouseEntity = courthouseRepository.saveAndFlush(courthouseEntity);
 
-        var courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "R1");
+        var courtroomEntity = CourtroomTestData.createCourtRoomWithNameAtCourthouse(courthouseEntity, "R1");
         courtroomRepository.saveAndFlush(courtroomEntity);
 
-        var hearingEntityWithMediaRequest1 = CommonTestDataUtil.createHearing(caseEntity, courtroomEntity);
+        var hearingEntityWithMediaRequest1 = createHearingWith(caseEntity, courtroomEntity);
         hearingEntityWithMediaRequest1 = hearingRepository.saveAndFlush(hearingEntityWithMediaRequest1);
 
         mediaRequestEntity1 = AudioTestDataUtil.createMediaRequest(

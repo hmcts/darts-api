@@ -9,6 +9,10 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "event_handler")
@@ -34,4 +38,11 @@ public class EventHandlerEntity {
     @Column(name = "handler")
     private String handler;
 
+    @CreationTimestamp
+    @Column(name = "created_ts")
+    private OffsetDateTime createdTimestamp;
+
+    @UpdateTimestamp
+    @Column(name = "last_modified_ts")
+    private OffsetDateTime lastModifiedTimestamp;
 }

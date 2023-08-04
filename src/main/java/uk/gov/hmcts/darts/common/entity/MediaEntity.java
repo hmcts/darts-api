@@ -60,14 +60,9 @@ public class MediaEntity extends VersionedEntity {
     @Column(name = "case_number")
     private List<String> caseIdList = new ArrayList<>();
 
-    @Type(ListArrayType.class)
-    @Column(name = "case_object_id")
-    private List<String> caseObjectIdList = new ArrayList<>();
-
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
     @Column(name = "superseded")
     private Boolean superseded;
-
 }

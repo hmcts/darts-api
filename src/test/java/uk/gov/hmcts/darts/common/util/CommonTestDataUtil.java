@@ -1,18 +1,56 @@
 package uk.gov.hmcts.darts.common.util;
 
+import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @UtilityClass
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class CommonTestDataUtil {
+
+    public static EventEntity createEvent(String eventName, String eventText, HearingEntity hearingEntity) {
+        EventEntity event = new EventEntity();
+        event.setHearingEntities(List.of(hearingEntity));
+        event.setCourtroom(hearingEntity.getCourtroom());
+        event.setEventName(eventName);
+        event.setEventText(eventText);
+        event.setId(1);
+        event.setTimestamp(createOffsetDateTime("2023-07-01T10:00:00"));
+
+        return event;
+
+    }
+
+    public static OffsetDateTime createOffsetDateTime(String timestamp) {
+
+        ZoneId zoneId = ZoneId.of("UTC");   // Or another geographic: Europe/Paris
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        LocalDateTime start = LocalDateTime.parse(timestamp, formatter);
+
+        ZoneOffset offset = zoneId.getRules().getOffset(start);
+
+        return OffsetDateTime.of(start, offset);
+    }
 
     public CourthouseEntity createCourthouse(String name) {
         CourthouseEntity courthouse = new CourthouseEntity();
@@ -32,17 +70,74 @@ public class CommonTestDataUtil {
         return createCourtroom(createCourthouse("SWANSEA"), name);
     }
 
-    public CaseEntity createCase(String caseNumber) {
-        CaseEntity courtcase = new CaseEntity();
-        courtcase.setCaseNumber(caseNumber);
-        courtcase.setDefenders(List.of("defender_" + caseNumber + "_1", "defender_" + caseNumber + "_2"));
-        courtcase.setDefendants(List.of("defendant_" + caseNumber + "_1", "defendant_" + caseNumber + "_2"));
-        courtcase.setProsecutors(List.of("Prosecutor_" + caseNumber + "_1", "Prosecutor_" + caseNumber + "_2"));
-        return courtcase;
+    public CourtCaseEntity createCase(String caseNumber, CourthouseEntity courthouseEntity) {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCourthouse(courthouseEntity);
+        courtCase.setCaseNumber(caseNumber);
+        courtCase.setDefenceList(createDefenceList(courtCase));
+        courtCase.setDefendantList(createDefendantList(courtCase));
+        courtCase.setProsecutorList(createProsecutorList(courtCase));
+        return courtCase;
     }
 
-    public HearingEntity createHearing(CaseEntity courtcase, CourtroomEntity courtroom, LocalDate date) {
+    public CourtCaseEntity createCase(String caseNumber) {
+        return createCaseWithId(caseNumber, 101);
+    }
+
+    public CourtCaseEntity createCaseWithId(String caseNumber, Integer id) {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber(caseNumber);
+        courtCase.setDefenceList(createDefenceList(courtCase));
+        courtCase.setDefendantList(createDefendantList(courtCase));
+        courtCase.setProsecutorList(createProsecutorList(courtCase));
+        courtCase.setCourthouse(createCourthouse("case_courthouse"));
+        courtCase.setJudges(createJudges(2));
+        courtCase.setId(id);
+        return courtCase;
+    }
+
+    public static List<DefenceEntity> createDefenceList(CourtCaseEntity courtCase) {
+        DefenceEntity defence1 = createDefence(courtCase, "1");
+        DefenceEntity defence2 = createDefence(courtCase, "2");
+        return new ArrayList<>(List.of(defence1, defence2));
+    }
+
+    public static DefenceEntity createDefence(CourtCaseEntity courtCase, String number) {
+        DefenceEntity defenceEntity = new DefenceEntity();
+        defenceEntity.setCourtCase(courtCase);
+        defenceEntity.setName("defence_" + courtCase.getCaseNumber() + "_" + number);
+        return defenceEntity;
+    }
+
+    public static List<DefendantEntity> createDefendantList(CourtCaseEntity courtCase) {
+        DefendantEntity defendant1 = createDefendant(courtCase, "1");
+        DefendantEntity defendant2 = createDefendant(courtCase, "2");
+        return new ArrayList<>(List.of(defendant1, defendant2));
+    }
+
+    public static DefendantEntity createDefendant(CourtCaseEntity courtCase, String number) {
+        DefendantEntity defendantEntity = new DefendantEntity();
+        defendantEntity.setCourtCase(courtCase);
+        defendantEntity.setName("defendant_" + courtCase.getCaseNumber() + "_" + number);
+        return defendantEntity;
+    }
+
+    public static List<ProsecutorEntity> createProsecutorList(CourtCaseEntity courtCase) {
+        ProsecutorEntity prosecutor1 = createProsecutor(courtCase, "1");
+        ProsecutorEntity prosecutor2 = createProsecutor(courtCase, "2");
+        return new ArrayList<>(List.of(prosecutor1, prosecutor2));
+    }
+
+    public static ProsecutorEntity createProsecutor(CourtCaseEntity courtCase, String number) {
+        ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
+        prosecutorEntity.setCourtCase(courtCase);
+        prosecutorEntity.setName("prosecutor_" + courtCase.getCaseNumber() + "_" + number);
+        return prosecutorEntity;
+    }
+
+    public HearingEntity createHearing(CourtCaseEntity courtcase, CourtroomEntity courtroom, LocalDate date) {
         HearingEntity hearing1 = new HearingEntity();
+        hearing1.setId(1);
         hearing1.setCourtCase(courtcase);
         hearing1.setCourtroom(courtroom);
         hearing1.setHearingDate(date);
@@ -55,7 +150,23 @@ public class CommonTestDataUtil {
         hearing1.setCourtroom(createCourtroom("1"));
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
+        hearing1.setId(102);
+        hearing1.setJudges(createJudges(2));
         return hearing1;
+    }
+
+    public List<JudgeEntity> createJudges(int numOfJudges) {
+        List<JudgeEntity> returnList = new ArrayList<>();
+        for (int counter = 1; counter <= numOfJudges; counter++) {
+            returnList.add(createJudge("Judge_" + counter));
+        }
+        return returnList;
+    }
+
+    public JudgeEntity createJudge(String name) {
+        JudgeEntity judgeEntity = new JudgeEntity();
+        judgeEntity.setName(name);
+        return judgeEntity;
     }
 
     public List<HearingEntity> createHearings(int numOfHearings) {
@@ -68,4 +179,28 @@ public class CommonTestDataUtil {
         return returnList;
     }
 
+    public AddCaseRequest createAddCaseRequest(String courtroom) {
+
+        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        request.setCourtroom(courtroom);
+        request.setCaseNumber("2");
+        request.setDefendants(Lists.newArrayList("Defendant1"));
+        request.setJudges(Lists.newArrayList("Judge1"));
+        request.setProsecutors(Lists.newArrayList("Prosecutor1"));
+        request.setDefenders(Lists.newArrayList("Defender1"));
+        return request;
+    }
+
+
+    public AddCaseRequest createUpdateCaseRequest(String courtroom) {
+
+        AddCaseRequest request = new AddCaseRequest("Swansea", "case_number");
+        request.setCourtroom(courtroom);
+        request.setCaseNumber("case1");
+        request.setDefendants(Lists.newArrayList("UpdatedDefendant1"));
+        request.setJudges(Lists.newArrayList("UpdateJudge1"));
+        request.setProsecutors(Lists.newArrayList("UpdateProsecutor1"));
+        request.setDefenders(Lists.newArrayList("UpdateDefender1"));
+        return request;
+    }
 }

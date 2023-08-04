@@ -12,8 +12,8 @@ public interface JpaAuditing {
 
     void setModifiedTimestamp(OffsetDateTime modifiedTimestamp);
 
-    UserAccount getModifiedBy();
+    UserAccountEntity getModifiedBy();
 
-    void setModifiedBy(UserAccount userAccount);
+    void setModifiedBy(UserAccountEntity modifiedBy);
 
 }

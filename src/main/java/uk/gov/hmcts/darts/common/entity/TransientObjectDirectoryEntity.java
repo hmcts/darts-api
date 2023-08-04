@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -34,7 +35,7 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
     @SequenceGenerator(name = "tod_gen", sequenceName = "tod_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mer_id", foreignKey = @ForeignKey(name = "tod_media_request_fk"), nullable = false)
     private MediaRequestEntity mediaRequest;
 
@@ -57,11 +58,11 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
     private OffsetDateTime createdTimestamp;
 
     @UpdateTimestamp
-    @Column(name = "modified_ts")
+    @Column(name = "last_modified_ts")
     private OffsetDateTime modifiedTimestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
-    @JoinColumn(name = "modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
-    private UserAccount modifiedBy;
+    @JoinColumn(name = "last_modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
+    private UserAccountEntity modifiedBy;
 
 }

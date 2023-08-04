@@ -9,7 +9,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.CourtLogsService;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 
 import static org.mockito.Mockito.any;
@@ -29,6 +31,12 @@ class EventsControllerTest {
     @MockBean
     private EventDispatcher eventDispatcher;
 
+    @MockBean
+    private CourtLogsService courtLogsService;
+
+    @MockBean
+    private DartsEventMapper dartsEventMapper;
+
     @Test
     void eventsApiPostEndpoint() throws Exception {
         String requestBody = """
@@ -46,8 +54,8 @@ class EventsControllerTest {
 
         String expectedResponse = """
             {
-              "code": "200",
-              "message": "OK"
+              "code": "201",
+              "message": "CREATED"
             }""";
         MockHttpServletRequestBuilder requestBuilder = post("/events")
             .contentType(MediaType.APPLICATION_JSON_VALUE)

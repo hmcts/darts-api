@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS audit (
+CREATE TABLE IF NOT EXISTS darts.audit (
   id                    INTEGER                    NOT NULL
 , case_id               INTEGER                    NOT NULL
 , audit_activity_id     INTEGER                    NOT NULL

@@ -31,10 +31,10 @@ public class TranscriptionCommentEntity extends VersionedEntity {
     @JoinColumn(name = "tra_id")
     private TranscriptionEntity transcription;
 
-    @Column(name = "r_transcription_object_id", length = 16)
+    @Column(name = "transcription_object_id", length = 16)
     private String legacyTranscriptionObjectId;
 
-    @Column(name = "c_comment")
+    @Column(name = "transcription_comment")
     private String comment;
 
     @Column(name = "comment_ts")
@@ -52,7 +52,7 @@ public class TranscriptionCommentEntity extends VersionedEntity {
     @Column(name = "last_modified_by")
     private Integer lastModifiedByUserId;
 
-    @Column(name = "i_superseded")
+    @Column(name = "superseded")
     private Boolean superseded;
 
 }

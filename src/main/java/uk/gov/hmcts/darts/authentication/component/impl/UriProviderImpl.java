@@ -32,19 +32,11 @@ public class UriProviderImpl implements UriProvider {
 
     @Override
     @SneakyThrows(URISyntaxException.class)
-    public URI getLogoutUri(String sessionId) {
+    public URI getLogoutUri(String accessToken) {
         return new URIBuilder(
             authConfig.getExternalADlogoutUri())
-            .addParameter("id_token_hint", sessionId)
+            .addParameter("id_token_hint", accessToken)
             .addParameter("post_logout_redirect_uri", authConfig.getExternalADlogoutRedirectUri())
-            .build();
-    }
-
-    @Override
-    @SneakyThrows(URISyntaxException.class)
-    public URI getResetPasswordUri() {
-        return buildCommonAuthUri(authConfig.getExternalADresetPasswordUri())
-            .addParameter("response_type", "id_token")
             .build();
     }
 

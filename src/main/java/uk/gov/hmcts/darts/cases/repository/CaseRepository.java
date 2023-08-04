@@ -2,16 +2,18 @@ package uk.gov.hmcts.darts.cases.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import uk.gov.hmcts.darts.common.entity.CaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 
-import java.util.List;
 import java.util.Optional;
 
 @SuppressWarnings("PMD.MethodNamingConventions")
 @Repository
-public interface CaseRepository extends JpaRepository<CaseEntity, Integer> {
+public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
 
-    List<CaseEntity> findByCaseNumber(String caseNumber);
+    Optional<CourtCaseEntity> findByCaseNumberAndCourthouse_CourthouseName(String caseNumber, String courthouseName);
 
-    Optional<CaseEntity> findByCaseNumberAndCourthouse_CourthouseName(String caseNumber, String courthouseName);
+    @Override
+    Optional<CourtCaseEntity> findById(Integer id);
+
+
 }

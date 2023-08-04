@@ -5,6 +5,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@Profile("!intTest")
 public class DataManagementServiceImpl implements DataManagementService {
 
     @Autowired

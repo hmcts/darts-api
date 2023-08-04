@@ -10,6 +10,7 @@
     <exclude name="GuardLogStatement"/>
     <exclude name="JUnitTestContainsTooManyAsserts"/>
     <exclude name="JUnitAssertionsShouldIncludeMessage"/>
+    <exclude name="JUnitTestsShouldIncludeAssert"/>
   </rule>
   <rule ref="category/java/codestyle.xml">
     <exclude name="AtLeastOneConstructor"/>
@@ -40,6 +41,7 @@
   </rule>
   <rule ref="category/java/design.xml">
     <exclude name="AvoidCatchingGenericException"/>
+<!--    <exclude name="AvoidThrowingRawExceptionTypes"/>-->
     <exclude name="UseUtilityClass"/>
     <exclude name="LoosePackageCoupling"/>
     <exclude name="DataClass"/>
@@ -69,7 +71,14 @@
     <exclude name="NonSerializableClass"/>
     <exclude name="MissingSerialVersionUID"/>
   </rule>
-  <rule ref="category/java/multithreading.xml"/>
+  <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+    <properties>
+      <property name="ignoreMagicNumbers" value="-1,0,1"/>
+    </properties>
+  </rule>
+  <rule ref="category/java/multithreading.xml">
+    <exclude name="UseConcurrentHashMap"/>
+  </rule>
   <rule ref="category/java/performance.xml"/>
   <rule ref="category/java/security.xml"/>
   <exclude-pattern>.*/generated.*</exclude-pattern>

@@ -1,0 +1,117 @@
+[
+  {
+    "courthouse": "SWANSEA",
+    "courtroom": "1",
+    "hearing_date": "2023-06-20",
+    "case_number": "caseNum_1",
+    "scheduled_start": "09:00",
+    "defendants": [
+      "defendant_caseNum_1_1",
+      "defendant_caseNum_1_2"
+    ],
+    "judges": [
+      "Judge_1",
+      "Judge_2"
+    ],
+    "prosecutors": [
+      "prosecutor_caseNum_1_1",
+      "prosecutor_caseNum_1_2"
+    ],
+    "defenders": [
+      "defence_caseNum_1_1",
+      "defence_caseNum_1_2"
+    ]
+  },
+  {
+    "courthouse": "SWANSEA",
+    "courtroom": "1",
+    "hearing_date": "2023-06-20",
+    "case_number": "caseNum_2",
+    "scheduled_start": "10:00",
+    "defendants": [
+      "defendant_caseNum_2_1",
+      "defendant_caseNum_2_2"
+    ],
+    "judges": [
+      "Judge_1",
+      "Judge_2"
+    ],
+    "prosecutors": [
+      "prosecutor_caseNum_2_1",
+      "prosecutor_caseNum_2_2"
+    ],
+    "defenders": [
+      "defence_caseNum_2_1",
+      "defence_caseNum_2_2"
+    ]
+  },
+  {
+    "courthouse": "SWANSEA",
+    "courtroom": "1",
+    "hearing_date": "2023-06-20",
+    "case_number": "caseNum_3",
+    "scheduled_start": "11:00",
+    "defendants": [
+      "defendant_caseNum_3_1",
+      "defendant_caseNum_3_2"
+    ],
+    "judges": [
+      "Judge_1",
+      "Judge_2"
+    ],
+    "prosecutors": [
+      "prosecutor_caseNum_3_1",
+      "prosecutor_caseNum_3_2"
+    ],
+    "defenders": [
+      "defence_caseNum_3_1",
+      "defence_caseNum_3_2"
+    ]
+  },
+  {
+    "courthouse": "SWANSEA",
+    "courtroom": "1",
+    "hearing_date": "2023-06-20",
+    "case_number": "caseNum_4",
+    "scheduled_start": "12:00",
+    "defendants": [
+      "defendant_caseNum_4_1",
+      "defendant_caseNum_4_2"
+    ],
+    "judges": [
+      "Judge_1",
+      "Judge_2"
+    ],
+    "prosecutors": [
+      "prosecutor_caseNum_4_1",
+      "prosecutor_caseNum_4_2"
+    ],
+    "defenders": [
+      "defence_caseNum_4_1",
+      "defence_caseNum_4_2"
+    ]
+  },
+  {
+    "courthouse": "SWANSEA",
+    "courtroom": "1",
+    "hearing_date": "2023-06-20",
+    "case_number": "caseNum_5",
+    "scheduled_start": "13:00",
+    "defendants": [
+      "defendant_caseNum_5_1",
+      "defendant_caseNum_5_2"
+    ],
+    "judges": [
+      "Judge_1",
+      "Judge_2"
+    ],
+    "prosecutors": [
+      "prosecutor_caseNum_5_1",
+      "prosecutor_caseNum_5_2"
+    ],
+    "defenders": [
+      "defence_caseNum_5_1",
+      "defence_caseNum_5_2"
+    ]
+  }
+]

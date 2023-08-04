@@ -16,27 +16,17 @@ class AuthenticationInternalUserControllerTest {
 
     @Test
     void loginAndRefreshTokenFromAzureWhenTokenDoesntExistsInSession() {
-        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null, null));
+        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null));
     }
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturned() {
-        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null, null));
+        assertThrows(NotImplementedException.class, () -> controller.handleOauthCode(null));
     }
 
     @Test
     void logoutWhenUserLogoutFromdarts() {
         assertThrows(NotImplementedException.class, () -> controller.logout(null));
-    }
-
-    @Test
-    void invalidateSessionShouldCompleteWithoutExceptionWhenSessionIsInvalidated() {
-        assertThrows(NotImplementedException.class, () -> controller.invalidateSession(null));
-    }
-
-    @Test
-    void resetPasswordShouldCompleteWithoutExceptionWhenSessionIsInvalidated() {
-        assertThrows(NotImplementedException.class, () -> controller.resetPassword(null));
     }
 
 }
