@@ -69,7 +69,14 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public SingleCase getCasesById(Integer caseId) {
-        return new SingleCase();
+
+        Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
+
+        if (caseEntity.isEmpty()) {
+            throw new DartsApiException(CaseError.CASE_NOT_FOUND);
+        }
+
+        return casesMapper.mapToSingleCase(caseEntity.get());
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {

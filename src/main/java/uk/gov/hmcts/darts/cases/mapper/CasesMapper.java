@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
+import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
@@ -23,6 +24,7 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class CasesMapper {
 
     private final CourthouseRepository courthouseRepository;
@@ -39,6 +41,7 @@ public class CasesMapper {
         scheduledCase.setDefendants(caseEntity.getDefendantStringList());
         scheduledCase.setProsecutors(caseEntity.getProsecutorsStringList());
         scheduledCase.setDefenders(caseEntity.getDefenceStringList());
+
         return scheduledCase;
     }
 
@@ -76,6 +79,22 @@ public class CasesMapper {
         });
 
         return caseEntity;
+    }
+
+    public SingleCase mapToSingleCase(CourtCaseEntity caseEntity) {
+
+        SingleCase singleCase = new SingleCase();
+
+        singleCase.setCaseId(caseEntity.getId());
+        singleCase.setCaseNumber(caseEntity.getCaseNumber());
+        singleCase.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
+        singleCase.setRetainUntil(caseEntity.getRetainUntilTimestamp());
+        singleCase.setDefendants(caseEntity.getDefendantStringList());
+        singleCase.setDefenders(caseEntity.getDefenceStringList());
+        singleCase.setProsecutors(caseEntity.getProsecutorsStringList());
+        singleCase.setJudges(caseEntity.getJudgeStringList());
+
+        return singleCase;
     }
 
     private void mapDefendantProsecutorDefender(CourtCaseEntity caseEntity, AddCaseRequest caseRequest) {

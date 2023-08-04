@@ -12,6 +12,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
+import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -181,4 +182,21 @@ class CasesMapperTest {
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
+
+    @Test
+    void testMapToSingleCase() throws Exception {
+
+        CourtCaseEntity caseEntity = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+
+        SingleCase singleCase = caseMapper.mapToSingleCase(caseEntity);
+
+        String actualResponse = objectMapper.writeValueAsString(singleCase);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToSingleCase/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+
+
+    }
+
 }
