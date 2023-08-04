@@ -16,9 +16,7 @@ paths:
     get:
       tags:
         - Cases
-      summary: Allows the retrieval of all cases for a given courthouse, courtroom and date
-      description: |-
-        Retrieves all cases for a given courthouse, courtroom and date
+      summary: Allows the retrieval of all scheduled cases/hearings for a given courthouse, courtroom and date
       parameters:
         - in: query
           name: courthouse
@@ -262,9 +260,6 @@ components:
           type: string
           format: time
           example: 10:00
-        upload_priority:
-          type: string
-          example: 10
         defendants:
           type: array
           items:
