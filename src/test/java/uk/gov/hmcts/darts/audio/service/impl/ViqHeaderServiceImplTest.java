@@ -3,16 +3,21 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
+import uk.gov.hmcts.darts.audio.model.xml.AnnotationMeta;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,14 +25,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.COURTHOUSE_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.END_TIME_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_BY_README_LABEL;
@@ -46,6 +54,9 @@ class ViqHeaderServiceImplTest {
     @InjectMocks
     ViqHeaderServiceImpl viqHeaderService;
 
+    @Mock
+    HearingRepository hearingRepository;
+
     @TempDir
     File tempDirectory;
 
@@ -61,7 +72,7 @@ class ViqHeaderServiceImplTest {
         String playListFile = viqHeaderService.generatePlaylist(playlistInfos, playlistOutputFile);
         log.debug("Playlist file {}", playListFile);
         assertTrue(Files.exists(Path.of(playListFile)));
-        Playlist playlist = unmarshalPlaylist(playListFile);
+        Playlist playlist = unmarshalXmlFile(Playlist.class, playListFile);
         assertEquals("1.0", playlist.getPlaylistVersion());
         assertEquals(2, playlist.getItems().size());
         assertEquals(CASE_NUMBER, playlist.getItems().get(0).getCaseNumber());
@@ -87,9 +98,103 @@ class ViqHeaderServiceImplTest {
     }
 
     @Test
-    void generateAnnotation() {
-        assertThrows(NotImplementedException.class, () ->
-            viqHeaderService.generateAnnotation(null, null, null));
+    void generateAnnotationReturnsXmlFile() throws JAXBException, IOException {
+
+        HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
+        EventEntity event = CommonTestDataUtil.createEvent("LOG", "Start Recording", hearingEntity,
+                                                           CommonTestDataUtil.createOffsetDateTime("2023-07-01T10:00:00"));
+
+        EventEntity event2 = CommonTestDataUtil.createEvent("LOG", "End Recording", hearingEntity,
+                                                            CommonTestDataUtil.createOffsetDateTime("2023-07-01T10:00:00"));
+
+        List<EventEntity> entities = new ArrayList<>();
+        entities.add(event);
+        entities.add(event2);
+        hearingEntity.setEventList(entities);
+
+        List<HearingEntity> hearingEntities = new ArrayList<>();
+        hearingEntities.add(hearingEntity);
+
+        OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
+        OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00");
+
+        String annotationsOutputFile = tempDirectory.getAbsolutePath();
+
+        when(hearingRepository.findAllById(Collections.singleton(hearingEntity.getId()))).thenReturn(hearingEntities);
+
+        String annotationsFile = viqHeaderService.generateAnnotation(hearingEntity.getId(), startTime, endTime, annotationsOutputFile);
+
+        log.debug("Annotations file {}", annotationsFile);
+        assertTrue(Files.exists(Path.of(annotationsFile)));
+        AnnotationMeta annotationMeta = unmarshalXmlFile(AnnotationMeta.class, annotationsFile);
+
+        assertEquals(2, annotationMeta.getAnnotations().getAnnotationItems().size());
+        assertNotNull(annotationMeta.getAnnotations().getAnnotationItems().get(0).getStartTimeInMillis());
+        assertEquals("2023", annotationMeta.getAnnotations().getAnnotationItems().get(0).getStartTimeYear());
+        assertEquals("7", annotationMeta.getAnnotations().getAnnotationItems().get(0).getStartTimeMonth());
+        assertEquals("1", annotationMeta.getAnnotations().getAnnotationItems().get(0).getStartTimeDate());
+        assertEquals("10", annotationMeta.getAnnotations().getAnnotationItems().get(0).getStartTimeHour());
+        assertEquals("0", annotationMeta.getAnnotations().getAnnotationItems().get(0).getStartTimeMinutes());
+        assertEquals("0", annotationMeta.getAnnotations().getAnnotationItems().get(0).getStartTimeSeconds());
+    }
+
+    @Test
+    void generateAnnotationWithEventOutsideRequestTimeReturnsXmlFile() throws JAXBException, IOException {
+
+        HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
+        EventEntity event = CommonTestDataUtil.createEvent("LOG", "Start Recording", hearingEntity,
+                                                           CommonTestDataUtil.createOffsetDateTime("2023-07-01T10:00:00"));
+
+        EventEntity event2 = CommonTestDataUtil.createEvent("LOG", "End Recording", hearingEntity,
+                                                            CommonTestDataUtil.createOffsetDateTime("2023-07-01T10:00:00"));
+
+        List<EventEntity> entities = new ArrayList<>();
+        entities.add(event);
+        entities.add(event2);
+        hearingEntity.setEventList(entities);
+
+        List<HearingEntity> hearingEntities = new ArrayList<>();
+        hearingEntities.add(hearingEntity);
+
+        OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
+        OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:59:59");
+
+        String annotationsOutputFile = tempDirectory.getAbsolutePath();
+
+        when(hearingRepository.findAllById(Collections.singleton(hearingEntity.getId()))).thenReturn(hearingEntities);
+
+        String annotationsFile = viqHeaderService.generateAnnotation(hearingEntity.getId(), startTime, endTime, annotationsOutputFile);
+
+        log.debug("Annotations file {}", annotationsFile);
+        assertTrue(Files.exists(Path.of(annotationsFile)));
+        AnnotationMeta annotationMeta = unmarshalXmlFile(AnnotationMeta.class, annotationsFile);
+
+        assertEquals(0, annotationMeta.getAnnotations().getAnnotationItems().size());
+    }
+
+    @Test
+    void generateAnnotationWithHearingContainingZeroEventsReturnsXmlFile() throws IOException, JAXBException {
+
+        var hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
+        hearingEntity.setEventList(new ArrayList<>());
+
+        List<HearingEntity> hearingEntities = new ArrayList<>();
+        hearingEntities.add(hearingEntity);
+
+        OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
+        OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00");
+
+        String annotationsOutputFile = tempDirectory.getAbsolutePath();
+
+        when(hearingRepository.findAllById(Collections.singleton(hearingEntity.getId()))).thenReturn(hearingEntities);
+
+        String annotationsFile = viqHeaderService.generateAnnotation(hearingEntity.getId(), startTime, endTime, annotationsOutputFile);
+        log.debug("Annotations file {}", annotationsFile);
+        assertTrue(Files.exists(Path.of(annotationsFile)));
+        AnnotationMeta annotationMeta = unmarshalXmlFile(AnnotationMeta.class, annotationsFile);
+
+        assertEquals(0, annotationMeta.getAnnotations().getAnnotationItems().size());
+        assertEquals("0", annotationMeta.getAnnotations().getEventCount());
     }
 
     @Test
@@ -148,9 +253,8 @@ class ViqHeaderServiceImplTest {
             .build();
     }
 
-    public Playlist unmarshalPlaylist(String xmlFile) throws JAXBException, IOException {
-        JAXBContext context = JAXBContext.newInstance(Playlist.class);
-        return (Playlist) context.createUnmarshaller()
-            .unmarshal(Files.newBufferedReader(Path.of(xmlFile)));
+    public <T> T unmarshalXmlFile(Class<T> type, String xmlFile) throws JAXBException, IOException {
+        JAXBContext context = JAXBContext.newInstance(type);
+        return type.cast(context.createUnmarshaller().unmarshal(Files.newBufferedReader(Path.of(xmlFile))));
     }
 }
