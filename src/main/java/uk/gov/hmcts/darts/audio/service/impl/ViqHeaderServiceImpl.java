@@ -4,12 +4,13 @@ import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
+import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
 import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
+import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
-import uk.gov.hmcts.darts.audio.model.xml.AnnotationMeta;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
-import uk.gov.hmcts.darts.audio.model.xml.ViqAnnotationItem;
 import uk.gov.hmcts.darts.audio.model.xml.ViqPlayListItem;
 import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.audio.util.XmlUtil;
@@ -28,6 +29,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import static java.lang.String.format;
 
@@ -78,19 +81,16 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
         List<HearingEntity> hearingEntities = hearingRepository.findAllById(Collections.singleton(hearingId));
         List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntities, startTime, endTime);
 
-        AnnotationMeta annotationMeta = new AnnotationMeta();
+        ViqAnnotationData annotationData = ViqAnnotationData.builder()
+            .annotationsStartTime(startTime)
+            .events(events)
+            .build();
 
         try {
-            annotationMeta.getAnnotations().setEventCount(String.valueOf(events.size()));
+            OutboundDocumentGenerator xmlDocumentGenerator = new AnnotationXmlGeneratorImpl();
+            return xmlDocumentGenerator.generateAndWriteXmlFile(annotationData, outputFileLocation).toString();
 
-            for (EventEntity event : events) {
-                annotationMeta.getAnnotations().getAnnotationItems().add(createViqAnnotationItem(event, startTime));
-            }
-
-            return XmlUtil.marshalToXmlFile(annotationMeta, AnnotationMeta.class,
-                                        outputFileLocation, ANNOTATION_XML_FILENAME);
-        } catch (JAXBException exception) {
-            log.error("Unable to generate annotations.xml: {}", exception.getMessage());
+        } catch (IOException | TransformerException | ParserConfigurationException exception) {
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
     }
@@ -132,25 +132,6 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
         playlistItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getSecond()));
 
         return playlistItem;
-    }
-
-    private ViqAnnotationItem createViqAnnotationItem(EventEntity event, OffsetDateTime startTime) {
-
-        ViqAnnotationItem annotationItem = new ViqAnnotationItem();
-        OffsetDateTime eventTimestamp = event.getTimestamp();
-        Long lapsed = (eventTimestamp.toInstant().toEpochMilli() - startTime.toInstant().toEpochMilli()) / 1000;
-
-        annotationItem.setEventName(event.getEventName());
-        annotationItem.setStartTimeInMillis(String.valueOf(eventTimestamp.toInstant().toEpochMilli()));
-        annotationItem.setStartTimeYear(format(DATE_TIME_ATTRIBUTE, eventTimestamp.getYear()));
-        annotationItem.setStartTimeMonth(format(DATE_TIME_ATTRIBUTE, eventTimestamp.getMonthValue()));
-        annotationItem.setStartTimeDate(format(DATE_TIME_ATTRIBUTE, eventTimestamp.getDayOfMonth()));
-        annotationItem.setStartTimeHour(format(DATE_TIME_ATTRIBUTE, eventTimestamp.getHour()));
-        annotationItem.setStartTimeMinutes(format(DATE_TIME_ATTRIBUTE, eventTimestamp.getMinute()));
-        annotationItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, eventTimestamp.getSecond()));
-        annotationItem.setLapsed(String.valueOf(lapsed));
-
-        return annotationItem;
     }
 
     private List<EventEntity> getHearingEventsByStartAndEndTime(
