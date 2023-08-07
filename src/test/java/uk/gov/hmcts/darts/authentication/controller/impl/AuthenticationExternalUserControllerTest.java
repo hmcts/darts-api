@@ -97,6 +97,17 @@ class AuthenticationExternalUserControllerTest {
         assertEquals("redirect:https://www.example.com/logout?param=value", modelAndView.getViewName());
     }
 
+    @Test
+    void resetPasswordShouldReturnResetPageAsRedirect() {
+        when(authenticationService.resetPassword())
+            .thenReturn(DUMMY_AUTHORIZATION_URI);
+
+        ModelAndView modelAndView = controller.resetPassword();
+
+        assertNotNull(modelAndView);
+        assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
+    }
+
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
     private String createDummyAccessToken() throws JOSEException {
         RSAKey rsaKey = new RSAKeyGenerator(2048)
