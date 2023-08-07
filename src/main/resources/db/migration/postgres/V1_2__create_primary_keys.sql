@@ -3,6 +3,9 @@
 CREATE UNIQUE INDEX annotation_pk ON annotation(ann_id);
 ALTER TABLE annotation              ADD PRIMARY KEY USING INDEX annotation_pk;
 
+CREATE UNIQUE INDEX automated_task_pk ON automated_task(aut_id);
+ALTER TABLE automated_task          ADD PRIMARY KEY USING INDEX automated_task_pk;
+
 CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id);
 ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
 
