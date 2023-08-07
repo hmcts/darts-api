@@ -6,7 +6,8 @@
       "Judge_1",
       "Judge_2"
     ],
-    "courtroom": "1"
+    "courtroom": "1",
+    "transcriptCount": 1
   },
   {
     "id": 102,
@@ -15,7 +16,8 @@
       "Judge_1",
       "Judge_2"
     ],
-    "courtroom": "1"
+    "courtroom": "1",
+    "transcriptCount": 1
   },
   {
     "id": 102,
@@ -24,7 +26,8 @@
       "Judge_1",
       "Judge_2"
     ],
-    "courtroom": "1"
+    "courtroom": "1",
+    "transcriptCount": 1
   },
   {
     "id": 102,
@@ -33,7 +36,8 @@
       "Judge_1",
       "Judge_2"
     ],
-    "courtroom": "1"
+    "courtroom": "1",
+    "transcriptCount": 1
   },
   {
     "id": 102,
@@ -42,6 +46,7 @@
       "Judge_1",
       "Judge_2"
     ],
-    "courtroom": "1"
+    "courtroom": "1",
+    "transcriptCount": 1
   }
 ]

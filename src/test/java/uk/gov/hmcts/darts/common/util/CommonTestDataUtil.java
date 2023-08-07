@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -160,8 +161,15 @@ public class CommonTestDataUtil {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
+        hearing1.setTranscriptions(createTranscription());
         hearing1.addJudges(createJudges(2));
         return hearing1;
+    }
+
+    public List<TranscriptionEntity> createTranscription() {
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setCompany("Transcription company");
+        return List.of(transcription);
     }
 
     public List<JudgeEntity> createJudges(int numOfJudges) {

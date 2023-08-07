@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -66,6 +67,9 @@ public class HearingEntity {
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList = new ArrayList<>();
+
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.CouHEARING_DATE)
+    private List<TranscriptionEntity> transcriptions = new ArrayList<>();
 
     @Transient
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
