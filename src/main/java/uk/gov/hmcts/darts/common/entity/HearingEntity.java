@@ -68,7 +68,7 @@ public class HearingEntity {
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList = new ArrayList<>();
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.CouHEARING_DATE)
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARING)
     private List<TranscriptionEntity> transcriptions = new ArrayList<>();
 
     @Transient
