@@ -260,14 +260,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private Path handleDownload(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
         throws ExecutionException, InterruptedException {
 
-        List<List<AudioFileInfo>> processedAudio;
-        processedAudio = outboundFileProcessor.processAudioForDownload(
+        List<List<AudioFileInfo>> processedAudio = outboundFileProcessor.processAudioForDownload(
             downloadedMedias,
             mediaRequestEntity.getStartTime(),
             mediaRequestEntity.getEndTime()
         );
 
-        return outboundFileZipGenerator.generateAndWriteZip(processedAudio);
+        return outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity, AudioRequestType.DOWNLOAD);
     }
 
     private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)

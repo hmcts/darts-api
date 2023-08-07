@@ -5,8 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.AudioRequestType;
+import uk.gov.hmcts.darts.audio.model.ViqMetaData;
+import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.io.IOException;
@@ -28,14 +32,18 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
 
+    private final ViqHeaderService viqHeaderService;
+
     /**
      * Produce a structured zip file containing audio files.
      *
      * @param audioSessions A grouping of audio sessions, as produced by OutboundFileProcessor.
+     * @param mediaRequestEntity Details of media request
+     * @param audioRequestType Media request audio type
      * @return The local filepath of the produced zip file containing the provided audioSessions.
      */
     @Override
-    public Path generateAndWriteZip(List<List<AudioFileInfo>> audioSessions) {
+    public Path generateAndWriteZip(List<List<AudioFileInfo>> audioSessions, MediaRequestEntity mediaRequestEntity, AudioRequestType audioRequestType) {
 
         Map<Path, Path> sourceToDestinationPaths = generateZipStructure(audioSessions);
         try {
@@ -44,11 +52,22 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
                 String.format("%s.zip", UUID.randomUUID())
             );
             writeZip(sourceToDestinationPaths, outputPath);
-
+            ViqMetaData viqMetaData = createViqMetaData(mediaRequestEntity, audioRequestType);
+            String readme = viqHeaderService.generateReadme(viqMetaData, audioConfigurationProperties.getTempBlobWorkspace());
             return outputPath;
         } catch (IOException e) {
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
+    }
+
+    private static ViqMetaData createViqMetaData(MediaRequestEntity mediaRequestEntity, AudioRequestType audioRequestType) {
+        ViqMetaData viqMetaData = ViqMetaData.builder()
+            .type(audioRequestType.getValue())
+
+            .startTime(mediaRequestEntity.getStartTime().toString())
+            .endTime(mediaRequestEntity.getEndTime().toString())
+            .build();
+        return viqMetaData;
     }
 
     private Map<Path, Path> generateZipStructure(List<List<AudioFileInfo>> audioSessions) {
