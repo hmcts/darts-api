@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 @Table(name = "event_handler")
 @Getter
 @Setter
-public class EventHandlerEntity {
+public class EventHandlerEntity implements JpaAuditing {
 
     @Id
     @Column(name = "evh_id")
@@ -41,7 +41,7 @@ public class EventHandlerEntity {
     @Column(name = "handler")
     private String handler;
 
-    @Column(name = "active")
+    @Column(name = "active", nullable = false)
     private Boolean active;
 
     @CreationTimestamp
@@ -50,9 +50,9 @@ public class EventHandlerEntity {
 
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
-    private OffsetDateTime lastModifiedTimestamp;
+    private OffsetDateTime modifiedTimestamp;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by")
-    private UserAccountEntity lastModifiedBy;
+    private UserAccountEntity modifiedBy;
 }

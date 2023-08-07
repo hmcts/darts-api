@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import java.util.List;
 
 @Repository
-public interface EventTypeRepository extends JpaRepository<EventHandlerEntity, Integer> {
+public interface EventHandlerRepository extends JpaRepository<EventHandlerEntity, Integer> {
 
     List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName);
 }

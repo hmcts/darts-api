@@ -24,8 +24,8 @@ import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.DefenceRepository;
 import uk.gov.hmcts.darts.common.repository.DefendantRepository;
+import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -69,7 +69,7 @@ public class DartsDatabaseStub {
     private final DefenceRepository defenceRepository;
     private final DefendantRepository defendantRepository;
     private final EventRepository eventRepository;
-    private final EventTypeRepository eventTypeRepository;
+    private final EventHandlerRepository eventHandlerRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final HearingRepository hearingRepository;
