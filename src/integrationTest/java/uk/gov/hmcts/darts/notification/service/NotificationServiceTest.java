@@ -87,7 +87,7 @@ class NotificationServiceTest extends IntegrationBase {
     }
 
     @Test
-    void sendNotificationToGovNotify() throws TemplateNotFoundException {
+    void sendNotificationToGovNotifyNow() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)).thenReturn(
             "976bf288-705d-4cbb-b24f-c5529abf14cf");
@@ -108,7 +108,7 @@ class NotificationServiceTest extends IntegrationBase {
             .build();
 
         service.scheduleNotification(request);
-        service.sendNotificationToGovNotify();
+        service.sendNotificationToGovNotifyNow();
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
@@ -130,7 +130,7 @@ class NotificationServiceTest extends IntegrationBase {
             .build();
 
         service.scheduleNotification(request);
-        service.sendNotificationToGovNotify();
+        service.sendNotificationToGovNotifyNow();
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
@@ -155,7 +155,7 @@ class NotificationServiceTest extends IntegrationBase {
         service.scheduleNotification(request);
 
         for (int counter = 0; counter <= 3; counter++) {
-            service.sendNotificationToGovNotify();
+            service.sendNotificationToGovNotifyNow();
         }
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
@@ -177,7 +177,7 @@ class NotificationServiceTest extends IntegrationBase {
             .templateValues("{,1,}")
             .build();
         service.scheduleNotification(request);
-        service.sendNotificationToGovNotify();
+        service.sendNotificationToGovNotifyNow();
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
@@ -198,7 +198,7 @@ class NotificationServiceTest extends IntegrationBase {
             .build();
 
         service.scheduleNotification(request);
-        service.sendNotificationToGovNotify();
+        service.sendNotificationToGovNotifyNow();
 
         List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
         NotificationEntity result = resultList.get(0);
