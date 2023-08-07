@@ -27,42 +27,42 @@ paths:
               example1:
                 summary: Case called on
                 value:
-                  messageId: '18422'
+                  message_id: '18422'
                   type: '10100'
-                  subType: '10100'
-                  eventId: '001'
+                  sub_type: '10100'
+                  event_id: '001'
                   courthouse: SNARESBROOK
                   courtroom: '1'
-                  caseNumbers:
+                  case_numbers:
                     - A20230049
-                  dateTime: '2023-06-14T08:37:30.945Z'
+                  date_time: '2023-06-14T08:37:30.945Z'
               example2:
                 summary: Freetext
                 value:
-                  messageId: '18422'
+                  message_id: '18422'
                   type: '21300'
-                  subType: '21300'
-                  eventId: '002'
+                  sub_type: '21300'
+                  event_id: '002'
                   courthouse: SNARESBROOK
                   courtroom: '1'
-                  caseNumbers:
+                  case_numbers:
                     - T20190441
                   eventText: 'test'
-                  dateTime: '2023-06-14T08:37:30.945Z'
+                  date_time: '2023-06-14T08:37:30.945Z'
               example3:
                 summary: Life Imprisonment
                 value:
-                  messageId: '18422'
+                  message_id: '18422'
                   type: '40750'
-                  subType: '11504'
-                  eventId: '003'
+                  sub_type: '11504'
+                  event_id: '003'
                   courthouse: SNARESBROOK
                   courtroom: '1'
-                  caseNumbers:
+                  case_numbers:
                     - T20190441
                   eventText: '[Defendant: DEFENDANT ONE]'
-                  dateTime: '2023-06-14T08:37:30.945Z'
-                  RetentionPolicy:
+                  date_time: '2023-06-14T08:37:30.945Z'
+                  retention_policy:
                     CaseRetentionFixedPolicy: 4
                     CaseTotalSentence: 26Y0M0D
 

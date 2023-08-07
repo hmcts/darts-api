@@ -54,7 +54,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     @PostConstruct
     public void populateMessageTypes() {
-        eventTypeRepository.findByHandler(this.getClass().getSimpleName())
+        eventTypeRepository.findByHandlerAndActiveTrue(this.getClass().getSimpleName())
             .forEach(eventType -> {
                 var key = buildKey(eventType.getType(), eventType.getSubType());
                 eventTypesToIdAndName.put(key, Pair.of(eventType.getId(), eventType.getEventName()));

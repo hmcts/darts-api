@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.DefenceRepository;
 import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -62,24 +63,25 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 public class DartsDatabaseStub {
 
     private final CaseRepository caseRepository;
-    private final EventRepository eventRepository;
     private final CourthouseRepository courthouseRepository;
-    private final HearingRepository hearingRepository;
     private final CourtroomRepository courtroomRepository;
-    private final MediaRepository mediaRepository;
-    private final MediaRequestRepository mediaRequestRepository;
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final NotificationRepository notificationRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final DailyListRepository dailyListRepository;
-    private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-    private final JudgeRepository judgeRepository;
-    private final ProsecutorRepository prosecutorRepository;
     private final DefenceRepository defenceRepository;
     private final DefendantRepository defendantRepository;
-    private final UserAccountRepository userAccountRepository;
+    private final EventRepository eventRepository;
+    private final EventTypeRepository eventTypeRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final HearingRepository hearingRepository;
+    private final JudgeRepository judgeRepository;
+    private final MediaRepository mediaRepository;
+    private final MediaRequestRepository mediaRequestRepository;
+    private final NotificationRepository notificationRepository;
+    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ProsecutorRepository prosecutorRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+    private final UserAccountRepository userAccountRepository;
 
     public void clearDatabase() {
         externalObjectDirectoryRepository.deleteAll();

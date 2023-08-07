@@ -9,13 +9,38 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 @RequiredArgsConstructor
 public enum CaseApiError implements DartsApiError {
 
-    COURTHOUSE_PROVIDED_DOES_NOT_EXIST(
+    TOO_MANY_RESULTS(
         "100",
+        HttpStatus.BAD_REQUEST,
+        "Too many results have been returned. Please change search criteria."
+    ),
+    NO_CRITERIA_SPECIFIED(
+        "101",
+        HttpStatus.BAD_REQUEST,
+        "No search criteria has been specified, please add at least 1 criteria to search for."
+    ),
+    CRITERIA_TOO_BROAD(
+        "102",
+        HttpStatus.BAD_REQUEST,
+        "Search criteria is too broad, please add at least 1 more criteria to search for."
+    ),
+    INVALID_REQUEST(
+        "103",
+        HttpStatus.BAD_REQUEST,
+        "The request is not valid.."
+    ),
+    CASE_NOT_FOUND(
+        "104",
+        HttpStatus.NOT_FOUND,
+        "The requested case cannot be found"
+    ),
+    COURTHOUSE_PROVIDED_DOES_NOT_EXIST(
+        "105",
         HttpStatus.BAD_REQUEST,
         "Provided courthouse does not exist"
     );
 
-    private static final String ERROR_TYPE_PREFIX = "SERVICE";
+    private static final String ERROR_TYPE_PREFIX = "CASE";
 
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;

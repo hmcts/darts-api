@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.cases.exception.CaseError;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
@@ -74,7 +74,7 @@ public class CaseServiceImpl implements CaseService {
         Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
 
         if (caseEntity.isEmpty()) {
-            throw new DartsApiException(CaseError.CASE_NOT_FOUND);
+            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         }
 
         return casesMapper.mapToSingleCase(caseEntity.get());
@@ -110,7 +110,7 @@ public class CaseServiceImpl implements CaseService {
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
         List<CourtCaseEntity> courtCaseEntities = advancedSearchRequestHelper.getMatchingCourtCases(request);
         if (courtCaseEntities.size() > MAX_RESULTS) {
-            throw new DartsApiException(CaseError.TOO_MANY_RESULTS);
+            throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
         if (courtCaseEntities.isEmpty()) {
             return new ArrayList<>();

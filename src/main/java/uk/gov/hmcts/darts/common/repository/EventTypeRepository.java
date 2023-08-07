@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface EventTypeRepository extends JpaRepository<EventHandlerEntity, Integer> {
 
-    List<EventHandlerEntity> findByHandler(String handlerName);
+    List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName);
 }
