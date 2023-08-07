@@ -276,7 +276,8 @@ task generateEventsAPI(type: org.openapitools.generator.gradle.plugin.tasks.Gene
   configOptions = [
     dateLibrary  : "java8",
     interfaceOnly: "true",
-    useTags      : "true"
+    useTags      : "true",
+    useSpringBoot3: "true"
   ]
 }
 

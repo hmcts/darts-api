@@ -1,0 +1,2 @@
+INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active) VALUES (1001, 'ActiveTestType', 'ActiveTestSubType', 'Old Description', 'StandardEventHandler', current_timestamp, current_timestamp, 0, false);
+INSERT INTO darts.event_handler (evh_id, event_type, event_sub_type, event_name, handler, created_ts, last_modified_ts, last_modified_by, active) VALUES (1002, 'ActiveTestType', 'ActiveTestSubType', 'New Description', 'StandardEventHandler', current_timestamp, current_timestamp, 0, true);

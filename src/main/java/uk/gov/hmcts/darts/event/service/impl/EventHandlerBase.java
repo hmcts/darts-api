@@ -12,8 +12,8 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.common.repository.EventTypeRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
@@ -36,7 +36,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     @Getter
     @Autowired
-    private EventTypeRepository eventTypeRepository;
+    private EventHandlerRepository eventHandlerRepository;
     @Autowired
     private CourtroomRepository courtroomRepository;
     @Getter
@@ -54,7 +54,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     @PostConstruct
     public void populateMessageTypes() {
-        eventTypeRepository.findByHandler(this.getClass().getSimpleName())
+        eventHandlerRepository.findByHandlerAndActiveTrue(this.getClass().getSimpleName())
             .forEach(eventType -> {
                 var key = buildKey(eventType.getType(), eventType.getSubType());
                 eventTypesToIdAndName.put(key, Pair.of(eventType.getId(), eventType.getEventName()));
@@ -80,7 +80,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     protected EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
         var key = buildKey(dartsEvent.getType(), dartsEvent.getSubType());
-        return eventTypeRepository.getReferenceById(eventTypesToIdAndName.get(key).getLeft());
+        return eventHandlerRepository.getReferenceById(eventTypesToIdAndName.get(key).getLeft());
     }
 
     private String eventNameFor(DartsEvent dartsEvent) {
