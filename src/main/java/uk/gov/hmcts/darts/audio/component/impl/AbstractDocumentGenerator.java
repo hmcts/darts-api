@@ -7,9 +7,10 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,7 +40,7 @@ public abstract class AbstractDocumentGenerator implements OutboundDocumentGener
     }
 
     public void transformDocument(Document document, Path outboundFilePath) throws TransformerException, IOException {
-        try (FileWriter writer = new FileWriter(outboundFilePath.toFile())) {
+        try (BufferedWriter writer = Files.newBufferedWriter(outboundFilePath)) {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
