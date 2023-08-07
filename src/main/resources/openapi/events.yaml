@@ -47,7 +47,7 @@ paths:
                   courtroom: '1'
                   case_numbers:
                     - T20190441
-                  eventText: 'test'
+                  event_text: 'test'
                   date_time: '2023-06-14T08:37:30.945Z'
               example3:
                 summary: Life Imprisonment
@@ -60,7 +60,7 @@ paths:
                   courtroom: '1'
                   case_numbers:
                     - T20190441
-                  eventText: '[Defendant: DEFENDANT ONE]'
+                  event_text: '[Defendant: DEFENDANT ONE]'
                   date_time: '2023-06-14T08:37:30.945Z'
                   retention_policy:
                     CaseRetentionFixedPolicy: 4
