@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -100,6 +101,10 @@ public class DartsDatabaseStub {
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
         courthouseRepository.deleteAll();
+    }
+
+    public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
+        return eventHandlerRepository.findByHandlerAndActiveTrue(handlerName);
     }
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
