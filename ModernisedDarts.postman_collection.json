@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "fcb40111-fcaf-4022-bc0a-69e90cbd8a92",
+		"_postman_id": "768c8675-0aec-44b3-b83d-4897031799ea",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "27582460"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -64,10 +63,10 @@
 			"name": "Cases",
 			"item": [
 				{
-					"name": "getCases",
+					"name": "GET /cases",
 					"item": [
 						{
-							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
+							"name": "Swansea",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -108,10 +107,10 @@
 					]
 				},
 				{
-					"name": "Advanced search",
+					"name": "GET /cases/search",
 					"item": [
 						{
-							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
+							"name": "/cases/search",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -180,10 +179,10 @@
 					]
 				},
 				{
-					"name": "CaseHearings",
+					"name": "GET /case/:caseId/hearings",
 					"item": [
 						{
-							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string Copy 2",
+							"name": "/cases/:caseId/hearings",
 							"protocolProfileBehavior": {
 								"disableBodyPruning": true
 							},
@@ -201,7 +200,7 @@
 									"raw": "{}"
 								},
 								"url": {
-									"raw": "http://localhost:4550/cases/{{caseId}}/hearings",
+									"raw": "http://localhost:4550/cases/:caseId/hearings",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -209,8 +208,50 @@
 									"port": "4550",
 									"path": [
 										"cases",
-										"{{caseId}}",
+										":caseId",
 										"hearings"
+									],
+									"variable": [
+										{
+											"key": "caseId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "POST /cases",
+					"item": [
+						{
+							"name": "swansea",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"courthouse\": \"swansea\",\n  \"case_number\": \"Swansea_case_1\",\n  \"defendants\": [\n    \"CASE1_DMP461-D001\", \"CASE1_DMP461-D002\"\n  ],\n  \"judges\": [\n    \"CASE1_DMP461-J001\"\n  ],\n  \"prosecutors\": [\n    \"CASE1_DMP461-P001\"\n  ],\n  \"defenders\": [\n    \"CASE1_DMP461-DEF001\"\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4550/cases",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4550",
+									"path": [
+										"cases"
 									]
 								}
 							},
@@ -266,6 +307,86 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Generate Bearer Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let responseData = pm.response.json();",
+							"pm.environment.set(\"access_token\", responseData.access_token.value);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "053d44f9-cd27-463e-a995-bcf835233cf8",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "zKO8Q~0Ab-4MZKHcghuhLKvzG8Ot~lkzr4EaacjI",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "https://hmctsdartsb2csbox.onmicrosoft.com/053d44f9-cd27-463e-a995-bcf835233cf8/Functional.Test",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "dartstestuser",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "Password@1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_ropc_darts_signin/oauth2/v2.0/token",
+					"protocol": "https",
+					"host": [
+						"hmctsdartsb2csbox",
+						"b2clogin",
+						"com"
+					],
+					"path": [
+						"hmctsdartsb2csbox.onmicrosoft.com",
+						"B2C_1_ropc_darts_signin",
+						"oauth2",
+						"v2.0",
+						"token"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,7 +31,8 @@ public class CommonTestDataUtil {
     public static EventEntity createEvent(String eventName, String eventText, HearingEntity hearingEntity) {
 
         return createEvent(eventName, eventText,
-                           hearingEntity, createOffsetDateTime("2023-07-01T10:00:00"));
+                           hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
+        );
     }
 
     public static EventEntity createEvent(String eventName, String eventText,
@@ -46,7 +48,6 @@ public class CommonTestDataUtil {
 
         return event;
     }
-
 
 
     public static OffsetDateTime createOffsetDateTime(String timestamp) {
@@ -160,8 +161,16 @@ public class CommonTestDataUtil {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
+        hearing1.setTranscriptions(createTranscriptionList());
         hearing1.addJudges(createJudges(2));
         return hearing1;
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList() {
+        TranscriptionEntity transcription = new TranscriptionEntity();
+        transcription.setCompany("Transcription company");
+        transcription.setTranscriptionTypeId(1);
+        return List.of(transcription);
     }
 
     public List<JudgeEntity> createJudges(int numOfJudges) {
