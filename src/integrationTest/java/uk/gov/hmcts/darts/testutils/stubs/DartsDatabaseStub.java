@@ -103,7 +103,10 @@ public class DartsDatabaseStub {
     }
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
-        return caseRepository.findByCaseNumberAndCourthouse_CourthouseName(someCaseNumber, someCourthouse);
+        return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            someCaseNumber,
+            someCourthouse
+        );
     }
 
     public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom, LocalDate toLocalDate) {
@@ -156,7 +159,7 @@ public class DartsDatabaseStub {
     @Transactional
     public CourtCaseEntity createCaseUnlessExists(String caseNumber, String courthouseName) {
 
-        Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
+        Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
             caseNumber,
             courthouseName
         );
