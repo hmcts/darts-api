@@ -62,7 +62,10 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
                                           .dateTime(today));
 
         var courtCase =
-            caseRepository.findByCaseNumberAndCourthouse_CourthouseName(SOME_CASE_NUMBER, SOME_COURTHOUSE);
+            caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+                SOME_CASE_NUMBER,
+                SOME_COURTHOUSE
+            );
 
         assertThat(courtCase.get().getInterpreterUsed()).isTrue();
 

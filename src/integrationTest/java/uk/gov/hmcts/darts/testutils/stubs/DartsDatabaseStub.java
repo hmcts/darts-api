@@ -107,13 +107,14 @@ public class DartsDatabaseStub {
         return eventHandlerRepository.findByHandlerAndActiveTrue(handlerName);
     }
 
-    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
-                                                                             String someCourthouse) {
-        return caseRepository.findByCaseNumberAndCourthouse_CourthouseName(someCaseNumber, someCourthouse);
+    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
+        return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            someCaseNumber,
+            someCourthouse
+        );
     }
 
-    public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom,
-                                                                LocalDate toLocalDate) {
+    public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom, LocalDate toLocalDate) {
         return hearingRepository.findByCourthouseCourtroomAndDate(someCourthouse, someRoom, toLocalDate);
     }
 
@@ -153,9 +154,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber,
-                                                                                  String courthouseName,
-                                                                                  String courtroomName) {
+    public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
         givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
         var caseEntity = createCaseUnlessExists(caseNumber, courthouseName);
 
@@ -165,7 +164,7 @@ public class DartsDatabaseStub {
     @Transactional
     public CourtCaseEntity createCaseUnlessExists(String caseNumber, String courthouseName) {
 
-        Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
+        Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
             caseNumber,
             courthouseName
         );
@@ -257,8 +256,7 @@ public class DartsDatabaseStub {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(
-        ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
+    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
         return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
     }
 

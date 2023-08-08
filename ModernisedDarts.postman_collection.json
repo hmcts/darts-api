@@ -10,10 +10,24 @@
 			"item": [
 				{
 					"name": "AddDocument",
+					"item": []
+				},
+				{
+					"name": "POST /events",
 					"item": [
 						{
-							"name": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
+							"name": "swansea event",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{access_token}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -24,32 +38,17 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{}"
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
 								},
 								"url": {
-									"raw": "http://localhost:4550/event/addDocument?message_id=100&type=string&sub_type=string",
+									"raw": "http://localhost:4550/events",
 									"protocol": "http",
 									"host": [
 										"localhost"
 									],
 									"port": "4550",
 									"path": [
-										"event",
-										"addDocument"
-									],
-									"query": [
-										{
-											"key": "message_id",
-											"value": "100"
-										},
-										{
-											"key": "type",
-											"value": "string"
-										},
-										{
-											"key": "sub_type",
-											"value": "string"
-										}
+										"events"
 									]
 								}
 							},
@@ -316,7 +315,7 @@
 					"script": {
 						"exec": [
 							"let responseData = pm.response.json();",
-							"pm.environment.set(\"access_token\", responseData.access_token.value);"
+							"pm.environment.set(\"access_token\", responseData.access_token);"
 						],
 						"type": "text/javascript"
 					}

@@ -94,7 +94,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
 
     @Override
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
-        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberAndCourthouse_CourthouseName(
+        Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
             caseNumber,
             courthouseName
         );
