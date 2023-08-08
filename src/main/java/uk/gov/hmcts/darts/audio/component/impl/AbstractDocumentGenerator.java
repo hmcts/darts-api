@@ -46,7 +46,7 @@ public abstract class AbstractDocumentGenerator implements OutboundDocumentGener
         try (BufferedWriter writer = Files.newBufferedWriter(outboundFilePath)) {
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.transform(new DOMSource(document), new StreamResult(new File(outboundFilePath.toString())));
+            transformer.transform(new DOMSource(document), new StreamResult(writer));
         }
     }
 
