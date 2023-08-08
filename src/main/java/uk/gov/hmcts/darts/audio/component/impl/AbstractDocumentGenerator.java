@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
-import javax.xml.XMLConstants;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +8,10 @@ import org.w3c.dom.Document;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
