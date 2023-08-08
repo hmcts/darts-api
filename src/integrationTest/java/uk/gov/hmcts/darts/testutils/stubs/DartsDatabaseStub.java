@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -102,11 +103,17 @@ public class DartsDatabaseStub {
         courthouseRepository.deleteAll();
     }
 
-    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
+    public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
+        return eventHandlerRepository.findByHandlerAndActiveTrue(handlerName);
+    }
+
+    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
+                                                                             String someCourthouse) {
         return caseRepository.findByCaseNumberAndCourthouse_CourthouseName(someCaseNumber, someCourthouse);
     }
 
-    public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom, LocalDate toLocalDate) {
+    public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom,
+                                                                LocalDate toLocalDate) {
         return hearingRepository.findByCourthouseCourtroomAndDate(someCourthouse, someRoom, toLocalDate);
     }
 
@@ -146,7 +153,9 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
+    public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber,
+                                                                                  String courthouseName,
+                                                                                  String courtroomName) {
         givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
         var caseEntity = createCaseUnlessExists(caseNumber, courthouseName);
 
@@ -248,7 +257,8 @@ public class DartsDatabaseStub {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
+    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(
+        ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
         return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
     }
 
