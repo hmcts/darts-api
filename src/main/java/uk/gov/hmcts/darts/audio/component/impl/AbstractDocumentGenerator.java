@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
+import javax.xml.XMLConstants;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,19 +31,20 @@ import javax.xml.transform.stream.StreamResult;
 public abstract class AbstractDocumentGenerator implements OutboundDocumentGenerator {
 
     private DocumentBuilder documentBuilder;
-    private Transformer transformer;
+    private TransformerFactory transformerFactory;
 
     AbstractDocumentGenerator() throws TransformerConfigurationException, ParserConfigurationException {
         DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
         documentBuilder = documentFactory.newDocumentBuilder();
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
-        transformer = transformerFactory.newTransformer();
+
+        transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
     }
 
     public void transformDocument(Document document, Path outboundFilePath) throws TransformerException, IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(outboundFilePath)) {
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            transformer = transformerFactory.newTransformer();
+            Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.transform(new DOMSource(document), new StreamResult(new File(outboundFilePath.toString())));
         }
