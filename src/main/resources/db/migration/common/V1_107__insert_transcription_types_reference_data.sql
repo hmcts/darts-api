@@ -6,3 +6,5 @@ INSERT INTO darts.transcription_type (trt_id, description) VALUES (7, 'Proceedin
 INSERT INTO darts.transcription_type (trt_id, description) VALUES (8, 'Prosecution opening of facts');
 INSERT INTO darts.transcription_type (trt_id, description) VALUES (9, 'Specified Times');
 INSERT INTO darts.transcription_type (trt_id, description) VALUES (10, 'Other');
+
+ALTER SEQUENCE trt_seq RESTART WITH 11;
