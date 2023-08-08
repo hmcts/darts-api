@@ -52,4 +52,7 @@ public class AuthenticationConfiguration {
     @Value("${spring.security.oauth2.client.registration.external-azure-ad.issuer-uri}")
     private String externalADissuerUri;
 
+    @Value("${spring.security.oauth2.client.provider.external-azure-ad-provider.reset-password-uri}")
+    private String externalADresetPasswordUri;
+
 }

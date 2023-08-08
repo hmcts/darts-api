@@ -65,4 +65,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return uriProvider.getLogoutUri(accessToken);
     }
 
+    @Override
+    public URI resetPassword() {
+        log.debug("Requesting password reset");
+        return uriProvider.getResetPasswordUri();
+    }
+
 }

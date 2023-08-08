@@ -58,6 +58,12 @@ public class AuthenticationExternalUserController implements AuthenticationContr
         return new ModelAndView("redirect:" + url.toString());
     }
 
+    @Override
+    public ModelAndView resetPassword() {
+        URI url = authenticationService.resetPassword();
+        return new ModelAndView("redirect:" + url.toString());
+    }
+
     private String parseEmailAddressFromAccessToken(String accessToken) throws ParseException {
         SignedJWT jwt = SignedJWT.parse(accessToken);
         final List<String> emailAddresses = jwt.getJWTClaimsSet().getStringListClaim(EMAILS_CLAIM_NAME);

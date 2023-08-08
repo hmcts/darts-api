@@ -53,6 +53,18 @@ class UriProviderImplTest {
                      logoutUri.toString());
     }
 
+    @Test
+    void getResetPasswordUriShouldReturnExpectedUri() {
+        commonMocksForAuthorisation();
+        when(authConfig.getExternalADresetPasswordUri()).thenReturn("ResetUrl");
+
+        URI logoutUri = uriProvider.getResetPasswordUri();
+
+        assertEquals("ResetUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
+                         "&response_type=id_token",
+                     logoutUri.toString());
+    }
+
     private void commonMocksForAuthorisation() {
         when(authConfig.getExternalADclientId()).thenReturn("ClientId");
         when(authConfig.getExternalADredirectUri()).thenReturn("RedirectId");
