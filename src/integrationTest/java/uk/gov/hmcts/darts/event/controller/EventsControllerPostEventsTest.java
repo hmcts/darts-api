@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
@@ -48,7 +49,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     }
 
     @Test
-    void courtLogsPostShouldPersistActiveDescriptionForEventHandler() throws Exception {
+    void eventsPostShouldPersistActiveDescriptionForEventHandler() throws Exception {
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("swansea");
 
@@ -84,6 +85,46 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         EventHandlerEntity eventType = persistedEvent.getEventType();
         Assertions.assertEquals("New Description", eventType.getEventName());
+
+    }
+
+    @Test
+    void useExistingCase() throws Exception {
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("swansea1");
+
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber("CaseNumber");
+        courtCase.setCourthouse(courthouse);
+        dartsDatabase.getCaseRepository().save(courtCase);
+
+        String requestBody = """
+            {
+              "message_id": "useExistingCase",
+              "type": "1000",
+              "sub_type": "1002",
+              "courthouse": "swansea1",
+              "courtroom": "1",
+              "case_numbers": [
+                "casenumber"
+              ],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }""";
+
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(requestBody);
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isCreated());
+
+        List<EventEntity> results = dartsDatabase.getAllEvents()
+            .stream()
+            .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
+            .toList();
+
+        Assertions.assertEquals(1, results.size());
 
     }
 
