@@ -11,20 +11,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
-
 @Component
 public class EventTypeToHandlerMap {
 
-    protected final Map<String, Pair<Integer, String>> eventTypesToIdAndName = new ConcurrentHashMap<>();
-    protected final Map<String, String> typeToHandler = new ConcurrentHashMap<>();
+    protected final Map<HandlerKey, Pair<Integer, String>> eventTypesToIdAndName = new ConcurrentHashMap<>();
+    protected final Map<HandlerKey, String> typeToHandler = new ConcurrentHashMap<>();
 
     @Autowired
     private EventHandlerRepository eventHandlerRepository;
 
     public boolean hasMapping(String type, String subType, String simpleName) {
-        var key = buildKey(type, subType);
+        var key = new HandlerKey(type, subType);
         if (Objects.equals(typeToHandler.get(key), simpleName)) {
             return true;
         }
@@ -39,22 +36,19 @@ public class EventTypeToHandlerMap {
         return this.eventTypesToIdAndName.get(buildKey(dartsEvent)).getRight();
     }
 
-    protected String buildKey(DartsEvent dartsEvent) {
-        return this.buildKey(dartsEvent.getType(), dartsEvent.getSubType());
-    }
-
-    protected String buildKey(String type, String subType) {
-        requireNonNull(type);
-        return type + (isNull(subType) ? "" : subType);
-    }
-
     protected EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
-        var key = buildKey(dartsEvent.getType(), dartsEvent.getSubType());
+        var key = buildKey(dartsEvent);
         return eventHandlerRepository.getReferenceById(eventTypesToIdAndName.get(key).getLeft());
     }
 
-    private void addHandlerMapping(String typeKey, EventHandlerEntity eventType) {
-        typeToHandler.put(typeKey, eventType.getHandler());
-        eventTypesToIdAndName.put(typeKey, Pair.of(eventType.getId(), eventType.getEventName()));
+    private HandlerKey buildKey(DartsEvent dartsEvent) {
+        return new HandlerKey(dartsEvent.getType(), dartsEvent.getSubType());
     }
+
+    private void addHandlerMapping(HandlerKey key, EventHandlerEntity eventType) {
+        typeToHandler.put(key, eventType.getHandler());
+        eventTypesToIdAndName.put(key, Pair.of(eventType.getId(), eventType.getEventName()));
+    }
+
+    record HandlerKey(String type, String subType) {}
 }
