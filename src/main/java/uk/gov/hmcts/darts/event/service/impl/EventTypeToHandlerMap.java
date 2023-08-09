@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
@@ -12,33 +12,32 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 public class EventTypeToHandlerMap {
 
-    protected final Map<HandlerKey, Pair<Integer, String>> eventTypesToIdAndName = new ConcurrentHashMap<>();
-    protected final Map<HandlerKey, String> typeToHandler = new ConcurrentHashMap<>();
+    private final Map<HandlerKey, Pair<Integer, String>> eventTypeToIdAndName = new ConcurrentHashMap<>();
+    private final Map<HandlerKey, String> eventTypeToHandler = new ConcurrentHashMap<>();
+    private final EventHandlerRepository eventHandlerRepository;
 
-    @Autowired
-    private EventHandlerRepository eventHandlerRepository;
-
-    public boolean hasMapping(String type, String subType, String simpleName) {
-        var key = new HandlerKey(type, subType);
-        if (Objects.equals(typeToHandler.get(key), simpleName)) {
+    public boolean hasMapping(DartsEvent event, String simpleName) {
+        var key = buildKey(event);
+        if (Objects.equals(eventTypeToHandler.get(key), simpleName)) {
             return true;
         }
 
-        eventHandlerRepository.findByTypeAndSubTypeAndActiveTrue(type, subType)
+        eventHandlerRepository.findByTypeAndSubTypeAndActiveTrue(event.getType(), event.getSubType())
               .ifPresent(eventHandler -> addHandlerMapping(key, eventHandler));
 
-        return Objects.equals(typeToHandler.get(key), simpleName);
+        return Objects.equals(eventTypeToHandler.get(key), simpleName);
     }
 
     protected String eventNameFor(DartsEvent dartsEvent) {
-        return this.eventTypesToIdAndName.get(buildKey(dartsEvent)).getRight();
+        return this.eventTypeToIdAndName.get(buildKey(dartsEvent)).getRight();
     }
 
     protected EventHandlerEntity eventTypeReference(DartsEvent dartsEvent) {
         var key = buildKey(dartsEvent);
-        return eventHandlerRepository.getReferenceById(eventTypesToIdAndName.get(key).getLeft());
+        return eventHandlerRepository.getReferenceById(eventTypeToIdAndName.get(key).getLeft());
     }
 
     private HandlerKey buildKey(DartsEvent dartsEvent) {
@@ -46,9 +45,9 @@ public class EventTypeToHandlerMap {
     }
 
     private void addHandlerMapping(HandlerKey key, EventHandlerEntity eventType) {
-        typeToHandler.put(key, eventType.getHandler());
-        eventTypesToIdAndName.put(key, Pair.of(eventType.getId(), eventType.getEventName()));
+        eventTypeToHandler.put(key, eventType.getHandler());
+        eventTypeToIdAndName.put(key, Pair.of(eventType.getId(), eventType.getEventName()));
     }
 
-    record HandlerKey(String type, String subType) {}
+    private record HandlerKey(String type, String subType) {}
 }

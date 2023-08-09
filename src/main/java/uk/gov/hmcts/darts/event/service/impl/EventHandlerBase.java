@@ -34,8 +34,8 @@ public abstract class EventHandlerBase implements EventHandler {
     private RetrieveCoreObjectService retrieveCoreObjectService;
 
     @Override
-    public boolean isHandlerFor(String type, String subType) {
-        return handlerMap.hasMapping(type, subType, this.getClass().getSimpleName());
+    public boolean isHandlerFor(DartsEvent event) {
+        return handlerMap.hasMapping(event, this.getClass().getSimpleName());
     }
 
     protected EventEntity eventEntityFrom(DartsEvent dartsEvent) {
