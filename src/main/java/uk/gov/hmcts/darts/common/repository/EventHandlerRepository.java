@@ -5,9 +5,14 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventHandlerRepository extends JpaRepository<EventHandlerEntity, Integer> {
 
     List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName);
+
+    Optional<EventHandlerEntity> findByTypeAndSubTypeAndActiveTrue(String type, String subType);
+
+
 }

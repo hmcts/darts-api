@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -32,8 +33,7 @@ class StandardEventHandlerTest extends IntegrationBase {
     private final OffsetDateTime today = now();
 
     @Autowired
-    StandardEventHandler eventHandler;
-
+    EventDispatcher eventDispatcher;
 
     @Test
     void throwsOnUnknownCourthouse() {
@@ -41,7 +41,7 @@ class StandardEventHandlerTest extends IntegrationBase {
         DartsEvent dartsEvent = someMinimalDartsEvent().courthouse(UNKNOWN_COURTHOUSE);
         dartsEvent.setCaseNumbers(List.of("123"));
         dartsEvent.setDateTime(today);
-        assertThatThrownBy(() -> eventHandler.handle(dartsEvent))
+        assertThatThrownBy(() -> eventDispatcher.receive(dartsEvent))
             .isInstanceOf(DartsApiException.class);
     }
 
@@ -53,7 +53,7 @@ class StandardEventHandlerTest extends IntegrationBase {
         );
         dartsGateway.darNotificationReturnsSuccess();
 
-        eventHandler.handle(someMinimalDartsEvent()
+        eventDispatcher.receive(someMinimalDartsEvent()
                                 .caseNumbers(List.of(SOME_CASE_NUMBER))
                                 .courthouse(SOME_COURTHOUSE)
                                 .courtroom(SOME_ROOM)
@@ -89,7 +89,7 @@ class StandardEventHandlerTest extends IntegrationBase {
         );
         dartsGateway.darNotificationReturnsSuccess();
 
-        eventHandler.handle(someMinimalDartsEvent()
+        eventDispatcher.receive(someMinimalDartsEvent()
                                 .caseNumbers(List.of(SOME_CASE_NUMBER))
                                 .courthouse(SOME_COURTHOUSE)
                                 .courtroom(SOME_ROOM)
@@ -124,7 +124,7 @@ class StandardEventHandlerTest extends IntegrationBase {
         dartsDatabase.givenTheCourtHouseHasRoom(caseEntity.getCourthouse(), SOME_OTHER_ROOM);
         dartsGateway.darNotificationReturnsSuccess();
 
-        eventHandler.handle(someMinimalDartsEvent()
+        eventDispatcher.receive(someMinimalDartsEvent()
                                 .caseNumbers(List.of(SOME_CASE_NUMBER))
                                 .courthouse(SOME_COURTHOUSE)
                                 .courtroom(SOME_OTHER_ROOM)
@@ -161,7 +161,7 @@ class StandardEventHandlerTest extends IntegrationBase {
         );
         dartsGateway.darNotificationReturnsSuccess();
 
-        eventHandler.handle(someMinimalDartsEvent()
+        eventDispatcher.receive(someMinimalDartsEvent()
                                 .caseNumbers(List.of(SOME_CASE_NUMBER))
                                 .courthouse(SOME_COURTHOUSE)
                                 .courtroom(SOME_ROOM)
@@ -217,7 +217,7 @@ class StandardEventHandlerTest extends IntegrationBase {
                     .courtroom("asyncTestCourtroom")
                     .dateTime(today.withNano(nanoSec))
                     .eventId(null);
-                eventHandler.handle(dartsEvent);
+                eventDispatcher.receive(dartsEvent);
                 latch.countDown();
             });
         }

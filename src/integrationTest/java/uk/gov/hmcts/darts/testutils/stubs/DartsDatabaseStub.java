@@ -44,6 +44,7 @@ import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -84,7 +85,9 @@ public class DartsDatabaseStub {
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
 
-    public void clearDatabase() {
+    private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
+
+    public void clearDatabaseInThisOrder() {
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         userAccountRepository.deleteAll();
@@ -101,6 +104,7 @@ public class DartsDatabaseStub {
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
         courthouseRepository.deleteAll();
+        eventHandlerRepository.deleteAll(eventHandlerBin);
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -323,12 +327,15 @@ public class DartsDatabaseStub {
         hearingRepository.saveAllAndFlush(asList(hearingEntities));
     }
 
-    public void saveAll(CourtCaseEntity... courtCaseEntities) {
-        caseRepository.saveAll(asList(courtCaseEntities));
-    }
-
     public void saveAll(EventEntity... eventEntities) {
         eventRepository.saveAll(asList(eventEntities));
     }
 
+    public void saveAll(EventHandlerEntity... eventHandlerEntities) {
+        eventHandlerRepository.saveAll(asList(eventHandlerEntities));
+    }
+
+    public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
+        this.eventHandlerBin.addAll(asList(eventHandlerEntities));
+    }
 }
