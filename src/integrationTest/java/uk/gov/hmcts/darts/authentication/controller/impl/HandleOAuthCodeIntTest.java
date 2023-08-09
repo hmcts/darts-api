@@ -38,13 +38,15 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
 
@@ -67,34 +69,75 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @MockBean
-    private AuthorisationApi authorisationApi;
+    private AuthorisationApi mockAuthorisationApi;
 
     @Test
     void handleOAuthCodeShouldReturnAccessTokenWhenValidAuthTokenIsObtainedForProvidedAuthCode() throws Exception {
-        when(authorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
-            .thenReturn(UserState.builder()
-                            .userId(-1)
-                            .userName("Test User")
-                            .roles(Set.of(Role.builder()
-                                              .roleId(TRANSCRIPTION_COMPANY.getId())
-                                              .roleName(TRANSCRIPTION_COMPANY.toString())
-                                              .permissions(new HashSet<>())
-                                              .build()))
-                            .build()
+        when(mockAuthorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
+            .thenReturn(Optional.ofNullable(UserState.builder()
+                                                .userId(-1)
+                                                .userName("Test User")
+                                                .roles(Set.of(Role.builder()
+                                                                  .roleId(TRANSCRIPTION_COMPANY.getId())
+                                                                  .roleName(TRANSCRIPTION_COMPANY.toString())
+                                                                  .permissions(new HashSet<>())
+                                                                  .build()))
+                                                .build())
             );
 
-        KeyPair keyPair = setTokenStub();
+        KeyPair keyPair = setTokenStub(List.of(VALID_EMAIL_VALUE));
+        setKeyStoreStub(keyPair);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+            .andExpect(status().is2xxSuccessful())
+            .andExpect(jsonPath("$.accessToken").isString())
+            .andExpect(jsonPath("$.userState").exists());
+
+        verify(mockAuthorisationApi).getAuthorisation(VALID_EMAIL_VALUE);
+    }
+
+    @Test
+    void handleOAuthCodeShouldReturnErrorResponseWhenAccessTokenMissingEmailsClaim() throws Exception {
+        KeyPair keyPair = setTokenStub(Collections.emptyList());
         setKeyStoreStub(keyPair);
 
         MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
                 EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
-            .andExpect(status().is2xxSuccessful())
+            .andExpect(status().isInternalServerError())
             .andReturn();
 
-        String token = response.getResponse().getContentAsString();
-        assertThat(token).isNotNull();
+        String actualResponseBody = response.getResponse().getContentAsString();
 
-        verify(authorisationApi).getAuthorisation(VALID_EMAIL_VALUE);
+        String expectedResponseBody = """
+            {
+                "type":"AUTHENTICATION_101",
+                "title":"Failed to validate access token",
+                "status":500
+            }
+            """;
+
+        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(mockAuthorisationApi);
+    }
+
+    @Test
+    void handleOAuthCodeShouldReturnSecurityTokenWithNoUserStateWhenNoUserAccount() throws Exception {
+        String testMissingEmailAddress = "test.missing@example.com";
+        when(mockAuthorisationApi.getAuthorisation(testMissingEmailAddress))
+            .thenReturn(Optional.empty());
+
+        KeyPair keyPair = setTokenStub(List.of(testMissingEmailAddress));
+        setKeyStoreStub(keyPair);
+
+        mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+            .andExpect(status().is2xxSuccessful())
+            .andExpect(jsonPath("$.accessToken").isString())
+            .andExpect(jsonPath("$.userState").doesNotExist());
+
+        verify(mockAuthorisationApi).getAuthorisation(testMissingEmailAddress);
     }
 
     @Test
@@ -126,7 +169,7 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
 
     @Test
     void handleOAuthCodeShouldReturnErrorResponseWhenTokenValidationFails() throws Exception {
-        setTokenStub();
+        setTokenStub(List.of(VALID_EMAIL_VALUE));
 
         MvcResult response = mockMvc.perform(MockMvcRequestBuilders.post(
                 EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
@@ -151,14 +194,14 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
      * provides a token whose signature can be verified against a public key provided by the configured Remote JWKS.
      * This setup method generates these private and public RSA keys and sets the stub responses accordingly.
      */
-    private KeyPair setTokenStub() {
+    private KeyPair setTokenStub(List<String> emails) {
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(CONFIGURED_AUDIENCE_VALUE)
             .issuer(CONFIGURED_ISSUER_VALUE)
             .expirationTime(createDateInFuture())
             .issueTime(Date.from(Instant.now()))
             .subject(VALID_SUBJECT_VALUE)
-            .claim(EMAILS_CLAIM_NAME, List.of(VALID_EMAIL_VALUE))
+            .claim(EMAILS_CLAIM_NAME, emails)
             .build();
 
         KeyPair keyPair = createKeys();

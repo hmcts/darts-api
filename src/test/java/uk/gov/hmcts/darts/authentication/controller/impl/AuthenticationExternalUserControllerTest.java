@@ -24,6 +24,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,15 +67,15 @@ class AuthenticationExternalUserControllerTest {
             .thenReturn(createDummyAccessToken());
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
-            UserState.builder()
-                .userId(-1)
-                .userName("Test User")
-                .roles(Set.of(Role.builder()
-                                  .roleId(TRANSCRIPTION_COMPANY.getId())
-                                  .roleName(TRANSCRIPTION_COMPANY.toString())
-                                  .permissions(new HashSet<>())
-                                  .build()))
-                .build()
+            Optional.ofNullable(UserState.builder()
+                                    .userId(-1)
+                                    .userName("Test User")
+                                    .roles(Set.of(Role.builder()
+                                                      .roleId(TRANSCRIPTION_COMPANY.getId())
+                                                      .roleName(TRANSCRIPTION_COMPANY.toString())
+                                                      .permissions(new HashSet<>())
+                                                      .build()))
+                                    .build())
         );
 
         SecurityToken securityToken = controller.handleOauthCode("code");
