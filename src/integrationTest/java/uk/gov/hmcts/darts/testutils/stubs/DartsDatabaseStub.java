@@ -105,6 +105,7 @@ public class DartsDatabaseStub {
         dailyListRepository.deleteAll();
         courthouseRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
+        eventHandlerBin.clear();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
