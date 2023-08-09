@@ -41,7 +41,7 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNam
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.VariableDeclarationUsageDistance", "PMD.NcssCount"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports", "PMD.TooManyMethods"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Autowired

@@ -7,6 +7,10 @@
       "defendant_test1_1",
       "defendant_test1_2"
     ],
+    "judges": [
+      "Judge_1",
+      "Judge_2"
+    ],
     "hearings": [
       {
         "id": 201,
@@ -37,6 +41,12 @@
       "defendant_test2_1",
       "defendant_test2_2"
     ],
+    "judges": [
+      "Judge_1",
+      "Judge_2",
+      "Judge_3",
+      "Judge_4"
+    ],
     "hearings": [
       {
         "id": 203,
@@ -58,6 +68,13 @@
     "defendants": [
       "defendant_test3_1",
       "defendant_test3_2"
+    ],
+    "judges": [
+      "Judge_1",
+      "Judge_2",
+      "Judge_3",
+      "Judge_4",
+      "Judge_5"
     ],
     "hearings": [
       {

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.cases.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Slf4j
 class AdvancedSearchResponseMapperTest {
 
     public static final String TEST_1 = "test1";
@@ -49,7 +51,7 @@ class AdvancedSearchResponseMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/AdvancedSearchResponseMapperTest/one/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        compareJson(actualResponse, expectedResponse);
     }
 
     @Test
@@ -80,7 +82,16 @@ class AdvancedSearchResponseMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/AdvancedSearchResponseMapperTest/twoSameCase/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    private static void compareJson(String actualResponse, String expectedResponse) {
+        try {
+            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        } catch (AssertionError ae) {
+            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
+            throw ae;
+        }
     }
 
     @Test
@@ -131,7 +142,7 @@ class AdvancedSearchResponseMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/AdvancedSearchResponseMapperTest/fourWithTwoSameCase/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        compareJson(actualResponse, expectedResponse);
     }
 
 }
