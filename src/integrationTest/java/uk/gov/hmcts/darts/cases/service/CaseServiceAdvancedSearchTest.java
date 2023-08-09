@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.cases.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,7 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNam
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Slf4j
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.VariableDeclarationUsageDistance", "PMD.NcssCount"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
@@ -149,7 +151,16 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
 
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    private static void compareJson(String actualResponse, String expectedResponse) {
+        try {
+            JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        } catch (AssertionError ae) {
+            log.error("expected\r\n{}to match\r\n{}", expectedResponse, actualResponse);
+            throw ae;
+        }
     }
 
     @Test
@@ -164,7 +175,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFrom/expectedResponse.json"));
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
     }
 
     @Test
@@ -179,7 +190,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeTo/expectedResponse.json"));
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
     }
 
     @Test
@@ -195,7 +206,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFromTo/expectedResponse.json"));
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
     }
 
     @Test
@@ -210,7 +221,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithJudge/expectedResponse.json"));
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
     }
 
     @Test
@@ -225,7 +236,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroom/expectedResponse.json"));
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
     }
 
     @Test
@@ -240,7 +251,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithEventText/expectedResponse.json"));
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
     }
 
 
@@ -257,7 +268,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroomJudge/expectedResponse.json"));
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        compareJson(actualResponse, expectedResponse);
     }
 
 }
