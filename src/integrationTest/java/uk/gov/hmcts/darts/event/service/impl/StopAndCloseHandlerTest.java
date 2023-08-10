@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -30,7 +31,7 @@ class StopAndCloseHandlerTest extends IntegrationBase {
     private final OffsetDateTime today = now();
 
     @Autowired
-    private StopAndCloseHandler stopAndCloseHandler;
+    private EventDispatcher eventDispatcher;
 
     @Test
     void throwsOnUnknownCourthouse() {
@@ -38,7 +39,7 @@ class StopAndCloseHandlerTest extends IntegrationBase {
         DartsEvent event = someMinimalDartsEvent().courthouse(SOME_ROOM);
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
-        assertThatThrownBy(() -> stopAndCloseHandler.handle(event))
+        assertThatThrownBy(() -> eventDispatcher.receive(event))
             .isInstanceOf(DartsApiException.class);
     }
 
@@ -67,7 +68,7 @@ class StopAndCloseHandlerTest extends IntegrationBase {
             .caseNumbers(List.of(SOME_CASE_NUMBER))
             .dateTime(today);
 
-        stopAndCloseHandler.handle(dartsEvent);
+        eventDispatcher.receive(dartsEvent);
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,

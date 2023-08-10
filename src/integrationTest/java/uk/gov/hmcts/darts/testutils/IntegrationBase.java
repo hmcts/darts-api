@@ -19,8 +19,8 @@ public class IntegrationBase {
     protected DartsDatabaseStub dartsDatabase;
 
     @BeforeEach
-    void clearDbInThisOrder() {
-        dartsDatabase.clearDatabase();
+    void clearDbAndStubs() {
+        dartsDatabase.clearDatabaseInThisOrder();
         dartsGateway.clearStubs();
     }
 }
