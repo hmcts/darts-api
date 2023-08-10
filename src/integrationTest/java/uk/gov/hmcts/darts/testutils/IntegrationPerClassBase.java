@@ -23,7 +23,7 @@ public class IntegrationPerClassBase {
 
     @BeforeAll
     void clearDbInThisOrder() {
-        dartsDatabase.clearDatabase();
+        dartsDatabase.clearDatabaseInThisOrder();
         dartsGateway.clearStubs();
     }
 }
