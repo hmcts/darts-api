@@ -43,6 +43,7 @@ import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -95,6 +96,24 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.userState").exists());
 
         verify(mockAuthorisationApi).getAuthorisation(VALID_EMAIL_VALUE);
+
+        verifySecurityTokenWithNoUserStateWhenNoUserAccount();
+    }
+
+    // DetachedTestCase - workaround for BadJWSException: Signed JWT rejected: Invalid signature
+    private void verifySecurityTokenWithNoUserStateWhenNoUserAccount() throws Exception {
+        reset(mockAuthorisationApi);
+
+        when(mockAuthorisationApi.getAuthorisation(VALID_EMAIL_VALUE))
+            .thenReturn(Optional.empty());
+
+        mockMvc.perform(MockMvcRequestBuilders.post(
+                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
+            .andExpect(status().is2xxSuccessful())
+            .andExpect(jsonPath("$.accessToken").isString())
+            .andExpect(jsonPath("$.userState").doesNotExist());
+
+        verify(mockAuthorisationApi).getAuthorisation(VALID_EMAIL_VALUE);
     }
 
     @Test
@@ -120,24 +139,6 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
 
         verifyNoInteractions(mockAuthorisationApi);
-    }
-
-    @Test
-    void handleOAuthCodeShouldReturnSecurityTokenWithNoUserStateWhenNoUserAccount() throws Exception {
-        String testMissingEmailAddress = "test.missing@example.com";
-        when(mockAuthorisationApi.getAuthorisation(testMissingEmailAddress))
-            .thenReturn(Optional.empty());
-
-        KeyPair keyPair = setTokenStub(List.of(testMissingEmailAddress));
-        setKeyStoreStub(keyPair);
-
-        mockMvc.perform(MockMvcRequestBuilders.post(
-                EXTERNAL_USER_HANDLE_OAUTH_CODE_ENDPOINT_WITH_CODE))
-            .andExpect(status().is2xxSuccessful())
-            .andExpect(jsonPath("$.accessToken").isString())
-            .andExpect(jsonPath("$.userState").doesNotExist());
-
-        verify(mockAuthorisationApi).getAuthorisation(testMissingEmailAddress);
     }
 
     @Test
