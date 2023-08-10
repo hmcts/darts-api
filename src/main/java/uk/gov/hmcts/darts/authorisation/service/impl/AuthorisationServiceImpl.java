@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -34,7 +35,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     private EntityManager em;
 
     @Override
-    public UserState getAuthorisation(String emailAddress) {
+    public Optional<UserState> getAuthorisation(String emailAddress) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<GetAuthorisationResult> criteriaQuery = criteriaBuilder.createQuery(GetAuthorisationResult.class);
 
@@ -80,7 +81,11 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     }
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    private UserState getUserState(List<GetAuthorisationResult> getAuthorisationResultList) {
+    private Optional<UserState> getUserState(List<GetAuthorisationResult> getAuthorisationResultList) {
+        if (getAuthorisationResultList.isEmpty()) {
+            return Optional.empty();
+        }
+
         UserState.UserStateBuilder userStateBuilder = UserState.builder();
         Set<Role> roles = new LinkedHashSet<>();
         userStateBuilder.roles(roles);
@@ -112,7 +117,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             }
         }
 
-        return userStateBuilder.build();
+        return Optional.ofNullable(userStateBuilder.build());
     }
 
 }

@@ -17,11 +17,11 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_CLERK;
 import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_MANAGER;
@@ -66,9 +66,8 @@ class AuthorisationServiceTest {
 
     @Test
     void shouldGetAuthorisationForTestJudge() {
-        UserState judgeUserState = authorisationService.getAuthorisation("test.judge@example.com");
+        UserState judgeUserState = authorisationService.getAuthorisation("test.judge@example.com").orElseThrow();
 
-        assertNotNull(judgeUserState);
         assertEquals(1, judgeUserState.getRoles().size());
 
         Role judgeRole = judgeUserState.getRoles().iterator().next();
@@ -87,9 +86,8 @@ class AuthorisationServiceTest {
 
     @Test
     void shouldGetAuthorisationForTestBristol() {
-        UserState userState = authorisationService.getAuthorisation("Test.Bristol@Example.com");
+        UserState userState = authorisationService.getAuthorisation("Test.Bristol@Example.com").orElseThrow();
 
-        assertNotNull(userState);
         assertEquals(2, userState.getRoles().size());
 
         Iterator<Role> roleIterator = userState.getRoles().iterator();
@@ -115,12 +113,18 @@ class AuthorisationServiceTest {
 
     @Test
     void shouldGetAuthorisationForTestNewUserWithoutAnySecurityGroupRoles() {
-        UserState userState = authorisationService.getAuthorisation("test.new@example.com");
+        UserState userState = authorisationService.getAuthorisation("test.new@example.com").orElseThrow();
 
-        assertNotNull(userState);
         assertTrue(userState.getUserId() > 0);
         assertEquals("Test New", userState.getUserName());
         assertEquals(0, userState.getRoles().size());
+    }
+
+    @Test
+    void shouldGetOptionalUserStateForMissingUserAccount() {
+        Optional<UserState> userStateOptional = authorisationService.getAuthorisation("test.missing@example.com");
+
+        assertTrue(userStateOptional.isEmpty());
     }
 
 }
