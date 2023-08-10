@@ -5,6 +5,9 @@
     "defendants": [
       "Defendant2"
     ],
+    "judges": [
+      "aJudge"
+    ],
     "hearings": [
       {
         "date": "2023-06-20",
@@ -34,6 +37,10 @@
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"
+    ],
+    "judges": [
+      "Judge3a",
+      "aJudge"
     ],
     "hearings": [
       {

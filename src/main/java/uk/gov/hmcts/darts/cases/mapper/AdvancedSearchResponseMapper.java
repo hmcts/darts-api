@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResultHearing;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
@@ -37,14 +38,16 @@ public class AdvancedSearchResponseMapper {
 
     private AdvancedSearchResult maptToAdvancedSearchResult(HearingEntity hearing) {
         AdvancedSearchResult advancedSearchResult = new AdvancedSearchResult();
-        advancedSearchResult.setCaseID(hearing.getCourtCase().getId());
-        advancedSearchResult.setCaseNumber(hearing.getCourtCase().getCaseNumber());
-        advancedSearchResult.setCourthouse(hearing.getCourtCase().getCourthouse().getCourthouseName());
-        advancedSearchResult.setDefendants(hearing.getCourtCase().getDefendantStringList());
+        CourtCaseEntity courtCase = hearing.getCourtCase();
+        advancedSearchResult.setCaseID(courtCase.getId());
+        advancedSearchResult.setCaseNumber(courtCase.getCaseNumber());
+        advancedSearchResult.setCourthouse(courtCase.getCourthouse().getCourthouseName());
+        advancedSearchResult.setDefendants(courtCase.getDefendantStringList());
+        advancedSearchResult.setJudges(courtCase.getJudgeStringList());
 
         advancedSearchResult.addHearingsItem(mapToAdvancedSearchResultHearing(hearing));
 
-        EventHandlerEntity reportingRestrictions = hearing.getCourtCase().getReportingRestrictions();
+        EventHandlerEntity reportingRestrictions = courtCase.getReportingRestrictions();
         if (reportingRestrictions != null) {
             advancedSearchResult.setReportingRestriction(reportingRestrictions.getEventName());
         }

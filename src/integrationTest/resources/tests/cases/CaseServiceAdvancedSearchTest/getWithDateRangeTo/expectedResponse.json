@@ -1,14 +1,15 @@
 [
   {
-    "caseID": 21,
     "caseNumber": "Case1",
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"
     ],
+    "judges": [
+      "aJudge"
+    ],
     "hearings": [
       {
-        "id": 76,
         "date": "2023-05-20",
         "courtroom": "courtroom1",
         "judges": [
@@ -16,7 +17,6 @@
         ]
       },
       {
-        "id": 77,
         "date": "2023-05-21",
         "courtroom": "courtroom1",
         "judges": [
@@ -24,7 +24,6 @@
         ]
       },
       {
-        "id": 78,
         "date": "2023-05-22",
         "courtroom": "courtroom1",
         "judges": [
@@ -34,15 +33,16 @@
     ]
   },
   {
-    "caseID": 22,
     "caseNumber": "Case2",
     "courthouse": "SWANSEA",
     "defendants": [
       "Defendant2"
     ],
+    "judges": [
+      "aJudge"
+    ],
     "hearings": [
       {
-        "id": 79,
         "date": "2023-06-20",
         "courtroom": "courtroom1",
         "judges": [
@@ -50,7 +50,6 @@
         ]
       },
       {
-        "id": 80,
         "date": "2023-06-21",
         "courtroom": "courtroom1",
         "judges": [
@@ -58,7 +57,6 @@
         ]
       },
       {
-        "id": 81,
         "date": "2023-06-22",
         "courtroom": "courtroom1",
         "judges": [
