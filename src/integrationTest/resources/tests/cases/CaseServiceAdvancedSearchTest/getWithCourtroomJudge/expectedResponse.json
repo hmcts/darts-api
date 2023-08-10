@@ -5,6 +5,10 @@
     "defendants": [
       "aDefendant"
     ],
+    "judges": [
+      "Judge6b",
+      "aJudge"
+    ],
     "hearings": [
       {
         "date": "2023-09-20",
