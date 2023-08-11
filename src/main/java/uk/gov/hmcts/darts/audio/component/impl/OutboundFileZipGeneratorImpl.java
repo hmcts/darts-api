@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -16,11 +17,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -76,13 +81,28 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
             audioConfigurationProperties.getTempBlobWorkspace()
         )), Path.of("readMe.txt"));
 
+        Set<PlaylistInfo> playlistInfos = new LinkedHashSet<>();
+
         for (int i = 0; i < audioSessions.size(); i++) {
             List<AudioFileInfo> audioSession = audioSessions.get(i);
             for (AudioFileInfo audioFileInfo : audioSession) {
                 Path path = generateZipPath(i, audioFileInfo);
                 sourceToDestinationPaths.put(Path.of(audioFileInfo.getFileName()), path);
+                playlistInfos.add(PlaylistInfo.builder()
+                                      .caseNumber(mediaRequestEntity.getHearing().getCourtCase().getCaseNumber())
+                                      .startTime(OffsetDateTime.ofInstant(
+                                          audioFileInfo.getStartTime(),
+                                          ZoneId.of("Europe/London")
+                                      ))
+                                      .fileLocation(path.getParent().toString())
+                                      .build());
             }
         }
+
+        sourceToDestinationPaths.put(Path.of(viqHeaderService.generatePlaylist(
+            playlistInfos,
+            audioConfigurationProperties.getTempBlobWorkspace()
+        )), Path.of("playlist.xml"));
 
         log.debug("Generated zip structure: {}", sourceToDestinationPaths);
         return sourceToDestinationPaths;

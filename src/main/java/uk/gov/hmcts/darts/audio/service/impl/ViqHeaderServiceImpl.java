@@ -29,6 +29,7 @@ import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -55,7 +56,7 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     private final HearingRepository hearingRepository;
 
     @Override
-    public String generatePlaylist(List<PlaylistInfo> playlistInfos, String outputFileLocation) {
+    public String generatePlaylist(Set<PlaylistInfo> playlistInfos, String outputFileLocation) {
         String playlistFile;
         Playlist playlist = new Playlist();
         try {

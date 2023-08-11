@@ -29,7 +29,9 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -69,7 +71,7 @@ class ViqHeaderServiceImplTest {
 
     @Test
     void generatePlaylistReturnsXmlFile() throws IOException, JAXBException {
-        List<PlaylistInfo> playlistInfos = new ArrayList<>();
+        Set<PlaylistInfo> playlistInfos = new LinkedHashSet<>();
         playlistInfos.add(createPlaylistInfo1());
         playlistInfos.add(createPlaylistInfo2());
 

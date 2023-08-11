@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -92,20 +93,24 @@ class OutboundFileZipGeneratorImplTest {
 
         List<String> paths = readZipStructure(path);
 
-        assertEquals(4, paths.size());
+        assertEquals(5, paths.size());
         assertThat(paths, hasItem("0001/0001.a00"));
         assertThat(paths, hasItem("0001/0001.a01"));
         assertThat(paths, hasItem("0002/0002.a00"));
         assertThat(paths, hasItem("readMe.txt"));
+        assertThat(paths, hasItem("playlist.xml"));
     }
 
     private MediaRequestEntity createDummyMediaRequestEntity() {
         HearingEntity mockHearingEntity = mock(HearingEntity.class);
+        CourtCaseEntity mockCourtCaseEntity = mock(CourtCaseEntity.class);
         CourtroomEntity mockCourtroomEntity = mock(CourtroomEntity.class);
         CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockHearingEntity.getCourtroom()).thenReturn(mockCourtroomEntity);
+        when(mockHearingEntity.getCourtCase()).thenReturn(mockCourtCaseEntity);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
         when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");
+        when(mockCourtCaseEntity.getCaseNumber()).thenReturn("T20190024");
 
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(mockHearingEntity);
