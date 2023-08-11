@@ -10,14 +10,20 @@ import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 public interface AuthenticationController {
 
     @GetMapping("/login-or-refresh")
-    ModelAndView loginOrRefresh(@RequestHeader(value = "Authorization", required = false) String authHeaderValue);
+    ModelAndView loginOrRefresh(
+        @RequestHeader(value = "Authorization", required = false) String authHeaderValue, 
+        @RequestParam(value = "redirect_uri", required = false) String redirectUri
+    );
 
     @PostMapping("/handle-oauth-code")
     SecurityToken handleOauthCode(@RequestParam("code") String code);
 
     @GetMapping("/logout")
-    ModelAndView logout(@RequestHeader("Authorization") String authHeaderValue);
+    ModelAndView logout(
+        @RequestHeader("Authorization") String authHeaderValue, 
+        @RequestParam(value = "redirect_uri", required = false) String redirectUri
+    );
 
     @GetMapping("/reset-password")
-    ModelAndView resetPassword();
+    ModelAndView resetPassword(@RequestParam(value = "redirect_uri", required = false) String redirectUri);
 }

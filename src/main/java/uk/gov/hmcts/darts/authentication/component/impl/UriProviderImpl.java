@@ -18,8 +18,8 @@ public class UriProviderImpl implements UriProvider {
 
     @Override
     @SneakyThrows(URISyntaxException.class)
-    public URI getLoginUri() {
-        return buildCommonAuthUri(authConfig.getExternalADauthorizationUri())
+    public URI getLoginUri(String redirectUri) {
+        return buildCommonAuthUri(authConfig.getExternalADauthorizationUri(), redirectUri)
             .addParameter("response_mode", authConfig.getExternalADresponseMode())
             .addParameter("response_type", authConfig.getExternalADresponseType())
             .build();
@@ -32,27 +32,35 @@ public class UriProviderImpl implements UriProvider {
 
     @Override
     @SneakyThrows(URISyntaxException.class)
-    public URI getLogoutUri(String accessToken) {
+    public URI getLogoutUri(String accessToken, String redirectUriOverride) {
+        var redirectUri = authConfig.getExternalADlogoutRedirectUri();
+        if (redirectUriOverride != null) {
+            redirectUri = redirectUriOverride;
+        }
         return new URIBuilder(
             authConfig.getExternalADlogoutUri())
             .addParameter("id_token_hint", accessToken)
-            .addParameter("post_logout_redirect_uri", authConfig.getExternalADlogoutRedirectUri())
+            .addParameter("post_logout_redirect_uri", redirectUri)
             .build();
     }
 
     @Override
     @SneakyThrows(URISyntaxException.class)
-    public URI getResetPasswordUri() {
-        return buildCommonAuthUri(authConfig.getExternalADresetPasswordUri())
+    public URI getResetPasswordUri(String redirectUri) {
+        return buildCommonAuthUri(authConfig.getExternalADresetPasswordUri(), redirectUri)
             .addParameter("response_type", "id_token")
             .build();
     }
 
     @SneakyThrows(URISyntaxException.class)
-    private URIBuilder buildCommonAuthUri(String uri) {
+    private URIBuilder buildCommonAuthUri(String uri, String redirectUriOverride) {
+        var redirectUri = authConfig.getExternalADredirectUri();
+        if (redirectUriOverride != null) {
+            redirectUri = redirectUriOverride;
+        }
         return new URIBuilder(uri)
             .addParameter("client_id", authConfig.getExternalADclientId())
-            .addParameter("redirect_uri", authConfig.getExternalADredirectUri())
+            .addParameter("redirect_uri", redirectUri)
             .addParameter("scope", authConfig.getExternalADscope())
             .addParameter("prompt", authConfig.getExternalADprompt());
     }

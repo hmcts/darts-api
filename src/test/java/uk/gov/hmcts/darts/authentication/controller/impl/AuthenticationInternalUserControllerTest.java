@@ -26,12 +26,12 @@ class AuthenticationInternalUserControllerTest {
 
     @Test
     void logoutWhenUserLogoutFromdarts() {
-        assertThrows(NotImplementedException.class, () -> controller.logout(null));
+        assertThrows(NotImplementedException.class, () -> controller.logout(null, null));
     }
 
     @Test
     void resetPasswordShouldCompleteWithoutExceptionWhenSessionIsInvalidated() {
-        assertThrows(NotImplementedException.class, () -> controller.resetPassword());
+        assertThrows(NotImplementedException.class, () -> controller.resetPassword(null));
     }
 
 }

@@ -24,16 +24,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UriProvider uriProvider;
 
     @Override
-    public URI loginOrRefresh(String accessToken) {
+    public URI loginOrRefresh(String accessToken, String redirectUri) {
         log.debug("Initiated login or refresh flow with access token {}", accessToken);
 
         if (accessToken == null) {
-            return uriProvider.getLoginUri();
+            return uriProvider.getLoginUri(redirectUri);
         }
 
         var validationResult = tokenValidator.validate(accessToken);
         if (!validationResult.valid()) {
-            return uriProvider.getLoginUri();
+            return uriProvider.getLoginUri(redirectUri);
         }
 
         return uriProvider.getLandingPageUri();
@@ -60,15 +60,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public URI logout(String accessToken) {
-        log.debug("Initiated logout flow with access token {}", accessToken);
-        return uriProvider.getLogoutUri(accessToken);
+    public URI logout(String accessToken, String redirectUri) {
+        log.debug("Initiated logout flow with access token {} and redirectUri {}", accessToken, redirectUri);
+        return uriProvider.getLogoutUri(accessToken, redirectUri);
     }
 
     @Override
-    public URI resetPassword() {
-        log.debug("Requesting password reset");
-        return uriProvider.getResetPasswordUri();
+    public URI resetPassword(String redirectUri) {
+        log.debug("Requesting password reset, with redirectUri {}", redirectUri);
+        return uriProvider.getResetPasswordUri(redirectUri);
     }
 
 }

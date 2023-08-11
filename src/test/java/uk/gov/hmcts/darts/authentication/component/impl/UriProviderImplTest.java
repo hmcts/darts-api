@@ -28,9 +28,23 @@ class UriProviderImplTest {
         when(authConfig.getExternalADresponseMode()).thenReturn("ResponseMode");
         when(authConfig.getExternalADresponseType()).thenReturn("ResponseType");
 
-        URI authUrl = uriProvider.getLoginUri();
+        URI authUrl = uriProvider.getLoginUri(null);
 
         assertEquals("AuthUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
+                         "&response_mode=ResponseMode&response_type=ResponseType",
+                     authUrl.toString());
+    }
+
+    @Test
+    void getLoginUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
+        commonMocksForAuthorisation();
+        when(authConfig.getExternalADauthorizationUri()).thenReturn("AuthUrl");
+        when(authConfig.getExternalADresponseMode()).thenReturn("ResponseMode");
+        when(authConfig.getExternalADresponseType()).thenReturn("ResponseType");
+
+        URI authUrl = uriProvider.getLoginUri("OverriddenRedirectUri");
+
+        assertEquals("AuthUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
                          "&response_mode=ResponseMode&response_type=ResponseType",
                      authUrl.toString());
     }
@@ -47,9 +61,20 @@ class UriProviderImplTest {
         when(authConfig.getExternalADlogoutUri()).thenReturn("LogoutUrl");
         when(authConfig.getExternalADlogoutRedirectUri()).thenReturn("LogoutRedirectUrl");
 
-        URI logoutUri = uriProvider.getLogoutUri("DUMMY_SESSION_ID");
+        URI logoutUri = uriProvider.getLogoutUri("DUMMY_SESSION_ID", null);
 
         assertEquals("LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=LogoutRedirectUrl",
+                     logoutUri.toString());
+    }
+
+    @Test
+    void getLogoutUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
+        when(authConfig.getExternalADlogoutUri()).thenReturn("LogoutUrl");
+        when(authConfig.getExternalADlogoutRedirectUri()).thenReturn("LogoutRedirectUrl");
+
+        URI logoutUri = uriProvider.getLogoutUri("DUMMY_SESSION_ID", "OverriddenRedirectUri");
+
+        assertEquals("LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=OverriddenRedirectUri",
                      logoutUri.toString());
     }
 
@@ -58,9 +83,21 @@ class UriProviderImplTest {
         commonMocksForAuthorisation();
         when(authConfig.getExternalADresetPasswordUri()).thenReturn("ResetUrl");
 
-        URI logoutUri = uriProvider.getResetPasswordUri();
+        URI logoutUri = uriProvider.getResetPasswordUri(null);
 
         assertEquals("ResetUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
+                         "&response_type=id_token",
+                     logoutUri.toString());
+    }
+
+    @Test
+    void getResetPasswordUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
+        commonMocksForAuthorisation();
+        when(authConfig.getExternalADresetPasswordUri()).thenReturn("ResetUrl");
+
+        URI logoutUri = uriProvider.getResetPasswordUri("OverriddenRedirectUri");
+
+        assertEquals("ResetUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
                          "&response_type=id_token",
                      logoutUri.toString());
     }
