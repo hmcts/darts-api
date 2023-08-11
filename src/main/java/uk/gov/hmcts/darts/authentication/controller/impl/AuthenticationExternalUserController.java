@@ -31,12 +31,12 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     private final AuthorisationApi authorisationApi;
 
     @Override
-    public ModelAndView loginOrRefresh(String authHeaderValue) {
+    public ModelAndView loginOrRefresh(String authHeaderValue, String redirectUri) {
         String accessToken = null;
         if (authHeaderValue != null) {
             accessToken = authHeaderValue.replace("Bearer ", "");
         }
-        URI url = authenticationService.loginOrRefresh(accessToken);
+        URI url = authenticationService.loginOrRefresh(accessToken, redirectUri);
         return new ModelAndView("redirect:" + url.toString());
     }
 
@@ -60,15 +60,15 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     }
 
     @Override
-    public ModelAndView logout(String authHeaderValue) {
+    public ModelAndView logout(String authHeaderValue, String redirectUri) {
         String accessToken = authHeaderValue.replace("Bearer ", "");
-        URI url = authenticationService.logout(accessToken);
+        URI url = authenticationService.logout(accessToken, redirectUri);
         return new ModelAndView("redirect:" + url.toString());
     }
 
     @Override
-    public ModelAndView resetPassword() {
-        URI url = authenticationService.resetPassword();
+    public ModelAndView resetPassword(String redirectUri) {
+        URI url = authenticationService.resetPassword(redirectUri);
         return new ModelAndView("redirect:" + url.toString());
     }
 

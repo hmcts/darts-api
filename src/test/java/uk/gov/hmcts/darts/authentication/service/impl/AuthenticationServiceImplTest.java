@@ -17,6 +17,7 @@ import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -43,22 +44,22 @@ class AuthenticationServiceImplTest {
 
     @Test
     void loginOrRefreshShouldReturnAuthUriWhenNoAuthHeaderExists() {
-        when(uriProvider.getLoginUri())
+        when(uriProvider.getLoginUri(null))
             .thenReturn(DUMMY_AUTH_URI);
 
-        URI uri = authenticationService.loginOrRefresh(null);
+        URI uri = authenticationService.loginOrRefresh(null, null);
 
         assertEquals(DUMMY_AUTH_URI, uri);
     }
 
     @Test
     void loginOrRefreshShouldReturnAuthUriWhenInvalidAccessTokenExists() {
-        when(uriProvider.getLoginUri())
+        when(uriProvider.getLoginUri(null))
             .thenReturn(DUMMY_AUTH_URI);
         when(tokenValidator.validate(DUMMY_ID_TOKEN))
             .thenReturn(new JwtValidationResult(false, "Invalid token"));
 
-        URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN);
+        URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN, null);
 
         assertEquals(DUMMY_AUTH_URI, uri);
     }
@@ -70,7 +71,7 @@ class AuthenticationServiceImplTest {
         when(tokenValidator.validate(DUMMY_ID_TOKEN))
             .thenReturn(new JwtValidationResult(true, null));
 
-        URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN);
+        URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN, null);
 
         assertEquals(DUMMY_LANDING_PAGE_URI, uri);
     }
@@ -117,20 +118,20 @@ class AuthenticationServiceImplTest {
 
     @Test
     void logoutShouldReturnLogoutPageUriWhenSessionExists() {
-        when(uriProvider.getLogoutUri(anyString()))
+        when(uriProvider.getLogoutUri(anyString(), any()))
             .thenReturn(DUMMY_LOGOUT_URI);
 
-        URI uri = authenticationService.logout(DUMMY_ID_TOKEN);
+        URI uri = authenticationService.logout(DUMMY_ID_TOKEN, null);
 
         assertEquals(DUMMY_LOGOUT_URI, uri);
     }
 
     @Test
     void resetPasswordShouldReturnResetPasswordUri() {
-        when(uriProvider.getResetPasswordUri())
+        when(uriProvider.getResetPasswordUri(null))
             .thenReturn(DUMMY_AUTH_URI);
 
-        URI uri = authenticationService.resetPassword();
+        URI uri = authenticationService.resetPassword(null);
 
         assertEquals(DUMMY_AUTH_URI, uri);
     }
