@@ -28,6 +28,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,9 +111,15 @@ class ViqHeaderServiceImplTest {
         OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00");
         String annotationsOutputFile = tempDirectory.getAbsolutePath();
 
-        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(hearingEntities);
+        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(
+            hearingEntities);
 
-        String annotationsFile = viqHeaderService.generateAnnotation(hearingEntities.get(0).getId(), startTime, endTime, annotationsOutputFile);
+        String annotationsFile = viqHeaderService.generateAnnotation(
+            hearingEntities.get(0).getId(),
+            startTime,
+            endTime,
+            annotationsOutputFile
+        );
 
         assertTrue(Files.exists(Path.of(annotationsFile)));
 
@@ -138,9 +145,15 @@ class ViqHeaderServiceImplTest {
         OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:59:59");
         String annotationsOutputFile = tempDirectory.getAbsolutePath();
 
-        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(hearingEntities);
+        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(
+            hearingEntities);
 
-        String annotationsFile = viqHeaderService.generateAnnotation(hearingEntities.get(0).getId(), startTime, endTime, annotationsOutputFile);
+        String annotationsFile = viqHeaderService.generateAnnotation(
+            hearingEntities.get(0).getId(),
+            startTime,
+            endTime,
+            annotationsOutputFile
+        );
 
         assertTrue(Files.exists(Path.of(annotationsFile)));
 
@@ -156,7 +169,8 @@ class ViqHeaderServiceImplTest {
         OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:59:59");
         String invalidPath = "/non_existent_directory/";
 
-        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(hearingEntities);
+        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(
+            hearingEntities);
 
         assertThrows(RuntimeException.class, () ->
             viqHeaderService.generateAnnotation(hearingEntities.get(0).getId(), startTime, endTime, invalidPath));
@@ -164,18 +178,12 @@ class ViqHeaderServiceImplTest {
 
     @Test
     void generateReadmeCreatesReadmeWithContent() throws IOException {
-        String courthouse = "Trainwell Crown Court";
-        String startTime = "Fri Mar 24 09:00:00 GMT 2023";
-        String endTime = "Fri Mar 24 12:00:00 GMT 2023";
-        String raisedBy = "User";
-        String requestType = "Download";
-
         ViqMetaData viqMetaData = ViqMetaData.builder()
-            .courthouse(courthouse)
-            .startTime(startTime)
-            .endTime(endTime)
-            .raisedBy(raisedBy)
-            .type(requestType)
+            .courthouse("Trainwell Crown Court")
+            .raisedBy(null)
+            .startTime(Date.from(OffsetDateTime.parse("2023-03-24T09:00:00.000Z").toInstant()))
+            .endTime(Date.from(OffsetDateTime.parse("2023-03-24T12:00:00.000Z").toInstant()))
+            .type(null)
             .build();
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -192,10 +200,10 @@ class ViqHeaderServiceImplTest {
                     assertEquals("Start Time: Fri Mar 24 09:00:00 GMT 2023", line);
                 } else if (line.startsWith(END_TIME_README_LABEL)) {
                     assertEquals("End Time: Fri Mar 24 12:00:00 GMT 2023", line);
-                }  else if (line.startsWith(RAISED_BY_README_LABEL)) {
-                    assertEquals("Raised by: User", line);
+                } else if (line.startsWith(RAISED_BY_README_LABEL)) {
+                    assertEquals("Raised by: ", line);
                 } else if (line.startsWith(REQUEST_TYPE_README_LABEL)) {
-                    assertEquals("Type: Download", line);
+                    assertEquals("Type: ", line);
                 }
             }
         }
@@ -219,13 +227,13 @@ class ViqHeaderServiceImplTest {
     }
 
 
-
     private List<HearingEntity> createHearingInfo() {
         List<HearingEntity> hearingEntities = new ArrayList<>();
         List<EventEntity> entities = new ArrayList<>();
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
         EventEntity event = CommonTestDataUtil.createEvent("LOG", "Start Recording", hearingEntity,
-                                                           CommonTestDataUtil.createOffsetDateTime(EVENT_TIMESTAMP));
+                                                           CommonTestDataUtil.createOffsetDateTime(EVENT_TIMESTAMP)
+        );
 
         entities.add(event);
         hearingEntity.setEventList(entities);

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import jakarta.xml.bind.JAXBException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
 import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
@@ -66,7 +67,12 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
                 }
             }
 
-            playlistFile = XmlUtil.marshalToXmlFile(playlist, Playlist.class, outputFileLocation, PLAYLIST_XML_FILENAME);
+            playlistFile = XmlUtil.marshalToXmlFile(
+                playlist,
+                Playlist.class,
+                outputFileLocation,
+                PLAYLIST_XML_FILENAME
+            );
         } catch (JAXBException | IllegalArgumentException exception) {
             log.error("Unable to generate playlist.xml: {}", exception.getMessage());
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
@@ -77,7 +83,8 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
 
 
     @Override
-    public String generateAnnotation(Integer hearingId, OffsetDateTime startTime, OffsetDateTime endTime, String outputFileLocation) {
+    public String generateAnnotation(Integer hearingId, OffsetDateTime startTime, OffsetDateTime endTime,
+                                     String outputFileLocation) {
         List<HearingEntity> hearingEntities = hearingRepository.findAllById(Collections.singleton(hearingId));
         List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntities, startTime, endTime);
 
@@ -101,15 +108,21 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
         File readmeFile = new File(fileLocation, README_TXT_FILENAME);
         log.debug("Writing readme to {}", readmeFile.getAbsoluteFile());
         try (BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
-             PrintWriter printWriter = new PrintWriter(fileWriter);) {
+            PrintWriter printWriter = new PrintWriter(fileWriter);) {
 
             printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
-            printWriter.println(format(RAISED_BY_README_LABEL + README_FORMAT, viqMetaData.getRaisedBy()));
+            printWriter.println(format(
+                RAISED_BY_README_LABEL + README_FORMAT,
+                StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
+            ));
             printWriter.println(format(START_TIME_README_LABEL + README_FORMAT, viqMetaData.getStartTime()));
             printWriter.println(format(END_TIME_README_LABEL + README_FORMAT, viqMetaData.getEndTime()));
-            printWriter.print(format(REQUEST_TYPE_README_LABEL + README_FORMAT, viqMetaData.getType()));
+            printWriter.print(format(
+                REQUEST_TYPE_README_LABEL + README_FORMAT,
+                StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
+            ));
         } catch (IOException exception) {
-            log.error("Unable to generate readme.txt file: {}", exception.getMessage());
+            log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
         return readmeFile.getAbsolutePath();

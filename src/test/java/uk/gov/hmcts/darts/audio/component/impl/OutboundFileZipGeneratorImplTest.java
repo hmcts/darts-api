@@ -8,9 +8,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
-import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
+import uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
 
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 @ExtendWith(MockitoExtension.class)
@@ -50,10 +54,12 @@ class OutboundFileZipGeneratorImplTest {
     private AudioConfigurationProperties audioConfigurationProperties;
 
     @Mock
-    private ViqHeaderService viqHeaderService;
+    private HearingRepository mockHearingRepository;
 
     @BeforeEach
     void setUp() throws IOException {
+        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(mockHearingRepository);
+
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(audioConfigurationProperties, viqHeaderService);
 
         var tempDirectoryName = UUID.randomUUID().toString();
@@ -77,31 +83,37 @@ class OutboundFileZipGeneratorImplTest {
             audioWithSession2AndChannel1
         );
 
-        HearingEntity mockHearingEntity = mock(HearingEntity.class);
-
-        MediaRequestEntity mediaRequestEntity = createMediaRequestEntity(mockHearingEntity);
-
         Path path = outboundFileZipGenerator.generateAndWriteZip(
-            List.of(session1, session2), mediaRequestEntity, AudioRequestType.DOWNLOAD
+            List.of(session1, session2),
+            createDummyMediaRequestEntity()
         );
 
         assertTrue(Files.exists(path));
 
         List<String> paths = readZipStructure(path);
 
-        assertEquals(3, paths.size());
+        assertEquals(4, paths.size());
         assertThat(paths, hasItem("0001/0001.a00"));
         assertThat(paths, hasItem("0001/0001.a01"));
         assertThat(paths, hasItem("0002/0002.a00"));
+        assertThat(paths, hasItem("readMe.txt"));
     }
 
-    private static MediaRequestEntity createMediaRequestEntity(HearingEntity hearingEntity) {
+    private MediaRequestEntity createDummyMediaRequestEntity() {
+        HearingEntity mockHearingEntity = mock(HearingEntity.class);
+        CourtroomEntity mockCourtroomEntity = mock(CourtroomEntity.class);
+        CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
+        when(mockHearingEntity.getCourtroom()).thenReturn(mockCourtroomEntity);
+        when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
+        when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");
+
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
-        mediaRequestEntity.setHearing(hearingEntity);
+        mediaRequestEntity.setHearing(mockHearingEntity);
         mediaRequestEntity.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         mediaRequestEntity.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         mediaRequestEntity.setRequestor(TEST_REQUESTER);
         mediaRequestEntity.setStatus(OPEN);
+        mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setAttempts(0);
         OffsetDateTime now = OffsetDateTime.now();
         mediaRequestEntity.setCreatedDateTime(now);

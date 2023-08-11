@@ -1,15 +1,24 @@
 package uk.gov.hmcts.darts.audio.model;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.NonNull;
+import lombok.ToString;
+import lombok.Value;
 
-@Data
+import java.util.Date;
+
+@Value
 @Builder
+@ToString
 public class ViqMetaData {
 
+    @NonNull
     private String courthouse;
     private String raisedBy;
-    private String startTime;
-    private String endTime;
+    @NonNull
+    private Date startTime;
+    @NonNull
+    private Date endTime;
     private String type;
+
 }
