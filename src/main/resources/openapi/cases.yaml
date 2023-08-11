@@ -411,3 +411,5 @@ components:
             $ref: '#/components/schemas/judge'
         courtroom:
           type: string
+        transcriptCount:
+          type: integer

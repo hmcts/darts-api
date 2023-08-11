@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -20,7 +21,7 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
     private final OffsetDateTime today = now();
 
     @Autowired
-    SetReportingRestrictionEventHandler setReportingRestrictionEventHandler;
+    EventDispatcher eventDispatcher;
 
     @Test
     void handleSetReportingRestrictionEventHandler() {
@@ -31,7 +32,7 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
             SOME_ROOM,
             today.toLocalDate());
 
-        setReportingRestrictionEventHandler.handle(someMinimalDartsEvent()
+        eventDispatcher.receive(someMinimalDartsEvent()
                                                        .caseNumbers(List.of(SOME_CASE_NUMBER))
                                                        .courthouse(SOME_COURTHOUSE)
                                                        .courtroom(SOME_ROOM)
@@ -61,7 +62,7 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
             SOME_ROOM,
             today.toLocalDate());
 
-        setReportingRestrictionEventHandler.handle(clearReportingRestrictionsDartsEvent()
+        eventDispatcher.receive(clearReportingRestrictionsDartsEvent()
                                                        .caseNumbers(List.of(SOME_CASE_NUMBER))
                                                        .courthouse(SOME_COURTHOUSE)
                                                        .courtroom(SOME_ROOM)

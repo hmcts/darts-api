@@ -17,4 +17,7 @@ public interface AuthenticationController {
 
     @GetMapping("/logout")
     ModelAndView logout(@RequestHeader("Authorization") String authHeaderValue);
+
+    @GetMapping("/reset-password")
+    ModelAndView resetPassword();
 }

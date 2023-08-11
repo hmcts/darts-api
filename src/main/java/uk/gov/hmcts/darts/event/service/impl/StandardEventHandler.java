@@ -30,6 +30,4 @@ public class StandardEventHandler extends EventHandlerBase {
             eventPublisher.publishEvent(notifyEvent);
         }
     }
-
-
 }

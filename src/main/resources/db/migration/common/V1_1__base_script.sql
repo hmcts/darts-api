@@ -81,11 +81,12 @@
 --    add unique constraint on jud.judge_name
 --v39 remove origating_courtroom from court_case
 --v40 changed judge table to contain only (jud_id integer PK, judge_name character varying UK)
---    created table case_judge_ae to contain (cas_id, jud_id) composite PK
-
+--    created table case_judge_ae to contain (cas_id, jud_id) composite PK    
+--v41 add table automated_task
 
 -- List of Table Aliases
 -- annotation                 ANN
+-- automated_task             AUT
 -- case_judge_ae              CAJ
 -- case_retention             CAR
 -- case_retention_event       CRE
@@ -151,6 +152,19 @@ IS 'directly sourced from moj_annotation_s';
 
 COMMENT ON COLUMN annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
+
+
+CREATE TABLE automated_task
+(aut_id                     INTEGER                    NOT NULL
+,task_name                  CHARACTER VARYING          NOT NULL
+,task_description           CHARACTER VARYING          NOT NULL
+,cron_expression            CHARACTER VARYING          NOT NULL
+,cron_editable              BOOLEAN                    NOT NULL
+);
+
+COMMENT ON COLUMN automated_task.aut_id
+IS 'primary key of automated_task';
+
 
 CREATE TABLE case_judge_ae
 (cas_id                     INTEGER                          NOT NULL
@@ -905,6 +919,7 @@ IS 'internal Documentum primary key from dm_user_s';
 
 -- defaults for postgres sequences, datatype->bigint, increment->1, nocycle is default, owned by none
 CREATE SEQUENCE ann_seq CACHE 20;
+CREATE SEQUENCE aut_seq CACHE 20;
 CREATE SEQUENCE car_seq CACHE 20;
 CREATE SEQUENCE cre_seq CACHE 20;
 CREATE SEQUENCE cas_seq CACHE 20;

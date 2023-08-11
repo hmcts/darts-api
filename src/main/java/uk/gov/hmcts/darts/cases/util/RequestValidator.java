@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.cases.util;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import uk.gov.hmcts.darts.cases.exception.CaseError;
+import uk.gov.hmcts.darts.cases.exception.CaseApiError;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
@@ -24,7 +24,7 @@ public class RequestValidator {
         if (request.getDateFrom() != null
             && request.getDateTo() != null
             && request.getDateFrom().isAfter(request.getDateTo())) {
-            throw new DartsApiException(CaseError.INVALID_REQUEST, "The 'From' date cannot be after the 'To' date.");
+            throw new DartsApiException(CaseApiError.INVALID_REQUEST, "The 'From' date cannot be after the 'To' date.");
         }
     }
 
@@ -39,7 +39,7 @@ public class RequestValidator {
             request.getDateTo() == null,
             StringUtils.isBlank(request.getEventTextContains())
         })) {
-            throw new DartsApiException(CaseError.CRITERIA_TOO_BROAD);
+            throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
         }
     }
 
@@ -54,7 +54,7 @@ public class RequestValidator {
             request.getDateTo() == null,
             StringUtils.isBlank(request.getEventTextContains())
         })) {
-            throw new DartsApiException(CaseError.CRITERIA_TOO_BROAD);
+            throw new DartsApiException(CaseApiError.CRITERIA_TOO_BROAD);
         }
     }
 
@@ -69,7 +69,7 @@ public class RequestValidator {
             request.getDateTo() == null,
             StringUtils.isBlank(request.getEventTextContains())
         })) {
-            throw new DartsApiException(CaseError.NO_CRITERIA_SPECIFIED);
+            throw new DartsApiException(CaseApiError.NO_CRITERIA_SPECIFIED);
         }
     }
 }

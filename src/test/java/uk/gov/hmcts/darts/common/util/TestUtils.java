@@ -4,12 +4,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
 import org.apache.commons.io.FileUtils;
 import org.zalando.problem.jackson.ProblemModule;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases"})
 public final class TestUtils {
@@ -39,5 +46,31 @@ public final class TestUtils {
 
     public static String substituteHearingDateWithToday(String expectedResponse) {
         return expectedResponse.replace("todays_date", LocalDate.now().toString());
+    }
+
+    public static String readTempFileContent(final String annotationsFile) {
+        String xmlContent = "";
+
+        try (BufferedReader reader = Files.newBufferedReader(Path.of(annotationsFile))) {
+            String line;
+            StringBuilder content = new StringBuilder();
+            while (true) {
+                line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                content.append(line);
+            }
+            xmlContent = content.toString();
+        } catch (Exception e) {
+            fail("Error reading XML file: " + e.getMessage());
+        }
+
+        return xmlContent;
+    }
+
+    public static <T> T unmarshalXmlFile(Class<T> type, String xmlFile) throws JAXBException, IOException {
+        JAXBContext context = JAXBContext.newInstance(type);
+        return type.cast(context.createUnmarshaller().unmarshal(Files.newBufferedReader(Path.of(xmlFile))));
     }
 }

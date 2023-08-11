@@ -11,11 +11,13 @@ import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -41,14 +43,20 @@ public class AuthenticationExternalUserController implements AuthenticationContr
     @Override
     public SecurityToken handleOauthCode(String code) {
         String accessToken = authenticationService.handleOauthCode(code);
+        var securityTokenBuilder = SecurityToken.builder()
+            .accessToken(accessToken);
+
         try {
-            return SecurityToken.builder()
-                .accessToken(accessToken)
-                .userState(authorisationApi.getAuthorisation(parseEmailAddressFromAccessToken(accessToken)))
-                .build();
+            Optional<String> emailAddressOptional = parseEmailAddressFromAccessToken(accessToken);
+            if (emailAddressOptional.isPresent()) {
+                Optional<UserState> userStateOptional = authorisationApi.getAuthorisation(emailAddressOptional.get());
+                securityTokenBuilder.userState(userStateOptional.orElse(null));
+            }
         } catch (ParseException e) {
             throw new DartsApiException(AuthenticationError.FAILED_TO_PARSE_ACCESS_TOKEN, e);
         }
+
+        return securityTokenBuilder.build();
     }
 
     @Override
@@ -58,9 +66,18 @@ public class AuthenticationExternalUserController implements AuthenticationContr
         return new ModelAndView("redirect:" + url.toString());
     }
 
-    private String parseEmailAddressFromAccessToken(String accessToken) throws ParseException {
+    @Override
+    public ModelAndView resetPassword() {
+        URI url = authenticationService.resetPassword();
+        return new ModelAndView("redirect:" + url.toString());
+    }
+
+    private Optional<String> parseEmailAddressFromAccessToken(String accessToken) throws ParseException {
         SignedJWT jwt = SignedJWT.parse(accessToken);
         final List<String> emailAddresses = jwt.getJWTClaimsSet().getStringListClaim(EMAILS_CLAIM_NAME);
-        return emailAddresses.get(0);
+        if (emailAddresses == null || emailAddresses.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(emailAddresses.get(0));
     }
 }

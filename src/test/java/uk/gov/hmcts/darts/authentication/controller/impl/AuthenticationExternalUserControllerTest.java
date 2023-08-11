@@ -24,11 +24,13 @@ import java.net.URI;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -40,6 +42,7 @@ class AuthenticationExternalUserControllerTest {
 
     private static final URI DUMMY_AUTHORIZATION_URI = URI.create("https://www.example.com/authorization?param=value");
     private static final URI DUMMY_LOGOUT_URI = URI.create("https://www.example.com/logout?param=value");
+    private static final String DUMMY_CODE = "code";
 
     @InjectMocks
     private AuthenticationExternalUserController controller;
@@ -61,29 +64,45 @@ class AuthenticationExternalUserControllerTest {
     }
 
     @Test
-    void handleOauthCodeFromAzureWhenCodeIsReturned() throws JOSEException {
+    void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken());
+            .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
-            UserState.builder()
-                .userId(-1)
-                .userName("Test User")
-                .roles(Set.of(Role.builder()
-                                  .roleId(TRANSCRIPTION_COMPANY.getId())
-                                  .roleName(TRANSCRIPTION_COMPANY.toString())
-                                  .permissions(new HashSet<>())
-                                  .build()))
-                .build()
+            Optional.ofNullable(UserState.builder()
+                                    .userId(-1)
+                                    .userName("Test User")
+                                    .roles(Set.of(Role.builder()
+                                                      .roleId(TRANSCRIPTION_COMPANY.getId())
+                                                      .roleName(TRANSCRIPTION_COMPANY.toString())
+                                                      .permissions(new HashSet<>())
+                                                      .build()))
+                                    .build())
         );
 
-        SecurityToken securityToken = controller.handleOauthCode("code");
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
         assertNotNull(securityToken);
         assertNotNull(securityToken.getAccessToken());
         assertNotNull(securityToken.getUserState());
 
-        verify(authenticationService).handleOauthCode("code");
+        verify(authenticationService).handleOauthCode(DUMMY_CODE);
         verify(authorisationApi).getAuthorisation("test.user@example.com");
+    }
+
+    @Test
+    void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
+        when(authenticationService.handleOauthCode(anyString()))
+            .thenReturn(createDummyAccessToken(List.of("test.missing@example.com")));
+
+        when(authorisationApi.getAuthorisation(anyString())).thenReturn(Optional.empty());
+
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
+        assertNotNull(securityToken);
+        assertNotNull(securityToken.getAccessToken());
+        assertNull(securityToken.getUserState());
+
+        verify(authenticationService).handleOauthCode(DUMMY_CODE);
+        verify(authorisationApi).getAuthorisation("test.missing@example.com");
     }
 
     @Test
@@ -97,8 +116,19 @@ class AuthenticationExternalUserControllerTest {
         assertEquals("redirect:https://www.example.com/logout?param=value", modelAndView.getViewName());
     }
 
+    @Test
+    void resetPasswordShouldReturnResetPageAsRedirect() {
+        when(authenticationService.resetPassword())
+            .thenReturn(DUMMY_AUTHORIZATION_URI);
+
+        ModelAndView modelAndView = controller.resetPassword();
+
+        assertNotNull(modelAndView);
+        assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
+    }
+
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
-    private String createDummyAccessToken() throws JOSEException {
+    private String createDummyAccessToken(List<String> emails) throws JOSEException {
         RSAKey rsaKey = new RSAKeyGenerator(2048)
             .keyID("123")
             .generate();
@@ -112,7 +142,7 @@ class AuthenticationExternalUserControllerTest {
             .claim("nonce", "defaultNonce")
             .issueTime(new Date(1690969893))
             .claim("auth_time", new Date(1690969893))
-            .claim("emails", List.of("test.user@example.com"))
+            .claim("emails", emails)
             .claim("name", "Test User")
             .claim("given_name", "Test")
             .claim("family_name", "User")

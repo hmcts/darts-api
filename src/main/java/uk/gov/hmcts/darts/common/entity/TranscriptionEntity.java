@@ -34,8 +34,9 @@ public class TranscriptionEntity extends VersionedEntity {
     @JoinColumn(name = "cas_id", nullable = false)
     private CourtCaseEntity courtCase;
 
-    @Column(name = "ctr_id", nullable = false)
-    private Integer courtroomId;
+    @ManyToOne
+    @JoinColumn(name = "ctr_id", nullable = false)
+    private CourtroomEntity courtroom;
 
     @Column(name = "trt_id", nullable = false)
     private Integer transcriptionTypeId;
@@ -43,8 +44,9 @@ public class TranscriptionEntity extends VersionedEntity {
     @Column(name = "urg_id")
     private Integer transcriptionUrgencyId;
 
-    @Column(name = "hea_id")
-    private Integer hearingId;
+    @ManyToOne
+    @JoinColumn(name = "hea_id")
+    private HearingEntity hearing;
 
     @Column(name = "transcription_object_id", length = 16)
     private String legacyObjectId;

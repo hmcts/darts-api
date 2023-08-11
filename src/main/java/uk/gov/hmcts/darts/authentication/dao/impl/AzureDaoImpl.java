@@ -49,9 +49,11 @@ public class AzureDaoImpl implements AzureDao {
                 StandardCharsets.UTF_8
             );
             if (HttpStatus.SC_OK != response.status()) {
-                throw new AzureDaoException("Unexpected HTTP response code received from Azure",
-                                            parsedResponse,
-                                            response.status());
+                throw new AzureDaoException(
+                    "Unexpected HTTP response code received from Azure",
+                    parsedResponse,
+                    response.status()
+                );
             }
 
             ObjectMapper mapper = new ObjectMapper();
@@ -60,7 +62,7 @@ public class AzureDaoImpl implements AzureDao {
                 OAuthProviderRawResponse.class
             );
 
-            log.debug("Obtained access tokens for authorization code: {}, {}", code, tokenResponse);
+            log.debug("Obtained access token for authorization code: {}, {}", code, tokenResponse);
             return tokenResponse;
 
         } catch (IOException e) {
