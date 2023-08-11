@@ -4,12 +4,12 @@ import java.net.URI;
 
 public interface UriProvider {
 
-    URI getLoginUri();
+    URI getLoginUri(String redirectUri);
 
     URI getLandingPageUri();
 
-    URI getLogoutUri(String accessToken);
+    URI getLogoutUri(String accessToken, String redirectUri);
 
-    URI getResetPasswordUri();
+    URI getResetPasswordUri(String redirectUri);
 
 }

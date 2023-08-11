@@ -22,7 +22,12 @@ class ResetPasswordIntTest {
         "B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize?" +
         "client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&" +
         "scope=openid&prompt=login&response_type=id_token";
+    private static final String EXPECTED_REDIRECT_URL_WITH_OVERRIDE = "https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/" +
+        "B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize?" +
+        "client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fdarts-portal.com%2Fauth%2Fcallback&" +
+        "scope=openid&prompt=login&response_type=id_token";
     private static final String EXTERNAL_USER_RESET_PASSWORD_ENDPOINT = "/external-user/reset-password";
+    private static final String EXTERNAL_USER_RESET_PASSWORD_ENDPOINT_WITH_OVERRIDE = "/external-user/reset-password?redirect_uri=https://darts-portal.com/auth/callback";
 
 
     @Autowired
@@ -38,6 +43,19 @@ class ResetPasswordIntTest {
             .andExpect(header().string(
                 HttpHeaders.LOCATION,
                 EXPECTED_REDIRECT_URL
+            ));
+    }
+    
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void resetPasswordShouldReturnRedirectWithOverriddenRedirectUri() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_RESET_PASSWORD_ENDPOINT_WITH_OVERRIDE);
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isFound())
+            .andExpect(header().string(
+                HttpHeaders.LOCATION,
+                EXPECTED_REDIRECT_URL_WITH_OVERRIDE
             ));
     }
 

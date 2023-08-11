@@ -16,7 +16,7 @@ public class AuthenticationInternalUserController implements AuthenticationContr
     private static final String INTERNAL_USERS_NOT_SUPPORTED_MESSAGE = "Internal users not yet supported";
 
     @Override
-    public ModelAndView loginOrRefresh(String authHeaderValue) {
+    public ModelAndView loginOrRefresh(String authHeaderValue, String redirectUri) {
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
@@ -27,12 +27,12 @@ public class AuthenticationInternalUserController implements AuthenticationContr
     }
 
     @Override
-    public ModelAndView logout(String authHeaderValue) {
+    public ModelAndView logout(String authHeaderValue, String redirectUri) {
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 
     @Override
-    public ModelAndView resetPassword() {
+    public ModelAndView resetPassword(String redirectUri) {
         throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
     }
 

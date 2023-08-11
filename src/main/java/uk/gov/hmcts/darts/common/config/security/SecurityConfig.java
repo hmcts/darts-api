@@ -87,7 +87,7 @@ public class SecurityConfig {
                 filterChain.doFilter(request, response);
                 return;
             }
-            response.sendRedirect(uriProvider.getLoginUri().toString());
+            response.sendRedirect(uriProvider.getLoginUri(null).toString());
         }
     }
 }

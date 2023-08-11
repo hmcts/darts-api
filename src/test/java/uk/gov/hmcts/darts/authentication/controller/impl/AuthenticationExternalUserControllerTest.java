@@ -43,6 +43,7 @@ class AuthenticationExternalUserControllerTest {
     private static final URI DUMMY_AUTHORIZATION_URI = URI.create("https://www.example.com/authorization?param=value");
     private static final URI DUMMY_LOGOUT_URI = URI.create("https://www.example.com/logout?param=value");
     private static final String DUMMY_CODE = "code";
+    private static final String DUMMY_TOKEN = "token";
 
     @InjectMocks
     private AuthenticationExternalUserController controller;
@@ -54,10 +55,10 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
-        when(authenticationService.loginOrRefresh(null))
+        when(authenticationService.loginOrRefresh(null, null))
             .thenReturn(DUMMY_AUTHORIZATION_URI);
 
-        ModelAndView modelAndView = controller.loginOrRefresh(null);
+        ModelAndView modelAndView = controller.loginOrRefresh(null, null);
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
@@ -107,10 +108,10 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void logoutShouldReturnLogoutPageUriAsRedirectWhenTokenExistsInSession() {
-        when(authenticationService.logout(any()))
+        when(authenticationService.logout(DUMMY_TOKEN, null))
             .thenReturn(DUMMY_LOGOUT_URI);
 
-        ModelAndView modelAndView = controller.logout(anyString());
+        ModelAndView modelAndView = controller.logout("Bearer " + DUMMY_TOKEN, null);
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/logout?param=value", modelAndView.getViewName());
@@ -118,10 +119,10 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void resetPasswordShouldReturnResetPageAsRedirect() {
-        when(authenticationService.resetPassword())
+        when(authenticationService.resetPassword(any()))
             .thenReturn(DUMMY_AUTHORIZATION_URI);
 
-        ModelAndView modelAndView = controller.resetPassword();
+        ModelAndView modelAndView = controller.resetPassword(null);
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
