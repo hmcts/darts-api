@@ -64,7 +64,7 @@ public class NotificationEntity {
     private NotificationStatus status;
 
     @Column(name = ATTEMPTS)
-    private int attempts = 0;
+    private Integer attempts;
 
     @Column(name = TEMPLATE_VALUES)
     private String templateValues;

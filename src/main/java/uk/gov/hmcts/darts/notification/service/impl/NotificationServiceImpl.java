@@ -126,7 +126,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void incrementNotificationFailureCount(NotificationEntity notification) {
-        int attempts = notification.getAttempts();
+        Integer attempts = notification.getAttempts();
+        if (attempts == null) {
+            attempts = 0;
+        }
         attempts++;
         if (attempts <= maxRetry) {
             notification.setAttempts(attempts);
