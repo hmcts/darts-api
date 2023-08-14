@@ -6,16 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
 import java.io.BufferedReader;
@@ -27,7 +24,6 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -37,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.COURTHOUSE_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.END_TIME_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_BY_README_LABEL;
@@ -58,12 +53,6 @@ class ViqHeaderServiceImplTest {
 
     @InjectMocks
     ViqHeaderServiceImpl viqHeaderService;
-
-    @Mock
-    HearingRepository hearingRepository;
-
-    @Mock
-    AnnotationXmlGeneratorImpl annotationXmlGenerator;
 
     @TempDir
     File tempDirectory;
@@ -95,7 +84,7 @@ class ViqHeaderServiceImplTest {
     }
 
     @Test
-    void generatePlayListWithNullPlayListInfoThrowsException() throws IOException {
+    void generatePlayListWithNullPlayListInfoThrowsException() {
         String playlistOutputFile = tempDirectory.getAbsolutePath();
         assertThrows(DartsApiException.class, () -> viqHeaderService.generatePlaylist(null, playlistOutputFile));
     }
@@ -106,28 +95,25 @@ class ViqHeaderServiceImplTest {
     }
 
     @Test
-    void generateAnnotationReturnsXmlFile() throws JAXBException, IOException {
+    void generateAnnotationReturnsXmlFile() {
 
-        List<HearingEntity> hearingEntities = createHearingInfo();
-        OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
-        OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T12:00:00");
-        String annotationsOutputFile = tempDirectory.getAbsolutePath();
-
-        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(
-            hearingEntities);
+        HearingEntity hearingEntity = createHearingInfo();
+        OffsetDateTime startTime = OffsetDateTime.parse("2023-07-01T09:00:00Z");
+        OffsetDateTime endTime = OffsetDateTime.parse("2023-07-01T12:00:00Z");
+        Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
         String annotationsFile = viqHeaderService.generateAnnotation(
-            hearingEntities.get(0).getId(),
+            hearingEntity,
             startTime,
             endTime,
-            annotationsOutputFile
+            annotationsOutputFile.toString()
         );
 
         assertTrue(Files.exists(Path.of(annotationsFile)));
 
         String xmlContent = readTempFileContent(annotationsFile);
         assertTrue(xmlContent.contains("D=\"1\""));
-        assertTrue(xmlContent.contains("H=\"10\""));
+        assertTrue(xmlContent.contains("H=\"11\""));
         assertTrue(xmlContent.contains("L=\"operator\""));
         assertTrue(xmlContent.contains("M=\"7\""));
         assertTrue(xmlContent.contains("MIN=\"0\""));
@@ -140,21 +126,18 @@ class ViqHeaderServiceImplTest {
     }
 
     @Test
-    void generateAnnotationWithEventOutsideRequestTimeReturnsXmlFile() throws JAXBException, IOException {
+    void generateAnnotationWithEventOutsideRequestTimeReturnsXmlFile() {
 
-        List<HearingEntity> hearingEntities = createHearingInfo();
+        HearingEntity hearingEntity = createHearingInfo();
         OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
         OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:59:59");
-        String annotationsOutputFile = tempDirectory.getAbsolutePath();
-
-        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(
-            hearingEntities);
+        Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
         String annotationsFile = viqHeaderService.generateAnnotation(
-            hearingEntities.get(0).getId(),
+            hearingEntity,
             startTime,
             endTime,
-            annotationsOutputFile
+            annotationsOutputFile.toString()
         );
 
         assertTrue(Files.exists(Path.of(annotationsFile)));
@@ -166,16 +149,13 @@ class ViqHeaderServiceImplTest {
     @Test
     void testBuildAnnotationsDocumentWithInvalidPath() {
 
-        List<HearingEntity> hearingEntities = createHearingInfo();
+        HearingEntity hearingEntity = createHearingInfo();
         OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
         OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:59:59");
         String invalidPath = "/non_existent_directory/";
 
-        when(hearingRepository.findAllById(Collections.singleton(hearingEntities.get(0).getId()))).thenReturn(
-            hearingEntities);
-
         assertThrows(RuntimeException.class, () ->
-            viqHeaderService.generateAnnotation(hearingEntities.get(0).getId(), startTime, endTime, invalidPath));
+            viqHeaderService.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
     }
 
     @Test
@@ -229,19 +209,17 @@ class ViqHeaderServiceImplTest {
     }
 
 
-    private List<HearingEntity> createHearingInfo() {
-        List<HearingEntity> hearingEntities = new ArrayList<>();
-        List<EventEntity> entities = new ArrayList<>();
+    private HearingEntity createHearingInfo() {
+        List<EventEntity> eventEntities = new ArrayList<>();
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
-        EventEntity event = CommonTestDataUtil.createEvent("LOG", "Start Recording", hearingEntity,
-                                                           CommonTestDataUtil.createOffsetDateTime(EVENT_TIMESTAMP)
+        EventEntity eventEntity = CommonTestDataUtil.createEvent("LOG", "Start Recording", hearingEntity,
+                                                                 CommonTestDataUtil.createOffsetDateTime(EVENT_TIMESTAMP)
         );
 
-        entities.add(event);
-        hearingEntity.setEventList(entities);
-        hearingEntities.add(hearingEntity);
+        eventEntities.add(eventEntity);
+        hearingEntity.setEventList(eventEntities);
 
-        return hearingEntities;
+        return hearingEntity;
     }
 
 }

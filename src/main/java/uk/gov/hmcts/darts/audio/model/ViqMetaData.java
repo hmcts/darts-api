@@ -2,14 +2,12 @@ package uk.gov.hmcts.darts.audio.model;
 
 import lombok.Builder;
 import lombok.NonNull;
-import lombok.ToString;
 import lombok.Value;
 
 import java.util.Date;
 
 @Value
 @Builder
-@ToString
 public class ViqMetaData {
 
     @NonNull

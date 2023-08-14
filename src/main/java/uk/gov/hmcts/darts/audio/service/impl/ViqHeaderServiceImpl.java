@@ -18,16 +18,14 @@ import uk.gov.hmcts.darts.audio.util.XmlUtil;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,7 +42,6 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     private static final String DATE_TIME_ATTRIBUTE = "%d";
     private static final String INVALID_PLAYLIST_INFORMATION = "Invalid playlist information";
     public static final String PLAYLIST_XML_FILENAME = "playlist.xml";
-    public static final String ANNOTATION_XML_FILENAME = "annotations.xml";
     public static final String README_TXT_FILENAME = "Readme.txt";
     public static final String COURTHOUSE_README_LABEL = "Courthouse";
     public static final String RAISED_BY_README_LABEL = "Raised by";
@@ -52,8 +49,6 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     public static final String END_TIME_README_LABEL = "End Time";
     public static final String REQUEST_TYPE_README_LABEL = "Type";
     public static final String README_FORMAT = ": %s";
-
-    private final HearingRepository hearingRepository;
 
     @Override
     public String generatePlaylist(Set<PlaylistInfo> playlistInfos, String outputFileLocation) {
@@ -84,10 +79,9 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
 
 
     @Override
-    public String generateAnnotation(Integer hearingId, OffsetDateTime startTime, OffsetDateTime endTime,
-                                     String outputFileLocation) {
-        List<HearingEntity> hearingEntities = hearingRepository.findAllById(Collections.singleton(hearingId));
-        List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntities, startTime, endTime);
+    public String generateAnnotation(HearingEntity hearingEntity, OffsetDateTime startTime, OffsetDateTime endTime,
+                                     String annotationsOutputFile) {
+        List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntity, startTime, endTime);
 
         ViqAnnotationData annotationData = ViqAnnotationData.builder()
             .annotationsStartTime(startTime)
@@ -96,7 +90,8 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
 
         try {
             OutboundDocumentGenerator xmlDocumentGenerator = new AnnotationXmlGeneratorImpl();
-            return xmlDocumentGenerator.generateAndWriteXmlFile(annotationData, outputFileLocation).toString();
+            return xmlDocumentGenerator.generateAndWriteXmlFile(annotationData, Path.of(annotationsOutputFile))
+                .toString();
 
         } catch (IOException | TransformerException | ParserConfigurationException exception) {
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
@@ -149,15 +144,13 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     }
 
     private List<EventEntity> getHearingEventsByStartAndEndTime(
-        List<HearingEntity> hearingEntities,
+        HearingEntity hearingEntity,
         OffsetDateTime startTime,
         OffsetDateTime endTime) {
 
-        return hearingEntities.stream()
-            .map(h -> h.getEventList())
-            .flatMap(Collection::stream)
-            .filter(e -> !e.getTimestamp().isBefore(startTime))
-            .filter(e -> !e.getTimestamp().isAfter(endTime))
+        return hearingEntity.getEventList().stream()
+            .filter(eventEntity -> !eventEntity.getTimestamp().isBefore(startTime))
+            .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime))
             .sorted((t1, t2) -> t1.getTimestamp().compareTo(t2.getTimestamp()))
             .collect(Collectors.toList());
     }

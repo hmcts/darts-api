@@ -13,20 +13,23 @@ import uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,17 +39,17 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
 
-@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
+@SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "PMD.ExcessiveImports"})
 @ExtendWith(MockitoExtension.class)
 class OutboundFileZipGeneratorImplTest {
 
     // Any value that exceeds the size of the read buffer of the tested impl
     private static final int DUMMY_FILE_SIZE = 2048;
     private static final Instant SOME_INSTANT = Instant.now();
+    private static final Instant SOME_START_TIME = SOME_INSTANT.minus(45, ChronoUnit.MINUTES);
+    private static final Instant SOME_END_TIME = SOME_INSTANT.minus(15, ChronoUnit.MINUTES);
 
     private static final Integer TEST_REQUESTER = 1234;
-    private static final String OFFSET_T_09_00_00_Z = "2023-05-31T09:00:00Z";
-    private static final String OFFSET_T_12_00_00_Z = "2023-05-31T12:00:00Z";
 
     private OutboundFileZipGeneratorImpl outboundFileZipGenerator;
     private Path tempDirectory;
@@ -54,12 +57,9 @@ class OutboundFileZipGeneratorImplTest {
     @Mock
     private AudioConfigurationProperties audioConfigurationProperties;
 
-    @Mock
-    private HearingRepository mockHearingRepository;
-
     @BeforeEach
     void setUp() throws IOException {
-        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(mockHearingRepository);
+        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl();
 
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(audioConfigurationProperties, viqHeaderService);
 
@@ -93,47 +93,63 @@ class OutboundFileZipGeneratorImplTest {
 
         List<String> paths = readZipStructure(path);
 
-        assertEquals(5, paths.size());
+        assertEquals(7, paths.size());
         assertThat(paths, hasItem("0001/0001.a00"));
         assertThat(paths, hasItem("0001/0001.a01"));
         assertThat(paths, hasItem("0002/0002.a00"));
         assertThat(paths, hasItem("readMe.txt"));
         assertThat(paths, hasItem("playlist.xml"));
+        assertThat(paths, hasItem("0001/annotations.xml"));
+        assertThat(paths, hasItem("0002/annotations.xml"));
     }
 
     private MediaRequestEntity createDummyMediaRequestEntity() {
+
         HearingEntity mockHearingEntity = mock(HearingEntity.class);
         CourtCaseEntity mockCourtCaseEntity = mock(CourtCaseEntity.class);
         CourtroomEntity mockCourtroomEntity = mock(CourtroomEntity.class);
-        CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockHearingEntity.getCourtroom()).thenReturn(mockCourtroomEntity);
         when(mockHearingEntity.getCourtCase()).thenReturn(mockCourtCaseEntity);
+
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setCourtroom(mockCourtroomEntity);
+        EventHandlerEntity eventType = mock(EventHandlerEntity.class);
+        eventEntity.setEventType(eventType);
+        eventEntity.setLegacyEventId(1);
+        eventEntity.setEventName("Jury Returned");
+        eventEntity.setEventText("Start Event");
+        OffsetDateTime utcStartTime = OffsetDateTime.ofInstant(SOME_START_TIME, UTC);
+        eventEntity.setTimestamp(utcStartTime.plusMinutes(5));
+
+        when(mockHearingEntity.getEventList()).thenReturn(List.of(eventEntity));
+        CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
         when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");
         when(mockCourtCaseEntity.getCaseNumber()).thenReturn("T20190024");
 
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setId(2023);
         mediaRequestEntity.setHearing(mockHearingEntity);
-        mediaRequestEntity.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
-        mediaRequestEntity.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
+        mediaRequestEntity.setStartTime(utcStartTime);
+        OffsetDateTime utcEndTime = OffsetDateTime.ofInstant(SOME_END_TIME, UTC);
+        mediaRequestEntity.setEndTime(utcEndTime);
         mediaRequestEntity.setRequestor(TEST_REQUESTER);
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setAttempts(0);
-        OffsetDateTime now = OffsetDateTime.now();
-        mediaRequestEntity.setCreatedDateTime(now);
-        mediaRequestEntity.setLastUpdated(now);
+        OffsetDateTime utcNow = OffsetDateTime.ofInstant(SOME_INSTANT, UTC);
+        mediaRequestEntity.setCreatedDateTime(utcNow);
+        mediaRequestEntity.setLastUpdated(utcNow);
         return mediaRequestEntity;
     }
 
     private AudioFileInfo createDummyFileAndAudioFileInfo(int channel) {
         Path path = createDummyFile();
-        return new AudioFileInfo(SOME_INSTANT, SOME_INSTANT, path.toString(), channel);
+        return new AudioFileInfo(SOME_START_TIME, SOME_END_TIME, path.toString(), channel);
     }
 
     private Path createDummyFile() {
-        var tempFilename = UUID.randomUUID()
-            .toString();
+        var tempFilename = UUID.randomUUID().toString();
         try {
             return Files.write(tempDirectory.resolve(tempFilename), new byte[DUMMY_FILE_SIZE]);
         } catch (IOException e) {
