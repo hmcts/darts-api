@@ -29,7 +29,7 @@ services:
       - darts-network
   darts-db:
     container_name: darts-db
-    image: postgres:15.3-alpine
+    image: postgres:15.4-alpine
     restart: always
     environment:
       - POSTGRES_USER=postgres
