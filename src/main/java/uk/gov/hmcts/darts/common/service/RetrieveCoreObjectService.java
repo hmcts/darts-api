@@ -8,8 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 
 import java.time.LocalDate;
 
@@ -36,4 +39,13 @@ public interface RetrieveCoreObjectService {
 
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     JudgeEntity retrieveOrCreateJudge(String judgeName);
+
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    DefendantEntity retrieveOrCreateDefendant(String defendantName, CourtCaseEntity courtCase);
+
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    DefenceEntity retrieveOrCreateDefence(String defenceName, CourtCaseEntity courtCase);
+
+    @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
+    ProsecutorEntity retrieveOrCreateProsecutor(String prosecutorName, CourtCaseEntity courtCase);
 }
