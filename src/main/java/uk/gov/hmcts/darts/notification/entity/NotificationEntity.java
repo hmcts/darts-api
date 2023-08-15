@@ -53,7 +53,7 @@ public class NotificationEntity {
     private String eventId;
 
     @JoinColumn(name = CASE_ID)
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {PERSIST, MERGE})
     private CourtCaseEntity courtCase;
 
     @Column(name = EMAIL_ADDRESS)
@@ -64,7 +64,7 @@ public class NotificationEntity {
     private NotificationStatus status;
 
     @Column(name = ATTEMPTS)
-    private int attempts;
+    private Integer attempts;
 
     @Column(name = TEMPLATE_VALUES)
     private String templateValues;
