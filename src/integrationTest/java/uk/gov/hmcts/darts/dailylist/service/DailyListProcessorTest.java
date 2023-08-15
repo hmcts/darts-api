@@ -37,6 +37,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class DailyListProcessorTest extends IntegrationBase {
 
     static final ObjectMapper MAPPER = new ObjectMapper();
+    public static final String SWANSEA = "SWANSEA";
+    public static final String CASE_NUMBER_1 = "42GD2391421";
+    public static final String CASE_NUMBER_2 = "42GD2391433";
+    public static final String COURTROOM_1 = "1";
+    public static final String COURTROOM_2 = "2";
 
     @Autowired
     DailyListProcessor dailyListProcessor;
@@ -66,9 +71,9 @@ class DailyListProcessorTest extends IntegrationBase {
     @Transactional
     void dailyListProcessorSingleDailyList() throws IOException {
         courthouseRepository.deleteAll();
-        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
-        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
-        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithNameAndCode(SWANSEA, 457);
+        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_1));
+        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_2));
 
         DailyListEntity dailyListEntity = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.CPP),
                 swanseaCourtEntity, "tests/dailyListProcessorTest/dailyList.json");
@@ -81,9 +86,9 @@ class DailyListProcessorTest extends IntegrationBase {
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        CourtCaseEntity newCase1 = caseRepository.findById(1).get();
-        assertEquals("42GD2391421", newCase1.getCaseNumber());
-        assertEquals("SWANSEA", newCase1.getCourthouse().getCourthouseName());
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_1, SWANSEA).get();
+        assertEquals(CASE_NUMBER_1, newCase1.getCaseNumber());
+        assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
         assertEquals(1, newCase1.getDefendantList().size());
         assertEquals(1, newCase1.getDefenceList().size());
         assertEquals(1, newCase1.getProsecutorList().size());
@@ -91,14 +96,14 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getHearings().size());
 
 
-        HearingEntity newHearing1 = hearingRepository.findById(1).get();
+        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
-        assertEquals("1", newHearing1.getCourtroom().getName());
+        assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
 
-        CourtCaseEntity newCase2 = caseRepository.findById(2).get();
-        assertEquals("42GD2391433", newCase2.getCaseNumber());
-        assertEquals("SWANSEA", newCase2.getCourthouse().getCourthouseName());
+        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_2, SWANSEA).get();
+        assertEquals(CASE_NUMBER_2, newCase2.getCaseNumber());
+        assertEquals(SWANSEA, newCase2.getCourthouse().getCourthouseName());
         assertEquals(1, newCase2.getDefendantList().size());
         assertEquals(1, newCase2.getDefenceList().size());
         assertEquals(1, newCase2.getProsecutorList().size());
@@ -106,9 +111,9 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getHearings().size());
 
 
-        HearingEntity newHearing2 = hearingRepository.findById(2).get();
+        HearingEntity newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now()).get(0);
         assertEquals(LocalDate.now(), newHearing2.getHearingDate());
-        assertEquals("2", newHearing2.getCourtroom().getName());
+        assertEquals(COURTROOM_2, newHearing2.getCourtroom().getName());
         assertEquals(1, newHearing2.getJudges().size());
     }
 
