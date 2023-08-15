@@ -39,7 +39,7 @@ public class CourthouseEntity {
     private String courthouseName;
 
     @OneToMany(mappedBy = "courthouse", cascade = {PERSIST, MERGE})
-    private List<CourtroomEntity> courtrooms;
+    private List<CourtroomEntity> courtrooms = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_ts")

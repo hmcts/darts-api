@@ -6,6 +6,7 @@ import java.net.URI;
 
 public interface DartsApiError {
 
+
     String getErrorTypePrefix();
 
     String getErrorTypeNumeric();

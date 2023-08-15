@@ -10,4 +10,18 @@ import java.util.Optional;
 public interface JudgeRepository extends JpaRepository<JudgeEntity, Integer> {
 
     Optional<JudgeEntity> findByNameIgnoreCase(String name);
+
+    default JudgeEntity createJudge(String judgeName) {
+        JudgeEntity judge = new JudgeEntity();
+        judge.setName(judgeName);
+        this.saveAndFlush(judge);
+        return judge;
+    }
+
+
+
+
+
+
+
 }

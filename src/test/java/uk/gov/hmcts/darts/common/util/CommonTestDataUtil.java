@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -13,12 +14,16 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @UtilityClass
 public class CommonTestDataUtil {
@@ -26,7 +31,7 @@ public class CommonTestDataUtil {
     public static EventEntity createEvent(String eventName, String eventText, HearingEntity hearingEntity) {
 
         return createEvent(eventName, eventText,
-                           hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
+                hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
@@ -207,4 +212,16 @@ public class CommonTestDataUtil {
         request.setDefenders(Lists.newArrayList("UpdateDefender1"));
         return request;
     }
+
+    public DailyListEntity createDailyList(LocalTime time, String source, String filelocation) throws IOException {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
+        dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(filelocation)));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setSource(source);
+        return dailyListEntity;
+    }
+
+
 }
