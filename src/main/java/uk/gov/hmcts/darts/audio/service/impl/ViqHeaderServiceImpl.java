@@ -1,12 +1,11 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.xml.bind.JAXBException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
-import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
 import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
@@ -39,7 +38,6 @@ import static java.time.format.FormatStyle.LONG;
 import static java.util.Locale.UK;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 @SuppressWarnings("PMD.ExcessiveImports")
 public class ViqHeaderServiceImpl implements ViqHeaderService {
@@ -56,6 +54,12 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     public static final String END_TIME_README_LABEL = "End Time";
     public static final String REQUEST_TYPE_README_LABEL = "Type";
     public static final String README_FORMAT = ": %s";
+
+    private final OutboundDocumentGenerator annotationXmlGenerator;
+
+    public ViqHeaderServiceImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator) {
+        this.annotationXmlGenerator = annotationXmlGenerator;
+    }
 
     @Override
     public String generatePlaylist(Set<PlaylistInfo> playlistInfos, String outputFileLocation) {
@@ -96,10 +100,8 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             .build();
 
         try {
-            OutboundDocumentGenerator xmlDocumentGenerator = new AnnotationXmlGeneratorImpl();
-            return xmlDocumentGenerator.generateAndWriteXmlFile(annotationData, Path.of(annotationsOutputFile))
+            return annotationXmlGenerator.generateAndWriteXmlFile(annotationData, Path.of(annotationsOutputFile))
                 .toString();
-
         } catch (IOException | TransformerException | ParserConfigurationException exception) {
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -8,22 +8,20 @@ import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
 @Component
-@Slf4j
+@Qualifier("annotationXmlGenerator")
 public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
 
-    private static final ZoneId EUROPE_LONDON_ZONE = ZoneId.of("Europe/London");
     private static final String ANNOTATION_ROOT_ELEMENT_NAME = "cfMetaFile";
     private static final String ANNOTATION_ANNOTATION_ELEMENT_NAME = "annotations";
     private static final String ANNOTATION_COUNT_ATTRIBUTE_NAME = "count";
@@ -43,8 +41,11 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
     private static final String ANNOTATION_EVENT_ATTRIBUTE_RESTRICTED = "R";
     private static final String ANNOTATION_EVENT_ATTRIBUTE_LAPSED = "P";
 
-    public AnnotationXmlGeneratorImpl() throws TransformerConfigurationException, ParserConfigurationException {
+    private final DateConverters dateConverters;
+
+    public AnnotationXmlGeneratorImpl(DateConverters dateConverters) throws ParserConfigurationException {
         super();
+        this.dateConverters = dateConverters;
     }
 
     @Override
@@ -74,7 +75,7 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
         // Events
         for (EventEntity event : annotationData.getEvents()) {
 
-            ZonedDateTime localEventTimestamp = event.getTimestamp().atZoneSameInstant(EUROPE_LONDON_ZONE);
+            ZonedDateTime localEventTimestamp = dateConverters.offsetDateTimeToLegacyDateTime(event.getTimestamp());
 
             Element eventElement = document.createElement(String.format(
                 "%s%d",

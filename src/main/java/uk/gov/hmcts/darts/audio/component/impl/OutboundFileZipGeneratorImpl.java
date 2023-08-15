@@ -13,12 +13,12 @@ import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -30,16 +30,16 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static uk.gov.hmcts.darts.common.util.DateConverters.EUROPE_LONDON_ZONE;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
-    private static final ZoneId EUROPE_LONDON_ZONE = ZoneId.of("Europe/London");
-
     private final AudioConfigurationProperties audioConfigurationProperties;
-
     private final ViqHeaderService viqHeaderService;
+    private final DateConverters dateConverters;
 
     /**
      * Produce a structured zip file containing audio files.
@@ -82,8 +82,8 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
         return ViqMetaData.builder()
             .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
             .raisedBy(null)
-            .startTime(mediaRequestEntity.getStartTime().atZoneSameInstant(EUROPE_LONDON_ZONE))
-            .endTime(mediaRequestEntity.getEndTime().atZoneSameInstant(EUROPE_LONDON_ZONE))
+            .startTime(dateConverters.offsetDateTimeToLegacyDateTime(mediaRequestEntity.getStartTime()))
+            .endTime(dateConverters.offsetDateTimeToLegacyDateTime(mediaRequestEntity.getEndTime()))
             .build();
     }
 

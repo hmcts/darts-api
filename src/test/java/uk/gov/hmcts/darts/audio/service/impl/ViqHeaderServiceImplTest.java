@@ -2,18 +2,21 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
+import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,12 +27,12 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.xml.parsers.ParserConfigurationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,24 +44,28 @@ import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.README_TXT_FILENAME;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.REQUEST_TYPE_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.START_TIME_README_LABEL;
+import static uk.gov.hmcts.darts.common.util.DateConverters.EUROPE_LONDON_ZONE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.readTempFileContent;
 import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
 
 
-@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports",
+    "PMD.TooManyMethods"})
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class ViqHeaderServiceImplTest {
 
-    private static final ZoneId EUROPE_LONDON_ZONE = ZoneId.of("Europe/London");
     private static final String CASE_NUMBER = "T2023041301_1";
 
-    @InjectMocks
-    ViqHeaderServiceImpl viqHeaderService;
+    private static ViqHeaderService viqHeaderService;
 
     @TempDir
-    File tempDirectory;
+    private File tempDirectory;
 
+    @BeforeAll
+    static void beforeAll() throws ParserConfigurationException {
+        viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(new DateConverters()));
+    }
 
     @Test
     void generatePlaylistReturnsXmlFile() throws IOException, JAXBException {

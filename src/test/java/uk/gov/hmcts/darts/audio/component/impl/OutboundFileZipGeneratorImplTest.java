@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.xml.parsers.ParserConfigurationException;
 
 import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -58,10 +60,16 @@ class OutboundFileZipGeneratorImplTest {
     private AudioConfigurationProperties audioConfigurationProperties;
 
     @BeforeEach
-    void setUp() throws IOException {
-        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl();
+    void setUp() throws IOException, ParserConfigurationException {
+        DateConverters dateConverters = new DateConverters();
 
-        outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(audioConfigurationProperties, viqHeaderService);
+        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(dateConverters));
+
+        outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(
+            audioConfigurationProperties,
+            viqHeaderService,
+            dateConverters
+        );
 
         var tempDirectoryName = UUID.randomUUID().toString();
         tempDirectory = Files.createTempDirectory(tempDirectoryName);

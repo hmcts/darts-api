@@ -17,7 +17,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -32,7 +31,7 @@ public abstract class AbstractDocumentGenerator implements OutboundDocumentGener
     private DocumentBuilder documentBuilder;
     private TransformerFactory transformerFactory;
 
-    AbstractDocumentGenerator() throws TransformerConfigurationException, ParserConfigurationException {
+    AbstractDocumentGenerator() throws ParserConfigurationException {
         DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
         documentBuilder = documentFactory.newDocumentBuilder();
 
