@@ -33,11 +33,6 @@ public enum CaseApiError implements DartsApiError {
         "104",
         HttpStatus.NOT_FOUND,
         "The requested case cannot be found"
-    ),
-    COURTHOUSE_PROVIDED_DOES_NOT_EXIST(
-        "105",
-        HttpStatus.BAD_REQUEST,
-        "Provided courthouse does not exist"
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";
