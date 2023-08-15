@@ -109,13 +109,23 @@ checkstyle {
   getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
+var sourceSetsCopy = sourceSets
 pmd {
   toolVersion = "6.55.0"
-  sourceSets = [sourceSets.main, sourceSets.test, sourceSets.functionalTest, sourceSets.integrationTest, sourceSets.smokeTest]
+  sourceSets = [sourceSetsCopy.main]
   reportsDir = file("$project.buildDir/reports/pmd")
   // https://github.com/pmd/pmd/issues/876
   ruleSets = []
-  ruleSetFiles = files("config/pmd/ruleset.xml")
+  ruleSetFiles = files("config/pmd/main-ruleset.xml")
+}
+
+pmd {
+  toolVersion = "6.55.0"
+  sourceSets = [sourceSetsCopy.test, sourceSetsCopy.functionalTest, sourceSetsCopy.integrationTest, sourceSetsCopy.smokeTest]
+  reportsDir = file("$project.buildDir/reports/pmd")
+  // https://github.com/pmd/pmd/issues/876
+  ruleSets = []
+  ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 
 jacocoTestReport {
