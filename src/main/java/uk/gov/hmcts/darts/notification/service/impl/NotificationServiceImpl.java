@@ -39,8 +39,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final TemplateIdHelper templateIdHelper;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
     private static final List<NotificationStatus> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
-          NotificationStatus.OPEN,
-          NotificationStatus.PROCESSING
+        NotificationStatus.OPEN,
+        NotificationStatus.PROCESSING
     );
 
     @Value("${darts.notification.max_retry_attempts}")
@@ -53,10 +53,10 @@ public class NotificationServiceImpl implements NotificationService {
         String[] emailAddressList = emailAddresses.split(",");
         for (String emailAddress : emailAddressList) {
             saveNotificationToDb(
-                  request.getEventId(),
-                  request.getCaseId(),
-                  StringUtils.trim(emailAddress),
-                  request.getTemplateValues()
+                request.getEventId(),
+                request.getCaseId(),
+                StringUtils.trim(emailAddress),
+                request.getTemplateValues()
             );
         }
     }
@@ -79,7 +79,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @SchedulerLock(name = "NotificationService_sendNotificationToGovNotify",
-          lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
+        lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
         log.debug("sendNotificationToGovNotify scheduler started.");
@@ -87,7 +87,12 @@ public class NotificationServiceImpl implements NotificationService {
         List<NotificationEntity> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);
         int notificationCounter = 0;
         for (NotificationEntity notification : notificationEntries) {
-            log.trace("Processing {} of {}, Id {}.", ++notificationCounter, notificationEntries.size(), notification.getId());
+            log.trace(
+                "Processing {} of {}, Id {}.",
+                ++notificationCounter,
+                notificationEntries.size(),
+                notification.getId()
+            );
             String templateId;
             try {
                 templateId = templateIdHelper.findTemplateId(notification.getEventId());
@@ -105,10 +110,10 @@ public class NotificationServiceImpl implements NotificationService {
                 updateNotificationStatus(notification, NotificationStatus.FAILED);
             } catch (NotificationClientException e) {
                 log.error(
-                      "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
-                      notification.getId(),
-                      govNotifyRequest,
-                      e.getMessage()
+                    "GovNotify has responded back with an error while trying to send Notification Id {}. Request={}, error={}",
+                    notification.getId(),
+                    govNotifyRequest,
+                    e.getMessage()
                 );
                 incrementNotificationFailureCount(notification);
             }
@@ -121,7 +126,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private void incrementNotificationFailureCount(NotificationEntity notification) {
-        int attempts = notification.getAttempts();
+        Integer attempts = notification.getAttempts();
+        if (attempts == null) {
+            attempts = 0;
+        }
         attempts++;
         if (attempts <= maxRetry) {
             notification.setAttempts(attempts);

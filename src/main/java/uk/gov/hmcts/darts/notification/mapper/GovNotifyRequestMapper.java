@@ -29,8 +29,9 @@ public class GovNotifyRequestMapper {
     private Map<String, String> createParameterMap(NotificationEntity notification) throws JsonProcessingException {
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
         parameterMap.put(
-              NotificationConstants.ParameterMapValues.CASE_ID,
-              String.valueOf(notification.getCourtCase().getId()));
+            NotificationConstants.ParameterMapValues.CASE_NUMBER,
+            String.valueOf(notification.getCourtCase().getCaseNumber())
+        );
         String templateValuesStr = notification.getTemplateValues();
         if (StringUtils.isNotBlank(templateValuesStr)) {
             Map<String, String> keyValues;
