@@ -47,9 +47,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/cases'
-
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
     post:
       tags:
         - Cases
@@ -71,8 +74,21 @@ paths:
                 $ref: '#/components/schemas/post_case_response'
         '400':
           description: A required parameter is missing or an invalid datatype or value was provided for property.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "COMMON_100"
+                title: "Provided courthouse does not exist"
+                status: 400
+                detail: "Courthouse '' not found."
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /cases/{caseId}:
     get:
@@ -95,9 +111,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
-
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /cases/{caseId}/hearings:
     get:
@@ -120,9 +139,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/hearings'
-
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /cases/search:
     get:
@@ -198,11 +220,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/advancedSearchResult'
-
         '400':
           description: A required parameter is missing or an invalid.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_100"
+                title: "Too many results have been returned. Please change search criteria."
+                status: 400
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
 components:
   schemas:
