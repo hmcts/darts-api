@@ -27,6 +27,7 @@ services:
       - "4550:4550"
     networks:
       - darts-network
+
   darts-db:
     container_name: darts-db
     image: postgres:15.4-alpine
@@ -35,6 +36,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=darts
+    command: ["postgres", "-c", "log_statement=all"]
     ports:
       - "5432:5432"
     volumes:
