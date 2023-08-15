@@ -27,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -36,13 +35,17 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import static java.lang.String.format;
+import static java.time.format.FormatStyle.LONG;
+import static java.util.Locale.UK;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@SuppressWarnings("PMD.ExcessiveImports")
 public class ViqHeaderServiceImpl implements ViqHeaderService {
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)
+        .withLocale(UK);
     private static final String DATE_TIME_ATTRIBUTE = "%d";
     private static final String INVALID_PLAYLIST_INFORMATION = "Invalid playlist information";
     public static final String PLAYLIST_XML_FILENAME = "playlist.xml";
