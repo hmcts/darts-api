@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,39 +23,56 @@ import java.util.Optional;
 @Slf4j
 public class CourthouseServiceImpl implements CourthouseService {
 
-    private CourthouseRepository repository;
+    private CourthouseRepository courthouseRepository;
+    private RetrieveCoreObjectService retrieveCoreObjectService;
 
     private CourthouseToCourthouseEntityMapper mapper;
 
     @Override
     public void deleteCourthouseById(Integer id) {
-        repository.deleteById(id);
+        courthouseRepository.deleteById(id);
     }
 
     @Override
-    public CourthouseEntity amendCourthouseById(uk.gov.hmcts.darts.courthouse.model.Courthouse courthouse, Integer id) {
-        CourthouseEntity originalEntity = repository.getReferenceById(id);
+    public CourthouseEntity amendCourthouseById(Courthouse courthouse, Integer id) {
+        checkCourthouseIsUnique(courthouse);
 
+        CourthouseEntity originalEntity = courthouseRepository.getReferenceById(id);
         originalEntity.setCourthouseName(courthouse.getCourthouseName());
         originalEntity.setCode(courthouse.getCode());
 
-        return repository.saveAndFlush(originalEntity);
+        return courthouseRepository.saveAndFlush(originalEntity);
     }
 
     @Override
     public CourthouseEntity getCourtHouseById(Integer id) {
-        return repository.getReferenceById(id);
+        return courthouseRepository.getReferenceById(id);
     }
 
     @Override
     public List<CourthouseEntity> getAllCourthouses() {
-        return repository.findAll();
+        return courthouseRepository.findAll();
     }
 
     @Override
-    public CourthouseEntity addCourtHouse(uk.gov.hmcts.darts.courthouse.model.Courthouse courthouse) {
+    public CourthouseEntity addCourtHouse(Courthouse courthouse) {
+        checkCourthouseIsUnique(courthouse);
         CourthouseEntity mappedEntity = this.mapper.mapToEntity(courthouse);
-        return repository.saveAndFlush(mappedEntity);
+        return courthouseRepository.saveAndFlush(mappedEntity);
+    }
+
+    private void checkCourthouseIsUnique(Courthouse courthouse) {
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouse.getCourthouseName());
+        if (foundCourthouse.isPresent()) {
+            throw new DartsApiException(CourthouseApiError.COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS);
+        }
+        if (courthouse.getCode() != null) {
+            foundCourthouse = courthouseRepository.findByCode(courthouse.getCode());
+            if (foundCourthouse.isPresent()) {
+                throw new DartsApiException(CourthouseApiError.COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS);
+            }
+
+        }
     }
 
 
@@ -72,7 +93,7 @@ public class CourthouseServiceImpl implements CourthouseService {
         if (foundCourthouse.getCode() == null && courthouseCode != null) {
             //update courthouse in database with new code
             foundCourthouse.setCode(courthouseCode);
-            repository.saveAndFlush(foundCourthouse);
+            courthouseRepository.saveAndFlush(foundCourthouse);
         } else {
             if (!StringUtils.equalsIgnoreCase(foundCourthouse.getCourthouseName(), courthouseName)
                 || (courthouseCode != null && !Objects.equals(courthouseCode, foundCourthouse.getCode()))) {
@@ -86,11 +107,11 @@ public class CourthouseServiceImpl implements CourthouseService {
         String courthouseNameUC = StringUtils.upperCase(courthouseName);
         Optional<CourthouseEntity> courthouseOptional = Optional.empty();
         if (courthouseCode != null) {
-            courthouseOptional = repository.findByCode(courthouseCode.shortValue());
+            courthouseOptional = courthouseRepository.findByCode(courthouseCode.shortValue());
         }
         if (courthouseOptional.isEmpty()) {
             //code not found, lookup name instead
-            courthouseOptional = repository.findByCourthouseNameIgnoreCase(courthouseNameUC);
+            courthouseOptional = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseNameUC);
             if (courthouseOptional.isEmpty()) {
                 throw new CourthouseNameNotFoundException(courthouseNameUC);
             }
