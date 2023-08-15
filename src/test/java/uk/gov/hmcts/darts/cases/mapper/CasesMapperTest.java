@@ -34,7 +34,6 @@ import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefendantL
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createProsecutorList;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
 class CasesMapperTest {
