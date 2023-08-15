@@ -36,7 +36,6 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createListOfJudges
 import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createListOfProsecutor;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 class CaseControllerTest extends IntegrationBase {
 
     public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";

@@ -19,7 +19,6 @@ import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourtho
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouseWithRoom;
 
-@SuppressWarnings("PMD.TooManyMethods")
 class InterpreterUsedHandlerTest extends IntegrationBase {
 
     public static final String SOME_COURTHOUSE = "some-courthouse";
@@ -57,10 +56,10 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                          .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                          .courthouse(SOME_COURTHOUSE)
-                                          .courtroom(SOME_ROOM)
-                                          .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var courtCase =
             caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
@@ -83,10 +82,10 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                          .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                          .courthouse(SOME_COURTHOUSE)
-                                          .courtroom(SOME_ROOM)
-                                          .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -120,10 +119,10 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                          .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                          .courthouse(SOME_COURTHOUSE)
-                                          .courtroom(SOME_OTHER_ROOM)
-                                          .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_OTHER_ROOM)
+                                    .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -159,10 +158,10 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                          .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                          .courthouse(SOME_COURTHOUSE)
-                                          .courtroom(SOME_ROOM)
-                                          .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,

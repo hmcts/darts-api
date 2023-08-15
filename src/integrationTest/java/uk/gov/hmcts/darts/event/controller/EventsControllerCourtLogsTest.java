@@ -30,7 +30,6 @@ import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateT
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
     public static final String NEW_CASE = "Case0000001";

@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class EventTestData {
 
     public static EventEntity someMinimalEvent() {

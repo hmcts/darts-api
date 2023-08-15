@@ -17,7 +17,6 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class EventEntityToCourtLogMapperTest {
 

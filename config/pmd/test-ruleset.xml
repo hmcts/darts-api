@@ -47,6 +47,7 @@
     <exclude name="DataClass"/>
     <exclude name="TooManyFields"/>
     <exclude name="TooManyMethods"/>
+    <exclude name="ExcessiveImports"/>
   </rule>
   <rule ref="category/java/design.xml/ExcessiveImports">
     <properties>
@@ -71,6 +72,7 @@
   <rule ref="category/java/errorprone.xml">
     <exclude name="NonSerializableClass"/>
     <exclude name="MissingSerialVersionUID"/>
+    <exclude name="AvoidDuplicateLiterals"/>
   </rule>
   <rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
     <properties>

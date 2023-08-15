@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.DoNotUseThreads"})
+@SuppressWarnings({"PMD.DoNotUseThreads"})
 class StandardEventHandlerTest extends IntegrationBase {
 
     public static final String UNKNOWN_COURTROOM = "unknown-courtroom";
@@ -54,10 +54,10 @@ class StandardEventHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                .courthouse(SOME_COURTHOUSE)
-                                .courtroom(SOME_ROOM)
-                                .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -90,10 +90,10 @@ class StandardEventHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                .courthouse(SOME_COURTHOUSE)
-                                .courtroom(SOME_ROOM)
-                                .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -125,10 +125,10 @@ class StandardEventHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                .courthouse(SOME_COURTHOUSE)
-                                .courtroom(SOME_OTHER_ROOM)
-                                .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_OTHER_ROOM)
+                                    .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
@@ -162,10 +162,10 @@ class StandardEventHandlerTest extends IntegrationBase {
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                .courthouse(SOME_COURTHOUSE)
-                                .courtroom(SOME_ROOM)
-                                .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,

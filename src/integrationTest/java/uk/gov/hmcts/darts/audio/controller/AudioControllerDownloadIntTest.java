@@ -22,7 +22,6 @@ import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class AudioControllerDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio/download");
@@ -37,9 +36,11 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
         var mediaRequestEntity = dartsDatabase.createAndLoadMediaRequestEntity();
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(TransientObjectDirectoryTestData.createTransientObjectDirectoryEntity(mediaRequestEntity,
-                                                                              objectDirectoryStatusEntity,
-                                                                              blobId));
+            .saveAndFlush(TransientObjectDirectoryTestData.createTransientObjectDirectoryEntity(
+                mediaRequestEntity,
+                objectDirectoryStatusEntity,
+                blobId
+            ));
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("audioRequestId", String.valueOf(mediaRequestEntity.getId()));
