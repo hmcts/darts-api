@@ -4,14 +4,14 @@ import lombok.Builder;
 import lombok.Value;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Value
 @Builder
 public class ViqAnnotationData {
 
-    private OffsetDateTime annotationsStartTime;
+    private ZonedDateTime annotationsStartTime;
     private List<EventEntity> events;
 
 }

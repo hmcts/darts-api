@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 @Value
 @Builder
@@ -14,9 +14,9 @@ public class ViqMetaData {
     private String courthouse;
     private String raisedBy;
     @NonNull
-    private Date startTime;
+    private ZonedDateTime startTime;
     @NonNull
-    private Date endTime;
+    private ZonedDateTime endTime;
     private String type;
 
 }

@@ -21,10 +21,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,8 +50,8 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
 @ExtendWith(MockitoExtension.class)
 class ViqHeaderServiceImplTest {
 
+    private static final ZoneId EUROPE_LONDON_ZONE = ZoneId.of("Europe/London");
     private static final String CASE_NUMBER = "T2023041301_1";
-    private static final String EVENT_TIMESTAMP = "2023-07-01T10:00:00";
 
     @InjectMocks
     ViqHeaderServiceImpl viqHeaderService;
@@ -77,10 +79,9 @@ class ViqHeaderServiceImplTest {
         assertEquals("2023", playlist.getItems().get(0).getStartTimeYear());
         assertEquals("6", playlist.getItems().get(0).getStartTimeMonth());
         assertEquals("11", playlist.getItems().get(0).getStartTimeDate());
-        assertEquals("12", playlist.getItems().get(0).getStartTimeHour());
+        assertEquals("13", playlist.getItems().get(0).getStartTimeHour());
         assertEquals("0", playlist.getItems().get(0).getStartTimeMinutes());
         assertEquals("0", playlist.getItems().get(0).getStartTimeSeconds());
-
     }
 
     @Test
@@ -98,8 +99,14 @@ class ViqHeaderServiceImplTest {
     void generateAnnotationReturnsXmlFile() {
 
         HearingEntity hearingEntity = createHearingInfo();
-        OffsetDateTime startTime = OffsetDateTime.parse("2023-07-01T09:00:00Z");
-        OffsetDateTime endTime = OffsetDateTime.parse("2023-07-01T12:00:00Z");
+        ZonedDateTime startTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-07-01T09:00:00Z"),
+            EUROPE_LONDON_ZONE
+        );
+        ZonedDateTime endTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-07-01T12:00:00Z"),
+            EUROPE_LONDON_ZONE
+        );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
         String annotationsFile = viqHeaderService.generateAnnotation(
@@ -129,8 +136,15 @@ class ViqHeaderServiceImplTest {
     void generateAnnotationWithEventOutsideRequestTimeReturnsXmlFile() {
 
         HearingEntity hearingEntity = createHearingInfo();
-        OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
-        OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:59:59");
+
+        ZonedDateTime startTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-07-01T09:00:00Z"),
+            EUROPE_LONDON_ZONE
+        );
+        ZonedDateTime endTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-07-01T09:59:59Z"),
+            EUROPE_LONDON_ZONE
+        );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
         String annotationsFile = viqHeaderService.generateAnnotation(
@@ -150,8 +164,14 @@ class ViqHeaderServiceImplTest {
     void testBuildAnnotationsDocumentWithInvalidPath() {
 
         HearingEntity hearingEntity = createHearingInfo();
-        OffsetDateTime startTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:00:00");
-        OffsetDateTime endTime = CommonTestDataUtil.createOffsetDateTime("2023-07-01T09:59:59");
+        ZonedDateTime startTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-07-01T09:00:00Z"),
+            EUROPE_LONDON_ZONE
+        );
+        ZonedDateTime endTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-07-01T09:59:59Z"),
+            EUROPE_LONDON_ZONE
+        );
         String invalidPath = "/non_existent_directory/";
 
         assertThrows(RuntimeException.class, () ->
@@ -160,11 +180,21 @@ class ViqHeaderServiceImplTest {
 
     @Test
     void generateReadmeCreatesReadmeWithContent() throws IOException {
+
+        ZonedDateTime startTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-03-24T09:00:00.000Z"),
+            EUROPE_LONDON_ZONE
+        );
+        ZonedDateTime endTime = ZonedDateTime.ofInstant(
+            Instant.parse("2023-03-24T12:00:00.000Z"),
+            EUROPE_LONDON_ZONE
+        );
+
         ViqMetaData viqMetaData = ViqMetaData.builder()
             .courthouse("Trainwell Crown Court")
             .raisedBy(null)
-            .startTime(Date.from(OffsetDateTime.parse("2023-03-24T09:00:00.000Z").toInstant()))
-            .endTime(Date.from(OffsetDateTime.parse("2023-03-24T12:00:00.000Z").toInstant()))
+            .startTime(startTime)
+            .endTime(endTime)
             .type(null)
             .build();
 
@@ -179,9 +209,9 @@ class ViqHeaderServiceImplTest {
                 if (line.startsWith(COURTHOUSE_README_LABEL)) {
                     assertEquals("Courthouse: Trainwell Crown Court", line);
                 } else if (line.startsWith(START_TIME_README_LABEL)) {
-                    assertEquals("Start Time: Fri Mar 24 09:00:00 GMT 2023", line);
+                    assertEquals("Start Time: 24 March 2023 at 09:00:00 GMT", line);
                 } else if (line.startsWith(END_TIME_README_LABEL)) {
-                    assertEquals("End Time: Fri Mar 24 12:00:00 GMT 2023", line);
+                    assertEquals("End Time: 24 March 2023 at 12:00:00 GMT", line);
                 } else if (line.startsWith(RAISED_BY_README_LABEL)) {
                     assertEquals("Raised by: ", line);
                 } else if (line.startsWith(REQUEST_TYPE_README_LABEL)) {
@@ -195,7 +225,10 @@ class ViqHeaderServiceImplTest {
     private PlaylistInfo createPlaylistInfo1() {
         return PlaylistInfo.builder()
             .caseNumber(CASE_NUMBER)
-            .startTime(OffsetDateTime.parse("2023-06-11T12:00Z"))
+            .startTime(ZonedDateTime.ofInstant(
+                Instant.parse("2023-06-11T12:00:00Z"),
+                EUROPE_LONDON_ZONE
+            ))
             .fileLocation("daudio/localaudio/T2023/041301_1/0001")
             .build();
     }
@@ -203,7 +236,10 @@ class ViqHeaderServiceImplTest {
     private PlaylistInfo createPlaylistInfo2() {
         return PlaylistInfo.builder()
             .caseNumber(CASE_NUMBER)
-            .startTime(OffsetDateTime.parse("2023-06-11T13:00Z"))
+            .startTime(ZonedDateTime.ofInstant(
+                Instant.parse("2023-06-11T13:00:00Z"),
+                EUROPE_LONDON_ZONE
+            ))
             .fileLocation("daudio/localaudio/T2023/041301_1/0002")
             .build();
     }
@@ -213,7 +249,7 @@ class ViqHeaderServiceImplTest {
         List<EventEntity> eventEntities = new ArrayList<>();
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
         EventEntity eventEntity = CommonTestDataUtil.createEvent("LOG", "Start Recording", hearingEntity,
-                                                                 CommonTestDataUtil.createOffsetDateTime(EVENT_TIMESTAMP)
+                                                                 OffsetDateTime.parse("2023-07-01T10:00:00Z")
         );
 
         eventEntities.add(eventEntity);

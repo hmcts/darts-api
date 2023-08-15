@@ -15,12 +15,8 @@ import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,14 +48,7 @@ public class CommonTestDataUtil {
 
     public static OffsetDateTime createOffsetDateTime(String timestamp) {
 
-        ZoneId zoneId = ZoneId.of("UTC");   // Or another geographic: Europe/Paris
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDateTime start = LocalDateTime.parse(timestamp, formatter);
-
-        ZoneOffset offset = zoneId.getRules().getOffset(start);
-
-        return OffsetDateTime.of(start, offset);
+        return OffsetDateTime.parse(String.format("%sZ", timestamp));
     }
 
     public CourthouseEntity createCourthouse(String name) {

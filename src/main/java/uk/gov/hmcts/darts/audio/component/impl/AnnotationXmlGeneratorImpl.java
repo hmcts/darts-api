@@ -23,6 +23,7 @@ import javax.xml.transform.TransformerException;
 @Slf4j
 public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
 
+    private static final ZoneId EUROPE_LONDON_ZONE = ZoneId.of("Europe/London");
     private static final String ANNOTATION_ROOT_ELEMENT_NAME = "cfMetaFile";
     private static final String ANNOTATION_ANNOTATION_ELEMENT_NAME = "annotations";
     private static final String ANNOTATION_COUNT_ATTRIBUTE_NAME = "count";
@@ -73,7 +74,7 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
         // Events
         for (EventEntity event : annotationData.getEvents()) {
 
-            ZonedDateTime localEventTimestamp = event.getTimestamp().atZoneSameInstant(ZoneId.of("Europe/London"));
+            ZonedDateTime localEventTimestamp = event.getTimestamp().atZoneSameInstant(EUROPE_LONDON_ZONE);
 
             Element eventElement = document.createElement(String.format(
                 "%s%d",

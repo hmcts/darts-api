@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,7 +35,7 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
-    private static final String EUROPE_LONDON = "Europe/London";
+    private static final ZoneId EUROPE_LONDON_ZONE = ZoneId.of("Europe/London");
 
     private final AudioConfigurationProperties audioConfigurationProperties;
 
@@ -79,12 +78,12 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
         }
     }
 
-    private static ViqMetaData createViqMetaData(MediaRequestEntity mediaRequestEntity) {
+    private ViqMetaData createViqMetaData(MediaRequestEntity mediaRequestEntity) {
         return ViqMetaData.builder()
             .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
             .raisedBy(null)
-            .startTime(Date.from(mediaRequestEntity.getStartTime().toInstant()))
-            .endTime(Date.from(mediaRequestEntity.getEndTime().toInstant()))
+            .startTime(mediaRequestEntity.getStartTime().atZoneSameInstant(EUROPE_LONDON_ZONE))
+            .endTime(mediaRequestEntity.getEndTime().atZoneSameInstant(EUROPE_LONDON_ZONE))
             .build();
     }
 
@@ -106,13 +105,13 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
         for (int i = 0; i < audioSessions.size(); i++) {
             List<AudioFileInfo> audioSession = audioSessions.get(i);
             for (AudioFileInfo audioFileInfo : audioSession) {
-                OffsetDateTime localStartTime = OffsetDateTime.ofInstant(
+                ZonedDateTime localStartTime = ZonedDateTime.ofInstant(
                     audioFileInfo.getStartTime(),
-                    ZoneId.of(EUROPE_LONDON)
+                    EUROPE_LONDON_ZONE
                 );
-                OffsetDateTime localEndTime = OffsetDateTime.ofInstant(
+                ZonedDateTime localEndTime = ZonedDateTime.ofInstant(
                     audioFileInfo.getEndTime(),
-                    ZoneId.of(EUROPE_LONDON)
+                    EUROPE_LONDON_ZONE
                 );
                 Path path = generateZipPath(i, audioFileInfo);
                 sourceToDestinationPaths.put(Path.of(audioFileInfo.getFileName()), path);

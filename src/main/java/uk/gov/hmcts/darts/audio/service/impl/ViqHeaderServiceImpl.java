@@ -25,7 +25,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,6 +42,7 @@ import static java.lang.String.format;
 @Service
 public class ViqHeaderServiceImpl implements ViqHeaderService {
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
     private static final String DATE_TIME_ATTRIBUTE = "%d";
     private static final String INVALID_PLAYLIST_INFORMATION = "Invalid playlist information";
     public static final String PLAYLIST_XML_FILENAME = "playlist.xml";
@@ -79,7 +83,7 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
 
 
     @Override
-    public String generateAnnotation(HearingEntity hearingEntity, OffsetDateTime startTime, OffsetDateTime endTime,
+    public String generateAnnotation(HearingEntity hearingEntity, ZonedDateTime startTime, ZonedDateTime endTime,
                                      String annotationsOutputFile) {
         List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntity, startTime, endTime);
 
@@ -103,16 +107,23 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     public String generateReadme(ViqMetaData viqMetaData, String fileLocation) {
         File readmeFile = new File(fileLocation, README_TXT_FILENAME);
         log.debug("Writing readme to {}", readmeFile.getAbsoluteFile());
+
         try (BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
-            PrintWriter printWriter = new PrintWriter(fileWriter);) {
+            PrintWriter printWriter = new PrintWriter(fileWriter)) {
 
             printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
             printWriter.println(format(
                 RAISED_BY_README_LABEL + README_FORMAT,
                 StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
             ));
-            printWriter.println(format(START_TIME_README_LABEL + README_FORMAT, viqMetaData.getStartTime()));
-            printWriter.println(format(END_TIME_README_LABEL + README_FORMAT, viqMetaData.getEndTime()));
+            printWriter.println(format(
+                START_TIME_README_LABEL + README_FORMAT,
+                viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
+            ));
+            printWriter.println(format(
+                END_TIME_README_LABEL + README_FORMAT,
+                viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
+            ));
             printWriter.print(format(
                 REQUEST_TYPE_README_LABEL + README_FORMAT,
                 StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
@@ -130,28 +141,28 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
         playlistItem.setValue(playlistInfo.getFileLocation());
         playlistItem.setCaseNumber(playlistInfo.getCaseNumber());
 
-        OffsetDateTime mediaStartTime = playlistInfo.getStartTime();
+        ZonedDateTime itemStartTime = playlistInfo.getStartTime();
 
-        playlistItem.setStartTimeInMillis(String.valueOf(mediaStartTime.toInstant().toEpochMilli()));
-        playlistItem.setStartTimeYear(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getYear()));
-        playlistItem.setStartTimeMonth(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getMonthValue()));
-        playlistItem.setStartTimeDate(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getDayOfMonth()));
-        playlistItem.setStartTimeHour(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getHour()));
-        playlistItem.setStartTimeMinutes(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getMinute()));
-        playlistItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getSecond()));
+        playlistItem.setStartTimeInMillis(String.valueOf(itemStartTime.toInstant().toEpochMilli()));
+        playlistItem.setStartTimeYear(format(DATE_TIME_ATTRIBUTE, itemStartTime.getYear()));
+        playlistItem.setStartTimeMonth(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMonthValue()));
+        playlistItem.setStartTimeDate(format(DATE_TIME_ATTRIBUTE, itemStartTime.getDayOfMonth()));
+        playlistItem.setStartTimeHour(format(DATE_TIME_ATTRIBUTE, itemStartTime.getHour()));
+        playlistItem.setStartTimeMinutes(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMinute()));
+        playlistItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, itemStartTime.getSecond()));
 
         return playlistItem;
     }
 
     private List<EventEntity> getHearingEventsByStartAndEndTime(
         HearingEntity hearingEntity,
-        OffsetDateTime startTime,
-        OffsetDateTime endTime) {
+        ZonedDateTime startTime,
+        ZonedDateTime endTime) {
 
         return hearingEntity.getEventList().stream()
-            .filter(eventEntity -> !eventEntity.getTimestamp().isBefore(startTime))
-            .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime))
-            .sorted((t1, t2) -> t1.getTimestamp().compareTo(t2.getTimestamp()))
+            .filter(eventEntity -> !eventEntity.getTimestamp().isBefore(startTime.toOffsetDateTime()))
+            .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime.toOffsetDateTime()))
+            .sorted(Comparator.comparing(EventEntity::getTimestamp))
             .collect(Collectors.toList());
     }
 }
