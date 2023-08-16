@@ -49,8 +49,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.readTempFileContent;
 import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
 
 
-@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports",
-    "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports"})
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class ViqHeaderServiceImplTest {
