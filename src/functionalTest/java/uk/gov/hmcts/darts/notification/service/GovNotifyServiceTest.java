@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
 class GovNotifyServiceTest {
 
     public static final String EMAIL_ADDRESS = "test@test.com";

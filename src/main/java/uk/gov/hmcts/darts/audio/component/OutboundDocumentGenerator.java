@@ -7,5 +7,6 @@ import javax.xml.transform.TransformerException;
 
 public interface OutboundDocumentGenerator<T> {
 
-    Path generateAndWriteXmlFile(Object documentData, String outboundDirectory) throws ParserConfigurationException, IOException, TransformerException;
+    Path generateAndWriteXmlFile(Object documentData, Path outboundFilePath)
+        throws ParserConfigurationException, IOException, TransformerException;
 }

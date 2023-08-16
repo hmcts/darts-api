@@ -1,11 +1,11 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.xml.bind.JAXBException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
-import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
 import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
@@ -17,32 +17,36 @@ import uk.gov.hmcts.darts.audio.util.XmlUtil;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
+import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import static java.lang.String.format;
+import static java.time.format.FormatStyle.LONG;
+import static java.util.Locale.UK;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
+@SuppressWarnings("PMD.ExcessiveImports")
 public class ViqHeaderServiceImpl implements ViqHeaderService {
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)
+        .withLocale(UK);
     private static final String DATE_TIME_ATTRIBUTE = "%d";
     private static final String INVALID_PLAYLIST_INFORMATION = "Invalid playlist information";
     public static final String PLAYLIST_XML_FILENAME = "playlist.xml";
-    public static final String ANNOTATION_XML_FILENAME = "annotations.xml";
     public static final String README_TXT_FILENAME = "Readme.txt";
     public static final String COURTHOUSE_README_LABEL = "Courthouse";
     public static final String RAISED_BY_README_LABEL = "Raised by";
@@ -51,10 +55,14 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     public static final String REQUEST_TYPE_README_LABEL = "Type";
     public static final String README_FORMAT = ": %s";
 
-    private final HearingRepository hearingRepository;
+    private final OutboundDocumentGenerator annotationXmlGenerator;
+
+    public ViqHeaderServiceImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator) {
+        this.annotationXmlGenerator = annotationXmlGenerator;
+    }
 
     @Override
-    public String generatePlaylist(List<PlaylistInfo> playlistInfos, String outputFileLocation) {
+    public String generatePlaylist(Set<PlaylistInfo> playlistInfos, String outputFileLocation) {
         String playlistFile;
         Playlist playlist = new Playlist();
         try {
@@ -66,7 +74,12 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
                 }
             }
 
-            playlistFile = XmlUtil.marshalToXmlFile(playlist, Playlist.class, outputFileLocation, PLAYLIST_XML_FILENAME);
+            playlistFile = XmlUtil.marshalToXmlFile(
+                playlist,
+                Playlist.class,
+                outputFileLocation,
+                PLAYLIST_XML_FILENAME
+            );
         } catch (JAXBException | IllegalArgumentException exception) {
             log.error("Unable to generate playlist.xml: {}", exception.getMessage());
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
@@ -77,9 +90,9 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
 
 
     @Override
-    public String generateAnnotation(Integer hearingId, OffsetDateTime startTime, OffsetDateTime endTime, String outputFileLocation) {
-        List<HearingEntity> hearingEntities = hearingRepository.findAllById(Collections.singleton(hearingId));
-        List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntities, startTime, endTime);
+    public String generateAnnotation(HearingEntity hearingEntity, ZonedDateTime startTime, ZonedDateTime endTime,
+                                     String annotationsOutputFile) {
+        List<EventEntity> events = getHearingEventsByStartAndEndTime(hearingEntity, startTime, endTime);
 
         ViqAnnotationData annotationData = ViqAnnotationData.builder()
             .annotationsStartTime(startTime)
@@ -87,9 +100,8 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             .build();
 
         try {
-            OutboundDocumentGenerator xmlDocumentGenerator = new AnnotationXmlGeneratorImpl();
-            return xmlDocumentGenerator.generateAndWriteXmlFile(annotationData, outputFileLocation).toString();
-
+            return annotationXmlGenerator.generateAndWriteXmlFile(annotationData, Path.of(annotationsOutputFile))
+                .toString();
         } catch (IOException | TransformerException | ParserConfigurationException exception) {
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
@@ -100,16 +112,29 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     public String generateReadme(ViqMetaData viqMetaData, String fileLocation) {
         File readmeFile = new File(fileLocation, README_TXT_FILENAME);
         log.debug("Writing readme to {}", readmeFile.getAbsoluteFile());
+
         try (BufferedWriter fileWriter = Files.newBufferedWriter(readmeFile.toPath());
-             PrintWriter printWriter = new PrintWriter(fileWriter);) {
+            PrintWriter printWriter = new PrintWriter(fileWriter)) {
 
             printWriter.println(format(COURTHOUSE_README_LABEL + README_FORMAT, viqMetaData.getCourthouse()));
-            printWriter.println(format(RAISED_BY_README_LABEL + README_FORMAT, viqMetaData.getRaisedBy()));
-            printWriter.println(format(START_TIME_README_LABEL + README_FORMAT, viqMetaData.getStartTime()));
-            printWriter.println(format(END_TIME_README_LABEL + README_FORMAT, viqMetaData.getEndTime()));
-            printWriter.print(format(REQUEST_TYPE_README_LABEL + README_FORMAT, viqMetaData.getType()));
+            printWriter.println(format(
+                RAISED_BY_README_LABEL + README_FORMAT,
+                StringUtils.defaultIfEmpty(viqMetaData.getRaisedBy(), "")
+            ));
+            printWriter.println(format(
+                START_TIME_README_LABEL + README_FORMAT,
+                viqMetaData.getStartTime().format(DATE_TIME_FORMATTER)
+            ));
+            printWriter.println(format(
+                END_TIME_README_LABEL + README_FORMAT,
+                viqMetaData.getEndTime().format(DATE_TIME_FORMATTER)
+            ));
+            printWriter.print(format(
+                REQUEST_TYPE_README_LABEL + README_FORMAT,
+                StringUtils.defaultIfEmpty(viqMetaData.getType(), "")
+            ));
         } catch (IOException exception) {
-            log.error("Unable to generate readme.txt file: {}", exception.getMessage());
+            log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
         return readmeFile.getAbsolutePath();
@@ -121,30 +146,28 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
         playlistItem.setValue(playlistInfo.getFileLocation());
         playlistItem.setCaseNumber(playlistInfo.getCaseNumber());
 
-        OffsetDateTime mediaStartTime = playlistInfo.getStartTime();
+        ZonedDateTime itemStartTime = playlistInfo.getStartTime();
 
-        playlistItem.setStartTimeInMillis(String.valueOf(mediaStartTime.toInstant().toEpochMilli()));
-        playlistItem.setStartTimeYear(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getYear()));
-        playlistItem.setStartTimeMonth(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getMonthValue()));
-        playlistItem.setStartTimeDate(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getDayOfMonth()));
-        playlistItem.setStartTimeHour(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getHour()));
-        playlistItem.setStartTimeMinutes(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getMinute()));
-        playlistItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, mediaStartTime.getSecond()));
+        playlistItem.setStartTimeInMillis(String.valueOf(itemStartTime.toInstant().toEpochMilli()));
+        playlistItem.setStartTimeYear(format(DATE_TIME_ATTRIBUTE, itemStartTime.getYear()));
+        playlistItem.setStartTimeMonth(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMonthValue()));
+        playlistItem.setStartTimeDate(format(DATE_TIME_ATTRIBUTE, itemStartTime.getDayOfMonth()));
+        playlistItem.setStartTimeHour(format(DATE_TIME_ATTRIBUTE, itemStartTime.getHour()));
+        playlistItem.setStartTimeMinutes(format(DATE_TIME_ATTRIBUTE, itemStartTime.getMinute()));
+        playlistItem.setStartTimeSeconds(format(DATE_TIME_ATTRIBUTE, itemStartTime.getSecond()));
 
         return playlistItem;
     }
 
     private List<EventEntity> getHearingEventsByStartAndEndTime(
-        List<HearingEntity> hearingEntities,
-        OffsetDateTime startTime,
-        OffsetDateTime endTime) {
+        HearingEntity hearingEntity,
+        ZonedDateTime startTime,
+        ZonedDateTime endTime) {
 
-        return hearingEntities.stream()
-            .map(h -> h.getEventList())
-            .flatMap(Collection::stream)
-            .filter(e -> !e.getTimestamp().isBefore(startTime))
-            .filter(e -> !e.getTimestamp().isAfter(endTime))
-            .sorted((t1, t2) -> t1.getTimestamp().compareTo(t2.getTimestamp()))
+        return hearingEntity.getEventList().stream()
+            .filter(eventEntity -> !eventEntity.getTimestamp().isBefore(startTime.toOffsetDateTime()))
+            .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime.toOffsetDateTime()))
+            .sorted(Comparator.comparing(EventEntity::getTimestamp))
             .collect(Collectors.toList());
     }
 }
