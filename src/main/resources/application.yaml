@@ -114,6 +114,10 @@ darts:
     active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsdartsb2csbox.onmicrosoft.com
     active-directory-b2c-external-user-signin-policy: "B2C_1_darts_externaluser_signin"
     active-directory-b2c-external-user-passwordreset-policy: "B2C_1_darts_externaluser_password_reset"
+  daily-list:
+    housekeeping:
+      cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:4 0/2 * * * MON-FRI}
+      days-to-keep: 30
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}
     events-dar-notify-path: /events/dar-notify
