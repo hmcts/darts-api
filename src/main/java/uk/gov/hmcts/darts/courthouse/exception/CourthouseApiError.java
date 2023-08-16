@@ -15,7 +15,7 @@ public enum CourthouseApiError implements DartsApiError {
         "Provided courthouse name already exists."
     ),
     COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS(
-        "100",
+        "101",
         HttpStatus.CONFLICT,
         "Provided courthouse code already exists."
     );
