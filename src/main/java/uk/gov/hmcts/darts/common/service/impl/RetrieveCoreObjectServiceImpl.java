@@ -7,19 +7,13 @@ import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.DefenceEntity;
-import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
-import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.common.repository.DefenceRepository;
-import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
-import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
@@ -35,9 +29,6 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
     private final JudgeRepository judgeRepository;
-    private final DefendantRepository defendantRepository;
-    private final DefenceRepository defenceRepository;
-    private final ProsecutorRepository prosecutorRepository;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
 
@@ -136,23 +127,5 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     public JudgeEntity retrieveOrCreateJudge(String judgeName) {
         Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
         return foundJudge.orElseGet(() -> judgeRepository.createJudge(judgeName));
-    }
-
-    @Override
-    public DefendantEntity retrieveOrCreateDefendant(String defendantName, CourtCaseEntity courtCase) {
-        Optional<DefendantEntity> foundJudge = defendantRepository.findByNameIgnoreCase(defendantName);
-        return foundJudge.orElseGet(() -> defendantRepository.createDefendant(defendantName, courtCase));
-    }
-
-    @Override
-    public DefenceEntity retrieveOrCreateDefence(String defenceName, CourtCaseEntity courtCase) {
-        Optional<DefenceEntity> foundDefence = defenceRepository.findByNameIgnoreCase(defenceName);
-        return foundDefence.orElseGet(() -> defenceRepository.createDefence(defenceName, courtCase));
-    }
-
-    @Override
-    public ProsecutorEntity retrieveOrCreateProsecutor(String prosecutorName, CourtCaseEntity courtCase) {
-        Optional<ProsecutorEntity> foundProsecutor = prosecutorRepository.findByNameIgnoreCase(prosecutorName);
-        return foundProsecutor.orElseGet(() -> prosecutorRepository.createProsecutor(prosecutorName, courtCase));
     }
 }
