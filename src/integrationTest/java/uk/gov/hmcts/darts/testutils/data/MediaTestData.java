@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import java.time.OffsetDateTime;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class MediaTestData {
 
     public static MediaEntity someMinimalMedia() {

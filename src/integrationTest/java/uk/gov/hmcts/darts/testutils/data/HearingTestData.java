@@ -14,7 +14,7 @@ import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseN
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class HearingTestData {
 
     public static HearingEntity someMinimalHearing() {

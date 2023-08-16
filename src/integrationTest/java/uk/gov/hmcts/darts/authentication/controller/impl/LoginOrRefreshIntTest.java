@@ -26,7 +26,6 @@ class LoginOrRefreshIntTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void loginOrRefreshShouldReturnRedirectWhenNoAuthHeaderIsSent() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT);
 
@@ -39,7 +38,6 @@ class LoginOrRefreshIntTest extends IntegrationBase {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void loginOrRefreshShouldReturnRedirectWithOverriddenRedirectUri() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT_WITH_OVERRIDE);
 
@@ -52,7 +50,6 @@ class LoginOrRefreshIntTest extends IntegrationBase {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void loginOrRefreshShouldReturnRedirectWhenNoSessionExistsInCache() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(EXTERNAL_USER_LOGIN_OR_REFRESH_ENDPOINT)
             .queryParam("session-id", UUID.randomUUID().toString());

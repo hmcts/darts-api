@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomAtCourthouse;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class CourthouseTestData {
 
     public static CourthouseEntity someMinimalCourthouse() {

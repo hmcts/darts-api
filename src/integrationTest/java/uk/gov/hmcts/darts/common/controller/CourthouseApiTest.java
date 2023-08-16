@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
 class CourthouseApiTest extends IntegrationBase {
 
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
@@ -102,8 +101,10 @@ class CourthouseApiTest extends IntegrationBase {
             extendedCourthouse.setLastModifiedDateTime(extendedCourthouse.getLastModifiedDateTime().truncatedTo(
                 ChronoUnit.MILLIS));
         }
-        assertTrue(courthouseList.contains(haverfordwestCourthouse),
-                   haverfordwestResponse.getResponse().getContentAsString());
+        assertTrue(
+            courthouseList.contains(haverfordwestCourthouse),
+            haverfordwestResponse.getResponse().getContentAsString()
+        );
         assertTrue(courthouseList.contains(swanseaCourthouse), swanseaResponse.getResponse().getContentAsString());
     }
 

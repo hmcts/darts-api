@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.time.OffsetDateTime;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class EventHandlerTestData {
 
     public static EventHandlerEntity someMinimalEventHandler() {
