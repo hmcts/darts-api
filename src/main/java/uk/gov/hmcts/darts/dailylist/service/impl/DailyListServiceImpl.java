@@ -37,6 +37,9 @@ public class DailyListServiceImpl implements DailyListService {
     @Value("${darts.daily-list.housekeeping.days-to-keep:30}")
     private int housekeepingDays;
 
+    @Value("${darts.daily-list.housekeeping.enabled:false}")
+    private boolean housekeepingEnabled;
+
     @Override
     /*
     Retrieve the new Daily List, and store it in the database.
@@ -68,10 +71,12 @@ public class DailyListServiceImpl implements DailyListService {
     @Scheduled(cron = "${darts.daily-list.housekeeping.cron}")
     @Transactional
     public void runHouseKeeping() {
-        LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
-        log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
-        List<DailyListEntity> deletedEntities = dailyListRepository.deleteByStartDateBefore(dateToDeleteBefore);
-        log.info("Finished DailyList housekeeping. Deleted {} rows.", deletedEntities.size());
+        if (housekeepingEnabled) {
+            LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
+            log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
+            List<DailyListEntity> deletedEntities = dailyListRepository.deleteByStartDateBefore(dateToDeleteBefore);
+            log.info("Finished DailyList housekeeping. Deleted {} rows.", deletedEntities.size());
+        }
     }
 
     private CourthouseEntity retrieveCourtHouse(DailyList dailyList) {

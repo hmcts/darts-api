@@ -35,6 +35,10 @@ paths:
 
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /dailylists/getCases:
     get:
@@ -75,6 +79,10 @@ paths:
 
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
   /dailylists/housekeeping:
     post:
@@ -89,7 +97,10 @@ paths:
 
         '500':
           description: Internal Server Error
-
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
 components:
   examples:
