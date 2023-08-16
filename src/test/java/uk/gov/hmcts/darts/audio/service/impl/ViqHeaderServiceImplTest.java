@@ -178,10 +178,16 @@ class ViqHeaderServiceImplTest {
             Instant.parse("2023-07-01T09:59:59Z"),
             EUROPE_LONDON_ZONE
         );
-        String invalidPath = "/non_existent_directory/";
+        String invalidPath = "/non_existent_directory/0_annotations.xml";
 
-        assertThrows(RuntimeException.class, () ->
+        var exception = assertThrows(DartsApiException.class, () ->
             viqHeaderService.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
+
+        assertEquals("Failed to process audio request", exception.getMessage());
+        assertEquals(
+            "java.nio.file.NoSuchFileException: /non_existent_directory/0_annotations.xml",
+            exception.getCause().toString()
+        );
     }
 
     @Test
