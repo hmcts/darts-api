@@ -110,7 +110,6 @@ class CaseServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testGetCasesWithMultipleHearing() throws IOException {
 
         List<HearingEntity> hearingEntities = CommonTestDataUtil.createHearings(8);
@@ -133,7 +132,6 @@ class CaseServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testGetCasesWithSingleHearingAndDifferentCourtroom() throws IOException {
         HearingEntity hearingEntity = createHearingEntity();
         Mockito.when(hearingRepository.findByCourthouseCourtroomAndDate(
@@ -156,7 +154,6 @@ class CaseServiceImplTest {
 
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testGetCasesCreateCourtroom() {
         String courtroomName = "99";
 
@@ -176,7 +173,6 @@ class CaseServiceImplTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testAddCase() throws IOException {
         Mockito.when(caseRepository.saveAndFlush(any())).thenAnswer(invocation -> {
             Object[] args = invocation.getArguments();

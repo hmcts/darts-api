@@ -10,7 +10,7 @@ import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createDefendan
 import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createProsecutorForCaseWithName;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class CaseTestData {
 
     public static CourtCaseEntity someMinimalCase() {
@@ -40,7 +40,6 @@ public class CaseTestData {
         courtCase.setCourthouse(courthouse);
         return courtCase;
     }
-
 
 
 }

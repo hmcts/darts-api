@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 class CourthouseServiceImplTest {
@@ -63,6 +65,49 @@ class CourthouseServiceImplTest {
         CourthouseEntity returnedEntity = courthouseService.addCourtHouse(courthouseModel);
         assertEquals("Test courthouse", returnedEntity.getCourthouseName());
         assertEquals((short) 123, returnedEntity.getCode());
+    }
+
+    @Test
+    void addDuplicateCourtHouseName() {
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseEntity.setCode(CODE);
+
+        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseModel.setCode((int) CODE);
+
+
+        Mockito.when(repository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.of(new CourthouseEntity()));
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> courthouseService.addCourtHouse(courthouseModel)
+        );
+
+        assertEquals("Provided courthouse name already exists.", exception.getMessage());
+    }
+
+    @Test
+    void addDuplicateCourtHouseCode() {
+        CourthouseEntity courthouseEntity = new CourthouseEntity();
+        courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseEntity.setCode(CODE);
+
+        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
+        courthouseModel.setCode((int) CODE);
+
+
+        Mockito.when(repository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.empty());
+        Mockito.when(repository.findByCode(any(Integer.class))).thenReturn(Optional.of(new CourthouseEntity()));
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> courthouseService.addCourtHouse(courthouseModel)
+        );
+
+        assertEquals("Provided courthouse code already exists.", exception.getMessage());
     }
 
     @Test

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.IntStream.rangeClosed;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class JudgeTestData {
 
     public static JudgeEntity someMinimalJudge() {

@@ -39,7 +39,7 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNam
 
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.VariableDeclarationUsageDistance", "PMD.NcssCount"})
+@SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount"})
 class CaseControllerSearchGetTest extends IntegrationBase {
 
     @Autowired
