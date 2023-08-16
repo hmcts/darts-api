@@ -21,7 +21,10 @@ import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.repository.DefenceRepository;
+import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
@@ -32,7 +35,6 @@ import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Month;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -61,6 +63,12 @@ class DailyListProcessorImplTest {
     @Mock
     private HearingRepository hearingRepository;
     @Mock
+    private DefendantRepository defendantRepository;
+    @Mock
+    private DefenceRepository defenceRepository;
+    @Mock
+    private ProsecutorRepository prosecutorRepository;
+    @Mock
     private RetrieveCoreObjectService retrieveCoreObjectService;
     private DailyListProcessor dailyListProcessor;
     @Captor
@@ -81,7 +89,7 @@ class DailyListProcessorImplTest {
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         dailyListProcessor = new DailyListProcessorImpl(
                 dailyListRepository, retrieveCoreObjectService, courthouseRepository, caseRepository, hearingRepository,
-                objectMapper);
+                defendantRepository, defenceRepository, prosecutorRepository, objectMapper);
     }
 
     @Test
@@ -107,31 +115,40 @@ class DailyListProcessorImplTest {
         Mockito.when(courthouseRepository.findAll()).thenReturn(courthouses);
         Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA)).thenReturn(Optional.of(swansea));
 
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(any(), any())).thenReturn(courtCase);
-
-        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, swanseaCourtroom, LocalDate.of(2021, Month.FEBRUARY, 23));
+        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, swanseaCourtroom, LocalDate.now());
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(any(), any(), any(), any())).thenReturn(hearing);
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString()))
                 .thenReturn(createJudgeWithName("JudgeName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateDefendant(anyString(), any()))
+        Mockito.when(defendantRepository.createDefendant(anyString(), any()))
                 .thenReturn(createDefendantForCaseWithName(courtCase, "DefendantName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateDefence(anyString(), any()))
+        Mockito.when(defenceRepository.createDefence(anyString(), any()))
                 .thenReturn(createDefenceForCaseWithName(courtCase, "DefenceName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateProsecutor(anyString(), any()))
+        Mockito.when(prosecutorRepository.createProsecutor(anyString(), any()))
                 .thenReturn(createProsecutorForCaseWithName(courtCase, "ProsecutorName Surname"));
 
         List<DailyListEntity> dailyListEntities = List.of(CommonTestDataUtil.createDailyList(LocalTime.now(),
                 String.valueOf(SourceType.XHB), DAILYLIST_LOCATION));
         Mockito.when(dailyListRepository
-                        .findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                                1, String.valueOf(JobStatusType.NEW), LocalDate.now()))
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
                 .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
-                        .findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                                2, String.valueOf(JobStatusType.NEW), LocalDate.now()))
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
                 .thenReturn(Collections.emptyList());
+
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                .thenReturn(Collections.emptyList());
+
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                .thenReturn(Collections.emptyList());
+
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(caseRepository).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
@@ -178,18 +195,16 @@ class DailyListProcessorImplTest {
         Mockito.when(courthouseRepository.findAll()).thenReturn(courthouses);
         Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA)).thenReturn(Optional.of(swansea));
 
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(any(), any())).thenReturn(courtCase);
-
-        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, swanseaCourtroom, LocalDate.of(2021, Month.FEBRUARY, 23));
+        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, swanseaCourtroom, LocalDate.now());
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(any(), any(), any(), any())).thenReturn(hearing);
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString()))
                 .thenReturn(createJudgeWithName("JudgeName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateDefendant(anyString(), any()))
+        Mockito.when(defendantRepository.createDefendant(anyString(), any()))
                 .thenReturn(createDefendantForCaseWithName(courtCase, "DefendantName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateDefence(anyString(), any()))
+        Mockito.when(defenceRepository.createDefence(anyString(), any()))
                 .thenReturn(createDefenceForCaseWithName(courtCase, "DefenceName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateProsecutor(anyString(), any()))
+        Mockito.when(prosecutorRepository.createProsecutor(anyString(), any()))
                 .thenReturn(createProsecutorForCaseWithName(courtCase, "ProsecutorName Surname"));
 
         DailyListEntity oldDailyList = CommonTestDataUtil.createDailyList(LocalTime.now().minusHours(4),
@@ -199,14 +214,26 @@ class DailyListProcessorImplTest {
                 String.valueOf(SourceType.XHB), DAILYLIST_LOCATION), oldDailyList);
 
         Mockito.when(dailyListRepository
-                        .findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                                1, String.valueOf(JobStatusType.NEW), LocalDate.now()))
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
                 .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
-                        .findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                                2, String.valueOf(JobStatusType.NEW), LocalDate.now()))
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
                 .thenReturn(Collections.emptyList());
+
+
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                .thenReturn(Collections.emptyList());
+
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                .thenReturn(Collections.emptyList());
+
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(caseRepository).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
@@ -246,7 +273,7 @@ class DailyListProcessorImplTest {
         CourtroomEntity swanseaCourtroom = CommonTestDataUtil.createCourtroom(swansea, COURTROOM);
         swansea.setCourtrooms(List.of(swanseaCourtroom));
 
-        CourtCaseEntity courtCase = CommonTestDataUtil.createCase(CASE_NUMBER, swansea);
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCase(URN, swansea);
 
 
         List<CourthouseEntity> courthouses = List.of(swansea, edinburgh);
@@ -254,18 +281,16 @@ class DailyListProcessorImplTest {
         Mockito.when(courthouseRepository.findAll()).thenReturn(courthouses);
         Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA)).thenReturn(Optional.of(swansea));
 
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateCase(any(), any())).thenReturn(courtCase);
-
-        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, swanseaCourtroom, LocalDate.of(2021, Month.FEBRUARY, 23));
+        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, swanseaCourtroom, LocalDate.now());
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(any(), any(), any(), any())).thenReturn(hearing);
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString()))
                 .thenReturn(createJudgeWithName("JudgeName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateDefendant(anyString(), any()))
+        Mockito.when(defendantRepository.createDefendant(anyString(), any()))
                 .thenReturn(createDefendantForCaseWithName(courtCase, "DefendantName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateDefence(anyString(), any()))
+        Mockito.when(defenceRepository.createDefence(anyString(), any()))
                 .thenReturn(createDefenceForCaseWithName(courtCase, "DefenceName Surname"));
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateProsecutor(anyString(), any()))
+        Mockito.when(prosecutorRepository.createProsecutor(anyString(), any()))
                 .thenReturn(createProsecutorForCaseWithName(courtCase, "ProsecutorName Surname"));
 
         DailyListEntity oldDailyList = CommonTestDataUtil.createDailyList(LocalTime.now().minusHours(4),
@@ -274,14 +299,29 @@ class DailyListProcessorImplTest {
                 String.valueOf(SourceType.CPP), DAILYLIST_LOCATION), oldDailyList);
 
         Mockito.when(dailyListRepository
-                        .findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                                1, String.valueOf(JobStatusType.NEW), LocalDate.now()))
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
                 .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
-                        .findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                                2, String.valueOf(JobStatusType.NEW), LocalDate.now()))
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
                 .thenReturn(Collections.emptyList());
+
+
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                .thenReturn(dailyListEntities);
+
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                .thenReturn(Collections.emptyList());
+
+
+
+
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(caseRepository).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
@@ -329,8 +369,8 @@ class DailyListProcessorImplTest {
                 "Tests/dailylist/dailyListProcessorTest/dailyList_NonExistingCourthouse.json"));
 
         Mockito.when(dailyListRepository
-                        .findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                                1, String.valueOf(JobStatusType.NEW), LocalDate.now()))
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
                 .thenReturn(dailyListEntities);
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());

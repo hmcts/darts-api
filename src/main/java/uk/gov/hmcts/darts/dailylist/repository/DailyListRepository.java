@@ -13,7 +13,8 @@ import java.util.Optional;
 public interface DailyListRepository extends JpaRepository<DailyListEntity, Integer> {
     Optional<DailyListEntity> findByUniqueId(String uniqueId);
 
-    List<DailyListEntity> findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(Integer id, String status, LocalDate date);
+    List<DailyListEntity> findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+            Integer id, String status, LocalDate date, String source);
 
     List<DailyListEntity> deleteByStartDateBefore(LocalDate startDate);
 }

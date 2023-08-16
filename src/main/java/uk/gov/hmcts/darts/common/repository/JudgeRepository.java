@@ -17,11 +17,4 @@ public interface JudgeRepository extends JpaRepository<JudgeEntity, Integer> {
         this.saveAndFlush(judge);
         return judge;
     }
-
-
-
-
-
-
-
 }

@@ -9,12 +9,14 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.DefenceRepository;
+import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
@@ -29,6 +31,7 @@ import uk.gov.hmcts.darts.dailylist.model.Sitting;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +44,9 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     private final CourthouseRepository courthouseRepository;
     private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
+    private final DefendantRepository defendantRepository;
+    private final DefenceRepository defenceRepository;
+    private final ProsecutorRepository prosecutorRepository;
 
     private final ObjectMapper objectMapper;
 
@@ -48,11 +54,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     public void processAllDailyLists(LocalDate date) {
         List<CourthouseEntity> allCourthouses = courthouseRepository.findAll();
         for (CourthouseEntity allCourthouse : allCourthouses) {
-            List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateOrderByPublishedTimestampDesc(
-                    allCourthouse.getId(),
-                    String.valueOf(JobStatusType.NEW),
-                    date
-            );
+            List<DailyListEntity> dailyLists = getDailyListForCppAndXhb(date, allCourthouse);
 
             // Daily lists are being ordered descending by date so first item will be the most recent version
             if (!dailyLists.isEmpty()) {
@@ -67,6 +69,22 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
             }
         }
+    }
+
+
+    private List<DailyListEntity> getDailyListForCppAndXhb(LocalDate date, CourthouseEntity allCourthouse) {
+        // it is possible for a courthouse to be using both CPP and XHB system.
+        List<DailyListEntity> dailyLists = new ArrayList<>(dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                allCourthouse.getId(),
+                String.valueOf(JobStatusType.NEW),
+                date, String.valueOf(SourceType.XHB)
+        ));
+        dailyLists.addAll(dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                allCourthouse.getId(),
+                String.valueOf(JobStatusType.NEW),
+                date, String.valueOf(SourceType.CPP)
+        ));
+        return dailyLists;
     }
 
     private void ignoreOldDailyList(List<DailyListEntity> dailyLists) {
@@ -91,93 +109,77 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 for (Sitting sitting : sittings) {
                     List<Hearing> hearings = sitting.getHearings();
                     for (Hearing dailyListHearing : hearings) {
-                        CourtCaseEntity courtCase = retrieveCoreObjectService.retrieveOrCreateCase(
-                                courtHouseName,
-                                dailyListHearing.getCaseNumber()
-                        );
+
+                        String caseNumber = getCaseNumber(dailyListHearing.getDefendants(), dailyListEntity, dailyListHearing);
+
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                                courtHouseName,
-                                String.valueOf(sitting.getCourtRoomNumber()),
-                                dailyListHearing.getCaseNumber(),
-                                dailyListHearing.getHearingDetails().getHearingDate()
+                                courtHouseName, String.valueOf(sitting.getCourtRoomNumber()),
+                                caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
                         );
 
+                        CourtCaseEntity courtCase = hearing.getCourtCase();
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
-                        addProsecutions(
-                                courtCase,
-                                buildFullName(dailyListHearing.getProsecution().getAdvocate().getPersonalDetails().getName())
-                        );
+                        addProsecutions(courtCase, dailyListHearing.getProsecution().getAdvocate().getPersonalDetails().getName());
                         addDefenders(courtCase, dailyListHearing.getDefendants());
-                        setCourtroom(hearing, courtCase, sitting.getCourtRoomNumber());
-                        setCaseNumber(courtCase, dailyListHearing.getDefendants(), dailyListEntity, dailyListHearing);
-                        hearing.setHearingDate(dailyListHearing.getHearingDetails().getHearingDate());
 
                         courtCase.addHearing(hearing);
+
                         hearingRepository.saveAndFlush(hearing);
                         caseRepository.saveAndFlush(courtCase);
-
-
                     }
                 }
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
-                log.info("Unregistered courthouse " + courtHouseName + " daily list entry has not been processed");
+                log.error("Unregistered courthouse " + courtHouseName + " daily list entry has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType.name());
     }
 
-    private void setCaseNumber(CourtCaseEntity courtCase, List<Defendant> defendants, DailyListEntity dailyListEntity, Hearing hearing) {
+    private String getCaseNumber(List<Defendant> defendants, DailyListEntity dailyListEntity, Hearing hearing) {
         // CPP don't provide case id, use URN
         if (String.valueOf(SourceType.CPP).equalsIgnoreCase(dailyListEntity.getSource())) {
             if (defendants.isEmpty()) {
-                courtCase.setCaseNumber(hearing.getCaseNumber());
+                return hearing.getCaseNumber();
             } else {
                 String urn = defendants.get(0).getUrn();
                 if (StringUtils.isEmpty(urn)) {
                     log.error("Hearing not added - HearingInfo does not contain a URN value");
                 } else {
-                    courtCase.setCaseNumber(urn);
+                    return urn;
                 }
             }
-        } else {
-            courtCase.setCaseNumber(hearing.getCaseNumber());
         }
+        return hearing.getCaseNumber();
 
     }
 
-    private void setCourtroom(HearingEntity hearing, CourtCaseEntity courtCase, Integer courtRoomNumber) {
-        Optional<CourtroomEntity> courtroomEntity = courtCase.getCourthouse().getCourtrooms().stream().filter(
-                c -> c.getName().equals(String.valueOf(courtRoomNumber))).findFirst();
-        courtroomEntity.ifPresent(hearing::setCourtroom);
 
-    }
-
-    private void addProsecutions(CourtCaseEntity courtCase, String prosecutionName) {
-        courtCase.addProsecutor(retrieveCoreObjectService.retrieveOrCreateProsecutor(prosecutionName, courtCase));
+    private void addProsecutions(CourtCaseEntity courtCase, CitizenName prosecutionName) {
+        courtCase.addProsecutor(prosecutorRepository.createProsecutor(buildFullName(prosecutionName), courtCase));
     }
 
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            String fullName = buildFullName(defendant.getCounsel().getAdvocate().getPersonalDetails().getName());
-            courtCase.addDefence(retrieveCoreObjectService.retrieveOrCreateDefence(fullName, courtCase));
+            courtCase.addDefence(defenceRepository.createDefence(
+                    buildFullName(defendant.getCounsel().getAdvocate().getPersonalDetails().getName()), courtCase));
         }
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            courtCase.addDefendant(retrieveCoreObjectService.retrieveOrCreateDefendant(
-                    buildFullName(defendant.getPersonalDetails().getName()), courtCase));
+            courtCase.addDefendant(defendantRepository.createDefendant(buildFullName(defendant.getPersonalDetails().getName()), courtCase));
         }
 
     }
 
-    private void addJudges(Sitting sitting, HearingEntity courtCase) {
+    private void addJudges(Sitting sitting, HearingEntity hearing) {
         for (CitizenName judge : sitting.getJudiciary()) {
             JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(buildFullName(judge));
-            courtCase.addJudge(judgeEntity);
+            hearing.addJudge(judgeEntity);
+
         }
     }
 

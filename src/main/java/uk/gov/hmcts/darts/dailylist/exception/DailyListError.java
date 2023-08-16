@@ -10,12 +10,12 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum DailyListError implements DartsApiError {
 
     FAILED_TO_PROCESS_DAILYLIST(
-            "105",
+            "100",
             HttpStatus.INTERNAL_SERVER_ERROR,
             "Failed to process daily list"
     );
 
-    private static final String ERROR_TYPE_PREFIX = "CASE";
+    private static final String ERROR_TYPE_PREFIX = "DAILYLIST";
 
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
