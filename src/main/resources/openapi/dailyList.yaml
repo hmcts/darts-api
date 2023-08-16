@@ -76,6 +76,20 @@ paths:
         '500':
           description: Internal Server Error
 
+  /dailylists/housekeeping:
+    post:
+      tags:
+        - DailyLists
+      summary: Deletes old DailyLists from the database
+      description: |-
+        Deletes old DailyLists from the database. It will keep x number of days, as defined by application properties.
+      responses:
+        '200':
+          description: OK
+
+        '500':
+          description: Internal Server Error
+
 
 components:
   examples:
