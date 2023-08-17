@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "768c8675-0aec-44b3-b83d-4897031799ea",
+		"_postman_id": "7a48dccf-5630-4bb3-9409-9923c57a4b64",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -304,6 +304,39 @@
 							"response": []
 						}
 					]
+				}
+			]
+		},
+		{
+			"name": "Audio",
+			"item": [
+				{
+					"name": "GET /audio/hearings/:hearingId/audios",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4550/audio/hearings/1/audios",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4550",
+							"path": [
+								"audio",
+								"hearings",
+								"1",
+								"audios"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
