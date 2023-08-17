@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.dailylist.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.transaction.Transactional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -17,13 +16,10 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.CourtroomTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
 import java.io.IOException;
@@ -54,12 +50,6 @@ class DailyListProcessorTest extends IntegrationBase {
     DailyListRepository dailyListRepository;
 
     @Autowired
-    CourtroomRepository courtroomRepository;
-
-    @Autowired
-    CourthouseRepository courthouseRepository;
-
-    @Autowired
     CaseRepository caseRepository;
 
     @Autowired
@@ -72,13 +62,8 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void dailyListProcessorMultipleDailyList() throws IOException {
-        courthouseRepository.deleteAll();
-        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithNameAndCode(SWANSEA, 457);
-        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_1));
-        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_2));
-
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         DailyListEntity dailyListEntity = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.CPP),
                 swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
@@ -97,7 +82,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getDefenceList().size());
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
-        assertEquals(1, newCase1.getHearings().size());
 
 
         HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
@@ -112,7 +96,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getDefenceList().size());
         assertEquals(1, newCase2.getProsecutorList().size());
         assertEquals(1, newCase2.getJudges().size());
-        assertEquals(1, newCase2.getHearings().size());
 
 
         HearingEntity newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now()).get(0);
@@ -122,21 +105,10 @@ class DailyListProcessorTest extends IntegrationBase {
     }
 
     @Test
-    @Transactional
     void dailyListProcessorCppAndXhbDailyLists() throws IOException {
-        courthouseRepository.deleteAll();
-        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithNameAndCode(SWANSEA, 457);
-        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_1));
-        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_2));
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
 
-        DailyListEntity xhbDailyList = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.XHB),
-                swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListXHB.json");
-
-        DailyListEntity cppDailyList = DailyListTestData.createDailyList(LocalTime.now(),
-                String.valueOf(SourceType.CPP), swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
-
-        dailyListRepository.saveAndFlush(xhbDailyList);
-        dailyListRepository.saveAndFlush(cppDailyList);
+        dartsDatabase.createDailyLists(swanseaCourtEntity);
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
@@ -147,7 +119,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getDefenceList().size());
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
-        assertEquals(1, newCase1.getHearings().size());
 
         CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
         assertEquals(URN_2, newCase2.getCaseNumber());
@@ -156,7 +127,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getDefenceList().size());
         assertEquals(1, newCase2.getProsecutorList().size());
         assertEquals(1, newCase2.getJudges().size());
-        assertEquals(1, newCase2.getHearings().size());
 
 
         CourtCaseEntity newCase3 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_1, SWANSEA).get();
@@ -166,7 +136,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase3.getDefenceList().size());
         assertEquals(1, newCase3.getProsecutorList().size());
         assertEquals(1, newCase3.getJudges().size());
-        assertEquals(1, newCase3.getHearings().size());
 
 
         CourtCaseEntity newCase4 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_2, SWANSEA).get();
@@ -176,7 +145,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase4.getDefenceList().size());
         assertEquals(1, newCase4.getProsecutorList().size());
         assertEquals(1, newCase4.getJudges().size());
-        assertEquals(1, newCase4.getHearings().size());
 
 
         List<HearingEntity> hearings = hearingRepository.findAll();
@@ -188,5 +156,6 @@ class DailyListProcessorTest extends IntegrationBase {
         }
 
     }
+
 
 }

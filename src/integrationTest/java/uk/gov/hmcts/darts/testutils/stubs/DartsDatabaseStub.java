@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -38,11 +39,15 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
+import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,8 +119,8 @@ public class DartsDatabaseStub {
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
         return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-            someCaseNumber,
-            someCourthouse
+                someCaseNumber,
+                someCourthouse
         );
     }
 
@@ -141,11 +146,11 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-        String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
+            String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
         var caseEntity = givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-            caseNumber,
-            courthouseName,
-            courtroomName
+                caseNumber,
+                courthouseName,
+                courtroomName
         );
 
         var courtroomEntity = courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName);
@@ -170,15 +175,11 @@ public class DartsDatabaseStub {
     public CourtCaseEntity createCaseUnlessExists(String caseNumber, String courthouseName) {
 
         Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-            caseNumber,
-            courthouseName
+                caseNumber,
+                courthouseName
         );
 
-        if (caseEntity.isPresent()) {
-            return caseEntity.get();
-        }
-
-        return createCase(caseNumber, courthouseName);
+        return caseEntity.orElseGet(() -> createCase(caseNumber, courthouseName));
 
     }
 
@@ -195,15 +196,11 @@ public class DartsDatabaseStub {
     public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
 
         Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseNameIgnoreCase(
-            courthouseName);
+                courthouseName);
 
         CourthouseEntity courthouseEntity;
 
-        if (courthouseEntityOptional.isEmpty()) {
-            courthouseEntity = createCourthouseWithoutCourtrooms(courthouseName);
-        } else {
-            courthouseEntity = courthouseEntityOptional.get();
-        }
+        courthouseEntity = courthouseEntityOptional.orElseGet(() -> createCourthouseWithoutCourtrooms(courthouseName));
 
         return courthouseEntity;
     }
@@ -227,11 +224,11 @@ public class DartsDatabaseStub {
     @Transactional
     public HearingEntity hasSomeHearing() {
         return hearingRepository.saveAndFlush(
-            createHearingWith(
-                createCaseWithCaseNumber("c1"),
-                createCourtRoomWithNameAtCourthouse(
-                    createCourthouse("NEWCASTLE"), "r1"), now()
-            ));
+                createHearingWith(
+                        createCaseWithCaseNumber("c1"),
+                        createCourtRoomWithNameAtCourthouse(
+                                createCourthouse("NEWCASTLE"), "r1"), now()
+                ));
     }
 
     public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
@@ -242,6 +239,27 @@ public class DartsDatabaseStub {
         var courthouse = createCourthouse(name);
         courthouse.setCode(code);
         return courthouseRepository.save(courthouse);
+    }
+
+    @Transactional
+    public CourthouseEntity createCourthouseWithTwoCourtrooms() {
+        CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457);
+        courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
+        courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
+        return swanseaCourtEntity;
+
+    }
+
+    @Transactional
+    public void createDailyLists(CourthouseEntity courthouseEntity) throws IOException {
+        DailyListEntity xhbDailyList = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.XHB),
+                courthouseEntity, "tests/dailyListProcessorTest/dailyListXHB.json");
+
+        DailyListEntity cppDailyList = DailyListTestData.createDailyList(LocalTime.now(),
+                String.valueOf(SourceType.CPP), courthouseEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
+
+        dailyListRepository.saveAndFlush(xhbDailyList);
+        dailyListRepository.saveAndFlush(cppDailyList);
     }
 
     public MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
@@ -270,16 +288,16 @@ public class DartsDatabaseStub {
 
         var caseEntity = save(createCaseWithCaseNumber("2"));
         var courtroomEntity = save(
-            createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
+                createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
         var hearingEntityWithMediaRequest1 = save(createHearingWith(caseEntity, courtroomEntity));
 
         return save(
-            AudioTestDataUtil.createMediaRequest(
-                hearingEntityWithMediaRequest1,
-                -2,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z")
-            ));
+                AudioTestDataUtil.createMediaRequest(
+                        hearingEntityWithMediaRequest1,
+                        -2,
+                        OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                        OffsetDateTime.parse("2023-06-26T13:45:00Z")
+                ));
     }
 
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {

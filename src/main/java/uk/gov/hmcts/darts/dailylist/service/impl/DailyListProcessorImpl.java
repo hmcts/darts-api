@@ -1,22 +1,19 @@
-package uk.gov.hmcts.darts.dailylist.service;
+package uk.gov.hmcts.darts.dailylist.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.repository.DefenceRepository;
-import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
@@ -29,6 +26,7 @@ import uk.gov.hmcts.darts.dailylist.model.Defendant;
 import uk.gov.hmcts.darts.dailylist.model.Hearing;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
+import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -42,15 +40,13 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     private final DailyListRepository dailyListRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final CourthouseRepository courthouseRepository;
-    private final CaseRepository caseRepository;
     private final HearingRepository hearingRepository;
-    private final DefendantRepository defendantRepository;
-    private final DefenceRepository defenceRepository;
-    private final ProsecutorRepository prosecutorRepository;
+
 
     private final ObjectMapper objectMapper;
 
     @Override
+    @Transactional
     public void processAllDailyLists(LocalDate date) {
         Arrays.stream(SourceType.values()).forEach(sourceType -> processDailyListForSourceType(date, sourceType));
     }
@@ -112,18 +108,16 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                         CourtCaseEntity courtCase = hearing.getCourtCase();
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
-                        addProsecutions(courtCase, dailyListHearing.getProsecution().getAdvocate().getPersonalDetails().getName());
+                        addProsecution(courtCase, dailyListHearing.getProsecution().getAdvocate().getPersonalDetails().getName());
                         addDefenders(courtCase, dailyListHearing.getDefendants());
 
-                        courtCase.addHearing(hearing);
-
                         hearingRepository.saveAndFlush(hearing);
-                        caseRepository.saveAndFlush(courtCase);
                     }
                 }
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
-                log.error("Unregistered courthouse " + courtHouseName + " daily list entry has not been processed");
+                log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
+                        + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType.name());
@@ -136,7 +130,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 return hearing.getCaseNumber();
             } else {
                 String urn = defendants.get(0).getUrn();
-                if (StringUtils.isEmpty(urn)) {
+                if (StringUtils.isBlank(urn)) {
                     log.error("Hearing not added - HearingInfo does not contain a URN value");
                 } else {
                     return urn;
@@ -148,28 +142,28 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     }
 
 
-    private void addProsecutions(CourtCaseEntity courtCase, CitizenName prosecutionName) {
-        courtCase.addProsecutor(prosecutorRepository.createProsecutor(buildFullName(prosecutionName), courtCase));
+    private void addProsecution(CourtCaseEntity courtCase, CitizenName prosecutionName) {
+        courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(buildFullName(prosecutionName), courtCase));
     }
 
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            courtCase.addDefence(defenceRepository.createDefence(
+            courtCase.addDefence(retrieveCoreObjectService.createDefence(
                     buildFullName(defendant.getCounsel().getAdvocate().getPersonalDetails().getName()), courtCase));
         }
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            courtCase.addDefendant(defendantRepository.createDefendant(buildFullName(defendant.getPersonalDetails().getName()), courtCase));
+            courtCase.addDefendant(retrieveCoreObjectService.createDefendant(buildFullName(defendant.getPersonalDetails().getName()), courtCase));
         }
 
     }
 
     private void addJudges(Sitting sitting, HearingEntity hearing) {
         for (CitizenName judge : sitting.getJudiciary()) {
-            JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(buildFullName(judge));
+            JudgeEntity judgeEntity = retrieveCoreObjectService.retrieveOrCreateJudge(judge.getCitizenNameRequestedName());
             hearing.addJudge(judgeEntity);
 
         }

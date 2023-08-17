@@ -7,13 +7,19 @@ import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.repository.DefenceRepository;
+import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
+import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
@@ -31,6 +37,9 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     private final JudgeRepository judgeRepository;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
+    private final DefenceRepository defenceRepository;
+    private final DefendantRepository defendantRepository;
+    private final ProsecutorRepository prosecutorRepository;
 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
@@ -127,5 +136,31 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     public JudgeEntity retrieveOrCreateJudge(String judgeName) {
         Optional<JudgeEntity> foundJudge = judgeRepository.findByNameIgnoreCase(judgeName);
         return foundJudge.orElseGet(() -> judgeRepository.createJudge(judgeName));
+    }
+
+    @Override
+    public DefenceEntity createDefence(String defenceName, CourtCaseEntity courtCase) {
+        DefenceEntity defence = new DefenceEntity();
+        defence.setName(defenceName);
+        defence.setCourtCase(courtCase);
+        return defenceRepository.saveAndFlush(defence);
+    }
+
+
+    @Override
+    public DefendantEntity createDefendant(String defendantName, CourtCaseEntity courtCase) {
+        DefendantEntity defendant = new DefendantEntity();
+        defendant.setName(defendantName);
+        defendant.setCourtCase(courtCase);
+        return defendantRepository.saveAndFlush(defendant);
+    }
+
+    @Override
+    public ProsecutorEntity createProsecutor(String prosecutorName, CourtCaseEntity courtCase) {
+        ProsecutorEntity prosecutor = new ProsecutorEntity();
+        prosecutor.setName(prosecutorName);
+        prosecutor.setCourtCase(courtCase);
+        prosecutorRepository.saveAndFlush(prosecutor);
+        return prosecutor;
     }
 }

@@ -8,8 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DefenceEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 
 import java.time.LocalDate;
 
@@ -36,4 +39,11 @@ public interface RetrieveCoreObjectService {
 
     @Retryable(backoff = @Backoff(delay = 50), retryFor = {DataIntegrityViolationException.class, PSQLException.class})
     JudgeEntity retrieveOrCreateJudge(String judgeName);
+
+    @Transactional
+    DefenceEntity createDefence(String defence, CourtCaseEntity courtCase);
+
+    DefendantEntity createDefendant(String defendant, CourtCaseEntity courtCase);
+
+    ProsecutorEntity createProsecutor(String prosecution, CourtCaseEntity courtCase);
 }
