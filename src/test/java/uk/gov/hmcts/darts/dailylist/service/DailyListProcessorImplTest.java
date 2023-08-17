@@ -373,6 +373,11 @@ class DailyListProcessorImplTest {
                                 1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
                 .thenReturn(dailyListEntities);
 
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                .thenReturn(dailyListEntities);
+
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(caseRepository, Mockito.never()).saveAndFlush(any());

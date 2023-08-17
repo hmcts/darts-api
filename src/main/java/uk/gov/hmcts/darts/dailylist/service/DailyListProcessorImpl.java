@@ -31,7 +31,7 @@ import uk.gov.hmcts.darts.dailylist.model.Sitting;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,9 +52,17 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     @Override
     public void processAllDailyLists(LocalDate date) {
+        Arrays.stream(SourceType.values()).forEach(sourceType -> processDailyListForSourceType(date, sourceType));
+    }
+
+    private void processDailyListForSourceType(LocalDate date, SourceType sourceType) {
         List<CourthouseEntity> allCourthouses = courthouseRepository.findAll();
         for (CourthouseEntity allCourthouse : allCourthouses) {
-            List<DailyListEntity> dailyLists = getDailyListForCppAndXhb(date, allCourthouse);
+            List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                    allCourthouse.getId(),
+                    String.valueOf(JobStatusType.NEW),
+                    date, String.valueOf(sourceType)
+            );
 
             // Daily lists are being ordered descending by date so first item will be the most recent version
             if (!dailyLists.isEmpty()) {
@@ -69,22 +77,6 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
             }
         }
-    }
-
-
-    private List<DailyListEntity> getDailyListForCppAndXhb(LocalDate date, CourthouseEntity allCourthouse) {
-        // it is possible for a courthouse to be using both CPP and XHB system.
-        List<DailyListEntity> dailyLists = new ArrayList<>(dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                allCourthouse.getId(),
-                String.valueOf(JobStatusType.NEW),
-                date, String.valueOf(SourceType.XHB)
-        ));
-        dailyLists.addAll(dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                allCourthouse.getId(),
-                String.valueOf(JobStatusType.NEW),
-                date, String.valueOf(SourceType.CPP)
-        ));
-        return dailyLists;
     }
 
     private void ignoreOldDailyList(List<DailyListEntity> dailyLists) {
