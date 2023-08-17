@@ -93,7 +93,7 @@ class DailyListProcessorImplTest {
     }
 
     @Test
-    void processAllDailyLists() throws IOException {
+    void processAllSingleDailyListsWithMultipleCourthouses() throws IOException {
         CourthouseEntity edinburgh = CommonTestDataUtil.createCourthouse(EDINBURGH);
         edinburgh.setId(1);
 

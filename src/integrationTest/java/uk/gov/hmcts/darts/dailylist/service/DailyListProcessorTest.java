@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,9 @@ import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
@@ -36,13 +39,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(MockitoExtension.class)
 class DailyListProcessorTest extends IntegrationBase {
 
-    static final ObjectMapper MAPPER = new ObjectMapper();
     public static final String SWANSEA = "SWANSEA";
-    public static final String CASE_NUMBER_1 = "42GD2391421";
-    public static final String CASE_NUMBER_2 = "42GD2391433";
+    public static final String URN_1 = "42GD2391421";
+    public static final String URN_2 = "42GD2391433";
     public static final String COURTROOM_1 = "1";
     public static final String COURTROOM_2 = "2";
-
+    public static final String CASE_NUMBER_1 = "Case1";
+    public static final String CASE_NUMBER_2 = "Case2";
+    static final ObjectMapper MAPPER = new ObjectMapper();
     @Autowired
     DailyListProcessor dailyListProcessor;
 
@@ -69,25 +73,25 @@ class DailyListProcessorTest extends IntegrationBase {
 
     @Test
     @Transactional
-    void dailyListProcessorSingleDailyList() throws IOException {
+    void dailyListProcessorMultipleDailyList() throws IOException {
         courthouseRepository.deleteAll();
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithNameAndCode(SWANSEA, 457);
         courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_1));
         courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_2));
 
         DailyListEntity dailyListEntity = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.CPP),
-                swanseaCourtEntity, "tests/dailyListProcessorTest/dailyList.json");
+                swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
         DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(LocalTime.now().minusHours(3),
-                String.valueOf(SourceType.CPP), swanseaCourtEntity, "tests/dailyListProcessorTest/dailyList.json");
+                String.valueOf(SourceType.CPP), swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
         dailyListRepository.saveAndFlush(dailyListEntity);
         dailyListRepository.saveAndFlush(oldDailyListEntity);
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_1, SWANSEA).get();
-        assertEquals(CASE_NUMBER_1, newCase1.getCaseNumber());
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, newCase1.getCaseNumber());
         assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
         assertEquals(1, newCase1.getDefendantList().size());
         assertEquals(1, newCase1.getDefenceList().size());
@@ -101,8 +105,8 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
 
-        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_2, SWANSEA).get();
-        assertEquals(CASE_NUMBER_2, newCase2.getCaseNumber());
+        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
+        assertEquals(URN_2, newCase2.getCaseNumber());
         assertEquals(SWANSEA, newCase2.getCourthouse().getCourthouseName());
         assertEquals(1, newCase2.getDefendantList().size());
         assertEquals(1, newCase2.getDefenceList().size());
@@ -115,6 +119,74 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(LocalDate.now(), newHearing2.getHearingDate());
         assertEquals(COURTROOM_2, newHearing2.getCourtroom().getName());
         assertEquals(1, newHearing2.getJudges().size());
+    }
+
+    @Test
+    @Transactional
+    void dailyListProcessorCppAndXhbDailyLists() throws IOException {
+        courthouseRepository.deleteAll();
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithNameAndCode(SWANSEA, 457);
+        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_1));
+        courtroomRepository.saveAndFlush(CourtroomTestData.createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, COURTROOM_2));
+
+        DailyListEntity xhbDailyList = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.XHB),
+                swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListXHB.json");
+
+        DailyListEntity cppDailyList = DailyListTestData.createDailyList(LocalTime.now(),
+                String.valueOf(SourceType.CPP), swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
+
+        dailyListRepository.saveAndFlush(xhbDailyList);
+        dailyListRepository.saveAndFlush(cppDailyList);
+
+        dailyListProcessor.processAllDailyLists(LocalDate.now());
+
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, newCase1.getCaseNumber());
+        assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
+        assertEquals(1, newCase1.getDefendantList().size());
+        assertEquals(1, newCase1.getDefenceList().size());
+        assertEquals(1, newCase1.getProsecutorList().size());
+        assertEquals(1, newCase1.getJudges().size());
+        assertEquals(1, newCase1.getHearings().size());
+
+        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
+        assertEquals(URN_2, newCase2.getCaseNumber());
+        assertEquals(SWANSEA, newCase2.getCourthouse().getCourthouseName());
+        assertEquals(1, newCase2.getDefendantList().size());
+        assertEquals(1, newCase2.getDefenceList().size());
+        assertEquals(1, newCase2.getProsecutorList().size());
+        assertEquals(1, newCase2.getJudges().size());
+        assertEquals(1, newCase2.getHearings().size());
+
+
+        CourtCaseEntity newCase3 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_1, SWANSEA).get();
+        assertEquals(CASE_NUMBER_1, newCase3.getCaseNumber());
+        assertEquals(SWANSEA, newCase3.getCourthouse().getCourthouseName());
+        assertEquals(1, newCase3.getDefendantList().size());
+        assertEquals(1, newCase3.getDefenceList().size());
+        assertEquals(1, newCase3.getProsecutorList().size());
+        assertEquals(1, newCase3.getJudges().size());
+        assertEquals(1, newCase3.getHearings().size());
+
+
+        CourtCaseEntity newCase4 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_2, SWANSEA).get();
+        assertEquals(CASE_NUMBER_2, newCase4.getCaseNumber());
+        assertEquals(SWANSEA, newCase4.getCourthouse().getCourthouseName());
+        assertEquals(1, newCase4.getDefendantList().size());
+        assertEquals(1, newCase4.getDefenceList().size());
+        assertEquals(1, newCase4.getProsecutorList().size());
+        assertEquals(1, newCase4.getJudges().size());
+        assertEquals(1, newCase4.getHearings().size());
+
+
+        List<HearingEntity> hearings = hearingRepository.findAll();
+        for (HearingEntity hearing : hearings) {
+            assertEquals(LocalDate.now(), hearing.getHearingDate());
+            assertThat(hearing.getCourtroom().getName(), Matchers.either(Matchers.is(COURTROOM_1)).or(Matchers.is(COURTROOM_2)));
+            assertEquals(1, hearing.getJudges().size());
+
+        }
+
     }
 
 }
