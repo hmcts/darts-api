@@ -44,7 +44,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
 
     }
 
@@ -96,7 +96,7 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath(
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andExpect(MockMvcResultMatchers.jsonPath(
             "$[0]").doesNotExist());
 
     }
