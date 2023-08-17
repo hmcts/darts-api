@@ -320,12 +320,10 @@ class DailyListProcessorImplTest {
                 .thenReturn(Collections.emptyList());
 
 
-
-
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        Mockito.verify(caseRepository).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
-        Mockito.verify(hearingRepository).saveAndFlush(hearingEntityArgumentCaptor.capture());
+        Mockito.verify(caseRepository, Mockito.times(2)).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
+        Mockito.verify(hearingRepository, Mockito.times(2)).saveAndFlush(hearingEntityArgumentCaptor.capture());
 
 
         CourtCaseEntity savedCase = courtCaseEntityArgumentCaptor.getValue();
