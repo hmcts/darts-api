@@ -39,8 +39,8 @@
           "judiciary": [
             {
               "citizen_name_forename": "JudgeName",
-              "citizen_name_surname": "Surname",
-              "citizen_name_requested_name": "Judgename Surname"
+              "citizen_name_surname": "CPP",
+              "citizen_name_requested_name": "Judgename CPP"
             }
           ],
           "hearings": [
@@ -52,7 +52,6 @@
                 "hearing_date": "todays_date"
               },
               "time_marking_note": "NOT BEFORE 11:00 AM",
-              "case_number": "Case1",
               "prosecution": {
                 "prosecuting_authority": "Crown Prosecution Service",
                 "prosecuting_reference": "Crown Prosecution Service",
@@ -63,7 +62,7 @@
                   "personal_details": {
                     "name": {
                       "citizen_name_forename": "ProsecutorName",
-                      "citizen_name_surname": "Surname",
+                      "citizen_name_surname": "CPP",
                       "citizen_name_requested_name": ""
                     }
                   }
@@ -74,7 +73,7 @@
                   "personal_details": {
                     "name": {
                       "citizen_name_forename": "DefendantName",
-                      "citizen_name_surname": "Surname",
+                      "citizen_name_surname": "CPP",
                       "citizen_name_requested_name": ""
                     },
                     "is_masked": "no"
@@ -92,7 +91,7 @@
                       "personal_details": {
                         "name": {
                           "citizen_name_forename": "DefenceName",
-                          "citizen_name_surname": "Surname",
+                          "citizen_name_surname": "CPP",
                           "citizen_name_requested_name": ""
                         }
                       }
@@ -111,7 +110,7 @@
           "judiciary": [
             {
               "citizen_name_forename": "JudgeName",
-              "citizen_name_surname": "Surname",
+              "citizen_name_surname": "CPP",
               "citizen_name_requested_name": "Judgename Surname"
             }
           ],
@@ -124,7 +123,6 @@
                 "hearing_date": "todays_date"
               },
               "time_marking_note": "NOT BEFORE 11:00 AM",
-              "case_number": "Case2",
               "prosecution": {
                 "prosecuting_authority": "Crown Prosecution Service",
                 "prosecuting_reference": "Crown Prosecution Service",
@@ -135,7 +133,7 @@
                   "personal_details": {
                     "name": {
                       "citizen_name_forename": "ProsecutorName",
-                      "citizen_name_surname": "Surname",
+                      "citizen_name_surname": "CPP",
                       "citizen_name_requested_name": ""
                     }
                   }
@@ -146,7 +144,7 @@
                   "personal_details": {
                     "name": {
                       "citizen_name_forename": "DefendantName",
-                      "citizen_name_surname": "Surname",
+                      "citizen_name_surname": "CPP",
                       "citizen_name_requested_name": ""
                     },
                     "is_masked": "no"
@@ -164,7 +162,7 @@
                       "personal_details": {
                         "name": {
                           "citizen_name_forename": "DefenceName",
-                          "citizen_name_surname": "Surname",
+                          "citizen_name_surname": "CPP",
                           "citizen_name_requested_name": ""
                         }
                       }
