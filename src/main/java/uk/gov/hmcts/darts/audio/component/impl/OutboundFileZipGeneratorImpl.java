@@ -5,21 +5,32 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
+import uk.gov.hmcts.darts.audio.model.ViqMetaData;
+import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static uk.gov.hmcts.darts.common.util.DateConverters.EUROPE_LONDON_ZONE;
 
 @Component
 @RequiredArgsConstructor
@@ -27,18 +38,34 @@ import java.util.zip.ZipOutputStream;
 public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
+    private final ViqHeaderService viqHeaderService;
+    private final DateConverters dateConverters;
 
     /**
      * Produce a structured zip file containing audio files.
      *
-     * @param audioSessions A grouping of audio sessions, as produced by OutboundFileProcessor.
+     * @param audioSessions      A grouping of audio sessions, as produced by OutboundFileProcessor.
+     * @param mediaRequestEntity Details of media request
      * @return The local filepath of the produced zip file containing the provided audioSessions.
      */
     @Override
-    public Path generateAndWriteZip(List<List<AudioFileInfo>> audioSessions) {
+    public Path generateAndWriteZip(List<List<AudioFileInfo>> audioSessions, MediaRequestEntity mediaRequestEntity) {
 
-        Map<Path, Path> sourceToDestinationPaths = generateZipStructure(audioSessions);
         try {
+            Path mediaRequestDir = Path.of(
+                audioConfigurationProperties.getTempBlobWorkspace(),
+                mediaRequestEntity.getId().toString()
+            );
+            if (Files.notExists(mediaRequestDir)) {
+                mediaRequestDir = Files.createDirectory(mediaRequestDir);
+            }
+
+            Map<Path, Path> sourceToDestinationPaths = generateZipStructure(
+                audioSessions,
+                mediaRequestEntity,
+                mediaRequestDir.toString()
+            );
+
             var outputPath = Path.of(
                 audioConfigurationProperties.getTempBlobWorkspace(),
                 String.format("%s.zip", UUID.randomUUID())
@@ -51,15 +78,70 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
         }
     }
 
-    private Map<Path, Path> generateZipStructure(List<List<AudioFileInfo>> audioSessions) {
+    private ViqMetaData createViqMetaData(MediaRequestEntity mediaRequestEntity) {
+        return ViqMetaData.builder()
+            .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
+            .raisedBy(null)
+            .startTime(dateConverters.offsetDateTimeToLegacyDateTime(mediaRequestEntity.getStartTime()))
+            .endTime(dateConverters.offsetDateTimeToLegacyDateTime(mediaRequestEntity.getEndTime()))
+            .build();
+    }
+
+    private Map<Path, Path> generateZipStructure(List<List<AudioFileInfo>> audioSessions,
+                                                 MediaRequestEntity mediaRequestEntity,
+                                                 String mediaRequestDirString) {
         Map<Path, Path> sourceToDestinationPaths = new HashMap<>();
+
+        HearingEntity hearingEntity = mediaRequestEntity.getHearing();
+        final String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
+
+        sourceToDestinationPaths.put(Path.of(viqHeaderService.generateReadme(
+            createViqMetaData(mediaRequestEntity),
+            mediaRequestDirString
+        )), Path.of("readMe.txt"));
+
+        Set<PlaylistInfo> playlistInfos = new LinkedHashSet<>();
+
         for (int i = 0; i < audioSessions.size(); i++) {
             List<AudioFileInfo> audioSession = audioSessions.get(i);
             for (AudioFileInfo audioFileInfo : audioSession) {
+                ZonedDateTime localStartTime = ZonedDateTime.ofInstant(
+                    audioFileInfo.getStartTime(),
+                    EUROPE_LONDON_ZONE
+                );
+                ZonedDateTime localEndTime = ZonedDateTime.ofInstant(
+                    audioFileInfo.getEndTime(),
+                    EUROPE_LONDON_ZONE
+                );
                 Path path = generateZipPath(i, audioFileInfo);
                 sourceToDestinationPaths.put(Path.of(audioFileInfo.getFileName()), path);
+
+                String parentPathString = path.getParent().toString();
+                playlistInfos.add(PlaylistInfo.builder()
+                                      .caseNumber(caseNumber)
+                                      .startTime(localStartTime)
+                                      .fileLocation(parentPathString)
+                                      .build());
+
+                Path annotationsOutputFile = Path.of(
+                    mediaRequestDirString,
+                    String.format("%d_%s", i, "annotations.xml")
+                );
+                if (Files.notExists(annotationsOutputFile)) {
+                    sourceToDestinationPaths.put(Path.of(viqHeaderService.generateAnnotation(
+                        hearingEntity,
+                        localStartTime,
+                        localEndTime,
+                        annotationsOutputFile.toString()
+                    )), Path.of(parentPathString, "annotations.xml"));
+                }
             }
         }
+
+        sourceToDestinationPaths.put(Path.of(viqHeaderService.generatePlaylist(
+            playlistInfos,
+            mediaRequestDirString
+        )), Path.of("playlist.xml"));
 
         log.debug("Generated zip structure: {}", sourceToDestinationPaths);
         return sourceToDestinationPaths;

@@ -221,7 +221,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest) throws IOException {
+    private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
+        throws IOException {
         Map<MediaEntity, Path> downloadedMedias = new HashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
             UUID id = getMediaLocation(mediaEntity).orElseThrow(
@@ -260,14 +261,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private Path handleDownload(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
         throws ExecutionException, InterruptedException {
 
-        List<List<AudioFileInfo>> processedAudio;
-        processedAudio = outboundFileProcessor.processAudioForDownload(
+        List<List<AudioFileInfo>> processedAudio = outboundFileProcessor.processAudioForDownload(
             downloadedMedias,
             mediaRequestEntity.getStartTime(),
             mediaRequestEntity.getEndTime()
         );
 
-        return outboundFileZipGenerator.generateAndWriteZip(processedAudio);
+        return outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity);
     }
 
     private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)

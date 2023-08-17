@@ -16,7 +16,6 @@ import java.time.OffsetDateTime;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Autowired

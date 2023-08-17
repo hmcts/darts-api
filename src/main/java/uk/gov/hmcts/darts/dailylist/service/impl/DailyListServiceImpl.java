@@ -1,7 +1,11 @@
 package uk.gov.hmcts.darts.dailylist.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
@@ -17,6 +21,8 @@ import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +34,11 @@ public class DailyListServiceImpl implements DailyListService {
     private final CourthouseApi courthouseApi;
     private final DailyListMapper dailyListMapper;
 
+    @Value("${darts.daily-list.housekeeping.days-to-keep:30}")
+    private int housekeepingDays;
+
+    @Value("${darts.daily-list.housekeeping.enabled:false}")
+    private boolean housekeepingEnabled;
 
     @Override
     /*
@@ -51,6 +62,20 @@ public class DailyListServiceImpl implements DailyListService {
                 courthouse
             );
             dailyListRepository.saveAndFlush(dailyListEntity);
+        }
+    }
+
+    @Override
+    @SchedulerLock(name = "DailyListService_Housekeeping",
+        lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
+    @Scheduled(cron = "${darts.daily-list.housekeeping.cron}")
+    @Transactional
+    public void runHouseKeeping() {
+        if (housekeepingEnabled) {
+            LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
+            log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
+            List<DailyListEntity> deletedEntities = dailyListRepository.deleteByStartDateBefore(dateToDeleteBefore);
+            log.info("Finished DailyList housekeeping. Deleted {} rows.", deletedEntities.size());
         }
     }
 

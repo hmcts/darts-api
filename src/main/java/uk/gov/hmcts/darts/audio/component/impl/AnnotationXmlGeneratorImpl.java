@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -8,20 +8,20 @@ import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
 @Component
-@Slf4j
+@Qualifier("annotationXmlGenerator")
 public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
 
-    private static final String ANNOTATION_FILENAME = "annotations.xml";
     private static final String ANNOTATION_ROOT_ELEMENT_NAME = "cfMetaFile";
     private static final String ANNOTATION_ANNOTATION_ELEMENT_NAME = "annotations";
     private static final String ANNOTATION_COUNT_ATTRIBUTE_NAME = "count";
@@ -41,12 +41,16 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
     private static final String ANNOTATION_EVENT_ATTRIBUTE_RESTRICTED = "R";
     private static final String ANNOTATION_EVENT_ATTRIBUTE_LAPSED = "P";
 
-    public AnnotationXmlGeneratorImpl() throws TransformerConfigurationException, ParserConfigurationException {
+    private final DateConverters dateConverters;
+
+    public AnnotationXmlGeneratorImpl(DateConverters dateConverters) throws ParserConfigurationException {
         super();
+        this.dateConverters = dateConverters;
     }
 
     @Override
-    public Path generateAndWriteXmlFile(Object data, String outboundPath) throws ParserConfigurationException, IOException, TransformerException {
+    public Path generateAndWriteXmlFile(Object data, Path outboundFilePath)
+        throws ParserConfigurationException, IOException, TransformerException {
 
         if (!(data instanceof ViqAnnotationData)) {
             throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST);
@@ -71,37 +75,52 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
         // Events
         for (EventEntity event : annotationData.getEvents()) {
 
-            OffsetDateTime eventTimestamp = event.getTimestamp();
+            ZonedDateTime localEventTimestamp = dateConverters.offsetDateTimeToLegacyDateTime(event.getTimestamp());
 
-            Element eventElement = document.createElement(String.format("%s%d", ANNOTATION_EVENT_ELEMENT_NAME, eventCounter));
+            Element eventElement = document.createElement(String.format(
+                "%s%d",
+                ANNOTATION_EVENT_ELEMENT_NAME,
+                eventCounter
+            ));
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_LABEL, ANNOTATION_EVENT_DEFAULT_LABEL);
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_TEXT, event.getEventText());
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_START_TIME_MILLIS,
-                                      String.valueOf(eventTimestamp.toInstant().toEpochMilli()));
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_YEAR, String.valueOf(eventTimestamp.getYear()));
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_MONTH, String.valueOf(eventTimestamp.getMonthValue()));
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_DAY, String.valueOf(eventTimestamp.getDayOfMonth()));
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_HOUR, String.valueOf(eventTimestamp.getHour()));
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_MINUTES, String.valueOf(eventTimestamp.getMinute()));
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_SECONDS, String.valueOf(eventTimestamp.getSecond()));
+            eventElement.setAttribute(
+                ANNOTATION_EVENT_ATTRIBUTE_START_TIME_MILLIS,
+                String.valueOf(localEventTimestamp.toInstant().toEpochMilli())
+            );
+            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_YEAR, String.valueOf(localEventTimestamp.getYear()));
+            eventElement.setAttribute(
+                ANNOTATION_EVENT_ATTRIBUTE_MONTH,
+                String.valueOf(localEventTimestamp.getMonthValue())
+            );
+            eventElement.setAttribute(
+                ANNOTATION_EVENT_ATTRIBUTE_DAY,
+                String.valueOf(localEventTimestamp.getDayOfMonth())
+            );
+            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_HOUR, String.valueOf(localEventTimestamp.getHour()));
+            eventElement.setAttribute(
+                ANNOTATION_EVENT_ATTRIBUTE_MINUTES,
+                String.valueOf(localEventTimestamp.getMinute())
+            );
+            eventElement.setAttribute(
+                ANNOTATION_EVENT_ATTRIBUTE_SECONDS,
+                String.valueOf(localEventTimestamp.getSecond())
+            );
             eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_RESTRICTED, ANNOTATION_EVENT_DEFAULT_RESTRICTION);
-            eventElement.setAttribute(ANNOTATION_EVENT_ATTRIBUTE_LAPSED,
-                                      String.valueOf(calculateLapsedTime(annotationData.getAnnotationsStartTime(), eventTimestamp)));
+            eventElement.setAttribute(
+                ANNOTATION_EVENT_ATTRIBUTE_LAPSED,
+                String.valueOf(Duration.between(annotationData.getAnnotationsStartTime(), localEventTimestamp)
+                                   .getSeconds())
+            );
 
             eventElement.appendChild(document.createTextNode(event.getEventName()));
             annotations.appendChild(eventElement);
             eventCounter++;
         }
 
-        Path outboundFile = Path.of(outboundPath, ANNOTATION_FILENAME);
+        transformDocument(document, outboundFilePath);
 
-        transformDocument(document, outboundFile);
-
-        return outboundFile;
-    }
-
-    private Long calculateLapsedTime(OffsetDateTime annotationAudioStartTime, OffsetDateTime eventTimestamp) {
-        return (eventTimestamp.toInstant().toEpochMilli() - annotationAudioStartTime.toInstant().toEpochMilli()) / 1000;
+        return outboundFilePath;
     }
 
 }

@@ -11,7 +11,7 @@ import static java.util.stream.IntStream.rangeClosed;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
+@SuppressWarnings({"HideUtilityClassConstructor"})
 public class DefenceTestData {
 
     public static DefenceEntity someMinimalDefence() {

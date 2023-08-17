@@ -4,4 +4,6 @@ import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 
 public interface DailyListService {
     void processIncomingDailyList(DailyListPostRequest postRequest);
+
+    void runHouseKeeping();
 }

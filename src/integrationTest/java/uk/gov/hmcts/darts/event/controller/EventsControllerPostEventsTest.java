@@ -23,7 +23,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.createEventHandlerWith;
 
 @AutoConfigureMockMvc
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
 class EventsControllerPostEventsTest extends IntegrationBase {
 
 
@@ -41,10 +40,10 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-              SOME_CASE_ID,
-              SOME_COURTHOUSE,
-              SOME_COURTROOM,
-              SOME_DATE_TIME.toLocalDate()
+            SOME_CASE_ID,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            SOME_DATE_TIME.toLocalDate()
         );
     }
 
@@ -64,17 +63,17 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         dartsDatabase.getCourthouseRepository().save(courthouse);
 
         String requestBody = """
-              {
-                "message_id": "12345",
-                "type": "ActiveTestType",
-                "sub_type": "ActiveTestSubType",
-                "courthouse": "swansea",
-                "courtroom": "1",
-                "case_numbers": [
-                  "A20230049"
-                ],
-                "date_time": "2023-06-14T08:37:30.945Z"
-              }""";
+            {
+              "message_id": "12345",
+              "type": "ActiveTestType",
+              "sub_type": "ActiveTestSubType",
+              "courthouse": "swansea",
+              "courtroom": "1",
+              "case_numbers": [
+                "A20230049"
+              ],
+              "date_time": "2023-06-14T08:37:30.945Z"
+            }""";
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
@@ -122,16 +121,16 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-              .header("Content-Type", "application/json")
-              .content(requestBody);
+            .header("Content-Type", "application/json")
+            .content(requestBody);
 
         mockMvc.perform(requestBuilder)
-              .andExpect(MockMvcResultMatchers.status().isCreated());
+            .andExpect(MockMvcResultMatchers.status().isCreated());
 
         List<EventEntity> results = dartsDatabase.getAllEvents()
-              .stream()
-              .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
-              .toList();
+            .stream()
+            .filter(eventEntity -> "useExistingCase".equals(eventEntity.getMessageId()))
+            .toList();
 
         Assertions.assertEquals(1, results.size());
 

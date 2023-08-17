@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.impl.AudioTransformationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -50,12 +51,16 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
-    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(AudioRequestType audioRequestType) {
+    @Transactional
+    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(
+        AudioRequestType audioRequestType) {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
-        given.aMediaRequestEntityForHearingWithRequestType(hearing,
-                                                           audioRequestType,
-                                                           userAccountEntity);
+        given.aMediaRequestEntityForHearingWithRequestType(
+            hearing,
+            audioRequestType,
+            userAccountEntity
+        );
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
 
@@ -80,11 +85,14 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
-    void processAudioRequestShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(AudioRequestType audioRequestType) {
+    void processAudioRequestShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
+        AudioRequestType audioRequestType) {
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
-        given.aMediaRequestEntityForHearingWithRequestType(hearing,
-                                                           audioRequestType,
-                                                           userAccountEntity);
+        given.aMediaRequestEntityForHearingWithRequestType(
+            hearing,
+            audioRequestType,
+            userAccountEntity
+        );
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
         var exception = assertThrows(

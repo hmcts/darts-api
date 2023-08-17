@@ -72,7 +72,6 @@ class ExceptionHandlerTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void shouldReturnRfc7807ResponseWhenADartsApiExceptionIsThrown() throws Exception {
         Mockito.when(mockController.test())
             .thenThrow(new DartsApiException(TestError.TEST_ERROR));
@@ -95,7 +94,6 @@ class ExceptionHandlerTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void shouldReturnRfc7807ResponseWithDetailFieldPopulatedWhenADartsApiExceptionIsThrownWithDetail()
         throws Exception {
         Mockito.when(mockController.test())
@@ -120,7 +118,6 @@ class ExceptionHandlerTest {
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void shouldReturnAGenericRfc7807ResponseWhenARuntimeExceptionIsThrown() throws Exception {
         Mockito.when(mockController.test())
             .thenThrow(new RuntimeException("A runtime exception occurred"));
