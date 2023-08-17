@@ -11,7 +11,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -21,16 +20,14 @@ import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
-import uk.gov.hmcts.darts.common.repository.DefenceRepository;
-import uk.gov.hmcts.darts.common.repository.DefendantRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
+import uk.gov.hmcts.darts.dailylist.service.impl.DailyListProcessorImpl;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -59,20 +56,10 @@ class DailyListProcessorImplTest {
     @Mock
     private DailyListRepository dailyListRepository;
     @Mock
-    private CaseRepository caseRepository;
-    @Mock
     private HearingRepository hearingRepository;
-    @Mock
-    private DefendantRepository defendantRepository;
-    @Mock
-    private DefenceRepository defenceRepository;
-    @Mock
-    private ProsecutorRepository prosecutorRepository;
     @Mock
     private RetrieveCoreObjectService retrieveCoreObjectService;
     private DailyListProcessor dailyListProcessor;
-    @Captor
-    private ArgumentCaptor<CourtCaseEntity> courtCaseEntityArgumentCaptor;
     @Captor
     private ArgumentCaptor<HearingEntity> hearingEntityArgumentCaptor;
 
@@ -87,9 +74,8 @@ class DailyListProcessorImplTest {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        dailyListProcessor = new DailyListProcessorImpl(
-                dailyListRepository, retrieveCoreObjectService, courthouseRepository, caseRepository, hearingRepository,
-                defendantRepository, defenceRepository, prosecutorRepository, objectMapper);
+        dailyListProcessor = new DailyListProcessorImpl(dailyListRepository, retrieveCoreObjectService,
+                courthouseRepository, hearingRepository, objectMapper);
     }
 
     @Test
@@ -120,11 +106,11 @@ class DailyListProcessorImplTest {
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString()))
                 .thenReturn(createJudgeWithName("JudgeName Surname"));
-        Mockito.when(defendantRepository.createDefendant(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createDefendant(anyString(), any()))
                 .thenReturn(createDefendantForCaseWithName(courtCase, "DefendantName Surname"));
-        Mockito.when(defenceRepository.createDefence(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createDefence(anyString(), any()))
                 .thenReturn(createDefenceForCaseWithName(courtCase, "DefenceName Surname"));
-        Mockito.when(prosecutorRepository.createProsecutor(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createProsecutor(anyString(), any()))
                 .thenReturn(createProsecutorForCaseWithName(courtCase, "ProsecutorName Surname"));
 
         List<DailyListEntity> dailyListEntities = List.of(CommonTestDataUtil.createDailyList(LocalTime.now(),
@@ -151,18 +137,16 @@ class DailyListProcessorImplTest {
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        Mockito.verify(caseRepository).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
         Mockito.verify(hearingRepository).saveAndFlush(hearingEntityArgumentCaptor.capture());
 
 
-        CourtCaseEntity savedCase = courtCaseEntityArgumentCaptor.getValue();
+        CourtCaseEntity savedCase = hearingEntityArgumentCaptor.getValue().getCourtCase();
         assertEquals(3, savedCase.getDefenceList().size());
         assertEquals(1, savedCase.getJudges().size());
         assertEquals(3, savedCase.getProsecutorList().size());
         assertEquals(3, savedCase.getDefendantList().size());
         assertEquals(CASE_NUMBER, savedCase.getCaseNumber());
         assertEquals(SWANSEA, courtCase.getCourthouse().getCourthouseName());
-        assertEquals(1, courtCase.getHearings().size());
 
 
         HearingEntity savedHearing = hearingEntityArgumentCaptor.getValue();
@@ -200,11 +184,11 @@ class DailyListProcessorImplTest {
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString()))
                 .thenReturn(createJudgeWithName("JudgeName Surname"));
-        Mockito.when(defendantRepository.createDefendant(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createDefendant(anyString(), any()))
                 .thenReturn(createDefendantForCaseWithName(courtCase, "DefendantName Surname"));
-        Mockito.when(defenceRepository.createDefence(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createDefence(anyString(), any()))
                 .thenReturn(createDefenceForCaseWithName(courtCase, "DefenceName Surname"));
-        Mockito.when(prosecutorRepository.createProsecutor(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createProsecutor(anyString(), any()))
                 .thenReturn(createProsecutorForCaseWithName(courtCase, "ProsecutorName Surname"));
 
         DailyListEntity oldDailyList = CommonTestDataUtil.createDailyList(LocalTime.now().minusHours(4),
@@ -236,18 +220,16 @@ class DailyListProcessorImplTest {
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        Mockito.verify(caseRepository).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
         Mockito.verify(hearingRepository).saveAndFlush(hearingEntityArgumentCaptor.capture());
 
 
-        CourtCaseEntity savedCase = courtCaseEntityArgumentCaptor.getValue();
+        CourtCaseEntity savedCase = hearingEntityArgumentCaptor.getValue().getCourtCase();
         assertEquals(3, savedCase.getDefenceList().size());
         assertEquals(1, savedCase.getJudges().size());
         assertEquals(3, savedCase.getProsecutorList().size());
         assertEquals(3, savedCase.getDefendantList().size());
         assertEquals(CASE_NUMBER, savedCase.getCaseNumber());
         assertEquals(SWANSEA, courtCase.getCourthouse().getCourthouseName());
-        assertEquals(1, courtCase.getHearings().size());
 
 
         HearingEntity savedHearing = hearingEntityArgumentCaptor.getValue();
@@ -286,11 +268,11 @@ class DailyListProcessorImplTest {
 
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString()))
                 .thenReturn(createJudgeWithName("JudgeName Surname"));
-        Mockito.when(defendantRepository.createDefendant(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createDefendant(anyString(), any()))
                 .thenReturn(createDefendantForCaseWithName(courtCase, "DefendantName Surname"));
-        Mockito.when(defenceRepository.createDefence(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createDefence(anyString(), any()))
                 .thenReturn(createDefenceForCaseWithName(courtCase, "DefenceName Surname"));
-        Mockito.when(prosecutorRepository.createProsecutor(anyString(), any()))
+        Mockito.when(retrieveCoreObjectService.createProsecutor(anyString(), any()))
                 .thenReturn(createProsecutorForCaseWithName(courtCase, "ProsecutorName Surname"));
 
         DailyListEntity oldDailyList = CommonTestDataUtil.createDailyList(LocalTime.now().minusHours(4),
@@ -322,19 +304,16 @@ class DailyListProcessorImplTest {
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        Mockito.verify(caseRepository, Mockito.times(2)).saveAndFlush(courtCaseEntityArgumentCaptor.capture());
         Mockito.verify(hearingRepository, Mockito.times(2)).saveAndFlush(hearingEntityArgumentCaptor.capture());
 
 
-        CourtCaseEntity savedCase = courtCaseEntityArgumentCaptor.getValue();
+        CourtCaseEntity savedCase = hearingEntityArgumentCaptor.getValue().getCourtCase();
         assertEquals(3, savedCase.getDefenceList().size());
         assertEquals(1, savedCase.getJudges().size());
         assertEquals(3, savedCase.getProsecutorList().size());
         assertEquals(3, savedCase.getDefendantList().size());
         assertEquals(URN, savedCase.getCaseNumber());
         assertEquals(SWANSEA, courtCase.getCourthouse().getCourthouseName());
-        assertEquals(1, courtCase.getHearings().size());
-
 
         HearingEntity savedHearing = hearingEntityArgumentCaptor.getValue();
         assertEquals(LocalDate.now(), savedHearing.getHearingDate());
@@ -378,7 +357,6 @@ class DailyListProcessorImplTest {
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        Mockito.verify(caseRepository, Mockito.never()).saveAndFlush(any());
         Mockito.verify(hearingRepository, Mockito.never()).saveAndFlush(any());
     }
 
