@@ -1,0 +1,87 @@
+openapi: 3.0.1
+
+servers:
+  - url: http://localhost:4550/
+
+info:
+  description: Modernised DARTS (Digital Audio Recording and Transcription Service).
+  version: "0.0.1"
+  title: Modernised DARTS
+
+paths:
+  /audio-requests:
+    get:
+      tags:
+        - Audio Requests
+      summary: Users can view a summary of their audio requests and status
+      operationId: getYourAudio
+      description: '"Your audio" requests for a user to view whether Current / Expired'
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+          description: user_account primary key
+          required: true
+        - in: query
+          name: expired
+          schema:
+            type: boolean
+          description: A way to filter whether Current / Expired
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AudioRequestSummary'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+components:
+  schemas:
+    AudioRequestSummary:
+      type: object
+      properties:
+        media_request_id:
+          type: integer
+          example: 12345
+        case_number:
+          type: string
+          example: T20200190
+        courthouse_name:
+          type: string
+          example: Manchester Minshull Street
+        hearing_date:
+          type: string
+          format: date
+          example: "2023-08-17"
+        media_request_start_ts:
+          type: string
+          format: date-time
+          example: "2023-08-17T09:00:00Z"
+        media_request_end_ts:
+          type: string
+          format: date-time
+          example: "2023-08-17T10:00:00Z"
+        expiry_ts:
+          type: string
+          format: date-time
+          example: "2023-08-20T09:00:00Z"
+        media_request_status:
+          $ref: '#/components/schemas/MediaRequestStatus'
+
+    MediaRequestStatus:
+      type: string
+      enum:
+        - OPEN
+        - PROCESSING
+        - FAILED
+        - COMPLETED
