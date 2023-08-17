@@ -9,6 +9,11 @@ spring:
     properties:
       hibernate:
         format_sql: false
+darts:
+  daily-list:
+    housekeeping:
+      enabled: false
+      cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:4 0/2 * * * MON-FRI}
 
 logging:
   level:

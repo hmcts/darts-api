@@ -35,15 +35,6 @@ public class DailyListController implements DailyListsApi {
     @Autowired
     private DailyListService dailyListService;
 
-    /**
-     * POST /dailylist/addDailyList : XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.
-     * description
-     *
-     * @param sourceSystem The source system that has sent the message (required)
-     * @param dailyList    (required)
-     * @return Created (status code 201)
-     *     or Internal Server Error (status code 500)
-     */
     @Operation(
         operationId = "dailylistsPost",
         summary = "XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.",
@@ -74,16 +65,6 @@ public class DailyListController implements DailyListsApi {
     }
 
     @Override
-    /**
-     * GET /dailylists/getCases : Retrieves the case list for the specified courthouse, courtroom and a hearing date.
-     * description
-     *
-     * @param courtHouseCode The CourtHouseCode to get the daily list for. (required)
-     * @param courtRoomNumber The CourtRoomNumber to get the daily list for.&lt;br&gt;This is optional, if not provided, the daily list for all court rooms in the court house will be provided. (optional)
-     * @param hearingDate The date to get the daily list for.&lt;br&gt;This is optional, if not provided, the daily list for today will be provided. (optional)
-     * @return OK (status code 200)
-     *         or Internal Server Error (status code 500)
-     */
     @Operation(
         operationId = "dailylistsGetCasesGet",
         summary = "Retrieves the case list for the specified courthouse, courtroom and a hearing date.",
@@ -109,4 +90,12 @@ public class DailyListController implements DailyListsApi {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
 
     }
+
+
+    public ResponseEntity<Void> dailylistsHousekeepingPost(
+    ) {
+        dailyListService.runHouseKeeping();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 }
