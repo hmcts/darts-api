@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.dailylist.model.Advocate;
 import uk.gov.hmcts.darts.dailylist.model.CitizenName;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
@@ -71,7 +72,6 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 } catch (JsonProcessingException e) {
                     log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}", courthouse, dailyLists.get(0).getId());
                 }
-
             }
             if (dailyLists.size() > 1) {
                 ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
@@ -112,7 +112,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                         CourtCaseEntity courtCase = hearing.getCourtCase();
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
-                        addProsecution(courtCase, dailyListHearing.getProsecution().getAdvocate().getPersonalDetails().getName());
+                        addProsecution(courtCase, dailyListHearing);
                         addDefenders(courtCase, dailyListHearing.getDefendants());
                         setScheduledStartTime(hearing, sitting, dailyListHearing);
                         hearingRepository.saveAndFlush(hearing);
@@ -203,15 +203,21 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     }
 
 
-    private void addProsecution(CourtCaseEntity courtCase, CitizenName prosecutionName) {
-        courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(buildFullName(prosecutionName), courtCase));
+    private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
+        List<Advocate> advocates = hearing.getProsecution().getAdvocates();
+        advocates.forEach(advocate ->
+                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                        buildFullName(advocate.getPersonalDetails().getName()), courtCase)));
+
     }
 
 
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                    buildFullName(defendant.getCounsel().getAdvocate().getPersonalDetails().getName()), courtCase));
+            for (Advocate advocate : defendant.getCounsel()) {
+                courtCase.addDefence(retrieveCoreObjectService.createDefence(
+                        buildFullName(advocate.getPersonalDetails().getName()), courtCase));
+            }
         }
     }
 
