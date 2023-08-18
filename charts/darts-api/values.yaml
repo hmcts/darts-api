@@ -39,6 +39,7 @@ java:
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
 
 function:
+  scaleType: Job
   image: 'sdshmctspublic.azurecr.io/darts/api:latest'
   aadIdentityName: darts
   environment:
