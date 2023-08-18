@@ -88,6 +88,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
+        assertEquals(LocalTime.of(11, 0), newHearing1.getScheduledStartTime());
 
         CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
         assertEquals(URN_2, newCase2.getCaseNumber());
@@ -102,6 +103,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(LocalDate.now(), newHearing2.getHearingDate());
         assertEquals(COURTROOM_2, newHearing2.getCourtroom().getName());
         assertEquals(1, newHearing2.getJudges().size());
+        assertEquals(LocalTime.of(16, 0), newHearing2.getScheduledStartTime());
     }
 
     @Test
@@ -152,6 +154,9 @@ class DailyListProcessorTest extends IntegrationBase {
             assertEquals(LocalDate.now(), hearing.getHearingDate());
             assertThat(hearing.getCourtroom().getName(), Matchers.either(Matchers.is(COURTROOM_1)).or(Matchers.is(COURTROOM_2)));
             assertEquals(1, hearing.getJudges().size());
+
+            assertThat(hearing.getScheduledStartTime(),
+                    Matchers.either(Matchers.is(LocalTime.of(16, 0))).or(Matchers.is(LocalTime.of(11, 0))));
 
         }
 

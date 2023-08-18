@@ -151,10 +151,11 @@ class DailyListProcessorImplTest {
 
         HearingEntity savedHearing = hearingEntityArgumentCaptor.getValue();
         assertEquals(LocalDate.now(), savedHearing.getHearingDate());
+        assertEquals(LocalTime.of(11, 0), savedHearing.getScheduledStartTime());
         assertEquals("1", savedHearing.getCourtroom().getName());
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED),dailyListEntities.get(0).getStatus());
+        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
     }
 
 
@@ -240,9 +241,10 @@ class DailyListProcessorImplTest {
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
         assertEquals(String.valueOf(JobStatusType.IGNORED), oldDailyList.getStatus());
         assertEquals(1, savedHearing.getJudges().size());
+        assertEquals(LocalTime.of(11, 0), savedHearing.getScheduledStartTime());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED),dailyListEntities.get(0).getStatus());
-        assertEquals(String.valueOf(JobStatusType.IGNORED),dailyListEntities.get(1).getStatus());
+        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
+        assertEquals(String.valueOf(JobStatusType.IGNORED), dailyListEntities.get(1).getStatus());
     }
 
     @Test
@@ -326,9 +328,76 @@ class DailyListProcessorImplTest {
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
         assertEquals(String.valueOf(JobStatusType.IGNORED), oldDailyList.getStatus());
         assertEquals(1, savedHearing.getJudges().size());
+        assertEquals(LocalTime.of(11, 0), savedHearing.getScheduledStartTime());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED),dailyListEntities.get(0).getStatus());
-        assertEquals(String.valueOf(JobStatusType.IGNORED),dailyListEntities.get(1).getStatus());
+        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
+        assertEquals(String.valueOf(JobStatusType.IGNORED), dailyListEntities.get(1).getStatus());
+    }
+
+
+    @Test
+    void processAllSingleDailyListsWithMissingTimeMarkingNote() throws IOException {
+
+
+        CourthouseEntity swansea = CommonTestDataUtil.createCourthouse(SWANSEA);
+        swansea.setId(1);
+
+        CourtroomEntity swanseaCourtroom = CommonTestDataUtil.createCourtroom(swansea, COURTROOM);
+        swansea.setCourtrooms(List.of(swanseaCourtroom));
+
+        CourtCaseEntity courtCase = CommonTestDataUtil.createCase(CASE_NUMBER, swansea);
+
+
+        List<CourthouseEntity> courthouses = List.of(swansea);
+
+        Mockito.when(courthouseRepository.findAll()).thenReturn(courthouses);
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(SWANSEA)).thenReturn(Optional.of(swansea));
+
+        HearingEntity hearing = CommonTestDataUtil.createHearing(courtCase, swanseaCourtroom, LocalDate.now());
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(any(), any(), any(), any())).thenReturn(hearing);
+
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString()))
+                .thenReturn(createJudgeWithName("JudgeName Surname"));
+        Mockito.when(retrieveCoreObjectService.createDefendant(anyString(), any()))
+                .thenReturn(createDefendantForCaseWithName(courtCase, "DefendantName Surname"));
+        Mockito.when(retrieveCoreObjectService.createDefence(anyString(), any()))
+                .thenReturn(createDefenceForCaseWithName(courtCase, "DefenceName Surname"));
+        Mockito.when(retrieveCoreObjectService.createProsecutor(anyString(), any()))
+                .thenReturn(createProsecutorForCaseWithName(courtCase, "ProsecutorName Surname"));
+
+        List<DailyListEntity> dailyListEntities = List.of(CommonTestDataUtil.createDailyList(LocalTime.now(),
+                String.valueOf(SourceType.XHB), "Tests/dailylist/dailyListProcessorTest/dailyListMissingTimeMarkNote.json"));
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(1,
+                                String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                .thenReturn(dailyListEntities);
+
+        Mockito.when(dailyListRepository
+                        .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                                1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                .thenReturn(Collections.emptyList());
+
+        dailyListProcessor.processAllDailyLists(LocalDate.now());
+
+        Mockito.verify(hearingRepository).saveAndFlush(hearingEntityArgumentCaptor.capture());
+
+
+        CourtCaseEntity savedCase = hearingEntityArgumentCaptor.getValue().getCourtCase();
+        assertEquals(3, savedCase.getDefenceList().size());
+        assertEquals(1, savedCase.getJudges().size());
+        assertEquals(3, savedCase.getProsecutorList().size());
+        assertEquals(3, savedCase.getDefendantList().size());
+        assertEquals(CASE_NUMBER, savedCase.getCaseNumber());
+        assertEquals(SWANSEA, courtCase.getCourthouse().getCourthouseName());
+
+
+        HearingEntity savedHearing = hearingEntityArgumentCaptor.getValue();
+        assertEquals(LocalDate.now(), savedHearing.getHearingDate());
+        assertEquals(LocalTime.of(11, 0), hearing.getScheduledStartTime());
+        assertEquals("1", savedHearing.getCourtroom().getName());
+        assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
+
+        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
     }
 
 
@@ -367,7 +436,7 @@ class DailyListProcessorImplTest {
 
         Mockito.verify(hearingRepository, Mockito.never()).saveAndFlush(any());
 
-        assertEquals(String.valueOf(JobStatusType.PARTIALLY_PROCESSED),dailyListEntities.get(0).getStatus());
+        assertEquals(String.valueOf(JobStatusType.PARTIALLY_PROCESSED), dailyListEntities.get(0).getStatus());
     }
 
 
