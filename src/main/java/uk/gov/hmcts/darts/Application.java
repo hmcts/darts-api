@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -16,7 +17,7 @@ import static java.time.ZoneOffset.UTC;
 @EnableTransactionManagement
 @Slf4j
 @SuppressWarnings("HideUtilityClassConstructor") // Spring needs a constructor, its not a utility class
-public class Application {
+public class Application implements CommandLineRunner {
 
     @PostConstruct
     public void started() {
@@ -25,7 +26,20 @@ public class Application {
     }
 
     public static void main(final String[] args) {
-        SpringApplication.run(Application.class, args);
+        final var application = new SpringApplication(Application.class);
+        final var instance = application.run(args);
+
+        if (System.getenv("ATS_MODE") != null) {
+            log.info("ATS_MODE found, closing instance");
+            instance.close();
+        }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        if (System.getenv("ATS_MODE") != null) {
+            log.info("ATS_MODE activated");
+        }
     }
 
 }
