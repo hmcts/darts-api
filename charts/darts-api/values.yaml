@@ -45,6 +45,7 @@ function:
   environment:
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
+    ATS_MODE: true
   keyVaults:
     "darts":
       secrets:
