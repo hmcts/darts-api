@@ -153,6 +153,8 @@ class DailyListProcessorImplTest {
         assertEquals(LocalDate.now(), savedHearing.getHearingDate());
         assertEquals("1", savedHearing.getCourtroom().getName());
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
+
+        assertEquals(String.valueOf(JobStatusType.PROCESSED),dailyListEntities.get(0).getStatus());
     }
 
 
@@ -238,6 +240,9 @@ class DailyListProcessorImplTest {
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
         assertEquals(String.valueOf(JobStatusType.IGNORED), oldDailyList.getStatus());
         assertEquals(1, savedHearing.getJudges().size());
+
+        assertEquals(String.valueOf(JobStatusType.PROCESSED),dailyListEntities.get(0).getStatus());
+        assertEquals(String.valueOf(JobStatusType.IGNORED),dailyListEntities.get(1).getStatus());
     }
 
     @Test
@@ -321,6 +326,9 @@ class DailyListProcessorImplTest {
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
         assertEquals(String.valueOf(JobStatusType.IGNORED), oldDailyList.getStatus());
         assertEquals(1, savedHearing.getJudges().size());
+
+        assertEquals(String.valueOf(JobStatusType.PROCESSED),dailyListEntities.get(0).getStatus());
+        assertEquals(String.valueOf(JobStatusType.IGNORED),dailyListEntities.get(1).getStatus());
     }
 
 
@@ -358,6 +366,8 @@ class DailyListProcessorImplTest {
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(hearingRepository, Mockito.never()).saveAndFlush(any());
+
+        assertEquals(String.valueOf(JobStatusType.PARTIALLY_PROCESSED),dailyListEntities.get(0).getStatus());
     }
 
 
