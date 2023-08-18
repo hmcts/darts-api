@@ -12,13 +12,11 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
-import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.model.CitizenName;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
@@ -53,9 +51,9 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     private void processDailyListForSourceType(LocalDate date, SourceType sourceType) {
         List<CourthouseEntity> allCourthouses = courthouseRepository.findAll();
-        for (CourthouseEntity allCourthouse : allCourthouses) {
+        for (CourthouseEntity courthouse : allCourthouses) {
             List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                    allCourthouse.getId(),
+                    courthouse.getId(),
                     String.valueOf(JobStatusType.NEW),
                     date, String.valueOf(sourceType)
             );
@@ -65,7 +63,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 try {
                     processDailyList(dailyLists.get(0));
                 } catch (JsonProcessingException e) {
-                    throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, e);
+                    log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}", courthouse, dailyLists.get(0).getId());
                 }
 
             }
@@ -131,6 +129,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             } else {
                 String urn = defendants.get(0).getUrn();
                 if (StringUtils.isBlank(urn)) {
+                    dailyListEntity.setStatus(String.valueOf(JobStatusType.PARTIALLY_PROCESSED));
                     log.error("Hearing not added - HearingInfo does not contain a URN value");
                 } else {
                     return urn;
