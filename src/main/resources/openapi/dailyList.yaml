@@ -337,8 +337,10 @@ components:
               type: string
               example: "Crown Prosecution Service"
               description: ""
-        advocate:
-          $ref: '#/components/schemas/Advocate'
+        advocates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Advocate'
     Defendant:
       type: object
       properties:
@@ -370,10 +372,9 @@ components:
           example: "Fail    / refuse give assistance to person executing Communications Act search warrant"
           description: ""
     Counsel:
-      type: object
-      properties:
-        advocate:
-          $ref: '#/components/schemas/Advocate'
+      type: array
+      items:
+        $ref: '#/components/schemas/Advocate'
     Advocate:
       type: object
       properties:
@@ -388,8 +389,3 @@ components:
           type: string
           example: "no"
           description: ""
-
-
-
-
-

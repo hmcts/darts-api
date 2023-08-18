@@ -58,15 +58,17 @@
                 "prosecuting_organisation": {
                   "organisation_name": "Crown Prosecution Service"
                 },
-                "advocate": {
-                  "personal_details": {
-                    "name": {
-                      "citizen_name_forename": "ProsecutorName",
-                      "citizen_name_surname": "Surname",
-                      "citizen_name_requested_name": ""
+                "advocates": [
+                  {
+                    "personal_details": {
+                      "name": {
+                        "citizen_name_forename": "ProsecutorName",
+                        "citizen_name_surname": "Surname",
+                        "citizen_name_requested_name": ""
+                      }
                     }
                   }
-                }
+                ]
               },
               "defendants": [
                 {
@@ -86,8 +88,8 @@
                       "offence_statement": "Fail    / refuse give assistance to person executing Communications Act search warrant"
                     }
                   ],
-                  "counsel": {
-                    "advocate": {
+                  "counsel": [
+                    {
                       "personal_details": {
                         "name": {
                           "citizen_name_forename": "DefenceName",
@@ -96,7 +98,7 @@
                         }
                       }
                     }
-                  }
+                  ]
                 }
               ]
             }
