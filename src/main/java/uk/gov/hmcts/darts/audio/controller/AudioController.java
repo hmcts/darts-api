@@ -7,11 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
+import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
+import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.service.AudioService;
+import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +24,8 @@ public class AudioController implements AudioApi {
 
     private final MediaRequestService mediaRequestService;
     private final AudioService audioService;
+    private final AudioTransformationService audioTransformationService;
+    private final AudioResponseMapper audioResponseMapper;
 
     @Override
     public ResponseEntity<Void> addAudioRequest(AudioRequestDetails audioRequestDetails) {
@@ -37,6 +44,14 @@ public class AudioController implements AudioApi {
 
         return new ResponseEntity<>(new InputStreamResource(audioFileStream),
                                     HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
+        List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingId);
+        List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
+
+        return new ResponseEntity<>(audioMetadata, HttpStatus.OK);
     }
 
 }
