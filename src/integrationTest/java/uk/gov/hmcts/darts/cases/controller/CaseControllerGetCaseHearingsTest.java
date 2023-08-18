@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -98,6 +99,17 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andExpect(MockMvcResultMatchers.jsonPath(
             "$[0]").doesNotExist());
+
+    }
+
+    @Test
+    void casesSearchEmptyHearingListCaseIdExists() throws Exception {
+
+        CourtCaseEntity courtCase = dartsDatabase.createCaseUnlessExists("25", "Test");
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
+
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.case_id").doesNotExist());
 
     }
 

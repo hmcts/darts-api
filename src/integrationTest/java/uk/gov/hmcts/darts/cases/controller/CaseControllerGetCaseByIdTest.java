@@ -77,15 +77,6 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     }
 
-    @Test
-    void casesSearchEmptyHearingListCaseIdExists() throws Exception {
-
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId("25","test"));
-
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
-
-    }
-
     private Integer getCaseId(String caseNumber, String courthouse) {
 
         CourtCaseEntity courtCase = dartsDatabase.createCaseUnlessExists(caseNumber, courthouse);
