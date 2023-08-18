@@ -65,7 +65,13 @@ public class CaseServiceImpl implements CaseService {
         List<HearingEntity> hearingList = hearingRepository.findByCaseIds(List.of(caseId));
 
         if (hearingList.isEmpty()) {
-            throw new DartsApiException(CaseApiError.HEARING_DATA_NOT_FOUND);
+
+            Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
+
+            if (caseEntity.isEmpty()) {
+                throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
+            }
+
         }
 
         return HearingEntityToCaseHearing.mapToHearingList(hearingList);
