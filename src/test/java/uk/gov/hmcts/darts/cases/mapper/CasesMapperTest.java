@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
@@ -171,8 +172,22 @@ class CasesMapperTest {
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testMapToSingleCase/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
 
+    @Test
+    void testMapToSingleCaseWithReportingRestriction() throws Exception {
 
+        CourtCaseEntity caseEntity = CommonTestDataUtil.createCaseWithId("Case00001", 1);
+        EventHandlerEntity reportingRestriction = new EventHandlerEntity();
+        reportingRestriction.setEventName("test reporting restriction name");
+        caseEntity.setReportingRestrictions(reportingRestriction);
+        SingleCase singleCase = caseMapper.mapToSingleCase(caseEntity);
+
+        String actualResponse = objectMapper.writeValueAsString(singleCase);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
 }
