@@ -26,7 +26,10 @@ import uk.gov.hmcts.darts.dailylist.model.Sitting;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,12 +38,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class DailyListProcessorImpl implements DailyListProcessor {
+    public static final String DL_TIME_NOT_BEFORE = "not before ";
+    public static final String DL_TIME_SITTING_AT = "sitting at ";
+    public static final String TIME_MARKING_NOTE_FORMAT = "hh:mm a";
+    public static final String SITTING_AT_FORMAT = "HH:mm:ss";
+
     private final DailyListRepository dailyListRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final CourthouseRepository courthouseRepository;
     private final HearingRepository hearingRepository;
-
-
     private final ObjectMapper objectMapper;
 
     @Override
@@ -108,7 +114,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing.getProsecution().getAdvocate().getPersonalDetails().getName());
                         addDefenders(courtCase, dailyListHearing.getDefendants());
-
+                        setScheduledStartTime(hearing, sitting, dailyListHearing);
                         hearingRepository.saveAndFlush(hearing);
                     }
                 }
@@ -119,6 +125,62 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             }
         }
         dailyListEntity.setStatus(statusType.name());
+    }
+
+    private void setScheduledStartTime(HearingEntity hearing, Sitting sitting, Hearing dailyListHearing) {
+
+        LocalTime time = null;
+        String timeMarkingNoteText = dailyListHearing.getTimeMarkingNote();
+        if (StringUtils.isNotBlank(timeMarkingNoteText)) {
+            try {
+                time = getTimeFromTimeMarkingNote(timeMarkingNoteText);
+            } catch (DateTimeException dateTimeException) {
+                log.debug("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
+                        + timeMarkingNoteText);
+                try {
+                    if (StringUtils.isNotBlank(sitting.getSittingAt())) {
+                        time = getTimeFromSittingAt(sitting);
+                    }
+                } catch (DateTimeException dateTimeException2) {
+                    log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
+                            + sitting.getSittingAt());
+                }
+            }
+        } else if (StringUtils.isNotBlank(sitting.getSittingAt())) {
+            try {
+                time = getTimeFromSittingAt(sitting);
+            } catch (DateTimeException pe) {
+                log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
+                        + sitting.getSittingAt());
+            }
+        }
+
+        hearing.setScheduledStartTime(time);
+    }
+
+    private LocalTime getTimeFromSittingAt(Sitting sitting) throws DateTimeException {
+        if (StringUtils.isNotBlank(sitting.getSittingAt())) {
+            return LocalTime.parse(sitting.getSittingAt(), DateTimeFormatter.ofPattern(SITTING_AT_FORMAT));
+        }
+        return null;
+    }
+
+
+    private LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
+        String rawTime;
+        if (StringUtils.isNotBlank(timeMarkingNote)) {
+            final String timeMarkingNoteLower = timeMarkingNote.toLowerCase();
+
+            if (timeMarkingNoteLower.startsWith(DL_TIME_NOT_BEFORE)) {
+                rawTime = timeMarkingNoteLower.substring(DL_TIME_NOT_BEFORE.length());
+            } else if (timeMarkingNoteLower.startsWith(DL_TIME_SITTING_AT)) {
+                rawTime = timeMarkingNoteLower.substring(DL_TIME_SITTING_AT.length());
+            } else {
+                rawTime = timeMarkingNoteLower;
+            }
+            return LocalTime.parse(rawTime, DateTimeFormatter.ofPattern(TIME_MARKING_NOTE_FORMAT));
+        }
+        return null;
     }
 
     private String getCaseNumber(List<Defendant> defendants, DailyListEntity dailyListEntity, Hearing hearing) {
