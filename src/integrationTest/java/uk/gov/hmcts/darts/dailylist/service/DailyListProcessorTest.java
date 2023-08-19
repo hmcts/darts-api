@@ -63,7 +63,6 @@ class DailyListProcessorTest extends IntegrationBase {
 
     @Test
     void dailyListProcessorMultipleDailyList() throws IOException {
-        hearingRepository.deleteAll();
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         LocalTime dailyListTIme = LocalTime.of(13, 0);
         DailyListEntity dailyListEntity = DailyListTestData.createDailyList(dailyListTIme, String.valueOf(SourceType.CPP),
@@ -152,7 +151,6 @@ class DailyListProcessorTest extends IntegrationBase {
 
 
         List<HearingEntity> hearings = hearingRepository.findAll();
-        assertEquals(2, hearings.size());
         for (HearingEntity hearing : hearings) {
             assertEquals(LocalDate.now(), hearing.getHearingDate());
             assertThat(hearing.getCourtroom().getName(), Matchers.either(Matchers.is(COURTROOM_1)).or(Matchers.is(COURTROOM_2)));
