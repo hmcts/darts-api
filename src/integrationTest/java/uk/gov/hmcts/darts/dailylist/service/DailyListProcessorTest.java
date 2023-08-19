@@ -84,7 +84,6 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-
         HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
