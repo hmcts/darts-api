@@ -64,10 +64,11 @@ class DailyListProcessorTest extends IntegrationBase {
     @Test
     void dailyListProcessorMultipleDailyList() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
-        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.CPP),
+        LocalTime dailyListTIme = LocalTime.of(13, 0);
+        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(dailyListTIme, String.valueOf(SourceType.CPP),
                 swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
-        DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(LocalTime.now().minusHours(3),
+        DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(dailyListTIme.minusHours(3),
                 String.valueOf(SourceType.CPP), swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
         dailyListRepository.saveAndFlush(dailyListEntity);

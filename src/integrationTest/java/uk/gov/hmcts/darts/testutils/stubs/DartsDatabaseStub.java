@@ -252,10 +252,10 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void createDailyLists(CourthouseEntity courthouseEntity) throws IOException {
-        DailyListEntity xhbDailyList = DailyListTestData.createDailyList(LocalTime.now(), String.valueOf(SourceType.XHB),
+        DailyListEntity xhbDailyList = DailyListTestData.createDailyList(LocalTime.of(13, 0), String.valueOf(SourceType.XHB),
                 courthouseEntity, "tests/dailyListProcessorTest/dailyListXHB.json");
 
-        DailyListEntity cppDailyList = DailyListTestData.createDailyList(LocalTime.now(),
+        DailyListEntity cppDailyList = DailyListTestData.createDailyList(LocalTime.of(13, 0),
                 String.valueOf(SourceType.CPP), courthouseEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
         dailyListRepository.saveAndFlush(xhbDailyList);
