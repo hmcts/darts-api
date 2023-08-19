@@ -243,6 +243,7 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourthouseEntity createCourthouseWithTwoCourtrooms() {
+        hearingRepository.deleteAll();
         CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457);
         courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
         courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
