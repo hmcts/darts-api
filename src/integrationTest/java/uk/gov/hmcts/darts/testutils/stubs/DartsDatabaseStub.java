@@ -243,7 +243,6 @@ public class DartsDatabaseStub {
 
     @Transactional
     public CourthouseEntity createCourthouseWithTwoCourtrooms() {
-        hearingRepository.deleteAll();
         CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457);
         courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
         courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
@@ -259,8 +258,7 @@ public class DartsDatabaseStub {
         DailyListEntity cppDailyList = DailyListTestData.createDailyList(LocalTime.of(13, 0),
                 String.valueOf(SourceType.CPP), courthouseEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
-        dailyListRepository.saveAndFlush(xhbDailyList);
-        dailyListRepository.saveAndFlush(cppDailyList);
+        dailyListRepository.saveAllAndFlush(List.of(xhbDailyList, cppDailyList));
     }
 
     public MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
