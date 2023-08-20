@@ -71,8 +71,7 @@ class DailyListProcessorTest extends IntegrationBase {
         DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(dailyListTIme.minusHours(3),
                 String.valueOf(SourceType.CPP), swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
 
-        dailyListRepository.saveAndFlush(dailyListEntity);
-        dailyListRepository.saveAndFlush(oldDailyListEntity);
+        dailyListRepository.saveAllAndFlush(List.of(dailyListEntity, oldDailyListEntity));
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
