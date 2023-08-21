@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.dailylist.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class DailyListProcessorTest extends IntegrationBase {
 
     public static final String SWANSEA = "SWANSEA";
@@ -65,17 +67,28 @@ class DailyListProcessorTest extends IntegrationBase {
     void dailyListProcessorMultipleDailyList() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         LocalTime dailyListTIme = LocalTime.of(13, 0);
-        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(dailyListTIme, String.valueOf(SourceType.CPP),
-                swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
+        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(
+            dailyListTIme,
+            String.valueOf(SourceType.CPP),
+            swanseaCourtEntity,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
 
-        DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(dailyListTIme.minusHours(3),
-                String.valueOf(SourceType.CPP), swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
+        DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(
+            dailyListTIme.minusHours(3),
+            String.valueOf(SourceType.CPP),
+            swanseaCourtEntity,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
 
         dailyListRepository.saveAllAndFlush(List.of(dailyListEntity, oldDailyListEntity));
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            URN_1,
+            SWANSEA
+        ).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
         assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
         assertEquals(1, newCase1.getDefendantList().size());
@@ -83,13 +96,23 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-        HearingEntity newHearing1 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_1, LocalDate.now()).get(0);
+        List<HearingEntity> foundHearings = hearingRepository.findByCourthouseCourtroomAndDate(
+            SWANSEA,
+            COURTROOM_1,
+            LocalDate.now()
+        );
+        log.info("foundHearings.size()={}", foundHearings.size());
+        assertEquals(1, foundHearings.size());
+        HearingEntity newHearing1 = foundHearings.get(0);
         assertEquals(LocalDate.now(), newHearing1.getHearingDate());
         assertEquals(COURTROOM_1, newHearing1.getCourtroom().getName());
         assertEquals(1, newHearing1.getJudges().size());
         assertEquals(LocalTime.of(11, 0), newHearing1.getScheduledStartTime());
 
-        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
+        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            URN_2,
+            SWANSEA
+        ).get();
         assertEquals(URN_2, newCase2.getCaseNumber());
         assertEquals(SWANSEA, newCase2.getCourthouse().getCourthouseName());
         assertEquals(1, newCase2.getDefendantList().size());
@@ -98,7 +121,11 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getJudges().size());
 
 
-        List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
+        List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(
+            SWANSEA,
+            COURTROOM_2,
+            LocalDate.now()
+        );
         assertEquals(1, newHearing2.size());
         assertEquals(LocalDate.now(), newHearing2.get(0).getHearingDate());
         assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
@@ -114,7 +141,10 @@ class DailyListProcessorTest extends IntegrationBase {
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
-        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            URN_1,
+            SWANSEA
+        ).get();
         assertEquals(URN_1, newCase1.getCaseNumber());
         assertEquals(SWANSEA, newCase1.getCourthouse().getCourthouseName());
         assertEquals(1, newCase1.getDefendantList().size());
@@ -122,7 +152,10 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase1.getProsecutorList().size());
         assertEquals(1, newCase1.getJudges().size());
 
-        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_2, SWANSEA).get();
+        CourtCaseEntity newCase2 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            URN_2,
+            SWANSEA
+        ).get();
         assertEquals(URN_2, newCase2.getCaseNumber());
         assertEquals(SWANSEA, newCase2.getCourthouse().getCourthouseName());
         assertEquals(1, newCase2.getDefendantList().size());
@@ -131,7 +164,10 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getJudges().size());
 
 
-        CourtCaseEntity newCase3 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_1, SWANSEA).get();
+        CourtCaseEntity newCase3 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            CASE_NUMBER_1,
+            SWANSEA
+        ).get();
         assertEquals(CASE_NUMBER_1, newCase3.getCaseNumber());
         assertEquals(SWANSEA, newCase3.getCourthouse().getCourthouseName());
         assertEquals(1, newCase3.getDefendantList().size());
@@ -140,7 +176,10 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase3.getJudges().size());
 
 
-        CourtCaseEntity newCase4 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(CASE_NUMBER_2, SWANSEA).get();
+        CourtCaseEntity newCase4 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
+            CASE_NUMBER_2,
+            SWANSEA
+        ).get();
         assertEquals(CASE_NUMBER_2, newCase4.getCaseNumber());
         assertEquals(SWANSEA, newCase4.getCourthouse().getCourthouseName());
         assertEquals(1, newCase4.getDefendantList().size());
@@ -152,11 +191,16 @@ class DailyListProcessorTest extends IntegrationBase {
         List<HearingEntity> hearings = hearingRepository.findAll();
         for (HearingEntity hearing : hearings) {
             assertEquals(LocalDate.now(), hearing.getHearingDate());
-            assertThat(hearing.getCourtroom().getName(), Matchers.either(Matchers.is(COURTROOM_1)).or(Matchers.is(COURTROOM_2)));
+            assertThat(
+                hearing.getCourtroom().getName(),
+                Matchers.either(Matchers.is(COURTROOM_1)).or(Matchers.is(COURTROOM_2))
+            );
             assertEquals(1, hearing.getJudges().size());
 
-            assertThat(hearing.getScheduledStartTime(),
-                    Matchers.either(Matchers.is(LocalTime.of(16, 0))).or(Matchers.is(LocalTime.of(11, 0))));
+            assertThat(
+                hearing.getScheduledStartTime(),
+                Matchers.either(Matchers.is(LocalTime.of(16, 0))).or(Matchers.is(LocalTime.of(11, 0)))
+            );
 
         }
 
