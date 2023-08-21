@@ -93,6 +93,7 @@ public class DartsDatabaseStub {
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
     public void clearDatabaseInThisOrder() {
+        log.error("started delete all");
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         userAccountRepository.deleteAll();
@@ -111,6 +112,7 @@ public class DartsDatabaseStub {
         courthouseRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
+        log.error("finished delete all");
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
