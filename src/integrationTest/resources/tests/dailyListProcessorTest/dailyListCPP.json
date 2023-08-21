@@ -34,7 +34,7 @@
         {
           "court_room_number": 1,
           "sitting_sequence_no": 1,
-          "sitting_at": "11:00:00",
+          "sitting_at": "09:00:00",
           "sitting_priority": "T",
           "judiciary": [
             {
@@ -107,7 +107,7 @@
         {
           "court_room_number": 2,
           "sitting_sequence_no": 1,
-          "sitting_at": "13:00:00",
+          "sitting_at": "10:00:00",
           "sitting_priority": "T",
           "judiciary": [
             {
