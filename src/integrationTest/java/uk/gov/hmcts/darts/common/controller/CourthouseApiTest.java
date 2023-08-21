@@ -144,8 +144,9 @@ class CourthouseApiTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
         assertEquals(
-            "{\"code\":\"400 BAD_REQUEST\",\"message\":\"courthouseName must not be null\"}",
+            "{\"violations\":[{\"field\":\"courthouseName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
             response.getResponse().getContentAsString()
         );
     }
