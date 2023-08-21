@@ -1,7 +1,7 @@
 spring:
   datasource:
-    username: postgres
-    password: postgres
+    username: darts
+    password: darts
   jpa:
     show-sql: false
     hibernate:
