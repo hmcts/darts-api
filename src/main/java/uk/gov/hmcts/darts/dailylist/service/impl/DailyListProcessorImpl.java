@@ -30,7 +30,7 @@ import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -161,7 +161,10 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     private LocalTime getTimeFromSittingAt(Sitting sitting) throws DateTimeException {
         if (StringUtils.isNotBlank(sitting.getSittingAt())) {
-            return LocalTime.parse(sitting.getSittingAt(), DateTimeFormatter.ofPattern(SITTING_AT_FORMAT, Locale.ENGLISH));
+            return LocalTime.parse(sitting.getSittingAt(), new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern(SITTING_AT_FORMAT)
+                    .toFormatter(Locale.ENGLISH));
         }
         return null;
     }
@@ -178,7 +181,11 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             } else {
                 rawTime = timeMarkingNote;
             }
-            return LocalTime.parse(rawTime, DateTimeFormatter.ofPattern(TIME_MARKING_NOTE_FORMAT, Locale.ENGLISH));
+
+            return LocalTime.parse(rawTime, new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .appendPattern(TIME_MARKING_NOTE_FORMAT)
+                    .toFormatter(Locale.ENGLISH));
         }
         return null;
     }
