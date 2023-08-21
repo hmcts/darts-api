@@ -98,11 +98,12 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(1, newCase2.getJudges().size());
 
 
-        HearingEntity newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now()).get(0);
-        assertEquals(LocalDate.now(), newHearing2.getHearingDate());
-        assertEquals(COURTROOM_2, newHearing2.getCourtroom().getName());
-        assertEquals(1, newHearing2.getJudges().size());
-        assertEquals(LocalTime.of(16, 0), newHearing2.getScheduledStartTime());
+        List<HearingEntity> newHearing2 = hearingRepository.findByCourthouseCourtroomAndDate(SWANSEA, COURTROOM_2, LocalDate.now());
+        assertEquals(1, newHearing2.size());
+        assertEquals(LocalDate.now(), newHearing2.get(0).getHearingDate());
+        assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
+        assertEquals(1, newHearing2.get(0).getJudges().size());
+        assertEquals(LocalTime.of(16, 0), newHearing2.get(0).getScheduledStartTime());
     }
 
     @Test
