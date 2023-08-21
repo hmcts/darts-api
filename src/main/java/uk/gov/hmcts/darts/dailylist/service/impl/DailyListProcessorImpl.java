@@ -33,14 +33,15 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class DailyListProcessorImpl implements DailyListProcessor {
-    public static final String DL_TIME_NOT_BEFORE = "not before ";
-    public static final String DL_TIME_SITTING_AT = "sitting at ";
+    public static final String DL_TIME_NOT_BEFORE = "NOT BEFORE ";
+    public static final String DL_TIME_SITTING_AT = "SITTING AT ";
     public static final String TIME_MARKING_NOTE_FORMAT = "hh:mm a";
     public static final String SITTING_AT_FORMAT = "HH:mm:ss";
 
@@ -160,7 +161,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     private LocalTime getTimeFromSittingAt(Sitting sitting) throws DateTimeException {
         if (StringUtils.isNotBlank(sitting.getSittingAt())) {
-            return LocalTime.parse(sitting.getSittingAt(), DateTimeFormatter.ofPattern(SITTING_AT_FORMAT));
+            return LocalTime.parse(sitting.getSittingAt(), DateTimeFormatter.ofPattern(SITTING_AT_FORMAT, Locale.ENGLISH));
         }
         return null;
     }
@@ -169,16 +170,15 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     private LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
         String rawTime;
         if (StringUtils.isNotBlank(timeMarkingNote)) {
-            final String timeMarkingNoteLower = timeMarkingNote.toLowerCase();
 
-            if (timeMarkingNoteLower.startsWith(DL_TIME_NOT_BEFORE)) {
-                rawTime = timeMarkingNoteLower.substring(DL_TIME_NOT_BEFORE.length());
-            } else if (timeMarkingNoteLower.startsWith(DL_TIME_SITTING_AT)) {
-                rawTime = timeMarkingNoteLower.substring(DL_TIME_SITTING_AT.length());
+            if (timeMarkingNote.startsWith(DL_TIME_NOT_BEFORE)) {
+                rawTime = timeMarkingNote.substring(DL_TIME_NOT_BEFORE.length());
+            } else if (timeMarkingNote.startsWith(DL_TIME_SITTING_AT)) {
+                rawTime = timeMarkingNote.substring(DL_TIME_SITTING_AT.length());
             } else {
-                rawTime = timeMarkingNoteLower;
+                rawTime = timeMarkingNote;
             }
-            return LocalTime.parse(rawTime, DateTimeFormatter.ofPattern(TIME_MARKING_NOTE_FORMAT));
+            return LocalTime.parse(rawTime, DateTimeFormatter.ofPattern(TIME_MARKING_NOTE_FORMAT, Locale.ENGLISH));
         }
         return null;
     }
