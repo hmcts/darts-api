@@ -8,8 +8,8 @@ services:
     environment:
       - DARTS_API_DB_HOST=darts-db
       - DARTS_API_DB_NAME=darts
-      - DARTS_API_DB_USERNAME=postgres
-      - DARTS_API_DB_PASSWORD=postgres
+      - DARTS_API_DB_USERNAME=darts
+      - DARTS_API_DB_PASSWORD=darts
       - DARTS_API_DB_SCHEMA=darts
       - SPRING_PROFILES_ACTIVE=local
       - AAD_B2C_CLIENT_ID_KEY
@@ -33,8 +33,8 @@ services:
     image: postgres:15.4-alpine
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=darts
+      - POSTGRES_PASSWORD=darts
       - POSTGRES_DB=darts
     command: ["postgres", "-c", "log_statement=all"]
     ports:

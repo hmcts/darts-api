@@ -66,6 +66,40 @@ paths:
                 title: "The requested data cannot be located"
                 status: 500
 
+  /audio/hearings/{hearingId}/audios:
+    get:
+      tags:
+        - Audio
+      summary: Media metadata for provided hearing
+      operationId: getAudioMetadata
+      description: Media metadata for provided hearing
+      parameters:
+        - in: path
+          name: hearingId
+          schema:
+            type: integer
+          required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AudioMetadata'
+              examples:
+                media-found:
+                  summary: Media metadata exists for the given hearing id
+                  value:
+                    - id: 1
+                      media_start_timestamp: '2023-07-31T14:32:24.620Z'
+                      media_end_timestamp: '2023-07-31T14:32:24.620Z'
+                media-not-found:
+                  summary: No media metadata exists for the given hearing id
+                  value:
+                    []
+
 components:
   schemas:
     AudioRequestType:
@@ -103,3 +137,16 @@ components:
     AudioRequestId:
       type: integer
       example: 12345
+
+    AudioMetadata:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        media_start_timestamp:
+          type: string
+          format: date-time
+        media_end_timestamp:
+          type: string
+          format: date-time

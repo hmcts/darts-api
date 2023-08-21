@@ -96,10 +96,12 @@ public class CasesMapper {
         singleCase.setDefenders(caseEntity.getDefenceStringList());
         singleCase.setProsecutors(caseEntity.getProsecutorsStringList());
         singleCase.setJudges(caseEntity.getJudgeStringList());
+        if (caseEntity.getReportingRestrictions() != null) {
+            singleCase.setReportingRestriction(caseEntity.getReportingRestrictions().getEventName());
+        }
 
         return singleCase;
     }
-
 
 
     private DefenceEntity createNewDefence(String newProsecutor, CourtCaseEntity caseEntity) {

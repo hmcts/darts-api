@@ -32,9 +32,43 @@ java:
           alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
         - name: AzureStorageConnectionString
           alias: AZURE_STORAGE_CONNECTION_STRING
-
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
+
+function:
+  scaleType: Job
+  image: 'sdshmctspublic.azurecr.io/darts/api:latest'
+  aadIdentityName: darts
+  environment:
+    POSTGRES_SSL_MODE: require
+    RUN_DB_MIGRATION_ON_STARTUP: false
+    ATS_MODE: true
+  keyVaults:
+    "darts":
+      secrets:
+        - name: GovukNotifyApiKey
+          alias: GOVUK_NOTIFY_API_KEY
+        - name: api-POSTGRES-USER
+          alias: DARTS_API_DB_USERNAME
+        - name: api-POSTGRES-PASS
+          alias: DARTS_API_DB_PASSWORD
+        - name: api-POSTGRES-HOST
+          alias: DARTS_API_DB_HOST
+        - name: api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME
+        - name: api-POSTGRES-SCHEMA
+          alias: DARTS_API_DB_SCHEMA
+  job:
+    activeDeadlineSeconds: 300
+    parallelism: 1
+    completions: 1
+  triggerAuth:
+    enabled: true
+  triggers:
+    - type: azure-blob
+      blobContainerName: "darts-st-container"
+      accountName: "dartssa{{ .Values.global.environment }}"
+      blobPrefix: keda-

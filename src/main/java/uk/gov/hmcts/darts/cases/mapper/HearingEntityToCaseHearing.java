@@ -21,6 +21,7 @@ public class HearingEntityToCaseHearing {
             }
 
         }
+
         return hearings;
     }
 
