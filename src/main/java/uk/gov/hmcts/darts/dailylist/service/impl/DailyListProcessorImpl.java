@@ -39,8 +39,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class DailyListProcessorImpl implements DailyListProcessor {
-    public static final String DL_TIME_NOT_BEFORE = "not before ";
-    public static final String DL_TIME_SITTING_AT = "sitting at ";
+    public static final String DL_TIME_NOT_BEFORE = "NOT BEFORE ";
+    public static final String DL_TIME_SITTING_AT = "SITTING AT ";
     public static final String TIME_MARKING_NOTE_FORMAT = "hh:mm a";
     public static final String SITTING_AT_FORMAT = "HH:mm:ss";
 
@@ -179,7 +179,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
         String rawTime;
         if (StringUtils.isNotBlank(timeMarkingNote)) {
 
-            rawTime = timeMarkingNote.toLowerCase();
+            rawTime = timeMarkingNote.toUpperCase();
             rawTime = rawTime.replace(DL_TIME_NOT_BEFORE, "");
             rawTime = rawTime.replace(DL_TIME_SITTING_AT, "");
             return LocalTime.parse(rawTime, DateTimeFormatter.ofPattern(TIME_MARKING_NOTE_FORMAT));
