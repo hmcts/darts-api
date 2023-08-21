@@ -60,9 +60,9 @@ public class DailyListProcessorImpl implements DailyListProcessor {
         List<CourthouseEntity> allCourthouses = courthouseRepository.findAll();
         for (CourthouseEntity courthouse : allCourthouses) {
             List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                    courthouse.getId(),
-                    String.valueOf(JobStatusType.NEW),
-                    date, String.valueOf(sourceType)
+                courthouse.getId(),
+                String.valueOf(JobStatusType.NEW),
+                date, String.valueOf(sourceType)
             );
 
             // Daily lists are being ordered descending by date so first item will be the most recent version
@@ -70,7 +70,11 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 try {
                     processDailyList(dailyLists.get(0));
                 } catch (JsonProcessingException e) {
-                    log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}", courthouse, dailyLists.get(0).getId());
+                    log.error(
+                        "Failed to process dailylist for courthouse: {} with dailylist id: {}",
+                        courthouse,
+                        dailyLists.get(0).getId()
+                    );
                 }
             }
             if (dailyLists.size() > 1) {
@@ -94,7 +98,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
             String courtHouseName = courtList.getCourtHouse().getCourtHouseName();
             Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
-                    courtHouseName);
+                courtHouseName);
 
             if (foundCourthouse.isPresent()) {
                 List<Sitting> sittings = courtList.getSittings();
@@ -102,11 +106,15 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                     List<Hearing> hearings = sitting.getHearings();
                     for (Hearing dailyListHearing : hearings) {
 
-                        String caseNumber = getCaseNumber(dailyListHearing.getDefendants(), dailyListEntity, dailyListHearing);
+                        String caseNumber = getCaseNumber(
+                            dailyListHearing.getDefendants(),
+                            dailyListEntity,
+                            dailyListHearing
+                        );
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                                courtHouseName, String.valueOf(sitting.getCourtRoomNumber()),
-                                caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
+                            courtHouseName, String.valueOf(sitting.getCourtRoomNumber()),
+                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
                         );
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
@@ -121,7 +129,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
                 log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
-                        + dailyListEntity.getId() + " has not been processed");
+                          + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType.name());
@@ -136,14 +144,14 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 time = getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
                 log.debug("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                        + timeMarkingNoteText);
+                          + timeMarkingNoteText);
                 try {
                     if (StringUtils.isNotBlank(sitting.getSittingAt())) {
                         time = getTimeFromSittingAt(sitting);
                     }
                 } catch (DateTimeException dateTimeException2) {
                     log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                            + sitting.getSittingAt());
+                              + sitting.getSittingAt());
                 }
             }
         } else if (StringUtils.isNotBlank(sitting.getSittingAt())) {
@@ -151,7 +159,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 time = getTimeFromSittingAt(sitting);
             } catch (DateTimeException pe) {
                 log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                        + sitting.getSittingAt());
+                          + sitting.getSittingAt());
             }
         }
 
@@ -169,15 +177,10 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     private LocalTime getTimeFromTimeMarkingNote(final String timeMarkingNote) throws DateTimeException {
         String rawTime;
         if (StringUtils.isNotBlank(timeMarkingNote)) {
-            final String timeMarkingNoteLower = timeMarkingNote.toLowerCase();
 
-            if (timeMarkingNoteLower.startsWith(DL_TIME_NOT_BEFORE)) {
-                rawTime = timeMarkingNoteLower.substring(DL_TIME_NOT_BEFORE.length());
-            } else if (timeMarkingNoteLower.startsWith(DL_TIME_SITTING_AT)) {
-                rawTime = timeMarkingNoteLower.substring(DL_TIME_SITTING_AT.length());
-            } else {
-                rawTime = timeMarkingNoteLower;
-            }
+            rawTime = timeMarkingNote.toLowerCase();
+            rawTime = rawTime.replace(DL_TIME_NOT_BEFORE, "");
+            rawTime = rawTime.replace(DL_TIME_SITTING_AT, "");
             return LocalTime.parse(rawTime, DateTimeFormatter.ofPattern(TIME_MARKING_NOTE_FORMAT));
         }
         return null;
@@ -206,8 +209,8 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
         List<Advocate> advocates = hearing.getProsecution().getAdvocates();
         advocates.forEach(advocate ->
-                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                        buildFullName(advocate.getPersonalDetails().getName()), courtCase)));
+                              courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                                  buildFullName(advocate.getPersonalDetails().getName()), courtCase)));
 
     }
 
@@ -216,14 +219,17 @@ public class DailyListProcessorImpl implements DailyListProcessor {
         for (Defendant defendant : defendants) {
             for (Advocate advocate : defendant.getCounsel()) {
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                        buildFullName(advocate.getPersonalDetails().getName()), courtCase));
+                    buildFullName(advocate.getPersonalDetails().getName()), courtCase));
             }
         }
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            courtCase.addDefendant(retrieveCoreObjectService.createDefendant(buildFullName(defendant.getPersonalDetails().getName()), courtCase));
+            courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
+                buildFullName(defendant.getPersonalDetails().getName()),
+                courtCase
+            ));
         }
 
     }
