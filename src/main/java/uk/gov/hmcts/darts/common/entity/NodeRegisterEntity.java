@@ -22,16 +22,12 @@ public class NodeRegisterEntity {
     public static final String TABLE_NAME = "node_register";
     public static final String NODE_GENERATOR = "nod_gen";
     public static final String NODE_SEQUENCE = "nod_seq";
-    public static final String DEVICE_ID = "der_id";
     public static final String COURTROOM_ID = "ctr_id";
     public static final String NODE_ID = "node_id";
     public static final String HOSTNAME = "hostname";
     public static final String IP_ADDRESS = "ip_address";
     public static final String MAC_ADDRESS = "mac_address";
     public static final String DEVICE_TYPE = "device_type";
-
-    @Column(name = DEVICE_ID)
-    private Integer deviceId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = COURTROOM_ID, nullable = false)
