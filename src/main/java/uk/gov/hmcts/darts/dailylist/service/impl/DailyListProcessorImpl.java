@@ -71,6 +71,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 try {
                     processDailyList(dailyLists.get(0));
                 } catch (JsonProcessingException e) {
+                    dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
                     log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}", courthouse, dailyLists.get(0).getId());
                 }
             }
@@ -103,7 +104,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                     List<Hearing> hearings = sitting.getHearings();
                     for (Hearing dailyListHearing : hearings) {
 
-                        String caseNumber = getCaseNumber(dailyListHearing.getDefendants(), dailyListEntity, dailyListHearing);
+                        String caseNumber = getCaseNumber(dailyListEntity, dailyListHearing);
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                                 courtHouseName, String.valueOf(sitting.getCourtRoomNumber()),
@@ -115,7 +116,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing);
                         addDefenders(courtCase, dailyListHearing.getDefendants());
-                        setScheduledStartTime(hearing, sitting, dailyListHearing);
+                        hearing.setScheduledStartTime(getScheduledStartTime(sitting, dailyListHearing));
                         hearingRepository.saveAndFlush(hearing);
                     }
                 }
@@ -128,35 +129,27 @@ public class DailyListProcessorImpl implements DailyListProcessor {
         dailyListEntity.setStatus(statusType.name());
     }
 
-    private void setScheduledStartTime(HearingEntity hearing, Sitting sitting, Hearing dailyListHearing) {
 
-        LocalTime time = null;
+    private LocalTime getScheduledStartTime(Sitting sitting, Hearing dailyListHearing) {
         String timeMarkingNoteText = dailyListHearing.getTimeMarkingNote();
         if (StringUtils.isNotBlank(timeMarkingNoteText)) {
             try {
-                time = getTimeFromTimeMarkingNote(timeMarkingNoteText);
+                return getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
-                log.debug("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
+                log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
                         + timeMarkingNoteText, dateTimeException);
-                try {
-                    if (StringUtils.isNotBlank(sitting.getSittingAt())) {
-                        time = getTimeFromSittingAt(sitting);
-                    }
-                } catch (DateTimeException dateTimeException2) {
-                    log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                            + sitting.getSittingAt(), dateTimeException2);
-                }
-            }
-        } else if (StringUtils.isNotBlank(sitting.getSittingAt())) {
-            try {
-                time = getTimeFromSittingAt(sitting);
-            } catch (DateTimeException pe) {
-                log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                        + sitting.getSittingAt(), pe);
             }
         }
 
-        hearing.setScheduledStartTime(time);
+        if (StringUtils.isNotBlank(sitting.getSittingAt())) {
+            try {
+                return getTimeFromSittingAt(sitting);
+            } catch (DateTimeException dateTimeException) {
+                log.warn("Ignore error and continue, Parsing failed for field SittingAt with value: "
+                        + sitting.getSittingAt(), dateTimeException);
+            }
+        }
+        return null;
     }
 
     private LocalTime getTimeFromSittingAt(Sitting sitting) throws DateTimeException {
@@ -190,13 +183,13 @@ public class DailyListProcessorImpl implements DailyListProcessor {
         return null;
     }
 
-    private String getCaseNumber(List<Defendant> defendants, DailyListEntity dailyListEntity, Hearing hearing) {
+    private String getCaseNumber(DailyListEntity dailyListEntity, Hearing hearing) {
         // CPP don't provide case id, use URN
         if (String.valueOf(SourceType.CPP).equalsIgnoreCase(dailyListEntity.getSource())) {
-            if (defendants.isEmpty()) {
+            if (hearing.getDefendants().isEmpty()) {
                 return hearing.getCaseNumber();
             } else {
-                String urn = defendants.get(0).getUrn();
+                String urn = hearing.getDefendants().get(0).getUrn();
                 if (StringUtils.isBlank(urn)) {
                     dailyListEntity.setStatus(String.valueOf(JobStatusType.PARTIALLY_PROCESSED));
                     log.error("Hearing not added - HearingInfo does not contain a URN value");

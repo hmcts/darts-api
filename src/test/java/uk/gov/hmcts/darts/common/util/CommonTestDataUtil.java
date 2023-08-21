@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
+import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -221,6 +222,17 @@ public class CommonTestDataUtil {
         dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(filelocation)));
         dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
         dailyListEntity.setSource(source);
+        return dailyListEntity;
+    }
+
+
+    public DailyListEntity createInvalidDailyList(LocalTime time) {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
+        dailyListEntity.setContent("blah");
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setSource(String.valueOf(SourceType.XHB));
         return dailyListEntity;
     }
 
