@@ -136,14 +136,14 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 time = getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
                 log.debug("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                        + timeMarkingNoteText);
+                        + timeMarkingNoteText, dateTimeException);
                 try {
                     if (StringUtils.isNotBlank(sitting.getSittingAt())) {
                         time = getTimeFromSittingAt(sitting);
                     }
                 } catch (DateTimeException dateTimeException2) {
                     log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                            + sitting.getSittingAt());
+                            + sitting.getSittingAt(), dateTimeException2);
                 }
             }
         } else if (StringUtils.isNotBlank(sitting.getSittingAt())) {
@@ -151,7 +151,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 time = getTimeFromSittingAt(sitting);
             } catch (DateTimeException pe) {
                 log.debug("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                        + sitting.getSittingAt());
+                        + sitting.getSittingAt(), pe);
             }
         }
 

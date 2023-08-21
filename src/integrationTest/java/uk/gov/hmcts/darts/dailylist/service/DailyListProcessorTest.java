@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.dailylist.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 class DailyListProcessorTest extends IntegrationBase {
 
     public static final String SWANSEA = "SWANSEA";
@@ -63,6 +65,7 @@ class DailyListProcessorTest extends IntegrationBase {
 
     @Test
     void dailyListProcessorMultipleDailyList() throws IOException {
+        log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         LocalTime dailyListTIme = LocalTime.of(13, 0);
         DailyListEntity dailyListEntity = DailyListTestData.createDailyList(dailyListTIme, String.valueOf(SourceType.CPP),
@@ -104,6 +107,8 @@ class DailyListProcessorTest extends IntegrationBase {
         assertEquals(COURTROOM_2, newHearing2.get(0).getCourtroom().getName());
         assertEquals(1, newHearing2.get(0).getJudges().size());
         assertEquals(LocalTime.of(16, 0), newHearing2.get(0).getScheduledStartTime());
+        log.info("end dailyListProcessorMultipleDailyList");
+
     }
 
     @Test
