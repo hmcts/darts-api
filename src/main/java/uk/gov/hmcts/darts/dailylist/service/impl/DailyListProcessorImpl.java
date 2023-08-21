@@ -143,8 +143,9 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             try {
                 time = getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
-                log.debug("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                          + timeMarkingNoteText);
+                log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
+                         + timeMarkingNoteText, dateTimeException);
+                log.info("Java version = {}", Runtime.version());
                 try {
                     if (StringUtils.isNotBlank(sitting.getSittingAt())) {
                         time = getTimeFromSittingAt(sitting);
