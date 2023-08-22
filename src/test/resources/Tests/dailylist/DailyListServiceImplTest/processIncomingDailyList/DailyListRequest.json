@@ -68,7 +68,7 @@
                       "citizen_name_surname": "Bonnell",
                       "citizen_name_requested_name": "Mrs Susan Katherine Bonnell JP"
                     },
-                    "is_masked": "no"
+                    "is_masked": false
                   },
                   "urn": "42GD2391421",
                   "charges": [

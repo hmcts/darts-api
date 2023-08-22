@@ -340,14 +340,16 @@ components:
         advocates:
           type: array
           items:
-            $ref: '#/components/schemas/Advocate'
+            $ref: '#/components/schemas/PersonalDetails'
     Defendant:
       type: object
       properties:
         personal_details:
           $ref: '#/components/schemas/PersonalDetails'
         counsel:
-          $ref: '#/components/schemas/Counsel'
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalDetails'
         urn:
           type: string
           example: "42GD2391421"
@@ -371,21 +373,11 @@ components:
           type: string
           example: "Fail    / refuse give assistance to person executing Communications Act search warrant"
           description: ""
-    Counsel:
-      type: array
-      items:
-        $ref: '#/components/schemas/Advocate'
-    Advocate:
-      type: object
-      properties:
-        personal_details:
-          $ref: '#/components/schemas/PersonalDetails'
     PersonalDetails:
       type: object
       properties:
         name:
           $ref: '#/components/schemas/CitizenName'
         is_masked:
-          type: string
-          example: "no"
-          description: ""
+          type: boolean
+          example: false
