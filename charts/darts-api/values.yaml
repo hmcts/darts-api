@@ -70,6 +70,7 @@ function:
   triggerAuth:
     enabled: true
     create: true
+    triggerPodIdentityProvider: "azure"
   triggers:
     - type: azure-blob
       blobContainerName: "darts-st-container"
