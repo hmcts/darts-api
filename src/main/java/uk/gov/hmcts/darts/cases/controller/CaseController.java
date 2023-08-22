@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.cases.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
+import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -116,6 +117,13 @@ public class CaseController implements CasesApi {
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
 
+    }
+
+    @Override
+    public ResponseEntity<List<EventResponse>> getEvents(
+        @Parameter(name = "hearing_id", description = "hearingId is the internal hea_id of the hearing.", required = true, in = ParameterIn.PATH) @PathVariable("hearing_id") Integer hearingId
+    ) {
+        return new ResponseEntity<>(caseService.getEvents(hearingId), HttpStatus.OK);
     }
 
 }

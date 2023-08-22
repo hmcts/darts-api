@@ -32,7 +32,7 @@ class EventEntityToCourtLogMapperTest {
     void testSingleEntityToCourtLog() throws Exception {
 
         var hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
-        List<EventEntity> event = List.of(CommonTestDataUtil.createEvent("LOG", "Test", hearingEntity));
+        List<EventEntity> event = List.of(CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity));
 
         List<CourtLog> courtLogs = EventEntityToCourtLogMapper.mapToCourtLogsList(event);
 
@@ -51,9 +51,9 @@ class EventEntityToCourtLogMapperTest {
 
         List<EventEntity> entities = new ArrayList<>();
 
-        EventEntity event = CommonTestDataUtil.createEvent("LOG", "Test", hearingEntity);
+        EventEntity event = CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity);
 
-        EventEntity event2 = CommonTestDataUtil.createEvent("LOG", "Test", hearingEntity2);
+        EventEntity event2 = CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity2);
 
         entities.add(event);
         entities.add(event2);
