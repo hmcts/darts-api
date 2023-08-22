@@ -10,3 +10,6 @@ dependencies:
   - name: java
     version: 4.1.5
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
+  - name: function
+    version: 2.3.4
+    repository: 'https://hmctspublic.azurecr.io/helm/v1/repo'
