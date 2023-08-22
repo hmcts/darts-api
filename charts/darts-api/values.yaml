@@ -67,8 +67,9 @@ function:
     completions: 1
   triggerAuth:
     enabled: true
+    create: true
   triggers:
     - type: azure-blob
       blobContainerName: "darts-st-container"
       accountName: "dartssa{{ .Values.global.environment }}"
-      blobPrefix: keda-
+      blobPrefix: "keda-"
