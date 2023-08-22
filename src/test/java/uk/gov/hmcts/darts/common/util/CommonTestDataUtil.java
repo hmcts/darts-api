@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
@@ -30,15 +31,15 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @UtilityClass
 public class CommonTestDataUtil {
 
-    public static EventEntity createEvent(String eventName, String eventText, HearingEntity hearingEntity) {
+    public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
-        return createEvent(eventName, eventText,
-                hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
+        return createEventWith(eventName, eventText,
+                               hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
-    public static EventEntity createEvent(String eventName, String eventText,
-                                          HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
+    public static EventEntity createEventWith(String eventName, String eventText,
+                                              HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
 
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
@@ -49,6 +50,37 @@ public class CommonTestDataUtil {
         event.setTimestamp(eventTimestamp);
 
         return event;
+    }
+
+    public static EventEntity createEventWith(String eventName, String eventText,
+                                              HearingEntity hearingEntity,
+                                              EventHandlerEntity eventHandlerEntity) {
+
+        return createEventWith(eventName, eventText, hearingEntity,
+                                        eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00"));
+    }
+
+    public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity,
+                                              EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
+
+        EventEntity event = new EventEntity();
+        event.setHearingEntities(List.of(hearingEntity));
+        event.setCourtroom(hearingEntity.getCourtroom());
+        event.setEventName(eventName);
+        event.setEventText(eventText);
+        event.setId(1);
+        event.setTimestamp(eventTimestamp);
+        event.setEventType(eventHandlerEntity);
+
+        return event;
+    }
+
+    public EventHandlerEntity createEventHandlerWith(String eventName, String type, String subType) {
+        EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
+        eventHandlerEntity.setEventName(eventName);
+        eventHandlerEntity.setType(type);
+        eventHandlerEntity.setSubType(subType);
+        return eventHandlerEntity;
     }
 
 

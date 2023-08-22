@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
+import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.darts.cases.util.CourtCaseUtil;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
@@ -42,6 +44,7 @@ public class CaseServiceImpl implements CaseService {
 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
+    private final EventRepository eventRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
 
@@ -130,5 +133,11 @@ public class CaseServiceImpl implements CaseService {
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
-
+    public List<EventResponse> getEvents(Integer hearingId) {
+        Optional<HearingEntity> hearingEntity = hearingRepository.findById(hearingId);
+        if (hearingEntity.isEmpty()) {
+            throw new DartsApiException(CaseApiError.HEARING_NOT_FOUND);
+        }
+        return casesMapper.mapToEvents(eventRepository.findAllByHearingId(hearingEntity.get().getId()));
+    }
 }

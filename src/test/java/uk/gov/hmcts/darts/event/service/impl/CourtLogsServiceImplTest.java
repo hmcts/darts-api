@@ -30,7 +30,7 @@ class CourtLogsServiceImplTest {
     void testGetCourtLogs() {
 
         var hearingEntity = CommonTestDataUtil.createHearing(CASE_0000001, LocalTime.of(10, 0));
-        List<EventEntity> event = List.of(CommonTestDataUtil.createEvent("LOG", "Test", hearingEntity));
+        List<EventEntity> event = List.of(CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity));
 
         Mockito.when(repository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
             "SWANSEA",
