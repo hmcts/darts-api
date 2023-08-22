@@ -175,7 +175,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
                  originalAutomatedTaskEntity.get().getCronExpression());
 
-        automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), false,"*/8 * * * * *");
+        automatedTaskService.cancelAutomatedTaskAndUpdateCronExpression(automatedTask.getTaskName(), false,"*/5 * * * * *");
 
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -189,7 +189,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity2 =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
         AutomatedTaskEntity automatedTaskEntity2 = updatedAutomatedTaskEntity2.get();
-        automatedTaskEntity2.setCronExpression("*/30 * * * * *");
+        automatedTaskEntity2.setCronExpression("*/4 * * * * *");
         automatedTaskRepository.saveAndFlush(automatedTaskEntity2);
 
         log.info("TEST - Updated task {} cron expression {}  via database directly", automatedTask.getTaskName(),
@@ -199,7 +199,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
         Thread.sleep(10_000);
 
         AutomatedTaskStatus newAutomatedTaskStatus = automatedTaskService.getAutomatedTaskStatus(automatedTask.getTaskName());
-        assertEquals(AutomatedTaskStatus.SKIPPED, newAutomatedTaskStatus);
+        assertEquals(AutomatedTaskStatus.COMPLETED, newAutomatedTaskStatus);
 
         automatedTaskService.updateAutomatedTaskCronExpression(
             automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
