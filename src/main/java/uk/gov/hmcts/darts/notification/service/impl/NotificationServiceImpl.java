@@ -82,6 +82,11 @@ public class NotificationServiceImpl implements NotificationService {
         lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.notification.scheduler.cron}")
     public void sendNotificationToGovNotify() {
+        sendNotificationToGovNotifyNow();
+    }
+
+    @Override
+    public void sendNotificationToGovNotifyNow() {
         log.debug("sendNotificationToGovNotify scheduler started.");
 
         List<NotificationEntity> notificationEntries = notificationRepo.findByStatusIn(STATUS_ELIGIBLE_TO_SEND);

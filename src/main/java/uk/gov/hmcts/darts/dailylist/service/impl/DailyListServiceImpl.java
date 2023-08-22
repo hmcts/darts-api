@@ -67,10 +67,15 @@ public class DailyListServiceImpl implements DailyListService {
 
     @Override
     @SchedulerLock(name = "DailyListService_Housekeeping",
-        lockAtLeastFor = "PT1M", lockAtMostFor = "PT5M")
+        lockAtLeastFor = "PT20S", lockAtMostFor = "PT5M")
     @Scheduled(cron = "${darts.daily-list.housekeeping.cron}")
-    @Transactional
     public void runHouseKeeping() {
+        runHouseKeepingNow();
+    }
+
+    @Transactional
+    @Override
+    public void runHouseKeepingNow() {
         if (housekeepingEnabled) {
             LocalDate dateToDeleteBefore = LocalDate.now().minusDays(housekeepingDays);
             log.info("Starting DailyList housekeeping, deleting anything before {}", dateToDeleteBefore);
