@@ -287,17 +287,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                             String notificationTemplateId) {
         log.debug("Scheduling notification for templateId: {}...", notificationTemplateId);
 
-        Integer requester = mediaRequestEntity.getRequestor();
-        var userAccountEntity = userAccountRepository.findById(requester)
-            .orElseThrow(() -> new DartsApiException(
-                AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST,
-                String.format("User record for id %s could not be obtained", requester)
-            ));
-
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
             .eventId(notificationTemplateId)
             .caseId(courtCase.getId())
-            .emailAddresses(userAccountEntity.getEmailAddress())
+            .emailAddresses(mediaRequestEntity.getRequestor().getEmailAddress())
             .build();
 
         notificationApi.scheduleNotification(saveNotificationToDbRequest);

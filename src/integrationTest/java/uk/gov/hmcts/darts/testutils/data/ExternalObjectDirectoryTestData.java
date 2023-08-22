@@ -30,7 +30,8 @@ public class ExternalObjectDirectoryTestData {
         return externalObjectDirectory;
     }
 
-    public static ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
+    public static ExternalObjectDirectoryEntity createExternalObjectDirectory(UserAccountEntity user,
+                                                                              MediaEntity mediaEntity,
                                                                               ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
                                                                               ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                               UUID externalLocation) {
@@ -42,7 +43,7 @@ public class ExternalObjectDirectoryTestData {
         externalObjectDirectory.setChecksum(null);
         externalObjectDirectory.setTransferAttempts(null);
 
-        UserAccountEntity user = new UserAccountEntity();
+        externalObjectDirectory.setCreatedBy(user);
         externalObjectDirectory.setModifiedBy(user);
 
         return externalObjectDirectory;

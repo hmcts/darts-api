@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.DefenceRepository;
 import uk.gov.hmcts.darts.common.repository.DefendantRepository;
@@ -49,6 +50,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.LocalDate.now;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseNumber;
@@ -63,6 +65,9 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
+
+    private static final int SYSTEM_USER_ID = 0;
+    private static final String INTEGRATIONTEST_USER_EMAIL = "integrationtest.user@example.com";
 
     private final CaseRepository caseRepository;
     private final CourthouseRepository courthouseRepository;
@@ -112,14 +117,16 @@ public class DartsDatabaseStub {
         return eventHandlerRepository.findByHandlerAndActiveTrue(handlerName);
     }
 
-    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
+    public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber,
+                                                                             String someCourthouse) {
         return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
             someCaseNumber,
             someCourthouse
         );
     }
 
-    public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom, LocalDate toLocalDate) {
+    public List<HearingEntity> findByCourthouseCourtroomAndDate(String someCourthouse, String someRoom,
+                                                                LocalDate toLocalDate) {
         return hearingRepository.findByCourthouseCourtroomAndDate(someCourthouse, someRoom, toLocalDate);
     }
 
@@ -159,7 +166,9 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
+    public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber,
+                                                                                  String courthouseName,
+                                                                                  String courtroomName) {
         givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
         var caseEntity = createCaseUnlessExists(caseNumber, courthouseName);
 
@@ -261,25 +270,68 @@ public class DartsDatabaseStub {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
+    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(
+        ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
         return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
     }
 
     @Transactional
-    public MediaRequestEntity createAndLoadMediaRequestEntity() {
-
+    public MediaRequestEntity createAndLoadCurrentMediaRequestEntity(UserAccountEntity requestor) {
         var caseEntity = save(createCaseWithCaseNumber("2"));
         var courtroomEntity = save(
             createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
         var hearingEntityWithMediaRequest1 = save(createHearingWith(caseEntity, courtroomEntity));
 
         return save(
-            AudioTestDataUtil.createMediaRequest(
+            AudioTestDataUtil.createCurrentMediaRequest(
                 hearingEntityWithMediaRequest1,
-                -2,
+                requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z")
             ));
+    }
+
+    public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
+                                                                     UserAccountEntity requestor) {
+        OffsetDateTime now = OffsetDateTime.now(UTC);
+        return save(
+            AudioTestDataUtil.createExpiredMediaRequest(
+                hearing,
+                requestor,
+                now.minusDays(5),
+                now.minusDays(4)
+            ));
+    }
+
+    public UserAccountEntity createSystemUserAccountEntity() {
+
+        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findById(SYSTEM_USER_ID);
+
+        if (userAccountEntityOptional.isPresent()) {
+            return userAccountEntityOptional.get();
+        } else {
+            var newUser = new UserAccountEntity();
+            newUser.setUsername("System User");
+            newUser.setEmailAddress("system.user@example.com");
+            return userAccountRepository.saveAndFlush(newUser);
+        }
+    }
+
+    public UserAccountEntity createIntegrationTestUserAccountEntity(UserAccountEntity systemUser) {
+
+        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddress(
+            INTEGRATIONTEST_USER_EMAIL);
+
+        if (userAccountEntityOptional.isPresent()) {
+            return userAccountEntityOptional.get();
+        } else {
+            var newUser = new UserAccountEntity();
+            newUser.setUsername("IntegrationTest User");
+            newUser.setEmailAddress(INTEGRATIONTEST_USER_EMAIL);
+            newUser.setCreatedBy(systemUser);
+            newUser.setModifiedBy(systemUser);
+            return userAccountRepository.saveAndFlush(newUser);
+        }
     }
 
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {

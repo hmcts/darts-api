@@ -28,7 +28,7 @@ public class AudioRequestSummaryMapperImpl implements AudioRequestSummaryMapper 
         audioRequestSummary.setHearingDate(result.hearingDate());
         audioRequestSummary.setMediaRequestStartTs(result.mediaRequestStartTs());
         audioRequestSummary.setMediaRequestEndTs(result.mediaRequestEndTs());
-        audioRequestSummary.setExpiryTs(result.expiryTs());
+        audioRequestSummary.setMediaRequestExpiryTs(result.mediaRequestExpiryTs());
         audioRequestSummary.setMediaRequestStatus(MediaRequestStatus.fromValue(result.mediaRequestStatus().toString()));
 
         return audioRequestSummary;

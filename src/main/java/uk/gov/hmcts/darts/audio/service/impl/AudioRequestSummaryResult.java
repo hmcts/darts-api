@@ -12,7 +12,7 @@ public record AudioRequestSummaryResult(
     LocalDate hearingDate,
     OffsetDateTime mediaRequestStartTs,
     OffsetDateTime mediaRequestEndTs,
-    OffsetDateTime expiryTs,
+    OffsetDateTime mediaRequestExpiryTs,
     AudioRequestStatus mediaRequestStatus
 ) {
 

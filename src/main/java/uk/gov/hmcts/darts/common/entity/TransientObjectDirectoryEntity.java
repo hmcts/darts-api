@@ -12,7 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -21,12 +22,10 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import static jakarta.persistence.CascadeType.MERGE;
-import static jakarta.persistence.CascadeType.PERSIST;
-
 @Entity
 @Table(name = "transient_object_directory")
-@Data
+@Getter
+@Setter
 public class TransientObjectDirectoryEntity implements JpaAuditing {
 
     @Id
@@ -57,11 +56,15 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
     @Column(name = "created_ts")
     private OffsetDateTime createdTimestamp;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserAccountEntity createdBy;
+
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
     private OffsetDateTime modifiedTimestamp;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
     private UserAccountEntity modifiedBy;
 

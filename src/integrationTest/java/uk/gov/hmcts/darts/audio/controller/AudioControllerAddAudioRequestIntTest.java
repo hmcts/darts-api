@@ -62,7 +62,7 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
 
         var mediaRequestEntity = mediaRequestEntities.get(0);
         assertEquals(hearingEntity.getId(), mediaRequestEntity.getHearing().getId());
-        assertEquals(REQUESTOR, mediaRequestEntity.getRequestor());
+        assertEquals(REQUESTOR, mediaRequestEntity.getRequestor().getId());
         assertEquals(START_TIME, mediaRequestEntity.getStartTime());
         assertEquals(END_TIME, mediaRequestEntity.getEndTime());
         assertEquals(AUDIO_REQUEST_TYPE, mediaRequestEntity.getRequestType());

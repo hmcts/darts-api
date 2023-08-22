@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
@@ -36,6 +37,8 @@ public class AudioTransformationServiceGivenBuilder {
 
     private final DartsDatabaseStub dartsDatabase;
 
+    private UserAccountEntity systemUser;
+    private UserAccountEntity integrationTestUser;
     private HearingEntity hearingEntityWithMedia1;
     private HearingEntity hearingEntityWithMedia2;
     private HearingEntity hearingEntityWithoutMedia;
@@ -47,6 +50,9 @@ public class AudioTransformationServiceGivenBuilder {
     private JudgeEntity judge;
 
     public void setupTest() {
+        systemUser = dartsDatabase.createSystemUserAccountEntity();
+        integrationTestUser = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+
         courtroomAtNewcastle = getCourtroomAtNewcastle();
         courtCase = dartsDatabase.save(createCaseAtCourthouse("c1", courtroomAtNewcastle.getCourthouse()));
         judge = dartsDatabase.save(createJudgeWithName("aJudge"));
@@ -77,6 +83,7 @@ public class AudioTransformationServiceGivenBuilder {
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity1 = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+            integrationTestUser,
             mediaEntity,
             dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId()),
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()),

@@ -113,7 +113,11 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @Test
     void shouldSaveTransientDataLocation() {
-        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadMediaRequestEntity();
+
+        var systemUser = dartsDatabase.createSystemUserAccountEntity();
+        var testUser = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+
+        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(testUser);
 
         when(mockTransientObjectDirectoryService.saveTransientDataLocation(
             mediaRequestEntity,
@@ -207,6 +211,8 @@ class AudioTransformationServiceTest extends IntegrationBase {
         newMedia.setEnd(OffsetDateTime.parse("2023-07-04T17:00:00Z"));
         newMedia = dartsDatabase.save(newMedia);
 
+        var systemUser = dartsDatabase.createSystemUserAccountEntity();
+        var testUser = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
         ExternalLocationTypeEntity externalLocationTypeEntity =
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
         ObjectDirectoryStatusEntity objectDirectoryStatus =
@@ -214,6 +220,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();
         ExternalObjectDirectoryEntity externalObjectDirectory1 = createExternalObjectDirectory(
+            testUser,
             newMedia,
             objectDirectoryStatus,
             externalLocationTypeEntity,
@@ -222,6 +229,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory1);
 
         ExternalObjectDirectoryEntity externalObjectDirectory2 = createExternalObjectDirectory(
+            testUser,
             newMedia,
             objectDirectoryStatus,
             externalLocationTypeEntity,

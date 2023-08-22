@@ -48,6 +48,10 @@ public class EventHandlerEntity implements JpaAuditing {
     @Column(name = "created_ts")
     private OffsetDateTime createdTimestamp;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserAccountEntity createdBy;
+
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
     private OffsetDateTime modifiedTimestamp;
@@ -55,4 +59,5 @@ public class EventHandlerEntity implements JpaAuditing {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "last_modified_by")
     private UserAccountEntity modifiedBy;
+
 }

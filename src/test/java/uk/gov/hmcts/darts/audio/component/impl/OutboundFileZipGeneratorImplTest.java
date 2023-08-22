@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
@@ -50,8 +51,6 @@ class OutboundFileZipGeneratorImplTest {
     private static final Instant SOME_INSTANT = Instant.now();
     private static final Instant SOME_START_TIME = SOME_INSTANT.minus(45, ChronoUnit.MINUTES);
     private static final Instant SOME_END_TIME = SOME_INSTANT.minus(15, ChronoUnit.MINUTES);
-
-    private static final Integer TEST_REQUESTER = 1234;
 
     private OutboundFileZipGeneratorImpl outboundFileZipGenerator;
     private Path tempDirectory;
@@ -135,19 +134,23 @@ class OutboundFileZipGeneratorImplTest {
         when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");
         when(mockCourtCaseEntity.getCaseNumber()).thenReturn("T20190024");
 
+        UserAccountEntity mockUserAccountEntity = mock(UserAccountEntity.class);
+
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setId(2023);
         mediaRequestEntity.setHearing(mockHearingEntity);
         mediaRequestEntity.setStartTime(utcStartTime);
         OffsetDateTime utcEndTime = OffsetDateTime.ofInstant(SOME_END_TIME, UTC);
         mediaRequestEntity.setEndTime(utcEndTime);
-        mediaRequestEntity.setRequestor(TEST_REQUESTER);
+        mediaRequestEntity.setRequestor(mockUserAccountEntity);
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setAttempts(0);
         OffsetDateTime utcNow = OffsetDateTime.ofInstant(SOME_INSTANT, UTC);
-        mediaRequestEntity.setCreatedDateTime(utcNow);
-        mediaRequestEntity.setLastUpdated(utcNow);
+        mediaRequestEntity.setCreatedTimestamp(utcNow);
+        mediaRequestEntity.setCreatedBy(mockUserAccountEntity);
+        mediaRequestEntity.setModifiedTimestamp(utcNow);
+        mediaRequestEntity.setModifiedBy(mockUserAccountEntity);
         return mediaRequestEntity;
     }
 

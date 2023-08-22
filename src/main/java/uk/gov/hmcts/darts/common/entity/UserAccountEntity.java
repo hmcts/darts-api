@@ -56,6 +56,10 @@ public class UserAccountEntity implements JpaAuditing {
     @Column(name = "created_ts")
     private OffsetDateTime createdTimestamp;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private UserAccountEntity createdBy;
+
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
     private OffsetDateTime modifiedTimestamp;

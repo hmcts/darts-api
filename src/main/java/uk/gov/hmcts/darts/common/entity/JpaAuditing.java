@@ -8,6 +8,10 @@ public interface JpaAuditing {
 
     void setCreatedTimestamp(OffsetDateTime createdTimestamp);
 
+    UserAccountEntity getCreatedBy();
+
+    void setCreatedBy(UserAccountEntity createdBy);
+
     OffsetDateTime getModifiedTimestamp();
 
     void setModifiedTimestamp(OffsetDateTime modifiedTimestamp);

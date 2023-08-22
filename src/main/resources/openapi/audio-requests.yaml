@@ -18,12 +18,6 @@ paths:
       description: '"Your audio" requests for a user to view whether Current / Expired'
       parameters:
         - in: query
-          name: user_id
-          schema:
-            type: integer
-          description: user_account primary key
-          required: true
-        - in: query
           name: expired
           schema:
             type: boolean
@@ -55,10 +49,10 @@ components:
           example: 12345
         case_number:
           type: string
-          example: T20200190
+          example: "T20200190"
         courthouse_name:
           type: string
-          example: Manchester Minshull Street
+          example: "Manchester Minshull Street"
         hearing_date:
           type: string
           format: date
@@ -66,15 +60,15 @@ components:
         media_request_start_ts:
           type: string
           format: date-time
-          example: "2023-08-17T09:00:00Z"
+          example: "2023-08-21T09:00:00Z"
         media_request_end_ts:
           type: string
           format: date-time
-          example: "2023-08-17T10:00:00Z"
-        expiry_ts:
+          example: "2023-08-21T10:00:00Z"
+        media_request_expiry_ts:
           type: string
           format: date-time
-          example: "2023-08-20T09:00:00Z"
+          example: "2023-08-23T09:00:00Z"
         media_request_status:
           $ref: '#/components/schemas/MediaRequestStatus'
 
@@ -85,3 +79,4 @@ components:
         - PROCESSING
         - FAILED
         - COMPLETED
+        - EXPIRED
