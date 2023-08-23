@@ -5,7 +5,6 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.service.impl.AudioRequestSummaryResult;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ public interface MediaRequestService {
 
     Integer saveAudioRequest(AudioRequestDetails audioRequestDetails);
 
-    List<AudioRequestSummaryResult> viewAudioRequests(UserAccountEntity userAccountEntity,
-                                                      Boolean expired);
+    List<AudioRequestSummaryResult> viewAudioRequests(Integer userId, Boolean expired);
 
 }

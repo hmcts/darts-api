@@ -94,7 +94,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public List<AudioRequestSummaryResult> viewAudioRequests(UserAccountEntity userAccountEntity, Boolean expired) {
+    public List<AudioRequestSummaryResult> viewAudioRequests(Integer userId, Boolean expired) {
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<AudioRequestSummaryResult> criteriaQuery = criteriaBuilder.createQuery(AudioRequestSummaryResult.class);
@@ -128,7 +128,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         ));
 
         TypedQuery<AudioRequestSummaryResult> query = entityManager.createQuery(criteriaQuery);
-        query.setParameter(paramRequestor, userAccountEntity);
+
+        query.setParameter(paramRequestor, userAccountRepository.getReferenceById(userId));
 
         return query.getResultList();
     }

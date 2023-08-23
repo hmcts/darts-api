@@ -11,12 +11,20 @@ info:
 paths:
   /audio-requests:
     get:
+      security:
+        - bearerAuth: [ ]
       tags:
         - Audio Requests
       summary: Users can view a summary of their audio requests and status
       operationId: getYourAudio
       description: '"Your audio" requests for a user to view whether Current / Expired'
       parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
         - in: query
           name: expired
           schema:
@@ -40,6 +48,12 @@ paths:
                 $ref: './problem.yaml'
 
 components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     AudioRequestSummary:
       type: object
