@@ -31,82 +31,82 @@ import java.time.OffsetDateTime;
 @Setter
 public class MediaRequestEntity implements JpaAuditing {
 
-    public static final String REQUEST_ID = "mer_id";
-    public static final String HEARING_ID = "hea_id";
-    public static final String REQUESTOR = "requestor";
-    public static final String REQUEST_STATUS = "request_status";
-    public static final String REQUEST_TYPE = "request_type";
-    public static final String REQ_PROC_ATTEMPTS = "req_proc_attempts";
-    public static final String START_TIME = "start_ts";
-    public static final String END_TIME = "end_ts";
-    public static final String OUTPUT_FORMAT = "output_format";
-    public static final String OUTPUT_FILENAME = "output_filename";
-    public static final String LAST_ACCESSED_TS = "last_accessed_ts";
-    public static final String EXPIRY_TS = "expiry_ts";
-    public static final String CREATED_TS = "created_ts";
-    public static final String CREATED_BY = "created_by";
-    public static final String LAST_MODIFIED_TS = "last_modified_ts";
-    public static final String LAST_MODIFIED_BY = "last_modified_by";
+    public static final String ID_COLUMN_NAME = "mer_id";
+    public static final String HEARING_ID_COLUMN_NAME = "hea_id";
+    public static final String REQUESTOR_COLUMN_NAME = "requestor";
+    public static final String REQUEST_STATUS_COLUMN_NAME = "request_status";
+    public static final String REQUEST_TYPE_COLUMN_NAME = "request_type";
+    public static final String REQ_PROC_ATTEMPTS_COLUMN_NAME = "req_proc_attempts";
+    public static final String START_TIME_COLUMN_NAME = "start_ts";
+    public static final String END_TIME_COLUMN_NAME = "end_ts";
+    public static final String OUTPUT_FORMAT_COLUMN_NAME = "output_format";
+    public static final String OUTPUT_FILENAME_COLUMN_NAME = "output_filename";
+    public static final String LAST_ACCESSED_TS_COLUMN_NAME = "last_accessed_ts";
+    public static final String EXPIRY_TS_COLUMN_NAME = "expiry_ts";
+    public static final String CREATED_TS_COLUMN_NAME = "created_ts";
+    public static final String CREATED_BY_COLUMN_NAME = "created_by";
+    public static final String LAST_MODIFIED_TS_COLUMN_NAME = "last_modified_ts";
+    public static final String LAST_MODIFIED_BY_COLUMN_NAME = "last_modified_by";
     public static final String TABLE_NAME = "media_request";
 
     @Id
-    @Column(name = REQUEST_ID)
+    @Column(name = ID_COLUMN_NAME)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "media_request_gen")
     @SequenceGenerator(name = "media_request_gen", sequenceName = "mer_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = HEARING_ID, nullable = false)
+    @JoinColumn(name = HEARING_ID_COLUMN_NAME, nullable = false)
     private HearingEntity hearing;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = REQUESTOR, nullable = false)
+    @JoinColumn(name = REQUESTOR_COLUMN_NAME, nullable = false)
     private UserAccountEntity requestor;
 
-    @Column(name = REQUEST_STATUS, nullable = false)
+    @Column(name = REQUEST_STATUS_COLUMN_NAME, nullable = false)
     @Enumerated(EnumType.STRING)
     private AudioRequestStatus status;
 
-    @Column(name = REQUEST_TYPE, nullable = false)
+    @Column(name = REQUEST_TYPE_COLUMN_NAME, nullable = false)
     @Enumerated(EnumType.STRING)
     private AudioRequestType requestType;
 
-    @Column(name = REQ_PROC_ATTEMPTS)
+    @Column(name = REQ_PROC_ATTEMPTS_COLUMN_NAME)
     private Integer attempts;
 
-    @Column(name = START_TIME, nullable = false)
+    @Column(name = START_TIME_COLUMN_NAME, nullable = false)
     private OffsetDateTime startTime;
 
-    @Column(name = END_TIME, nullable = false)
+    @Column(name = END_TIME_COLUMN_NAME, nullable = false)
     private OffsetDateTime endTime;
 
-    @Column(name = OUTPUT_FORMAT)
+    @Column(name = OUTPUT_FORMAT_COLUMN_NAME)
     @Enumerated(EnumType.STRING)
     private AudioRequestOutputFormat outputFormat;
 
-    @Column(name = OUTPUT_FILENAME)
+    @Column(name = OUTPUT_FILENAME_COLUMN_NAME)
     private String outputFilename;
 
-    @Column(name = LAST_ACCESSED_TS)
+    @Column(name = LAST_ACCESSED_TS_COLUMN_NAME)
     private OffsetDateTime lastAccessedDateTime;
 
-    @Column(name = EXPIRY_TS)
+    @Column(name = EXPIRY_TS_COLUMN_NAME)
     private OffsetDateTime expiryTime;
 
     @CreationTimestamp
-    @Column(name = CREATED_TS, nullable = false)
+    @Column(name = CREATED_TS_COLUMN_NAME, nullable = false)
     private OffsetDateTime createdTimestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = CREATED_BY, nullable = false)
+    @JoinColumn(name = CREATED_BY_COLUMN_NAME, nullable = false)
     private UserAccountEntity createdBy;
 
     @UpdateTimestamp
-    @Column(name = LAST_MODIFIED_TS, nullable = false)
+    @Column(name = LAST_MODIFIED_TS_COLUMN_NAME, nullable = false)
     private OffsetDateTime modifiedTimestamp;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = LAST_MODIFIED_BY, nullable = false)
+    @JoinColumn(name = LAST_MODIFIED_BY_COLUMN_NAME, nullable = false)
     private UserAccountEntity modifiedBy;
 
 }

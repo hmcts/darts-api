@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static java.lang.Boolean.FALSE;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 
@@ -136,7 +137,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
                                        Root<MediaRequestEntity> mediaRequest) {
 
         final Predicate expiredPredicate;
-        if (!expired) {
+        if (FALSE.equals(expired)) {
             expiredPredicate = criteriaBuilder.notEqual(mediaRequest.get(MediaRequestEntity_.status), EXPIRED);
         } else {
             expiredPredicate = criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.status), EXPIRED);
