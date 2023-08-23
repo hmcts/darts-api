@@ -25,7 +25,7 @@ import static uk.gov.hmcts.darts.audiorequests.model.MediaRequestStatus.EXPIRED;
 
 @AutoConfigureMockMvc
 @TestInstance(Lifecycle.PER_CLASS)
-class AudioRequestsControllerIntTest extends IntegrationBase {
+class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
@@ -86,6 +86,64 @@ class AudioRequestsControllerIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].media_request_end_ts").isString())
             .andExpect(jsonPath("$[0].media_request_expiry_ts").isString())
             .andExpect(jsonPath("$[0].media_request_status", is(EXPIRED.getValue())));
+    }
+
+    @Test
+    void getYourAudioCurrentShouldReturnEmptyArrayInResponseBodyWhenNoCurrentMediaRequestExists() throws Exception {
+
+        dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+
+        var requestBuilder = get(URI.create(String.format("/audio-requests?&expired=%s", FALSE)));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            []
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getYourAudioExpiredShouldReturnEmptyArrayInResponseBodyWhenNoExpiredMediaRequestExists() throws Exception {
+        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
+
+        var requestBuilder = get(URI.create(String.format("/audio-requests?&expired=%s", TRUE)));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            []
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void getYourAudioShouldReturnBadRequestWhenExpiredQueryParamIsNotPresent() throws Exception {
+
+        var requestBuilder = get(URI.create("/audio-requests"));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            {
+                "type": "about:blank",
+                "title": "Bad Request",
+                "status": 400,
+                "detail": "Required parameter 'expired' is not present.",
+                "instance": "/audio-requests"
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
 }

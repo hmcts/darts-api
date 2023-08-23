@@ -19,6 +19,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
 
 @Transactional
@@ -94,6 +95,7 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
                                                              UserAccountEntity userAccountEntity) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
+        mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setRequestor(userAccountEntity);
         mediaRequestEntity.setStartTime(TIME_12_00);
