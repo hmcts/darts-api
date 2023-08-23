@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.cases.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
@@ -31,8 +33,10 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,6 +48,8 @@ import java.util.Locale;
 public class CaseController implements CasesApi {
 
     private final CaseService caseService;
+    private final CaseRepository caseRepository;
+    private final AuthorisationApi authorisationApi;
 
     @Override
     /*
@@ -113,10 +119,12 @@ public class CaseController implements CasesApi {
     }
 
     @Override
+    // TODO: Should we also enforce @RolesAllowed() to coarsely screen by role before making any DB calls?
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
+        List<CourthouseEntity> associatedCourthouses = caseRepository.getAssociatedCourthouses(caseId);
+        authorisationApi.checkAuthorisation(associatedCourthouses);
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
-
     }
 
     @Override
