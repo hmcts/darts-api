@@ -21,7 +21,8 @@ public interface AuditDtoMapper {
     }
 
     @Mappings({
-        @Mapping(source = "createdDateTime", target = "createdAt")
+        @Mapping(source = "createdDateTime", target = "createdAt"),
+        @Mapping(source = "auditActivity", target = "eventId")
     })
     SearchResult map(AuditEntity auditEntity);
 

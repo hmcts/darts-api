@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.CourtroomTestData;
+import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -40,7 +41,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData.createExternalObjectDirectory;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
@@ -69,6 +69,9 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @MockBean
     FileOperationService mockFileOperationService;
+
+    @Autowired
+    private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     @Mock
     private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
@@ -213,7 +216,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
             dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId());
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();
-        ExternalObjectDirectoryEntity externalObjectDirectory1 = createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity externalObjectDirectory1 = externalObjectDirectoryStub.createExternalObjectDirectory(
             newMedia,
             objectDirectoryStatus,
             externalLocationTypeEntity,
@@ -221,7 +224,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         );
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory1);
 
-        ExternalObjectDirectoryEntity externalObjectDirectory2 = createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity externalObjectDirectory2 = externalObjectDirectoryStub.createExternalObjectDirectory(
             newMedia,
             objectDirectoryStatus,
             externalLocationTypeEntity,

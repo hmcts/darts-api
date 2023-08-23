@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.DefenceRepository;
 import uk.gov.hmcts.darts.common.repository.DefendantRepository;
@@ -43,6 +44,7 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
+import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
 import java.io.IOException;
@@ -55,9 +57,7 @@ import java.util.Optional;
 
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseNumber;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWith;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
@@ -69,6 +69,7 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 @Slf4j
 public class DartsDatabaseStub {
 
+    private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
@@ -90,13 +91,18 @@ public class DartsDatabaseStub {
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
 
+    private final UserAccountStub userAccountStub;
+    private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
+    private final CourthouseStub courthouseStub;
+    private final AuditStub auditStub;
+
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
     public void clearDatabaseInThisOrder() {
         log.error("started delete all");
+        auditRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
-        userAccountRepository.deleteAll();
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
@@ -168,49 +174,18 @@ public class DartsDatabaseStub {
     @Transactional
     public CourtCaseEntity givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(String caseNumber, String courthouseName, String courtroomName) {
         givenTheDatabaseContainsCourthouseWithRoom(courthouseName, courtroomName);
-        var caseEntity = createCaseUnlessExists(caseNumber, courthouseName);
-
-        return caseRepository.saveAndFlush(caseEntity);
+        return retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber);
     }
 
-    @Transactional
-    public CourtCaseEntity createCaseUnlessExists(String caseNumber, String courthouseName) {
-
-        Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-            caseNumber,
-            courthouseName
-        );
-
-        return caseEntity.orElseGet(() -> createCase(caseNumber, courthouseName));
-
-    }
-
-    @Transactional
-    public CourtCaseEntity createCase(String caseNumber, String courthouseName) {
-
-        CourthouseEntity courthouse = createCourthouseUnlessExists(courthouseName);
-
-        return caseRepository.save(createCaseAtCourthouse(caseNumber, courthouse));
-
-    }
-
-    @Transactional
-    public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
-
-        Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseNameIgnoreCase(
-            courthouseName);
-
-        CourthouseEntity courthouseEntity;
-
-        courthouseEntity = courthouseEntityOptional.orElseGet(() -> createCourthouseWithoutCourtrooms(courthouseName));
-
-        return courthouseEntity;
+    public CourtCaseEntity createCase(String courthouseName, String caseNumber) {
+        courthouseStub.getCourthouse(courthouseName);
+        return retrieveCoreObjectService.retrieveOrCreateCase(courthouseName, caseNumber);
     }
 
     @Transactional
     public CourtroomEntity givenTheDatabaseContainsCourthouseWithRoom(String courthouseName, String courtroomName) {
 
-        var persistedCourthouse = createCourthouseUnlessExists(courthouseName);
+        var persistedCourthouse = courthouseStub.getCourthouse(courthouseName);
 
         var courtroom = new CourtroomEntity();
         courtroom.setName(courtroomName);
@@ -229,16 +204,16 @@ public class DartsDatabaseStub {
             createHearingWith(
                 createCaseWithCaseNumber("c1"),
                 createCourtRoomWithNameAtCourthouse(
-                    createCourthouse("NEWCASTLE"), "r1"), now()
+                    CourthouseTestData.createCourthouse("NEWCASTLE"), "r1"), now()
             ));
     }
 
-    public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
-        return courthouseRepository.save(createCourthouse(courthouseName));
+    public CourthouseEntity createCourthouse(String courthouseName) {
+        return courthouseStub.getCourthouse(courthouseName);
     }
 
     public CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code) {
-        var courthouse = createCourthouse(name);
+        var courthouse = CourthouseTestData.createCourthouse(name);
         courthouse.setCode(code);
         return courthouseRepository.save(courthouse);
     }
@@ -297,7 +272,10 @@ public class DartsDatabaseStub {
 
         var caseEntity = save(createCaseWithCaseNumber("2"));
         var courtroomEntity = save(
-            createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
+            createCourtRoomWithNameAtCourthouse(
+                CourthouseTestData.createCourthouse("NEWCASTLE"),
+                "Int Test Courtroom 2"
+            ));
         var hearingEntityWithMediaRequest1 = save(createHearingWith(caseEntity, courtroomEntity));
 
         return save(

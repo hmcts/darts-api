@@ -11,8 +11,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -35,6 +35,7 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
 public class AudioTransformationServiceGivenBuilder {
 
     private final DartsDatabaseStub dartsDatabase;
+    private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     private HearingEntity hearingEntityWithMedia1;
     private HearingEntity hearingEntityWithMedia2;
@@ -53,19 +54,19 @@ public class AudioTransformationServiceGivenBuilder {
         hearingEntityWithMedia1 = dartsDatabase.save(createHearingWithDefaults(
             courtCase,
             courtroomAtNewcastle,
-            LocalDate.of(2020, 06, 20),
+            LocalDate.of(2020, 6, 20),
             judge
         ));
         hearingEntityWithMedia2 = dartsDatabase.save(createHearingWithDefaults(
             courtCase,
             courtroomAtNewcastle,
-            LocalDate.of(2020, 06, 21),
+            LocalDate.of(2020, 6, 21),
             judge
         ));
         hearingEntityWithoutMedia = dartsDatabase.save(createHearingWithDefaults(
             courtCase,
             courtroomAtNewcastle,
-            LocalDate.of(2020, 06, 22),
+            LocalDate.of(2020, 6, 22),
             judge
         ));
 
@@ -76,7 +77,7 @@ public class AudioTransformationServiceGivenBuilder {
     }
 
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
-        var externalObjectDirectoryEntity1 = ExternalObjectDirectoryTestData.createExternalObjectDirectory(
+        var externalObjectDirectoryEntity1 = externalObjectDirectoryStub.createExternalObjectDirectory(
             mediaEntity,
             dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId()),
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()),

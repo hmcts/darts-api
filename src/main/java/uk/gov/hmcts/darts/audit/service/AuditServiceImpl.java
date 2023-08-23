@@ -48,14 +48,15 @@ public class AuditServiceImpl implements AuditService {
         }
 
         if (auditSearchQuery.getFromDate() != null && auditSearchQuery.getToDate() != null) {
-            predicates.add(criteriaBuilder.between(root.get(AuditEntity_.createdDateTime),
-                                                   auditSearchQuery.getFromDate(),
-                                                   auditSearchQuery.getToDate()
+            predicates.add(criteriaBuilder.between(
+                root.get(AuditEntity_.createdDateTime),
+                auditSearchQuery.getFromDate(),
+                auditSearchQuery.getToDate()
             ));
         }
 
         if (auditSearchQuery.getEventId() != null) {
-            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.eventId), auditSearchQuery.getEventId()));
+            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.auditActivity), auditSearchQuery.getEventId()));
         }
         return predicates;
     }

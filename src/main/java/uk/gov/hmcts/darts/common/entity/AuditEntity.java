@@ -26,7 +26,7 @@ public class AuditEntity extends CreatedModifiedBaseEntity {
     private Integer caseId;
 
     @Column(name = "aua_id")
-    private Integer eventId;
+    private Integer auditActivity;
 
     @Column(name = "usr_id")
     private Integer userId;

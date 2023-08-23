@@ -34,7 +34,7 @@ class DailyListHousekeepingControllerTest extends IntegrationBase {
     @Test
     void housekeepingPostEndpoint() throws Exception {
 
-        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("courthouse1");
+        CourthouseEntity courthouse = dartsDatabase.createCourthouse("courthouse1");
         createEmptyDailyLists(50, LocalDate.now(), courthouse);
 
         List<DailyListEntity> resultList = dartsDatabase.getDailyListRepository().findAll();

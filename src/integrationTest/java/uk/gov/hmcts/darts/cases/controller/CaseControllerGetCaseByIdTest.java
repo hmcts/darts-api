@@ -56,7 +56,10 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.case_id", Matchers.is(getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))))
+            .andExpect(MockMvcResultMatchers.jsonPath(
+                "$.case_id",
+                Matchers.is(getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
+            ))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges", Matchers.hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1judge1")))
             .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors", Matchers.hasSize(1)))
@@ -79,7 +82,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     private Integer getCaseId(String caseNumber, String courthouse) {
 
-        CourtCaseEntity courtCase = dartsDatabase.createCaseUnlessExists(caseNumber, courthouse);
+        CourtCaseEntity courtCase = dartsDatabase.createCase(courthouse, caseNumber);
 
         return courtCase.getId();
     }

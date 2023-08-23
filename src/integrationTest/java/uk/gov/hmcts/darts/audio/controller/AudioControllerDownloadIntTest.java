@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.TransientObjectDirectoryTestData;
+import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
 import java.net.URI;
 import java.util.UUID;
@@ -25,6 +25,8 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 class AudioControllerDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio/download");
+    @Autowired
+    protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,7 +38,7 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
         var mediaRequestEntity = dartsDatabase.createAndLoadMediaRequestEntity();
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(TransientObjectDirectoryTestData.createTransientObjectDirectoryEntity(
+            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
                 mediaRequestEntity,
                 objectDirectoryStatusEntity,
                 blobId

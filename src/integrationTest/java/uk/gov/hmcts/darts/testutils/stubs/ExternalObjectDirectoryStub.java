@@ -1,21 +1,24 @@
-package uk.gov.hmcts.darts.testutils.data;
+package uk.gov.hmcts.darts.testutils.stubs;
 
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.util.UUID;
 
-@UtilityClass
-@SuppressWarnings({"PMD.LawOfDemeter", "HideUtilityClassConstructor"})
-public class ExternalObjectDirectoryTestData {
+@Component
+@RequiredArgsConstructor
+public class ExternalObjectDirectoryStub {
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final UserAccountStub userAccountStub;
 
-    public static ExternalObjectDirectoryEntity someMinimalExternalObjectDirectory() {
+    public ExternalObjectDirectoryEntity someMinimalExternalObjectDirectory() {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
 
         var externalLocationType = new ExternalLocationTypeEntity();
@@ -30,10 +33,10 @@ public class ExternalObjectDirectoryTestData {
         return externalObjectDirectory;
     }
 
-    public static ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
-                                                                              ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
-                                                                              ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                              UUID externalLocation) {
+    public ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity,
+                                                                       ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                       ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                       UUID externalLocation) {
         var externalObjectDirectory = new ExternalObjectDirectoryEntity();
         externalObjectDirectory.setMedia(mediaEntity);
         externalObjectDirectory.setStatus(objectDirectoryStatusEntity);
@@ -42,8 +45,7 @@ public class ExternalObjectDirectoryTestData {
         externalObjectDirectory.setChecksum(null);
         externalObjectDirectory.setTransferAttempts(null);
 
-        UserAccountEntity user = new UserAccountEntity();
-        externalObjectDirectory.setLastModifiedBy(user);
+        externalObjectDirectory.setLastModifiedBy(userAccountStub.getDefaultUser());
 
         return externalObjectDirectory;
     }
