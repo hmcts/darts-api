@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,7 +36,7 @@ public class EventEntity extends VersionedEntity {
     @Column(name = "event_object_id", unique = true, length = 16)
     private String legacyObjectId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "evh_id")
     private EventHandlerEntity eventType;
 

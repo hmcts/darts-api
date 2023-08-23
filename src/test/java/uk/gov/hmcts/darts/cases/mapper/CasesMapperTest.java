@@ -11,12 +11,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -37,6 +39,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class CasesMapperTest {
     public static final String SWANSEA = "SWANSEA";
     public static final String CASE_NUMBER = "casenumber1";
@@ -187,6 +190,23 @@ class CasesMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void testMapToEvents() throws IOException {
+        EventHandlerEntity eventType = new EventHandlerEntity();
+        eventType.setEventName("TestName");
+
+        HearingEntity hearingEntity = CommonTestDataUtil.createHearing("TEST_1", LocalTime.NOON);
+        EventEntity eventEntity = CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType);
+
+        List<EventResponse> eventResponses = caseMapper.mapToEvents(List.of(eventEntity));
+
+        String actualResponse = objectMapper.writeValueAsString(eventResponses);
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CasesMapperTest/testMapToEvents/expectedResponse.json");
+
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 

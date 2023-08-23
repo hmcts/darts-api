@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.testutils.data;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.time.OffsetDateTime;
@@ -22,6 +23,18 @@ public class EventTestData {
         event.setEventName(eventName);
         event.setEventText(eventText);
         event.setTimestamp(eventTime);
+        return event;
+    }
+
+    public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity, OffsetDateTime eventTime,
+                                              EventHandlerEntity eventHandlerEntity) {
+        EventEntity event = someMinimalEvent();
+        event.setHearingEntities(List.of(hearingEntity));
+        event.setCourtroom(hearingEntity.getCourtroom());
+        event.setEventName(eventName);
+        event.setEventText(eventText);
+        event.setTimestamp(eventTime);
+        event.setEventType(eventHandlerEntity);
         return event;
     }
 }

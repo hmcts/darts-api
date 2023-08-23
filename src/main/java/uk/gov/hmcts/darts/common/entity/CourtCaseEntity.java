@@ -100,12 +100,14 @@ public class CourtCaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_judge_ae",
-        joinColumns = {@JoinColumn(name = "cas_id")},
-        inverseJoinColumns = {@JoinColumn(name = "jud_id")})
+            joinColumns = {@JoinColumn(name = "cas_id")},
+            inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
     public void addHearing(HearingEntity hearing) {
-        this.hearings.add(hearing);
+        if (hearings.stream().noneMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()))) {
+            this.hearings.add(hearing);
+        }
     }
 
     public void addDefence(DefenceEntity defence) {
@@ -128,7 +130,7 @@ public class CourtCaseEntity {
 
     public void addProsecutor(ProsecutorEntity prosecutor) {
         if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
-            prosecutor.getName()))) {
+                prosecutor.getName()))) {
             prosecutorList.add(prosecutor);
         }
     }

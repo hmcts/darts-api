@@ -6,4 +6,6 @@ public interface NotificationService {
     void scheduleNotification(SaveNotificationToDbRequest request);
 
     void sendNotificationToGovNotify();
+
+    void sendNotificationToGovNotifyNow();
 }

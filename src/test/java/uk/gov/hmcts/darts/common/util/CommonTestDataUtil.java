@@ -6,32 +6,40 @@ import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
+import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+
+import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @UtilityClass
 public class CommonTestDataUtil {
 
-    public static EventEntity createEvent(String eventName, String eventText, HearingEntity hearingEntity) {
+    public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity) {
 
-        return createEvent(eventName, eventText,
-                           hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
+        return createEventWith(eventName, eventText,
+                               hearingEntity, createOffsetDateTime("2023-07-01T10:00:00")
         );
     }
 
-    public static EventEntity createEvent(String eventName, String eventText,
-                                          HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
+    public static EventEntity createEventWith(String eventName, String eventText,
+                                              HearingEntity hearingEntity, OffsetDateTime eventTimestamp) {
 
         EventEntity event = new EventEntity();
         event.setHearingEntities(List.of(hearingEntity));
@@ -42,6 +50,37 @@ public class CommonTestDataUtil {
         event.setTimestamp(eventTimestamp);
 
         return event;
+    }
+
+    public static EventEntity createEventWith(String eventName, String eventText,
+                                              HearingEntity hearingEntity,
+                                              EventHandlerEntity eventHandlerEntity) {
+
+        return createEventWith(eventName, eventText, hearingEntity,
+                                        eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00"));
+    }
+
+    public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity,
+                                              EventHandlerEntity eventHandlerEntity, OffsetDateTime eventTimestamp) {
+
+        EventEntity event = new EventEntity();
+        event.setHearingEntities(List.of(hearingEntity));
+        event.setCourtroom(hearingEntity.getCourtroom());
+        event.setEventName(eventName);
+        event.setEventText(eventText);
+        event.setId(1);
+        event.setTimestamp(eventTimestamp);
+        event.setEventType(eventHandlerEntity);
+
+        return event;
+    }
+
+    public EventHandlerEntity createEventHandlerWith(String eventName, String type, String subType) {
+        EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
+        eventHandlerEntity.setEventName(eventName);
+        eventHandlerEntity.setType(type);
+        eventHandlerEntity.setSubType(subType);
+        return eventHandlerEntity;
     }
 
 
@@ -207,4 +246,27 @@ public class CommonTestDataUtil {
         request.setDefenders(Lists.newArrayList("UpdateDefender1"));
         return request;
     }
+
+    public DailyListEntity createDailyList(LocalTime time, String source, String filelocation) throws IOException {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
+        dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(filelocation)));
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setSource(source);
+        return dailyListEntity;
+    }
+
+
+    public DailyListEntity createInvalidDailyList(LocalTime time) {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
+        dailyListEntity.setContent("blah");
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setSource(String.valueOf(SourceType.XHB));
+        return dailyListEntity;
+    }
+
+
 }

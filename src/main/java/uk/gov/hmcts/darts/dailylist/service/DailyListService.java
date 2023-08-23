@@ -6,4 +6,6 @@ public interface DailyListService {
     void processIncomingDailyList(DailyListPostRequest postRequest);
 
     void runHouseKeeping();
+
+    void runHouseKeepingNow();
 }
