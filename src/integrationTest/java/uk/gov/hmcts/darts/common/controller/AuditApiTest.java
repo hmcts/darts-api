@@ -163,8 +163,9 @@ class AuditApiTest {
         MockHttpServletRequestBuilder requestBuilder = get("/audit/search")
             .queryParam("wrong_query_param", "value")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.detail", is("All filters were empty. ")));
+        mockMvc.perform(requestBuilder).andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title", is("All filters were empty.")));
+
     }
 
     @ParameterizedTest
@@ -173,7 +174,7 @@ class AuditApiTest {
         MockHttpServletRequestBuilder requestBuilder = get("/audit/search")
             .queryParam(dateFilter, date)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
-        mockMvc.perform(requestBuilder).andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.detail", is("When using date filters, both must be provided. ")));
+        mockMvc.perform(requestBuilder).andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.title", is("When using date filters, both must be provided.")));
     }
 }
