@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.common.entity;
+package uk.gov.hmcts.darts.common.entity.base;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;

@@ -12,8 +12,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -23,7 +22,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class DailyListEntity extends VersionedEntity {
+public class DailyListEntity extends CreatedModifiedBaseEntity {
 
     public static final String ID = "dal_id";
     public static final String COURTHOUSE_ID = "cth_id";
@@ -40,7 +39,8 @@ public class DailyListEntity extends VersionedEntity {
     public static final String LEGACY_VERSION_LABEL = "version_label";
     public static final String SUPERSEDED = "superseded";
     public static final String TABLE_NAME = "daily_list";
-    public static final String DAILY_LIST_CONTENT = "daily_list_content";
+    public static final String DAILY_LIST_CONTENT_JSON = "daily_list_content_json";
+    public static final String DAILY_LIST_CONTENT_XML = "daily_list_content_xml";
 
     @Id
     @Column(name = ID)
@@ -76,21 +76,14 @@ public class DailyListEntity extends VersionedEntity {
     @Column(name = DAILY_LIST_SOURCE)
     private String source;
 
-    @Column(name = DAILY_LIST_CONTENT)
+    @Column(name = DAILY_LIST_CONTENT_JSON)
     private String content;
+
+    @Column(name = DAILY_LIST_CONTENT_XML)
+    private String xmlContent;
 
     @Column(name = LEGACY_VERSION_LABEL)
     private String legacyVersionLabel;
 
-    @Column(name = SUPERSEDED)
-    private Boolean superseded;
-
-    @CreationTimestamp
-    @Column(name = CREATED_DATE_TIME)
-    private OffsetDateTime createdDate;
-
-    @UpdateTimestamp
-    @Column(name = LAST_UPDATED_DATE_TIME)
-    private OffsetDateTime modifiedDateTime;
 
 }

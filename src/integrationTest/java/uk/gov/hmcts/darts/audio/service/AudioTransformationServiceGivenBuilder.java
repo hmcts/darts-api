@@ -18,8 +18,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-import static uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomAtCourthouse;

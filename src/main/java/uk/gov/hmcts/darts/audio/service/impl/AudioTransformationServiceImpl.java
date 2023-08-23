@@ -49,8 +49,8 @@ import java.util.concurrent.ExecutionException;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
-import static uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor

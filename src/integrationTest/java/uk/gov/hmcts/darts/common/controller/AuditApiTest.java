@@ -33,7 +33,7 @@ class AuditApiTest {
     public static final int EVENT_ID = 998;
     public static final int CASE_ID = 2;
     public static final int ID = 999;
-    private static final int USER_ID = 4;
+    private static final int USER_ID = -1;
     @Autowired
     private transient MockMvc mockMvc;
 

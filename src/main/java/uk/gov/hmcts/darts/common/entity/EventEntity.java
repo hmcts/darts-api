@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class EventEntity extends VersionedEntity {
+public class EventEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "eve_id")
@@ -61,9 +62,6 @@ public class EventEntity extends VersionedEntity {
 
     @Column(name = "message_id")
     private String messageId;
-
-    @Column(name = "superseded")
-    private Boolean superseded;
 
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",

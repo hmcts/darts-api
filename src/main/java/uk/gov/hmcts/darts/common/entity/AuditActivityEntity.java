@@ -12,18 +12,19 @@ import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
-@Table(name = "external_location_type")
+@Table(name = "audit_activity")
 @Getter
 @Setter
-public class ExternalLocationTypeEntity extends CreatedModifiedBaseEntity {
-
+public class AuditActivityEntity extends CreatedModifiedBaseEntity {
     @Id
-    @Column(name = "elt_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "elt_gen")
-    @SequenceGenerator(name = "elt_gen", sequenceName = "elt_seq", allocationSize = 1)
+    @Column(name = "aua_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "aua_gen")
+    @SequenceGenerator(name = "aua_gen", sequenceName = "aua_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "elt_description")
-    private String description;
+    @Column(name = "activity_name")
+    private String name;
 
+    @Column(name = "activity_description")
+    private String description;
 }

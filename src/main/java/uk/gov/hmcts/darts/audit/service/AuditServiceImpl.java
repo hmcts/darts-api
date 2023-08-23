@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,8 @@ import java.util.List;
 @Slf4j
 public class AuditServiceImpl implements AuditService {
 
-    private static final String CASE_ID = "caseId";
-    private static final String CREATED_TS = "createdAt";
-    private static final String EVENT_ID = "eventId";
     @PersistenceContext
     private EntityManager entityManager;
-
 
     @Override
     public List<AuditEntity> search(AuditSearchQuery auditSearchQuery) {
@@ -46,17 +43,19 @@ public class AuditServiceImpl implements AuditService {
     private List<Predicate> getPredicates(AuditSearchQuery auditSearchQuery, CriteriaBuilder criteriaBuilder, Root<AuditEntity> root) {
         List<Predicate> predicates = new ArrayList<>();
         if (auditSearchQuery.getCaseId() != null) {
-            predicates.add(criteriaBuilder.equal(root.get(CASE_ID), auditSearchQuery.getCaseId()));
+
+            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.caseId), auditSearchQuery.getCaseId()));
         }
 
         if (auditSearchQuery.getFromDate() != null && auditSearchQuery.getToDate() != null) {
-            predicates.add(criteriaBuilder.between(root.get(CREATED_TS), auditSearchQuery.getFromDate(),
+            predicates.add(criteriaBuilder.between(root.get(AuditEntity_.createdDateTime),
+                                                   auditSearchQuery.getFromDate(),
                                                    auditSearchQuery.getToDate()
             ));
         }
 
         if (auditSearchQuery.getEventId() != null) {
-            predicates.add(criteriaBuilder.equal(root.get(EVENT_ID), auditSearchQuery.getEventId()));
+            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.eventId), auditSearchQuery.getEventId()));
         }
         return predicates;
     }

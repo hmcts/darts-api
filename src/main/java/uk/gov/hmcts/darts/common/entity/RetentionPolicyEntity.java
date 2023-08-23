@@ -12,24 +12,24 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
+
 @Entity
-@Table(name = JudgeEntity.TABLE_NAME)
+@Table(name = "retention_policy")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
-public class JudgeEntity extends CreatedModifiedBaseEntity {
-
-    public static final String TABLE_NAME = "judge";
-    public static final String ID = "jud_id";
-    public static final String JUDGE_NAME = "judge_name";
+@EqualsAndHashCode(callSuper = false)
+public class RetentionPolicyEntity extends CreatedModifiedBaseEntity {
 
     @Id
-    @Column(name = ID)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "jud_gen")
-    @SequenceGenerator(name = "jud_gen", sequenceName = "jud_seq", allocationSize = 1)
+    @Column(name = "rtp_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "rtp_gen")
+    @SequenceGenerator(name = "rtp_gen", sequenceName = "rtp_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = JUDGE_NAME)
+    @Column(name = "policy_name")
     private String name;
+
+    @Column(name = "retention_period")
+    private int retentionPeriod;
 
 }

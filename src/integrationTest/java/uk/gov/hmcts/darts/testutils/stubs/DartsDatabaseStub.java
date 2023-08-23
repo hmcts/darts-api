@@ -16,13 +16,13 @@ import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.DefenceRepository;
 import uk.gov.hmcts.darts.common.repository.DefendantRepository;
@@ -121,8 +121,8 @@ public class DartsDatabaseStub {
 
     public Optional<CourtCaseEntity> findByCaseByCaseNumberAndCourtHouseName(String someCaseNumber, String someCourthouse) {
         return caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-                someCaseNumber,
-                someCourthouse
+            someCaseNumber,
+            someCourthouse
         );
     }
 
@@ -148,11 +148,11 @@ public class DartsDatabaseStub {
 
     @Transactional
     public HearingEntity givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-            String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
+        String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
         var caseEntity = givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom(
-                caseNumber,
-                courthouseName,
-                courtroomName
+            caseNumber,
+            courthouseName,
+            courtroomName
         );
 
         var courtroomEntity = courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName);
@@ -177,8 +177,8 @@ public class DartsDatabaseStub {
     public CourtCaseEntity createCaseUnlessExists(String caseNumber, String courthouseName) {
 
         Optional<CourtCaseEntity> caseEntity = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-                caseNumber,
-                courthouseName
+            caseNumber,
+            courthouseName
         );
 
         return caseEntity.orElseGet(() -> createCase(caseNumber, courthouseName));
@@ -198,7 +198,7 @@ public class DartsDatabaseStub {
     public CourthouseEntity createCourthouseUnlessExists(String courthouseName) {
 
         Optional<CourthouseEntity> courthouseEntityOptional = courthouseRepository.findByCourthouseNameIgnoreCase(
-                courthouseName);
+            courthouseName);
 
         CourthouseEntity courthouseEntity;
 
@@ -226,11 +226,11 @@ public class DartsDatabaseStub {
     @Transactional
     public HearingEntity hasSomeHearing() {
         return hearingRepository.saveAndFlush(
-                createHearingWith(
-                        createCaseWithCaseNumber("c1"),
-                        createCourtRoomWithNameAtCourthouse(
-                                createCourthouse("NEWCASTLE"), "r1"), now()
-                ));
+            createHearingWith(
+                createCaseWithCaseNumber("c1"),
+                createCourtRoomWithNameAtCourthouse(
+                    createCourthouse("NEWCASTLE"), "r1"), now()
+            ));
     }
 
     public CourthouseEntity createCourthouseWithoutCourtrooms(String courthouseName) {
@@ -254,11 +254,19 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void createDailyLists(CourthouseEntity courthouseEntity) throws IOException {
-        DailyListEntity xhbDailyList = DailyListTestData.createDailyList(LocalTime.of(13, 0), String.valueOf(SourceType.XHB),
-                courthouseEntity, "tests/dailyListProcessorTest/dailyListXHB.json");
+        DailyListEntity xhbDailyList = DailyListTestData.createDailyList(
+            LocalTime.of(13, 0),
+            String.valueOf(SourceType.XHB),
+            courthouseEntity,
+            "tests/dailyListProcessorTest/dailyListXHB.json"
+        );
 
-        DailyListEntity cppDailyList = DailyListTestData.createDailyList(LocalTime.of(13, 0),
-                String.valueOf(SourceType.CPP), courthouseEntity, "tests/dailyListProcessorTest/dailyListCPP.json");
+        DailyListEntity cppDailyList = DailyListTestData.createDailyList(
+            LocalTime.of(13, 0),
+            String.valueOf(SourceType.CPP),
+            courthouseEntity,
+            "tests/dailyListProcessorTest/dailyListCPP.json"
+        );
 
         dailyListRepository.saveAllAndFlush(List.of(xhbDailyList, cppDailyList));
     }
@@ -289,16 +297,16 @@ public class DartsDatabaseStub {
 
         var caseEntity = save(createCaseWithCaseNumber("2"));
         var courtroomEntity = save(
-                createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
+            createCourtRoomWithNameAtCourthouse(createCourthouse("NEWCASTLE"), "Int Test Courtroom 2"));
         var hearingEntityWithMediaRequest1 = save(createHearingWith(caseEntity, courtroomEntity));
 
         return save(
-                AudioTestDataUtil.createMediaRequest(
-                        hearingEntityWithMediaRequest1,
-                        -2,
-                        OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                        OffsetDateTime.parse("2023-06-26T13:45:00Z")
-                ));
+            AudioTestDataUtil.createMediaRequest(
+                hearingEntityWithMediaRequest1,
+                -2,
+                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-06-26T13:45:00Z")
+            ));
     }
 
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {

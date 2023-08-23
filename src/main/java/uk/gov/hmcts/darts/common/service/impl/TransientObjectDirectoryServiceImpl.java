@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setChecksum(null);
         transientObjectDirectoryEntity.setTransferAttempts(null);
-        transientObjectDirectoryEntity.setModifiedBy(new UserAccountEntity());
+        transientObjectDirectoryEntity.setLastModifiedBy(new UserAccountEntity());
 
         return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
     }

@@ -2,12 +2,12 @@ package uk.gov.hmcts.darts.testutils.data;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 
 import java.util.UUID;
 
@@ -43,7 +43,7 @@ public class ExternalObjectDirectoryTestData {
         externalObjectDirectory.setTransferAttempts(null);
 
         UserAccountEntity user = new UserAccountEntity();
-        externalObjectDirectory.setModifiedBy(user);
+        externalObjectDirectory.setLastModifiedBy(user);
 
         return externalObjectDirectory;
     }

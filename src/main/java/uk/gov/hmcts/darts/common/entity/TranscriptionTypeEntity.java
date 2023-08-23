@@ -7,23 +7,24 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
-@Table(name = "external_location_type")
+@Table(name = "transcription_type")
 @Getter
 @Setter
-public class ExternalLocationTypeEntity extends CreatedModifiedBaseEntity {
+@EqualsAndHashCode(callSuper = false)
+public class TranscriptionTypeEntity extends CreatedModifiedBaseEntity {
 
     @Id
-    @Column(name = "elt_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "elt_gen")
-    @SequenceGenerator(name = "elt_gen", sequenceName = "elt_seq", allocationSize = 1)
+    @Column(name = "trt_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trt_gen")
+    @SequenceGenerator(name = "trt_gen", sequenceName = "trt_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "elt_description")
+    @Column(name = "description")
     private String description;
-
 }

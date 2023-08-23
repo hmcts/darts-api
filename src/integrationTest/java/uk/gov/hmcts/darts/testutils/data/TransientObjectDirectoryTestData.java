@@ -12,14 +12,14 @@ import java.util.UUID;
 public class TransientObjectDirectoryTestData {
 
     public static TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(MediaRequestEntity mediaRequestEntity,
-                                                                        ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
-                                                                        UUID externalLocation) {
+                                                                                      ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                                      UUID externalLocation) {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
-        transientObjectDirectoryEntity.setModifiedBy(new UserAccountEntity());
+        transientObjectDirectoryEntity.setLastModifiedBy(new UserAccountEntity());
         transientObjectDirectoryEntity.setStatus(objectDirectoryStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
-        transientObjectDirectoryEntity.setModifiedTimestamp(OffsetDateTime.now());
+        transientObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.now());
 
         return transientObjectDirectoryEntity;
     }

@@ -10,10 +10,8 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +22,7 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @Table(name = "courthouse")
 @Getter
 @Setter
-public class CourthouseEntity {
+public class CourthouseEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "cth_id")
@@ -40,14 +38,6 @@ public class CourthouseEntity {
 
     @OneToMany(mappedBy = "courthouse", cascade = {PERSIST, MERGE})
     private List<CourtroomEntity> courtrooms;
-
-    @CreationTimestamp
-    @Column(name = "created_ts")
-    private OffsetDateTime createdDateTime;
-
-    @UpdateTimestamp
-    @Column(name = "last_modified_ts")
-    private OffsetDateTime lastModifiedDateTime;
 
     public void addCourtRoom(CourtroomEntity courtroom) {
         if (courtrooms == null) {

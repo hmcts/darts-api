@@ -196,7 +196,7 @@ public class CommonTestDataUtil {
     public List<TranscriptionEntity> createTranscriptionList() {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCompany("Transcription company");
-        transcription.setTranscriptionTypeId(1);
+        transcription.setTranscriptionType(1);
         return List.of(transcription);
     }
 

@@ -9,33 +9,27 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.OffsetDateTime;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = "audit")
 @Getter
 @Setter
-public class AuditEntity {
+public class AuditEntity extends CreatedModifiedBaseEntity {
     @Id
-    @Column(name = "id")
+    @Column(name = "aud_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "audit_gen")
     @SequenceGenerator(name = "audit_gen", sequenceName = "audit_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "case_id")
+    @Column(name = "cas_id")
     private Integer caseId;
 
-    @Column(name = "audit_activity_id")
+    @Column(name = "aua_id")
     private Integer eventId;
 
-    @Column(name = "user_id")
+    @Column(name = "usr_id")
     private Integer userId;
-
-    @CreationTimestamp
-    @Column(name = "created_ts")
-    private OffsetDateTime createdAt;
 
     @Column(name = "application_server")
     private String applicationServer;
