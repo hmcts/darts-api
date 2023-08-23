@@ -31,7 +31,6 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -54,32 +53,43 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     @Override
     @Transactional
     public void processAllDailyLists(LocalDate date) {
-        Arrays.stream(SourceType.values()).forEach(sourceType -> processDailyListForSourceType(date, sourceType));
+        processAllDailyListsForDateAndCourthouses(LocalDate.now(), courthouseRepository.findAll());
     }
 
-    private void processDailyListForSourceType(LocalDate date, SourceType sourceType) {
-        List<CourthouseEntity> allCourthouses = courthouseRepository.findAll();
-        for (CourthouseEntity courthouse : allCourthouses) {
-            List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                courthouse.getId(),
-                String.valueOf(JobStatusType.NEW),
-                date, String.valueOf(sourceType)
-            );
+    @Override
+    @Transactional
+    public void processAllDailyListForCourthouse(Integer courthouseId) {
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findById(courthouseId);
+        foundCourthouse.ifPresent(courthouseEntity -> processAllDailyListsForDateAndCourthouses(
+            LocalDate.now(),
+            List.of(courthouseEntity)
+        ));
+    }
 
-            // Daily lists are being ordered descending by date so first item will be the most recent version
-            if (!dailyLists.isEmpty()) {
-                try {
-                    processDailyList(dailyLists.get(0));
-                } catch (JsonProcessingException e) {
-                    dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
-                    log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}",
-                              courthouse, dailyLists.get(0).getId(), e
-                    );
+    private void processAllDailyListsForDateAndCourthouses(LocalDate date, List<CourthouseEntity> courthouseEntityList) {
+        for (CourthouseEntity courthouse : courthouseEntityList) {
+            for (SourceType source : SourceType.values()) {
+                List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                    courthouse.getId(),
+                    String.valueOf(JobStatusType.NEW),
+                    date, String.valueOf(source)
+                );
+                // Daily lists are being ordered descending by date so first item will be the most recent version
+                if (!dailyLists.isEmpty()) {
+                    try {
+                        processDailyList(dailyLists.get(0));
+                    } catch (JsonProcessingException e) {
+                        dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
+                        log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}",
+                                  courthouse, dailyLists.get(0).getId(), e
+                        );
+                    }
+                }
+                if (dailyLists.size() > 1) {
+                    ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
                 }
             }
-            if (dailyLists.size() > 1) {
-                ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
-            }
+
         }
     }
 

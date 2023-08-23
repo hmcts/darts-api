@@ -101,7 +101,30 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+  /dailylists/run:
+    post:
+      tags:
+        - DailyLists
+      summary: Runs dailylist processing task asynchronously.
+      parameters:
+        - in: query
+          name: courthouse_id
+          schema:
+            type: integer
+          description: "Internal courthouse id"
+          required: false
+      description: |-
+        Asynchrounously start processing dailylists for all courthouses.
+      responses:
+        '200':
+          description: OK
 
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 components:
   examples:
     OperationName_HappyScenario:
