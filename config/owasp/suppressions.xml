@@ -26,9 +26,21 @@
   </suppress>
 
   <suppress until="2023-09-14">
-    <notes>The exploitation depends on the structure of the target LDAP directory, as well as what kind of errors are exposed to the user.</notes>
+    <notes>The exploitation depends on the structure of the target LDAP directory, as well as what kind of errors are
+      exposed to the user.
+    </notes>
     <packageUrl regex="true">pkg:maven/org.bouncycastle/bcprov-jdk15on@1.69</packageUrl>
     <vulnerabilityName>CVE-2023-33201</vulnerabilityName>
+  </suppress>
+
+  <suppress until="2023-09-14">
+    <notes>Latest Release: pgJDBC v42.6.0 17 March 2023
+      - https://www.cve.org/CVERecord?id=CVE-2020-21469
+      An issue was discovered in PostgreSQL 12.2 allows attackers to cause a denial of service via repeatedly sending
+      SIGHUP signals.
+    </notes>
+    <packageUrl regex="true">pkg:maven/org.postgresql/postgresql@42.6.0</packageUrl>
+    <vulnerabilityName>CVE-2020-21469</vulnerabilityName>
   </suppress>
   <!--End of temporary suppression section -->
 </suppressions>
