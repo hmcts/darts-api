@@ -138,6 +138,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
+    @Order(7)
     void shouldDeleteAudioRequestById() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));

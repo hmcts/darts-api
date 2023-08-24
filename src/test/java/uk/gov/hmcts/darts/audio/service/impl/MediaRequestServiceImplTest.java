@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
@@ -105,7 +104,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    public void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() {
+    void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() {
         var mediaRequestId = 1;
         UUID blobId = UUID.randomUUID();
 
@@ -123,7 +122,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    public void whenTransientObjectHasNoExternalLocationValueAvoidDeletingFromBlobStorage() {
+    void whenTransientObjectHasNoExternalLocationValueAvoidDeletingFromBlobStorage() {
         var mediaRequestId = 1;
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(null);
@@ -139,7 +138,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    public void whenNoAudioIsPresentOnlyDeleteAudioRequest() {
+    void whenNoAudioIsPresentOnlyDeleteAudioRequest() {
         var mediaRequestId = 1;
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.empty());

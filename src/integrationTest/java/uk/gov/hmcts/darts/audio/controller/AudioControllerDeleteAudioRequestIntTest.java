@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -8,21 +7,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
-import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
-import uk.gov.hmcts.darts.audio.model.AudioRequestType;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.TransientObjectDirectoryTestData;
 
 import java.net.URI;
-import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
