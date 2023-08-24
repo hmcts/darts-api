@@ -192,7 +192,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     }
 
     @Test
-    void getYourAudioShouldReturnEmptyArrayInResponseBodyWhenNoWhenNoUserAccountExists() throws Exception {
+    void getYourAudioShouldReturnEmptyArrayInResponseBodyWhenNoUserAccountExists() throws Exception {
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
             .header(
