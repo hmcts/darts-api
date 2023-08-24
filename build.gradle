@@ -344,7 +344,7 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.21.1'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.21.2'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.5.1'
 
   //database
