@@ -58,12 +58,11 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     @Override
     @Transactional
-    public void processAllDailyListForCourthouse(Integer courthouseId) {
-        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findById(courthouseId);
-        foundCourthouse.ifPresent(courthouseEntity -> processAllDailyListsForDateAndCourthouses(
+    public void processAllDailyListForCourthouse(CourthouseEntity courthouseEntity) {
+        processAllDailyListsForDateAndCourthouses(
             LocalDate.now(),
             List.of(courthouseEntity)
-        ));
+        );
     }
 
     private void processAllDailyListsForDateAndCourthouses(LocalDate date, List<CourthouseEntity> courthouseEntityList) {
