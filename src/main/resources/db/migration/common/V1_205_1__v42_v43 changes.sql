@@ -82,10 +82,10 @@ ALTER TABLE defendant ADD COLUMN created_by                  INTEGER            
 ALTER TABLE defendant ADD COLUMN last_modified_ts            TIMESTAMP WITH TIME ZONE     ;
 ALTER TABLE defendant ADD COLUMN last_modified_by            INTEGER                       ;
 
-ALTER TABLE device_register ADD COLUMN created_ts                  TIMESTAMP WITH TIME ZONE      ;
-ALTER TABLE device_register ADD COLUMN created_by                  INTEGER                       ;
-ALTER TABLE device_register ADD COLUMN last_modified_ts            TIMESTAMP WITH TIME ZONE     ;
-ALTER TABLE device_register ADD COLUMN last_modified_by            INTEGER                       ;
+ALTER TABLE node_register ADD COLUMN created_ts                  TIMESTAMP WITH TIME ZONE      ;
+ALTER TABLE node_register ADD COLUMN created_by                  INTEGER                       ;
+ALTER TABLE node_register ADD COLUMN last_modified_ts            TIMESTAMP WITH TIME ZONE     ;
+ALTER TABLE node_register ADD COLUMN last_modified_by            INTEGER                       ;
 
 ALTER TABLE event DROP COLUMN superseded;
 ALTER TABLE event DROP COLUMN version;
