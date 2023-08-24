@@ -41,10 +41,10 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "rtp_id")
     private RetentionPolicyEntity retentionPolicy;
 
-    @JoinColumn(name = "retain_until_ts")
+    @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntil;
 
-    @JoinColumn(name = "manual_override")
+    @Column(name = "manual_override")
     private boolean manualOverride;
 
 }

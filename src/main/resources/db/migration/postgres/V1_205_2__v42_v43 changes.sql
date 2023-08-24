@@ -17,7 +17,7 @@ ALTER TABLE transcription_urgency                 ADD PRIMARY KEY USING INDEX tr
 
 
 CREATE UNIQUE INDEX courthouse_name_unique_idx on courthouse (UPPER(courthouse_name));
-CREATE UNIQUE INDEX courtroom_name_unique_idx on courtroom (UPPER(courtroom_name));
+CREATE UNIQUE INDEX courtroom_name_unique_idx on courtroom (cth_id, UPPER(courtroom_name));
 
 
 ALTER TABLE external_service_auth_token
