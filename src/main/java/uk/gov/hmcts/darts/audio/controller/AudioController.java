@@ -38,6 +38,12 @@ public class AudioController implements AudioApi {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    public ResponseEntity<Void> deleteAudioRequest(Integer audioRequestId) {
+
+        mediaRequestService.deleteAudioRequest(audioRequestId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @Override
     public ResponseEntity<Resource> download(Integer audioRequestId) {
         InputStream audioFileStream = audioService.download(audioRequestId);

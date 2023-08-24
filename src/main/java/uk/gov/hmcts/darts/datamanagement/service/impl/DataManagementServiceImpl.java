@@ -38,4 +38,12 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         return uniqueBlobId;
     }
+
+    @Override
+    public void deleteBlobData(String containerName, UUID blobId) {
+
+        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
+        BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
+        blobClient.delete();
+    }
 }

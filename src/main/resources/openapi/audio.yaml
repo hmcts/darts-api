@@ -29,6 +29,31 @@ paths:
             schema:
               $ref: '#/components/schemas/AudioRequestDetails'
         description: Audio Request item to add
+    delete:
+      tags:
+        - Audio
+      summary: Delete Audio Request and Processed Audio
+      description: Delete Audio Request and Processed Audio
+      operationId: deleteAudioRequest
+      parameters:
+        - in: query
+          name: audioRequestId
+          required: true
+          schema:
+            $ref: '#/components/schemas/AudioRequestId'
+      responses:
+        '200':
+          description: audio request has been deleted
+        '500':
+          description: The requested data cannot be located
+          content:
+            application/json+problem:
+              schema:
+                $ref: ./problem.yaml
+              example:
+                type: AUDIO_101
+                title: The requested data cannot be located
+                status: 500
 
   /audio/download:
     get:

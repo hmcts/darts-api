@@ -36,6 +36,11 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         return uuid;
     }
 
+    @Override
+    public void deleteBlobData(String containerName, UUID blobId) {
+        log.info("Delete blob data method executed");
+    }
+
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"
                      + " you should ask questions! ###");
