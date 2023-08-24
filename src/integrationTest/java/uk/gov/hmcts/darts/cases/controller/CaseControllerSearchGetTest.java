@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -23,7 +24,9 @@ import java.util.Arrays;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.CASE_NUMBER;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetSearchCasesParams.DATE_TO;
@@ -143,6 +146,25 @@ class CaseControllerSearchGetTest extends IntegrationBase {
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponse.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchGetCaseNumberSizeValidation() throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL)
+            .queryParam(CASE_NUMBER, "THISCASENUMBERISGREATERTHAN20CHARACTERS")
+            .queryParam(COURTROOM, "1")
+            .queryParam(DATE_TO, "2023-05-20");
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        System.out.println(actualResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponseCaseNumberLongerThan20Characters.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
     }
 
 }

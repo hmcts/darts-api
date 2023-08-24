@@ -1,11 +1,6 @@
 {
-  "violations": [
-    {
-      "field": "caseNumber",
-      "message": "must not be null"
-    }
-  ],
-  "type": "https://zalando.github.io/problem/constraint-violation",
+  "type": "COMMON_100",
+  "title": "Provided courthouse does not exist",
   "status": 400,
-  "title": "Constraint Violation"
+  "detail": "Courthouse 'courthouse' not found."
 }
