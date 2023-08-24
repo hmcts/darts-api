@@ -114,11 +114,20 @@ paths:
           description: "Internal courthouse id"
           required: false
       description: |-
-        Asynchrounously start processing dailylists for all courthouses.
+        Asynchronously start processing dailylists for all courthouses.
       responses:
         '200':
           description: OK
-
+        '400':
+          description: Provided id is does not exist.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "COMMON_100"
+                title: "Provided courthouse does not exist"
+                status: 400
         '500':
           description: Internal Server Error
           content:
