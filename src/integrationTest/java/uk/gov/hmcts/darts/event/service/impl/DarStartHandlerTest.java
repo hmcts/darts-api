@@ -15,7 +15,6 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouseWithRoom;
 
 class DarStartHandlerTest extends IntegrationBase {
 
@@ -43,9 +42,7 @@ class DarStartHandlerTest extends IntegrationBase {
 
     @Test
     void shouldNotifyDarStartRecordingForHearingStarted() {
-        var courthouseEntity = createCourthouseWithRoom(SOME_COURTHOUSE, SOME_ROOM);
-        dartsDatabase.save(courthouseEntity);
-
+        dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
         dartsGateway.darNotificationReturnsSuccess();
 
         List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(

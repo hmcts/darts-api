@@ -12,13 +12,14 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = DefendantEntity.TABLE_NAME)
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class DefendantEntity {
+public class DefendantEntity extends CreatedModifiedBaseEntity {
 
     public static final String TABLE_NAME = "defendant";
     public static final String ID = "dfd_id";

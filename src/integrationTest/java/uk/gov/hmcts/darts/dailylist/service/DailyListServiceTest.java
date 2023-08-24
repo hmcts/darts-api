@@ -127,8 +127,8 @@ class DailyListServiceTest extends IntegrationBase {
 
     private void checkExpectedResponse(DailyListEntity dailyListEntity, String expectedResponseLocation) {
         try {
-            dailyListEntity.setCreatedDate(null);
-            dailyListEntity.setModifiedDateTime(null);
+            dailyListEntity.setCreatedDateTime(null);
+            dailyListEntity.setLastModifiedDateTime(null);
             dailyListEntity.setId(null);
             dailyListEntity.getCourthouse().setCourtrooms(emptyList());
             dailyListEntity.getCourthouse().setId(null);

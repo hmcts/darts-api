@@ -18,6 +18,7 @@ import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,7 +32,7 @@ import static java.util.Objects.isNull;
 @Table(name = "hearing")
 @Getter
 @Setter
-public class HearingEntity {
+public class HearingEntity extends CreatedModifiedBaseEntity {
 
     public static final String HEA_ID = "hea_id";
     @Id

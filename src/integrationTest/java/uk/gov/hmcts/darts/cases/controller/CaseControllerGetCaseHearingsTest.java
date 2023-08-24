@@ -97,19 +97,21 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andExpect(MockMvcResultMatchers.jsonPath(
-            "$[0]").doesNotExist());
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andExpect(
+            MockMvcResultMatchers.jsonPath(
+                "$[0]").doesNotExist());
 
     }
 
     @Test
     void casesSearchEmptyHearingListCaseIdExists() throws Exception {
 
-        CourtCaseEntity courtCase = dartsDatabase.createCaseUnlessExists("25", "Test");
+        CourtCaseEntity courtCase = dartsDatabase.createCase("25", "Test");
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.case_id").doesNotExist());
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath(
+            "$.case_id").doesNotExist());
 
     }
 

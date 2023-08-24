@@ -23,9 +23,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_CLERK;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_MANAGER;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_CLERK;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})

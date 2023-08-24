@@ -9,12 +9,13 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = AutomatedTaskEntity.TABLE_NAME)
 @Getter
 @Setter
-public class AutomatedTaskEntity {
+public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
 
     public static final String TABLE_NAME = "automated_task";
     public static final String AUTOMATED_TASK_ID = "aut_id";

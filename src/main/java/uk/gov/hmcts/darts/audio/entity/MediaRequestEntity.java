@@ -14,12 +14,11 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -27,7 +26,7 @@ import java.time.OffsetDateTime;
 @Table(name = MediaRequestEntity.TABLE_NAME)
 @Getter
 @Setter
-public class MediaRequestEntity {
+public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     public static final String REQUEST_ID = "mer_id";
     public static final String HEARING_ID = "hea_id";
@@ -40,8 +39,6 @@ public class MediaRequestEntity {
     public static final String OUTPUT_FORMAT = "output_format";
     public static final String OUTPUT_FILENAME = "output_filename";
     public static final String LAST_ACCESSED_DATE_TIME = "last_accessed_ts";
-    public static final String CREATED_DATE_TIME = "created_ts";
-    public static final String LAST_MODIFIED_TS = "last_modified_ts";
     public static final String TABLE_NAME = "media_request";
 
     @Id
@@ -84,13 +81,6 @@ public class MediaRequestEntity {
     @Column(name = LAST_ACCESSED_DATE_TIME)
     private OffsetDateTime lastAccessedDateTime;
 
-    @CreationTimestamp
-    @Column(name = CREATED_DATE_TIME)
-    private OffsetDateTime createdDateTime;
-
-    @UpdateTimestamp
-    @Column(name = LAST_MODIFIED_TS)
-    private OffsetDateTime lastUpdated;
 
 }
 

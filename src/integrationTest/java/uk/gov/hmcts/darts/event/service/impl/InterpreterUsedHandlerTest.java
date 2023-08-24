@@ -15,9 +15,7 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouseWithRoom;
 
 class InterpreterUsedHandlerTest extends IntegrationBase {
 
@@ -47,12 +45,7 @@ class InterpreterUsedHandlerTest extends IntegrationBase {
 
     @Test
     void handlesScenarioWhereCourtCaseAndHearingDontExist() {
-        dartsDatabase.save(
-            createCaseAtCourthouse(
-                SOME_CASE_NUMBER,
-                createCourthouseWithRoom(SOME_COURTHOUSE, SOME_ROOM)
-            ));
-
+        dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
         dartsGateway.darNotificationReturnsSuccess();
 
         eventDispatcher.receive(someMinimalDartsEvent()

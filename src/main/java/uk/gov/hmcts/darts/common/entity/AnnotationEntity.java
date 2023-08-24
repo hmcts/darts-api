@@ -14,6 +14,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -22,7 +23,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class AnnotationEntity extends VersionedEntity {
+public class AnnotationEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "ann_id")
@@ -49,7 +50,4 @@ public class AnnotationEntity extends VersionedEntity {
 
     @Column(name = "version_label")
     private String legacyVersionLabel;
-
-    @Column(name = "superseded")
-    private Boolean superseded;
 }
