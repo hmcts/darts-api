@@ -50,7 +50,7 @@ class AuditApiTest {
     protected DartsDatabaseStub dartsDatabaseStub;
 
     @BeforeEach
-    private void before() {
+    public void before() {
         CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourthouse", "TestCourtCase");
         AuditStub auditStub = dartsDatabaseStub.getAuditStub();
         UserAccountStub userAccountStub = dartsDatabaseStub.getUserAccountStub();
@@ -67,13 +67,6 @@ class AuditApiTest {
         auditEntity.setCreatedDateTime(OffsetDateTime.of(2023, 6, 13, 8, 13, 9, 0, ZoneOffset.UTC));
         dartsDatabaseStub.getAuditRepository().saveAndFlush(auditEntity);
 
-    }
-
-    private static Stream<Arguments> existingIdTypeAndId() {
-        return Stream.of(
-            arguments("case_id", CASE_ID),
-            arguments("event_id", EVENT_ID)
-        );
     }
 
     private static Stream<Arguments> nonExistingId() {

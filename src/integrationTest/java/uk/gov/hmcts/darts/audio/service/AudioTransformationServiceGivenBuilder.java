@@ -20,8 +20,6 @@ import java.util.UUID;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
 
@@ -83,12 +81,5 @@ public class AudioTransformationServiceGivenBuilder {
             UUID.randomUUID()
         );
         return dartsDatabase.save(externalObjectDirectoryEntity1);
-    }
-
-    private CourtroomEntity getCourtroomAtNewcastle() {
-        return dartsDatabase.save(
-            createCourtRoomAtCourthouse(
-                createCourthouse("NEWCASTLE")));
-
     }
 }
