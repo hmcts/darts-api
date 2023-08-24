@@ -31,6 +31,11 @@ data "azurerm_key_vault" "key_vault" {
   resource_group_name = local.rg_name
 }
 
+resource "azurerm_key_vault_secret" "POSTGRES-CONNECTION-STRING" {
+  name         = "api-POSTGRES-CONNECTION-STRING"
+  value        = "postgres://${module.postgresql_flexible.username}:${module.postgresql_flexible.password}@${module.postgresql_flexible.fqdn}:${local.db_port}/${local.db_name}"
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+}
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
   name         = "api-POSTGRES-USER"
