@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.entity.base;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MappedSuperclass;
@@ -21,15 +22,15 @@ public class CreatedModifiedBaseEntity {
     @Column(name = "created_ts")
     private OffsetDateTime createdDateTime;
 
-    @ManyToOne
-    @JoinColumn(name = "created_by", referencedColumnName = "usr_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
     private UserAccountEntity createdBy;
 
     @UpdateTimestamp
     @Column(name = "last_modified_ts")
     private OffsetDateTime lastModifiedDateTime;
 
-    @ManyToOne
-    @JoinColumn(name = "last_modified_by", referencedColumnName = "usr_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_modified_by")
     private UserAccountEntity lastModifiedBy;
 }
