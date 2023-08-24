@@ -7,16 +7,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +49,10 @@ class MediaRequestServiceImplTest {
     private UserAccountRepository mockUserAccountRepository;
     @Mock
     private MediaRequestRepository mockMediaRequestRepository;
+    @Mock
+    private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+    @Mock
+    private DataManagementApiImpl dataManagementApi;
 
     private HearingEntity mockHearingEntity;
     private MediaRequestEntity mockMediaRequestEntity;
@@ -88,6 +102,53 @@ class MediaRequestServiceImplTest {
         verify(mockHearingRepository).getReferenceById(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
+    }
+
+    @Test
+    public void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() {
+        var mediaRequestId = 1;
+        UUID blobId = UUID.randomUUID();
+
+        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
+        transientObjectDirectoryEntity.setExternalLocation(blobId);
+
+        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+
+        mediaRequestService.deleteAudioRequest(mediaRequestId);
+
+        verify(mockMediaRequestRepository, times(1)).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi, times(1)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(transientObjectDirectoryRepository, times(1)).deleteById(any());
+    }
+
+    @Test
+    public void whenTransientObjectHasNoExternalLocationValueAvoidDeletingFromBlobStorage() {
+        var mediaRequestId = 1;
+        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
+        transientObjectDirectoryEntity.setExternalLocation(null);
+
+        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+
+        mediaRequestService.deleteAudioRequest(mediaRequestId);
+
+        verify(mockMediaRequestRepository, times(1)).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(transientObjectDirectoryRepository, times(1)).deleteById(any());
+    }
+
+    @Test
+    public void whenNoAudioIsPresentOnlyDeleteAudioRequest() {
+        var mediaRequestId = 1;
+        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+            .thenReturn(Optional.empty());
+
+        mediaRequestService.deleteAudioRequest(mediaRequestId);
+
+        verify(mockMediaRequestRepository, times(1)).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(transientObjectDirectoryRepository, times(0)).deleteById(any());
     }
 
 }

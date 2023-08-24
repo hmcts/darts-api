@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.exception.AudioError;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -89,7 +91,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         if (transientObject.isPresent()) {
             TransientObjectDirectoryEntity mediaTransientObject  = transientObject.get();
             UUID blobId = mediaTransientObject.getExternalLocation();
-            dataManagementApi.deleteBlobDataFromOutboundContainer(blobId);
+
+            if (blobId != null) {
+                dataManagementApi.deleteBlobDataFromOutboundContainer(blobId);
+            }
+
             transientObjectDirectoryRepository.deleteById(mediaTransientObject.getId());
         }
 

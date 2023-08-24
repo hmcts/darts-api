@@ -137,4 +137,18 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(-3));
     }
 
+    @Test
+    void shouldDeleteAudioRequestById() {
+        requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
+        requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
+
+        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
+
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+        assertNotNull(mediaRequestEntity);
+
+        mediaRequestService.deleteAudioRequest(requestId);
+        assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(requestId));
+    }
+
 }
