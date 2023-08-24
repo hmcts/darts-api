@@ -20,10 +20,8 @@ import java.util.UUID;
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
 
@@ -48,27 +46,28 @@ public class AudioTransformationServiceGivenBuilder {
     private JudgeEntity judge;
 
     public void setupTest() {
-        courtroomAtNewcastle = getCourtroomAtNewcastle();
-        courtCase = dartsDatabase.save(createCaseAtCourthouse("c1", courtroomAtNewcastle.getCourthouse()));
+        hearingEntityWithMedia1 = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "room_a",
+            "c1",
+            LocalDate.of(2020, 6, 20)
+        );
         judge = dartsDatabase.save(createJudgeWithName("aJudge"));
-        hearingEntityWithMedia1 = dartsDatabase.save(createHearingWithDefaults(
-            courtCase,
-            courtroomAtNewcastle,
-            LocalDate.of(2020, 6, 20),
-            judge
-        ));
-        hearingEntityWithMedia2 = dartsDatabase.save(createHearingWithDefaults(
-            courtCase,
-            courtroomAtNewcastle,
-            LocalDate.of(2020, 6, 21),
-            judge
-        ));
-        hearingEntityWithoutMedia = dartsDatabase.save(createHearingWithDefaults(
-            courtCase,
-            courtroomAtNewcastle,
-            LocalDate.of(2020, 6, 22),
-            judge
-        ));
+        hearingEntityWithMedia1.addJudge(judge);
+        hearingEntityWithMedia2 = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "room_a",
+            "c1",
+            LocalDate.of(2020, 6, 21)
+        );
+        hearingEntityWithMedia2.addJudge(judge);
+        hearingEntityWithoutMedia = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "room_a",
+            "c1",
+            LocalDate.of(2020, 6, 22)
+        );
+        hearingEntityWithoutMedia.addJudge(judge);
 
         mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
         mediaEntity2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));

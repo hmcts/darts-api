@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -16,9 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouseWithRoom;
 
 class StopAndCloseHandlerTest extends IntegrationBase {
 
@@ -45,9 +44,7 @@ class StopAndCloseHandlerTest extends IntegrationBase {
 
     @Test
     void shouldNotifyDarStopRecordingForHearingEndedAndCaseClosedFlagAndDate() {
-        var courthouseEntity = createCourthouseWithRoom(SOME_COURTHOUSE, SOME_ROOM);
-        var courtCaseEntity = createCaseAtCourthouse(SOME_CASE_NUMBER, courthouseEntity);
-        courtCaseEntity = dartsDatabase.save(courtCaseEntity);
+        CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
         assertNull(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 

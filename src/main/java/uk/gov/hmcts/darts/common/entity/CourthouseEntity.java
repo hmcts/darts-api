@@ -12,11 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static jakarta.persistence.CascadeType.MERGE;
-import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
 @Table(name = "courthouse")
@@ -36,15 +32,6 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     @Column(name = "courthouse_name", unique = true)
     private String courthouseName;
 
-    @OneToMany(mappedBy = "courthouse", cascade = {PERSIST, MERGE})
+    @OneToMany(mappedBy = "courthouse")
     private List<CourtroomEntity> courtrooms;
-
-    public void addCourtRoom(CourtroomEntity courtroom) {
-        if (courtrooms == null) {
-            courtrooms = new ArrayList<>();
-        }
-
-        courtrooms.add(courtroom);
-    }
-
 }

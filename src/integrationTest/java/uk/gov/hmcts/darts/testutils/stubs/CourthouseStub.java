@@ -11,15 +11,15 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class CourthouseStub {
-    private final CourthouseRepository courthouseRepository ;
+    private final CourthouseRepository courthouseRepository;
 
     @Transactional
-    public CourthouseEntity getCourthouse(String name) {
+    public CourthouseEntity createCourthouseUnlessExists(String name) {
         Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(name);
         return foundCourthouse.orElseGet(() -> createCourthouse(name));
     }
 
-    private CourthouseEntity createCourthouse(String name){
+    private CourthouseEntity createCourthouse(String name) {
         CourthouseEntity newCourthouse = new CourthouseEntity();
         newCourthouse.setCourthouseName(name);
         courthouseRepository.saveAndFlush(newCourthouse);

@@ -54,7 +54,7 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setAttempts(0);
         OffsetDateTime now = OffsetDateTime.now();
         mockMediaRequestEntity.setCreatedDateTime(now);
-        mockMediaRequestEntity.setLastUpdated(now);
+        mockMediaRequestEntity.setLastModifiedDateTime(now);
     }
 
     @Test

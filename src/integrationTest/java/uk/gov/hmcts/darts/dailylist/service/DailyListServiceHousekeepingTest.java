@@ -52,7 +52,7 @@ class DailyListServiceHousekeepingTest extends IntegrationBase {
     @Test
     void housekeepingOk() throws IOException {
 
-        CourthouseEntity courthouse = dartsDatabaseStub.createCourthouse("courthouse1");
+        CourthouseEntity courthouse = dartsDatabaseStub.createCourthouseUnlessExists("courthouse1");
         createEmptyDailyLists(50, LocalDate.now(), courthouse);
 
         List<DailyListEntity> resultList = dailyListRepository.findAll();

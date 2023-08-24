@@ -51,7 +51,7 @@ class AuditApiTest {
 
     @BeforeEach
     private void before() {
-        CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourtCase", "TestCourthouse");
+        CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourthouse", "TestCourtCase");
         AuditStub auditStub = dartsDatabaseStub.getAuditStub();
         UserAccountStub userAccountStub = dartsDatabaseStub.getUserAccountStub();
         UserAccountEntity defaultUser = userAccountStub.getDefaultUser();
@@ -90,17 +90,43 @@ class AuditApiTest {
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("existingIdTypeAndId")
-    void searchForAuditByIds(String idType, int id) throws Exception {
+    @Test
+    void searchForAuditByIds() throws Exception {
+        CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourthouse", "TestCourtCase2");
+        AuditStub auditStub = dartsDatabaseStub.getAuditStub();
+        UserAccountStub userAccountStub = dartsDatabaseStub.getUserAccountStub();
+        UserAccountEntity defaultUser = userAccountStub.getDefaultUser();
+        AuditActivityEntity newAuditActivity = auditStub.createTestAuditActivityEntity();
+        AuditEntity auditEntity = auditStub.createAuditEntity(
+            courtCase,
+            newAuditActivity,
+            defaultUser,
+            "application_server",
+            "additional_data"
+        );
+
+        //get by caseId
         MockHttpServletRequestBuilder requestBuilder = get("/audit/search")
-            .queryParam(idType, Integer.toString(id))
+            .queryParam("case_id", courtCase.getId().toString())
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id", is(ID)))
-            .andExpect(jsonPath("$[0].case_id", is(CASE_ID)))
+            .andExpect(jsonPath("$[0].id", is(auditEntity.getId())))
+            .andExpect(jsonPath("$[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
-            .andExpect(jsonPath("$[0].event_id", is(EVENT_ID)))
+            .andExpect(jsonPath("$[0].event_id", is(auditEntity.getAuditActivity())))
+            .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
+            .andExpect(jsonPath("$[0].application_server", is("application_server")))
+            .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
+
+        //get by eventId
+        requestBuilder = get("/audit/search")
+            .queryParam("event_id", Integer.toString(auditEntity.getAuditActivity()))
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+        mockMvc.perform(requestBuilder).andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id", is(auditEntity.getId())))
+            .andExpect(jsonPath("$[0].case_id", is(courtCase.getId())))
+            .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
+            .andExpect(jsonPath("$[0].event_id", is(auditEntity.getAuditActivity())))
             .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
             .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
@@ -123,7 +149,6 @@ class AuditApiTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id", is(ID)))
-            .andExpect(jsonPath("$[0].case_id", is(CASE_ID)))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
             .andExpect(jsonPath("$[0].event_id", is(EVENT_ID)))
             .andExpect(jsonPath("$[0].user_id", is(USER_ID)))

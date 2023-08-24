@@ -23,15 +23,18 @@ public class AuditStub {
         return found.orElseGet(this::createTestAuditActivityEntity);
     }
 
-    private AuditActivityEntity createTestAuditActivityEntity() {
+    public AuditActivityEntity createTestAuditActivityEntity() {
         AuditActivityEntity auditActivity = new AuditActivityEntity();
+        auditActivity.setName("Test AuditActivityEntity name");
         auditActivity.setDescription("Test AuditActivityEntity description");
         auditActivity.setCreatedBy(userAccountStub.getDefaultUser());
         auditActivity.setLastModifiedBy(userAccountStub.getDefaultUser());
+        auditActivityRepository.saveAndFlush(auditActivity);
         return auditActivity;
     }
 
-    public AuditEntity createAuditEntity(CourtCaseEntity courtCase, AuditActivityEntity auditActivity, UserAccountEntity userAccount, String applicationServer, String additionalData) {
+    public AuditEntity createAuditEntity(CourtCaseEntity courtCase, AuditActivityEntity auditActivity,
+                                         UserAccountEntity userAccount, String applicationServer, String additionalData) {
         AuditEntity auditEntity = new AuditEntity();
         auditEntity.setCaseId(courtCase.getId());
         auditEntity.setAuditActivity(auditActivity.getId());

@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 
@@ -57,7 +58,8 @@ public class CommonTestDataUtil {
                                               EventHandlerEntity eventHandlerEntity) {
 
         return createEventWith(eventName, eventText, hearingEntity,
-                                        eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00"));
+                               eventHandlerEntity, createOffsetDateTime("2023-07-01T10:00:00")
+        );
     }
 
     public static EventEntity createEventWith(String eventName, String eventText, HearingEntity hearingEntity,
@@ -196,7 +198,7 @@ public class CommonTestDataUtil {
     public List<TranscriptionEntity> createTranscriptionList() {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCompany("Transcription company");
-        transcription.setTranscriptionType(1);
+        transcription.setTranscriptionType(new TranscriptionTypeEntity());
         return List.of(transcription);
     }
 

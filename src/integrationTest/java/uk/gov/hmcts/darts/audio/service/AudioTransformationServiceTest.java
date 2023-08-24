@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -19,7 +18,6 @@ import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.CourtroomTestData;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.io.IOException;
@@ -40,7 +38,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
@@ -240,14 +237,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     private CourtroomEntity somePersistedCourtroom() {
-        CourthouseEntity courthouse = createCourthouse("some-courthouse");
-        CourtroomEntity courtroom = CourtroomTestData.createCourtRoomWithNameAtCourthouse(
-            createCourthouse("NEWCASTLE"),
-            "some-room"
-        );
-        courtroom.setCourthouse(courthouse);
-        dartsDatabase.save(courtroom);
-        return courtroom;
+        return dartsDatabase.createCourtroomUnlessExists("some-courthouse", "some-room");
     }
 
     @Test
