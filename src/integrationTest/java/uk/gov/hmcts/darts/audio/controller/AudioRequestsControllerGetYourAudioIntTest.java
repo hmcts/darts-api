@@ -160,13 +160,11 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
-                "type": "about:blank",
-                "title": "Bad Request",
-                "status": 400,
-                "detail": "Required parameter 'expired' is not present.",
-                "instance": "/audio-requests"
-            }
-            """;
+              "title": "Bad Request",
+              "status": 400,
+              "detail": "Required request parameter 'expired' for method parameter type Boolean is not present"
+            }""";
+
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -182,11 +180,9 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
-                "type": "about:blank",
-                "title": "Bad Request",
-                "status": 400,
-                "detail": "Required header 'user_id' is not present.",
-                "instance": "/audio-requests"
+              "title": "Bad Request",
+              "status": 400,
+              "detail": "Required request header 'user_id' for method parameter type Integer is not present"
             }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
