@@ -15,9 +15,8 @@ paths:
         - bearerAuth: [ ]
       tags:
         - Audio Requests
-      summary: Users can view a summary of their audio requests and status
       operationId: getYourAudio
-      description: '"Your audio" requests for a user to view whether Current / Expired'
+      description: 'Audio requests for a user to view whether Current / Expired'
       parameters:
         - in: header
           name: user_id
@@ -29,7 +28,7 @@ paths:
           name: expired
           schema:
             type: boolean
-          description: A way to filter whether Current / Expired
+          description: if true, will retrieve expired audio requests only, if false will get current requests only
           required: true
       responses:
         '200':
@@ -40,12 +39,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/AudioRequestSummary'
-        '500':
-          description: Internal Server Error
+        '400':
+          description: A required parameter is missing or an invalid.
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+              example:
+                type: "about:blank"
+                title: "Bad Request"
+                status: 400
+                detail: "Required parameter 'expired' is not present."
+                instance: "/audio-requests"
 
 components:
   securitySchemes:
