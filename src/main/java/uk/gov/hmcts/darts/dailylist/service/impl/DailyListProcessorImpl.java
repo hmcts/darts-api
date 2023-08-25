@@ -80,13 +80,15 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                     } catch (JsonProcessingException e) {
                         dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
                         log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}",
-                                  courthouse, dailyLists.get(0).getId(), e
+                                  courthouse.getCourthouseName(), dailyLists.get(0).getId(), e
                         );
                     }
+
+                    if (dailyLists.size() > 1) {
+                        ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
+                    }
                 }
-                if (dailyLists.size() > 1) {
-                    ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
-                }
+
             }
 
         }
