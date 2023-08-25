@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -25,7 +24,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,9 +114,9 @@ class MediaRequestServiceImplTest {
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
-        verify(mockMediaRequestRepository, times(1)).deleteById(eq(mediaRequestId));
-        verify(dataManagementApi, times(1)).deleteBlobDataFromOutboundContainer(any(UUID.class));
-        verify(transientObjectDirectoryRepository, times(1)).deleteById(any());
+        verify(mockMediaRequestRepository, Mockito.times(1)).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi, Mockito.times(1)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(transientObjectDirectoryRepository, Mockito.times(1)).deleteById(any());
     }
 
     @Test
@@ -132,9 +130,9 @@ class MediaRequestServiceImplTest {
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
-        verify(mockMediaRequestRepository, times(1)).deleteById(eq(mediaRequestId));
-        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
-        verify(transientObjectDirectoryRepository, times(1)).deleteById(any());
+        verify(mockMediaRequestRepository, Mockito.times(1)).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi, Mockito.times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(transientObjectDirectoryRepository, Mockito.times(1)).deleteById(any());
     }
 
     @Test
@@ -145,9 +143,9 @@ class MediaRequestServiceImplTest {
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
-        verify(mockMediaRequestRepository, times(1)).deleteById(eq(mediaRequestId));
-        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
-        verify(transientObjectDirectoryRepository, times(0)).deleteById(any());
+        verify(mockMediaRequestRepository, Mockito.times(1)).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi, Mockito.times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(transientObjectDirectoryRepository, Mockito.times(0)).deleteById(any());
     }
 
 }
