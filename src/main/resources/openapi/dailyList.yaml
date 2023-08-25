@@ -101,7 +101,39 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
-
+  /dailylists/run:
+    post:
+      tags:
+        - DailyLists
+      summary: Runs dailylist processing task asynchronously.
+      parameters:
+        - in: query
+          name: courthouse_id
+          schema:
+            type: integer
+          description: "Internal courthouse id"
+          required: false
+      description: |-
+        Asynchronously start processing dailylists for all courthouses.
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Provided id is does not exist.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "COMMON_100"
+                title: "Provided courthouse does not exist"
+                status: 400
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 components:
   examples:
     OperationName_HappyScenario:
@@ -340,14 +372,16 @@ components:
         advocates:
           type: array
           items:
-            $ref: '#/components/schemas/Advocate'
+            $ref: '#/components/schemas/PersonalDetails'
     Defendant:
       type: object
       properties:
         personal_details:
           $ref: '#/components/schemas/PersonalDetails'
         counsel:
-          $ref: '#/components/schemas/Counsel'
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonalDetails'
         urn:
           type: string
           example: "42GD2391421"
@@ -371,21 +405,11 @@ components:
           type: string
           example: "Fail    / refuse give assistance to person executing Communications Act search warrant"
           description: ""
-    Counsel:
-      type: array
-      items:
-        $ref: '#/components/schemas/Advocate'
-    Advocate:
-      type: object
-      properties:
-        personal_details:
-          $ref: '#/components/schemas/PersonalDetails'
     PersonalDetails:
       type: object
       properties:
         name:
           $ref: '#/components/schemas/CitizenName'
         is_masked:
-          type: string
-          example: "no"
-          description: ""
+          type: boolean
+          example: false

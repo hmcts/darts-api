@@ -15,13 +15,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.exception.CommonApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.api.DailyListsApi;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 
 import java.time.LocalDate;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -33,7 +40,11 @@ import javax.validation.constraints.NotNull;
 public class DailyListController implements DailyListsApi {
 
     @Autowired
+    CourthouseRepository courthouseRepository;
+    @Autowired
     private DailyListService dailyListService;
+    @Autowired
+    private DailyListProcessor processor;
 
     @Operation(
         operationId = "dailylistsPost",
@@ -92,10 +103,30 @@ public class DailyListController implements DailyListsApi {
     }
 
 
-    public ResponseEntity<Void> dailylistsHousekeepingPost(
-    ) {
+    public ResponseEntity<Void> dailylistsHousekeepingPost() {
         dailyListService.runHouseKeepingNow();
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> dailylistsRunPost(Integer courthouseId) {
+
+        if (courthouseId == null) {
+            CompletableFuture.runAsync(() -> processor.processAllDailyLists(LocalDate.now()));
+        } else {
+            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findById(
+                courthouseId);
+            foundCourthouse.ifPresentOrElse(
+                courthouse -> CompletableFuture.runAsync(() -> processor.processAllDailyListForCourthouse(courthouse)),
+                () -> {
+                    throw new DartsApiException(CommonApiError.COURTHOUSE_PROVIDED_DOES_NOT_EXIST);
+                }
+            );
+
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+
     }
 
 }

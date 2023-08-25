@@ -17,12 +17,12 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
-import uk.gov.hmcts.darts.dailylist.model.Advocate;
 import uk.gov.hmcts.darts.dailylist.model.CitizenName;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
 import uk.gov.hmcts.darts.dailylist.model.Defendant;
 import uk.gov.hmcts.darts.dailylist.model.Hearing;
+import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
 import uk.gov.hmcts.darts.dailylist.model.Sitting;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
@@ -31,7 +31,6 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -54,30 +53,44 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     @Override
     @Transactional
     public void processAllDailyLists(LocalDate date) {
-        Arrays.stream(SourceType.values()).forEach(sourceType -> processDailyListForSourceType(date, sourceType));
+        processAllDailyListsForDateAndCourthouses(LocalDate.now(), courthouseRepository.findAll());
     }
 
-    private void processDailyListForSourceType(LocalDate date, SourceType sourceType) {
-        List<CourthouseEntity> allCourthouses = courthouseRepository.findAll();
-        for (CourthouseEntity courthouse : allCourthouses) {
-            List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+    @Override
+    @Transactional
+    public void processAllDailyListForCourthouse(CourthouseEntity courthouseEntity) {
+        processAllDailyListsForDateAndCourthouses(
+            LocalDate.now(),
+            List.of(courthouseEntity)
+        );
+    }
+
+    private void processAllDailyListsForDateAndCourthouses(LocalDate date, List<CourthouseEntity> courthouseEntityList) {
+        for (CourthouseEntity courthouse : courthouseEntityList) {
+            for (SourceType source : SourceType.values()) {
+                List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
                     courthouse.getId(),
                     String.valueOf(JobStatusType.NEW),
-                    date, String.valueOf(sourceType)
-            );
+                    date, String.valueOf(source)
+                );
+                // Daily lists are being ordered descending by date so first item will be the most recent version
+                if (!dailyLists.isEmpty()) {
+                    try {
+                        processDailyList(dailyLists.get(0));
+                    } catch (JsonProcessingException e) {
+                        dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
+                        log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}",
+                                  courthouse.getCourthouseName(), dailyLists.get(0).getId(), e
+                        );
+                    }
 
-            // Daily lists are being ordered descending by date so first item will be the most recent version
-            if (!dailyLists.isEmpty()) {
-                try {
-                    processDailyList(dailyLists.get(0));
-                } catch (JsonProcessingException e) {
-                    dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
-                    log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}", courthouse, dailyLists.get(0).getId());
+                    if (dailyLists.size() > 1) {
+                        ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
+                    }
                 }
+
             }
-            if (dailyLists.size() > 1) {
-                ignoreOldDailyList(dailyLists.subList(1, dailyLists.size()));
-            }
+
         }
     }
 
@@ -96,7 +109,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
             String courtHouseName = courtList.getCourtHouse().getCourtHouseName();
             Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
-                    courtHouseName);
+                courtHouseName);
 
             if (foundCourthouse.isPresent()) {
                 List<Sitting> sittings = courtList.getSittings();
@@ -107,8 +120,8 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                         String caseNumber = getCaseNumber(dailyListEntity, dailyListHearing);
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                                courtHouseName, String.valueOf(sitting.getCourtRoomNumber()),
-                                caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
+                            courtHouseName, String.valueOf(sitting.getCourtRoomNumber()),
+                            caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
                         );
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
@@ -123,7 +136,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
                 log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
-                        + dailyListEntity.getId() + " has not been processed");
+                              + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType.name());
@@ -137,7 +150,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 return getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                        + timeMarkingNoteText, dateTimeException);
+                             + timeMarkingNoteText, dateTimeException);
             }
         }
 
@@ -146,7 +159,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 return getTimeFromSittingAt(sitting);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                        + sitting.getSittingAt(), dateTimeException);
+                             + sitting.getSittingAt(), dateTimeException);
             }
         }
         return null;
@@ -155,9 +168,9 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     private LocalTime getTimeFromSittingAt(Sitting sitting) throws DateTimeException {
         if (StringUtils.isNotBlank(sitting.getSittingAt())) {
             return LocalTime.parse(sitting.getSittingAt(), new DateTimeFormatterBuilder()
-                    .parseCaseInsensitive()
-                    .appendPattern(SITTING_AT_FORMAT)
-                    .toFormatter(Locale.ENGLISH));
+                .parseCaseInsensitive()
+                .appendPattern(SITTING_AT_FORMAT)
+                .toFormatter(Locale.ENGLISH));
         }
         return null;
     }
@@ -176,9 +189,9 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             }
 
             return LocalTime.parse(rawTime, new DateTimeFormatterBuilder()
-                    .parseCaseInsensitive()
-                    .appendPattern(TIME_MARKING_NOTE_FORMAT)
-                    .toFormatter(Locale.ENGLISH));
+                .parseCaseInsensitive()
+                .appendPattern(TIME_MARKING_NOTE_FORMAT)
+                .toFormatter(Locale.ENGLISH));
         }
         return null;
     }
@@ -204,26 +217,28 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
 
     private void addProsecution(CourtCaseEntity courtCase, Hearing hearing) {
-        List<Advocate> advocates = hearing.getProsecution().getAdvocates();
+        List<PersonalDetails> advocates = hearing.getProsecution().getAdvocates();
         advocates.forEach(advocate ->
-                courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
-                        buildFullName(advocate.getPersonalDetails().getName()), courtCase)));
+                              courtCase.addProsecutor(retrieveCoreObjectService.createProsecutor(
+                                  buildFullName(advocate.getName()), courtCase)));
 
     }
 
-
     private void addDefenders(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            for (Advocate advocate : defendant.getCounsel()) {
+            for (PersonalDetails personalDetails : defendant.getCounsel()) {
                 courtCase.addDefence(retrieveCoreObjectService.createDefence(
-                        buildFullName(advocate.getPersonalDetails().getName()), courtCase));
+                    buildFullName(personalDetails.getName()), courtCase));
             }
         }
     }
 
     private void addDefendants(CourtCaseEntity courtCase, List<Defendant> defendants) {
         for (Defendant defendant : defendants) {
-            courtCase.addDefendant(retrieveCoreObjectService.createDefendant(buildFullName(defendant.getPersonalDetails().getName()), courtCase));
+            courtCase.addDefendant(retrieveCoreObjectService.createDefendant(
+                buildFullName(defendant.getPersonalDetails().getName()),
+                courtCase
+            ));
         }
 
     }
