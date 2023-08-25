@@ -30,4 +30,5 @@ public interface AudioTransformationService {
 
     UUID saveProcessedData(MediaRequestEntity mediaRequest, BinaryData binaryData);
 
+    Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException;
 }

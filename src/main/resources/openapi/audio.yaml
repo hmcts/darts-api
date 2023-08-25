@@ -99,6 +99,45 @@ paths:
                   summary: No media metadata exists for the given hearing id
                   value:
                     []
+  /audio/preview:
+    get:
+      tags:
+        - Audio
+      summary: Preview audio
+      operationId: preview
+      description: Preview audio
+      parameters:
+        - in: query
+          name: media_id
+          schema:
+            type: integer
+          required: true
+          description: "Internal identifier for media"
+          example: 1
+      responses:
+        200:
+          description: OK
+          content:
+            audio/mp3:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: A required parameter is invalid.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        500:
+          description: The requested data cannot be located
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_101"
+                title: "The requested data cannot be located"
+                status: 500
 
 components:
   schemas:

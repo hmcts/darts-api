@@ -54,4 +54,10 @@ public class AudioController implements AudioApi {
         return new ResponseEntity<>(audioMetadata, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<Resource> preview(Integer mediaId) {
+        InputStream audioMediaFile = audioService.preview(mediaId);
+        return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
+    }
+
 }

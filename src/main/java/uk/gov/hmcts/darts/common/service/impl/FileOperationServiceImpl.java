@@ -39,4 +39,8 @@ public class FileOperationServiceImpl implements FileOperationService {
         return targetTempFile;
     }
 
+    public BinaryData saveFileToBinaryData(String fileName) {
+        return BinaryData.fromFile(Path.of(fileName));
+    }
+
 }
