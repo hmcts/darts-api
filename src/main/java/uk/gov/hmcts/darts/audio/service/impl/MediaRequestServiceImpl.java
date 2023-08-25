@@ -88,7 +88,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setCreatedBy(requestor);
-        mediaRequestEntity.setModifiedBy(requestor);
+        mediaRequestEntity.setLastModifiedBy(requestor);
 
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }

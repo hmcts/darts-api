@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ import java.util.List;
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
-public class CourtCaseEntity {
+public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public static final String COURT_CASE = "courtCase";
     public static final String VERSION_LABEL = "version_label";
@@ -100,8 +101,8 @@ public class CourtCaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_judge_ae",
-            joinColumns = {@JoinColumn(name = "cas_id")},
-            inverseJoinColumns = {@JoinColumn(name = "jud_id")})
+        joinColumns = {@JoinColumn(name = "cas_id")},
+        inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
 
     public void addHearing(HearingEntity hearing) {
@@ -116,9 +117,29 @@ public class CourtCaseEntity {
         }
     }
 
+    public void addDefence(String name) {
+        if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(
+            name))) {
+            DefenceEntity defenceEntity = new DefenceEntity();
+            defenceEntity.setName(name);
+            defenceEntity.setCourtCase(this);
+            defenceList.add(defenceEntity);
+        }
+    }
+
     public void addDefendant(DefendantEntity defendant) {
         if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(defendant.getName()))) {
             defendantList.add(defendant);
+        }
+    }
+
+    public void addDefendant(String name) {
+        if (defendantList.stream().noneMatch(defendantEntity -> defendantEntity.getName().equalsIgnoreCase(
+            name))) {
+            DefendantEntity defendantEntity = new DefendantEntity();
+            defendantEntity.setName(name);
+            defendantEntity.setCourtCase(this);
+            defendantList.add(defendantEntity);
         }
     }
 
@@ -130,8 +151,18 @@ public class CourtCaseEntity {
 
     public void addProsecutor(ProsecutorEntity prosecutor) {
         if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
-                prosecutor.getName()))) {
+            prosecutor.getName()))) {
             prosecutorList.add(prosecutor);
+        }
+    }
+
+    public void addProsecutor(String name) {
+        if (prosecutorList.stream().noneMatch(prosecutorEntity -> prosecutorEntity.getName().equalsIgnoreCase(
+            name))) {
+            ProsecutorEntity prosecutorEntity = new ProsecutorEntity();
+            prosecutorEntity.setName(name);
+            prosecutorEntity.setCourtCase(this);
+            prosecutorList.add(prosecutorEntity);
         }
     }
 

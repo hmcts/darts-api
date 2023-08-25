@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -22,7 +23,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class TranscriptionEntity extends VersionedEntity {
+public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "tra_id")
@@ -38,11 +39,13 @@ public class TranscriptionEntity extends VersionedEntity {
     @JoinColumn(name = "ctr_id", nullable = false)
     private CourtroomEntity courtroom;
 
-    @Column(name = "trt_id", nullable = false)
-    private Integer transcriptionTypeId;
+    @ManyToOne
+    @JoinColumn(name = "trt_id", nullable = false)
+    private TranscriptionTypeEntity transcriptionType;
 
-    @Column(name = "urg_id")
-    private Integer transcriptionUrgencyId;
+    @ManyToOne
+    @JoinColumn(name = "tru_id")
+    private TranscriptionUrgencyEntity transcriptionUrgency;
 
     @ManyToOne
     @JoinColumn(name = "hea_id")
@@ -72,15 +75,6 @@ public class TranscriptionEntity extends VersionedEntity {
     @Column(name = "end_ts")
     private OffsetDateTime end;
 
-    @Column(name = "created_ts")
-    private OffsetDateTime createdTimestamp;
-
-    @Column(name = "last_modified_ts")
-    private OffsetDateTime lastModifiedTimestamp;
-
-    @Column(name = "last_modified_by")
-    private Integer lastModifiedByUserId;
-
     @Column(name = "requested_by")
     private Integer requestedByUserId;
 
@@ -95,9 +89,6 @@ public class TranscriptionEntity extends VersionedEntity {
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
-
-    @Column(name = "superseded")
-    private Boolean superseded;
 
     @OneToMany(mappedBy = "transcription")
     private List<TranscriptionCommentEntity> transcriptionComments;

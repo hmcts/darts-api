@@ -59,10 +59,10 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setStatus(OPEN);
         mockMediaRequestEntity.setAttempts(0);
         OffsetDateTime now = OffsetDateTime.now();
-        mockMediaRequestEntity.setCreatedTimestamp(now);
+        mockMediaRequestEntity.setCreatedDateTime(now);
         mockMediaRequestEntity.setCreatedBy(mockUserAccountEntity);
-        mockMediaRequestEntity.setModifiedTimestamp(now);
-        mockMediaRequestEntity.setModifiedBy(mockUserAccountEntity);
+        mockMediaRequestEntity.setLastModifiedDateTime(now);
+        mockMediaRequestEntity.setLastModifiedBy(mockUserAccountEntity);
     }
 
     @Test

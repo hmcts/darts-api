@@ -147,10 +147,10 @@ class OutboundFileZipGeneratorImplTest {
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setAttempts(0);
         OffsetDateTime utcNow = OffsetDateTime.ofInstant(SOME_INSTANT, UTC);
-        mediaRequestEntity.setCreatedTimestamp(utcNow);
+        mediaRequestEntity.setCreatedDateTime(utcNow);
         mediaRequestEntity.setCreatedBy(mockUserAccountEntity);
-        mediaRequestEntity.setModifiedTimestamp(utcNow);
-        mediaRequestEntity.setModifiedBy(mockUserAccountEntity);
+        mediaRequestEntity.setLastModifiedDateTime(utcNow);
+        mediaRequestEntity.setLastModifiedBy(mockUserAccountEntity);
         return mediaRequestEntity;
     }
 

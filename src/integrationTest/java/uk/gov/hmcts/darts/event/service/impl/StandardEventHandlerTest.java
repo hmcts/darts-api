@@ -200,7 +200,7 @@ class StandardEventHandlerTest extends IntegrationBase {
     @Test
     void testSummationWithConcurrency() throws InterruptedException {
 
-        dartsDatabase.createCourthouseWithoutCourtrooms(SOME_COURTHOUSE);
+        dartsDatabase.createCourthouseUnlessExists(SOME_COURTHOUSE);
         dartsGateway.darNotificationReturnsSuccess();
 
         int numberOfThreads = 100;

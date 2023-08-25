@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.common.entity;
+package uk.gov.hmcts.darts.common.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

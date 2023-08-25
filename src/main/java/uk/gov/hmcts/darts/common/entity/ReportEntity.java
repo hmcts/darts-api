@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 
 @Entity
@@ -17,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class ReportEntity extends VersionedEntity {
+public class ReportEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "rep_id")
@@ -45,8 +46,5 @@ public class ReportEntity extends VersionedEntity {
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
-
-    @Column(name = "superseded")
-    private Boolean superseded;
 
 }

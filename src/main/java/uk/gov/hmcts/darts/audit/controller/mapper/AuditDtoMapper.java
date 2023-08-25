@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.audit.controller.mapper;
 
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.audit.model.SearchResult;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -17,5 +19,11 @@ public interface AuditDtoMapper {
     default String map(OffsetDateTime value) {
         return value.toString();
     }
+
+    @Mappings({
+        @Mapping(source = "createdDateTime", target = "createdAt"),
+        @Mapping(source = "auditActivity", target = "eventId")
+    })
+    SearchResult map(AuditEntity auditEntity);
 
 }

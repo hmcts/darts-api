@@ -54,10 +54,10 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
-        assertNotNull(mediaRequestEntity.getCreatedTimestamp());
+        assertNotNull(mediaRequestEntity.getCreatedDateTime());
         assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getModifiedTimestamp());
-        assertNotNull(mediaRequestEntity.getModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
     @Test
@@ -74,10 +74,10 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(OffsetDateTime.parse(T_09_00_00_Z), mediaRequestEntity.getStartTime());
         assertEquals(OffsetDateTime.parse(T_12_00_00_Z), mediaRequestEntity.getEndTime());
-        assertNotNull(mediaRequestEntity.getCreatedTimestamp());
+        assertNotNull(mediaRequestEntity.getCreatedDateTime());
         assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getModifiedTimestamp());
-        assertNotNull(mediaRequestEntity.getModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
     @Test
@@ -96,10 +96,10 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
-        assertNotNull(mediaRequestEntity.getCreatedTimestamp());
+        assertNotNull(mediaRequestEntity.getCreatedDateTime());
         assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getModifiedTimestamp());
-        assertNotNull(mediaRequestEntity.getModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
     @Test
@@ -117,10 +117,10 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
         assertEquals(requestDetails.getStartTime(), mediaRequestEntity.getStartTime());
         assertEquals(requestDetails.getEndTime(), mediaRequestEntity.getEndTime());
-        assertNotNull(mediaRequestEntity.getCreatedTimestamp());
+        assertNotNull(mediaRequestEntity.getCreatedDateTime());
         assertNotNull(mediaRequestEntity.getCreatedBy());
-        assertNotNull(mediaRequestEntity.getModifiedTimestamp());
-        assertNotNull(mediaRequestEntity.getModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedBy());
+        assertNotNull(mediaRequestEntity.getLastModifiedDateTime());
     }
 
     @Test

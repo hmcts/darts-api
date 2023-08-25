@@ -24,9 +24,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_CLERK;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_MANAGER;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_CLERK;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -53,7 +53,7 @@ class AuthorisationServiceTest {
         judgeUserAccount.setEmailAddress("test.judge@example.com");
         judgeUserAccount.setSecurityGroupEntities(List.of(judgesSecurityGroup));
         judgeUserAccount.setCreatedBy(testUser);
-        judgeUserAccount.setModifiedBy(testUser);
+        judgeUserAccount.setLastModifiedBy(testUser);
         UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
@@ -64,14 +64,14 @@ class AuthorisationServiceTest {
         bristolUserAccount.setEmailAddress("test.bristol@example.com");
         bristolUserAccount.setSecurityGroupEntities(List.of(bristolStaff, bristolAppr));
         bristolUserAccount.setCreatedBy(testUser);
-        bristolUserAccount.setModifiedBy(testUser);
+        bristolUserAccount.setLastModifiedBy(testUser);
         userAccountRepository.saveAndFlush(bristolUserAccount);
 
         UserAccountEntity newUser = new UserAccountEntity();
         newUser.setUsername("Test New");
         newUser.setEmailAddress("test.new@example.com");
         newUser.setCreatedBy(testUser);
-        newUser.setModifiedBy(testUser);
+        newUser.setLastModifiedBy(testUser);
         userAccountRepository.saveAndFlush(newUser);
     }
 

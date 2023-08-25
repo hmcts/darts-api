@@ -14,9 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import static jakarta.persistence.CascadeType.MERGE;
-import static jakarta.persistence.CascadeType.PERSIST;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.CTH_ID, CourtroomEntity.COURTROOM_NAME})})
@@ -24,7 +22,7 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CourtroomEntity {
+public class CourtroomEntity extends CreatedModifiedBaseEntity {
 
     public static final String CTR_ID = "ctr_id";
     public static final String COURTROOM_NAME = "courtroom_name";
@@ -40,7 +38,7 @@ public class CourtroomEntity {
     @Column(name = COURTROOM_NAME)
     private String name;
 
-    @ManyToOne(cascade = {PERSIST, MERGE})
+    @ManyToOne
     @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
 

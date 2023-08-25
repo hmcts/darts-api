@@ -15,7 +15,6 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouseWithRoom;
 
 class DarStopHandlerTest extends IntegrationBase {
 
@@ -42,8 +41,7 @@ class DarStopHandlerTest extends IntegrationBase {
 
     @Test
     void shouldNotifyDarStopRecordingForHearingEnded() {
-        var courthouseEntity = createCourthouseWithRoom(SOME_COURTHOUSE, SOME_ROOM);
-        dartsDatabase.save(courthouseEntity);
+        dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
 
         dartsGateway.darNotificationReturnsSuccess();
 

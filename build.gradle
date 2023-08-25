@@ -269,9 +269,10 @@ task generateAudioApi(type: org.openapitools.generator.gradle.plugin.tasks.Gener
 
   skipOperationExample = true
   configOptions = [
-    dateLibrary  : "java8",
-    interfaceOnly: "true",
-    useTags      : "true"
+    dateLibrary   : "java8",
+    interfaceOnly : "true",
+    useTags       : "true",
+    useSpringBoot3: "true"
   ]
 }
 
@@ -284,9 +285,10 @@ task generateAudioRequestsApi(type: org.openapitools.generator.gradle.plugin.tas
 
   skipOperationExample = true
   configOptions = [
-    dateLibrary  : "java8",
-    interfaceOnly: "true",
-    useTags      : "true"
+    dateLibrary   : "java8",
+    interfaceOnly : "true",
+    useTags       : "true",
+    useSpringBoot3: "true"
   ]
 }
 
@@ -355,7 +357,7 @@ dependencies {
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
   implementation group: 'org.apache.commons', name: 'commons-exec', version: '1.3'
 
-  implementation platform('com.azure:azure-sdk-bom:1.2.15')
+  implementation platform('com.azure:azure-sdk-bom:1.2.16')
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'

@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationExternalUserControllerTest {

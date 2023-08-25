@@ -13,18 +13,16 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.UpdateTimestamp;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "external_object_directory")
 @Getter
 @Setter
-public class ExternalObjectDirectoryEntity implements JpaAuditing {
+public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "eod_id")
@@ -59,21 +57,5 @@ public class ExternalObjectDirectoryEntity implements JpaAuditing {
 
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
-
-    @CreationTimestamp
-    @Column(name = "created_ts")
-    private OffsetDateTime createdTimestamp;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private UserAccountEntity createdBy;
-
-    @UpdateTimestamp
-    @Column(name = "last_modified_ts")
-    private OffsetDateTime modifiedTimestamp;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "last_modified_by", foreignKey = @ForeignKey(name = "eod_modified_by_fk"))
-    private UserAccountEntity modifiedBy;
 
 }

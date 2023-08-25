@@ -14,19 +14,17 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.UpdateTimestamp;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "transient_object_directory")
 @Getter
 @Setter
-public class TransientObjectDirectoryEntity implements JpaAuditing {
+public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "tod_id")
@@ -51,21 +49,5 @@ public class TransientObjectDirectoryEntity implements JpaAuditing {
 
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
-
-    @CreationTimestamp
-    @Column(name = "created_ts")
-    private OffsetDateTime createdTimestamp;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private UserAccountEntity createdBy;
-
-    @UpdateTimestamp
-    @Column(name = "last_modified_ts")
-    private OffsetDateTime modifiedTimestamp;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "last_modified_by", foreignKey = @ForeignKey(name = "tod_modified_by_fk"))
-    private UserAccountEntity modifiedBy;
 
 }

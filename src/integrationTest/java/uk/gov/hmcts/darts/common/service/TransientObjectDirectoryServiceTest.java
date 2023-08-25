@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -50,11 +50,11 @@ class TransientObjectDirectoryServiceTest {
         assertEquals(STORED.getId(), transientObjectDirectoryEntity.getStatus().getId());
         assertEquals(externalLocation, transientObjectDirectoryEntity.getExternalLocation());
         assertNull(transientObjectDirectoryEntity.getChecksum());
-        assertTrue(transientObjectDirectoryEntity.getCreatedTimestamp()
+        assertTrue(transientObjectDirectoryEntity.getCreatedDateTime()
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));
-        assertTrue(transientObjectDirectoryEntity.getModifiedTimestamp()
+        assertTrue(transientObjectDirectoryEntity.getLastModifiedDateTime()
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:05:00.000Z")));
-        assertNotNull(transientObjectDirectoryEntity.getModifiedBy());
+        assertNotNull(transientObjectDirectoryEntity.getLastModifiedBy());
     }
 
 }

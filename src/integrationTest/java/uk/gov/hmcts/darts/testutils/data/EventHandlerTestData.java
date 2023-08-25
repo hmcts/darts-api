@@ -17,10 +17,10 @@ public class EventHandlerTestData {
         var entity = new EventHandlerEntity();
         entity.setType("some-type");
         entity.setEventName("some-desc");
-        entity.setCreatedTimestamp(OffsetDateTime.now());
+        entity.setCreatedDateTime(OffsetDateTime.now());
         entity.setCreatedBy(userAccountEntity);
-        entity.setModifiedTimestamp(OffsetDateTime.now());
-        entity.setModifiedBy(userAccountEntity);
+        entity.setLastModifiedDateTime(OffsetDateTime.now());
+        entity.setLastModifiedBy(userAccountEntity);
         entity.setActive(true);
 
         return entity;

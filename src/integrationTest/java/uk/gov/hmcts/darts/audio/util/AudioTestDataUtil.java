@@ -30,7 +30,7 @@ public class AudioTestDataUtil {
         mediaRequestEntity.setLastAccessedDateTime(null);
         mediaRequestEntity.setExpiryTime(null);
         mediaRequestEntity.setCreatedBy(requestor);
-        mediaRequestEntity.setModifiedBy(requestor);
+        mediaRequestEntity.setLastModifiedBy(requestor);
         return mediaRequestEntity;
     }
 
@@ -51,7 +51,7 @@ public class AudioTestDataUtil {
         mediaRequestEntity.setLastAccessedDateTime(now.minusDays(3));
         mediaRequestEntity.setExpiryTime(now.minusDays(1));
         mediaRequestEntity.setCreatedBy(requestor);
-        mediaRequestEntity.setModifiedBy(requestor);
+        mediaRequestEntity.setLastModifiedBy(requestor);
         return mediaRequestEntity;
     }
 

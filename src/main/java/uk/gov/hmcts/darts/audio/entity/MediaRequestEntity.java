@@ -14,14 +14,12 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.JpaAuditing;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -29,7 +27,7 @@ import java.time.OffsetDateTime;
 @Table(name = MediaRequestEntity.TABLE_NAME)
 @Getter
 @Setter
-public class MediaRequestEntity implements JpaAuditing {
+public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     public static final String ID_COLUMN_NAME = "mer_id";
     public static final String HEARING_ID_COLUMN_NAME = "hea_id";
@@ -92,22 +90,6 @@ public class MediaRequestEntity implements JpaAuditing {
 
     @Column(name = EXPIRY_TS_COLUMN_NAME)
     private OffsetDateTime expiryTime;
-
-    @CreationTimestamp
-    @Column(name = CREATED_TS_COLUMN_NAME, nullable = false)
-    private OffsetDateTime createdTimestamp;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = CREATED_BY_COLUMN_NAME, nullable = false)
-    private UserAccountEntity createdBy;
-
-    @UpdateTimestamp
-    @Column(name = LAST_MODIFIED_TS_COLUMN_NAME, nullable = false)
-    private OffsetDateTime modifiedTimestamp;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = LAST_MODIFIED_BY_COLUMN_NAME, nullable = false)
-    private UserAccountEntity modifiedBy;
 
 }
 
