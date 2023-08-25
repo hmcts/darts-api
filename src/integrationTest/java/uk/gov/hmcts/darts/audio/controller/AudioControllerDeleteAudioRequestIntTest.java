@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.TransientObjectDirectoryTestData;
+import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
 import java.net.URI;
 import java.util.UUID;
@@ -16,7 +16,7 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -27,6 +27,8 @@ class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
     @Test
     void audioRequestDeleteShouldReturnSuccess() throws Exception {
@@ -35,7 +37,7 @@ class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
         var mediaRequestEntity = dartsDatabase.createAndLoadMediaRequestEntity();
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(TransientObjectDirectoryTestData.createTransientObjectDirectoryEntity(
+            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
                 mediaRequestEntity,
                 objectDirectoryStatusEntity,
                 blobId
