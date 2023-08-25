@@ -164,7 +164,8 @@ class AuditApiTest {
             .queryParam("wrong_query_param", "value")
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", is("All filters were empty. ")));
+            .andExpect(jsonPath("$.title", is("All filters were empty.")));
+
     }
 
     @ParameterizedTest
@@ -174,6 +175,6 @@ class AuditApiTest {
             .queryParam(dateFilter, date)
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", is("When using date filters, both must be provided. ")));
+            .andExpect(jsonPath("$.title", is("When using date filters, both must be provided.")));
     }
 }

@@ -1,4 +1,11 @@
 {
-  "code": "400 BAD_REQUEST",
-  "message": "caseNumber must not be null"
+  "violations": [
+    {
+      "field": "caseNumber",
+      "message": "must not be null"
+    }
+  ],
+  "type": "https://zalando.github.io/problem/constraint-violation",
+  "status": 400,
+  "title": "Constraint Violation"
 }
