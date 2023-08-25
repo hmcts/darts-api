@@ -20,7 +20,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "user_account")
-@SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
 public class UserAccountEntity extends CreatedModifiedBaseEntity {

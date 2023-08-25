@@ -11,15 +11,16 @@ import java.time.OffsetDateTime;
 public class EventHandlerTestData {
 
     public static EventHandlerEntity someMinimalEventHandler() {
-        var modifiedBy = new UserAccountEntity();
-        modifiedBy.setId(0);
+        var userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(0);
 
         var entity = new EventHandlerEntity();
         entity.setType("some-type");
         entity.setEventName("some-desc");
         entity.setCreatedDateTime(OffsetDateTime.now());
+        entity.setCreatedBy(userAccountEntity);
         entity.setLastModifiedDateTime(OffsetDateTime.now());
-        entity.setLastModifiedBy(modifiedBy);
+        entity.setLastModifiedBy(userAccountEntity);
         entity.setActive(true);
 
         return entity;

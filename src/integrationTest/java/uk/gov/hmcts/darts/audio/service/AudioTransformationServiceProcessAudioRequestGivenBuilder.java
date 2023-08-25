@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @Transactional
@@ -54,18 +55,20 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
             ExternalLocationTypeEnum.UNSTRUCTURED);
         var objectDirectoryStatusEntity = dartsDatabaseStub.getObjectDirectoryStatusEntity(STORED);
 
-        var externalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub().createExternalObjectDirectory(
-            mediaEntity,
-            objectDirectoryStatusEntity,
-            externalLocationTypeEntity,
-            UUID.randomUUID()
-        );
+        var externalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
+            .createExternalObjectDirectory(
+                mediaEntity,
+                objectDirectoryStatusEntity,
+                externalLocationTypeEntity,
+                UUID.randomUUID()
+            );
         dartsDatabaseStub.getExternalObjectDirectoryRepository()
             .saveAndFlush(externalObjectDirectoryEntity);
     }
 
-    public UserAccountEntity aUserAccount(String emailAddress) {
-        userAccountEntity = new UserAccountEntity();
+    public UserAccountEntity aUserAccount(UserAccountEntity systemUser, String emailAddress) {
+
+        userAccountEntity = dartsDatabaseStub.createIntegrationTestUserAccountEntity(systemUser);
         userAccountEntity.setEmailAddress(emailAddress);
 
         dartsDatabaseStub.getUserAccountRepository()
@@ -85,13 +88,17 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
         return hearingEntity;
     }
 
-    public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType, UserAccountEntity userAccountEntity) {
+    public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType,
+                                                             UserAccountEntity userAccountEntity) {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearing);
+        mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(audioRequestType);
-        mediaRequestEntity.setRequestor(userAccountEntity.getId());
+        mediaRequestEntity.setRequestor(userAccountEntity);
         mediaRequestEntity.setStartTime(TIME_12_00);
         mediaRequestEntity.setEndTime(TIME_13_00);
+        mediaRequestEntity.setCreatedBy(userAccountEntity);
+        mediaRequestEntity.setLastModifiedBy(userAccountEntity);
 
         dartsDatabaseStub.getMediaRequestRepository()
             .saveAndFlush(mediaRequestEntity);

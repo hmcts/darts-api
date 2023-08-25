@@ -1,0 +1,101 @@
+openapi: 3.0.1
+
+servers:
+  - url: http://localhost:4550/
+
+info:
+  description: Modernised DARTS (Digital Audio Recording and Transcription Service).
+  version: "0.0.1"
+  title: Modernised DARTS
+
+paths:
+  /audio-requests:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Audio Requests
+      operationId: getYourAudio
+      description: 'Audio requests for a user to view whether Current / Expired'
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+        - in: query
+          name: expired
+          schema:
+            type: boolean
+          description: if true, will retrieve expired audio requests only, if false will get current requests only
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AudioRequestSummary'
+        '400':
+          description: A required parameter is missing or an invalid.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "about:blank"
+                title: "Bad Request"
+                status: 400
+                detail: "Required parameter 'expired' is not present."
+                instance: "/audio-requests"
+
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AudioRequestSummary:
+      type: object
+      properties:
+        media_request_id:
+          type: integer
+          example: 12345
+        case_number:
+          type: string
+          example: "T20200190"
+        courthouse_name:
+          type: string
+          example: "Manchester Minshull Street"
+        hearing_date:
+          type: string
+          format: date
+          example: "2023-08-17"
+        media_request_start_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T09:00:00Z"
+        media_request_end_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T10:00:00Z"
+        media_request_expiry_ts:
+          type: string
+          format: date-time
+          example: "2023-08-23T09:00:00Z"
+        media_request_status:
+          $ref: '#/components/schemas/MediaRequestStatus'
+
+    MediaRequestStatus:
+      type: string
+      enum:
+        - OPEN
+        - PROCESSING
+        - FAILED
+        - COMPLETED
+        - EXPIRED

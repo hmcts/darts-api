@@ -12,8 +12,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
@@ -22,8 +22,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "transient_object_directory")
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity {
 
     @Id

@@ -32,7 +32,9 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setChecksum(null);
         transientObjectDirectoryEntity.setTransferAttempts(null);
-        transientObjectDirectoryEntity.setLastModifiedBy(userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId()));
+        var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
+        transientObjectDirectoryEntity.setCreatedBy(systemUser);
+        transientObjectDirectoryEntity.setLastModifiedBy(systemUser);
 
         return transientObjectDirectoryRepository.saveAndFlush(transientObjectDirectoryEntity);
     }

@@ -10,12 +10,13 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,12 +34,17 @@ class MediaRequestServiceImplTest {
     private MediaRequestServiceImpl mediaRequestService;
 
     @Mock
-    private HearingRepository hearingRepository;
+    private HearingRepository mockHearingRepository;
     @Mock
-    private MediaRequestRepository mediaRequestRepository;
+    private UserAccountRepository mockUserAccountRepository;
+    @Mock
+    private MediaRequestRepository mockMediaRequestRepository;
 
     private HearingEntity mockHearingEntity;
     private MediaRequestEntity mockMediaRequestEntity;
+
+    @Mock
+    private UserAccountEntity mockUserAccountEntity;
 
     @BeforeEach
     void beforeEach() {
@@ -49,12 +55,14 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setHearing(mockHearingEntity);
         mockMediaRequestEntity.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
         mockMediaRequestEntity.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
-        mockMediaRequestEntity.setRequestor(TEST_REQUESTER);
+        mockMediaRequestEntity.setRequestor(mockUserAccountEntity);
         mockMediaRequestEntity.setStatus(OPEN);
         mockMediaRequestEntity.setAttempts(0);
         OffsetDateTime now = OffsetDateTime.now();
         mockMediaRequestEntity.setCreatedDateTime(now);
+        mockMediaRequestEntity.setCreatedBy(mockUserAccountEntity);
         mockMediaRequestEntity.setLastModifiedDateTime(now);
+        mockMediaRequestEntity.setLastModifiedBy(mockUserAccountEntity);
     }
 
     @Test
@@ -71,14 +79,15 @@ class MediaRequestServiceImplTest {
         requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
         requestDetails.setRequestType(DOWNLOAD);
 
-        when(hearingRepository.getReferenceById(eq(hearingId))).thenReturn(mockHearingEntity);
-        when(mediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
-
+        when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
+        when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
         var requestId = mediaRequestService.saveAudioRequest(requestDetails);
 
-        verify(hearingRepository).getReferenceById(eq(hearingId));
-        verify(mediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         assertEquals(requestId, mockMediaRequestEntity.getId());
+        verify(mockHearingRepository).getReferenceById(hearingId);
+        verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
+        verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
     }
 
 }
