@@ -27,4 +27,13 @@ public class MediaTestData {
         mediaEntity.setChannel(channel);
         return mediaEntity;
     }
+
+    public static MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        var mediaEntity = someMinimalMedia();
+        mediaEntity.setCourtroom(courtroomEntity);
+        mediaEntity.setStart(startTime);
+        mediaEntity.setEnd(endTime);
+        mediaEntity.setChannel(channel);
+        return mediaEntity;
+    }
 }
