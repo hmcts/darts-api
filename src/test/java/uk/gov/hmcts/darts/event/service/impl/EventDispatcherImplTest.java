@@ -21,8 +21,8 @@ class EventDispatcherImplTest {
     @Test
     void receiveWithMultipleHandlersForSameEvent() {
         List<EventHandler> eventHandlers = new ArrayList<>();
-        eventHandlers.add(new TestEventHandler());
-        eventHandlers.add(new TestEventHandler());
+        eventHandlers.add(new MockEventHandler());
+        eventHandlers.add(new MockEventHandler());
 
         EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers);
 
@@ -60,24 +60,25 @@ class EventDispatcherImplTest {
     @Test
     void receiveWithOneHandlers() {
         List<EventHandler> eventHandlers = new ArrayList<>();
-        TestEventHandler testEventHandler = Mockito.mock(TestEventHandler.class);
-        Mockito.when(testEventHandler.isHandlerFor(any())).thenReturn(true);
-        eventHandlers.add(testEventHandler);
+        MockEventHandler mockEventHandler = Mockito.mock(MockEventHandler.class);
+        Mockito.when(mockEventHandler.isHandlerFor(any())).thenReturn(true);
+        eventHandlers.add(mockEventHandler);
 
-        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers);
+
 
         DartsEvent event = new DartsEvent();
         event.setType("TestType");
         event.setSubType("TestSubType");
         event.setMessageId("1");
 
+        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers);
         eventDispatcher.receive(event);
 
-        Mockito.verify(testEventHandler).handle(any());
+        Mockito.verify(mockEventHandler).handle(any());
     }
 
 
-    private static class TestEventHandler implements EventHandler {
+    private static class MockEventHandler implements EventHandler {
 
         @Override
         public void handle(DartsEvent dartsEvent) {
