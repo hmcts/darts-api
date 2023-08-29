@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -31,13 +32,17 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
 
-        dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
             SOME_DATE_TIME.toLocalDate()
         );
-
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.addProsecutor("aProsecutor");
+        courtCase.addDefendant("aDefendant");
+        courtCase.addDefence("aDefence");
+        dartsDatabase.save(courtCase);
     }
 
     @Test
@@ -56,7 +61,10 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.case_id", Matchers.is(getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))))
+            .andExpect(MockMvcResultMatchers.jsonPath(
+                "$.case_id",
+                Matchers.is(getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
+            ))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges", Matchers.hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1judge1")))
             .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors", Matchers.hasSize(1)))
@@ -79,7 +87,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     private Integer getCaseId(String caseNumber, String courthouse) {
 
-        CourtCaseEntity courtCase = dartsDatabase.createCaseUnlessExists(caseNumber, courthouse);
+        CourtCaseEntity courtCase = dartsDatabase.createCase(courthouse, caseNumber);
 
         return courtCase.getId();
     }

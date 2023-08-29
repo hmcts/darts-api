@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -20,7 +21,7 @@ import java.time.OffsetDateTime;
 @EqualsAndHashCode(callSuper = false)
 @Getter
 @Setter
-public class TranscriptionCommentEntity extends VersionedEntity {
+public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
     @Id
     @Column(name = "trc_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trc_gen")
@@ -42,17 +43,5 @@ public class TranscriptionCommentEntity extends VersionedEntity {
 
     @Column(name = "author")
     private Integer authorUserId;
-
-    @Column(name = "created_ts")
-    private OffsetDateTime createdTimestamp;
-
-    @Column(name = "last_modified_ts")
-    private OffsetDateTime lastModifiedTimestamp;
-
-    @Column(name = "last_modified_by")
-    private Integer lastModifiedByUserId;
-
-    @Column(name = "superseded")
-    private Boolean superseded;
 
 }

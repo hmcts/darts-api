@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,9 +24,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_CLERK;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_MANAGER;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_CLERK;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -33,7 +34,7 @@ import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.JUDGE;
 class AuthorisationServiceTest {
 
     @Autowired
-    private UserAccountRepository userAccountRepository;
+    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private SecurityGroupRepository securityGroupRepository;
@@ -43,11 +44,17 @@ class AuthorisationServiceTest {
 
     @BeforeAll
     void beforeAll() {
+        var systemUser = dartsDatabaseStub.createSystemUserAccountEntity();
+        var testUser = dartsDatabaseStub.createIntegrationTestUserAccountEntity(systemUser);
+
         SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(36);
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setUsername("Test Judge");
         judgeUserAccount.setEmailAddress("test.judge@example.com");
         judgeUserAccount.setSecurityGroupEntities(List.of(judgesSecurityGroup));
+        judgeUserAccount.setCreatedBy(testUser);
+        judgeUserAccount.setLastModifiedBy(testUser);
+        UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
         SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(20);
@@ -56,11 +63,15 @@ class AuthorisationServiceTest {
         bristolUserAccount.setUsername("Test Bristol");
         bristolUserAccount.setEmailAddress("test.bristol@example.com");
         bristolUserAccount.setSecurityGroupEntities(List.of(bristolStaff, bristolAppr));
+        bristolUserAccount.setCreatedBy(testUser);
+        bristolUserAccount.setLastModifiedBy(testUser);
         userAccountRepository.saveAndFlush(bristolUserAccount);
 
         UserAccountEntity newUser = new UserAccountEntity();
         newUser.setUsername("Test New");
         newUser.setEmailAddress("test.new@example.com");
+        newUser.setCreatedBy(testUser);
+        newUser.setLastModifiedBy(testUser);
         userAccountRepository.saveAndFlush(newUser);
     }
 

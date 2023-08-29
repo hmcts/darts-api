@@ -2,18 +2,15 @@
   "courthouse": "EDINBURGH",
   "case_number": "case1",
   "defendants": [
-    "Jow Bloggs",
-    "aDefendant"
+    "Jow Bloggs"
   ],
   "judges": [
     "Mr Judge"
   ],
   "prosecutors": [
-    "Mrs Prosecutor",
-    "aProsecutor"
+    "Mrs Prosecutor"
   ],
   "defenders": [
-    "Mr Defender",
-    "aDefence"
+    "Mr Defender"
   ]
 }

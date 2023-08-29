@@ -2,26 +2,20 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.OffsetDateTime;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = "event_handler")
 @Getter
 @Setter
-public class EventHandlerEntity implements JpaAuditing {
+public class EventHandlerEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "evh_id")
@@ -44,15 +38,4 @@ public class EventHandlerEntity implements JpaAuditing {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
-    @CreationTimestamp
-    @Column(name = "created_ts")
-    private OffsetDateTime createdTimestamp;
-
-    @UpdateTimestamp
-    @Column(name = "last_modified_ts")
-    private OffsetDateTime modifiedTimestamp;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "last_modified_by")
-    private UserAccountEntity modifiedBy;
 }

@@ -1,1 +1,1 @@
-{"code":"400 BAD_REQUEST","message":"courthouse must not be null"}
+{"violations":[{"field":"courthouse","message":"must not be null"}],"type":"https://zalando.github.io/problem/constraint-violation","status":400,"title":"Constraint Violation"}

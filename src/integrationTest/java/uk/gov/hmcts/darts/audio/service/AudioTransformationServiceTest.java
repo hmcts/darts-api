@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -19,7 +18,7 @@ import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.testutils.data.CourtroomTestData;
+import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,10 +36,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.ExternalObjectDirectoryTestData.createExternalObjectDirectory;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
@@ -69,6 +66,9 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @MockBean
     FileOperationService mockFileOperationService;
+
+    @Autowired
+    private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
     @Mock
     private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
@@ -113,7 +113,10 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @Test
     void shouldSaveTransientDataLocation() {
-        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadMediaRequestEntity();
+
+        var systemUser = dartsDatabase.createSystemUserAccountEntity();
+        var testUser = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(testUser);
 
         when(mockTransientObjectDirectoryService.saveTransientDataLocation(
             mediaRequestEntity,
@@ -213,7 +216,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
             dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId());
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();
-        ExternalObjectDirectoryEntity externalObjectDirectory1 = createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity externalObjectDirectory1 = externalObjectDirectoryStub.createExternalObjectDirectory(
             newMedia,
             objectDirectoryStatus,
             externalLocationTypeEntity,
@@ -221,7 +224,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         );
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory1);
 
-        ExternalObjectDirectoryEntity externalObjectDirectory2 = createExternalObjectDirectory(
+        ExternalObjectDirectoryEntity externalObjectDirectory2 = externalObjectDirectoryStub.createExternalObjectDirectory(
             newMedia,
             objectDirectoryStatus,
             externalLocationTypeEntity,
@@ -237,14 +240,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     }
 
     private CourtroomEntity somePersistedCourtroom() {
-        CourthouseEntity courthouse = createCourthouse("some-courthouse");
-        CourtroomEntity courtroom = CourtroomTestData.createCourtRoomWithNameAtCourthouse(
-            createCourthouse("NEWCASTLE"),
-            "some-room"
-        );
-        courtroom.setCourthouse(courthouse);
-        dartsDatabase.save(courtroom);
-        return courtroom;
+        return dartsDatabase.createCourtroomUnlessExists("some-courthouse", "some-room");
     }
 
     @Test

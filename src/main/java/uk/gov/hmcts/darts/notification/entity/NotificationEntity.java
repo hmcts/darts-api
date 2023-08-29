@@ -14,13 +14,11 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
-
-import java.time.OffsetDateTime;
 
 import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
@@ -30,7 +28,8 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificationEntity {
+@EqualsAndHashCode(callSuper = true)
+public class NotificationEntity extends CreatedModifiedBaseEntity {
 
     public static final String ID = "not_id";
     public static final String EVENT_ID = "notification_event";
@@ -39,8 +38,6 @@ public class NotificationEntity {
     public static final String STATUS = "notification_status";
     public static final String ATTEMPTS = "send_attempts";
     public static final String TEMPLATE_VALUES = "template_values";
-    public static final String CREATED_DATE_TIME = "created_ts";
-    public static final String LAST_MODIFIED_TS = "last_modified_ts";
     public static final String TABLE_NAME = "notification";
 
     @Id
@@ -68,13 +65,5 @@ public class NotificationEntity {
 
     @Column(name = TEMPLATE_VALUES)
     private String templateValues;
-
-    @CreationTimestamp
-    @Column(name = CREATED_DATE_TIME)
-    private OffsetDateTime createdDateTime;
-
-    @UpdateTimestamp
-    @Column(name = LAST_MODIFIED_TS)
-    private OffsetDateTime lastUpdated;
 
 }

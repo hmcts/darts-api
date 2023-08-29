@@ -224,7 +224,7 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostWithExistingCaseButNoHearing() throws Exception {
-        dartsDatabase.givenTheDatabaseContainsCourtCaseAndCourthouseWithRoom("case1", "EDINBURGH", "1");
+        dartsDatabase.createCase("EDINBURGH", "case1");
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(

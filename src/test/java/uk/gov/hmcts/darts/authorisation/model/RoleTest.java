@@ -7,9 +7,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_CLERK;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.COURT_MANAGER;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_CLERK;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 
 class RoleTest {
 

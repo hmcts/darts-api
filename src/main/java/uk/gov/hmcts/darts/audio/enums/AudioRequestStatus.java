@@ -4,5 +4,6 @@ public enum AudioRequestStatus {
     OPEN,
     PROCESSING,
     FAILED,
-    COMPLETED
+    COMPLETED,
+    EXPIRED
 }

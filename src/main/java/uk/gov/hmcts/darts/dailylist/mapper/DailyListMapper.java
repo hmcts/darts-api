@@ -21,7 +21,6 @@ public class DailyListMapper {
     public DailyListEntity mapToDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse) {
 
         DailyListEntity dailyListEntity = new DailyListEntity();
-        dailyListEntity.setVersion(1);
         mapToExistingDailyListEntity(postRequest, courthouse, dailyListEntity);
         return dailyListEntity;
     }

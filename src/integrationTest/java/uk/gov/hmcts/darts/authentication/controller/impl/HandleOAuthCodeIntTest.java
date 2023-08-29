@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.entity.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
 
 @AutoConfigureMockMvc
 @SuppressWarnings("PMD.ExcessiveImports")

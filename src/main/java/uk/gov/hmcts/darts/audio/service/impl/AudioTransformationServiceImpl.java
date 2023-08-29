@@ -49,8 +49,8 @@ import java.util.concurrent.ExecutionException;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
-import static uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
@@ -287,17 +287,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                             String notificationTemplateId) {
         log.debug("Scheduling notification for templateId: {}...", notificationTemplateId);
 
-        Integer requester = mediaRequestEntity.getRequestor();
-        var userAccountEntity = userAccountRepository.findById(requester)
-            .orElseThrow(() -> new DartsApiException(
-                AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST,
-                String.format("User record for id %s could not be obtained", requester)
-            ));
-
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
             .eventId(notificationTemplateId)
             .caseId(courtCase.getId())
-            .emailAddresses(userAccountEntity.getEmailAddress())
+            .emailAddresses(mediaRequestEntity.getRequestor().getEmailAddress())
             .build();
 
         notificationApi.scheduleNotification(saveNotificationToDbRequest);

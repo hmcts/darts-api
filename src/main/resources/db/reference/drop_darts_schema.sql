@@ -34,23 +34,30 @@ DROP TABLE courthouse_region_ae;
 DROP TABLE region;
 DROP TABLE daily_list  ;              
 DROP TABLE event       ; 
+DROP TABLE transcription_workflow;
 DROP TABLE transcription_comment ;  
 DROP TABLE transcription ; 
+DROP TABLE transcription_urgency;
 DROP TABLE hearing     ;              
 DROP TABLE media       ;
 DROP TABLE notification;              
 DROP TABLE report      ;      
 DROP TABLE automated_task;
 
-DROP TABLE urgency;
-DROP TABLE user_account;
+DROP TABLE audit;
+DROP TABLE audit_activity;
+DROP TABLE external_service_auth_token;
+
 DROP TABLE court_case;
 DROP TABLE event_handler; 
 DROP TABLE transcription_type;
 DROP TABLE courtroom; 
-DROP TABLE courthouse ;   
+DROP TABLE courthouse;   
+DROP TABLE user_account;
  
 DROP SEQUENCE ann_seq;
+DROP SEQUENCE aud_seq;
+DROP SEQUENCE aua_seq;
 DROP SEQUENCE aut_seq;
 DROP SEQUENCE car_seq;
 DROP SEQUENCE cas_seq;
@@ -66,6 +73,7 @@ DROP SEQUENCE eve_seq;
 DROP SEQUENCE evh_seq;
 DROP SEQUENCE eod_seq;
 DROP SEQUENCE elt_seq;
+DROP SEQUENCE esa_seq;
 DROP SEQUENCE jud_seq;
 DROP SEQUENCE hea_seq;
 DROP SEQUENCE med_seq;
@@ -80,8 +88,10 @@ DROP SEQUENCE tod_seq;
 DROP SEQUENCE tra_seq;
 DROP SEQUENCE trc_seq;
 DROP SEQUENCE trt_seq;
-DROP SEQUENCE urg_seq;
+DROP SEQUENCE tru_seq;
+DROP SEQUENCE trw_seq;
 DROP SEQUENCE usr_seq;
+
 
 DROP SCHEMA darts;
 

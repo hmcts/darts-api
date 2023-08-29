@@ -16,6 +16,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class MediaEntity extends VersionedEntity {
+public class MediaEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "med_id")
@@ -63,6 +64,4 @@ public class MediaEntity extends VersionedEntity {
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
-    @Column(name = "superseded")
-    private Boolean superseded;
 }

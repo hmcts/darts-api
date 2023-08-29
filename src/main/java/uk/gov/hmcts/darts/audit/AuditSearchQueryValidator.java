@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.audit;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
+import uk.gov.hmcts.darts.common.exception.AuditApiError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 public class AuditSearchQueryValidator implements Validator {
     @Override
@@ -17,12 +19,11 @@ public class AuditSearchQueryValidator implements Validator {
             && auditSearchQuery.getEventId() == null
             && auditSearchQuery.getFromDate() == null
             && auditSearchQuery.getToDate() == null) {
-            errors.rejectValue(null, "filters.empty", "All filters were empty.");
-            return;
+            throw new DartsApiException(AuditApiError.FILTERS_WERE_EMPTY);
         }
 
         if (auditSearchQuery.getFromDate() == null ^ auditSearchQuery.getToDate() == null) {
-            errors.rejectValue(null, "dates.empty", "When using date filters, both must be provided.");
+            throw new DartsApiException(AuditApiError.DATE_EMPTY);
         }
     }
 }

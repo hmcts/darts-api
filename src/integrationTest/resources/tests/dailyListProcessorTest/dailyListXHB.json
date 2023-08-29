@@ -60,12 +60,10 @@
                 },
                 "advocates": [
                   {
-                    "personal_details": {
-                      "name": {
-                        "citizen_name_forename": "ProsecutorName",
-                        "citizen_name_surname": "XHB",
-                        "citizen_name_requested_name": ""
-                      }
+                    "name": {
+                      "citizen_name_forename": "ProsecutorName",
+                      "citizen_name_surname": "XHB",
+                      "citizen_name_requested_name": ""
                     }
                   }
                 ]
@@ -78,7 +76,7 @@
                       "citizen_name_surname": "XHB",
                       "citizen_name_requested_name": ""
                     },
-                    "is_masked": "no"
+                    "is_masked": "false"
                   },
                   "charges": [
                     {
@@ -89,12 +87,10 @@
                   ],
                   "counsel": [
                     {
-                      "personal_details": {
-                        "name": {
-                          "citizen_name_forename": "DefenceName",
-                          "citizen_name_surname": "XHB",
-                          "citizen_name_requested_name": ""
-                        }
+                      "name": {
+                        "citizen_name_forename": "DefenceName",
+                        "citizen_name_surname": "XHB",
+                        "citizen_name_requested_name": ""
                       }
                     }
                   ]
@@ -133,12 +129,10 @@
                 },
                 "advocates": [
                   {
-                    "personal_details": {
-                      "name": {
-                        "citizen_name_forename": "ProsecutorName",
-                        "citizen_name_surname": "XHB",
-                        "citizen_name_requested_name": ""
-                      }
+                    "name": {
+                      "citizen_name_forename": "ProsecutorName",
+                      "citizen_name_surname": "XHB",
+                      "citizen_name_requested_name": ""
                     }
                   }
                 ]
@@ -151,7 +145,7 @@
                       "citizen_name_surname": "XHB",
                       "citizen_name_requested_name": ""
                     },
-                    "is_masked": "no"
+                    "is_masked": "false"
                   },
                   "charges": [
                     {
@@ -162,12 +156,10 @@
                   ],
                   "counsel": [
                     {
-                      "personal_details": {
-                        "name": {
-                          "citizen_name_forename": "DefenceName",
-                          "citizen_name_surname": "XHB",
-                          "citizen_name_requested_name": ""
-                        }
+                      "name": {
+                        "citizen_name_forename": "DefenceName",
+                        "citizen_name_surname": "XHB",
+                        "citizen_name_requested_name": ""
                       }
                     }
                   ]
