@@ -15,7 +15,7 @@ import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
-import uk.gov.hmcts.darts.dailylist.model.DailyList;
+import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 
@@ -68,10 +68,10 @@ class DailyListServiceImplTest {
         )).thenReturn(new DailyListEntity());
         String requestBody = getContentsFromFile(
             "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
-        DailyList dailyList = objectMapper.readValue(requestBody, DailyList.class);
+        DailyListJsonObject dailyList = objectMapper.readValue(requestBody, DailyListJsonObject.class);
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, dailyList);
-        service.processIncomingDailyList(request);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, dailyList, null, null);
+        service.saveDailyListToDatabase(request);
 
         //make sure an exception is not thrown.
         verify(dailyListRepository).saveAndFlush(any(DailyListEntity.class));

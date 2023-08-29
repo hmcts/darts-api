@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,12 +21,17 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.api.DailyListsApi;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
-import uk.gov.hmcts.darts.dailylist.model.DailyList;
+import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
+import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
+import uk.gov.hmcts.darts.dailylist.model.Problem;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
+import uk.gov.hmcts.darts.dailylist.validation.DailyListPostValidator;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import javax.validation.Valid;
@@ -46,32 +51,83 @@ public class DailyListController implements DailyListsApi {
     @Autowired
     private DailyListProcessor processor;
 
+    @Override
+    @Operation(
+        operationId = "dailylistsPatch",
+        summary = "Update existing DailyList",
+        description = "description",
+        tags = {"DailyLists"},
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Created", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = PostDailyListResponse.class)),
+                @Content(mediaType = "application/json+problem", schema = @Schema(implementation = PostDailyListResponse.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Problem.class)),
+                @Content(mediaType = "application/json+problem", schema = @Schema(implementation = Problem.class))
+            })
+        }
+    )
+    @RequestMapping(
+        method = RequestMethod.PATCH,
+        value = "/dailylists",
+        produces = {"application/json", "application/json+problem"}
+    )
+    public ResponseEntity<PostDailyListResponse> dailylistsPatch(
+        @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
+        @NotNull @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = true) DailyListJsonObject jsonDocument
+    ) {
+        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
+        dailyListPatchRequest.setDailyListId(dalId);
+        dailyListPatchRequest.setDailyListJson(jsonDocument);
+        PostDailyListResponse postDailyListResponse = dailyListService.updateDailyListInDatabase(dailyListPatchRequest);
+        return new ResponseEntity<>(postDailyListResponse, HttpStatus.OK);
+
+    }
+
+    @Override
     @Operation(
         operationId = "dailylistsPost",
         summary = "XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.",
         description = "description",
         tags = {"DailyLists"},
         responses = {
-            @ApiResponse(responseCode = "201", description = "Created"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+            @ApiResponse(responseCode = "200", description = "Created", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = PostDailyListResponse.class)),
+                @Content(mediaType = "application/json+problem", schema = @Schema(implementation = PostDailyListResponse.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Problem.class)),
+                @Content(mediaType = "application/json+problem", schema = @Schema(implementation = Problem.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = "/dailylists",
-        consumes = {"application/json"}
+        produces = {"application/json", "application/json+problem"}
     )
-    @Override
-    public ResponseEntity<Void> dailylistsPost(
+    public ResponseEntity<PostDailyListResponse> dailylistsPost(
         @NotNull @Parameter(name = "source_system", description = "The source system that has sent the message", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "source_system", required = true) String sourceSystem,
-        @Parameter(name = "DailyList", description = "", required = true) @Valid @RequestBody DailyList dailyList
+        @Parameter(name = "courthouse", description = "The courthouse that the dailyList represents. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = false) String courthouse,
+        @Parameter(name = "hearing_date", description = "The date that the dailyList represents. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "hearing_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hearingDate,
+        @Parameter(name = "unique_id", description = "The uniqueId. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "unique_id", required = false) String uniqueId,
+        @Parameter(name = "published_ts", description = "The date that the dailyList was published. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "published_ts", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime publishedTs,
+        @Parameter(name = "xml_document", description = "XML representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just stored in the database as a string", in = ParameterIn.HEADER) @RequestHeader(value = "xml_document", required = false) String xmlDocument,
+        @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = false) DailyListJsonObject jsonDocument
     ) {
         DailyListPostRequest postRequest = new DailyListPostRequest();
         postRequest.setSourceSystem(sourceSystem);
-        postRequest.setDailyList(dailyList);
+        postRequest.setCourthouse(courthouse);
+        postRequest.setDailyListXml(xmlDocument);
+        postRequest.setDailyListJson(jsonDocument);
+        postRequest.setHearingDate(hearingDate);
+        postRequest.setUniqueId(uniqueId);
+        postRequest.setPublishedDateTime(publishedTs);
 
-        dailyListService.processIncomingDailyList(postRequest);
-        return new ResponseEntity<>(HttpStatus.OK);
+        DailyListPostValidator.validate(postRequest);
+        PostDailyListResponse postDailyListResponse = dailyListService.saveDailyListToDatabase(postRequest);
+        return new ResponseEntity<>(postDailyListResponse, HttpStatus.OK);
 
     }
 

@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.model.CitizenName;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
-import uk.gov.hmcts.darts.dailylist.model.DailyList;
+import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.Defendant;
 import uk.gov.hmcts.darts.dailylist.model.Hearing;
 import uk.gov.hmcts.darts.dailylist.model.PersonalDetails;
@@ -102,7 +102,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     private void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException {
-        DailyList dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyList.class);
+        DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
 
         for (CourtList courtList : dailyList.getCourtLists()) {

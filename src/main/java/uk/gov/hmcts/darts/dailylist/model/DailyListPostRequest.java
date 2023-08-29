@@ -4,11 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class DailyListPostRequest {
 
     String sourceSystem;
-    DailyList dailyList;
+    String courthouse;
+    LocalDate hearingDate;
+    String dailyListXml;
+    DailyListJsonObject dailyListJson;
+    String uniqueId;
+    OffsetDateTime publishedDateTime;
 }

@@ -27,11 +27,88 @@ paths:
             enum: [ CPP, XHB ]
           description: "The source system that has sent the message"
           required: true
-      requestBody:
-        $ref: '#/components/requestBodies/DailyListPost'
+        - in: query
+          name: courthouse
+          schema:
+            type: string
+          description: "The courthouse that the dailyList represents. <p>
+                        **Conditional mandatory**, required if json_document not provided"
+        - in: query
+          name: hearing_date
+          schema:
+            type: string
+            format: date
+          description: "The date that the dailyList represents. <p>
+                        **Conditional mandatory**, required if json_document not provided"
+        - in: query
+          name: unique_id
+          schema:
+            type: string
+          description: "The uniqueId. <p>
+                        **Conditional mandatory**, required if json_document not provided"
+        - in: query
+          name: published_ts
+          schema:
+            type: string
+            format: date-time
+          description: "The date that the dailyList was published. <p>
+                        **Conditional mandatory**, required if json_document not provided"
+        - in: header
+          name: xml_document
+          schema:
+            type: string
+          description: "XML representation of the 'document' received in the addDocument request.<p>
+            **Conditional mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just stored in the database as a string"
+        - in: header
+          name: json_document
+          schema:
+            $ref: '#/components/schemas/PostDailyListJson'
+          description: "JSON representation of the 'document' received in the addDocument request.<p>
+            **Conditional mandatory** either this or xml_document needs to be provided, or both."
+
       responses:
-        '201':
+        '200':
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDailyListResponse'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+    patch:
+      tags:
+        - DailyLists
+      summary: Update existing DailyList
+      description: |-
+        description
+      parameters:
+        - in: query
+          name: dal_id
+          schema:
+            type: integer
+          description: "ID of the DailyList in the database."
+          required: true
+        - in: header
+          name: json_document
+          schema:
+            $ref: '#/components/schemas/PostDailyListJson'
+          description: "JSON representation of the 'document' received in the addDocument request.<p>
+            **Conditional mandatory** either this or xml_document needs to be provided, or both."
+          required: true
+
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostDailyListResponse'
 
         '500':
           description: Internal Server Error
@@ -156,12 +233,6 @@ components:
   #-----------------#
 
   requestBodies:
-    DailyListPost:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/DailyList'
     CreateCase:
       required: true
       content:
@@ -175,7 +246,16 @@ components:
     #-----------------#
 
   schemas:
-    DailyList:
+    PostDailyListJson:
+      $ref: '#/components/schemas/DailyListJsonObject'
+    PostDailyListResponse:
+      type: object
+      properties:
+        dal_id:
+          description: ID of the created DailyList.
+          type: integer
+          example: 42
+    DailyListJsonObject:
       type: object
       properties:
         document_id:
