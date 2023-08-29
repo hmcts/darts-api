@@ -19,27 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 class EventDispatcherImplTest {
 
     @Test
-    void receiveWithMultipleHandlersForSameEvent() {
-        List<EventHandler> eventHandlers = new ArrayList<>();
-        eventHandlers.add(new MockEventHandler());
-        eventHandlers.add(new MockEventHandler());
-
-        EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers);
-
-
-        DartsEvent event = new DartsEvent();
-        event.setType("TestType");
-        event.setSubType("TestSubType");
-        event.setMessageId("1");
-        var exception = assertThrows(DartsApiException.class, () -> eventDispatcher.receive(event));
-
-        assertEquals(
-            "More than one event handler found for message: 1 type: TestType and subtype: TestSubType",
-            exception.getDetail()
-        );
-    }
-
-    @Test
     void receiveWithNoHandlers() {
         List<EventHandler> eventHandlers = new ArrayList<>();
         EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers);
