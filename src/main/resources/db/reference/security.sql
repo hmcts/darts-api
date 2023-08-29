@@ -2,11 +2,12 @@
 --    added NOT NULL to all PK columns and "name" columns
 --    added tablespaces to table creation (index ones already existed)
 --V14 added following columns to all tables (apart from ae tables - not supported by hibernate) and FKs to user_account
-        ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
-        ,created_by                  INTEGER                       NOT NULL
-        ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-        ,last_modified_by            INTEGER                       NOT NULL  
-     moved INSERT statements to new file security_test_data.sql
+--        ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+--        ,created_by                  INTEGER                       NOT NULL
+--        ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+--        ,last_modified_by            INTEGER                       NOT NULL  
+--     moved INSERT statements to new file security_test_data.sql
+--v15 comment preceding lines 
 
 -- assuming this already exists:
 -- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
