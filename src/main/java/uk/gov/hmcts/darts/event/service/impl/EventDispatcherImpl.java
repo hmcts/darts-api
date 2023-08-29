@@ -24,10 +24,10 @@ public class EventDispatcherImpl implements EventDispatcher {
     @Override
     public void receive(DartsEvent event) {
         eventHandlers.stream()
-              .filter(handler -> handler.isHandlerFor(event))
-              .findFirst().orElseThrow(() -> new DartsApiException(
-                    EVENT_HANDLER_NOT_FOUND,
-                    String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())))
-              .handle(event);
+            .filter(handler -> handler.isHandlerFor(event))
+            .findFirst().orElseThrow(() -> new DartsApiException(
+                EVENT_HANDLER_NOT_FOUND,
+                String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())))
+            .handle(event);
     }
 }
