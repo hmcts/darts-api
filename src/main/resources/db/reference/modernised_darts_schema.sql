@@ -84,16 +84,30 @@
 --    created table case_judge_ae to contain (cas_id, jud_id) composite PK    
 --v41 add table automated_task
 --v42 add tables audit, audit_activity, external_service_auth_token and associated constraints and sequences
-      rename table urgency to transcription_urgency
-      add new additional check constraints section
+--    rename table urgency to transcription_urgency
+--    add new additional check constraints section
 --v43 removed superseded and version from schema
-      add following columns to all tables (apart from ae tables - not supported by hibernate) and FKs to user_account
-        ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
-        ,created_by                  INTEGER                       NOT NULL
-        ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-        ,last_modified_by            INTEGER                       NOT NULL  
-      updated daily-list - rename daily_list_content to daily_list_content_json and add new column daily_list_content_xml
-      moved INSERT statements to new file standing_data.sql
+--    added following columns to all tables (apart from ae tables - not supported by hibernate) and FKs to user_account
+--      ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+--      ,created_by                  INTEGER                       NOT NULL
+--      ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+--      ,last_modified_by            INTEGER                       NOT NULL  
+--    updated daily-list - rename daily_list_content to daily_list_content_json and add new column daily_list_content_xml
+--    moved INSERT statements to new file standing_data.sql
+--v44 removed PK device_type.der_id 
+--    added new PK device_type.node_id
+--    added new column device_register.device_type 
+--    added new set defaults section 
+--    added default value DAR to column device_register.device_type
+--v45 add expiry_ts to media_request, amend request_status, request_type, start_ts, end_ts to not null
+--    rename media_hearing_fk to media_request_hearing_fk as per naming convention
+--    add foreign key on media_request.requestor to user_account
+--v46 add transcription_workflow table, to remove workflow related elements from transcription.  
+--    adding record_id and file_id to external_object_directory to allow full addressability for items needing to fields
+--    add current_owner to media_request, to allow requestor and current_owner to diverge following creation
+--    add is_log_entry to event, to differentiate between events coming from case management / mid tier
+--    added automated_task.task_enabled as a not null boolean
+
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -132,6 +146,7 @@
 -- transcription_comment       TRC
 -- transcription_type          TRT
 -- transcription_urgency       TRU
+-- transcription_workflow      TRW
 -- transient_object_directory  TOD
 -- user_account                USR
 
@@ -247,6 +262,7 @@ CREATE TABLE automated_task
 ,task_description            CHARACTER VARYING             NOT NULL
 ,cron_expression             CHARACTER VARYING             NOT NULL
 ,cron_editable               BOOLEAN                       NOT NULL
+,task_enabled                BOOLEAN                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -315,7 +331,7 @@ IS 'foreign key from case_retention';
 CREATE TABLE court_case
 (cas_id                      INTEGER                       NOT NULL
 ,cth_id                      INTEGER                       NOT NULL
-,evh_id                      INTEGER               -- must map to one of the reporting restriction elements
+,evh_id                      INTEGER               -- must map to one of the reporting restriction elements found on event_handler
 ,case_object_id              CHARACTER VARYING(16)
 ,case_number                 CHARACTER VARYING     -- maps to c_case_id in legacy                    
 ,case_closed                 BOOLEAN
@@ -482,9 +498,9 @@ COMMENT ON COLUMN defendant.cas_id
 IS 'foreign key from court_case';
 
 CREATE TABLE device_register
-(der_id                      INTEGER                       NOT NULL
+(node_id                    INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
-,node_id                     INTEGER                  
+,device_type                 CHARACTER VARYING             NOT NULL
 ,hostname                    CHARACTER VARYING
 ,ip_address                  CHARACTER VARYING
 ,mac_address                 CHARACTER VARYING
@@ -497,7 +513,7 @@ CREATE TABLE device_register
 COMMENT ON TABLE device_register
 IS 'corresponds to tbl_moj_node from legacy';
 
-COMMENT ON COLUMN device_register.der_id
+COMMENT ON COLUMN device_register.node_id
 IS 'primary key of device_register';
 
 COMMENT ON COLUMN device_register.ctr_id 
@@ -510,11 +526,12 @@ CREATE TABLE event
 ,evh_id                      INTEGER
 ,event_object_id             CHARACTER VARYING(16)
 ,event_id                    INTEGER
-,event_name                  CHARACTER VARYING -- details of the handler, at point in time the event arose
+,event_name                  CHARACTER VARYING -- details of the handler, at point in time the event arose, lots of discussion re import of legacy, retain.
 ,event_text                  CHARACTER VARYING
 ,event_ts                    TIMESTAMP WITH TIME ZONE  
 ,case_number                 CHARACTER VARYING(32)[] 
 ,message_id                  CHARACTER VARYING
+,is_log_entry                BOOLEAN                       NOT NULL  -- needs to be not null to ensure only 2 valid states
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -589,11 +606,13 @@ CREATE TABLE external_object_directory
 ,med_id                      INTEGER
 ,tra_id                      INTEGER
 ,ann_id                      INTEGER
-,ods_id                      INTEGER                       NOT NULL  -- FK to moj_object_directory_status
-,elt_id                      INTEGER                       NOT NULL  -- one of inbound,unstructured,arm,tempstore,vodafone 
+,ods_id                      INTEGER                       NOT NULL  -- FK to object_directory_status
+,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 -- additional optional FKs to other relevant internal objects would require columns here
 ,external_location           UUID                          NOT NULL
-,checksum                    CHARACTER VARYING
+,external_file_id            CHARACTER VARYING  
+,external_record_id          CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
+,checksum                    CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,transfer_attempts           INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -782,13 +801,15 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_media';
 CREATE TABLE media_request
 (mer_id                      INTEGER                       NOT NULL
 ,hea_id                      INTEGER                       NOT NULL
-,requestor                   INTEGER                       NOT NULL  -- FK to moj_user.moj_usr_id
-,request_status              CHARACTER VARYING
-,request_type                CHARACTER VARYING
+,requestor                   INTEGER                       NOT NULL  -- FK to user_account
+,current_owner               INTEGER                       NOT NULL  -- FK to user_account
+,request_status              CHARACTER VARYING             NOT NULL
+,request_type                CHARACTER VARYING             NOT NULL
 ,req_proc_attempts           INTEGER 
-,start_ts                    TIMESTAMP WITH TIME ZONE
-,end_ts                      TIMESTAMP WITH TIME ZONE
+,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
+,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_accessed_ts            TIMESTAMP WITH TIME ZONE
+,expiry_ts                   TIMESTAMP WITH TIME ZONE
 ,output_filename             CHARACTER VARYING
 ,output_format               CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -807,7 +828,7 @@ COMMENT ON COLUMN media_request.requestor
 IS 'requestor of the media request, possibly migrated from moj_transformation_request_s';
 
 COMMENT ON COLUMN media_request.request_status
-IS 'status of the migration request';
+IS 'status of the media request';
 
 COMMENT ON COLUMN media_request.req_proc_attempts
 IS 'number of attempts by ATS to process the request';
@@ -954,22 +975,18 @@ IS 'primary key of retention_policy';
 CREATE TABLE transcription
 (tra_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
+,trt_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                  
-,trt_id                      INTEGER                       NOT NULL  
-,tru_id                      INTEGER                  -- remains nullable, as nulls present in source data ( c_urgency)       
-,hea_id                      INTEGER                  -- remains nullable, until migration is complete
-,transcription_object_id     CHARACTER VARYING(16)    -- legacy pk from moj_transcription_s.r_object_id
-,company                     CHARACTER VARYING        -- effectively unused in legacy, either null or "<this field will be completed by the system>"
-,requestor                   CHARACTER VARYING        -- 1055 distinct, from <forname><surname> to <AAANNA>
-,current_state               CHARACTER VARYING        -- 23 distinct, far more than 5 expected (requested,awaiting authorisation,with transcribed, complete, rejected)
-,current_state_ts            TIMESTAMP WITH TIME ZONE -- date & time record entered the current c_current_state
-,hearing_date                TIMESTAMP WITH TIME ZONE -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
-,start_ts                    TIMESTAMP WITH TIME ZONE -- both c_start and c_end have time components
-,end_ts                      TIMESTAMP WITH TIME ZONE -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
-,requested_by                INTEGER                  -- will need to be FK to users table
-,approved_by                 INTEGER                  -- will need to be FK to users table
-,approved_on_ts              TIMESTAMP WITH TIME ZONE
-,transcribed_by              INTEGER                  -- will need to be FK to users table
+,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)       
+,hea_id                      INTEGER                                -- remains nullable, until migration is complete
+,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
+,company                     CHARACTER VARYING                      -- effectively unused in legacy, either null or "<this field will be completed by the system>"
+,requestor                   CHARACTER VARYING                      -- 1055 distinct, from <forname><surname> to <AAANNA>
+,current_state               CHARACTER VARYING                      -- 23 distinct, far more than 5 expected (requested,awaiting authorisation,with transcribed, complete, rejected)
+,current_state_ts            TIMESTAMP WITH TIME ZONE               -- date & time record entered the current c_current_state
+,hearing_date                TIMESTAMP WITH TIME ZONE               -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
+,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
+,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -1078,6 +1095,18 @@ IS 'inherited from tbl_moj_urgency.urgency_id';
 COMMENT ON COLUMN transcription_urgency.description
 IS 'inherited from tbl_moj_urgency.description';
 
+CREATE TABLE transcription_workflow
+(trw_id                      INTEGER                       NOT NULL 
+,tra_id                      INTEGER                       NOT NULL  -- FK to transcription 
+,workflow_stage              CHARACTER VARYING             NOT NULL  -- will include REQUEST, APPROVAL etc
+,workflow_comment            CHARACTER VARYING             
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
+) TABLESPACE darts_tables;
+
+
 
 CREATE TABLE transient_object_directory
 (tod_id                      INTEGER                       NOT NULL
@@ -1113,6 +1142,7 @@ COMMENT ON COLUMN user_account.usr_id
 IS 'primary key of user_account';
 COMMENT ON COLUMN user_account.dm_user_s_object_id
 IS 'internal Documentum primary key from dm_user_s';
+
 
 -- primary keys
 
@@ -1158,7 +1188,7 @@ ALTER TABLE defence               ADD PRIMARY KEY USING INDEX defence_pk;
 CREATE UNIQUE INDEX defendant_pk ON defendant(dfd_id) TABLESPACE darts_indexes;
 ALTER TABLE defendant             ADD PRIMARY KEY USING INDEX defendant_pk;
 
-CREATE UNIQUE INDEX device_register_pk ON device_register(der_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX device_register_pk ON device_register(node_id) TABLESPACE darts_indexes;
 ALTER TABLE device_register         ADD PRIMARY KEY USING INDEX device_register_pk;
 
 CREATE UNIQUE INDEX event_pk ON event(eve_id) TABLESPACE darts_indexes;
@@ -1227,11 +1257,16 @@ ALTER TABLE transcription_type      ADD PRIMARY KEY USING INDEX transcription_ty
 CREATE UNIQUE INDEX transcription_urgency_pk ON transcription_urgency(tru_id) TABLESPACE darts_indexes;
 ALTER TABLE transcription_urgency                 ADD PRIMARY KEY USING INDEX transcription_urgency_pk;
 
+CREATE UNIQUE INDEX transcription_workflow_pk ON transcription_workflow( trw_id) TABLESPACE darts_indexes;
+ALTER TABLE transcription_workflow               ADD PRIMARY KEY USING INDEX transcription_workflow_pk;
+
 CREATE UNIQUE INDEX transient_object_directory_pk ON transient_object_directory(tod_id) TABLESPACE darts_indexes;
 ALTER TABLE transient_object_directory  ADD PRIMARY KEY USING INDEX transient_object_directory_pk;
 
 CREATE UNIQUE INDEX user_account_pk ON user_account( usr_id) TABLESPACE darts_indexes;
 ALTER TABLE user_account            ADD PRIMARY KEY USING INDEX user_account_pk;
+
+
 
 -- defaults for postgres sequences, datatype->bigint, increment->1, nocycle is default, owned by none
 CREATE SEQUENCE ann_seq CACHE 20;
@@ -1268,7 +1303,9 @@ CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
 CREATE SEQUENCE trt_seq CACHE 20;
 CREATE SEQUENCE tru_seq CACHE 20;
+CREATE SEQUENCE trw_seq CACHE 20;
 CREATE SEQUENCE usr_seq CACHE 20;
+
 
 -- foreign keys
 
@@ -1574,7 +1611,7 @@ ADD CONSTRAINT media_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE media_request               
-ADD CONSTRAINT media_hearing_fk
+ADD CONSTRAINT media_request_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
 ALTER TABLE media_request
@@ -1584,6 +1621,14 @@ FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 ALTER TABLE media_request   
 ADD CONSTRAINT media_request_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE media_request   
+ADD CONSTRAINT media_request_requestor_fk
+FOREIGN KEY (requestor) REFERENCES user_account(usr_id);
+
+ALTER TABLE media_request   
+ADD CONSTRAINT media_request_current_owner_fk
+FOREIGN KEY (current_owner) REFERENCES user_account(usr_id);
 
 ALTER TABLE notification                
 ADD CONSTRAINT notification_case_fk
@@ -1666,18 +1711,6 @@ ADD CONSTRAINT transcription_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE transcription               
-ADD CONSTRAINT transcription_requested_by_fk
-FOREIGN KEY (requested_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE transcription               
-ADD CONSTRAINT transcription_approved_by_fk
-FOREIGN KEY (approved_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE transcription               
-ADD CONSTRAINT transcription_transcribed_by_fk
-FOREIGN KEY (transcribed_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE transcription               
 ADD CONSTRAINT transcription_transcription_type_fk
 FOREIGN KEY (trt_id) REFERENCES transcription_type(trt_id);
 
@@ -1713,6 +1746,18 @@ ALTER TABLE transcription_urgency
 ADD CONSTRAINT transcription_urgency_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
+ALTER TABLE transcription_workflow
+ADD CONSTRAINT transcription_workflow_transcription_fk
+FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
+
+ALTER TABLE transcription_workflow
+ADD CONSTRAINT transcription_workflow_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE transcription_workflow
+ADD CONSTRAINT transcription_workflow_last_modified_by_fk
+FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
 ALTER TABLE transient_object_directory
 ADD CONSTRAINT transient_object_directory_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
@@ -1728,6 +1773,11 @@ FOREIGN KEY (mer_id) REFERENCES media_request(mer_id);
 ALTER TABLE transient_object_directory  
 ADD CONSTRAINT tod_object_directory_status_fk
 FOREIGN KEY (ods_id) REFERENCES object_directory_status(ods_id);
+
+
+
+-- set defaults
+ALTER TABLE device_register ALTER COLUMN device_type SET DEFAULT 'DAR';
 
 -- additional check constraints
 
@@ -1790,6 +1840,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON transcription TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_comment TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_urgency TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_workflow TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transient_object_directory TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON user_account TO darts_user;
 
@@ -1827,6 +1878,7 @@ GRANT SELECT,UPDATE ON  tra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trt_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tru_seq TO darts_user;
+GRANT SELECT,UPDATE ON  trw_seq TO darts_user;
 GRANT SELECT,UPDATE ON  usr_seq TO darts_user;
 
 GRANT USAGE ON SCHEMA DARTS TO darts_user;
