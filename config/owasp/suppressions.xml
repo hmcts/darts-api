@@ -42,5 +42,14 @@
     <packageUrl regex="true">pkg:maven/org.postgresql/postgresql@42.6.0</packageUrl>
     <vulnerabilityName>CVE-2020-21469</vulnerabilityName>
   </suppress>
+
+  <suppress until="2023-09-14">
+    <notes>A vulnerability was found in the Hot Rod client. This security issue occurs as the Hot Rod client does not
+      enable hostname validation when using TLS, possibly resulting in a man-in-the-middle (MITM) attack. Will have to
+      wait until azure-sdk-bom is updated to use newer netty library.
+    </notes>
+    <packageUrl regex="true">pkg:maven/io.netty/netty-handler@4.1.97.Final</packageUrl>
+    <vulnerabilityName>CVE-2023-4586</vulnerabilityName>
+  </suppress>
   <!--End of temporary suppression section -->
 </suppressions>
