@@ -94,8 +94,8 @@
 --      ,last_modified_by            INTEGER                       NOT NULL  
 --    updated daily-list - rename daily_list_content to daily_list_content_json and add new column daily_list_content_xml
 --    moved INSERT statements to new file standing_data.sql
---v44 removed PK device_type.der_id 
---    added new PK device_type.node_id
+--v44 removed PK device_register.der_id 
+--    added new PK device_register.node_id
 --    added new column device_register.device_type 
 --    added new set defaults section 
 --    added default value DAR to column device_register.device_type
@@ -107,7 +107,13 @@
 --    add current_owner to media_request, to allow requestor and current_owner to diverge following creation
 --    add is_log_entry to event, to differentiate between events coming from case management / mid tier
 --    added automated_task.task_enabled as a not null boolean
-
+--v47 adding NN to hostname, ip_address, mac_address on device_register
+--    amending der_seq to restart at 50000, above highest legacy value of 30121
+--    removed PK courthouse_region_ae.cra_id and associated sequence
+--    added composite PK courthouse_region_ae (cth_id,reg_id)
+--    added table transcription_status
+--    removed column transcription.current_state
+--    added column transcription.trs_id and FK to transcription_status
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -144,6 +150,7 @@
 -- retention_policy            RTP
 -- transcription               TRA
 -- transcription_comment       TRC
+-- transcription_status        TRS
 -- transcription_type          TRT
 -- transcription_urgency       TRU
 -- transcription_workflow      TRW
@@ -389,8 +396,7 @@ COMMENT ON COLUMN courthouse.courthouse_name
 IS 'directly sourced from moj_courthouse_s.c_id';
 
 CREATE TABLE courthouse_region_ae
-(cra_id                      INTEGER                       NOT NULL
-,cth_id                      INTEGER                       NOT NULL
+(cth_id                      INTEGER                       NOT NULL
 ,reg_id                      INTEGER                       NOT NULL
 ) TABLESPACE darts_tables;
 
@@ -498,12 +504,12 @@ COMMENT ON COLUMN defendant.cas_id
 IS 'foreign key from court_case';
 
 CREATE TABLE device_register
-(node_id                    INTEGER                       NOT NULL
+(node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not der_id
 ,ctr_id                      INTEGER                       NOT NULL
 ,device_type                 CHARACTER VARYING             NOT NULL
-,hostname                    CHARACTER VARYING
-,ip_address                  CHARACTER VARYING
-,mac_address                 CHARACTER VARYING
+,hostname                    CHARACTER VARYING             NOT NULL
+,ip_address                  CHARACTER VARYING             NOT NULL
+,mac_address                 CHARACTER VARYING             NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -976,13 +982,13 @@ CREATE TABLE transcription
 (tra_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,trt_id                      INTEGER                       NOT NULL
+,trs_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                  
 ,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)       
 ,hea_id                      INTEGER                                -- remains nullable, until migration is complete
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
 ,company                     CHARACTER VARYING                      -- effectively unused in legacy, either null or "<this field will be completed by the system>"
 ,requestor                   CHARACTER VARYING                      -- 1055 distinct, from <forname><surname> to <AAANNA>
-,current_state               CHARACTER VARYING                      -- 23 distinct, far more than 5 expected (requested,awaiting authorisation,with transcribed, complete, rejected)
 ,current_state_ts            TIMESTAMP WITH TIME ZONE               -- date & time record entered the current c_current_state
 ,hearing_date                TIMESTAMP WITH TIME ZONE               -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
@@ -1000,14 +1006,17 @@ IS 'primary key of transcription';
 COMMENT ON COLUMN transcription.cas_id
 IS 'foreign key from case';
 
+COMMENT ON COLUMN transcription.trt_id
+IS 'foreign key to transcription_type, sourced from moj_transcription_s.c_type';
+
+COMMENT ON COLUMN transcription.trs_id
+IS 'foreign key to transcription_status';
+
 COMMENT ON COLUMN transcription.ctr_id
 IS 'foreign key from courtroom';
 
 COMMENT ON COLUMN transcription.tru_id
 IS 'foreign key from transcription_urgency';
-
-COMMENT ON COLUMN transcription.trt_id
-IS 'foreign key to transcription_type, sourced from moj_transcription_s.c_type';
 
 COMMENT ON COLUMN transcription.transcription_object_id
 IS 'internal Documentum primary key from moj_transcription_s';
@@ -1016,9 +1025,6 @@ COMMENT ON COLUMN transcription.company
 IS 'directly sourced from moj_transcription_s';
 
 COMMENT ON COLUMN transcription.requestor
-IS 'directly sourced from moj_transcription_s';
-
-COMMENT ON COLUMN transcription.current_state
 IS 'directly sourced from moj_transcription_s';
 
 COMMENT ON COLUMN transcription.hearing_date
@@ -1060,6 +1066,18 @@ IS 'directly sourced from moj_transcription_r';
 
 COMMENT ON COLUMN transcription_comment.transcription_object_id
 IS 'internal Documentum id from moj_transcription_s acting as foreign key';
+
+CREATE TABLE transcription_status
+(trs_id                      INTEGER                       NOT NULL
+,status_type                 CHARACTER VARYING             NOT NULL
+);
+
+COMMENT ON TABLE transcription_status
+IS 'standing data table';
+
+COMMENT ON COLUMN transcription_status.trs_id
+IS 'primary key of transcription_status';
+
 
 CREATE TABLE transcription_type
 (trt_id                      INTEGER                       NOT NULL
@@ -1173,7 +1191,7 @@ ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
 CREATE UNIQUE INDEX courthouse_pk ON courthouse(cth_id) TABLESPACE darts_indexes;
 ALTER TABLE courthouse              ADD PRIMARY KEY USING INDEX courthouse_pk;
 
-CREATE UNIQUE INDEX courthouse_region_ae_pk ON courthouse_region_ae(cra_id) TABLESPACE darts_indexes;
+CREATE UNIQUE INDEX courthouse_region_ae_pk ON courthouse_region_ae(cth_id,reg_id) TABLESPACE darts_indexes;
 ALTER TABLE courthouse_region_ae    ADD PRIMARY KEY USING INDEX courthouse_region_ae_pk;
 
 CREATE UNIQUE INDEX courtroom_pk ON courtroom(ctr_id) TABLESPACE darts_indexes;
@@ -1251,6 +1269,9 @@ ALTER TABLE transcription           ADD PRIMARY KEY USING INDEX transcription_pk
 CREATE UNIQUE INDEX transcription_comment_pk ON transcription_comment(trc_id) TABLESPACE darts_indexes;
 ALTER TABLE transcription_comment   ADD PRIMARY KEY USING INDEX transcription_comment_pk;
 
+CREATE UNIQUE INDEX transcription_status_pk ON transcription_status(trs_id) TABLESPACE darts_indexes;
+ALTER TABLE transcription_status      ADD PRIMARY KEY USING INDEX transcription_status_pk;
+
 CREATE UNIQUE INDEX transcription_type_pk ON transcription_type(trt_id) TABLESPACE darts_indexes;
 ALTER TABLE transcription_type      ADD PRIMARY KEY USING INDEX transcription_type_pk;
 
@@ -1277,12 +1298,11 @@ CREATE SEQUENCE car_seq CACHE 20;
 CREATE SEQUENCE cre_seq CACHE 20;
 CREATE SEQUENCE cas_seq CACHE 20;
 CREATE SEQUENCE cth_seq CACHE 20;
-CREATE SEQUENCE cra_seq CACHE 20;
 CREATE SEQUENCE ctr_seq CACHE 20;
 CREATE SEQUENCE dal_seq CACHE 20;
 CREATE SEQUENCE dfc_seq CACHE 20;
 CREATE SEQUENCE dfd_seq CACHE 20;
-CREATE SEQUENCE der_seq CACHE 20;
+CREATE SEQUENCE der_seq CACHE 20 RESTART WITH 50000;   -- sequence for device_register.node_id
 CREATE SEQUENCE eve_seq CACHE 20;
 CREATE SEQUENCE evh_seq CACHE 20;
 CREATE SEQUENCE eod_seq CACHE 20;
@@ -1301,6 +1321,7 @@ CREATE SEQUENCE rtp_seq CACHE 20;
 CREATE SEQUENCE tod_seq CACHE 20;
 CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
+CREATE SEQUENCE trs_seq CACHE 20;
 CREATE SEQUENCE trt_seq CACHE 20;
 CREATE SEQUENCE tru_seq CACHE 20;
 CREATE SEQUENCE trw_seq CACHE 20;
@@ -1714,6 +1735,10 @@ ALTER TABLE transcription
 ADD CONSTRAINT transcription_transcription_type_fk
 FOREIGN KEY (trt_id) REFERENCES transcription_type(trt_id);
 
+ALTER TABLE transcription               
+ADD CONSTRAINT transcription_transcription_status_fk
+FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
+
 ALTER TABLE transcription_comment       
 ADD CONSTRAINT transcription_comment_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
@@ -1838,6 +1863,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON report TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON retention_policy TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_comment TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_status TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_urgency TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_workflow TO darts_user;
@@ -1876,6 +1902,7 @@ GRANT SELECT,UPDATE ON  rtp_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trc_seq TO darts_user;
+GRANT SELECT,UPDATE ON  trs_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trt_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tru_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trw_seq TO darts_user;
