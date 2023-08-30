@@ -125,7 +125,7 @@ public class DailyListController implements DailyListsApi {
 
         }
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
 
     }
 

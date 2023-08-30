@@ -116,8 +116,8 @@ paths:
       description: |-
         Asynchronously start processing dailylists for all courthouses.
       responses:
-        '200':
-          description: OK
+        '202':
+          description: ACCEPTED
         '400':
           description: Provided id is does not exist.
           content:
