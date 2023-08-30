@@ -10,14 +10,13 @@ import jakarta.persistence.criteria.ParameterExpression;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.model.Permission;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
@@ -41,9 +40,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthorisationServiceImpl implements AuthorisationService {
 
-    private EntityManager em;
-    private CourthouseRepository courthouseRepository;
-    private UserIdentity userIdentity;
+    private final EntityManager em;
+    private final CourthouseRepository courthouseRepository;
+    private final UserIdentity userIdentity;
 
     @Override
     public Optional<UserState> getAuthorisation(String emailAddress) {
@@ -135,14 +134,16 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     public void checkAuthorisation(List<CourthouseEntity> courthouses) {
         String emailAddress = userIdentity.getEmailAddress();
 
-        List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(emailAddress);
+        List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(
+            emailAddress);
 
         if (new HashSet<>(authorisedCourthouses).containsAll(courthouses)) {
             return;
         }
 
         log.debug("User {} is not authorised for courthouses {}", emailAddress,
-                  courthouses.stream().map(CourthouseEntity::getCourthouseName).toList());
+                  courthouses.stream().map(CourthouseEntity::getCourthouseName).toList()
+        );
         throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
     }
 

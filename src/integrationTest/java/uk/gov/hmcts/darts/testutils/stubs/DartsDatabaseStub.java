@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -37,6 +38,7 @@ import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -59,6 +61,7 @@ import java.util.Optional;
 import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
@@ -93,6 +96,7 @@ public class DartsDatabaseStub {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
+    private final SecurityGroupRepository securityGroupRepository;
 
     private final UserAccountStub userAccountStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
@@ -335,6 +339,36 @@ public class DartsDatabaseStub {
             newUser.setLastModifiedBy(systemUser);
             return userAccountRepository.saveAndFlush(newUser);
         }
+    }
+
+    public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
+        final SecurityGroupRepository securityGroupRepository = getSecurityGroupRepository();
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
+        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
+        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        final UserAccountRepository userAccountRepository = getUserAccountRepository();
+        var systemUser = createSystemUserAccountEntity();
+        var testUser = createIntegrationTestUserAccountEntity(systemUser);
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
+    public UserAccountEntity createUnauthorisedIntegrationTestUser() {
+
+        final SecurityGroupRepository securityGroupRepository = getSecurityGroupRepository();
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
+        securityGroupEntity.getCourthouseEntities().clear();
+        securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        final UserAccountRepository userAccountRepository = getUserAccountRepository();
+        var systemUser = createSystemUserAccountEntity();
+        var testUser = createIntegrationTestUserAccountEntity(systemUser);
+        testUser.getSecurityGroupEntities().clear();
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
     }
 
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {

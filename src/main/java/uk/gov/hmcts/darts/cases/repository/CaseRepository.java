@@ -13,15 +13,16 @@ import java.util.Optional;
 @Repository
 public interface CaseRepository extends JpaRepository<CourtCaseEntity, Integer> {
 
-    Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(String caseNumber, String courthouseName);
+    Optional<CourtCaseEntity> findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(String caseNumber,
+                                                                                               String courthouseName);
 
     @Override
     Optional<CourtCaseEntity> findById(Integer id);
 
     @Query("""
         SELECT courthouse FROM CourtCaseEntity courtCase
-            JOIN courtCase.courthouse courthouse
-    """)
+        JOIN courtCase.courthouse courthouse
+        """)
     List<CourthouseEntity> getAssociatedCourthouses(Integer caseId);
 
 }
