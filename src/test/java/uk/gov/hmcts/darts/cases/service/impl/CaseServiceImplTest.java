@@ -393,7 +393,7 @@ class CaseServiceImplTest {
 
         List<EventEntity> event = List.of(
             CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType));
-        Mockito.when(eventRepository.findAllByHearingId(hearingEntity.getId())).thenReturn(event);
+        hearingEntity.setEventList(event);
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());
         assertEquals(1, eventResponses.size());
