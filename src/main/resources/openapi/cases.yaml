@@ -404,11 +404,11 @@ components:
     advancedSearchResult:
       type: object
       properties:
-        caseID:
+        case_id:
           type: integer
           example: 1
           description: Unique case identifier, used internally by DARTS.
-        caseNumber:
+        case_number:
           type: string
           example: C20220620001
           description: 'Case Number'
@@ -423,7 +423,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-        reportingRestriction:
+        reporting_restriction:
           type: string
           example: "Section 4(2) of the Contempt of Court Act 1981"
           description: 'Any reporting restrictions associated with the case.'
@@ -478,7 +478,7 @@ components:
             $ref: '#/components/schemas/judge'
         courtroom:
           type: string
-        transcriptCount:
+        transcript_count:
           type: integer
 
     events_response:
@@ -502,7 +502,3 @@ components:
         text:
           type: string
           example: Record:New Case
-
-
-
-

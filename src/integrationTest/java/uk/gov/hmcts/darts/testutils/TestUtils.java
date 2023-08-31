@@ -27,7 +27,7 @@ public final class TestUtils {
     }
 
     public static String removeIds(String input) {
-        return input.replaceAll("\"caseID\".{1,6},", "")
+        return input.replaceAll("\"case_id\".{1,6},", "")
             .replaceAll("\"id\".{1,6},", "");
     }
 
