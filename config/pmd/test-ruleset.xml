@@ -31,11 +31,6 @@
       <property name="utilityClassPattern" value="[A-Z][a-zA-Z]+"/>
     </properties>
   </rule>
-  <rule ref="category/java/codestyle.xml/MethodNamingConventions">
-    <properties>
-      <property name="junit4TestPattern" value="[a-z][a-zA-Z0-9_]+"/>
-    </properties>
-  </rule>
   <rule ref="category/java/codestyle.xml/ShortVariable">
     <properties>
       <property name="minimum" value="2"/>

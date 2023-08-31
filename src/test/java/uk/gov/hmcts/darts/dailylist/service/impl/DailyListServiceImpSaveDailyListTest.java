@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -107,7 +106,7 @@ class DailyListServiceImpSaveDailyListTest {
         );
         service.saveDailyListToDatabase(request);
 
-        Mockito.verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());
+        verify(dailyListRepository).saveAndFlush(dailyListEntityArgumentCaptor.capture());
 
 
         DailyListEntity savedDailyList = dailyListEntityArgumentCaptor.getValue();

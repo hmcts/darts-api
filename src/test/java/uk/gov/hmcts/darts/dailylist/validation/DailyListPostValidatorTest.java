@@ -58,7 +58,7 @@ class DailyListPostValidatorTest {
     }
 
     @Test
-    void error_Xml_missingXML() {
+    void error_Xml_missingXml() {
         DailyListPostRequest request = new DailyListPostRequest();
         request.setUniqueId("test");
         request.setSourceSystem("test");

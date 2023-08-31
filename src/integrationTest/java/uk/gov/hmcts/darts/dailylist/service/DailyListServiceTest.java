@@ -16,15 +16,20 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
+import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
@@ -135,5 +140,52 @@ class DailyListServiceTest extends IntegrationBase {
         String actualResponse = MAPPER.writeValueAsString(dailyListEntity);
         String expectedResponse = getContentsFromFile(expectedResponseLocation);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void ok_saveDl_xml_then_json() throws IOException {
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+
+        DailyListPostRequest requestWithXml = new DailyListPostRequest(
+            CPP,
+            "SWANSEA",
+            LocalDate.now(),
+            "theXml",
+            "uniqueId",
+            OffsetDateTime.now(),
+            null
+        );
+
+        service.saveDailyListToDatabase(requestWithXml);
+        DailyListEntity dailyListFromDb = getDailyListFromDb();
+        assertThat(dailyListFromDb.getUniqueId(), equalTo("uniqueId"));
+        assertThat(dailyListFromDb.getStartDate(), equalTo(LocalDate.now()));
+        assertThat(dailyListFromDb.getSource(), equalTo("CPP"));
+        assertThat(dailyListFromDb.getCourthouse().getCourthouseName(), equalTo("SWANSEA"));
+        assertThat(dailyListFromDb.getXmlContent(), equalTo("theXml"));
+        assertThat(dailyListFromDb.getContent(), nullValue());
+
+
+        String dailyListJson = getContentsFromFile(
+            "tests/dailylist/DailyListServiceTest/ok_saveDl_xml_then_json/document.json");
+        DailyListJsonObject dailyListJsonObject = MAPPER.readValue(dailyListJson, DailyListJsonObject.class);
+        DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest(
+            dailyListFromDb.getId(),
+            dailyListJsonObject
+        );
+        service.updateDailyListInDatabase(dailyListPatchRequest);
+
+        dailyListFromDb = getDailyListFromDb();
+        assertThat(dailyListFromDb.getUniqueId(), equalTo("CSDDL1613756980160"));
+        assertThat(dailyListFromDb.getStartDate(), equalTo(LocalDate.of(2021, 2, 23)));
+        assertThat(dailyListFromDb.getSource(), equalTo("CPP"));
+        assertThat(dailyListFromDb.getCourthouse().getCourthouseName(), equalTo("SWANSEA"));
+        assertThat(dailyListFromDb.getXmlContent(), equalTo("theXml"));
+        assertThat(dailyListFromDb.getContent(), containsString("DailyList_457_20210219174938.xml"));
+    }
+
+    private DailyListEntity getDailyListFromDb() {
+        List<DailyListEntity> resultList = dailyListRepository.findAll();
+        return resultList.get(0);
     }
 }
