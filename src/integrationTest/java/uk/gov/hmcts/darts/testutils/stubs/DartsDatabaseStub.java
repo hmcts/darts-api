@@ -326,7 +326,7 @@ public class DartsDatabaseStub {
 
     public UserAccountEntity createIntegrationTestUserAccountEntity(UserAccountEntity systemUser) {
 
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddress(
+        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCase(
             INTEGRATIONTEST_USER_EMAIL);
 
         if (userAccountEntityOptional.isPresent()) {

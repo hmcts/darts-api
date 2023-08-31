@@ -111,12 +111,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
-        '500':
-          description: Internal Server Error
+        '401':
+          description: Unauthorised Error
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested case cannot be found"
+                status: 404
 
   /cases/{caseId}/hearings:
     get:
@@ -483,7 +497,7 @@ components:
 
     events_response:
       type: array
-      default: []
+      default: [ ]
       items:
         $ref: '#/components/schemas/event_response'
     event_response:

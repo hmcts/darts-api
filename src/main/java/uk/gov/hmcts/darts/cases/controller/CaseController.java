@@ -2,10 +2,12 @@ package uk.gov.hmcts.darts.cases.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -29,15 +31,19 @@ import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
+import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
+
 @RestController
 @RequiredArgsConstructor
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI", "checkstyle.LineLengthCheck",
     "PMD.ExcessiveImports"})
+@Slf4j
 public class CaseController implements CasesApi {
 
     private final CaseService caseService;
@@ -101,8 +107,13 @@ public class CaseController implements CasesApi {
     @Override
     // TODO: Should we also enforce @RolesAllowed() to coarsely screen by role before making any DB calls?
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
-        List<CourthouseEntity> associatedCourthouses = caseRepository.getAssociatedCourthouses(caseId);
-        authorisationApi.checkAuthorisation(associatedCourthouses);
+        try {
+            final List<CourthouseEntity> courthouses = List.of(caseRepository.getReferenceById(caseId).getCourthouse());
+            authorisationApi.checkAuthorisation(courthouses);
+        } catch (EntityNotFoundException e) {
+            log.error("Unable to find Case-Courthouse for checkAuthorisation", e);
+            throw new DartsApiException(CASE_NOT_FOUND);
+        }
 
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
     }

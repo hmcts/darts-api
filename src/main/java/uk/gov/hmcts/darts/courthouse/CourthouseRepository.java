@@ -16,10 +16,11 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
     Optional<CourthouseEntity> findByCourthouseNameIgnoreCase(String name);
 
     @Query("""
-        SELECT courthouse FROM SecurityGroupEntity securityGroup, UserAccountEntity userAccount
-            JOIN securityGroup.courthouseEntities courthouse
-            JOIN userAccount.securityGroupEntities
-        WHERE userAccount.emailAddress = :emailAddress
+        SELECT DISTINCT courthouse
+        FROM UserAccountEntity userAccount
+        JOIN userAccount.securityGroupEntities securityGroup
+        JOIN securityGroup.courthouseEntities courthouse
+        WHERE lower(userAccount.emailAddress) = lower(:emailAddress)
         """)
     List<CourthouseEntity> findAuthorisedCourthousesForEmailAddress(String emailAddress);
 
