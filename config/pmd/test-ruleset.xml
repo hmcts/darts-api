@@ -17,6 +17,7 @@
     <exclude name="LocalVariableCouldBeFinal"/>
     <exclude name="LongVariable"/>
     <exclude name="MethodArgumentCouldBeFinal"/>
+    <exclude name="MethodNamingConventions"/>
     <exclude name="OnlyOneReturn"/>
     <exclude name="TooManyStaticImports"/>
     <exclude name="DefaultPackage"/>

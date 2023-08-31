@@ -58,7 +58,7 @@ class DailyListServiceTest extends IntegrationBase {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
         String requestBody = getContentsFromFile("tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, dailyList, null, null);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
 
         service.saveDailyListToDatabase(request);
 
@@ -78,14 +78,14 @@ class DailyListServiceTest extends IntegrationBase {
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, dailyList, null, null);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
         service.saveDailyListToDatabase(request);
 
         String requestBody2 = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/DailyListRequest2.json");
         DailyListJsonObject dailyList2 = MAPPER.readValue(requestBody2, DailyListJsonObject.class);
 
-        DailyListPostRequest request2 = new DailyListPostRequest(CPP, null, null, null, dailyList2, null, null);
+        DailyListPostRequest request2 = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList2);
         service.saveDailyListToDatabase(request2);
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(1, resultList.size());
@@ -104,7 +104,7 @@ class DailyListServiceTest extends IntegrationBase {
             "tests/dailylist/DailyListServiceTest/update_courthouse_ok/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, dailyList, null, null);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
         service.saveDailyListToDatabase(request);
 
         assertEquals(9999, dartsDatabase.findCourthouseWithName("TEMP").getCode());
@@ -116,7 +116,7 @@ class DailyListServiceTest extends IntegrationBase {
             "tests/dailylist/DailyListServiceTest/insert1_invalidCourthouse/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
 
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, dailyList, null, null);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
             service.saveDailyListToDatabase(request);
         });

@@ -16,7 +16,7 @@ public class DailyListPostRequest {
     String courthouse;
     LocalDate hearingDate;
     String dailyListXml;
-    DailyListJsonObject dailyListJson;
     String uniqueId;
     OffsetDateTime publishedDateTime;
+    DailyListJsonObject dailyListJson;
 }
