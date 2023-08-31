@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;

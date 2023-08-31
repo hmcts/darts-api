@@ -10,12 +10,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
+import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
-import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
-import uk.gov.hmcts.darts.courthouses.exception.CourthouseCodeNotMatchException;
-import uk.gov.hmcts.darts.courthouses.exception.CourthouseNameNotFoundException;
-import uk.gov.hmcts.darts.courthouses.mapper.CourthouseToCourthouseEntityMapper;
-import uk.gov.hmcts.darts.courthouses.service.CourthouseServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;

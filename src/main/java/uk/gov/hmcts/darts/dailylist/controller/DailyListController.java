@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.api.DailyListsApi;
 import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.courthouses.mapper;
+package uk.gov.hmcts.darts.courthouse.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

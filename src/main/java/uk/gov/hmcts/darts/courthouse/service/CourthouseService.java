@@ -1,9 +1,9 @@
-package uk.gov.hmcts.darts.courthouses.service;
+package uk.gov.hmcts.darts.courthouse.service;
 
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
+import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
-import uk.gov.hmcts.darts.courthouses.exception.CourthouseCodeNotMatchException;
-import uk.gov.hmcts.darts.courthouses.exception.CourthouseNameNotFoundException;
 
 import java.util.List;
 
