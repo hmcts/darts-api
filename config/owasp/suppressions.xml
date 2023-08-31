@@ -11,6 +11,11 @@
     <notes>Dependency brought in through gov-notify, so we can't control this.</notes>
     <cve>CVE-2022-45688</cve>
   </suppress>
+  <suppress>
+    <notes>The vulnerability only affects applications that use an LDAP CertStore from Bouncy Castle to validate X.509 certificates.
+    I have spoken to Hemanta who has confirmed we don't do this.</notes>
+    <cve>CVE-2023-33201</cve>
+  </suppress>
 
   <!--Please add all the temporary suppression under the below section-->
   <suppress until="2023-09-14">
