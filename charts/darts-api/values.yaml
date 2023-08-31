@@ -42,10 +42,10 @@ function:
   scaleType: Job
   image: 'sdshmctspublic.azurecr.io/darts/api:latest'
   aadIdentityName: darts
-  environment:
-    POSTGRES_SSL_MODE: require
-    RUN_DB_MIGRATION_ON_STARTUP: false
-    ATS_MODE: true
+  pollingInterval: 300 # every 5 mins, but this should probably be configurable per env
+  minReplicaCount: 0
+  maxReplicaCount: 2
+  scalingStrategy: accurate
   keyVaults:
     "darts":
       secrets:
@@ -61,14 +61,33 @@ function:
           alias: DARTS_API_DB_NAME
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
+        - name: AzureAdB2CTenantIdKey
+          alias: AAD_B2C_TENANT_ID_KEY
+        - name: AzureAdB2CClientIdKey
+          alias: AAD_B2C_CLIENT_ID_KEY
+        - name: AzureAdB2CClientSecretKey
+          alias: AAD_B2C_CLIENT_SECRET_KEY
+        - name: app-insights-connection-string
+          alias: app-insights-connection-string
+        - name: AzureAdB2CFuncTestROPCClientIdKey
+          alias: AAD_B2C_ROPC_CLIENT_ID_KEY
+        - name: AzureAdB2CFuncTestROPCClientSecretKey
+          alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
+        - name: AzureStorageConnectionString
+          alias: AZURE_STORAGE_CONNECTION_STRING
+        - name: api-POSTGRES-CONNECTION-STRING
+          alias: DARTS_API_DB_CONNECTION_STRING
+  environment:
+    ATS_MODE: true
+    POSTGRES_SSL_MODE: require
+    RUN_DB_MIGRATION_ON_STARTUP: false
+    DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
   job:
     activeDeadlineSeconds: 300
     parallelism: 1
     completions: 1
-  triggerAuth:
-    enabled: true
   triggers:
-    - type: azure-blob
-      blobContainerName: "darts-st-container"
-      accountName: "dartssa{{ .Values.global.environment }}"
-      blobPrefix: keda-
+    - type: postgres
+      connectionFromEnv: DARTS_API_DB_CONNECTION_STRING
+      query: "SELECT count(*) FROM darts.media_request WHERE mer_id = ( SELECT mer_id FROM darts.media_request WHERE request_status = 'OPEN' ORDER BY created_ts LIMIT 1 )"
+      targetQueryValue: "0.9"

@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '4.3.0.3225'
   id "io.freefair.lombok" version "8.3"
   id "org.openapi.generator" version "7.0.0-beta"
-  id "org.flywaydb.flyway" version "9.21.2"
+  id "org.flywaydb.flyway" version "9.22.0"
 }
 
 group = 'uk.gov.hmcts'
@@ -346,7 +346,7 @@ dependencies {
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.3'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.4'
   implementation 'org.springframework.retry:spring-retry:2.0.2'
 
   implementation 'net.javacrumbs.shedlock:shedlock-spring:5.7.0'
@@ -361,7 +361,7 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.21.2'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.22.0'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.5.2'
 
   //database
@@ -374,16 +374,14 @@ dependencies {
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.2.7.Final')
 
   testImplementation 'com.h2database:h2:2.2.220'
-  testImplementation(platform('org.junit:junit-bom:5.9.3'))
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.3'
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.3")
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.4'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
   compileJava.dependsOn = ['generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioApi', 'generateAudioRequestsApi', 'generateCourtHousesApi', 'generateCasesApi']
 }
 
