@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.event.component;
 
-import uk.gov.hmcts.darts.events.model.CourtLogsPostRequestBody;
-import uk.gov.hmcts.darts.events.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 
 public interface DartsEventMapper {
 

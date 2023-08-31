@@ -15,7 +15,7 @@ paths:
   /hearings/{hearing_id}:
     get:
       tags:
-        - Cases
+        - Hearings
       summary: Allows the retrieval of a hearing by ID.
       parameters:
         - in: path
@@ -30,7 +30,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_haring_response'
+                $ref: '#/components/schemas/get_hearing_response'
         '500':
           description: Internal Server Error
           content:
@@ -42,7 +42,7 @@ paths:
 
 components:
   schemas:
-    get_haring_response:
+    get_hearing_response:
       type: object
       properties:
         id:
@@ -56,8 +56,11 @@ components:
           example: 1
         hearing_date:
           type: string
-          format: date-time
+          format: date
           example: 2023-06-23
+        case_id:
+          type: integer
+          example: 1
         case_number:
           type: string
           example: CASE1001

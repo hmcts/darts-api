@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.events.model.DarNotifyApplicationEvent;
-import uk.gov.hmcts.darts.events.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
 

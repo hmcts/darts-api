@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.event.mapper.EventEntityToCourtLogMapper;
+import uk.gov.hmcts.darts.event.model.CourtLog;
 import uk.gov.hmcts.darts.event.service.CourtLogsService;
-import uk.gov.hmcts.darts.events.model.CourtLog;
 
 import java.time.OffsetDateTime;
 import java.util.List;

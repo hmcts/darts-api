@@ -6,8 +6,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.event.client.DartsGatewayClient;
-import uk.gov.hmcts.darts.events.model.DarNotifyApplicationEvent;
-import uk.gov.hmcts.darts.events.model.DarNotifyEvent;
+import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
+import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
 
 @Service
 @Slf4j

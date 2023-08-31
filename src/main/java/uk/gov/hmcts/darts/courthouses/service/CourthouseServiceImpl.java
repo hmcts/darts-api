@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouses.exception.CourthouseApiError;
 import uk.gov.hmcts.darts.courthouses.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouses.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouses.mapper.CourthouseToCourthouseEntityMapper;
-import uk.gov.hmcts.darts.courthouses.model.Courthouse;
 
 import java.util.List;
 import java.util.Objects;

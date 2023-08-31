@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.event.service;
 
-import uk.gov.hmcts.darts.events.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 
 public interface EventDispatcher {
 

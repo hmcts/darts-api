@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.events.model;
+package uk.gov.hmcts.darts.event.model;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;

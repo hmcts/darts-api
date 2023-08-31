@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.events.model;
+package uk.gov.hmcts.darts.event.model;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.event.service;
 
 
-import uk.gov.hmcts.darts.events.model.CourtLog;
+import uk.gov.hmcts.darts.event.model.CourtLog;
 
 import java.time.OffsetDateTime;
 import java.util.List;

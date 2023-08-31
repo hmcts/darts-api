@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.event.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.events.model.CourtLog;
+import uk.gov.hmcts.darts.event.model.CourtLog;
 
 import java.util.ArrayList;
 import java.util.List;

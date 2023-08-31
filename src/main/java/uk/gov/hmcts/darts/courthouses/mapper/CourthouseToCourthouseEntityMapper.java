@@ -5,8 +5,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.courthouses.model.Courthouse;
-import uk.gov.hmcts.darts.courthouses.model.ExtendedCourthouse;
+import uk.gov.hmcts.darts.courthouse.model.Courthouse;
+import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
 
 import java.time.OffsetDateTime;
 import java.util.List;

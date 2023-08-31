@@ -5,7 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
-import uk.gov.hmcts.darts.events.model.DartsEvent;
+import uk.gov.hmcts.darts.event.model.DartsEvent;
 
 import java.util.Map;
 import java.util.Objects;
