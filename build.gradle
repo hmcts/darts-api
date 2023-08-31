@@ -374,16 +374,14 @@ dependencies {
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.2.7.Final')
 
   testImplementation 'com.h2database:h2:2.2.220'
-  testImplementation(platform('org.junit:junit-bom:5.10.0'))
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.3'
-  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
   compileJava.dependsOn = ['generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioApi', 'generateAudioRequestsApi', 'generateCourtHousesApi', 'generateCasesApi']
 }
 
