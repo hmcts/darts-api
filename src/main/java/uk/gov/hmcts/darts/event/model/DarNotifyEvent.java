@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.model;
+package uk.gov.hmcts.darts.events.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;

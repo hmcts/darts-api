@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListException;
 import uk.gov.hmcts.darts.dailylist.model.DailyList;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;

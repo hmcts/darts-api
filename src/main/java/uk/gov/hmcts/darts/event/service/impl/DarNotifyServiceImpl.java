@@ -6,8 +6,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.event.client.DartsGatewayClient;
-import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
-import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
+import uk.gov.hmcts.darts.events.model.DarNotifyApplicationEvent;
+import uk.gov.hmcts.darts.events.model.DarNotifyEvent;
 
 @Service
 @Slf4j
@@ -23,12 +23,12 @@ public class DarNotifyServiceImpl {
         var dartsEvent = event.getDartsEvent();
 
         DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
-              .notificationType(darNotifyType.getNotificationType())
-              .timestamp(dartsEvent.getDateTime())
-              .courthouse(dartsEvent.getCourthouse())
-              .courtroom(dartsEvent.getCourtroom())
-              .caseNumbers(dartsEvent.getCaseNumbers())
-              .build();
+            .notificationType(darNotifyType.getNotificationType())
+            .timestamp(dartsEvent.getDateTime())
+            .courthouse(dartsEvent.getCourthouse())
+            .courtroom(dartsEvent.getCourtroom())
+            .caseNumbers(dartsEvent.getCaseNumbers())
+            .build();
 
         dartsGatewayClient.darNotify(darNotifyEvent);
     }

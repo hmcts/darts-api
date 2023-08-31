@@ -5,7 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
-import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.events.model.DartsEvent;
 
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +26,7 @@ public class EventTypeToHandlerMap {
         }
 
         eventHandlerRepository.findByTypeAndSubTypeAndActiveTrue(event.getType(), event.getSubType())
-              .ifPresent(eventHandler -> addHandlerMapping(key, eventHandler));
+            .ifPresent(eventHandler -> addHandlerMapping(key, eventHandler));
 
         return Objects.equals(eventTypeToHandler.get(key), simpleName);
     }
@@ -49,5 +49,6 @@ public class EventTypeToHandlerMap {
         eventTypeToIdAndName.put(key, Pair.of(eventType.getId(), eventType.getEventName()));
     }
 
-    private record HandlerKey(String type, String subType) {}
+    private record HandlerKey(String type, String subType) {
+    }
 }

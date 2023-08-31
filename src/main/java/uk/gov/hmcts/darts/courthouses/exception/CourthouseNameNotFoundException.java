@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.courthouse.exception;
+package uk.gov.hmcts.darts.courthouses.exception;
 
 import lombok.AllArgsConstructor;
 

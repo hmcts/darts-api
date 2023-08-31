@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;

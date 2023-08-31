@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.events.model.DartsEvent;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -30,13 +30,14 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM,
-            today.toLocalDate());
+            today.toLocalDate()
+        );
 
         eventDispatcher.receive(someMinimalDartsEvent()
-                                                       .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                                       .courthouse(SOME_COURTHOUSE)
-                                                       .courtroom(SOME_ROOM)
-                                                       .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
@@ -44,13 +45,17 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
-            SOME_COURTHOUSE).get();
+            SOME_COURTHOUSE
+        ).get();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
-        assertEquals("Judge directed on reporting restrictions", persistedCase.getReportingRestrictions().getEventName());
+        assertEquals(
+            "Judge directed on reporting restrictions",
+            persistedCase.getReportingRestrictions().getEventName()
+        );
     }
 
     @Test
@@ -60,13 +65,14 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
             SOME_ROOM,
-            today.toLocalDate());
+            today.toLocalDate()
+        );
 
         eventDispatcher.receive(clearReportingRestrictionsDartsEvent()
-                                                       .caseNumbers(List.of(SOME_CASE_NUMBER))
-                                                       .courthouse(SOME_COURTHOUSE)
-                                                       .courtroom(SOME_ROOM)
-                                                       .dateTime(today));
+                                    .caseNumbers(List.of(SOME_CASE_NUMBER))
+                                    .courthouse(SOME_COURTHOUSE)
+                                    .courtroom(SOME_ROOM)
+                                    .dateTime(today));
 
         var hearingsForCase = dartsDatabase.findByCourthouseCourtroomAndDate(
             SOME_COURTHOUSE, SOME_ROOM, today.toLocalDate());
@@ -74,7 +80,8 @@ class SetReportingRestrictionEventHandlerTest extends IntegrationBase {
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
         var persistedCase = dartsDatabase.findByCaseByCaseNumberAndCourtHouseName(
             SOME_CASE_NUMBER,
-            SOME_COURTHOUSE).get();
+            SOME_COURTHOUSE
+        ).get();
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.model;
+package uk.gov.hmcts.darts.events.model;
 
 import lombok.Builder;
 import lombok.Data;

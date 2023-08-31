@@ -15,7 +15,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
+import uk.gov.hmcts.darts.events.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;

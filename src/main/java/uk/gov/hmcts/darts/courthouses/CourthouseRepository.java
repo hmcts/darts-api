@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.courthouse;
+package uk.gov.hmcts.darts.courthouses;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.events.model.DartsEvent;
 
 import java.util.List;
 
@@ -27,7 +27,8 @@ public class EventDispatcherImpl implements EventDispatcher {
             .filter(handler -> handler.isHandlerFor(event))
             .findFirst().orElseThrow(() -> new DartsApiException(
                 EVENT_HANDLER_NOT_FOUND,
-                String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())))
+                String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())
+            ))
             .handle(event);
     }
 }

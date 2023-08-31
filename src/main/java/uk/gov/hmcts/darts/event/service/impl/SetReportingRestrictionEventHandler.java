@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
-import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.events.model.CourtroomCourthouseCourtcase;
+import uk.gov.hmcts.darts.events.model.DartsEvent;
 
 @Slf4j
 @Service

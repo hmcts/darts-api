@@ -1,0 +1,79 @@
+openapi: 3.0.1
+
+info:
+
+  version: 0.0.1
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /hearings/{hearing_id}:
+    get:
+      tags:
+        - Cases
+      summary: Allows the retrieval of a hearing by ID.
+      parameters:
+        - in: path
+          name: hearing_id
+          schema:
+            type: integer
+          description: "Internal hea_id of the case."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_haring_response'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+
+
+components:
+  schemas:
+    get_haring_response:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        courthouse:
+          type: string
+          example: SWANSEA
+        courtroom:
+          type: string
+          example: 1
+        hearing_date:
+          type: string
+          format: date-time
+          example: 2023-06-23
+        case_number:
+          type: string
+          example: CASE1001
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        transcription_count:
+          type: integer
+          example: 1
+
+    judge:
+      type: string
+      example: Mr Judge
+
+
+
+
+

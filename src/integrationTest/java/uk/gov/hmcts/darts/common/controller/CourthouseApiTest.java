@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
+import uk.gov.hmcts.darts.courthouses.model.ExtendedCourthouse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.temporal.ChronoUnit;

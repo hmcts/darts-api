@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.event.component.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
+import uk.gov.hmcts.darts.events.model.CourtLogsPostRequestBody;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;

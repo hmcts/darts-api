@@ -5,8 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.events.model.DartsEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,6 @@ class EventDispatcherImplTest {
         MockEventHandler mockEventHandler = Mockito.mock(MockEventHandler.class);
         Mockito.when(mockEventHandler.isHandlerFor(any())).thenReturn(true);
         eventHandlers.add(mockEventHandler);
-
 
 
         DartsEvent event = new DartsEvent();

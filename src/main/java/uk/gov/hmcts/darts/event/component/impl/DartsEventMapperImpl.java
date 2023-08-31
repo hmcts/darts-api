@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.event.component.impl;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
-import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
-import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.events.model.CourtLogsPostRequestBody;
+import uk.gov.hmcts.darts.events.model.DartsEvent;
 
 import java.util.UUID;
 

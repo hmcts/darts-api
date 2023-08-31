@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import uk.gov.hmcts.darts.event.model.DarNotifyEvent;
+import uk.gov.hmcts.darts.events.model.DarNotifyEvent;
 
 @FeignClient(name = "darts-gateway-client",
     url = "${darts.gateway.url}")

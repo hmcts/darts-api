@@ -10,10 +10,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
-import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
-import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
-import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouses.exception.CourthouseCodeNotMatchException;
+import uk.gov.hmcts.darts.courthouses.exception.CourthouseNameNotFoundException;
+import uk.gov.hmcts.darts.courthouses.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouses.service.CourthouseServiceImpl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +54,7 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        uk.gov.hmcts.darts.courthouses.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouses.model.Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseModel.setCode((int) CODE);
 
@@ -73,7 +74,7 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        uk.gov.hmcts.darts.courthouses.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouses.model.Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseModel.setCode((int) CODE);
 
@@ -94,7 +95,7 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        uk.gov.hmcts.darts.courthouses.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouses.model.Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseModel.setCode((int) CODE);
 
@@ -126,7 +127,7 @@ class CourthouseServiceImplTest {
         courthouseEntityOriginal.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntityOriginal.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModelAmendment = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        uk.gov.hmcts.darts.courthouses.model.Courthouse courthouseModelAmendment = new uk.gov.hmcts.darts.courthouses.model.Courthouse();
         courthouseModelAmendment.setCourthouseName("Changed courthouse");
         courthouseModelAmendment.setCode(543);
 

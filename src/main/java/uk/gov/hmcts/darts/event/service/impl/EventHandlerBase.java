@@ -10,9 +10,9 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
-import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
+import uk.gov.hmcts.darts.events.model.CourtroomCourthouseCourtcase;
+import uk.gov.hmcts.darts.events.model.DartsEvent;
 
 import static java.lang.String.format;
 import static java.lang.String.join;

@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.courthouses.CourthouseRepository;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -44,16 +44,16 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public HearingEntity retrieveOrCreateHearing(String courthouseName, String courtroomName, String caseNumber, LocalDate hearingDate) {
         Optional<HearingEntity> foundHearing = hearingRepository.findHearing(
-                courthouseName,
-                courtroomName,
-                caseNumber,
-                hearingDate
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
         );
         return foundHearing.orElseGet(() -> createHearing(
-                courthouseName,
-                courtroomName,
-                caseNumber,
-                hearingDate
+            courthouseName,
+            courtroomName,
+            caseNumber,
+            hearingDate
         ));
     }
 
@@ -72,8 +72,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(CourthouseEntity courthouse, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByNameAndId(
-                courthouse.getId(),
-                courtroomName
+            courthouse.getId(),
+            courtroomName
         );
         return foundCourtroom.orElseGet(() -> createCourtroom(courthouse, courtroomName));
     }
@@ -82,8 +82,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public CourtroomEntity retrieveOrCreateCourtroom(String courthouseName, String courtroomName) {
         Optional<CourtroomEntity> foundCourtroom = courtroomRepository.findByCourthouseNameAndCourtroomName(
-                courthouseName,
-                courtroomName
+            courthouseName,
+            courtroomName
         );
         if (foundCourtroom.isPresent()) {
             return foundCourtroom.get();
@@ -105,8 +105,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
     @Override
     public CourtCaseEntity retrieveOrCreateCase(String courthouseName, String caseNumber) {
         Optional<CourtCaseEntity> foundCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(
-                caseNumber,
-                courthouseName
+            caseNumber,
+            courthouseName
         );
         return foundCase.orElseGet(() -> createCase(courthouseName, caseNumber));
     }

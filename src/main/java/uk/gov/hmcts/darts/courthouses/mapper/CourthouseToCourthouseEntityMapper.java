@@ -1,12 +1,12 @@
-package uk.gov.hmcts.darts.courthouse.mapper;
+package uk.gov.hmcts.darts.courthouses.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.courthouse.model.Courthouse;
-import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;
+import uk.gov.hmcts.darts.courthouses.model.Courthouse;
+import uk.gov.hmcts.darts.courthouses.model.ExtendedCourthouse;
 
 import java.time.OffsetDateTime;
 import java.util.List;
