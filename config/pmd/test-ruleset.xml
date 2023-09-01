@@ -17,6 +17,7 @@
     <exclude name="LocalVariableCouldBeFinal"/>
     <exclude name="LongVariable"/>
     <exclude name="MethodArgumentCouldBeFinal"/>
+    <exclude name="MethodNamingConventions"/>
     <exclude name="OnlyOneReturn"/>
     <exclude name="TooManyStaticImports"/>
     <exclude name="DefaultPackage"/>
@@ -28,11 +29,6 @@
     <properties>
       <!-- same as any other class -->
       <property name="utilityClassPattern" value="[A-Z][a-zA-Z]+"/>
-    </properties>
-  </rule>
-  <rule ref="category/java/codestyle.xml/MethodNamingConventions">
-    <properties>
-      <property name="junit4TestPattern" value="[a-z][a-zA-Z0-9_]+"/>
     </properties>
   </rule>
   <rule ref="category/java/codestyle.xml/ShortVariable">
