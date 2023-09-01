@@ -1,6 +1,6 @@
 [
   {
-    "caseNumber": "Case3",
+    "case_number": "Case3",
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"
@@ -35,7 +35,7 @@
     ]
   },
   {
-    "caseNumber": "Case4",
+    "case_number": "Case4",
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"
@@ -68,7 +68,7 @@
     ]
   },
   {
-    "caseNumber": "case5",
+    "case_number": "case5",
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"
@@ -101,7 +101,7 @@
     ]
   },
   {
-    "caseNumber": "case6",
+    "case_number": "case6",
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"

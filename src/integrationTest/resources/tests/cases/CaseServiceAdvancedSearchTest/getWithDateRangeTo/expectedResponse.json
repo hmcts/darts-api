@@ -1,6 +1,6 @@
 [
   {
-    "caseNumber": "Case1",
+    "case_number": "Case1",
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"
@@ -33,7 +33,7 @@
     ]
   },
   {
-    "caseNumber": "Case2",
+    "case_number": "Case2",
     "courthouse": "SWANSEA",
     "defendants": [
       "Defendant2"
