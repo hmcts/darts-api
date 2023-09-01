@@ -14,7 +14,6 @@ import java.net.URI;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
@@ -22,8 +21,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
-
-    private static final URI ENDPOINT = URI.create("/audio/request");
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,8 +42,8 @@ class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
                 blobId
             ));
 
-        MockHttpServletRequestBuilder requestBuilder = delete(ENDPOINT)
-            .queryParam("audioRequestId", String.valueOf(mediaRequestEntity.getId()));
+        MockHttpServletRequestBuilder requestBuilder = delete(URI.create(
+            String.format("/audio-requests/%d", mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk());
@@ -54,12 +51,12 @@ class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
     }
 
     @Test
-    void audioRequestDeleteShouldReturnBadRequestWhenNoRequestBodyIsProvided() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = delete(ENDPOINT);
+    void audioRequestDeleteShouldReturnBadRequestWhenNoRequestIdProvided() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = delete(URI.create("/audio-requests/id"));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isBadRequest())
+            .andReturn();
     }
 
 }

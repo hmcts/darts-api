@@ -30,7 +30,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
 
 import java.time.OffsetDateTime;
@@ -101,7 +100,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestRepository.deleteById(mediaRequestId);
     }
 
-    private MediaRequestEntity saveAudioRequestToDb(HearingEntity hearingEntity, Integer requestor,
+    private MediaRequestEntity saveAudioRequestToDb(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                     OffsetDateTime startTime, OffsetDateTime endTime,
                                                     AudioRequestType requestType) {
 
