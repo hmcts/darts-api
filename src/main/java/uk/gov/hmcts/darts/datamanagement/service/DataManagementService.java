@@ -8,4 +8,6 @@ public interface DataManagementService {
     BinaryData getBlobData(String containerName, UUID blobId);
 
     UUID saveBlobData(String containerName, BinaryData binaryData);
+
+    void deleteBlobData(String containerName, UUID blobId);
 }

@@ -16,6 +16,8 @@ public interface MediaRequestService {
 
     Integer saveAudioRequest(AudioRequestDetails audioRequestDetails);
 
+    void deleteAudioRequest(Integer mediaRequestId);
+
     List<AudioRequestSummaryResult> viewAudioRequests(Integer userId, Boolean expired);
 
 }

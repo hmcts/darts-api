@@ -25,12 +25,16 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
+import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
@@ -43,6 +47,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final UserAccountRepository userAccountRepository;
     private final MediaRequestRepository mediaRequestRepository;
     private final EntityManager entityManager;
+    private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+    private final DataManagementApiImpl dataManagementApi;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -72,6 +78,26 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         );
 
         return audioRequest.getId();
+    }
+
+    @Transactional
+    @Override
+    public void deleteAudioRequest(Integer mediaRequestId) {
+
+        var transientObject = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId);
+
+        if (transientObject.isPresent()) {
+            TransientObjectDirectoryEntity mediaTransientObject  = transientObject.get();
+            UUID blobId = mediaTransientObject.getExternalLocation();
+
+            if (blobId != null) {
+                dataManagementApi.deleteBlobDataFromOutboundContainer(blobId);
+            }
+
+            transientObjectDirectoryRepository.deleteById(mediaTransientObject.getId());
+        }
+
+        mediaRequestRepository.deleteById(mediaRequestId);
     }
 
     private MediaRequestEntity saveAudioRequestToDb(HearingEntity hearingEntity, UserAccountEntity requestor,

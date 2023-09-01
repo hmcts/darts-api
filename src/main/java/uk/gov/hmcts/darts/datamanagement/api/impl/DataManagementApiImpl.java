@@ -26,4 +26,9 @@ public class DataManagementApiImpl implements DataManagementApi {
         return dataManagementService.saveBlobData(dataManagementConfiguration.getOutboundContainerName(), binaryData);
     }
 
+    @Override
+    public void deleteBlobDataFromOutboundContainer(UUID blobId) {
+        dataManagementService.deleteBlobData(dataManagementConfiguration.getOutboundContainerName(), blobId);
+    }
+
 }
