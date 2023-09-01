@@ -22,6 +22,7 @@
     <exclude name="DefaultPackage"/>
     <exclude name="CommentDefaultAccessModifier"/>
     <exclude name="LinguisticNaming"/>
+    <exclude name="MethodNamingConventions"/>
   </rule>
   <rule ref="category/java/codestyle.xml/ClassNamingConventions">
     <properties>

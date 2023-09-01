@@ -136,7 +136,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
                 log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
-                              + dailyListEntity.getId() + " has not been processed");
+                          + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType.name());
@@ -150,7 +150,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 return getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                             + timeMarkingNoteText, dateTimeException);
+                         + timeMarkingNoteText, dateTimeException);
             }
         }
 
@@ -159,7 +159,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 return getTimeFromSittingAt(sitting);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                             + sitting.getSittingAt(), dateTimeException);
+                         + sitting.getSittingAt(), dateTimeException);
             }
         }
         return null;

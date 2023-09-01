@@ -24,6 +24,11 @@
     <vulnerabilityName>CVE-2023-24998</vulnerabilityName>
   </suppress>
 
+  <suppress until="2023-12-14">
+    <notes>URL Redirection to Untrusted Site ('Open Redirect') vulnerability in FORM authentication feature Apache Tomcat.</notes>
+    <vulnerabilityName>CVE-2023-41080</vulnerabilityName>
+  </suppress>
+
   <suppress until="2023-09-14">
     <notes>Looks like a new security issue which involves DOS attacks</notes>
     <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>

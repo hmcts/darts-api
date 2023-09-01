@@ -44,7 +44,6 @@ class EventDispatcherImplTest {
         eventHandlers.add(mockEventHandler);
 
 
-
         DartsEvent event = new DartsEvent();
         event.setType("TestType");
         event.setSubType("TestSubType");
