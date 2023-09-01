@@ -3,28 +3,29 @@ package uk.gov.hmcts.darts.hearings.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
+import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class HearingsServiceImpl implements HearingsService {
 
+    private final HearingRepository hearingRepository;
+
     @Override
     public GetHearingResponse getHearings(Integer hearingId) {
-        GetHearingResponse getHearingResponse = new GetHearingResponse();
-        getHearingResponse.setId(1);
-        getHearingResponse.setCourthouse("Stub courthouse");
-        getHearingResponse.setCourtroom("Stub courtroom");
-        getHearingResponse.setCaseId(1);
-        getHearingResponse.setCaseNumber("Stub case number");
-        getHearingResponse.setHearingDate(LocalDate.now());
-        getHearingResponse.setJudges(List.of("stub judge"));
-        getHearingResponse.setTranscriptionCount(1);
-        return getHearingResponse;
+        Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
+        if (foundHearingOpt.isEmpty()) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
+        }
+        return GetHearingResponseMapper.map(foundHearingOpt.get());
     }
 }

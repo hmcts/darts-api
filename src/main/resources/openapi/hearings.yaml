@@ -45,7 +45,7 @@ components:
     get_hearing_response:
       type: object
       properties:
-        id:
+        hearing_id:
           type: integer
           example: 1
         courthouse:
