@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
+@SuppressWarnings("PMD.MethodNamingConventions")
 class HearingsGetControllerTest extends IntegrationBase {
 
     @Autowired
