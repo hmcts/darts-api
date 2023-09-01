@@ -14,12 +14,11 @@ public class DailyListPostValidator {
             if (StringUtils.isBlank(request.getDailyListXml())) {
                 throw new DartsApiException(DailyListError.XML_OR_JSON_NEEDS_TO_BE_PROVIDED);
             }
-            if (StringUtils.isNotBlank(request.getDailyListXml())
-                && (StringUtils.isBlank(request.getCourthouse())
-                    || request.getHearingDate() == null
-                    || StringUtils.isBlank(request.getUniqueId())
-                    || request.getPublishedDateTime() == null
-                    || StringUtils.isBlank(request.getSourceSystem()))) {
+            if (StringUtils.isBlank(request.getCourthouse())
+                || request.getHearingDate() == null
+                || StringUtils.isBlank(request.getUniqueId())
+                || request.getPublishedDateTime() == null
+                || StringUtils.isBlank(request.getSourceSystem())) {
                 throw new DartsApiException(DailyListError.XML_EXTRA_PARAMETERS_MISSING);
             }
         }

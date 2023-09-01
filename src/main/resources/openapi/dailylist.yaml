@@ -68,7 +68,7 @@ paths:
 
       responses:
         '200':
-          description: Created
+          description: OK
           content:
             application/json:
               schema:

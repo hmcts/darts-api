@@ -52,27 +52,6 @@ public class DailyListController implements DailyListsApi {
     private DailyListProcessor processor;
 
     @Override
-    @Operation(
-        operationId = "dailylistsPatch",
-        summary = "Update existing DailyList",
-        description = "description",
-        tags = {"DailyLists"},
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Created", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = PostDailyListResponse.class)),
-                @Content(mediaType = "application/json+problem", schema = @Schema(implementation = PostDailyListResponse.class))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Problem.class)),
-                @Content(mediaType = "application/json+problem", schema = @Schema(implementation = Problem.class))
-            })
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.PATCH,
-        value = "/dailylists",
-        produces = {"application/json", "application/json+problem"}
-    )
     public ResponseEntity<PostDailyListResponse> dailylistsPatch(
         @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
         @NotNull @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = true) DailyListJsonObject jsonDocument
