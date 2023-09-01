@@ -290,7 +290,7 @@ dependencies {
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.2.7.Final')
 
-  testImplementation 'com.h2database:h2:2.2.220'
+  testImplementation 'com.h2database:h2:2.2.222'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
