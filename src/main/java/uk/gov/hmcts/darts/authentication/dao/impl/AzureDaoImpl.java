@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
+import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
 import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
@@ -24,11 +24,10 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class AzureDaoImpl implements AzureDao {
 
-    private final AuthenticationConfiguration authConfig;
     private final AzureActiveDirectoryB2CClient azureActiveDirectoryB2CClient;
 
     @Override
-    public OAuthProviderRawResponse fetchAccessToken(String code) throws AzureDaoException {
+    public OAuthProviderRawResponse fetchAccessToken(String code, AuthConfiguration<?> configuration) throws AzureDaoException {
         log.debug("Fetching access token(s) for authorization code: {}", code);
 
         if (StringUtils.isBlank(code)) {
@@ -36,12 +35,12 @@ public class AzureDaoImpl implements AzureDao {
         }
 
         MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-        requestBody.add("grant_type", authConfig.getExternalADauthorizationGrantType());
-        requestBody.add("redirect_uri", authConfig.getExternalADredirectUri());
+        requestBody.add("grant_type", configuration.getGrantType());
+        requestBody.add("redirect_uri", configuration.getRedirectURI());
         requestBody.add("code", code);
-        requestBody.add("client_id", authConfig.getExternalADclientId());
-        requestBody.add("client_secret", authConfig.getExternalADclientSecret());
-        requestBody.add("scope", authConfig.getExternalADscope());
+        requestBody.add("client_id", configuration.getClientId());
+        requestBody.add("client_secret", configuration.getSecret());
+        requestBody.add("scope", configuration.getScope());
 
         try (Response response = azureActiveDirectoryB2CClient.fetchAccessToken(requestBody)) {
             String parsedResponse = StreamUtils.copyToString(

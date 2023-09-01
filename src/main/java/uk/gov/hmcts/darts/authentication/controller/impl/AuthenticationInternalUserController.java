@@ -7,33 +7,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
+import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 
 @Slf4j
 @RestController
 @RequestMapping("/internal-user")
-public class AuthenticationInternalUserController implements AuthenticationController {
-
-    private static final String INTERNAL_USERS_NOT_SUPPORTED_MESSAGE = "Internal users not yet supported";
-
-    @Override
-    public ModelAndView loginOrRefresh(String authHeaderValue, String redirectUri) {
-        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
+public class AuthenticationInternalUserController extends AbstractUserController {
+    public AuthenticationInternalUserController(AuthenticationService authenticationService, AuthorisationApi authorisationApi) {
+        super(authenticationService, authorisationApi);
     }
-
-    @Override
-    public SecurityToken handleOauthCode(String code) {
-        log.info("Authorization Token received successfully");
-        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public ModelAndView logout(String authHeaderValue, String redirectUri) {
-        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
-    }
-
-    @Override
-    public ModelAndView resetPassword(String redirectUri) {
-        throw new NotImplementedException(INTERNAL_USERS_NOT_SUPPORTED_MESSAGE);
-    }
-
 }

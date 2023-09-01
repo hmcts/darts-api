@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
+import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 import uk.gov.hmcts.darts.authentication.service.AzureActiveDirectoryB2CClient;
@@ -34,10 +34,11 @@ class AzureDaoImplTest {
     private AzureActiveDirectoryB2CClient azureActiveDirectoryB2CClient;
 
     @Mock
-    private AuthenticationConfiguration authenticationConfiguration;
+    private AuthConfiguration<?> authenticationConfiguration;
 
     @InjectMocks
     private AzureDaoImpl azureDaoImpl;
+
 
     @Test
     void fetchAccessTokenShouldReturnResponseWhenAzureCallIsSuccessful() throws AzureDaoException {
@@ -45,7 +46,7 @@ class AzureDaoImplTest {
         try (Response response = mockSuccessResponse()) {
             when(azureActiveDirectoryB2CClient.fetchAccessToken(any())).thenReturn(response);
 
-            OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken("CODE");
+            OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken("CODE", authenticationConfiguration);
 
             assertEquals("test_id_token", rawResponse.getAccessToken());
             assertEquals(1234L, rawResponse.getExpiresIn());
@@ -56,7 +57,7 @@ class AzureDaoImplTest {
     @ValueSource(strings = {" "})
     @NullAndEmptySource
     void fetchAccessTokenShouldThrowExceptionWhenProvidedCodeIsBlankOrNull(String code) {
-        AzureDaoException exception = assertThrows(AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(code));
+        AzureDaoException exception = assertThrows(AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(code, authenticationConfiguration));
 
         assertEquals("Null code not permitted", exception.getMessage());
     }
@@ -70,7 +71,7 @@ class AzureDaoImplTest {
 
                 AzureDaoException exception = assertThrows(
                     AzureDaoException.class,
-                    () -> azureDaoImpl.fetchAccessToken("CODE")
+                    () -> azureDaoImpl.fetchAccessToken("CODE", authenticationConfiguration)
                 );
 
                 assertEquals("Unexpected HTTP response code received from Azure: body", exception.getMessage());
@@ -93,11 +94,11 @@ class AzureDaoImplTest {
     }
 
     private void mockConfig() {
-        when(authenticationConfiguration.getExternalADclientId()).thenReturn("ClientId");
-        when(authenticationConfiguration.getExternalADredirectUri()).thenReturn("RedirectId");
-        when(authenticationConfiguration.getExternalADscope()).thenReturn("Scope");
-        when(authenticationConfiguration.getExternalADauthorizationGrantType()).thenReturn("GrantType");
-        when(authenticationConfiguration.getExternalADclientSecret()).thenReturn("ClientSecret");
+        when(authenticationConfiguration.getClientId()).thenReturn("ClientId");
+        when(authenticationConfiguration.getRedirectURI()).thenReturn("RedirectId");
+        when(authenticationConfiguration.getScope()).thenReturn("Scope");
+        when(authenticationConfiguration.getGrantType()).thenReturn("GrantType");
+        when(authenticationConfiguration.getSecret()).thenReturn("ClientSecret");
     }
 
 }

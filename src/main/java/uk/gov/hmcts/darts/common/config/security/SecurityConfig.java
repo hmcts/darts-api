@@ -16,7 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
-import uk.gov.hmcts.darts.authentication.component.UriProvider;
+import uk.gov.hmcts.darts.authentication.config.AuthConfigurationLocator;
 
 import java.io.IOException;
 
@@ -27,7 +27,7 @@ import java.io.IOException;
 @Profile("!intTest")
 public class SecurityConfig {
 
-    private final UriProvider uriProvider;
+    private AuthConfigurationLocator locator;
 
     @Bean
     @Order(1)
@@ -87,7 +87,8 @@ public class SecurityConfig {
                 filterChain.doFilter(request, response);
                 return;
             }
-            response.sendRedirect(uriProvider.getLoginUri(null).toString());
+
+            response.sendRedirect(locator.locateAuthenticationConfigurationWithExternalDefault().getLoginUri(null).toString());
         }
     }
 }

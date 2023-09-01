@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
+import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 
 import java.text.ParseException;
@@ -30,10 +30,9 @@ public class TokenValidatorImpl implements TokenValidator {
     private static final String EMAILS_CLAIM_NAME = "emails";
 
     private final JWKSource<SecurityContext> jwkSource;
-    private final AuthenticationConfiguration authenticationConfiguration;
 
     @Override
-    public JwtValidationResult validate(String accessToken) {
+    public JwtValidationResult validate(String accessToken, AuthConfiguration<?> configuration) {
         log.debug("Validating JWT: {}", accessToken);
 
         var keySelector = new JWSVerificationKeySelector<>(
@@ -45,10 +44,10 @@ public class TokenValidatorImpl implements TokenValidator {
         jwtProcessor.setJWSKeySelector(keySelector);
 
         JWTClaimsSet jwtClaimsSet = new Builder()
-            .issuer(authenticationConfiguration.getExternalADissuerUri())
+            .issuer(configuration.getIssuerURI())
             .build();
         var claimsVerifier = new DefaultJWTClaimsVerifier<>(
-            authenticationConfiguration.getExternalADclientId(),
+            configuration.getClientId(),
             jwtClaimsSet,
             new HashSet<>(Arrays.asList(
                 JWTClaimNames.AUDIENCE,

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
+import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 
 import java.security.KeyPair;
@@ -51,7 +51,7 @@ class TokenValidatorImplTest {
     private static final String EMAILS_CLAIM_NAME = "emails";
 
     @Mock
-    private AuthenticationConfiguration authenticationConfiguration;
+    private AuthConfiguration<?> authenticationConfiguration;
 
     private KeyPair keyPair;
     private TokenValidator tokenValidator;
@@ -62,10 +62,10 @@ class TokenValidatorImplTest {
 
         JWKSource<SecurityContext> testJwkSource = createTestJwkSource();
 
-        when(authenticationConfiguration.getExternalADissuerUri()).thenReturn(VALID_ISSUER_VALUE);
-        when(authenticationConfiguration.getExternalADclientId()).thenReturn(VALID_AUDIENCE_VALUE);
+        when(authenticationConfiguration.getIssuerURI()).thenReturn(VALID_ISSUER_VALUE);
+        when(authenticationConfiguration.getClientId()).thenReturn(VALID_AUDIENCE_VALUE);
 
-        tokenValidator = new TokenValidatorImpl(testJwkSource, authenticationConfiguration);
+        tokenValidator = new TokenValidatorImpl(testJwkSource);
     }
 
     @Test
@@ -84,7 +84,7 @@ class TokenValidatorImplTest {
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize(), authenticationConfiguration);
 
         assertTrue(validationResult.valid());
         assertNull(validationResult.reason());
@@ -102,7 +102,7 @@ class TokenValidatorImplTest {
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize(), authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals("JWT missing required claims: [emails]", validationResult.reason());
@@ -120,7 +120,7 @@ class TokenValidatorImplTest {
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize(), authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals("JWT missing required claims: [sub]", validationResult.reason());
@@ -138,7 +138,7 @@ class TokenValidatorImplTest {
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize(), authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals("JWT missing required claims: [iat]", validationResult.reason());
@@ -157,7 +157,7 @@ class TokenValidatorImplTest {
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize(), authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals("JWT audience rejected: [INVALID AUDIENCE VALUE]", validationResult.reason());
@@ -176,7 +176,7 @@ class TokenValidatorImplTest {
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize(), authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals(
@@ -198,7 +198,7 @@ class TokenValidatorImplTest {
 
         SignedJWT jwt = createSignedJwt(jwtClaimsSet);
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize());
+        JwtValidationResult validationResult = tokenValidator.validate(jwt.serialize(), authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals("Expired JWT", validationResult.reason());
@@ -223,7 +223,7 @@ class TokenValidatorImplTest {
             .add("I AM A MANGLED SIGNATURE")
             .toString();
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwtWithMangledSignature);
+        JwtValidationResult validationResult = tokenValidator.validate(jwtWithMangledSignature, authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals("Signed JWT rejected: Invalid signature", validationResult.reason());
@@ -233,7 +233,7 @@ class TokenValidatorImplTest {
     void validateShouldThrowExceptionWhenNonParsableTokenIsPresented() {
         String jwt = "I AM NOT PARSABLE AS A JWT";
 
-        JwtValidationResult validationResult = tokenValidator.validate(jwt);
+        JwtValidationResult validationResult = tokenValidator.validate(jwt, authenticationConfiguration);
 
         assertFalse(validationResult.valid());
         assertEquals(

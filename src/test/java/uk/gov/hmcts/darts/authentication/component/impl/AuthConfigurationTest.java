@@ -2,10 +2,9 @@ package uk.gov.hmcts.darts.authentication.component.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
+import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
 
 import java.net.URI;
 
@@ -13,22 +12,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UriProviderImplTest {
+class AuthConfigurationTest {
 
     @Mock
-    private AuthenticationConfiguration authConfig;
-
-    @InjectMocks
-    private UriProviderImpl uriProvider;
+    private AuthConfiguration<?> authConfig;
 
     @Test
     void getLoginUriShouldReturnExpectedUri() {
         commonMocksForAuthorisation();
-        when(authConfig.getExternalADauthorizationUri()).thenReturn("AuthUrl");
-        when(authConfig.getExternalADresponseMode()).thenReturn("ResponseMode");
-        when(authConfig.getExternalADresponseType()).thenReturn("ResponseType");
+        when(authConfig.getProvider().getAuthorizationURI()).thenReturn("AuthUrl");
+        when(authConfig.getResponseMode()).thenReturn("ResponseMode");
+        when(authConfig.getResponseType()).thenReturn("ResponseType");
 
-        URI authUrl = uriProvider.getLoginUri(null);
+        URI authUrl = authConfig.getLoginUri(null);
 
         assertEquals("AuthUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
                          "&response_mode=ResponseMode&response_type=ResponseType",
@@ -38,11 +34,11 @@ class UriProviderImplTest {
     @Test
     void getLoginUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
         commonMocksForAuthorisation();
-        when(authConfig.getExternalADauthorizationUri()).thenReturn("AuthUrl");
-        when(authConfig.getExternalADresponseMode()).thenReturn("ResponseMode");
-        when(authConfig.getExternalADresponseType()).thenReturn("ResponseType");
+        when(authConfig.getProvider().getAuthorizationURI()).thenReturn("AuthUrl");
+        when(authConfig.getResponseMode()).thenReturn("ResponseMode");
+        when(authConfig.getResponseType()).thenReturn("ResponseType");
 
-        URI authUrl = uriProvider.getLoginUri("OverriddenRedirectUri");
+        URI authUrl = authConfig.getLoginUri("OverriddenRedirectUri");
 
         assertEquals("AuthUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
                          "&response_mode=ResponseMode&response_type=ResponseType",
@@ -51,17 +47,17 @@ class UriProviderImplTest {
 
     @Test
     void getLandingPageUriShouldReturnExpectedUri() {
-        URI landingPageUri = uriProvider.getLandingPageUri();
+        URI landingPageUri = authConfig.getLandingPageUri();
 
         assertEquals("/", landingPageUri.toString());
     }
 
     @Test
     void getLogoutUriShouldReturnExpectedUri() {
-        when(authConfig.getExternalADlogoutUri()).thenReturn("LogoutUrl");
-        when(authConfig.getExternalADlogoutRedirectUri()).thenReturn("LogoutRedirectUrl");
+        when(authConfig.getProvider().getLogoutURI()).thenReturn("LogoutUrl");
+        when(authConfig.getRedirectURI()).thenReturn("LogoutRedirectUrl");
 
-        URI logoutUri = uriProvider.getLogoutUri("DUMMY_SESSION_ID", null);
+        URI logoutUri = authConfig.getLogoutUri("DUMMY_SESSION_ID", null);
 
         assertEquals("LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=LogoutRedirectUrl",
                      logoutUri.toString());
@@ -69,10 +65,10 @@ class UriProviderImplTest {
 
     @Test
     void getLogoutUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
-        when(authConfig.getExternalADlogoutUri()).thenReturn("LogoutUrl");
-        when(authConfig.getExternalADlogoutRedirectUri()).thenReturn("LogoutRedirectUrl");
+        when(authConfig.getProvider().getLogoutURI()).thenReturn("LogoutUrl");
+        when(authConfig.getLogoutRedirectURI()).thenReturn("LogoutRedirectUrl");
 
-        URI logoutUri = uriProvider.getLogoutUri("DUMMY_SESSION_ID", "OverriddenRedirectUri");
+        URI logoutUri = authConfig.getLogoutUri("DUMMY_SESSION_ID", "OverriddenRedirectUri");
 
         assertEquals("LogoutUrl?id_token_hint=DUMMY_SESSION_ID&post_logout_redirect_uri=OverriddenRedirectUri",
                      logoutUri.toString());
@@ -81,9 +77,9 @@ class UriProviderImplTest {
     @Test
     void getResetPasswordUriShouldReturnExpectedUri() {
         commonMocksForAuthorisation();
-        when(authConfig.getExternalADresetPasswordUri()).thenReturn("ResetUrl");
+        when(authConfig.getProvider().getResetPasswordURI()).thenReturn("ResetUrl");
 
-        URI logoutUri = uriProvider.getResetPasswordUri(null);
+        URI logoutUri = authConfig.getResetPasswordUri(null);
 
         assertEquals("ResetUrl?client_id=ClientId&redirect_uri=RedirectId&scope=Scope&prompt=Prompt" +
                          "&response_type=id_token",
@@ -93,9 +89,9 @@ class UriProviderImplTest {
     @Test
     void getResetPasswordUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
         commonMocksForAuthorisation();
-        when(authConfig.getExternalADresetPasswordUri()).thenReturn("ResetUrl");
+        when(authConfig.getProvider().getResetPasswordURI()).thenReturn("ResetUrl");
 
-        URI logoutUri = uriProvider.getResetPasswordUri("OverriddenRedirectUri");
+        URI logoutUri = authConfig.getResetPasswordUri("OverriddenRedirectUri");
 
         assertEquals("ResetUrl?client_id=ClientId&redirect_uri=OverriddenRedirectUri&scope=Scope&prompt=Prompt" +
                          "&response_type=id_token",
@@ -103,10 +99,10 @@ class UriProviderImplTest {
     }
 
     private void commonMocksForAuthorisation() {
-        when(authConfig.getExternalADclientId()).thenReturn("ClientId");
-        when(authConfig.getExternalADredirectUri()).thenReturn("RedirectId");
-        when(authConfig.getExternalADscope()).thenReturn("Scope");
-        when(authConfig.getExternalADprompt()).thenReturn("Prompt");
+        when(authConfig.getClientId()).thenReturn("ClientId");
+        when(authConfig.getRedirectURI()).thenReturn("RedirectId");
+        when(authConfig.getScope()).thenReturn("Scope");
+        when(authConfig.getPrompt()).thenReturn("Prompt");
     }
 
 }
