@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationF
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
+import uk.gov.hmcts.darts.authentication.config.DefaultAuthConfigurationPropertiesStrategy;
 
 import java.io.IOException;
 
@@ -27,7 +28,9 @@ import java.io.IOException;
 @Profile("!intTest")
 public class SecurityConfig {
 
-    private AuthStrategySelector locator;
+    private final AuthStrategySelector locator;
+
+    private final DefaultAuthConfigurationPropertiesStrategy fallbackConfiguration;
 
     @Bean
     @Order(1)
@@ -88,7 +91,7 @@ public class SecurityConfig {
                 return;
             }
 
-            response.sendRedirect(locator.locateAuthenticationConfiguration().getLoginUri(null).toString());
+            response.sendRedirect(locator.locateAuthenticationConfiguration(req -> fallbackConfiguration).getLoginUri(null).toString());
         }
     }
 }

@@ -2,15 +2,16 @@ package uk.gov.hmcts.darts.authentication.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import uk.gov.hmcts.darts.authentication.exception.AuthenticationException;
+import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 @Configuration
 public class AuthenticationConfiguration {
 
     @Bean
-    public AuthConfigFallback getDefaultNoAuthConfiguration() {
+    public AuthConfigFallback getNoAuthConfigurationFallback(DefaultAuthConfigurationPropertiesStrategy strategy) {
         return (req) -> {
-            throw new AuthenticationException("No authentication configuration found");
+            throw new DartsApiException(AuthenticationError.FAILED_TO_OBTAIN_AUTHENTICATION_CONFIG);
         };
     }
 }

@@ -9,21 +9,10 @@ public interface RequestMatcher {
 
     String externalUrlMatcher = "/external-user";
 
-    RequestMatcher URL_MAPPER_INTERNAL = (req) -> {
-        if (req.getRequestURL().toString().contains(internalUrlMatcher)) {
-            return true;
-        }
+    RequestMatcher URL_MAPPER_INTERNAL = (req) -> req.getRequestURL().toString().contains(internalUrlMatcher);
 
-        return false;
-    };
 
-    RequestMatcher URL_MAPPER_EXTERNAL = (req) -> {
-        if (req.getRequestURL().toString().contains(externalUrlMatcher)) {
-            return true;
-        }
-
-        return false;
-    };
+    RequestMatcher URL_MAPPER_EXTERNAL = (req) -> req.getRequestURL().toString().contains(externalUrlMatcher);
 
     boolean doesMatch(HttpServletRequest req);
 }
