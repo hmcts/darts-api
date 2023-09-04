@@ -5,18 +5,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
+@Transactional
 class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
     @Autowired
@@ -28,16 +36,24 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
 
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
     @BeforeEach
     void setUp() {
 
-        dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_ID,
             SOME_COURTHOUSE,
             SOME_COURTROOM,
             SOME_DATE_TIME.toLocalDate()
         );
 
+        CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
+        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
+
+        UserAccountEntity testUser = dartsDatabase.createAuthorisedIntegrationTestUser(courthouseEntity);
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
     }
 
     @Test
@@ -106,12 +122,18 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
     @Test
     void casesSearchEmptyHearingListCaseIdExists() throws Exception {
 
-        CourtCaseEntity courtCase = dartsDatabase.createCase("25", "Test");
+        String courthouseName = "25";
+        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists(courthouseName);
+        dartsDatabase.createUnauthorisedIntegrationTestUser();
+        dartsDatabase.createAuthorisedIntegrationTestUser(courthouseEntity);
+
+        CourtCaseEntity courtCase = dartsDatabase.createCase(courthouseName, "Test");
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, courtCase.getId());
 
-        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andExpect(MockMvcResultMatchers.jsonPath(
-            "$.case_id").doesNotExist());
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath(
+                "$.case_id").doesNotExist());
 
     }
 

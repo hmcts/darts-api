@@ -13,6 +13,11 @@ public enum AuthorisationError implements DartsApiError {
         "100",
         HttpStatus.UNAUTHORIZED,
         "User is not authorised for the associated courthouse"
+    ),
+    BAD_CASE_ID_REQUEST(
+        "101",
+        HttpStatus.BAD_REQUEST,
+        "Failed to check authorisation for the case"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

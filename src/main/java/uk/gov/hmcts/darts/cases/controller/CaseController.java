@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
@@ -27,17 +26,12 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
-import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
-
-import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,8 +41,6 @@ import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
 public class CaseController implements CasesApi {
 
     private final CaseService caseService;
-    private final CaseRepository caseRepository;
-    private final AuthorisationApi authorisationApi;
 
     @Override
     public ResponseEntity<List<ScheduledCase>> casesGet(
@@ -98,22 +90,14 @@ public class CaseController implements CasesApi {
     }
 
     @Override
-    public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(@Parameter(name = "case_id", description = "case_id is the internal cas_id of the case.", required = true, in = ParameterIn.PATH) @PathVariable("case_id") Integer caseId) {
-
+    @Authorisation
+    public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
     }
 
     @Override
-    // TODO: Should we also enforce @RolesAllowed() to coarsely screen by role before making any DB calls?
+    @Authorisation
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
-        try {
-            final List<CourthouseEntity> courthouses = List.of(caseRepository.getReferenceById(caseId).getCourthouse());
-            authorisationApi.checkAuthorisation(courthouses);
-        } catch (EntityNotFoundException e) {
-            log.error("Unable to find Case-Courthouse for checkAuthorisation", e);
-            throw new DartsApiException(CASE_NOT_FOUND);
-        }
-
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
     }
 
