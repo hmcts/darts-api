@@ -243,6 +243,44 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "PATCH /cases/{case_id}",
+					"item": [
+						{
+							"name": "PATCH /cases/{case_id}",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"retain_until\": \"2023-09-06T16:16:57.331Z\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{serverUrl}}/cases/:case_id",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"cases",
+										":case_id"
+									],
+									"variable": [
+										{
+											"key": "case_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -402,6 +440,43 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "GET /dailylists/getCases",
+					"item": [
+						{
+							"name": "GET /dailylists/getCases",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{serverUrl}}/dailylists/getCases?court_house_code=gfdg&court_room_number&hearing_date",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"dailylists",
+										"getCases"
+									],
+									"query": [
+										{
+											"key": "court_house_code",
+											"value": "gfdg"
+										},
+										{
+											"key": "court_room_number",
+											"value": null
+										},
+										{
+											"key": "hearing_date",
+											"value": null
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -438,86 +513,6 @@
 					]
 				}
 			]
-		},
-		{
-			"name": "Generate Bearer Token",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"let responseData = pm.response.json();",
-							"pm.globals.set(\"access_token\", responseData.access_token);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/x-www-form-urlencoded",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "grant_type",
-							"value": "password",
-							"type": "text"
-						},
-						{
-							"key": "client_id",
-							"value": "053d44f9-cd27-463e-a995-bcf835233cf8",
-							"type": "text"
-						},
-						{
-							"key": "client_secret",
-							"value": "zKO8Q~0Ab-4MZKHcghuhLKvzG8Ot~lkzr4EaacjI",
-							"type": "text"
-						},
-						{
-							"key": "scope",
-							"value": "https://hmctsdartsb2csbox.onmicrosoft.com/053d44f9-cd27-463e-a995-bcf835233cf8/Functional.Test",
-							"type": "text"
-						},
-						{
-							"key": "username",
-							"value": "dartstestuser",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "Password@1",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_ropc_darts_signin/oauth2/v2.0/token",
-					"protocol": "https",
-					"host": [
-						"hmctsdartsb2csbox",
-						"b2clogin",
-						"com"
-					],
-					"path": [
-						"hmctsdartsb2csbox.onmicrosoft.com",
-						"B2C_1_ropc_darts_signin",
-						"oauth2",
-						"v2.0",
-						"token"
-					]
-				}
-			},
-			"response": []
 		}
 	],
 	"auth": {
