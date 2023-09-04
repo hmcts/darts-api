@@ -75,7 +75,7 @@ class AutomatedTaskServiceImplTest {
     }
 
     @Test
-    void getAutomatedTaskCronExpressionInvalid() {
+    void getAutomatedTaskCronExpressionWithNullCronExpression() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
             mockLockProvider
