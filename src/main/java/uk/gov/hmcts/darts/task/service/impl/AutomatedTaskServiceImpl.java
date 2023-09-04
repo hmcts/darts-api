@@ -174,8 +174,11 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
      * @param taskRegistrar Registers scheduled tasks
      */
     private void addProcessDailyListToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
-        ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider);
-        processDailyListAutomatedTask.setDailyListProcessor(dailyListProcessor);
+        ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            dailyListProcessor
+        );
         processDailyListAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(processDailyListAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
         taskRegistrar.addTriggerTask(processDailyListAutomatedTask, trigger);
@@ -186,8 +189,11 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         Trigger trigger;
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider);
-            processDailyListAutomatedTask.setDailyListProcessor(dailyListProcessor);
+            processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                dailyListProcessor
+            );
             trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
             taskScheduler.schedule(processDailyListAutomatedTask, trigger);
         } else {

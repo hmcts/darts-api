@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 
@@ -22,6 +21,11 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
         super(automatedTaskRepository, lockProvider);
     }
 
+    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider, DailyListProcessor processor) {
+        super(automatedTaskRepository, lockProvider);
+        this.dailyListProcessor = processor;
+    }
+
     @Override
     public String getTaskName() {
         return taskName;
@@ -35,11 +39,6 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
     @Override
     protected void handleException(Exception exception) {
         log.error("Exception: {}", exception.getMessage());
-    }
-
-    @Autowired
-    public void setDailyListProcessor(DailyListProcessor dailyListProcessor) {
-        this.dailyListProcessor = dailyListProcessor;
     }
 
 }
