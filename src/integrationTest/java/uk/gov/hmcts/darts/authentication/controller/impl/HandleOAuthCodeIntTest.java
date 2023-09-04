@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -204,9 +203,9 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
             .issueTime(Date.from(Instant.now()))
             .subject(VALID_SUBJECT_VALUE);
 
-            if (emails.size() > 0) {
-                claimBuilder = claimBuilder.claim(EMAILS_CLAIM_NAME, emails);
-            }
+        if (!emails.isEmpty()) {
+            claimBuilder = claimBuilder.claim(EMAILS_CLAIM_NAME, emails);
+        }
         JWTClaimsSet jwtClaimsSet = claimBuilder.build();
 
         KeyPair keyPair = createKeys();
@@ -216,7 +215,8 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         stubFor(
             WireMock.post(OAUTH_TOKEN_ENDPOINT)
                 .willReturn(
-                    aResponse().withHeader("Content-Type", "application/json").withStatus(200).withBody("{\"id_token\":\"" + signedJwt + "\"}")
+                    aResponse().withHeader("Content-Type", "application/json").withStatus(200).withBody(
+                        "{\"id_token\":\"" + signedJwt + "\"}")
                 )
         );
 

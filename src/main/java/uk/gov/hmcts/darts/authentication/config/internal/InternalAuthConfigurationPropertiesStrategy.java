@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.authentication.config.internal;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.annotation.Configuration;
 import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;

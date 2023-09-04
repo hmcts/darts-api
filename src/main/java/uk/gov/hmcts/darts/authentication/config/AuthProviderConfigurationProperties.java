@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.authentication.config;
 
 import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.SecurityContext;
 import uk.gov.hmcts.darts.authentication.exception.AuthenticationException;
 
@@ -10,23 +10,22 @@ import java.net.URL;
 
 public interface AuthProviderConfigurationProperties {
 
-    String getAuthorizationURI();
+    String getAuthorizationUri();
 
-    String getTokenURI();
+    String getTokenUri();
 
     String getJwkSetUri();
 
-    String getLogoutURI();
+    String getLogoutUri();
 
-    String getResetPasswordURI();
+    String getResetPasswordUri();
 
     default JWKSource<SecurityContext> getJwkSource() {
         try {
             URL jwksUrl = new URL(getJwkSetUri());
 
-            return new RemoteJWKSet<>(jwksUrl);
-        }
-        catch (MalformedURLException malformedURLException) {
+            return JWKSourceBuilder.create(jwksUrl).build();
+        } catch (MalformedURLException malformedUrlException) {
             throw new AuthenticationException("Sorry authentication jwks URL is incorrect");
         }
     }

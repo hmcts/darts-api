@@ -18,9 +18,9 @@ public class InternalAuthConfigurationProperties implements AuthConfigurationPro
 
     private String scope;
 
-    private String redirectURI;
+    private String redirectUri;
 
-    private String logoutRedirectURI;
+    private String logoutRedirectUri;
 
     private String grantType;
 
@@ -30,5 +30,5 @@ public class InternalAuthConfigurationProperties implements AuthConfigurationPro
 
     private String prompt;
 
-    private String issuerURI;
+    private String issuerUri;
 }

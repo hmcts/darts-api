@@ -2,11 +2,11 @@ package uk.gov.hmcts.darts.authentication.config;
 
 public interface AuthConfigurationProperties {
 
-    String getRedirectURI();
+    String getRedirectUri();
 
-    String getLogoutRedirectURI();
+    String getLogoutRedirectUri();
 
-    String getIssuerURI();
+    String getIssuerUri();
 
     String getPrompt();
 

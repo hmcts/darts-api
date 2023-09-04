@@ -2,10 +2,8 @@ package uk.gov.hmcts.darts.authentication.component.impl;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
-import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.JWTClaimsSet.Builder;
@@ -43,7 +41,7 @@ public class TokenValidatorImpl implements TokenValidator {
         jwtProcessor.setJWSKeySelector(keySelector);
 
         JWTClaimsSet jwtClaimsSet = new Builder()
-            .issuer(configuration.getIssuerURI())
+            .issuer(configuration.getIssuerUri())
             .build();
         var claimsVerifier = new DefaultJWTClaimsVerifier<>(
             configuration.getClientId(),

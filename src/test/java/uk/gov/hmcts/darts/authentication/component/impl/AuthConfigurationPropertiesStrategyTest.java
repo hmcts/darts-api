@@ -1,26 +1,16 @@
 package uk.gov.hmcts.darts.authentication.component.impl;
 
-import groovy.transform.Sealed;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfigurationPropertiesStrategy;
 
 import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,7 +28,7 @@ class AuthConfigurationPropertiesStrategyTest {
     @Test
     void getLoginUriShouldReturnExpectedUri() {
         commonMocksForAuthorisation();
-        when(provider.getAuthorizationURI()).thenReturn("AuthUrl");
+        when(provider.getAuthorizationUri()).thenReturn("AuthUrl");
 
         when(authConfiguration.getResponseMode()).thenReturn("ResponseMode");
         when(authConfiguration.getResponseType()).thenReturn("ResponseType");
@@ -57,7 +47,7 @@ class AuthConfigurationPropertiesStrategyTest {
 
         commonMocksForAuthorisation();
 
-        when(provider.getAuthorizationURI()).thenReturn("AuthUrl");
+        when(provider.getAuthorizationUri()).thenReturn("AuthUrl");
         when(authConfiguration.getResponseMode()).thenReturn("ResponseMode");
         when(authConfiguration.getResponseType()).thenReturn("ResponseType");
 
@@ -80,8 +70,8 @@ class AuthConfigurationPropertiesStrategyTest {
     @Test
     void getLogoutUriShouldReturnExpectedUri() {
 
-        when(provider.getLogoutURI()).thenReturn("LogoutUrl");
-        when(authConfiguration.getLogoutRedirectURI()).thenReturn("LogoutRedirectUrl");
+        when(provider.getLogoutUri()).thenReturn("LogoutUrl");
+        when(authConfiguration.getLogoutRedirectUri()).thenReturn("LogoutRedirectUrl");
 
         URI logoutUri = authConfig.getLogoutUri("DUMMY_SESSION_ID", null);
 
@@ -93,8 +83,8 @@ class AuthConfigurationPropertiesStrategyTest {
 
     @Test
     void getLogoutUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
-        when(authConfiguration.getLogoutRedirectURI()).thenReturn("LogoutRedirectUrl");
-        when(provider.getLogoutURI()).thenReturn("LogoutUrl");
+        when(authConfiguration.getLogoutRedirectUri()).thenReturn("LogoutRedirectUrl");
+        when(provider.getLogoutUri()).thenReturn("LogoutUrl");
 
         URI logoutUri = authConfig.getLogoutUri("DUMMY_SESSION_ID", "OverriddenRedirectUri");
 
@@ -108,7 +98,7 @@ class AuthConfigurationPropertiesStrategyTest {
     void getResetPasswordUriShouldReturnExpectedUri() {
         commonMocksForAuthorisation();
 
-        when(provider.getResetPasswordURI()).thenReturn("ResetUrl");
+        when(provider.getResetPasswordUri()).thenReturn("ResetUrl");
 
         URI logoutUri = authConfig.getResetPasswordUri(null);
 
@@ -123,7 +113,7 @@ class AuthConfigurationPropertiesStrategyTest {
     void getResetPasswordUriShouldReturnExpectedUriWithOverriddenRedirectUri() {
         commonMocksForAuthorisation();
 
-        when(provider.getResetPasswordURI()).thenReturn("ResetUrl");
+        when(provider.getResetPasswordUri()).thenReturn("ResetUrl");
 
         URI logoutUri = authConfig.getResetPasswordUri("OverriddenRedirectUri");
 
@@ -136,7 +126,7 @@ class AuthConfigurationPropertiesStrategyTest {
 
     private AuthConfigurationProperties commonMocksForAuthorisation() {
         when(authConfiguration.getClientId()).thenReturn("ClientId");
-        when(authConfiguration.getRedirectURI()).thenReturn("RedirectId");
+        when(authConfiguration.getRedirectUri()).thenReturn("RedirectId");
         when(authConfiguration.getScope()).thenReturn("Scope");
         when(authConfiguration.getPrompt()).thenReturn("Prompt");
 
@@ -144,25 +134,3 @@ class AuthConfigurationPropertiesStrategyTest {
     }
 }
 
-@Getter
-@Setter
-@RequiredArgsConstructor
-class DummyAuthStrategy implements AuthenticationConfigurationPropertiesStrategy {
-    private final AuthConfigurationProperties configurationProperties;
-    private final AuthProviderConfigurationProperties configurationProviderProperties;
-
-    @Override
-    public AuthConfigurationProperties getConfiguration() {
-        return configurationProperties;
-    }
-
-    @Override
-    public AuthProviderConfigurationProperties getProviderConfiguration() {
-        return configurationProviderProperties;
-    }
-
-    @Override
-    public boolean doesMatch(HttpServletRequest req) {
-        return false;
-    }
-}

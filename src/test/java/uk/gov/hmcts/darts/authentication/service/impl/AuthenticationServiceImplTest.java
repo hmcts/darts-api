@@ -22,7 +22,9 @@ import java.net.URI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -102,7 +104,9 @@ class AuthenticationServiceImplTest {
             .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
-        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
+            new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(),
+                                                            new ExternalAuthProviderConfigurationProperties()));
 
         String token = authenticationService.handleOauthCode(DUMMY_CODE);
 
@@ -115,9 +119,8 @@ class AuthenticationServiceImplTest {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
             .thenThrow(AzureDaoException.class);
 
-        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
-
-        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
+            new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
@@ -135,9 +138,9 @@ class AuthenticationServiceImplTest {
             .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
-        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
-
-        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
+            new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(),
+                                                            new ExternalAuthProviderConfigurationProperties()));
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,

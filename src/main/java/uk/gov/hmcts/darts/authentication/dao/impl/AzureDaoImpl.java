@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationPropert
 import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
-import uk.gov.hmcts.darts.authentication.client.impl.OAuthClientImpl;
 
 import java.io.IOException;
 
@@ -25,7 +24,9 @@ public class AzureDaoImpl implements AzureDao {
     private final OAuthClient azureActiveDirectoryB2CClient;
 
     @Override
-    public OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig, AuthConfigurationProperties configuration) throws AzureDaoException {
+    public OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig,
+                                                     AuthConfigurationProperties configuration)
+        throws AzureDaoException {
         log.debug("Fetching access token(s) for authorization code: {}", code);
 
         if (StringUtils.isBlank(code)) {
@@ -33,7 +34,10 @@ public class AzureDaoImpl implements AzureDao {
         }
 
         try {
-            HTTPResponse response = azureActiveDirectoryB2CClient.fetchAccessToken(providerConfig, configuration.getRedirectURI(), code, configuration.getClientId(),
+            HTTPResponse response = azureActiveDirectoryB2CClient.fetchAccessToken(providerConfig,
+                                                                                   configuration.getRedirectUri(),
+                                                                                   code,
+                                                                                   configuration.getClientId(),
                                                                                    configuration.getClientSecret());
             String parsedResponse = response.getContent();
 

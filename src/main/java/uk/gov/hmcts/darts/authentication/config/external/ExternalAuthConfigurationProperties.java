@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.authentication.config.external;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -19,9 +18,9 @@ public class ExternalAuthConfigurationProperties implements AuthConfigurationPro
 
     private String scope;
 
-    private String redirectURI;
+    private String redirectUri;
 
-    private String logoutRedirectURI;
+    private String logoutRedirectUri;
 
     private String grantType;
 
@@ -31,6 +30,6 @@ public class ExternalAuthConfigurationProperties implements AuthConfigurationPro
 
     private String prompt;
 
-    private String issuerURI;
+    private String issuerUri;
 
 }

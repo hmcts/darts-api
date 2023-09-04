@@ -12,13 +12,13 @@ import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationPropert
 @Setter
 public class ExternalAuthProviderConfigurationProperties implements AuthProviderConfigurationProperties {
 
-    private String authorizationURI;
+    private String authorizationUri;
 
-    private String tokenURI;
+    private String tokenUri;
 
     private String jwkSetUri;
 
-    private String logoutURI;
+    private String logoutUri;
 
-    private String resetPasswordURI;
+    private String resetPasswordUri;
 }

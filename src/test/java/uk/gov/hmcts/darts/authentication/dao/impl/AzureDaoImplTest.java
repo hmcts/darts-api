@@ -16,11 +16,6 @@ import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
-import uk.gov.hmcts.darts.authentication.client.impl.OAuthClientImpl;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -58,7 +53,8 @@ class AzureDaoImplTest {
     @ValueSource(strings = {" "})
     @NullAndEmptySource
     void fetchAccessTokenShouldThrowExceptionWhenProvidedCodeIsBlankOrNull(String code) {
-        AzureDaoException exception = assertThrows(AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(code, authenticationProviderConfiguration, authenticationConfiguration));
+        AzureDaoException exception = assertThrows(AzureDaoException.class, () -> azureDaoImpl.fetchAccessToken(
+            code, authenticationProviderConfiguration, authenticationConfiguration));
 
         assertEquals("Null code not permitted", exception.getMessage());
     }
@@ -79,7 +75,6 @@ class AzureDaoImplTest {
 
     private HTTPResponse mockSuccessResponse() {
         String body = "{\"id_token\":\"test_id_token\", \"id_token_expires_in\":\"1234\"}";
-        Map<String, Collection<String>> headersError = new ConcurrentHashMap<>();
 
         HTTPResponse response = Mockito.mock(HTTPResponse.class);
         when(response.getStatusCode()).thenReturn(HttpStatus.SC_OK);
@@ -96,13 +91,4 @@ class AzureDaoImplTest {
 
         return response;
     }
-
-    private void mockConfig() {
-        when(authenticationConfiguration.getClientId()).thenReturn("ClientId");
-        when(authenticationConfiguration.getRedirectURI()).thenReturn("RedirectId");
-        when(authenticationConfiguration.getScope()).thenReturn("Scope");
-        when(authenticationConfiguration.getGrantType()).thenReturn("GrantType");
-        when(authenticationConfiguration.getClientSecret()).thenReturn("ClientSecret");
-    }
-
 }

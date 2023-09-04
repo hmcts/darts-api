@@ -5,11 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationProperties;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
