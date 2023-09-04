@@ -9,7 +9,7 @@ plugins {
   id 'com.github.ben-manes.versions' version '0.47.0'
   id 'org.sonarqube' version '4.3.0.3225'
   id "io.freefair.lombok" version "8.3"
-  id "org.openapi.generator" version "7.0.0-beta"
+  id "org.openapi.generator" version "7.0.0"
   id "org.flywaydb.flyway" version "9.22.0"
 }
 
@@ -204,123 +204,40 @@ ext {
 ext['snakeyaml.version'] = '2.0'
 ext['spring-security.version'] = '6.0.5' // https://spring.io/security/cve-2023-20862
 
-task generateDailyListApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/dailyList.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.dailylist.api"
-  modelPackage = "uk.gov.hmcts.darts.dailylist.model"
-  typeMappings = [
-    "string+date": "LocalDate"]
-  importMappings = [
-    "LocalDate": "java.time.LocalDate"]
+//here we are going to store swagger files
+def swaggerList = []
 
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary  : "java8",
-    interfaceOnly: "true",
-    useTags      : "true"
-  ]
+//iteration by swagger file root folder and save into swaggerList variable
+def dir = new File("$rootDir/src/main/resources/openapi/".toString())
+import static groovy.io.FileType.FILES
+
+dir.eachFileRecurse(FILES) {file ->
+  if (file.getName().endsWith(".yaml") && file.getName()!="problem.yaml")
+    swaggerList << file
 }
 
-task generateCasesApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/cases.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.cases.api"
-  modelPackage = "uk.gov.hmcts.darts.cases.model"
-  typeMappings = [
-    "string+date": "LocalDate"]
-  importMappings = [
-    "LocalDate": "java.time.LocalDate"]
+def openApiGenerateTaskList = []
 
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary   : "java8",
-    interfaceOnly : "true",
-    useTags       : "true",
-    useSpringBoot3: "true"
-  ]
-}
-
-
-task generateCourtHousesApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/courthouses.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.courthouse.api"
-  modelPackage = "uk.gov.hmcts.darts.courthouse.model"
-
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary   : "java8",
-    interfaceOnly : "true",
-    useTags       : "true",
-    useSpringBoot3: "true"
-  ]
-}
-
-task generateAudioApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/audio.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.audio.api"
-  modelPackage = "uk.gov.hmcts.darts.audio.model"
-
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary   : "java8",
-    interfaceOnly : "true",
-    useTags       : "true",
-    useSpringBoot3: "true"
-  ]
-}
-
-task generateAudioRequestsApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/audio-requests.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.audiorequests.api"
-  modelPackage = "uk.gov.hmcts.darts.audiorequests.model"
-
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary   : "java8",
-    interfaceOnly : "true",
-    useTags       : "true",
-    useSpringBoot3: "true"
-  ]
-}
-
-task generateEventsAPI(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/events.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.event.api"
-  modelPackage = "uk.gov.hmcts.darts.event.model"
-
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary   : "java8",
-    interfaceOnly : "true",
-    useTags       : "true",
-    useSpringBoot3: "true"
-  ]
-}
-
-task generateAuditApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
-  generatorName = "spring"
-  inputSpec = "$rootDir/src/main/resources/openapi/audit.yaml".toString()
-  outputDir = "$buildDir/generated/openapi".toString()
-  apiPackage = "uk.gov.hmcts.darts.audit.api"
-  modelPackage = "uk.gov.hmcts.darts.audit.model"
-
-  skipOperationExample = true
-  configOptions = [
-    dateLibrary  : "java8",
-    interfaceOnly: "true",
-    useTags      : "true",
-  ]
+// Iterate on all swagger files and generate a task for each one with the nomenclature openApiGenerate + swagger name
+swaggerList.each {
+  def apiName = it.getName().replace(".yaml", "");
+  def taskName = "openApiGenerate" + apiName.capitalize()
+  openApiGenerateTaskList << taskName
+  tasks.create(taskName, org.openapitools.generator.gradle.plugin.tasks.GenerateTask, {
+    generatorName = "spring"
+    inputSpec = "$rootDir/src/main/resources/openapi/".toString() + "${apiName}.yaml"
+    outputDir = "$buildDir/generated/openapi".toString()
+    apiPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".api"
+    modelPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".model"
+    //    https://openapi-generator.tech/docs/generators/java/#config-options
+    skipOperationExample = true
+    configOptions = [
+      dateLibrary   : "java8",
+      interfaceOnly : "true",
+      useTags       : "true",
+      useSpringBoot3: "true"
+    ]
+  })
 }
 
 dependencies {
@@ -371,9 +288,9 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.2.7.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.3.0.Final')
 
-  testImplementation 'com.h2database:h2:2.2.220'
+  testImplementation 'com.h2database:h2:2.2.222'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
   testImplementation 'org.mockito:mockito-inline:5.2.0'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
@@ -382,7 +299,7 @@ dependencies {
   }
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.0.4'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
-  compileJava.dependsOn = ['generateAuditApi', 'generateDailyListApi', 'generateEventsAPI', 'generateAudioApi', 'generateAudioRequestsApi', 'generateCourtHousesApi', 'generateCasesApi']
+  compileJava.dependsOn = openApiGenerateTaskList
 }
 
 mainClassName = 'uk.gov.hmcts.darts.Application'

@@ -26,7 +26,7 @@ public class EventTypeToHandlerMap {
         }
 
         eventHandlerRepository.findByTypeAndSubTypeAndActiveTrue(event.getType(), event.getSubType())
-              .ifPresent(eventHandler -> addHandlerMapping(key, eventHandler));
+            .ifPresent(eventHandler -> addHandlerMapping(key, eventHandler));
 
         return Objects.equals(eventTypeToHandler.get(key), simpleName);
     }
@@ -49,5 +49,6 @@ public class EventTypeToHandlerMap {
         eventTypeToIdAndName.put(key, Pair.of(eventType.getId(), eventType.getEventName()));
     }
 
-    private record HandlerKey(String type, String subType) {}
+    private record HandlerKey(String type, String subType) {
+    }
 }

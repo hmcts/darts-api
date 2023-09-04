@@ -27,7 +27,8 @@ public class EventDispatcherImpl implements EventDispatcher {
             .filter(handler -> handler.isHandlerFor(event))
             .findFirst().orElseThrow(() -> new DartsApiException(
                 EVENT_HANDLER_NOT_FOUND,
-                String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())))
+                String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())
+            ))
             .handle(event);
     }
 }

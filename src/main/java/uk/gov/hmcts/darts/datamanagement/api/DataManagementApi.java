@@ -10,4 +10,6 @@ public interface DataManagementApi {
 
     UUID saveBlobDataToOutboundContainer(BinaryData binaryData);
 
+    void deleteBlobDataFromOutboundContainer(UUID blobId);
+
 }

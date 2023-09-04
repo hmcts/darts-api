@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
+import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +54,7 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        Courthouse courthouseModel = new Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseModel.setCode((int) CODE);
 
@@ -73,7 +74,7 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        Courthouse courthouseModel = new Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseModel.setCode((int) CODE);
 
@@ -94,7 +95,7 @@ class CourthouseServiceImplTest {
         courthouseEntity.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntity.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModel = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        Courthouse courthouseModel = new Courthouse();
         courthouseModel.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseModel.setCode((int) CODE);
 
@@ -126,7 +127,7 @@ class CourthouseServiceImplTest {
         courthouseEntityOriginal.setCourthouseName(TEST_COURTHOUSE_NAME);
         courthouseEntityOriginal.setCode(CODE);
 
-        uk.gov.hmcts.darts.courthouse.model.Courthouse courthouseModelAmendment = new uk.gov.hmcts.darts.courthouse.model.Courthouse();
+        Courthouse courthouseModelAmendment = new Courthouse();
         courthouseModelAmendment.setCourthouseName("Changed courthouse");
         courthouseModelAmendment.setCode(543);
 

@@ -1,7 +1,7 @@
 [
   {
-    "caseID": 101,
-    "caseNumber": "test1",
+    "case_id": 101,
+    "case_number": "test1",
     "courthouse": "case_courthouse",
     "defendants": [
       "defendant_test1_1",
@@ -34,8 +34,8 @@
     ]
   },
   {
-    "caseID": 102,
-    "caseNumber": "test2",
+    "case_id": 102,
+    "case_number": "test2",
     "courthouse": "case_courthouse",
     "defendants": [
       "defendant_test2_1",
@@ -62,8 +62,8 @@
     ]
   },
   {
-    "caseID": 103,
-    "caseNumber": "test3",
+    "case_id": 103,
+    "case_number": "test3",
     "courthouse": "case_courthouse",
     "defendants": [
       "defendant_test3_1",

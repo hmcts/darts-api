@@ -28,14 +28,14 @@ class DailyListEntityTest extends IntegrationBase {
     void dailyListAddDailyListEndpoint() throws Exception {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
 
-        String requestBody = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
+        String jsonDocument = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
         MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam("source_system", "CPP")
-            .content(requestBody);
+            .header("json_document", jsonDocument);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
-        assertThat(response.getResponse().getContentAsString()).isEqualTo("");
+        assertThat(response.getResponse().getContentAsString()).contains("dal_id");
     }
 
     @Test

@@ -52,6 +52,28 @@ paths:
                 detail: "Required parameter 'expired' is not present."
                 instance: "/audio-requests"
 
+  /audio-requests/{audio_request_id}:
+    delete:
+      tags:
+        - Audio Requests
+      description: 'Delete Audio Request and Processed Audio'
+      operationId: deleteAudioRequest
+      parameters:
+        - in: path
+          name: audio_request_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: audio request has been deleted
+        '400':
+          description: required parameter is missing or an invalid datatype or value was provided for property.
+        '404':
+          description: resource with the provided id does not exist.
+        '500':
+          description: internal server error
+
 components:
   securitySchemes:
     bearerAuth: # arbitrary name for the security scheme

@@ -66,7 +66,7 @@ paths:
                 title: "The requested data cannot be located"
                 status: 500
 
-  /audio/hearings/{hearingId}/audios:
+  /audio/hearings/{hearing_id}/audios:
     get:
       tags:
         - Audio
@@ -75,7 +75,7 @@ paths:
       description: Media metadata for provided hearing
       parameters:
         - in: path
-          name: hearingId
+          name: hearing_id
           schema:
             type: integer
           required: true
@@ -111,23 +111,23 @@ components:
     AudioRequestDetails:
       type: object
       required:
-        - hearingId
+        - hearing_id
         - requestor
-        - startTime
-        - endTime
+        - start_time
+        - end_time
         - requestType
       properties:
-        hearingId:
+        hearing_id:
           type: integer
           example: 12345
         requestor:
           type: integer
           example: 4656
-        startTime:
+        start_time:
           type: string
           format: date-time
           example: '2023-05-31T09:00:00Z'
-        endTime:
+        end_time:
           type: string
           format: date-time
           example: '2023-05-31T12:00:00Z'
