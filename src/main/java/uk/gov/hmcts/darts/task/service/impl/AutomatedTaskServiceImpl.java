@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.task.model.TriggerAndAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,8 +37,8 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIS
 
 
 /**
- * Refer to https://docs.spring.io/spring-framework/reference/integration/scheduling.html#scheduling-cron-expression
- * for details of spring cron expressions
+ * Refer to <a href="https://docs.spring.io/spring-framework/reference/integration/scheduling.html#scheduling-cron-expression">...</a>
+ * for details of spring cron expressions.
  */
 @Service
 @Slf4j
@@ -53,6 +55,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final TaskScheduler taskScheduler;
 
     private final Map<String, Trigger> taskTriggers = new ConcurrentHashMap<>();
+
+    private final DailyListProcessor dailyListProcessor;
 
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -116,9 +120,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     @Override
     public void reloadTaskByName(String taskName) {
-        switch (AutomatedTaskName.valueOfTaskName(taskName)) {
-            case PROCESS_DAILY_LIST_TASK_NAME -> rescheduleProcessDailyListAutomatedTask();
-            default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
+        if (Objects.requireNonNull(AutomatedTaskName.valueOfTaskName(taskName)) == PROCESS_DAILY_LIST_TASK_NAME) {
+            rescheduleProcessDailyListAutomatedTask();
+        } else {
+            throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
 
@@ -170,6 +175,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
      */
     private void addProcessDailyListToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider);
+        processDailyListAutomatedTask.setDailyListProcessor(dailyListProcessor);
         processDailyListAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(processDailyListAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
         taskRegistrar.addTriggerTask(processDailyListAutomatedTask, trigger);
@@ -181,6 +187,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
             processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider);
+            processDailyListAutomatedTask.setDailyListProcessor(dailyListProcessor);
             trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
             taskScheduler.schedule(processDailyListAutomatedTask, trigger);
         } else {
