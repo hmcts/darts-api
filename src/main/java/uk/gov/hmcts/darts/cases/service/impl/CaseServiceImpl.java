@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
+import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
@@ -139,5 +140,17 @@ public class CaseServiceImpl implements CaseService {
             throw new DartsApiException(CaseApiError.HEARING_NOT_FOUND);
         }
         return casesMapper.mapToEvents(hearingEntity.get().getEventList());
+    }
+
+    @Override
+    public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
+        Optional<CourtCaseEntity> foundCaseOpt = caseRepository.findById(caseId);
+        if (foundCaseOpt.isEmpty()) {
+            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
+        }
+        CourtCaseEntity foundCase = foundCaseOpt.get();
+        foundCase.setRetainUntilTimestamp(patchRequestObject.getRetainUntil());
+        caseRepository.save(foundCase);
+        return casesMapper.mapToSingleCase(foundCase);
     }
 }
