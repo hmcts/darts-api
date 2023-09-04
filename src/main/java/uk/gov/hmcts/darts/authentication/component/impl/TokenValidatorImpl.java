@@ -15,7 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
-import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
+import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
 
 import java.text.ParseException;
@@ -29,15 +30,13 @@ public class TokenValidatorImpl implements TokenValidator {
 
     private static final String EMAILS_CLAIM_NAME = "emails";
 
-    private final JWKSource<SecurityContext> jwkSource;
-
     @Override
-    public JwtValidationResult validate(String accessToken, AuthConfiguration<?> configuration) {
+    public JwtValidationResult validate(String accessToken, AuthProviderConfigurationProperties providerConfig, AuthConfigurationProperties configuration) {
         log.debug("Validating JWT: {}", accessToken);
 
         var keySelector = new JWSVerificationKeySelector<>(
             JWSAlgorithm.RS256,
-            jwkSource
+            providerConfig.getJwkSource()
         );
 
         var jwtProcessor = new DefaultJWTProcessor<>();

@@ -1,19 +1,20 @@
 package uk.gov.hmcts.darts.authentication.config.internal;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import uk.gov.hmcts.darts.authentication.config.DefaultAuthConfiguration;
-import uk.gov.hmcts.darts.common.util.RequestMatcher;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 
-import javax.servlet.http.HttpServletRequest;
-
+@Component
 @ConfigurationProperties("spring.security.oauth2.client.registration.internal-azure-ad")
 @Getter
-public class InternalAuthConfiguration extends DefaultAuthConfiguration<uk.gov.hmcts.darts.authentication.config.internal.InternalProvider> {
+@Setter
+public class InternalAuthConfigurationProperties implements AuthConfigurationProperties {
 
     private String clientId;
 
-    private String secret;
+    private String clientSecret;
 
     private String scope;
 
@@ -30,11 +31,4 @@ public class InternalAuthConfiguration extends DefaultAuthConfiguration<uk.gov.h
     private String prompt;
 
     private String issuerURI;
-
-    private InternalProvider provider;
-
-    @Override
-    public boolean doesMatch(HttpServletRequest req) {
-        return RequestMatcher.URL_MAPPER_INTERNAL.doesMatch(req);
-    }
 }

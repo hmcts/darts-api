@@ -1,20 +1,21 @@
 package uk.gov.hmcts.darts.authentication.config.external;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
-import uk.gov.hmcts.darts.common.util.RequestMatcher;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
 
-import javax.servlet.http.HttpServletRequest;
-import java.net.URL;
-
+@Component
 @ConfigurationProperties("spring.security.oauth2.client.registration.external-azure-ad")
 @Getter
-public class ExternalAuthConfiguration implements AuthConfiguration <ExternalProvider> {
+@Setter
+public class ExternalAuthConfigurationProperties implements AuthConfigurationProperties {
 
     private String clientId;
 
-    private String secret;
+    private String clientSecret;
 
     private String scope;
 
@@ -32,10 +33,4 @@ public class ExternalAuthConfiguration implements AuthConfiguration <ExternalPro
 
     private String issuerURI;
 
-    private ExternalProvider provider;
-
-    @Override
-    public boolean doesMatch(HttpServletRequest req) {
-        return RequestMatcher.URL_MAPPER_EXTERNAL.doesMatch(req);
-    }
 }

@@ -1,20 +1,22 @@
 package uk.gov.hmcts.darts.authentication.config.external;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import uk.gov.hmcts.darts.authentication.config.AuthProviderConfiguration;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 
-import java.net.URI;
-
+@Component
 @ConfigurationProperties("spring.security.oauth2.client.provider.external-azure-ad-provider")
 @Getter
-public class ExternalProvider implements AuthProviderConfiguration {
+@Setter
+public class ExternalAuthProviderConfigurationProperties implements AuthProviderConfigurationProperties {
 
     private String authorizationURI;
 
     private String tokenURI;
 
-    private String JKWSURI;
+    private String jwkSetUri;
 
     private String logoutURI;
 

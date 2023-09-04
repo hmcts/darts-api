@@ -7,8 +7,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.authentication.component.TokenValidator;
-import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
-import uk.gov.hmcts.darts.authentication.config.AuthConfigurationLocator;
+import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
+import uk.gov.hmcts.darts.authentication.config.AuthenticationConfigurationPropertiesStrategy;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationPropertiesStrategy;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.dao.AzureDao;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.JwtValidationResult;
@@ -32,7 +35,7 @@ class AuthenticationServiceImplTest {
     private static final String DUMMY_ID_TOKEN = "DUMMY ID TOKEN";
 
     @InjectMocks
-    private AuthenticationServiceimpl authenticationService;
+    private AuthenticationServiceImpl authenticationService;
 
     @Mock
     private TokenValidator tokenValidator;
@@ -41,15 +44,16 @@ class AuthenticationServiceImplTest {
     private AzureDao azureDao;
 
     @Mock
-    private AuthConfigurationLocator uriProvider;
+    private AuthStrategySelector uriProvider;
 
     @Test
     @SuppressWarnings("unchecked")
     void loginOrRefreshShouldReturnAuthUriWhenNoAuthHeaderExists() {
 
-        AuthConfiguration authConfigMock = Mockito.mock(AuthConfiguration.class);
-        when(uriProvider.locateAuthenticationConfigurationWithExternalDefault()).thenReturn(authConfigMock);
-        when(authConfigMock.getLoginUri(null))
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
+
+        when(authStrategyMock.getLoginUri(null))
             .thenReturn(DUMMY_AUTH_URI);
 
         URI uri = authenticationService.loginOrRefresh(null, null);
@@ -61,12 +65,12 @@ class AuthenticationServiceImplTest {
     @SuppressWarnings("unchecked")
     void loginOrRefreshShouldReturnAuthUriWhenInvalidAccessTokenExists() {
 
-        AuthConfiguration authConfigMock = Mockito.mock(AuthConfiguration.class);
-        when(uriProvider.locateAuthenticationConfigurationWithExternalDefault()).thenReturn(authConfigMock);
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
 
-        when(authConfigMock.getLoginUri(null))
+        when(authStrategyMock.getLoginUri(null))
             .thenReturn(DUMMY_AUTH_URI);
-        when(tokenValidator.validate(DUMMY_ID_TOKEN, authConfigMock))
+        when(tokenValidator.validate(DUMMY_ID_TOKEN, authStrategyMock.getProviderConfiguration(), authStrategyMock.getConfiguration()))
             .thenReturn(new JwtValidationResult(false, "Invalid token"));
 
         URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN, null);
@@ -78,12 +82,12 @@ class AuthenticationServiceImplTest {
     @SuppressWarnings("unchecked")
     void loginOrRefreshShouldReturnLandingPageUriWhenValidAccessTokenExists() {
 
-        AuthConfiguration authConfigMock = Mockito.mock(AuthConfiguration.class);
-        when(uriProvider.locateAuthenticationConfigurationWithExternalDefault()).thenReturn(authConfigMock);
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
 
-        when(authConfigMock.getLandingPageUri())
+        when(authStrategyMock.getLandingPageUri())
             .thenReturn(DUMMY_LANDING_PAGE_URI);
-        when(tokenValidator.validate(DUMMY_ID_TOKEN, authConfigMock))
+        when(tokenValidator.validate(DUMMY_ID_TOKEN, authStrategyMock.getProviderConfiguration(), authStrategyMock.getConfiguration()))
             .thenReturn(new JwtValidationResult(true, null));
 
         URI uri = authenticationService.loginOrRefresh(DUMMY_ID_TOKEN, null);
@@ -94,10 +98,11 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull()))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
             .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
-        when(tokenValidator.validate(anyString(), notNull()))
+        when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
 
         String token = authenticationService.handleOauthCode(DUMMY_CODE);
 
@@ -107,8 +112,12 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("")
     void handleOauthCodeShouldThrowExceptionWhenFetchAccessTokenThrowsException() throws AzureDaoException {
-        when(azureDao.fetchAccessToken(anyString(), notNull()))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
             .thenThrow(AzureDaoException.class);
+
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
@@ -122,10 +131,13 @@ class AuthenticationServiceImplTest {
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
 
-        when(azureDao.fetchAccessToken(anyString(), notNull()))
+        when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
             .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
-        when(tokenValidator.validate(anyString(), notNull()))
+        when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
@@ -139,10 +151,11 @@ class AuthenticationServiceImplTest {
     @SuppressWarnings("unchecked")
     void logoutShouldReturnLogoutPageUriWhenSessionExists() {
 
-        AuthConfiguration authConfigMock = Mockito.mock(AuthConfiguration.class);
-        when(uriProvider.locateAuthenticationConfigurationWithExternalDefault()).thenReturn(authConfigMock);
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
 
-        when(authConfigMock.getLogoutUri(anyString(), any()))
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
+
+        when(authStrategyMock.getLogoutUri(anyString(), any()))
             .thenReturn(DUMMY_LOGOUT_URI);
 
         URI uri = authenticationService.logout(DUMMY_ID_TOKEN, null);
@@ -155,10 +168,10 @@ class AuthenticationServiceImplTest {
     void resetPasswordShouldReturnResetPasswordUri() {
 
 
-        AuthConfiguration authConfigMock = Mockito.mock(AuthConfiguration.class);
-        when(uriProvider.locateAuthenticationConfigurationWithExternalDefault()).thenReturn(authConfigMock);
+        AuthenticationConfigurationPropertiesStrategy authStrategyMock = Mockito.mock(AuthenticationConfigurationPropertiesStrategy.class);
+        when(uriProvider.locateAuthenticationConfiguration()).thenReturn(authStrategyMock);
 
-        when(authConfigMock.getResetPasswordUri(null))
+        when(authStrategyMock.getResetPasswordUri(null))
             .thenReturn(DUMMY_AUTH_URI);
 
         URI uri = authenticationService.resetPassword(null);

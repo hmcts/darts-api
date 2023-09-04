@@ -1,14 +1,16 @@
 package uk.gov.hmcts.darts.common.util;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 @FunctionalInterface
 public interface RequestMatcher {
 
-    String urlMatcher = "/internal-user";
+    String internalUrlMatcher = "/internal-user";
+
+    String externalUrlMatcher = "/external-user";
+
     RequestMatcher URL_MAPPER_INTERNAL = (req) ->
     {
-        if (req.getRequestURL().toString().contains(urlMatcher)) {
+        if (req.getRequestURL().toString().contains(internalUrlMatcher)) {
             return true;
         }
 
@@ -17,7 +19,7 @@ public interface RequestMatcher {
 
      RequestMatcher URL_MAPPER_EXTERNAL = (req) ->
     {
-        if (!req.getRequestURL().toString().contains(urlMatcher)) {
+        if (req.getRequestURL().toString().contains(externalUrlMatcher)) {
             return true;
         }
 

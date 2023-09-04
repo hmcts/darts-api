@@ -7,35 +7,17 @@ import uk.gov.hmcts.darts.common.util.RequestMatcher;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public interface AuthConfiguration<T extends AuthProviderConfiguration> extends RequestMatcher {
 
-    String getRedirectURI();
+public interface AuthenticationConfigurationPropertiesStrategy extends RequestMatcher {
+    AuthConfigurationProperties getConfiguration();
 
-    String getLogoutRedirectURI();
-
-    String getIssuerURI();
-
-    String getPrompt();
-
-    String getClientId();
-
-    String getSecret();
-
-    String getResponseMode();
-
-    String getScope();
-
-    String getGrantType();
-
-    String getResponseType();
-
-    T getProvider();
+    AuthProviderConfigurationProperties getProviderConfiguration();
 
     @SneakyThrows(URISyntaxException.class)
     default URI getLoginUri(String redirectUri) {
-        return buildCommonAuthUri(getProvider().getAuthorizationURI(), redirectUri)
-            .addParameter("response_mode", getResponseMode())
-            .addParameter("response_type", getResponseType())
+        return buildCommonAuthUri(getProviderConfiguration().getAuthorizationURI(), redirectUri)
+            .addParameter("response_mode", getConfiguration().getResponseMode())
+            .addParameter("response_type", getConfiguration().getResponseType())
             .build();
     }
 
@@ -45,12 +27,12 @@ public interface AuthConfiguration<T extends AuthProviderConfiguration> extends 
 
     @SneakyThrows(URISyntaxException.class)
     default URI getLogoutUri(String accessToken, String redirectUriOverride) {
-        var redirectUri = getLogoutRedirectURI();
+        var redirectUri = getConfiguration().getLogoutRedirectURI();
         if (redirectUriOverride != null) {
             redirectUri = redirectUriOverride;
         }
         return new URIBuilder(
-            getProvider().getLogoutURI())
+            getProviderConfiguration().getLogoutURI())
             .addParameter("id_token_hint", accessToken)
             .addParameter("post_logout_redirect_uri", redirectUri)
             .build();
@@ -58,21 +40,21 @@ public interface AuthConfiguration<T extends AuthProviderConfiguration> extends 
 
     @SneakyThrows(URISyntaxException.class)
     default URI getResetPasswordUri(String redirectUri) {
-        return buildCommonAuthUri(getProvider().getResetPasswordURI(), redirectUri)
+        return buildCommonAuthUri(getProviderConfiguration().getResetPasswordURI(), redirectUri)
             .addParameter("response_type", "id_token")
             .build();
     }
 
     @SneakyThrows(URISyntaxException.class)
     private URIBuilder buildCommonAuthUri(String uri, String redirectUriOverride) {
-        var redirectUri = getRedirectURI();
+        var redirectUri = getConfiguration().getRedirectURI();
         if (redirectUriOverride != null) {
             redirectUri = redirectUriOverride;
         }
         return new URIBuilder(uri)
-            .addParameter("client_id", getClientId())
+            .addParameter("client_id", getConfiguration().getClientId())
             .addParameter("redirect_uri", redirectUri)
-            .addParameter("scope", getScope())
-            .addParameter("prompt", getPrompt());
+            .addParameter("scope", getConfiguration().getScope())
+            .addParameter("prompt", getConfiguration().getPrompt());
     }
 }

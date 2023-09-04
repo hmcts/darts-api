@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.authentication.dao;
 
-import uk.gov.hmcts.darts.authentication.config.AuthConfiguration;
+import uk.gov.hmcts.darts.authentication.config.AuthConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 
 public interface AzureDao {
-    OAuthProviderRawResponse fetchAccessToken(String code, AuthConfiguration<?> configuration) throws AzureDaoException;
+    OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig, AuthConfigurationProperties configuration) throws AzureDaoException;
 }
