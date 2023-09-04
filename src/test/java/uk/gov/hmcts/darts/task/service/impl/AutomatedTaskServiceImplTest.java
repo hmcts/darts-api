@@ -149,6 +149,12 @@ class AutomatedTaskServiceImplTest {
         verify(taskScheduler).schedule(automatedTask, trigger);
     }
 
+
+    @Test
+    void reloadNonExistingTask() {
+        assertThrows(DartsApiException.class, () -> automatedTaskService.reloadTaskByName("blah"));
+    }
+
     @Test
     void cancelAutomatedTask() {
         ScheduledTask scheduledTask = mock(ScheduledTask.class);
