@@ -1,7 +1,7 @@
 [
   {
-    "caseID": 101,
-    "caseNumber": "test1",
+    "case_id": 101,
+    "case_number": "test1",
     "courthouse": "case_courthouse",
     "defendants": [
       "defendant_test1_1",

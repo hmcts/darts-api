@@ -138,6 +138,6 @@ public class CaseServiceImpl implements CaseService {
         if (hearingEntity.isEmpty()) {
             throw new DartsApiException(CaseApiError.HEARING_NOT_FOUND);
         }
-        return casesMapper.mapToEvents(eventRepository.findAllByHearingId(hearingEntity.get().getId()));
+        return casesMapper.mapToEvents(hearingEntity.get().getEventList());
     }
 }

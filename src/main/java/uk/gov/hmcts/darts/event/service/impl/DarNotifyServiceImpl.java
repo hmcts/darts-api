@@ -23,12 +23,12 @@ public class DarNotifyServiceImpl {
         var dartsEvent = event.getDartsEvent();
 
         DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
-              .notificationType(darNotifyType.getNotificationType())
-              .timestamp(dartsEvent.getDateTime())
-              .courthouse(dartsEvent.getCourthouse())
-              .courtroom(dartsEvent.getCourtroom())
-              .caseNumbers(dartsEvent.getCaseNumbers())
-              .build();
+            .notificationType(darNotifyType.getNotificationType())
+            .timestamp(dartsEvent.getDateTime())
+            .courthouse(dartsEvent.getCourthouse())
+            .courtroom(dartsEvent.getCourtroom())
+            .caseNumbers(dartsEvent.getCaseNumbers())
+            .build();
 
         dartsGatewayClient.darNotify(darNotifyEvent);
     }

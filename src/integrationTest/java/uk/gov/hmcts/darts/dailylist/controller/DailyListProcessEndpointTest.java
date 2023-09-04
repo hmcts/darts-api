@@ -6,6 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -32,7 +35,8 @@ class DailyListProcessEndpointTest {
 
     @Test
     void dailyListRun() {
-        controller.dailylistsRunPost(null);
+        ResponseEntity<Void> response = controller.dailylistsRunPost(null);
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyLists(LocalDate.now());
     }
 
@@ -40,7 +44,8 @@ class DailyListProcessEndpointTest {
     void dailyListRunWithCourthouse() {
         CourthouseEntity courthouse = Mockito.mock(CourthouseEntity.class);
         Mockito.when(courthouseRepository.findById(anyInt())).thenReturn(Optional.of(courthouse));
-        controller.dailylistsRunPost(1);
+        ResponseEntity<Void> response = controller.dailylistsRunPost(1);
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyListForCourthouse(any());
     }
 

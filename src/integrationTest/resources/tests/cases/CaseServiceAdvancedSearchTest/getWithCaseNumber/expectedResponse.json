@@ -1,6 +1,7 @@
 [
   {
-    "caseNumber": "Case1",
+    "case_id": 1,
+    "case_number": "Case1",
     "courthouse": "SWANSEA",
     "defendants": [
       "aDefendant"

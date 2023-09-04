@@ -11,12 +11,22 @@
     <notes>Dependency brought in through gov-notify, so we can't control this.</notes>
     <cve>CVE-2022-45688</cve>
   </suppress>
+  <suppress>
+    <notes>The vulnerability only affects applications that use an LDAP CertStore from Bouncy Castle to validate X.509 certificates.
+    I have spoken to Hemanta who has confirmed we don't do this.</notes>
+    <cve>CVE-2023-33201</cve>
+  </suppress>
 
   <!--Please add all the temporary suppression under the below section-->
   <suppress until="2023-09-14">
     <notes>Waiting for spring boot version to pull in Spring Framework v6.0.7</notes>
     <packageUrl regex="true">^pkg:maven/commons-fileupload/commons-fileupload@.*$</packageUrl>
     <vulnerabilityName>CVE-2023-24998</vulnerabilityName>
+  </suppress>
+
+  <suppress until="2023-12-14">
+    <notes>URL Redirection to Untrusted Site ('Open Redirect') vulnerability in FORM authentication feature Apache Tomcat.</notes>
+    <vulnerabilityName>CVE-2023-41080</vulnerabilityName>
   </suppress>
 
   <suppress until="2023-09-14">
@@ -41,6 +51,15 @@
     </notes>
     <packageUrl regex="true">pkg:maven/org.postgresql/postgresql@42.6.0</packageUrl>
     <vulnerabilityName>CVE-2020-21469</vulnerabilityName>
+  </suppress>
+
+  <suppress until="2023-09-14">
+    <notes>A vulnerability was found in the Hot Rod client. This security issue occurs as the Hot Rod client does not
+      enable hostname validation when using TLS, possibly resulting in a man-in-the-middle (MITM) attack. Will have to
+      wait until azure-sdk-bom is updated to use newer netty library.
+    </notes>
+    <packageUrl regex="true">pkg:maven/io.netty/netty-handler@4.1.97.Final</packageUrl>
+    <vulnerabilityName>CVE-2023-4586</vulnerabilityName>
   </suppress>
   <!--End of temporary suppression section -->
 </suppressions>

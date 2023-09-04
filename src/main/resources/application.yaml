@@ -40,8 +40,8 @@ spring:
             issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
             provider: external-azure-ad-provider
           internal-azure-ad:
-            client-id: ${AAD_B2C_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}
-            client-secret: ${AAD_B2C_CLIENT_SECRET_KEY:}
+            client-id: ${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}
+            client-secret: ${AAD_CLIENT_SECRET:}
             scope: openid
             redirect-uri: ${darts.portal.url}/auth/callback
             logout-redirect-uri: ${darts.portal.url}/auth/logout-callback
@@ -49,7 +49,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
+            issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
             provider: internal-azure-ad-provider
         provider:
           external-azure-ad-provider:
@@ -59,11 +59,11 @@ spring:
             logout-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
             reset-password-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
           internal-azure-ad-provider:
-            authorization-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/authorize
-            token-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/token
-            jwk-set-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/discovery/v2.0/keys
-            logout-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
-            reset-password-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
+            authorization-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
+            token-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
+            jwk-set-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/discovery/v2.0/keys
+            logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
+            reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -114,6 +114,7 @@ darts:
     active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsdartsb2csbox.onmicrosoft.com
     active-directory-b2c-external-user-signin-policy: "B2C_1_darts_externaluser_signin"
     active-directory-b2c-external-user-passwordreset-policy: "B2C_1_darts_externaluser_password_reset"
+    active-directory-justice-auth-uri: https://login.microsoftonline.com
   daily-list:
     housekeeping:
       enabled: true

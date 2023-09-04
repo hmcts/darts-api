@@ -90,19 +90,19 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-  /cases/{caseId}:
+  /cases/{case_id}:
     get:
       tags:
         - Cases
-      summary: Allows the retrieval of a single case using a given caseId
+      summary: Allows the retrieval of a single case using a given case_id
       description: |-
-        Retrieves a single case for a given caseId
+        Retrieves a single case for a given case_id
       parameters:
         - in: path
-          name: caseId
+          name: case_id
           schema:
             type: integer
-          description: "caseId is the internal cas_id of the case."
+          description: "case_id is the internal cas_id of the case."
           required: true
       responses:
         '200':
@@ -118,19 +118,19 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-  /cases/{caseId}/hearings:
+  /cases/{case_id}/hearings:
     get:
       tags:
         - Cases
-      summary: Allows the retrieval of hearings for a given caseId
+      summary: Allows the retrieval of hearings for a given case_id
       description: |-
-        Retrieves all hearings for a caseId.
+        Retrieves all hearings for a case_id.
       parameters:
         - in: path
-          name: caseId
+          name: case_id
           schema:
             type: integer
-          description: "caseId is the internal cas_id of the case."
+          description: "case_id is the internal cas_id of the case."
           required: true
       responses:
         '200':
@@ -404,11 +404,11 @@ components:
     advancedSearchResult:
       type: object
       properties:
-        caseID:
+        case_id:
           type: integer
           example: 1
           description: Unique case identifier, used internally by DARTS.
-        caseNumber:
+        case_number:
           type: string
           example: C20220620001
           description: 'Case Number'
@@ -423,7 +423,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/judge'
-        reportingRestriction:
+        reporting_restriction:
           type: string
           example: "Section 4(2) of the Contempt of Court Act 1981"
           description: 'Any reporting restrictions associated with the case.'
@@ -478,7 +478,7 @@ components:
             $ref: '#/components/schemas/judge'
         courtroom:
           type: string
-        transcriptCount:
+        transcript_count:
           type: integer
 
     events_response:
@@ -502,7 +502,3 @@ components:
         text:
           type: string
           example: Record:New Case
-
-
-
-

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "7a48dccf-5630-4bb3-9409-9923c57a4b64",
+		"_postman_id": "d05c9d15-f2b6-43e1-8756-325329c371e8",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -8,10 +8,6 @@
 		{
 			"name": "EventAPI",
 			"item": [
-				{
-					"name": "AddDocument",
-					"item": []
-				},
 				{
 					"name": "POST /events",
 					"item": [
@@ -41,12 +37,10 @@
 									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
 								},
 								"url": {
-									"raw": "http://localhost:4550/events",
-									"protocol": "http",
+									"raw": "{{serverUrl}}/events",
 									"host": [
-										"localhost"
+										"{{serverUrl}}"
 									],
-									"port": "4550",
 									"path": [
 										"events"
 									]
@@ -76,12 +70,10 @@
 									}
 								],
 								"url": {
-									"raw": "http://localhost:4550/cases?courthouse=SWANSEA&courtroom=1&date=2023-06-22",
-									"protocol": "http",
+									"raw": "{{serverUrl}}/cases?courthouse=SWANSEA&courtroom=1&date=2023-06-22",
 									"host": [
-										"localhost"
+										"{{serverUrl}}"
 									],
-									"port": "4550",
 									"path": [
 										"cases"
 									],
@@ -120,12 +112,10 @@
 									}
 								],
 								"url": {
-									"raw": "http://localhost:4550/cases/search?case_number=001",
-									"protocol": "http",
+									"raw": "{{serverUrl}}/cases/search?case_number=001",
 									"host": [
-										"localhost"
+										"{{serverUrl}}"
 									],
-									"port": "4550",
 									"path": [
 										"cases",
 										"search"
@@ -199,12 +189,10 @@
 									"raw": "{}"
 								},
 								"url": {
-									"raw": "http://localhost:4550/cases/:caseId/hearings",
-									"protocol": "http",
+									"raw": "{{serverUrl}}/cases/:caseId/hearings",
 									"host": [
-										"localhost"
+										"{{serverUrl}}"
 									],
-									"port": "4550",
 									"path": [
 										"cases",
 										":caseId",
@@ -243,12 +231,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:4550/cases",
-									"protocol": "http",
+									"raw": "{{serverUrl}}/cases",
 									"host": [
-										"localhost"
+										"{{serverUrl}}"
 									],
-									"port": "4550",
 									"path": [
 										"cases"
 									]
@@ -272,12 +258,10 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
-									"protocol": "http",
+									"raw": "{{serverUrl}}/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
 									"host": [
-										"localhost"
+										"{{serverUrl}}"
 									],
-									"port": "4550",
 									"path": [
 										"courtlogs"
 									],
@@ -322,12 +306,10 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:4550/audio/hearings/1/audios",
-							"protocol": "http",
+							"raw": "{{serverUrl}}/audio/hearings/1/audios",
 							"host": [
-								"localhost"
+								"{{serverUrl}}"
 							],
-							"port": "4550",
 							"path": [
 								"audio",
 								"hearings",
@@ -341,6 +323,123 @@
 			]
 		},
 		{
+			"name": "DailyLists",
+			"item": [
+				{
+					"name": "POST /dailylists",
+					"item": [
+						{
+							"name": "POST DailyLists",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "xml_document",
+										"value": "",
+										"type": "default",
+										"disabled": true
+									},
+									{
+										"key": "json_document",
+										"value": "{  \"document_id\": {    \"document_name\": \"DailyList_457_20210219174938.xml\",    \"unique_id\": \"CSDDL1613756980160\",    \"document_type\": \"DL\",    \"time_stamp\": \"2021-02-19T17:49:38.391+01:00\"  },  \"list_header\": {    \"list_category\": \"Criminal\",    \"start_date\": \"2021-02-23\",    \"end_date\": \"2021-02-23\",    \"version\": \"NOT VERSIONED\",    \"published_time\": \"2021-02-19T17:49:38.767Z\"  },  \"crown_court\": {    \"court_house_type\": \"Crown Court\",    \"court_house_code\": {      \"court_house_short_name\": \"SWANS\",      \"code\": 457    },    \"court_house_name\": \"SWANSEA\"  },  \"court_lists\": [    {      \"court_house\": {        \"court_house_type\": \"Crown Court\",        \"court_house_code\": {          \"court_house_short_name\": \"SWANS\",          \"code\": 457        },        \"court_house_name\": \"SWANSEA\"      },      \"sittings\": [        {          \"court_room_number\": 1,          \"sitting_sequence_no\": 1,          \"sitting_at\": \"11:00:00\",          \"sitting_priority\": \"T\",          \"judiciary\": [            {              \"citizen_name_forename\": \"JudgeName\",              \"citizen_name_surname\": \"Surname\",              \"citizen_name_requested_name\": \"Judgename Surname\"            }          ],          \"hearings\": [            {              \"hearing_sequence_number\": 1,              \"hearing_details\": {                \"hearing_type\": \"PTR\",                \"hearing_description\": \"For Pre-Trial Review\",                \"hearing_date\": \"2020-06-20\"              },              \"time_marking_note\": \"NOT BEFORE 11:00 AM\",              \"case_number\": \"Case1\",              \"prosecution\": {                \"prosecuting_authority\": \"Crown Prosecution Service\",                \"prosecuting_reference\": \"Crown Prosecution Service\",                \"prosecuting_organisation\": {                  \"organisation_name\": \"Crown Prosecution Service\"                },                \"advocates\": [                  {                    \"name\": {                      \"citizen_name_forename\": \"ProsecutorName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    }                  }                ]              },              \"defendants\": [                {                  \"personal_details\": {                    \"name\": {                      \"citizen_name_forename\": \"DefendantName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    },                    \"is_masked\": \"false\"                  },                  \"urn\": \"42GD2391421\",                  \"charges\": [                    {                      \"indictment_count_number\": 1,                      \"cjsoffence_code\": \"CA03014\",                      \"offence_statement\": \"Fail    / refuse give assistance to person executing Communications Act search warrant\"                    }                  ],                  \"counsel\": [                    {                      \"name\": {                        \"citizen_name_forename\": \"DefenceName\",                        \"citizen_name_surname\": \"Surname\",                        \"citizen_name_requested_name\": \"\"                      }                    }                  ]                }              ]            }          ]        }      ]    }  ]}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{serverUrl}}/dailylists?source_system=CPP&courthouse=liverpool",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"dailylists"
+									],
+									"query": [
+										{
+											"key": "source_system",
+											"value": "CPP"
+										},
+										{
+											"key": "courthouse",
+											"value": "liverpool"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "PATCH /dailylists",
+					"item": [
+						{
+							"name": "Post DailyLists",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "json_document",
+										"value": "{  \"document_id\": {    \"document_name\": \"DailyList_457_20210219174938.xml\",    \"unique_id\": \"CSDDL1613756980160\",    \"document_type\": \"DL\",    \"time_stamp\": \"2021-02-19T17:49:38.391+01:00\"  },  \"list_header\": {    \"list_category\": \"Criminal\",    \"start_date\": \"2021-02-23\",    \"end_date\": \"2021-02-23\",    \"version\": \"NOT VERSIONED\",    \"published_time\": \"2021-02-19T17:49:38.767Z\"  },  \"crown_court\": {    \"court_house_type\": \"Crown Court\",    \"court_house_code\": {      \"court_house_short_name\": \"SWANS\",      \"code\": 457    },    \"court_house_name\": \"SWANSEA\"  },  \"court_lists\": [    {      \"court_house\": {        \"court_house_type\": \"Crown Court\",        \"court_house_code\": {          \"court_house_short_name\": \"SWANS\",          \"code\": 457        },        \"court_house_name\": \"SWANSEA\"      },      \"sittings\": [        {          \"court_room_number\": 1,          \"sitting_sequence_no\": 1,          \"sitting_at\": \"11:00:00\",          \"sitting_priority\": \"T\",          \"judiciary\": [            {              \"citizen_name_forename\": \"JudgeName\",              \"citizen_name_surname\": \"Surname\",              \"citizen_name_requested_name\": \"Judgename Surname\"            }          ],          \"hearings\": [            {              \"hearing_sequence_number\": 1,              \"hearing_details\": {                \"hearing_type\": \"PTR\",                \"hearing_description\": \"For Pre-Trial Review\",                \"hearing_date\": \"2020-06-20\"              },              \"time_marking_note\": \"NOT BEFORE 11:00 AM\",              \"case_number\": \"Case1\",              \"prosecution\": {                \"prosecuting_authority\": \"Crown Prosecution Service\",                \"prosecuting_reference\": \"Crown Prosecution Service\",                \"prosecuting_organisation\": {                  \"organisation_name\": \"Crown Prosecution Service\"                },                \"advocates\": [                  {                    \"name\": {                      \"citizen_name_forename\": \"ProsecutorName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    }                  }                ]              },              \"defendants\": [                {                  \"personal_details\": {                    \"name\": {                      \"citizen_name_forename\": \"DefendantName\",                      \"citizen_name_surname\": \"Surname\",                      \"citizen_name_requested_name\": \"\"                    },                    \"is_masked\": \"false\"                  },                  \"urn\": \"42GD2391421\",                  \"charges\": [                    {                      \"indictment_count_number\": 1,                      \"cjsoffence_code\": \"CA03014\",                      \"offence_statement\": \"Fail    / refuse give assistance to person executing Communications Act search warrant\"                    }                  ],                  \"counsel\": [                    {                      \"name\": {                        \"citizen_name_forename\": \"DefenceName\",                        \"citizen_name_surname\": \"Surname\",                        \"citizen_name_requested_name\": \"\"                      }                    }                  ]                }              ]            }          ]        }      ]    }  ]}",
+										"type": "default"
+									}
+								],
+								"url": {
+									"raw": "{{serverUrl}}/dailylists?dal_id=1",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"dailylists"
+									],
+									"query": [
+										{
+											"key": "dal_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Hearings",
+			"item": [
+				{
+					"name": "GET",
+					"item": [
+						{
+							"name": "New Request",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{serverUrl}}/hearings/:hearingId",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"hearings",
+										":hearingId"
+									],
+									"variable": [
+										{
+											"key": "hearingId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Generate Bearer Token",
 			"event": [
 				{
@@ -348,7 +447,7 @@
 					"script": {
 						"exec": [
 							"let responseData = pm.response.json();",
-							"pm.environment.set(\"access_token\", responseData.access_token);"
+							"pm.globals.set(\"access_token\", responseData.access_token);"
 						],
 						"type": "text/javascript"
 					}
@@ -419,6 +518,36 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }

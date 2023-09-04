@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.task.model.TriggerAndAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
@@ -35,8 +36,8 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIS
 
 
 /**
- * Refer to https://docs.spring.io/spring-framework/reference/integration/scheduling.html#scheduling-cron-expression
- * for details of spring cron expressions
+ * Refer to <a href="https://docs.spring.io/spring-framework/reference/integration/scheduling.html#scheduling-cron-expression">...</a>
+ * for details of spring cron expressions.
  */
 @Service
 @Slf4j
@@ -53,6 +54,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private final TaskScheduler taskScheduler;
 
     private final Map<String, Trigger> taskTriggers = new ConcurrentHashMap<>();
+
+    private final DailyListProcessor dailyListProcessor;
 
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
@@ -90,7 +93,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
      * Calling this without the automated task being cancelled first, and then reloaded means the cron expression will only get picked up
      * after the next execution once the automated task has run and then calculates the next execution time. Cancelling
      * the automated task first means it will use the given cronExpression if the cron expression is valid.
-     * @param taskName name of automated task
+     *
+     * @param taskName       name of automated task
      * @param cronExpression cron expression
      * @return true if the automated task is successfully updated
      */
@@ -116,9 +120,10 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     @Override
     public void reloadTaskByName(String taskName) {
-        switch (AutomatedTaskName.valueOfTaskName(taskName)) {
-            case PROCESS_DAILY_LIST_TASK_NAME -> rescheduleProcessDailyListAutomatedTask();
-            default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
+        if (PROCESS_DAILY_LIST_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
+            rescheduleProcessDailyListAutomatedTask();
+        } else {
+            throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
 
@@ -142,7 +147,12 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask scheduledTask : scheduledTasks) {
             Task task = scheduledTask.getTask();
-            if (task instanceof TriggerTask triggerTask && cancelTriggerTask(taskName, scheduledTask, triggerTask, mayInterruptIfRunning)) {
+            if (task instanceof TriggerTask triggerTask && cancelTriggerTask(
+                taskName,
+                scheduledTask,
+                triggerTask,
+                mayInterruptIfRunning
+            )) {
                 return true;
             }
         }
@@ -166,10 +176,15 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     /**
      * Sets up the ProcessDailyListAutomatedTask and adds it to the task registrar which then makes it available to the
      * TaskScheduler.
+     *
      * @param taskRegistrar Registers scheduled tasks
      */
     private void addProcessDailyListToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
-        ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider);
+        ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            dailyListProcessor
+        );
         processDailyListAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(processDailyListAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
         taskRegistrar.addTriggerTask(processDailyListAutomatedTask, trigger);
@@ -180,7 +195,11 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         Trigger trigger;
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider);
+            processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                dailyListProcessor
+            );
             trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
             taskScheduler.schedule(processDailyListAutomatedTask, trigger);
         } else {
@@ -205,7 +224,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private boolean cancelTriggerTask(String taskName, ScheduledTask scheduledTask, TriggerTask triggerTask, boolean mayInterruptIfRunning) {
-        if (triggerTask.getRunnable() instanceof AutomatedTask automatedTask && automatedTask.getTaskName().equals(taskName)) {
+        if (triggerTask.getRunnable() instanceof AutomatedTask automatedTask && automatedTask.getTaskName().equals(
+            taskName)) {
             log.info("About to cancel task: " + taskName);
             scheduledTask.cancel(mayInterruptIfRunning);
             return true;
@@ -222,7 +242,11 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     private Trigger createCronTrigger(AutomatedTask automatedTask) {
         return triggerContext -> {
             String cronExpression = getAutomatedTaskCronExpression(automatedTask);
-            log.debug("Creating trigger for task: {} with cron expression: {} ", automatedTask.getTaskName(), cronExpression);
+            log.debug(
+                "Creating trigger for task: {} with cron expression: {} ",
+                automatedTask.getTaskName(),
+                cronExpression
+            );
             automatedTask.setLastCronExpression(cronExpression);
             CronTrigger crontrigger = new CronTrigger(cronExpression);
             return crontrigger.nextExecution(triggerContext);

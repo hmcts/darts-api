@@ -18,6 +18,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class DataManagementServiceImplTest {
@@ -55,5 +57,16 @@ class DataManagementServiceImplTest {
         Mockito.when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
         UUID blobId = dataManagementService.saveBlobData(BLOB_CONTAINER_NAME, BINARY_DATA);
         assertNotNull(blobId);
+    }
+
+    @Test
+    void testDeleteBlobData() {
+        Mockito.when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        Mockito.when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        Mockito.doNothing().when(blobClient).delete();
+
+        dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
+
+        verify(blobClient,times(1)).delete();
     }
 }

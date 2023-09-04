@@ -26,7 +26,7 @@ public class AdvancedSearchResponseMapper {
     private void addHearingToResultList(List<AdvancedSearchResult> advancedSearchResults, HearingEntity hearing) {
         //check to see if caseId record is already in the response and add the hearing to it.
         for (AdvancedSearchResult advancedSearchResult : advancedSearchResults) {
-            if (hearing.getCourtCase().getId().equals(advancedSearchResult.getCaseID())) {
+            if (hearing.getCourtCase().getId().equals(advancedSearchResult.getCaseId())) {
                 //If it exists, just add extra details to the existing record.
                 advancedSearchResult.addHearingsItem(mapToAdvancedSearchResultHearing(hearing));
                 return;
@@ -39,7 +39,7 @@ public class AdvancedSearchResponseMapper {
     private AdvancedSearchResult maptToAdvancedSearchResult(HearingEntity hearing) {
         AdvancedSearchResult advancedSearchResult = new AdvancedSearchResult();
         CourtCaseEntity courtCase = hearing.getCourtCase();
-        advancedSearchResult.setCaseID(courtCase.getId());
+        advancedSearchResult.setCaseId(courtCase.getId());
         advancedSearchResult.setCaseNumber(courtCase.getCaseNumber());
         advancedSearchResult.setCourthouse(courtCase.getCourthouse().getCourthouseName());
         advancedSearchResult.setDefendants(courtCase.getDefendantStringList());
