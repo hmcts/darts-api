@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -39,11 +40,17 @@ class AutomatedTaskServiceImplTest {
 
     @Test
     void getAutomatedTaskUsingProcessDailyListAutomatedTask() {
-        AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(mockAutomatedTaskRepository, mockLockProvider);
+        AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockLockProvider
+        );
         assertEquals(Duration.ofSeconds(20), processDailyListAutomatedTask.getLockConfiguration().getLockAtLeastFor());
         assertEquals(Duration.ofSeconds(600), processDailyListAutomatedTask.getLockConfiguration().getLockAtMostFor());
 
-        AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(processDailyListAutomatedTask, "*/7 * * * * *");
+        AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
+            processDailyListAutomatedTask,
+            "*/7 * * * * *"
+        );
         when(mockAutomatedTaskRepository.findByTaskName(processDailyListAutomatedTask.getTaskName()))
             .thenReturn(Optional.of(expectedAutomatedTaskEntity));
 
@@ -52,11 +59,37 @@ class AutomatedTaskServiceImplTest {
         assertEquals(expectedAutomatedTaskEntity, actualAutomatedTaskEntity.get());
     }
 
+
+    @Test
+    void registerProcessDailyListAutomatedTask() {
+        AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockLockProvider
+        );
+        assertEquals(Duration.ofSeconds(20), processDailyListAutomatedTask.getLockConfiguration().getLockAtLeastFor());
+        assertEquals(Duration.ofSeconds(600), processDailyListAutomatedTask.getLockConfiguration().getLockAtMostFor());
+
+        AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
+            processDailyListAutomatedTask,
+            "*/7 * * * * *"
+        );
+        when(mockAutomatedTaskRepository.findByTaskName(processDailyListAutomatedTask.getTaskName()))
+            .thenReturn(Optional.of(expectedAutomatedTaskEntity));
+
+        ScheduledTaskRegistrar taskRegistrar = new ScheduledTaskRegistrar();
+        automatedTaskService.configureAndLoadAutomatedTasks(taskRegistrar);
+        assertEquals(1, taskRegistrar.getTriggerTaskList().size());
+    }
+
     @Test
     void updateNonExistingAutomatedTaskCronExpressionThrowsException() {
 
         AutomatedTask automatedTask = new AutomatedTask() {
             private String lastCronExpression = "*/10 * * * * *";
+
+            private static Duration getLockAtLeastFor() {
+                return Duration.ofSeconds(10);
+            }
 
             @Override
             public String getTaskName() {
@@ -80,15 +113,11 @@ class AutomatedTaskServiceImplTest {
 
             @Override
             public void setLastCronExpression(String cronExpression) {
-                this.lastCronExpression = lastCronExpression;
+                this.lastCronExpression = cronExpression;
             }
 
-            protected Duration getLockAtMostFor() {
+            private Duration getLockAtMostFor() {
                 return Duration.ofSeconds(20);
-            }
-
-            protected static Duration getLockAtLeastFor() {
-                return Duration.ofSeconds(10);
             }
 
             @Override
@@ -103,7 +132,10 @@ class AutomatedTaskServiceImplTest {
     @Test
     void updateNonExistingAbstractLockableAutomatedTaskCronExpressionThrowsException() {
 
-        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(mockAutomatedTaskRepository, mockLockProvider) {
+        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockLockProvider
+        ) {
             @Override
             public String getTaskName() {
                 return "Test";
@@ -132,7 +164,7 @@ class AutomatedTaskServiceImplTest {
         assertThrows(DartsApiException.class, () ->
             automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/8 * * * * *"));
     }
-    
+
     private AutomatedTaskEntity createAutomatedTaskEntity(AutomatedTask automatedTask, String cronExpression) {
         AutomatedTaskEntity automatedTaskEntity1 = new AutomatedTaskEntity();
         automatedTaskEntity1.setId(1);
