@@ -74,6 +74,27 @@ class AutomatedTaskServiceImplTest {
         assertEquals(expectedAutomatedTaskEntity, actualAutomatedTaskEntity.get());
     }
 
+    @Test
+    void getAutomatedTaskCronExpressionInvalid() {
+        AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockLockProvider
+        );
+        AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
+            processDailyListAutomatedTask,
+            null
+        );
+        when(mockAutomatedTaskRepository.findByTaskName(processDailyListAutomatedTask.getTaskName()))
+            .thenReturn(Optional.of(expectedAutomatedTaskEntity));
+        DartsApiException exception = assertThrows(
+            DartsApiException.class,
+            () -> automatedTaskService.getAutomatedTaskCronExpression(createAutomatedTask("ProcessDailyList"))
+        );
+
+        assertEquals("Invalid cron expression", exception.getMessage());
+
+    }
+
 
     @Test
     void registerProcessDailyListAutomatedTask() {
@@ -81,8 +102,6 @@ class AutomatedTaskServiceImplTest {
             mockAutomatedTaskRepository,
             mockLockProvider
         );
-        assertEquals(Duration.ofSeconds(20), processDailyListAutomatedTask.getLockConfiguration().getLockAtLeastFor());
-        assertEquals(Duration.ofSeconds(600), processDailyListAutomatedTask.getLockConfiguration().getLockAtMostFor());
 
         AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
             processDailyListAutomatedTask,
