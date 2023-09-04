@@ -30,6 +30,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -117,7 +118,6 @@ class AutomatedTaskServiceImplTest {
 
     @Test
     void reloadByTaskName() {
-
         ScheduledTask scheduledTask = mock(ScheduledTask.class);
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
@@ -147,6 +147,42 @@ class AutomatedTaskServiceImplTest {
         automatedTaskService.reloadTaskByName("ProcessDailyList");
 
         verify(taskScheduler).schedule(automatedTask, trigger);
+    }
+
+    @Test
+    void cancelAutomatedTask() {
+        ScheduledTask scheduledTask = mock(ScheduledTask.class);
+        Set<ScheduledTask> scheduledTaskList = new HashSet<>();
+        scheduledTaskList.add(scheduledTask);
+
+        TriggerTask task = getTriggerTask();
+        when(scheduledTaskHolder.getScheduledTasks()).thenReturn(scheduledTaskList);
+        when(scheduledTask.getTask()).thenReturn(task);
+
+        assertTrue(automatedTaskService.cancelAutomatedTask("ProcessDailyList", true));
+
+    }
+
+    private TriggerTask getTriggerTask() {
+        AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
+            mockAutomatedTaskRepository,
+            mockLockProvider
+        ) {
+            @Override
+            protected void runTask() {
+            }
+
+            @Override
+            protected void handleException(Exception exception) {
+            }
+
+            @Override
+            public String getTaskName() {
+                return "ProcessDailyList";
+            }
+        };
+        Trigger trigger = triggerContext -> null;
+        return new TriggerTask(automatedTask, trigger);
     }
 
     @Test
