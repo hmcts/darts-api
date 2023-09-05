@@ -187,7 +187,7 @@ components:
           minItems: 1
         text:
           type: string
-          maxLength: 250
+          maxLength: 256
       required:
         - log_entry_date_time
         - courthouse
