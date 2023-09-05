@@ -21,7 +21,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
                 .contentType(ContentType.JSON)
                 .body("""
                         {
-                          "log_entry_date_time": "2023-05-23T09:15:25Z",
+                          "log_entry_date_time": "1999-05-23T09:15:25Z",
                           "courthouse": "liverpool",
                           "courtroom": "1",
                           "case_numbers": [
@@ -71,8 +71,8 @@ class CourtlogsFunctionalTest extends FunctionalTest {
                 .contentType(ContentType.JSON)
                 .param("courthouse", "liverpool")
                 .param("case_number", "CASE1001")
-                .param("start_date_time", "2023-05-23T09:15:25Z")
-                .param("end_date_time", "2023-05-23T09:15:25Z")
+                .param("start_date_time", "1999-05-23T09:15:25Z")
+                .param("end_date_time", "1999-05-23T09:15:25Z")
                 .when()
                 .baseUri(getUri(ENDPOINT_URL))
                 .redirects().follow(false)
@@ -85,7 +85,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
                     {
                         "courthouse": "Liverpool",
                         "caseNumber": "CASE1001",
-                        "timestamp": "2023-05-23T09:15:25Z",
+                        "timestamp": "1999-05-23T09:15:25Z",
                         "eventText": "System : Start Recording : Record: Case Code:0008, New Case"
                     }
                 ]""", response.asPrettyString());
@@ -109,7 +109,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
 
         assertEquals(400, response.statusCode());
         assertThat(response.asPrettyString()).contains("Required request parameter 'start_date_time' for method parameter type OffsetDateTime is not present");
-        
+
     }
 
 }
