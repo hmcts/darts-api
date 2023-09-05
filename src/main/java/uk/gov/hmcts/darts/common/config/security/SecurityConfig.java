@@ -51,6 +51,8 @@ public class SecurityConfig {
                 "/external-user/login-or-refresh",
                 "/external-user/handle-oauth-code",
                 "/external-user/reset-password",
+                "/internal-user/login-or-refresh",
+                "/internal-user/handle-oauth-code",
                 "/"
             )
             .authorizeHttpRequests().anyRequest().permitAll();
