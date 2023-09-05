@@ -43,7 +43,7 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
     }
 
     @Test
-    void testFail() throws Exception {
+    void testFail_emptyRetainUntil() throws Exception {
         CourtCaseEntity createdCase = dartsDatabase.createCase("testCourthouse", "testCaseNumber");
 
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
@@ -58,6 +58,26 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
 
         String expectedResponse = """
             {"type":"CASE_106","title":"The request does not contain any values that are supported by the PATCH operation.","status":400}""";
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void testFail_extraElement() throws Exception {
+        CourtCaseEntity createdCase = dartsDatabase.createCase("testCourthouse", "testCaseNumber");
+
+        MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("""
+                         {
+                           "courthouse": "swansea",
+                           "retain_until": "2023-09-06T16:16:57.331Z"
+                         }""");
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = "{\"title\":\"Bad Request\",\"status\":400,\"detail\":\"JSON parse error: Unrecognized field \\\"courthouse\\\" " +
+                                  "(class uk.gov.hmcts.darts.cases.model.PatchRequestObject), not marked as ignorable\"}";
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
