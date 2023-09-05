@@ -12,6 +12,8 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.net.URI;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,8 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 class AudioControllerPreviewIntTest extends IntegrationBase {
-    private static final String ENDPOINT = "/audio/preview";
-
     @Autowired
     private AudioTransformationServiceGivenBuilder given;
 
@@ -41,17 +41,17 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     @Test
     void previewShouldReturnSuccess() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("media_id", String.valueOf(mediaEntity.getId()));
+        MockHttpServletRequestBuilder requestBuilder = get(URI.create(
+            String.format("/audio/preview/%d", mediaEntity.getId())));
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
-
     }
 
     @Test
     void previewShouldReturnErrorWhenNoMediaIdExistsInDatabase() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("media_id", "1234567");
+
+        MockHttpServletRequestBuilder requestBuilder = get(
+            String.format("/audio/preview/%s", "1234567"));
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))

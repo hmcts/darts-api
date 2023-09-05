@@ -59,7 +59,8 @@ public class AudioController implements AudioApi {
 
     @Override
     public ResponseEntity<org.springframework.core.io.Resource> preview(
-        @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH) @PathVariable("media_id") Integer mediaId
+        @Parameter(name = "media_id", description = "Internal identifier for media",
+            required = true, in = ParameterIn.PATH) @PathVariable("media_id") Integer mediaId
     ) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
