@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = TranscriptionStatusEntity.TABLE_NAME)
+@Table(name = "transcription_status")
 @Getter
 @Setter
 public class TranscriptionStatusEntity {
