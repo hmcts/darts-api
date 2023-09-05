@@ -23,9 +23,9 @@ import uk.gov.hmcts.darts.common.enums.WorkflowStageEnum;
 public class TranscriptionWorkflowEntity extends CreatedModifiedBaseEntity {
 
     @Id
-    @Column(name = "transcription_workflow")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trw_id")
-    @SequenceGenerator(name = "trw_id", sequenceName = "trw_seq", allocationSize = 1)
+    @Column(name = "trw_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trw_gen")
+    @SequenceGenerator(name = "trw_gen", sequenceName = "trw_seq", allocationSize = 1)
     private Integer id;
 
     @ManyToOne(optional = false)
