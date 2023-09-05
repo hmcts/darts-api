@@ -38,6 +38,11 @@ public enum CaseApiError implements DartsApiError {
         "105",
         HttpStatus.NOT_FOUND,
         "The requested hearing cannot be found"
+    ),
+    PATCH_CRITERIA_NOT_MET(
+        "106",
+        HttpStatus.BAD_REQUEST,
+        "The request does not contain any values that are supported by the PATCH operation."
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";
