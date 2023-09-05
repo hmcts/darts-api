@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,6 +14,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.enums.WorkflowStageEnum;
 
 @Entity
 @Table(name = "transcription_workflow")
@@ -30,7 +33,8 @@ public class TranscriptionWorkflowEntity extends CreatedModifiedBaseEntity {
     private TranscriptionEntity transcription;
 
     @Column(name = "workflow_stage", nullable = false)
-    private String workflowStage;
+    @Enumerated(EnumType.STRING)
+    private WorkflowStageEnum workflowStage;
 
     @Column(name = "workflow_comment")
     private String workflowComment;
