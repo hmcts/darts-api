@@ -1,8 +1,8 @@
 package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -22,7 +22,7 @@ class DartsEventNullHandlerTest extends IntegrationBase {
     private static final String SOME_ROOM = "some-room";
     private final OffsetDateTime today = now();
 
-    @Mock
+    @SpyBean
     DartsEventNullHandler nullEventHandler;
 
     private static DartsEvent someMinimalDartsEvent() {
@@ -56,11 +56,10 @@ class DartsEventNullHandlerTest extends IntegrationBase {
         event.setCaseNumbers(List.of("123"));
         event.setDateTime(today);
 
-        Mockito.when(nullEventHandler.isHandlerFor(any())).thenReturn(true);
         EventDispatcher eventDispatcher = new EventDispatcherImpl(List.of(nullEventHandler));
         eventDispatcher.receive(event);
 
-        Mockito.verify(nullEventHandler).handle(any());
+        Mockito.verify(nullEventHandler, Mockito.times(1)).handle(any());
     }
 
 
