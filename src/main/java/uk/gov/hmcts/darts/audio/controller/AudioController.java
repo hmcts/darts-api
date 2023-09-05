@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
@@ -55,7 +58,9 @@ public class AudioController implements AudioApi {
     }
 
     @Override
-    public ResponseEntity<Resource> preview(Integer mediaId) {
+    public ResponseEntity<org.springframework.core.io.Resource> preview(
+        @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH) @PathVariable("media_id") Integer mediaId
+    ) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
     }

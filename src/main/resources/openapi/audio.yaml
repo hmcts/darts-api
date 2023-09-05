@@ -99,7 +99,7 @@ paths:
                   summary: No media metadata exists for the given hearing id
                   value:
                     []
-  /audio/preview:
+  /audio/preview/{media_id}:
     get:
       tags:
         - Audio
@@ -107,7 +107,7 @@ paths:
       operationId: preview
       description: Preview audio
       parameters:
-        - in: query
+        - in: path
           name: media_id
           schema:
             type: integer
