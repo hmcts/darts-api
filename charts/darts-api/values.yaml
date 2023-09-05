@@ -94,6 +94,7 @@ function:
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
+    DARTS_API_DB_CONNECTION_STRING: postgres://pgadmin:XXXXXXXXXX@darts-api-stg.postgres.database.azure.com:5432/darts
   job:
     activeDeadlineSeconds: 300
     parallelism: 1
