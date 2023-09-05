@@ -11,7 +11,7 @@ public interface AuthenticationController {
 
     @GetMapping("/login-or-refresh")
     ModelAndView loginOrRefresh(
-        @RequestHeader(value = "Authorization", required = false) String authHeaderValue, 
+        @RequestHeader(value = "Authorization", required = false) String authHeaderValue,
         @RequestParam(value = "redirect_uri", required = false) String redirectUri
     );
 
@@ -20,10 +20,12 @@ public interface AuthenticationController {
 
     @GetMapping("/logout")
     ModelAndView logout(
-        @RequestHeader("Authorization") String authHeaderValue, 
+        @RequestHeader("Authorization") String authHeaderValue,
         @RequestParam(value = "redirect_uri", required = false) String redirectUri
     );
 
     @GetMapping("/reset-password")
     ModelAndView resetPassword(@RequestParam(value = "redirect_uri", required = false) String redirectUri);
+
+
 }

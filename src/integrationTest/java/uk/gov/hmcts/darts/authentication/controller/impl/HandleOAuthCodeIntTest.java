@@ -196,14 +196,17 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
      * This setup method generates these private and public RSA keys and sets the stub responses accordingly.
      */
     private KeyPair setTokenStub(List<String> emails) {
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+        JWTClaimsSet.Builder claimBuilder = new JWTClaimsSet.Builder()
             .audience(CONFIGURED_AUDIENCE_VALUE)
             .issuer(CONFIGURED_ISSUER_VALUE)
             .expirationTime(createDateInFuture())
             .issueTime(Date.from(Instant.now()))
-            .subject(VALID_SUBJECT_VALUE)
-            .claim(EMAILS_CLAIM_NAME, emails)
-            .build();
+            .subject(VALID_SUBJECT_VALUE);
+
+        if (!emails.isEmpty()) {
+            claimBuilder = claimBuilder.claim(EMAILS_CLAIM_NAME, emails);
+        }
+        JWTClaimsSet jwtClaimsSet = claimBuilder.build();
 
         KeyPair keyPair = createKeys();
 
@@ -212,7 +215,8 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
         stubFor(
             WireMock.post(OAUTH_TOKEN_ENDPOINT)
                 .willReturn(
-                    aResponse().withStatus(200).withBody("{\"id_token\":\"" + signedJwt + "\"}")
+                    aResponse().withHeader("Content-Type", "application/json").withStatus(200).withBody(
+                        "{\"id_token\":\"" + signedJwt + "\"}")
                 )
         );
 

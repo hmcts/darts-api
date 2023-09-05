@@ -12,12 +12,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.darts.authentication.config.AuthenticationConfiguration;
 
 import java.net.URI;
 
 @SpringBootTest(
-    classes = {AuthenticationConfiguration.class, AccessTokenClient.class},
+    classes = {AccessTokenClient.class},
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
