@@ -118,9 +118,6 @@ class AudioServiceImplTest {
 
     @Test
     void previewShouldReturnExpectedData() throws IOException, ExecutionException, InterruptedException {
-        var blobUuid = UUID.randomUUID();
-        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity.setExternalLocation(blobUuid);
 
         MediaEntity mediaEntity = new MediaEntity();
         mediaEntity.setId(1);
@@ -145,4 +142,26 @@ class AudioServiceImplTest {
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
     }
+
+    @Test
+    void previewShouldThrowExceptionWhenMediaIdCannotBeFound() {
+
+        var mediaRequestId = 1;
+
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(mediaRequestId);
+        mediaEntity.setStart(START_TIME);
+        mediaEntity.setEnd(END_TIME);
+        mediaEntity.setChannel(1);
+
+        when(mediaRepository.findById(mediaRequestId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> audioService.preview(mediaRequestId)
+        );
+
+        assertEquals(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
+    }
+
 }
