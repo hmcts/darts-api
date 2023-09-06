@@ -80,7 +80,7 @@ paths:
             type: integer
           required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -98,7 +98,27 @@ paths:
                 media-not-found:
                   summary: No media metadata exists for the given hearing id
                   value:
-                    []
+                    [ ]
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_105"
+                title: "The requested hearing cannot be found"
+                status: 404
   /audio/preview/{media_id}:
     get:
       tags:

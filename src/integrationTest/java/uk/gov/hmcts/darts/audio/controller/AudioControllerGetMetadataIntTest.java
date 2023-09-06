@@ -93,4 +93,11 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
         JSONAssert.assertEquals("[]", actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void getAudioMetadataHearingNotFound() throws Exception {
+        var requestBuilder = get(URI.create(String.format("/audio/hearings/%d/audios", 999)));
+
+        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+    }
+
 }
