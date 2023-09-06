@@ -107,14 +107,12 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @Test
     void casesSearchGetEndpointCheckListsAreCorrectSize() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        final Integer caseId = getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE);
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, caseId);
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath(
-                "$.case_id",
-                Matchers.is(getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
-            ))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.case_id", Matchers.is(caseId)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges", Matchers.hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1judge1")))
             .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors", Matchers.hasSize(1)))

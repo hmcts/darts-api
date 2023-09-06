@@ -3,9 +3,9 @@ package uk.gov.hmcts.darts.authorisation.configuration;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -43,8 +43,8 @@ public class AuthorisationAspect {
     private static final Pattern HEARINGS_ID_PATH_PATTERN = Pattern.compile("(?<=\\/hearings\\/)(\\d+?)(?=\\/|$)");
 
 
-    @Around("@annotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation)")
-    public void authorisation(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Before("@annotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation)")
+    public void authorisation(JoinPoint joinPoint) throws Throwable {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
