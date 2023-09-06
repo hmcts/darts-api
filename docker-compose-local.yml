@@ -19,6 +19,9 @@ services:
       - AAD_B2C_ROPC_CLIENT_ID_KEY
       - AAD_B2C_ROPC_CLIENT_SECRET_KEY
       - AZURE_STORAGE_CONNECTION_STRING
+      - AAD_TENANT_ID
+      - AAD_CLIENT_ID
+      - AAD_CLIENT_SECRET
     build:
       context: .
       dockerfile: Dockerfile

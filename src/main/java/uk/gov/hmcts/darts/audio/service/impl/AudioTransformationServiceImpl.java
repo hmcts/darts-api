@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -225,20 +226,26 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         throws IOException {
         Map<MediaEntity, Path> downloadedMedias = new HashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
-            UUID id = getMediaLocation(mediaEntity).orElseThrow(
-                () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
-                )));
-
-            log.debug("Downloading audio blob for {}", id);
-            BinaryData binaryData = getAudioBlobData(id);
-            log.debug("Download audio blob complete for {}", id);
-
-            Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());
-            log.debug("Saved audio blob {} to {}", id, downloadPath);
+            Path downloadPath = saveMediaToWorkspace(mediaEntity);
 
             downloadedMedias.put(mediaEntity, downloadPath);
         }
         return downloadedMedias;
+    }
+
+    @Override
+    public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
+        UUID id = getMediaLocation(mediaEntity).orElseThrow(
+            () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
+            )));
+
+        log.debug("Downloading audio blob for {}", id);
+        BinaryData binaryData = getAudioBlobData(id);
+        log.debug("Download audio blob complete for {}", id);
+
+        Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());
+        log.debug("Saved audio blob {} to {}", id, downloadPath);
+        return downloadPath;
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")
@@ -270,16 +277,21 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity);
     }
 
-    private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
+    public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime, OffsetDateTime endTime)
         throws ExecutionException, InterruptedException {
 
         AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(
             downloadedMedias,
-            mediaRequestEntity.getStartTime(),
-            mediaRequestEntity.getEndTime()
+            startTime,
+            endTime
         );
 
         return Path.of(audioFileInfo.getFileName());
+    }
+
+    private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
+        throws ExecutionException, InterruptedException {
+        return handlePlayback(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
     }
 
     private void notifyUser(MediaRequestEntity mediaRequestEntity,

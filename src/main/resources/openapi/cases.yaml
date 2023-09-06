@@ -132,6 +132,39 @@ paths:
                 title: "The requested case cannot be found"
                 status: 404
 
+    patch:
+      tags:
+        - Cases
+      summary: Allows the update of a single case using a given case_id
+      description: |-
+        Patches a single case for a given case_id
+      parameters:
+        - in: path
+          name: case_id
+          schema:
+            type: integer
+          description: "case_id is the internal cas_id of the case."
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/patch_request_object'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/single_case'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
   /cases/{case_id}/hearings:
     get:
       tags:
@@ -378,6 +411,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defence'
+    patch_request_object:
+      type: object
+      properties:
+        retain_until:
+          type: string
+          format: date-time
     single_case:
       type: object
       required:

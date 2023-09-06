@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.ExternalObjectDirectoryStub;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTU
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
+import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Transactional
 @Service
@@ -42,6 +44,9 @@ public class AudioTransformationServiceGivenBuilder {
     private CourtroomEntity courtroomAtNewcastle;
     private CourtCaseEntity courtCase;
     private JudgeEntity judge;
+
+    private static final OffsetDateTime MEDIA_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
+    private static final OffsetDateTime MEDIA_END_TIME = MEDIA_START_TIME.plusHours(1);
 
     public void setupTest() {
         hearingEntityWithMedia1 = dartsDatabase.createHearing(
@@ -67,7 +72,10 @@ public class AudioTransformationServiceGivenBuilder {
         );
         hearingEntityWithoutMedia.addJudge(judge);
 
-        mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
+        int channel = 1;
+
+        mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaWith(
+            courtroomAtNewcastle, MEDIA_START_TIME, MEDIA_END_TIME, channel));
         mediaEntity2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
 
         mediaEntity3 = createMediaFor(courtroomAtNewcastle);
