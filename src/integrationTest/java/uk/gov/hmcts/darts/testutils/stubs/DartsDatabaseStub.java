@@ -98,6 +98,7 @@ public class DartsDatabaseStub {
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
     private final CourthouseStub courthouseStub;
     private final AuditStub auditStub;
+    private final EventStub eventStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
@@ -145,6 +146,10 @@ public class DartsDatabaseStub {
 
     public JudgeEntity createSimpleJudge(String name) {
         return retrieveCoreObjectService.retrieveOrCreateJudge(name);
+    }
+
+    public EventEntity createEvent(HearingEntity hearing) {
+        return eventStub.createEvent(hearing);
     }
 
     @Transactional
@@ -392,4 +397,6 @@ public class DartsDatabaseStub {
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
+
+
 }
