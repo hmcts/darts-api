@@ -10,7 +10,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
@@ -22,7 +21,6 @@ import java.util.List;
 @Table(name = "transcription")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = false)
 public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @Id
@@ -42,6 +40,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @ManyToOne
     @JoinColumn(name = "trt_id", nullable = false)
     private TranscriptionTypeEntity transcriptionType;
+
+    @ManyToOne
+    @JoinColumn(name = "trs_id", nullable = false)
+    private TranscriptionStatusEntity transcriptionStatus;
 
     @ManyToOne
     @JoinColumn(name = "tru_id")
@@ -74,18 +76,6 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "end_ts")
     private OffsetDateTime end;
-
-    @Column(name = "requested_by")
-    private Integer requestedByUserId;
-
-    @Column(name = "approved_by")
-    private Integer approvedByUserId;
-
-    @Column(name = "approved_on_ts")
-    private OffsetDateTime approvedOnTimestamp;
-
-    @Column(name = "transcribed_by")
-    private Integer transcribedByUserId;
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
