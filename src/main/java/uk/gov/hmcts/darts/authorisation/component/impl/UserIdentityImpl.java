@@ -29,10 +29,8 @@ public class UserIdentityImpl implements UserIdentity {
                 }
                 Object emailAddressObject = emails.get(0);
 
-                if (emailAddressObject instanceof String emailAddress) {
-                    if (StringUtils.isNotBlank(emailAddress)) {
-                        return emailAddress;
-                    }
+                if (emailAddressObject instanceof String emailAddress && StringUtils.isNotBlank(emailAddress)) {
+                    return emailAddress;
                 }
             }
         }

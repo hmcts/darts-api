@@ -18,6 +18,11 @@ public enum AuthorisationError implements DartsApiError {
         "101",
         HttpStatus.BAD_REQUEST,
         "Failed to check authorisation for the case"
+    ),
+    BAD_HEARING_ID_REQUEST(
+        "102",
+        HttpStatus.BAD_REQUEST,
+        "Failed to check authorisation for the hearing"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

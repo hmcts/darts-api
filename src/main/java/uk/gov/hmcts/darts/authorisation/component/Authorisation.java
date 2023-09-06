@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 @Component
 public interface Authorisation {
 
-    void authorise(Integer caseId);
+    void authoriseByCaseId(Integer caseId);
+
+    void authoriseByHearingId(Integer hearingId);
 
 }
