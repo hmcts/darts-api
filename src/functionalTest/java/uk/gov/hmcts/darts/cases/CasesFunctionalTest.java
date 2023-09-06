@@ -10,65 +10,75 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 class CasesFunctionalTest  extends FunctionalTest {
+    public static final String CASES_URI = "/cases";
+    public static final String COURTHOUSE = "courthouse";
+    public static final String COURTROOM = "courtroom";
+    public static final String CASE_DATE = "date";
+    public static final String COURTHOUSE1 = "LEEDS";
+    public static final String COURTHOUSE_ROOM = "ROOM";
+    public static final String DATE1 = "2023-09-06";
+    public static final int NOT_FOUND = 404;
+    public static final int OK = 200;
+    public static final String CASE_ID = "1";
+    public static final String CASE_BAD_ID = "0";
+
+
     @Test
     void getAllCases() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri("/cases"))
-            .param("courthouse", "LEEDS")
-            .param("courtroom", "ROOM")
-            .param("date", "2023-06-14")
+            .baseUri(getUri(CASES_URI))
+            .param(COURTHOUSE, COURTHOUSE1)
+            .param(COURTROOM, COURTHOUSE_ROOM)
+            .param(CASE_DATE, DATE1)
             .get()
             .then()
             .extract().response();
 
-        assertEquals(200, response.statusCode());
+        printDebug(response);
+
+        assertEquals(OK, response.statusCode());
     }
 
     @Test
-    void getAllCourthouses() {
+    void getExistingCase() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri("/courthouses"))
+            .baseUri(getUri(CASES_URI + CASE_ID))
             .get()
             .then()
             .extract().response();
 
-        System.out.println("<=========================COURTHOUSES-HEADERS==================================>");
-        System.out.println("HEADERS: " + response.getHeaders());
-        System.out.println("<=========================COURTHOUSES-HEADERS==================================>");
-        System.out.println("<=========================COURTHOUSES-BODY=====================================>");
-        System.out.println("BODY: " + response.getBody().prettyPrint());
-        System.out.println("<=========================COURTHOUSES-BODY======================================>");
+        printDebug(response);
 
-        assertEquals(200, response.statusCode());
+        assertEquals(OK, response.statusCode());
     }
 
     @Test
-    void getCourthouse() {
+    void getCaseBadRequest() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri("/courthouses/1"))
+            .baseUri(getUri(CASES_URI + CASE_BAD_ID))
             .get()
             .then()
             .extract().response();
 
-        assertEquals(200, response.statusCode());
+        printDebug(response);
+
+        assertEquals(NOT_FOUND, response.statusCode());
     }
 
-    @Test
-    void getCourthouseBadRequest() {
-        Response response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri("/courthouses/X"))
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(400, response.statusCode());
+    private static void printDebug(Response response) {
+        log.debug("<===============================CASES-HEADERS==================================>");
+        log.debug("HEADERS: " + response.getHeaders());
+        log.debug("<=========================COURTHOUSES-HEADERS==================================>");
+        log.debug("<=========================COURTHOUSES-BODY=====================================>");
+        log.debug("BODY: " + response.getBody().prettyPrint());
+        log.debug("<==============================CASES-BODY======================================>");
     }
+
+
 }
