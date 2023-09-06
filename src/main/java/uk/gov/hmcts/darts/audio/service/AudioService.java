@@ -6,4 +6,6 @@ public interface AudioService {
 
     InputStream download(Integer audioRequestId);
 
+    InputStream preview(Integer mediaId);
+
 }
