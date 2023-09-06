@@ -35,6 +35,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
+
 @RestController
 @RequiredArgsConstructor
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.UseObjectForClearerAPI", "checkstyle.LineLengthCheck",
@@ -92,13 +94,13 @@ public class CaseController implements CasesApi {
     }
 
     @Override
-    @Authorisation
+    @Authorisation(contextId = CASE_ID)
     public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
     }
 
     @Override
-    @Authorisation
+    @Authorisation(contextId = CASE_ID)
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
     }

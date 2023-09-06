@@ -16,10 +16,13 @@ import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
 import java.util.List;
+
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,11 +48,14 @@ public class AudioController implements AudioApi {
     public ResponseEntity<Resource> download(Integer audioRequestId) {
         InputStream audioFileStream = audioService.download(audioRequestId);
 
-        return new ResponseEntity<>(new InputStreamResource(audioFileStream),
-                                    HttpStatus.OK);
+        return new ResponseEntity<>(
+            new InputStreamResource(audioFileStream),
+            HttpStatus.OK
+        );
     }
 
     @Override
+    @Authorisation(contextId = HEARING_ID)
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingId);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
