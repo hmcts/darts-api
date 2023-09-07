@@ -105,6 +105,27 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(NOT_FOUND, response.statusCode());
     }
 
+    @Test
+    void patchCase() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_URI + CASE_ID))
+            .body("""
+                      {
+                        "retain_until": "2023-09-07T11:49:44.618Z"
+                      }
+                      """)
+            .patch()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(OK, response.statusCode());
+    }
+
+
     private static void printDebug(Response response) {
         log.debug("<===============================CASES-HEADERS==================================>");
         log.debug("HEADERS: " + response.getHeaders());
