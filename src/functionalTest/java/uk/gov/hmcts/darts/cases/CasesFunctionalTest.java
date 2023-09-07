@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 class CasesFunctionalTest  extends FunctionalTest {
     public static final String CASES_URI = "/cases";
+    public static final String SEARCH = "/search";
     public static final String COURTHOUSE = "courthouse";
     public static final String COURTROOM = "courtroom";
     public static final String CASE_DATE = "date";
@@ -57,6 +58,9 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(CREATED, response.statusCode());
     }
 
+    /**
+     * TBD: Review
+     */
     @Test
     void getAllCases() {
         Response response = buildRequestWithAuth()
@@ -117,6 +121,29 @@ class CasesFunctionalTest  extends FunctionalTest {
                       }
                       """)
             .patch()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(OK, response.statusCode());
+    }
+    @Test
+    void searchCase() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_URI + SEARCH))
+            .param("case_id", "41")
+            .param("case_number","42GD2391421")
+            .param("courthouse","SWANSEA")
+            .param("courtroom","1")
+            .param("defendant_name","DefendantName Surname")
+            .param("judge_name", "Judgename Surname")
+            .param("date_from", "2020-06-20")
+            .param("date_to","2020-06-20")
+            .param("event_test_contains","")
+            .get()
             .then()
             .extract().response();
 
