@@ -16,12 +16,46 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final String CASE_DATE = "date";
     public static final String COURTHOUSE1 = "LEEDS";
     public static final String COURTHOUSE_ROOM = "ROOM";
-    public static final String DATE1 = "2023-09-06";
+    public static final String DATE1 = "2023-09-07";
     public static final int NOT_FOUND = 404;
     public static final int OK = 200;
-    public static final String CASE_ID = "1";
-    public static final String CASE_BAD_ID = "0";
+    public static final int CREATED = 201;
+    public static final String CASE_ID = "/21";
+    public static final String CASE_BAD_ID = "/0";
 
+
+
+    @Test
+    void createCase() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_URI))
+            .body("""
+                      {
+                      "courthouse": "LEEDS",
+                        "case_number": "CASE1002",
+                        "defendants": [
+                          "defendantB"
+                        ],
+                        "judges": [
+                          "judgeB"
+                        ],
+                        "prosecutors": [
+                          "prosecuterB"
+                        ],
+                        "defenders": [
+                          "defenderB"
+                        ]
+                        }""")
+            .post()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(CREATED, response.statusCode());
+    }
 
     @Test
     void getAllCases() {
