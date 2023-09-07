@@ -17,6 +17,8 @@ import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationPropert
 import uk.gov.hmcts.darts.authentication.exception.AzureDaoException;
 import uk.gov.hmcts.darts.authentication.model.OAuthProviderRawResponse;
 
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,12 +43,21 @@ class AzureDaoImplTest {
     @Test
     void fetchAccessTokenShouldReturnResponseWhenAzureCallIsSuccessful() throws AzureDaoException {
         HTTPResponse response = mockSuccessResponse();
-        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(response);
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(
+            response);
 
-        OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken("CODE", authenticationProviderConfiguration, authenticationConfiguration);
+        OAuthProviderRawResponse rawResponse = azureDaoImpl.fetchAccessToken(
+            "CODE",
+            authenticationProviderConfiguration,
+            authenticationConfiguration
+        );
 
-        assertEquals("test_id_token", rawResponse.getAccessToken());
-        assertEquals(1234L, rawResponse.getExpiresIn());
+        assertEquals(
+            "test_id_token",
+            Objects.nonNull(rawResponse.getIdToken()) ? rawResponse.getIdToken() : rawResponse.getAccessToken()
+        );
+        assertEquals(
+            1234L, rawResponse.getIdTokenExpiresIn());
     }
 
     @ParameterizedTest
@@ -62,7 +73,7 @@ class AzureDaoImplTest {
     @Test
     void fetchAccessTokenShouldThrowExceptionWhenAzureCallIsNotSuccessful() {
         HTTPResponse failedResponse = mockFailedResponse();
-        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any())).thenReturn(failedResponse);
+        when(azureActiveDirectoryB2CClient.fetchAccessToken(any(), any(), any(), any(), any(), any())).thenReturn(failedResponse);
 
         AzureDaoException exception = assertThrows(
             AzureDaoException.class,

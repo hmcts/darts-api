@@ -76,6 +76,7 @@ class TokenValidatorImplTest {
 
     @Test
     void validateShouldReturnPositiveResultWhenValidTokenIsPresented() {
+        when(authenticationConfiguration.getClaims()).thenReturn(EMAILS_CLAIM_NAME);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)
@@ -98,6 +99,7 @@ class TokenValidatorImplTest {
 
     @Test
     void validateShouldReturnNegativeResultWhenEmailsClaimIsMissing() {
+        when(authenticationConfiguration.getClaims()).thenReturn(EMAILS_CLAIM_NAME);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)
@@ -116,6 +118,7 @@ class TokenValidatorImplTest {
 
     @Test
     void validateShouldReturnNegativeResultWhenSubjectClaimIsMissing() {
+        when(authenticationConfiguration.getClaims()).thenReturn(EMAILS_CLAIM_NAME);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)
@@ -134,6 +137,7 @@ class TokenValidatorImplTest {
 
     @Test
     void validateShouldReturnNegativeResultWhenIssuedAtClaimIsMissing() {
+        when(authenticationConfiguration.getClaims()).thenReturn(EMAILS_CLAIM_NAME);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)
@@ -171,6 +175,7 @@ class TokenValidatorImplTest {
 
     @Test
     void validateShouldReturnNegativeResultWhenInvalidIssuerIsPresented() {
+        when(authenticationConfiguration.getClaims()).thenReturn(EMAILS_CLAIM_NAME);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(VALID_AUDIENCE_VALUE)
             .issuer("INVALID ISSUER VALUE")
@@ -193,6 +198,7 @@ class TokenValidatorImplTest {
 
     @Test
     void validateShouldReturnNegativeResultWhenExpiredTokenIsPresented() {
+        when(authenticationConfiguration.getClaims()).thenReturn(EMAILS_CLAIM_NAME);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
             .audience(VALID_AUDIENCE_VALUE)
             .issuer(VALID_ISSUER_VALUE)

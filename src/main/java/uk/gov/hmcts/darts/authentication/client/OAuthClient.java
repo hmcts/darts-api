@@ -7,5 +7,5 @@ public interface OAuthClient {
     HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
                                   String redirectType, String authCode,
                                   String clientId,
-                                  String authClientSecret);
+                                  String authClientSecret, String scope);
 }

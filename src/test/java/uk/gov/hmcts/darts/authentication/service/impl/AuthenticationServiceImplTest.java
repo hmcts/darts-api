@@ -101,7 +101,7 @@ class AuthenticationServiceImplTest {
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldReturnLandingPageUriWhenTokenIsObtainedAndValid() throws AzureDaoException {
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
-            .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
@@ -135,7 +135,7 @@ class AuthenticationServiceImplTest {
     void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
 
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
-            .thenReturn(new OAuthProviderRawResponse(DUMMY_ID_TOKEN, 0));
+            .thenReturn(new OAuthProviderRawResponse(null, 0,DUMMY_ID_TOKEN,0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(

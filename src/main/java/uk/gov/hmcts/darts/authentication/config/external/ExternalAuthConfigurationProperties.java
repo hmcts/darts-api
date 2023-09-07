@@ -32,4 +32,6 @@ public class ExternalAuthConfigurationProperties implements AuthConfigurationPro
 
     private String issuerUri;
 
+    private String claims;
+
 }
