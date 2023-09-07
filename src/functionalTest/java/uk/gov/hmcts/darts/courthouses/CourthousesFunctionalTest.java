@@ -11,12 +11,38 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 class CourthousesFunctionalTest extends FunctionalTest {
     public static final String COURTHOUSES_URI = "/courthouses";
-    public static final String COURTHOUSE_ID = "/1";
+    public static final String COURTHOUSE_ID = "/3";
     public static final String COURTHOUSE_BAD_ID = "/99";
     public static final String DATE1 = "2023-09-06";
     public static final int NOT_FOUND = 404;
     public static final int OK = 200;
+    public static final int CREATED = 201;
 
+    @Test
+    /**
+     * .body(json) NOT
+     * .param("courthouse_name","READING")
+     * .param("code", 73)
+     */
+    void createCourthouse() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(COURTHOUSES_URI))
+            .body("""
+                      {
+                        "courthouse_name": "READING",
+                        "code": 73
+                      }
+                      """)
+            .post()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(CREATED, response.statusCode());
+    }
 
     @Test
     void getAllCourthouses() {
