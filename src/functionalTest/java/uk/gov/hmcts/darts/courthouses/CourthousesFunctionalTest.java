@@ -11,12 +11,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 class CourthousesFunctionalTest extends FunctionalTest {
     public static final String COURTHOUSES_URI = "/courthouses";
-    public static final String COURTHOUSE_ID = "/3";
+    public static final String COURTHOUSE_ID = "/24";
     public static final String COURTHOUSE_BAD_ID = "/99";
     public static final String DATE1 = "2023-09-06";
-    public static final int NOT_FOUND = 404;
     public static final int OK = 200;
     public static final int CREATED = 201;
+    public static final int DELETED = 204;
+    public static final int NOT_FOUND = 404;
+    public static final int RESOURCE_ALREADY_EXISTS = 409;
+
 
     @Test
     /**
@@ -25,6 +28,27 @@ class CourthousesFunctionalTest extends FunctionalTest {
      * .param("code", 73)
      */
     void createCourthouse() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(COURTHOUSES_URI))
+            .body("""
+                      {
+                        "courthouse_name": "BIRMINGHAM",
+                        "code": 163
+                      }
+                      """)
+            .post()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(CREATED, response.statusCode());
+    }
+
+    @Test
+    void createSameCourthouse() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -41,7 +65,43 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
         printDebug(response);
 
-        assertEquals(CREATED, response.statusCode());
+        assertEquals(RESOURCE_ALREADY_EXISTS, response.statusCode());
+    }
+
+    @Test
+    void updateCourthouse() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_ID))
+            .body("""
+                      {
+                        "courthouse_name": "READING",
+                        "code": 11
+                      }
+                      """)
+            .put()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(OK, response.statusCode());
+    }
+
+    @Test
+    void deleteCourthouse() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_ID))
+            .delete()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(DELETED, response.statusCode());
     }
 
     @Test
