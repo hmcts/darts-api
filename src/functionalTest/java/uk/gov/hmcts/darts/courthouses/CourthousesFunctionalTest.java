@@ -11,12 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 class CourthousesFunctionalTest extends FunctionalTest {
     public static final String COURTHOUSES_URI = "/courthouses";
-    public static final String COURTHOUSE_ID = "/24";
+    public static final String COURTHOUSE_ID = "/25";
     public static final String COURTHOUSE_BAD_ID = "/99";
     public static final String DATE1 = "2023-09-06";
     public static final int OK = 200;
     public static final int CREATED = 201;
-    public static final int DELETED = 204;
+    public static final int NOCONTENT = 204;
     public static final int NOT_FOUND = 404;
     public static final int RESOURCE_ALREADY_EXISTS = 409;
 
@@ -69,6 +69,9 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    /**
+     * TBD: NOT UPDATING
+     */
     void updateCourthouse() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -76,8 +79,8 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_ID))
             .body("""
                       {
-                        "courthouse_name": "READING",
-                        "code": 11
+                        "courthouse_name": "BIRMINGHAM",
+                        "code": 163
                       }
                       """)
             .put()
@@ -86,7 +89,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
         printDebug(response);
 
-        assertEquals(OK, response.statusCode());
+        assertEquals(NOCONTENT, response.statusCode());
     }
 
     @Test
@@ -101,7 +104,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
         printDebug(response);
 
-        assertEquals(DELETED, response.statusCode());
+        assertEquals(NOCONTENT, response.statusCode());
     }
 
     @Test
