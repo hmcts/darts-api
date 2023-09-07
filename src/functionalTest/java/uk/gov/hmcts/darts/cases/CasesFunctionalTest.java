@@ -13,6 +13,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final String CASES_URI = "/cases";
     public static final String SEARCH = "/search";
     public static final String HEARINGS = "/hearings";
+    public static final String EVENTS = "/events";
     public static final String COURTHOUSE = "courthouse";
     public static final String COURTROOM = "courtroom";
     public static final String CASE_DATE = "date";
@@ -24,6 +25,8 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final int CREATED = 201;
     public static final String CASE_ID = "/41";
     public static final String CASE_BAD_ID = "/0";
+    public static final String HEARING_ID = "/1";
+
 
 
 
@@ -159,6 +162,21 @@ class CasesFunctionalTest  extends FunctionalTest {
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_URI + CASE_ID + HEARINGS))
+            .get()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(OK, response.statusCode());
+    }
+
+    @Test
+    void getCaseHearingEvents() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_URI + HEARINGS + HEARING_ID + EVENTS))
             .get()
             .then()
             .extract().response();
