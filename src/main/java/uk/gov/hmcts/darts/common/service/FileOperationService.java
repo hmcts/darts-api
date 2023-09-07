@@ -8,4 +8,6 @@ import java.nio.file.Path;
 public interface FileOperationService {
 
     Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
+
+    BinaryData saveFileToBinaryData(String fileName);
 }
