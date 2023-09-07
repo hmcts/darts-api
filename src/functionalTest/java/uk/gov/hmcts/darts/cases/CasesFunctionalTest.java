@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CasesFunctionalTest  extends FunctionalTest {
     public static final String CASES_URI = "/cases";
     public static final String SEARCH = "/search";
+    public static final String HEARINGS = "/hearings";
     public static final String COURTHOUSE = "courthouse";
     public static final String COURTROOM = "courtroom";
     public static final String CASE_DATE = "date";
@@ -21,7 +22,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final int NOT_FOUND = 404;
     public static final int OK = 200;
     public static final int CREATED = 201;
-    public static final String CASE_ID = "/21";
+    public static final String CASE_ID = "/41";
     public static final String CASE_BAD_ID = "/0";
 
 
@@ -143,6 +144,21 @@ class CasesFunctionalTest  extends FunctionalTest {
             .param("date_from", "2020-06-20")
             .param("date_to","2020-06-20")
             .param("event_test_contains","")
+            .get()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(OK, response.statusCode());
+    }
+
+    @Test
+    void getCaseHearing() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_URI + CASE_ID + HEARINGS))
             .get()
             .then()
             .extract().response();
