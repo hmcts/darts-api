@@ -44,7 +44,7 @@ public class AuditServiceImpl implements AuditService {
         List<Predicate> predicates = new ArrayList<>();
         if (auditSearchQuery.getCaseId() != null) {
 
-            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.caseId), auditSearchQuery.getCaseId()));
+            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.courtCase), auditSearchQuery.getCaseId()));
         }
 
         if (auditSearchQuery.getFromDate() != null && auditSearchQuery.getToDate() != null) {
@@ -55,8 +55,8 @@ public class AuditServiceImpl implements AuditService {
             ));
         }
 
-        if (auditSearchQuery.getEventId() != null) {
-            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.auditActivity), auditSearchQuery.getEventId()));
+        if (auditSearchQuery.getAuditActivityId() != null) {
+            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.auditActivity), auditSearchQuery.getAuditActivityId()));
         }
         return predicates;
     }
