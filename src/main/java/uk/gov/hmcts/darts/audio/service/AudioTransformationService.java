@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,8 @@ public interface AudioTransformationService {
     BinaryData getAudioBlobData(UUID location);
 
     UUID saveAudioBlobData(BinaryData binaryData);
+
+    UUID saveAudioBlobDataToInbound(InputStream inputStream);
 
     TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest, UUID externalLocation);
 

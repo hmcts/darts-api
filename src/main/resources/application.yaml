@@ -16,6 +16,10 @@ springdoc:
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
   config:
     import: "optional:configtree:/mnt/secrets/darts/"
   application:

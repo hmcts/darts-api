@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 @Service
@@ -24,6 +25,11 @@ public class DataManagementApiImpl implements DataManagementApi {
     @Override
     public UUID saveBlobDataToOutboundContainer(BinaryData binaryData) {
         return dataManagementService.saveBlobData(dataManagementConfiguration.getOutboundContainerName(), binaryData);
+    }
+
+    @Override
+    public UUID saveBlobToInboundContainer(InputStream inputStream) {
+        return dataManagementService.saveBlobData("darts-inbound-container", inputStream);
     }
 
     @Override

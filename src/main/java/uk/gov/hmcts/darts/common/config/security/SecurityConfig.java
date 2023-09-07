@@ -53,6 +53,7 @@ public class SecurityConfig {
                 "/external-user/reset-password",
                 "/internal-user/login-or-refresh",
                 "/internal-user/handle-oauth-code",
+                "/audio/recordings", // To make local testing easier for purpose of POC only
                 "/"
             )
             .authorizeHttpRequests().anyRequest().permitAll();

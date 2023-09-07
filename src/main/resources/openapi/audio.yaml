@@ -139,6 +139,25 @@ paths:
                 title: "The requested data cannot be located"
                 status: 500
 
+  /audio/recordings:
+    post:
+      tags:
+        - Audio
+      summary: Upload an audio recording
+      operationId: recording
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: Recording accepted
+
 components:
   schemas:
     AudioRequestType:

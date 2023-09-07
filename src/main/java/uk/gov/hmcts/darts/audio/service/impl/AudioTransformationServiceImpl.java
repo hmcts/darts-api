@@ -170,6 +170,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
+    public UUID saveAudioBlobDataToInbound(InputStream inputStream) {
+        return dataManagementApi.saveBlobToInboundContainer(inputStream);
+    }
+
+    @Override
     public TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest,
                                                                     UUID externalLocation) {
         return transientObjectDirectoryService.saveTransientDataLocation(mediaRequest, externalLocation);

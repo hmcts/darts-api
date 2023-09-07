@@ -3,12 +3,15 @@ package uk.gov.hmcts.darts.audio.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
@@ -18,6 +21,8 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -64,6 +69,18 @@ public class AudioController implements AudioApi {
     ) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> recording(@RequestParam("file") MultipartFile file) {
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(file.getInputStream())) {
+            audioTransformationService.saveAudioBlobDataToInbound(bufferedInputStream);
+        } catch (IOException e) {
+          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .build();
+        }
+
+        return ResponseEntity.ok(null);
     }
 
 }

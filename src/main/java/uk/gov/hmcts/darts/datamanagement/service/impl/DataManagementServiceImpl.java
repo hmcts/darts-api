@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.io.InputStream;
 import java.util.UUID;
 
 @Service
@@ -35,6 +36,17 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
         BlobClient client = dataManagementDao.getBlobClient(containerClient, uniqueBlobId);
         client.upload(binaryData);
+
+        return uniqueBlobId;
+    }
+
+    @Override
+    public UUID saveBlobData(String containerName, InputStream inputStream) {
+
+        UUID uniqueBlobId = UUID.randomUUID();
+        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
+        BlobClient client = dataManagementDao.getBlobClient(containerClient, uniqueBlobId);
+        client.upload(inputStream);
 
         return uniqueBlobId;
     }
