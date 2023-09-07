@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.audio.util.AudioTestDataUtil;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -45,6 +44,7 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
+import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
@@ -291,7 +291,7 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         return save(
-            AudioTestDataUtil.createCurrentMediaRequest(
+            AudioTestData.createCurrentMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -303,7 +303,7 @@ public class DartsDatabaseStub {
                                                                      UserAccountEntity requestor) {
         OffsetDateTime now = OffsetDateTime.now(UTC);
         return save(
-            AudioTestDataUtil.createExpiredMediaRequest(
+            AudioTestData.createExpiredMediaRequest(
                 hearing,
                 requestor,
                 now.minusDays(5),
