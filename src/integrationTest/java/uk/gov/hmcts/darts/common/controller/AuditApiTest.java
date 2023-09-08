@@ -105,7 +105,7 @@ class AuditApiTest {
             .andExpect(jsonPath("$[0].id", is(auditEntity.getId())))
             .andExpect(jsonPath("$[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
-            .andExpect(jsonPath("$[0].audit_activity_id", is(auditEntity.getAuditActivity())))
+            .andExpect(jsonPath("$[0].audit_activity_id", is(auditEntity.getAuditActivity().getId())))
             .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
             .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
