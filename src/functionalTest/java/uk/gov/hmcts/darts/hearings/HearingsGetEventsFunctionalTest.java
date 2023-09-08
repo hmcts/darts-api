@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.hearings;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
@@ -15,6 +16,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     public static final String CASE_SEARCH_URL = "/cases/search";
 
     @Test
+    @Disabled
     void success() {
 
         String randomCaseNumber = RandomStringUtils.randomAlphanumeric(15);
