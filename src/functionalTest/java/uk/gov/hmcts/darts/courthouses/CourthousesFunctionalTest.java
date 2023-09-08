@@ -6,38 +6,35 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 class CourthousesFunctionalTest extends FunctionalTest {
     public static final String COURTHOUSES_URI = "/courthouses";
-    public static final String COURTHOUSE_ID = "/25";
-    public static final String COURTHOUSE_BAD_ID = "/99";
-    public static final String DATE1 = "2023-09-06";
+    public static final String COURTHOUSE_BODY = """
+        {"courthouse_name": "BIRMINGHAM","code": 5705}""";
+    public static final String COURTHOUSE_UPDATEBODY = """
+        {"courthouse_name": "MANCHESTER","code": 2112}""";
+    public static final String COURTHOUSE_INVALIDBODY = """
+        {"courthouse_name": "READING", code: "1234"}""";
+    public static final String COURTHOUSE_BAD_ID = "/99999";
     public static final int OK = 200;
     public static final int CREATED = 201;
-    public static final int NOCONTENT = 204;
+    public static final int NO_CONTENT = 204;
+    public static final int BAD_REQUEST = 400;
     public static final int NOT_FOUND = 404;
     public static final int RESOURCE_ALREADY_EXISTS = 409;
 
 
     @Test
-    /**
-     * .body(json) NOT
-     * .param("courthouse_name","READING")
-     * .param("code", 73)
-     */
     void createCourthouse() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI))
-            .body("""
-                      {
-                        "courthouse_name": "BIRMINGHAM",
-                        "code": 163
-                      }
-                      """)
+            .body(COURTHOUSE_BODY)
             .post()
             .then()
             .extract().response();
@@ -53,12 +50,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI))
-            .body("""
-                      {
-                        "courthouse_name": "READING",
-                        "code": 73
-                      }
-                      """)
+            .body(COURTHOUSE_BODY)
             .post()
             .then()
             .extract().response();
@@ -69,42 +61,53 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    /**
-     * TBD: NOT UPDATING
-     */
     void updateCourthouse() {
+        int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_ID))
-            .body("""
-                      {
-                        "courthouse_name": "BIRMINGHAM",
-                        "code": 163
-                      }
-                      """)
+            .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
+            .body(COURTHOUSE_UPDATEBODY)
             .put()
             .then()
             .extract().response();
 
         printDebug(response);
 
-        assertEquals(NOCONTENT, response.statusCode());
+        assertEquals(NO_CONTENT, response.statusCode());
+    }
+
+    @Test
+    void updateCourthouseWithInvalidBody() {
+        int courthouseID = getLatestCourthouseID();
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
+            .body(COURTHOUSE_INVALIDBODY)
+            .put()
+            .then()
+            .extract().response();
+
+        printDebug(response);
+
+        assertEquals(BAD_REQUEST, response.statusCode());
     }
 
     @Test
     void deleteCourthouse() {
+        int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_ID))
+            .baseUri(getUri(COURTHOUSES_URI  + "/" + courthouseID))
             .delete()
             .then()
             .extract().response();
 
         printDebug(response);
 
-        assertEquals(NOCONTENT, response.statusCode());
+        assertEquals(NO_CONTENT, response.statusCode());
     }
 
     @Test
@@ -124,10 +127,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
     @Test
     void getExistingCourthouse() {
+        int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_ID))
+            .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
             .get()
             .then()
             .extract().response();
@@ -137,8 +141,10 @@ class CourthousesFunctionalTest extends FunctionalTest {
         assertEquals(OK, response.statusCode());
     }
 
+
+
     @Test
-    void getCourthouseBadRequest() {
+    void getCourthouseIdDoesNotExist() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -159,5 +165,21 @@ class CourthousesFunctionalTest extends FunctionalTest {
         log.debug("<=========================COURTHOUSES-BODY=====================================>");
         log.debug("BODY: " + response.getBody().prettyPrint());
         log.debug("<=========================COURTHOUSES-BODY======================================>");
+    }
+
+
+    private int getLatestCourthouseID() {
+        List<Integer> ids = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(COURTHOUSES_URI))
+            .get()
+            .then()
+            .extract()
+            .response()
+            .getBody()
+            .jsonPath().get("id");
+
+        return ids.get(ids.size()-1);
     }
 }
