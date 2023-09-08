@@ -20,7 +20,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         String randomCaseNumber = RandomStringUtils.randomAlphanumeric(15);
         String requestBody = """
             {
-              "message_id": "<<messageId>>",
+              "message_id": "12345",
               "type": "1000",
               "sub_type": "1002",
               "event_id": "12345",
@@ -34,7 +34,6 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             }""";
 
         requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
-        requestBody = requestBody.replace("<<messageId>>", RandomStringUtils.randomNumeric(15));
         String randomEventText1 = RandomStringUtils.randomAlphanumeric(15);
         requestBody = requestBody.replace("<<eventText>>", randomEventText1);
         buildRequestWithAuth()
@@ -48,7 +47,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
         requestBody = """
             {
-              "message_id": "<<messageId>>",
+              "message_id": "12345",
               "type": "1000",
               "sub_type": "1002",
               "event_id": "12345",
@@ -62,7 +61,6 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             }""";
 
         requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
-        requestBody = requestBody.replace("<<messageId>>", RandomStringUtils.randomNumeric(15));
         String randomEventText2 = RandomStringUtils.randomAlphanumeric(15);
         requestBody = requestBody.replace("<<eventText>>", randomEventText2);
         buildRequestWithAuth()
