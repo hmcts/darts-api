@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "2145a42c-a8de-4495-8256-b1353e91a104",
+		"_postman_id": "39b658ff-eee8-43e6-8bcd-f66d924987c4",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -504,7 +504,7 @@
 					"name": "GET",
 					"item": [
 						{
-							"name": "New Request",
+							"name": "GET /hearings/:hearingId",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -521,6 +521,36 @@
 										{
 											"key": "hearingId",
 											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GET events",
+					"item": [
+						{
+							"name": "GET /hearings/:hearingId",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{serverUrl}}/hearings/:hearingId/events",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"hearings",
+										":hearingId",
+										"events"
+									],
+									"variable": [
+										{
+											"key": "hearingId",
+											"value": ""
 										}
 									]
 								}
