@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.authentication.client.impl;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
+import com.nimbusds.oauth2.sdk.Scope;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
 import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
@@ -25,10 +26,13 @@ public class OAuthClientImpl implements OAuthClient {
     public HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
                                          String redirectType, String authCode,
                                          String clientId,
-                                         String authClientSecret) {
+                                         String authClientSecret,
+                                         String scope) {
         AuthorizationCode code = new AuthorizationCode(authCode);
         URI callback = new URI(redirectType);
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
+        Scope authScope = new Scope();
+        authScope.add(scope);
 
         ClientID clientID = new ClientID(clientId);
         Secret clientSecret = new Secret(authClientSecret);
@@ -36,8 +40,7 @@ public class OAuthClientImpl implements OAuthClient {
 
         URI tokenEndpoint = new URI(providerConfigurationProperties.getTokenUri());
 
-        TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant);
-        HTTPResponse response = request.toHTTPRequest().send();
-        return response;
+        TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, codeGrant, authScope);
+        return request.toHTTPRequest().send();
     }
 }

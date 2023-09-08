@@ -21,7 +21,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class AzureDaoImpl implements AzureDao {
 
-    private final OAuthClient azureActiveDirectoryB2CClient;
+    private final OAuthClient azureActiveDirectoryClient;
 
     @Override
     public OAuthProviderRawResponse fetchAccessToken(String code, AuthProviderConfigurationProperties providerConfig,
@@ -34,11 +34,12 @@ public class AzureDaoImpl implements AzureDao {
         }
 
         try {
-            HTTPResponse response = azureActiveDirectoryB2CClient.fetchAccessToken(providerConfig,
+            HTTPResponse response = azureActiveDirectoryClient.fetchAccessToken(providerConfig,
                                                                                    configuration.getRedirectUri(),
                                                                                    code,
                                                                                    configuration.getClientId(),
-                                                                                   configuration.getClientSecret());
+                                                                                   configuration.getClientSecret(),
+                                                                                   configuration.getScope());
             String parsedResponse = response.getContent();
 
             if (HttpStatus.SC_OK != response.getStatusCode()) {
