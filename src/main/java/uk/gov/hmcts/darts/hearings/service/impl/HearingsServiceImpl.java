@@ -7,10 +7,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
+import uk.gov.hmcts.darts.hearings.mapper.GetEventsResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
+import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,4 +31,14 @@ public class HearingsServiceImpl implements HearingsService {
         }
         return GetHearingResponseMapper.map(foundHearingOpt.get());
     }
+
+    @Override
+    public List<EventResponse> getEvents(Integer hearingId) {
+        Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
+        if (foundHearingOpt.isEmpty()) {
+            throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
+        }
+        return GetEventsResponseMapper.mapToEvents(foundHearingOpt.get().getEventList());
+    }
+
 }

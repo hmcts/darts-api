@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -55,7 +56,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (AzureDaoException e) {
             throw new DartsApiException(AuthenticationError.FAILED_TO_OBTAIN_ACCESS_TOKEN, e);
         }
-        var accessToken = tokenResponse.getAccessToken();
+        var accessToken = Objects.nonNull(tokenResponse.getIdToken()) ? tokenResponse.getIdToken() : tokenResponse.getAccessToken();
 
         var validationResult = tokenValidator.validate(accessToken,  configStrategy.getProviderConfiguration(), configStrategy.getConfiguration());
         if (!validationResult.valid()) {

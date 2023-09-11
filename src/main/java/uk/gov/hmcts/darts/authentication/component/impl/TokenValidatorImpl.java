@@ -26,8 +26,6 @@ import java.util.HashSet;
 @Slf4j
 public class TokenValidatorImpl implements TokenValidator {
 
-    private static final String EMAILS_CLAIM_NAME = "emails";
-
     @Override
     public JwtValidationResult validate(String accessToken, AuthProviderConfigurationProperties providerConfig, AuthConfigurationProperties configuration) {
         log.debug("Validating JWT: {}", accessToken);
@@ -52,16 +50,16 @@ public class TokenValidatorImpl implements TokenValidator {
                 JWTClaimNames.EXPIRATION_TIME,
                 JWTClaimNames.ISSUED_AT,
                 JWTClaimNames.SUBJECT,
-                EMAILS_CLAIM_NAME
+                configuration.getClaims()
             ))
         );
         jwtProcessor.setJWTClaimsSetVerifier(claimsVerifier);
 
         try {
-            JWTClaimsSet claimsSet = jwtProcessor.process(accessToken, null);
-            log.debug("Validation successful - emailAddresses: {}", claimsSet.getStringListClaim(EMAILS_CLAIM_NAME));
+            jwtProcessor.process(accessToken, null);
+            log.debug("JWT Token Validation successful");
         } catch (ParseException | JOSEException | BadJOSEException e) {
-            log.debug("Validation failed", e);
+            log.debug("JWT Token Validation failed", e);
             return new JwtValidationResult(false, e.getMessage());
         }
 

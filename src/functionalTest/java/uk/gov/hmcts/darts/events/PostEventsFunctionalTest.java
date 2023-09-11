@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.events;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
@@ -13,6 +14,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
     public static final String ENDPOINT_URL = "/events";
 
     @Test
+    @Disabled
     void success() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)

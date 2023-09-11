@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.util;
+package uk.gov.hmcts.darts.testutils.data;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -13,7 +13,7 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
 
 @UtilityClass
-public class AudioTestDataUtil {
+public class AudioTestData {
 
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                         OffsetDateTime startTime, OffsetDateTime endTime) {
