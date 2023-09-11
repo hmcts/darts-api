@@ -5,7 +5,6 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
-import org.apache.http.client.utils.URIBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +35,7 @@ public class FunctionalTest {
 
     @SneakyThrows
     public String getUri(String endpoint) {
-        return new URIBuilder(baseUri)
-            .setPath(endpoint)
-            .build()
-            .toString();
+        return baseUri + endpoint;
     }
 
     public RequestSpecification buildRequestWithAuth() {
