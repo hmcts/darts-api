@@ -73,7 +73,7 @@ class DailyListServiceImpSaveDailyListTest {
 
         when(courthouseApi.retrieveAndUpdateCourtHouse(anyInt(), anyString())).thenThrow(exception);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
-        when(dailyListMapper.mapToDailyListEntity(
+        when(dailyListMapper.createDailyListEntity(
             any(DailyListPostRequest.class),
             any(CourthouseEntity.class)
         )).thenReturn(new DailyListEntity());

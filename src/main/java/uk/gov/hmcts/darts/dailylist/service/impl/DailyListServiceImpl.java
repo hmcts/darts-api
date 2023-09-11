@@ -66,11 +66,11 @@ public class DailyListServiceImpl implements DailyListService {
         if (existingRecordOpt.isPresent()) {
             //update the record
             savedDailyListEntity = existingRecordOpt.get();
-            dailyListMapper.mapToExistingDailyListEntity(postRequest, courthouse, savedDailyListEntity);
+            dailyListMapper.updateDailyListEntity(postRequest, courthouse, savedDailyListEntity);
             dailyListRepository.saveAndFlush(savedDailyListEntity);
         } else {
             //insert new record
-            savedDailyListEntity = dailyListMapper.mapToDailyListEntity(
+            savedDailyListEntity = dailyListMapper.createDailyListEntity(
                 postRequest,
                 courthouse
             );
@@ -109,7 +109,7 @@ public class DailyListServiceImpl implements DailyListService {
         }
 
         DailyListEntity foundDailyList = foundDailyListOpt.get();
-        dailyListMapper.mapToExistingDailyListEntity(patchRequest, foundDailyList);
+        dailyListMapper.updateDailyListEntity(patchRequest, foundDailyList);
         dailyListRepository.saveAndFlush(foundDailyList);
         try {
             foundDailyList.setContent(objectMapper.writeValueAsString(patchRequest.getDailyListJson()));
