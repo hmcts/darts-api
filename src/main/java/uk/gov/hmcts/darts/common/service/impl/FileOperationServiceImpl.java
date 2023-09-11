@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +24,8 @@ public class FileOperationServiceImpl implements FileOperationService {
     @Override
     public Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
 
-        Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace());
+        Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace())
+            .resolve(UUID.randomUUID().toString());
         Path targetTempFile = targetTempDirectory.resolve(fileName);
 
         try (InputStream audioInputStream = mediaFile.toStream()) {

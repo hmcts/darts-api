@@ -11,6 +11,9 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.util.AudioConstants;
 import uk.gov.hmcts.darts.audio.util.AudioConstants.AudioOperationTypes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalTime;
@@ -26,13 +29,11 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class AudioOperationServiceImpl implements AudioOperationService {
 
-    private static final String STRING_SLASH_STRING_FORMAT = "%s/%s";
-
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SystemCommandExecutor systemCommandExecutor;
 
-    CommandLine generateConcatenateCommand(final Integer channel, final List<AudioFileInfo> audioFileInfos,
-                                           final String outputFilename) {
+    CommandLine generateConcatenateCommand(final List<AudioFileInfo> audioFileInfos,
+                                           final Path outputPath) {
         StringBuilder command = new StringBuilder(audioConfigurationProperties.getFfmpegExecutable());
 
         for (final AudioFileInfo audioFileInfo : audioFileInfos) {
@@ -48,49 +49,49 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         }
 
         command.append(String.format("\"%sconcat=n=%d:v=0:a=1\"", inputFileAudioStreams, concatNumberOfSegments))
-            .append(' ').append(outputFilename);
+            .append(' ').append(outputPath.toString());
 
         return CommandLine.parse(command.toString());
     }
 
     @Override
     public AudioFileInfo concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
+
+        Path basePath = Path.of(audioConfigurationProperties.getConcatWorkspace(), workspaceDir);
 
         Integer channel = getFirstChannel(audioFileInfos);
-        String baseFilePath = String.format(
-            STRING_SLASH_STRING_FORMAT,
-            audioConfigurationProperties.getConcatWorkspace(),
-            workspaceDir
+
+        Path outputPath = generateOutputPath(basePath,
+                                             AudioOperationTypes.CONCATENATE,
+                                             channel,
+                                             AudioConstants.AudioFileFormats.MP2
         );
-        String outputFilename = generateOutputFilename(baseFilePath, AudioOperationTypes.CONCATENATE,
-                                                       channel, AudioConstants.AudioFileFormats.MP2
-        );
-        CommandLine command = generateConcatenateCommand(channel, audioFileInfos, outputFilename);
+
+        CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
         systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             getEarliestStartTime(audioFileInfos),
             getLatestEndTime(audioFileInfos),
-            outputFilename,
+            outputPath.toString(),
             channel
         );
     }
 
     @Override
     public AudioFileInfo merge(final List<AudioFileInfo> audioFilesInfo, String workspaceDir)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
-        String baseFilePath = String.format(
-            STRING_SLASH_STRING_FORMAT,
-            audioConfigurationProperties.getMergeWorkspace(),
-            workspaceDir
+        Path basePath = Path.of(audioConfigurationProperties.getMergeWorkspace(), workspaceDir);
+
+        Path outputPath = generateOutputPath(basePath,
+                                             AudioOperationTypes.MERGE,
+                                             0,
+                                             AudioConstants.AudioFileFormats.MP2
         );
 
         Integer numberOfChannels = audioFilesInfo.size();
-        String outputFilename = generateOutputFilename(baseFilePath, AudioConstants.AudioOperationTypes.MERGE,
-                                                       0, AudioConstants.AudioFileFormats.MP2
-        );
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         for (AudioFileInfo audioFileInfo : audioFilesInfo) {
@@ -98,72 +99,68 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         }
         command.addArgument("-filter_complex")
             .addArgument(String.format("amix=inputs=%d:duration=longest", numberOfChannels))
-            .addArgument(outputFilename);
+            .addArgument(outputPath.toString());
 
         systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             getEarliestStartTime(audioFilesInfo),
             getLatestEndTime(audioFilesInfo),
-            outputFilename,
+            outputPath.toString(),
             0
         );
     }
 
     @Override
     public AudioFileInfo trim(String workspaceDir, AudioFileInfo audioFileInfo, String startTime, String endTime)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
-        String baseFilePath = String.format(
-            STRING_SLASH_STRING_FORMAT,
-            audioConfigurationProperties.getTrimWorkspace(),
-            workspaceDir
-        );
+        Path basePath = Path.of(audioConfigurationProperties.getTrimWorkspace(), workspaceDir);
 
-        String outputFilename = generateOutputFilename(baseFilePath, AudioOperationTypes.TRIM,
-                                                       audioFileInfo.getChannel(), AudioConstants.AudioFileFormats.MP2
+        Path outputPath = generateOutputPath(basePath,
+                                             AudioOperationTypes.TRIM,
+                                             audioFileInfo.getChannel(),
+                                             AudioConstants.AudioFileFormats.MP2
         );
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         command.addArgument("-ss").addArgument(startTime);
         command.addArgument("-to").addArgument(endTime);
-        command.addArgument("-c").addArgument("copy").addArgument(outputFilename);
+        command.addArgument("-c").addArgument("copy").addArgument(outputPath.toString());
 
         systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             adjustTimeDuration(audioFileInfo.getStartTime(), startTime),
             adjustTimeDuration(audioFileInfo.getStartTime(), endTime),
-            outputFilename,
+            outputPath.toString(),
             audioFileInfo.getChannel()
         );
     }
 
     @Override
     public AudioFileInfo reEncode(String workspaceDir, AudioFileInfo audioFileInfo)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
-        String baseFilePath = String.format(
-            STRING_SLASH_STRING_FORMAT,
-            audioConfigurationProperties.getReEncodeWorkspace(),
-            workspaceDir
-        );
+        Path basePath = Path.of(audioConfigurationProperties.getReEncodeWorkspace(), workspaceDir);
 
-        String outputFilename = generateOutputFilename(baseFilePath, AudioOperationTypes.ENCODE,
-                                                       audioFileInfo.getChannel(), AudioConstants.AudioFileFormats.MP3
+        Path outputPath = generateOutputPath(basePath,
+                                             AudioOperationTypes.ENCODE,
+                                             audioFileInfo.getChannel(),
+                                             AudioConstants.AudioFileFormats.MP3
         );
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
-        command.addArgument(outputFilename);
+        command.addArgument(outputPath.toString());
 
         systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
             audioFileInfo.getStartTime(),
             audioFileInfo.getEndTime(),
-            outputFilename,
+            outputPath.toString(),
             audioFileInfo.getChannel()
         );
     }
@@ -201,18 +198,28 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return firstChannelNumber.orElseThrow();
     }
 
-    private String generateOutputFilename(String baseDir, AudioConstants.AudioOperationTypes operationType,
-                                          Integer channel, AudioConstants.AudioFileFormats outputFileFormat) {
-
+    private String generateOutputFilename(AudioConstants.AudioOperationTypes operationType,
+                                          Integer channel,
+                                          AudioConstants.AudioFileFormats outputFileFormat) {
         String currentTimeStamp = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.ENGLISH).format(new Date());
         return String.format(
-            "%s/C%s-%s-%s.%s",
-            baseDir,
+            "C%s-%s-%s.%s",
             channel,
             operationType.name().toLowerCase(Locale.ENGLISH),
             currentTimeStamp,
             outputFileFormat.name().toLowerCase(Locale.ENGLISH)
         );
+    }
+
+    private Path generateOutputPath(Path basePath,
+                                    AudioConstants.AudioOperationTypes operationType,
+                                    Integer channel,
+                                    AudioConstants.AudioFileFormats outputFileFormat) throws IOException {
+        Files.createDirectories(basePath);
+
+        String filename = generateOutputFilename(operationType, channel, outputFileFormat);
+
+        return basePath.resolve(filename);
     }
 
 }
