@@ -4,7 +4,7 @@ servers:
   - url: http://localhost:4550/
 info:
   description: Modernised DARTS (Digital Audio Recording and Transcription Service).
-  version: "0.0.1"
+  version: ${version}
   title: Modernised DARTS
 
 paths:

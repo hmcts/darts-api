@@ -2,7 +2,7 @@ openapi: 3.0.1
 
 info:
 
-  version: 0.0.1
+  version: ${version}
   title: Modernised DARTS
   description: |-
     Modernised DARTS (Digital Audio Recording and Transcription Service).
@@ -127,6 +127,3 @@ components:
         text:
           type: string
           example: Record:New Case
-
-
-
