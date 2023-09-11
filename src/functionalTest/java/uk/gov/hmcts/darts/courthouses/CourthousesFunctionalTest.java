@@ -180,6 +180,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .getBody()
             .jsonPath().get("id");
 
-        return ids.get(ids.size() - 1);
+        int idLen = ids.size();
+        return ids.get(--idLen);
     }
 }
