@@ -31,12 +31,12 @@ public class AuditController implements AuditApi {
     AuditSearchQueryValidator validator;
 
     @Override
-    public ResponseEntity<List<SearchResult>> search(OffsetDateTime fromDate, OffsetDateTime toDate, Integer caseId, Integer eventId) {
+    public ResponseEntity<List<SearchResult>> search(OffsetDateTime fromDate, OffsetDateTime toDate, Integer caseId, Integer auditActivityId) {
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(caseId);
         searchQuery.setFromDate(fromDate);
         searchQuery.setToDate(toDate);
-        searchQuery.setEventId(eventId);
+        searchQuery.setAuditActivityId(auditActivityId);
 
         validate(searchQuery);
         List<AuditEntity> searchResults = auditService.search(searchQuery);
