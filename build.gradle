@@ -11,6 +11,7 @@ plugins {
   id "io.freefair.lombok" version "8.3"
   id "org.openapi.generator" version "7.0.0"
   id "org.flywaydb.flyway" version "9.22.0"
+  id 'maven-publish'
 }
 
 group = 'uk.gov.hmcts'
@@ -64,6 +65,8 @@ configurations {
 
   smokeTestImplementation.extendsFrom testImplementation
   smokeTestRuntimeOnly.extendsFrom runtimeOnly
+
+  openapispecifications
 }
 
 tasks.withType(JavaCompile) {
@@ -134,6 +137,7 @@ jacocoTestReport {
     xml.required = true
     csv.required = false
     html.required = true
+    html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
   }
 }
 
@@ -356,6 +360,28 @@ task migratePostgresDatabase(type: org.flywaydb.gradle.task.FlywayMigrateTask) {
     url = "jdbc:postgresql://${dburl}"
   }
 }
+
+// Add a new jar that will be published to maven with the classifier -openapi
+task openapiJar(type: Jar) {
+  archiveClassifier = 'openapi'
+  from sourceSets.main.resources.filter {
+    File file ->
+      {
+        (file.path.contains("openapi") && file.path.endsWith ("yaml") & !file.isDirectory() )
+      }
+  }
+}
+
+artifacts.add('openapispecifications', openapiJar)
+
+publishing {
+  publications {
+      maven(MavenPublication) {
+        artifact openapiJar
+      }
+    }
+}
+
 
 // set flyway cleanDisabled to true above and uncomment if we require a fresh migration from scratch across all DBs
 // migratePostgresDatabase.dependsOn cleanPostgresDatabase
