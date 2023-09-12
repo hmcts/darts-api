@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.cases;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import jakarta.persistence.Index;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -235,7 +234,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .jsonPath().get("case_id");
 
         int len = ids.size();
-        caseId = len > 0 ? ids.get( --len ) : -1;
+        caseId = len > 0 ? ids.get(--len) : -1;
 
         if (caseId == -1) {
             assertEquals(NOT_FOUND, 404);
@@ -262,7 +261,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .jsonPath().get("id");
 
         int len = hearingIds.size();
-        hearingId = len > 0 ? hearingIds.get( --len ) : -1;
+        hearingId = len > 0 ? hearingIds.get(--len) : -1;
 
         if (hearingId == -1) {
             assertEquals(NOT_FOUND, 404);
