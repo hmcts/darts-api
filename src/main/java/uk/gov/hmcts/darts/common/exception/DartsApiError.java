@@ -16,7 +16,8 @@ public interface DartsApiError {
 
     default URI getType() {
         return URI.create(
-            getErrorTypePrefix());
+            String.format("%s_%s", getErrorTypePrefix(), getErrorTypeNumeric())
+        );
     }
 
 }

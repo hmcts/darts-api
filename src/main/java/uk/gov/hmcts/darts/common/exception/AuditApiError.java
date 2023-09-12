@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.audio.model.AuditErrorCode;
 import uk.gov.hmcts.darts.audio.model.AuditTitleErrors;
 
+import java.net.URI;
+
 @Getter
 @RequiredArgsConstructor
 public enum AuditApiError implements DartsApiError {
@@ -17,7 +19,7 @@ public enum AuditApiError implements DartsApiError {
     DATE_EMPTY(
         AuditErrorCode.AUDIT_DATE_EMPTY.getValue(),
         HttpStatus.BAD_REQUEST,
-        AuditErrorCode.AUDIT_DATE_EMPTY.getValue()
+        AuditTitleErrors.DATE_FILTER_BOTH_MUST_BE_PROVIDED.getValue()
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIT";
@@ -31,4 +33,9 @@ public enum AuditApiError implements DartsApiError {
         return ERROR_TYPE_PREFIX;
     }
 
+    @Override
+    public URI getType() {
+        return URI.create(
+            getErrorTypePrefix());
+    }
 }
