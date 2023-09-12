@@ -54,12 +54,10 @@ public class AudioServiceImpl implements AudioService {
             Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
 
             AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
-            String workspaceDir = downloadPath.toFile().getParent();
 
             AudioFileInfo encodedAudioFileInfo;
-
             try {
-                encodedAudioFileInfo = audioOperationService.reEncode(workspaceDir, audioFileInfo);
+                encodedAudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), audioFileInfo);
             } catch (ExecutionException | InterruptedException e) {
                 // For Sonar rule S2142
                 throw e;
