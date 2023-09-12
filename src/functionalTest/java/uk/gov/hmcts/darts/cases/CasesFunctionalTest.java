@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 class CasesFunctionalTest  extends FunctionalTest {
     public static final String CASES_URI = "/cases";
+    public static final String ENDPOINT_URL = "/events";
     public static final String SEARCH = "/search";
     public static final String HEARINGS = "/hearings";
     public static final String EVENTS = "/events";
@@ -30,7 +31,6 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final String CASE_ID = "/41";
     public static final String CASE_BAD_ID = "/0";
     public static final String HEARING_ID = "/1";
-
 
 
 
@@ -65,10 +65,41 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(CREATED, response.statusCode());
     }
 
+    @Test
+    @Order(2)
+    void createEvent() {
+        Response response = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(EVENTS))
+            .body("""
+                      {
+                          "message_id": "54321",
+                          "type": "1000",
+                          "sub_type": "1002",
+                          "event_id": "12345",
+                          "courthouse": "LEEDS",
+                          "courtroom": "ROOM_A",
+                          "case_numbers": [
+                            "CASE1002"
+                          ],
+                          "event_text": "Functional Test Setup",
+                          "date_time": "2023-09-12T12:57:18.596Z",
+                          "retention_policy": {
+                            "case_retention_fixed_policy": "unknown",
+                            "case_total_sentence": "unknown"
+                          }
+                        }""")
+            .post()
+            .then()
+            .extract().response();
+
+        assertEquals(CREATED, response.statusCode());
+    }
+
 
     @Test
-    @Disabled
-    @Order(2)
+    @Order(3)
     void getAllCases() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -86,7 +117,7 @@ class CasesFunctionalTest  extends FunctionalTest {
 
 
     @Test
-    @Order(3)
+    @Order(4)
     void getExistingCase() {
         int caseId = getCaseId();
         Response response = buildRequestWithAuth()
@@ -101,8 +132,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Disabled
-    @Order(4)
+    @Order(5)
     void getCaseBadRequest() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -116,7 +146,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void patchCase() {
         int caseId = getCaseId();
         Response response = buildRequestWithAuth()
@@ -125,7 +155,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .baseUri(getUri(CASES_URI + "/" + caseId))
             .body("""
                       {
-                        "retain_until": "2023-10-07T11:49:44.618Z"
+                        "retain_until": "2023-11-07T11:49:44.618Z"
                       }
                       """)
             .patch()
@@ -136,7 +166,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     void searchCase() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -158,14 +188,13 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Disabled
-    @Order(7)
+    @Order(8)
     void getCaseHearing() {
         int caseId = getCaseId();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(CASES_URI + "/" + caseId + "/" + HEARINGS))
+            .baseUri(getUri(CASES_URI + "/" + caseId + HEARINGS))
             .get()
             .then()
             .extract().response();
@@ -174,13 +203,13 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Disabled
-    @Order(8)
+    @Order(9)
     void getCaseHearingEvents() {
+        int hearingId = getCaseHearingId();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(CASES_URI + HEARINGS + HEARING_ID + EVENTS))
+            .baseUri(getUri(CASES_URI + HEARINGS + "/" + hearingId + EVENTS))
             .get()
             .then()
             .extract().response();
@@ -193,7 +222,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_URI + SEARCH))
-            .param("case_number","CA")
+            .param("case_number","CASE1002")
             .get()
             .then()
             .extract()
@@ -204,5 +233,24 @@ class CasesFunctionalTest  extends FunctionalTest {
         int len = ids.size();
         len = len > 0 ? --len : len;
         return ids.get(len);
+    }
+
+
+    Integer getCaseHearingId() {
+        int caseId = getCaseId();
+        List<Integer> hearingIds = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_URI + "/" + caseId + HEARINGS))
+            .get()
+            .then()
+            .extract()
+            .response()
+            .getBody()
+            .jsonPath().get("id");
+
+        int len = hearingIds.size();
+        len = len > 0 ? --len : len;
+        return hearingIds.get(len);
     }
 }
