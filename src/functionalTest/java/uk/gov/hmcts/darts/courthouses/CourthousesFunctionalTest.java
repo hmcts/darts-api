@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.courthouses;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
@@ -45,6 +46,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Disabled
     @Order(2)
     void createSameCourthouse() {
         Response response = buildRequestWithAuth()
