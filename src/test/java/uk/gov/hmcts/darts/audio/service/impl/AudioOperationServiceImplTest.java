@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AudioOperationServiceImplTest {
 
-    private static final String WORKSPACE_DIR = "requestId";
+    private static final String WORKSPACE_DIR = "44887a8c-d918-4907-b9e8-38d5b1bf9c9c";
     private static final String T_09_00_00_Z = "2023-04-28T09:00:00Z";
     private static final String T_10_30_00_Z = "2023-04-28T10:30:00Z";
     private static final String T_11_00_00_Z = "2023-04-28T11:00:00Z";
@@ -110,7 +110,7 @@ class AudioOperationServiceImplTest {
             inputAudioFileInfos
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/requestId/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
@@ -127,7 +127,7 @@ class AudioOperationServiceImplTest {
             WORKSPACE_DIR
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/requestId/C0-merge-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C0-merge-[0-9]*.mp2"));
         assertEquals(0, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
@@ -156,7 +156,7 @@ class AudioOperationServiceImplTest {
             "01:15:00"
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/requestId/C[1-4]-trim-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-trim-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse("2023-04-28T09:45:00Z"), audioFileInfo.getStartTime());
         assertEquals(Instant.parse("2023-04-28T10:15:00Z"), audioFileInfo.getEndTime());
@@ -220,7 +220,7 @@ class AudioOperationServiceImplTest {
             inputAudioFileInfos.get(0)
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/requestId/C[0-4]-encode-[0-9]*.mp3"));
+        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[0-4]-encode-[0-9]*.mp3"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.getEndTime());
