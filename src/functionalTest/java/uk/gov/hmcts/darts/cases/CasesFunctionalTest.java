@@ -205,23 +205,4 @@ class CasesFunctionalTest  extends FunctionalTest {
         len = len > 0 ? --len : len;
         return ids.get(len);
     }
-
-    private String getCaseNumber() {
-        List<String> ids = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_URI))
-            .param(COURTHOUSE, COURTHOUSE1)
-            .param(COURTROOM, COURTHOUSE_ROOM)
-            .param(CASE_DATE, DATE1)
-            .get()
-            .then()
-            .extract()
-            .response()
-            .getBody()
-            .jsonPath().get("case_number");
-
-        int len = ids.size();
-        return ids.get(--len);
-    }
 }
