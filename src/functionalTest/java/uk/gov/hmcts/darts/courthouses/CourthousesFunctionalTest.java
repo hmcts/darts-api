@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.courthouses;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
@@ -29,6 +30,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
 
     @Test
+    @Order(1)
     void createCourthouse() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -39,12 +41,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(CREATED, response.statusCode());
     }
 
     @Test
+    @Order(2)
     void createSameCourthouse() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -55,12 +56,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(RESOURCE_ALREADY_EXISTS, response.statusCode());
     }
 
     @Test
+    @Order(3)
     void updateCourthouse() {
         int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithAuth()
@@ -72,12 +72,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(NO_CONTENT, response.statusCode());
     }
 
     @Test
+    @Order(4)
     void updateCourthouseWithInvalidBody() {
         int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithAuth()
@@ -89,12 +88,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(BAD_REQUEST, response.statusCode());
     }
 
     @Test
+    @Order(5)
     void deleteCourthouse() {
         int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithAuth()
@@ -105,12 +103,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(NO_CONTENT, response.statusCode());
     }
 
     @Test
+    @Order(6)
     void getAllCourthouses() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -120,12 +117,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
 
     @Test
+    @Order(7)
     void getExistingCourthouse() {
         int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithAuth()
@@ -136,14 +132,13 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
 
 
 
     @Test
+    @Order(8)
     void getCourthouseIdDoesNotExist() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -153,18 +148,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(NOT_FOUND, response.statusCode());
-    }
-
-    private static void printDebug(Response response) {
-        log.debug("<=========================COURTHOUSES-HEADERS==================================>");
-        log.debug("HEADERS: " + response.getHeaders());
-        log.debug("<=========================COURTHOUSES-HEADERS==================================>");
-        log.debug("<=========================COURTHOUSES-BODY=====================================>");
-        log.debug("BODY: " + response.getBody().prettyPrint());
-        log.debug("<=========================COURTHOUSES-BODY======================================>");
     }
 
 
