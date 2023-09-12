@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.common.exception;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.darts.audio.model.AuditErrorCode;
-import uk.gov.hmcts.darts.audio.model.AuditTitleErrors;
+import uk.gov.hmcts.darts.audit.model.AuditErrorCode;
+import uk.gov.hmcts.darts.audit.model.AuditTitleErrors;
 
 import java.net.URI;
 
