@@ -11,6 +11,7 @@ plugins {
   id "io.freefair.lombok" version "8.3"
   id "org.openapi.generator" version "7.0.0"
   id "org.flywaydb.flyway" version "9.22.0"
+  id("com.dorongold.task-tree") version "2.1.1"
 }
 
 jacoco {
@@ -204,6 +205,7 @@ project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 jacocoTestReport.dependsOn check
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
 
 sonarqube {
   properties {
