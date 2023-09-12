@@ -13,6 +13,11 @@ plugins {
   id "org.flywaydb.flyway" version "9.22.0"
 }
 
+jacoco {
+  toolVersion = "0.8.9"
+  reportsDirectory.set(layout.buildDirectory.dir("jacocoHtml"))
+}
+
 group = 'uk.gov.hmcts'
 version = '0.0.1'
 
@@ -128,30 +133,83 @@ pmd {
   ruleSetFiles = files("config/pmd/test-ruleset.xml")
 }
 
+
+def coverageExclusions = [
+  '**/uk/gov/hmcts/darts/common/entity/**',
+  '**/uk/gov/hmcts/darts/**/model/**',
+  '**/uk/gov/hmcts/darts/**/config/**',
+  '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java',
+  '**/uk/gov/hmcts/darts/notification/NotificationConstants.java',
+  '**/uk/gov/hmcts/darts/cases/CasesConstants.java',
+  '**/uk/gov/hmcts/darts/cases/CasesConstants$GetCasesParams.java',
+  '**/uk/gov/hmcts/darts/cases/CasesConstants$GetSearchCasesParams.java',
+  '**/uk/gov/hmcts/darts/notification/NotificationConstants$ParameterMapValues.java',
+  '**/uk/gov/hmcts/darts/cases/api**',
+  '**/uk/gov/hmcts/darts/dailylist/api**',
+  '**/uk/gov/hmcts/darts/courthouse/api**',
+  '**/uk/gov/hmcts/darts/audio/api**',
+  '**/uk/gov/hmcts/darts/hearings/api**',
+  '**/uk/gov/hmcts/darts/audit/api**',
+  '**/uk/gov/hmcts/darts/event/api**',
+  '**/uk/gov/hmcts/darts/audiorequests/api**',
+]
+
 jacocoTestReport {
   executionData(test, integration)
   reports {
     xml.required = true
     csv.required = false
-    html.required = true
+    html.outputLocation.set(layout.buildDirectory.dir("jacocoHtml"))
+  }
+  afterEvaluate {
+    classDirectories.setFrom(files(classDirectories.files.collect {
+      fileTree(dir: it, exclude:  jacocoExclusionArray(coverageExclusions)
+      )
+    }))
+  }
+}
+
+static String[] jacocoExclusionArray(ArrayList<String> exclusions)
+{
+    final def lst = new ArrayList<String>();
+
+    exclusions.stream().forEach {it.endsWith(".java") ? lst.add(it.replace(".java", ".class")) : lst.add(it)}
+
+  return lst.toArray();
+}
+
+tasks.jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      limit {
+        minimum = "0.8".toBigDecimal()
+      }
+    }
+
+    rule {
+      enabled = true
+      element = "CLASS"
+      includes = Arrays.asList(new String[] {"uk.gov.hmcts.darts.*"})
+
+      limit {
+        counter = "LINE"
+        value = "TOTALCOUNT"
+        maximum = "0.8".toBigDecimal()
+      }
+    }
   }
 }
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
-def sonarExclusions = [
-  '**/uk/gov/hmcts/darts/common/entity/**',
-  '**/uk/gov/hmcts/darts/**/model/**',
-  '**/uk/gov/hmcts/darts/**/config/**',
-  '**/uk/gov/hmcts/darts/authentication/util/AuthenticationType.java'
-]
+jacocoTestReport.dependsOn check
 
 sonarqube {
   properties {
     property "sonar.projectName", "Reform :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
-    property "sonar.exclusions", sonarExclusions.join(', ')
+    property "sonar.exclusions", coverageExclusions.join(', ')
     property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*"
   }
 }

@@ -97,6 +97,18 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
+### Jacoco Coverage Report
+
+A local jacoco coverage report can be generated using the following command:-
+
+```bash
+  ./gradlew jacocoTestReport
+```
+
+The report will be available under ./build/jacocoHtml/index.html. The report incorporates both unit test
+and integration test coverage
+
+
 ### Running the application in docker
 
 Create the image of the application by executing the following command:
@@ -181,6 +193,3 @@ The following Spring Profiles are defined. "External Components" are defined as 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-
-
