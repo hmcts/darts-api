@@ -231,7 +231,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .jsonPath().get("case_id");
 
         int len = ids.size();
-        len = len > 0 ? --len : len;
+        len = len > 1 ? --len : 0;
         return ids.get(len);
     }
 
@@ -250,7 +250,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .jsonPath().get("id");
 
         int len = hearingIds.size();
-        len = len > 0 ? --len : len;
+        len = len > 1 ? --len : 0;
         return hearingIds.get(len);
     }
 }
