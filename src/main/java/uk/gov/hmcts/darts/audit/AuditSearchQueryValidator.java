@@ -16,7 +16,7 @@ public class AuditSearchQueryValidator implements Validator {
     public void validate(Object target, Errors errors) {
         AuditSearchQuery auditSearchQuery = (AuditSearchQuery) target;
         if (auditSearchQuery.getCaseId() == null
-            && auditSearchQuery.getEventId() == null
+            && auditSearchQuery.getAuditActivityId() == null
             && auditSearchQuery.getFromDate() == null
             && auditSearchQuery.getToDate() == null) {
             throw new DartsApiException(AuditApiError.FILTERS_WERE_EMPTY);

@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -43,7 +44,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     public List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
                                                              OffsetDateTime overallStartTime,
                                                              OffsetDateTime overallEndTime)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
         List<List<AudioFileInfo>> groupedAudioSessions = new ArrayList<>();
@@ -69,7 +70,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     public AudioFileInfo processAudioForPlayback(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
                                                  OffsetDateTime startTime,
                                                  OffsetDateTime endTime)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
         List<AudioFileInfo> concatenatedAudios = concatenateByChannel(audioFileInfos);
@@ -127,7 +128,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     }
 
     private List<AudioFileInfo> concatenateByChannel(List<AudioFileInfo> audioFileInfos)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
         Map<Integer, List<AudioFileInfo>> audioFileInfosByChannel = audioFileInfos.stream()
             .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
 
@@ -153,13 +154,14 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     }
 
     private AudioFileInfo merge(List<AudioFileInfo> audioFileInfos)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         return audioOperationService.merge(audioFileInfos, StringUtils.EMPTY);
     }
 
     private AudioFileInfo trimToPeriod(AudioFileInfo audioFileInfo, OffsetDateTime trimPeriodStart,
-                                       OffsetDateTime trimPeriodEnd) throws ExecutionException, InterruptedException {
+                                       OffsetDateTime trimPeriodEnd)
+        throws ExecutionException, InterruptedException, IOException {
         var audioFileStartTime = audioFileInfo.getStartTime();
 
         var trimStartDuration = Duration.between(audioFileStartTime, trimPeriodStart);
@@ -183,7 +185,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
     }
 
     private List<AudioFileInfo> trimAllToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,
-                                                OffsetDateTime end) throws ExecutionException, InterruptedException {
+                                                OffsetDateTime end)
+        throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> processedAudios = new ArrayList<>();
         for (AudioFileInfo audioFileInfo : audioFileInfos) {
             AudioFileInfo trimmedAudio = trimToPeriod(audioFileInfo, start, end);
@@ -193,7 +196,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return processedAudios;
     }
 
-    private AudioFileInfo reEncode(AudioFileInfo audioFileInfo) throws ExecutionException, InterruptedException {
+    private AudioFileInfo reEncode(AudioFileInfo audioFileInfo)
+        throws ExecutionException, InterruptedException, IOException {
         return audioOperationService.reEncode(StringUtils.EMPTY, audioFileInfo);
     }
 
