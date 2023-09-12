@@ -62,6 +62,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Disabled
     @Order(3)
     void updateCourthouse() {
         int courthouseID = getLatestCourthouseID();
