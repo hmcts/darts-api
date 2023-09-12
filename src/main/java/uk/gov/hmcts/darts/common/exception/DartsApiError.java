@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import java.net.URI;
 
 public interface DartsApiError {
-    
+
     String getErrorTypePrefix();
 
     String getErrorTypeNumeric();
@@ -16,8 +16,7 @@ public interface DartsApiError {
 
     default URI getType() {
         return URI.create(
-            String.format("%s_%s", getErrorTypePrefix(), getErrorTypeNumeric())
-        );
+            getErrorTypePrefix());
     }
 
 }

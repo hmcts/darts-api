@@ -189,3 +189,27 @@ components:
         media_end_timestamp:
           type: string
           format: date-time
+
+    AuditErrorCode:
+      type: string
+      enum:
+        - "AUDIT_100"
+        - "AUDIT_200"
+      x-enum-varnames: [AUDIT_FILTERS_WERE_EMPTY, AUDIT_DATE_EMPTY]
+
+    AuditTitleErrors:
+      type: string
+      enum:
+        - "All filters were empty."
+        - "When using date filters, both must be provided."
+      x-enum-varnames:
+        - FILTER_WAS_EMPTY
+        - DATE_FILTER_BOTH_MUST_BE_PROVIDED
+
+    AuditResponse:
+      type: object
+      properties:
+        errorType:
+          type: AuditErrorCode
+        title:
+          type: AuditTitle
