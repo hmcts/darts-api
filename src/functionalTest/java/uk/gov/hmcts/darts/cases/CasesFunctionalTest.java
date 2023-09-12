@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.cases;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import jakarta.persistence.Index;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -114,11 +115,11 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(OK, response.statusCode());
     }
 
-
     @Test
     @Order(4)
     void getExistingCase() {
         int caseId = getCaseId();
+
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -205,6 +206,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Order(9)
     void getCaseHearingEvents() {
         int hearingId = getCaseHearingId();
+
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -216,7 +218,10 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(OK, response.statusCode());
     }
 
+    @Test
+    @Order(10)
     public int getCaseId() {
+        int caseId = 0;
         List<Integer> ids = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -230,13 +235,21 @@ class CasesFunctionalTest  extends FunctionalTest {
             .jsonPath().get("case_id");
 
         int len = ids.size();
-        len = len > 1 ? --len : 0;
-        return ids.get(len);
+        caseId = len > 0 ? ids.get( --len ) : -1;
+
+        if (caseId == -1) {
+            assertEquals(NOT_FOUND, 404);
+        }
+
+        return caseId;
     }
 
-
+    @Test
+    @Order(11)
     Integer getCaseHearingId() {
+        int hearingId = 0;
         int caseId = getCaseId();
+
         List<Integer> hearingIds = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -249,7 +262,12 @@ class CasesFunctionalTest  extends FunctionalTest {
             .jsonPath().get("id");
 
         int len = hearingIds.size();
-        len = len > 1 ? --len : 0;
-        return hearingIds.get(len);
+        hearingId = len > 0 ? hearingIds.get( --len ) : -1;
+
+        if (hearingId == -1) {
+            assertEquals(NOT_FOUND, 404);
+        }
+
+        return hearingId;
     }
 }
