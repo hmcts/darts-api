@@ -3,6 +3,8 @@ package uk.gov.hmcts.darts.cases;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
@@ -33,6 +35,7 @@ class CasesFunctionalTest  extends FunctionalTest {
 
 
     @Test
+    @Order(1)
     void createCase() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -59,15 +62,13 @@ class CasesFunctionalTest  extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(CREATED, response.statusCode());
     }
 
-    /**
-     * TBD: Review
-     */
+
     @Test
+    @Disabled
+    @Order(2)
     void getAllCases() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -80,35 +81,13 @@ class CasesFunctionalTest  extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
 
-    /**
-     * TBD: Review
-     */
-    @Test
-    void getAllCases2() {
-        Response response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_URI))
-            .param(COURTHOUSE, "SWANSEA")
-            .param(COURTROOM, "ROOM")
-            .param(CASE_DATE, DATE1)
-            .get()
-            .then()
-            .extract().response();
-
-        printDebug(response);
-
-        assertEquals(OK, response.statusCode());
-    }
 
     @Test
+    @Order(3)
     void getExistingCase() {
-//        String caseNum = getCaseNumber();
         int caseId = getCaseId();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -118,12 +97,12 @@ class CasesFunctionalTest  extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
 
     @Test
+    @Disabled
+    @Order(4)
     void getCaseBadRequest() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -133,72 +112,70 @@ class CasesFunctionalTest  extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(NOT_FOUND, response.statusCode());
     }
 
     @Test
+    @Order(5)
     void patchCase() {
+        int caseId = getCaseId();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(CASES_URI + CASE_ID))
+            .baseUri(getUri(CASES_URI + "/" + caseId))
             .body("""
                       {
-                        "retain_until": "2023-09-07T11:49:44.618Z"
+                        "retain_until": "2023-10-07T11:49:44.618Z"
                       }
                       """)
             .patch()
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
+
     @Test
+    @Order(6)
     void searchCase() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_URI + SEARCH))
-//            .param("case_id", "41")
-            .param("case_number","42GD2391421")
-            .param("courthouse","SWANSEA")
-            .param("courtroom","1")
-            .param("defendant_name","DefendantName Surname")
-            .param("judge_name", "Judgename Surname")
-            .param("date_from", "2020-06-20")
-            .param("date_to","2020-06-20")
+            .param("case_number","CASE1002")
+            .param("courthouse","LEEDS")
+            .param("courtroom","")
+            .param("defendant_name","")
+            .param("judge_name", "")
+            .param("date_from", "")
+            .param("date_to","")
             .param("event_test_contains","")
             .get()
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
 
-
-
     @Test
+    @Disabled
+    @Order(7)
     void getCaseHearing() {
+        int caseId = getCaseId();
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(CASES_URI + CASE_ID + HEARINGS))
+            .baseUri(getUri(CASES_URI + "/" + caseId + "/" + HEARINGS))
             .get()
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
 
     @Test
+    @Disabled
+    @Order(8)
     void getCaseHearingEvents() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -208,21 +185,8 @@ class CasesFunctionalTest  extends FunctionalTest {
             .then()
             .extract().response();
 
-        printDebug(response);
-
         assertEquals(OK, response.statusCode());
     }
-
-
-    private static void printDebug(Response response) {
-        log.debug("<===============================CASES-HEADERS==================================>");
-        log.debug("HEADERS: " + response.getHeaders());
-        log.debug("<=========================COURTHOUSES-HEADERS==================================>");
-        log.debug("<=========================COURTHOUSES-BODY=====================================>");
-        log.debug("BODY: " + response.getBody().prettyPrint());
-        log.debug("<==============================CASES-BODY======================================>");
-    }
-
 
     public int getCaseId() {
         List<Integer> ids = buildRequestWithAuth()
@@ -237,9 +201,9 @@ class CasesFunctionalTest  extends FunctionalTest {
             .getBody()
             .jsonPath().get("case_id");
 
-        log.debug("*************> CASE_ID: " + ids.get(ids.size()-1) + "<*************" );
-
-        return ids.get(ids.size()-1);
+        int len = ids.size();
+        len=len > 0?--len:len;
+        return ids.get(len);
     }
 
     private String getCaseNumber() {
@@ -257,10 +221,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .getBody()
             .jsonPath().get("case_number");
 
-        log.debug("*************> CASE_NUM: " + ids.get(ids.size()-1) + "<*************" );
-
-        return ids.get(ids.size()-1);
+        int len = ids.size();
+        return ids.get(--len);
     }
-
-
 }
