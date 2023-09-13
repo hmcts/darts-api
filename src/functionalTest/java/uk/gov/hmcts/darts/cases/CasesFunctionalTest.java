@@ -279,7 +279,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     private static int getIdFromList(List<Integer> listIds) {
         int listId;
         int len;
-        if(!listIds.isEmpty()) {
+        if (!listIds.isEmpty()) {
             len = listIds.size();
             listId = listIds.get(--len);
         } else {
