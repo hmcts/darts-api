@@ -33,7 +33,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         @Parameter(name = "audio_request_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("audio_request_id") Integer audioRequestId
     ) {
         mediaRequestService.deleteAudioRequest(audioRequestId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.common.enums.WorkflowStageEnum;
+import uk.gov.hmcts.darts.common.enums.TranscriptionWorkflowStageEnum;
 
 @Entity
 @Table(name = "transcription_workflow")
@@ -34,7 +34,7 @@ public class TranscriptionWorkflowEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "workflow_stage", nullable = false)
     @Enumerated(EnumType.STRING)
-    private WorkflowStageEnum workflowStage;
+    private TranscriptionWorkflowStageEnum workflowStage;
 
     @Column(name = "workflow_comment")
     private String workflowComment;

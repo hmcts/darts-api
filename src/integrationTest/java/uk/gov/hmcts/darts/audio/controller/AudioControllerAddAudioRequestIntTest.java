@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
 
-    private static final URI ENDPOINT = URI.create("/audio/request");
+    private static final URI ENDPOINT = URI.create("/audio-requests");
     private static final AudioRequestType AUDIO_REQUEST_TYPE = AudioRequestType.PLAYBACK;
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");

@@ -1,0 +1,63 @@
+openapi: 3.0.1
+
+servers:
+  - url: http://localhost:4550/
+
+info:
+  description: Modernised DARTS (Digital Audio Recording and Transcription Service).
+  version: ${version}
+  title: Modernised DARTS
+
+paths:
+  /transcriptions:
+    post:
+      tags:
+        - Transcription
+      summary: Users can request transcription
+      operationId: requestTranscription
+      description: Adds a user transcription request for processing
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Failed to validate transcription request
+        '404':
+          description: Resource with the provided id does not exist.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranscriptionRequestDetails'
+        description: Transcription Request item to add
+components:
+  schemas:
+    TranscriptionRequestDetails:
+      type: object
+      required:
+        - urgency_id
+        - transcription_type_id
+      properties:
+        hearing_id:
+          type: integer
+          example: 1234
+        case_id:
+          type: integer
+          example: 4567
+        urgency_id:
+          type: integer
+          example: 2
+        transcription_type_id:
+          type: integer
+          example: 3
+        comment:
+          type: string
+          example: 'Please expedite my transcription request'
+        start_date_time:
+          type: string
+          format: date-time
+          example: '2023-07-31T14:32:24.000Z'
+        end_date_time:
+          type: string
+          format: date-time
+          example: '2023-07-31T14:32:24.000Z'
+
