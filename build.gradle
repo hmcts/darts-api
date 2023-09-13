@@ -388,8 +388,6 @@ publishing {
 task updateOpenSpecificationsWithVersion() {
 
   doLast {
-    println("HITS!!!");
-
     def fileDir = "$projectDir/src/main/resources/openapi/"
 
     File openFile = new File(fileDir)
