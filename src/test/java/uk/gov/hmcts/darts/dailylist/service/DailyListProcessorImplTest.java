@@ -482,6 +482,36 @@ class DailyListProcessorImplTest {
     }
 
     @Test
+    void processDailyListWithInvalidXmlContent() {
+
+        CourthouseEntity swansea = CommonTestDataUtil.createCourthouse(SWANSEA);
+        swansea.setId(1);
+
+        CourtroomEntity swanseaCourtroom = CommonTestDataUtil.createCourtroom(swansea, COURTROOM);
+        swansea.setCourtrooms(List.of(swanseaCourtroom));
+
+        List<CourthouseEntity> courthouses = List.of(swansea);
+
+        Mockito.when(courthouseRepository.findAll()).thenReturn(courthouses);
+
+        DailyListEntity invalidDailyList = CommonTestDataUtil.createInvalidXmlDailyList(LocalTime.now());
+        Mockito.when(dailyListRepository
+                         .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+            .thenReturn(List.of(invalidDailyList));
+
+        Mockito.when(dailyListRepository
+                         .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
+                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+            .thenReturn(Collections.emptyList());
+
+        dailyListProcessor.processAllDailyLists(LocalDate.now());
+
+        Mockito.verify(hearingRepository, Mockito.never()).saveAndFlush(hearingEntityArgumentCaptor.capture());
+        assertEquals(String.valueOf(JobStatusType.FAILED), invalidDailyList.getStatus());
+    }
+
+    @Test
     void processSingleDailyListsForSingleCourthouse() throws IOException {
 
         CourthouseEntity swansea = CommonTestDataUtil.createCourthouse(SWANSEA);

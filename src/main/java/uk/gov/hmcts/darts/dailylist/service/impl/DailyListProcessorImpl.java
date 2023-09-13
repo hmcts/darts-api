@@ -77,7 +77,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 if (!dailyLists.isEmpty()) {
                     try {
                         processDailyList(dailyLists.get(0));
-                    } catch (JsonProcessingException e) {
+                    } catch (JsonProcessingException | IllegalArgumentException e) {
                         dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
                         log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}",
                                   courthouse.getCourthouseName(), dailyLists.get(0).getId(), e
@@ -101,7 +101,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
     }
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
-    private void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException {
+    private void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException, IllegalArgumentException {
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
 
@@ -136,7 +136,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             } else {
                 statusType = JobStatusType.PARTIALLY_PROCESSED;
                 log.error("Unregistered courthouse " + courtHouseName + " daily list entry with id "
-                          + dailyListEntity.getId() + " has not been processed");
+                              + dailyListEntity.getId() + " has not been processed");
             }
         }
         dailyListEntity.setStatus(statusType.name());
@@ -150,7 +150,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 return getTimeFromTimeMarkingNote(timeMarkingNoteText);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field TimeMarkingNote with value: "
-                         + timeMarkingNoteText, dateTimeException);
+                             + timeMarkingNoteText, dateTimeException);
             }
         }
 
@@ -159,7 +159,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                 return getTimeFromSittingAt(sitting);
             } catch (DateTimeException dateTimeException) {
                 log.warn("Ignore error and continue, Parsing failed for field SittingAt with value: "
-                         + sitting.getSittingAt(), dateTimeException);
+                             + sitting.getSittingAt(), dateTimeException);
             }
         }
         return null;
