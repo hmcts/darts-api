@@ -36,6 +36,8 @@ import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -91,6 +93,8 @@ public class DartsDatabaseStub {
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
 
@@ -104,6 +108,8 @@ public class DartsDatabaseStub {
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
+        transcriptionWorkflowRepository.deleteAll();
+        transcriptionRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         mediaRequestRepository.deleteAll();

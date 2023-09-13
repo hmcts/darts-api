@@ -25,20 +25,22 @@ public class HearingsServiceImpl implements HearingsService {
 
     @Override
     public GetHearingResponse getHearings(Integer hearingId) {
+        HearingEntity foundHearing = getHearingById(hearingId);
+        return GetHearingResponseMapper.map(foundHearing);
+    }
+
+    public HearingEntity getHearingById(Integer hearingId) {
         Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
         if (foundHearingOpt.isEmpty()) {
             throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
         }
-        return GetHearingResponseMapper.map(foundHearingOpt.get());
+        return foundHearingOpt.get();
     }
 
     @Override
     public List<EventResponse> getEvents(Integer hearingId) {
-        Optional<HearingEntity> foundHearingOpt = hearingRepository.findById(hearingId);
-        if (foundHearingOpt.isEmpty()) {
-            throw new DartsApiException(HearingApiError.HEARING_NOT_FOUND);
-        }
-        return GetEventsResponseMapper.mapToEvents(foundHearingOpt.get().getEventList());
+        HearingEntity foundHearing = getHearingById(hearingId);
+        return GetEventsResponseMapper.mapToEvents(foundHearing.getEventList());
     }
 
 }
