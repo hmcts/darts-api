@@ -18,8 +18,8 @@ group = 'uk.gov.hmcts'
 version = '0.0.1'
 
 compileJava   {
-  sourceCompatibility = '1.8'
-  targetCompatibility = '1.8'
+  sourceCompatibility = '1.17'
+  targetCompatibility = '1.17'
 }
 
 java {
