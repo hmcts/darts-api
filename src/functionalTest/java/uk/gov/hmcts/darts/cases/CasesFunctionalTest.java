@@ -7,7 +7,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
+import java.math.BigInteger;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -19,72 +21,67 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final String EVENTS = "/events";
     public static final String COURTHOUSE = "courthouse";
     public static final String COURTROOM = "courtroom";
+    public static final String CASE_NUMBER = "case_number";
+    public static final String CASE_NUMBERS = "case_numbers";
     public static final String CASE_DATE = "date";
     public static final String COURTHOUSE1 = "LEEDS";
     public static final String COURTHOUSE_ROOM = "ROOM_A";
     public static final String DATE1 = "2023-09-12";
+    public static final String CASE_BAD_ID = "/0";
+    public static final String JUDGE_NAME = "judge_name";
+    public static final String CASE_ID = "case_id";
+    public static final String ID = "id";
+    public static final String DEFENDANT_NAME = "defendant_name";
+    public static final String DATE_FROM = "date_from";
+    public static final String DATE_TO = "date_to";
+    public static final String EVENT_TEST_CONTAINS = "event_test_contains";
     public static final int NOT_FOUND = 404;
     public static final int OK = 200;
     public static final int CREATED = 201;
-    public static final String CASE_BAD_ID = "/0";
 
 
     @Test
     @Order(1)
-    void createCase() {
-        Response response = buildRequestWithAuth()
+    void createCaseAndEvent() {
+        String uniqueCaseNum = generateUniquesCaseNum();
+
+        String casePayload = "{ \"" + COURTHOUSE + "\" : \"LEEDS\",\"" + CASE_NUMBER + "\" : \"" + uniqueCaseNum + "\",\"defendants\": [\"defendantC\"],\"judges\": [\"judgeC\"],\"prosecutors\": [\"prosecutorC\"],\"defenders\": [\"defenderC\"]}";
+
+        Response caseResponse = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_URI))
-            .body("""
-                      {
-                      "courthouse": "LEEDS",
-                        "case_number": "CASE1002",
-                        "defendants": [
-                          "defendantB"
-                        ],
-                        "judges": [
-                          "judgeB"
-                        ],
-                        "prosecutors": [
-                          "prosecuterB"
-                        ],
-                        "defenders": [
-                          "defenderB"
-                        ]
-                        }""")
+            .body(casePayload)
             .post()
             .then()
             .extract().response();
 
-        assertEquals(CREATED, response.statusCode());
+        assertEquals(CREATED, caseResponse.statusCode());
+
+        String eventsPayload = "{\"message_id\": \"54321\",\"type\": \"1000\",\"sub_type\": \"1002\",\"event_id\": \"12345\",\"" + COURTHOUSE + "\": \"" + COURTHOUSE1 + "\",\"" + COURTROOM + "\" : \"" + COURTHOUSE_ROOM + "\",\"" + CASE_NUMBERS + "\": [\"" + uniqueCaseNum + "\"],\"event_text\": \"FunctionalTestSetup2\",\"date_time\": \"2023-09-12T12:57:18.596Z\",\"retention_policy\": {\"case_retention_fixed_policy\": \"unknown\",\"case_total_sentence\": \"unknown\"}}";
+        Response eventResponse = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(EVENTS))
+            .body(eventsPayload)
+            .post()
+            .then()
+            .extract().response();
+
+        assertEquals(CREATED, eventResponse.statusCode());
     }
+
 
     @Test
     @Order(2)
     void createEvent() {
+        String caseNum = getCaseNumber();
+        String payload = "{\"message_id\": \"54321\",\"type \": \"1000\",\"sub_type\": \"1002\",\"event_id\": \"12345\",\"" + COURTHOUSE + "\": \"" + COURTHOUSE1 + "\",\"" + COURTROOM + "\": \"" + COURTHOUSE_ROOM + "\",\"" + CASE_NUMBER + "\": [\"" + caseNum + "\"],\"event_text\": \"Functional Test Setup\",\"date_time\": \"2023-09-12T12:57:18.596Z\",\"retention_policy\": {\"case_retention_fixed_policy\": \"unknown\",\"case_total_sentence\": \"unknown\"}}";
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(EVENTS))
-            .body("""
-                      {
-                          "message_id": "54321",
-                          "type": "1000",
-                          "sub_type": "1002",
-                          "event_id": "12345",
-                          "courthouse": "LEEDS",
-                          "courtroom": "ROOM_A",
-                          "case_numbers": [
-                            "CASE1002"
-                          ],
-                          "event_text": "Functional Test Setup",
-                          "date_time": "2023-09-12T12:57:18.596Z",
-                          "retention_policy": {
-                            "case_retention_fixed_policy": "unknown",
-                            "case_total_sentence": "unknown"
-                          }
-                        }""")
+            .body(payload)
             .post()
             .then()
             .extract().response();
@@ -152,15 +149,13 @@ class CasesFunctionalTest  extends FunctionalTest {
         if (caseId == -1) {
             assertEquals(NOT_FOUND, 404);
         } else {
+            String payload = "{\"retain_until\": \"2023-10-07T11:49:44.618Z\"}";
+
             Response response = buildRequestWithAuth()
                 .contentType(ContentType.JSON)
                 .when()
                 .baseUri(getUri(CASES_URI + "/" + caseId))
-                .body("""
-                          {
-                            "retain_until": "2023-11-07T11:49:44.618Z"
-                          }
-                          """)
+                .body(payload)
                 .patch()
                 .then()
                 .extract().response();
@@ -172,18 +167,20 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Test
     @Order(7)
     void searchCase() {
+        String caseNum = getCaseNumber();
+
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_URI + SEARCH))
-            .param("case_number","CASE1002")
-            .param("courthouse","LEEDS")
-            .param("courtroom","")
-            .param("defendant_name","")
-            .param("judge_name", "")
-            .param("date_from", "")
-            .param("date_to","")
-            .param("event_test_contains","")
+            .param(CASE_NUMBER, caseNum)
+            .param(COURTHOUSE,COURTHOUSE1)
+            .param(COURTROOM,"")
+            .param(DEFENDANT_NAME, "")
+            .param(JUDGE_NAME, "")
+            .param(DATE_FROM, "")
+            .param(DATE_TO, "")
+            .param(EVENT_TEST_CONTAINS, "")
             .get()
             .then()
             .extract().response();
@@ -231,20 +228,58 @@ class CasesFunctionalTest  extends FunctionalTest {
         }
     }
 
+    private static String generateUniquesCaseNum() {
+        String generateUUIDNo = String.format("%010d",
+                                              new BigInteger(UUID.randomUUID().
+                                                                 toString().
+                                                                 replace("-", ""),
+                                                             16));
+
+        generateUUIDNo = generateUUIDNo.substring( generateUUIDNo.length() - 15);
+
+        return generateUUIDNo;
+    }
+
+    public String getCaseNumber() {
+        String caseNum;
+
+        List<String> caseNums = buildRequestWithAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_URI + SEARCH))
+            .param(COURTHOUSE, COURTHOUSE1)
+            .param(JUDGE_NAME, "judgeC")
+            .get()
+            .then()
+            .extract()
+            .response()
+            .getBody()
+            .jsonPath().get(CASE_NUMBER);
+
+        caseNum = getCaseNumberFromList(caseNums);
+
+        return caseNum;
+    }
+
     public int getCaseId() {
+        String caseNum = getCaseNumber();
+        if("-1".equals(caseNum)) {
+            assertEquals(NOT_FOUND, 404);
+        }
+
         int caseId;
 
         List<Integer> caseIds = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_URI + SEARCH))
-            .param("case_number","CASE1002")
+            .param(CASE_NUMBER, caseNum)
             .get()
             .then()
             .extract()
             .response()
             .getBody()
-            .jsonPath().get("case_id");
+            .jsonPath().get(CASE_ID);
 
         caseId = getIdFromList(caseIds);
 
@@ -269,7 +304,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .extract()
             .response()
             .getBody()
-            .jsonPath().get("id");
+            .jsonPath().get(ID);
 
         hearingId = getIdFromList(hearingIds);
 
@@ -283,6 +318,17 @@ class CasesFunctionalTest  extends FunctionalTest {
             listId = -1;
         } else {
             len = listIds.size();
+            listId = listIds.get(--len);
+        }
+        return listId;
+    }
+
+    private static String getCaseNumberFromList(List<String> listIds) {
+        String listId;
+        if (listIds.isEmpty()) {
+            listId = "-1";
+        } else {
+            int len = listIds.size();
             listId = listIds.get(--len);
         }
         return listId;
