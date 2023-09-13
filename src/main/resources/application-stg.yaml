@@ -24,3 +24,6 @@ spring:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
       - "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
 
+logging:
+  level:
+    uk.gov.hmcts.darts: DEBUG
