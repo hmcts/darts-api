@@ -22,4 +22,6 @@ public interface AuthConfigurationProperties {
 
     String getResponseType();
 
+    String getClaims();
+
 }

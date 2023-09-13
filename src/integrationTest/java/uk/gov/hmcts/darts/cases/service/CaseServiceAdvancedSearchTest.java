@@ -84,6 +84,12 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         CourtCaseEntity case6 = createCaseAt(swanseaCourthouse);
         case6.setCaseNumber("case6");
 
+        CourtCaseEntity case7 = createCaseAt(swanseaCourthouse);
+        case7.setCaseNumber("case7");
+
+        CourtCaseEntity case8 = createCaseAt(swanseaCourthouse);
+        case8.setCaseNumber("case8");
+
         JudgeEntity judge = createJudgeWithName("aJudge");
         HearingEntity hearing1a = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
 
@@ -124,12 +130,17 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         HearingEntity hearing6c = createHearingWithDefaults(case6, courtroom1, LocalDate.of(2023, 9, 22), judge);
 
+        HearingEntity hearing7a = createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 21), judge);
+        HearingEntity hearing7b = createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
+        HearingEntity hearing8 = createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
+
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,
                               hearing3a, hearing3b, hearing3c,
                               hearing4a, hearing4b, hearing4c,
                               hearing5a, hearing5b, hearing5c,
-                              hearing6a, hearing6b, hearing6c
+                              hearing6a, hearing6b, hearing6c,
+                              hearing7a, hearing7b, hearing8
 
         );
 
@@ -206,6 +217,22 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFromTo/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void getWithDateRangeFromToSameDate() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .dateFrom(LocalDate.of(2023, 10, 22))
+            .dateTo(LocalDate.of(2023, 10, 22))
+            .build();
+
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithDateRangeFromToSameDate/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
     }
 

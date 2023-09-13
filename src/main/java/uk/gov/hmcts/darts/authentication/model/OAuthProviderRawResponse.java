@@ -12,9 +12,15 @@ import lombok.NoArgsConstructor;
 @Data
 public class OAuthProviderRawResponse {
 
-    @JsonProperty("id_token")
+    @JsonProperty("access_token")
     private String accessToken;
 
-    @JsonProperty("id_token_expires_in")
+    @JsonProperty("expires_in")
     private long expiresIn;
+
+    @JsonProperty("id_token")
+    private String idToken;
+
+    @JsonProperty("id_token_expires_in")
+    private long idTokenExpiresIn;
 }

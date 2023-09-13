@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d05c9d15-f2b6-43e1-8756-325329c371e8",
+		"_postman_id": "76b91877-23da-4e42-afde-2aa74b635913",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -323,6 +323,32 @@
 			"name": "Audio",
 			"item": [
 				{
+					"name": "/audio-requests",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "GET /audio/hearings/:hearingId/audios",
 					"request": {
 						"method": "GET",
@@ -477,7 +503,7 @@
 					"name": "GET",
 					"item": [
 						{
-							"name": "New Request",
+							"name": "GET /hearings/:hearingId",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -501,6 +527,159 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "GET events",
+					"item": [
+						{
+							"name": "GET /hearings/:hearingId",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{serverUrl}}/hearings/:hearingId/events",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"hearings",
+										":hearingId",
+										"events"
+									],
+									"variable": [
+										{
+											"key": "hearingId",
+											"value": ""
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Audio Requests",
+			"item": [
+				{
+					"name": "/audio-requests?expired=false",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests?expired=false",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests"
+							],
+							"query": [
+								{
+									"key": "expired",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests?expired=true",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests?expired=true",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests"
+							],
+							"query": [
+								{
+									"key": "expired",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/-1",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/:audio_request_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								":audio_request_id"
+							],
+							"variable": [
+								{
+									"key": "audio_request_id",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"/*",
+							"INSERT INTO user_account (usr_id, user_name, user_email_address)",
+							"VALUES (-10, 'Richard B', 'Richard.B@EXAMPLE.COM');",
+							"",
+							"INSERT INTO courthouse (cth_id, courthouse_name, created_ts, last_modified_ts)",
+							"VALUES (-1, 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
+							"",
+							"INSERT INTO court_case (cas_id, cth_id, case_number)",
+							"VALUES (-1, -1, 'T20230907-1');",
+							"",
+							"INSERT INTO courtroom (ctr_id, cth_id, courtroom_name)",
+							"VALUES (-1, -1, 'Court 1');",
+							"",
+							"INSERT INTO hearing (hea_id, cas_id, ctr_id, hearing_date)",
+							"VALUES (-1, -1, -1, CURRENT_DATE);",
+							"",
+							"INSERT INTO media_request (mer_id, hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_modified_ts)",
+							"VALUES (-1, -1, -10, 'OPEN', 'DOWNLOAD', '2023-05-31T09:00:00Z', '2023-05-31T12:00:00Z', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
+							"*/"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		}

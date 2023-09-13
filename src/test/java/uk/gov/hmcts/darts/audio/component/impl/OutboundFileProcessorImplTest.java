@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.impl.AudioOperationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -46,7 +47,7 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnOneSessionWithOneAudioWhenProvidedWithOneAudio()
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo trimmedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.trim(any(), any(), any(), any()))
@@ -77,7 +78,7 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnOneSessionWithOneAudioWhenProvidedWithTwoContinuousAudios()
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         var concatenatedAudioFileInfo = new AudioFileInfo(TIME_12_00.toInstant(),
                                                           TIME_12_20.toInstant(),
@@ -122,7 +123,7 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnOneSessionWithTwoAudioWhenProvidedWithTwoNonContinuousAudiosWithDifferentChannelsAndSameTimestamp()
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
         var secondTrimmedAudioFileInfo = new AudioFileInfo();
@@ -163,7 +164,7 @@ class OutboundFileProcessorImplTest {
 
     @Test
     void processAudioForDownloadShouldReturnTwoSessionsEachWithOneAudioWhenProvidedWithTwoNonContinuousAudios()
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
         var secondTrimmedAudioFileInfo = new AudioFileInfo();
@@ -206,7 +207,8 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioForPlaybackShouldPerformExpectedAudioOperations() throws ExecutionException, InterruptedException {
+    void processAudioForPlaybackShouldPerformExpectedAudioOperations()
+        throws ExecutionException, InterruptedException, IOException {
         var concatenatedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.concatenate(any(), any()))
             .thenReturn(concatenatedAudioFileInfo);
@@ -263,7 +265,8 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive() throws ExecutionException, InterruptedException {
+    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive()
+        throws ExecutionException, InterruptedException, IOException {
         var concatenatedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.concatenate(any(), any()))
             .thenReturn(concatenatedAudioFileInfo);
@@ -300,7 +303,8 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationIsNegative() throws ExecutionException, InterruptedException {
+    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationIsNegative()
+        throws ExecutionException, InterruptedException, IOException {
         var concatenatedAudioFileInfo = new AudioFileInfo();
         when(audioOperationService.concatenate(any(), any()))
             .thenReturn(concatenatedAudioFileInfo);

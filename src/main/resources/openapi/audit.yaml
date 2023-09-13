@@ -4,7 +4,7 @@ servers:
   - url: http://localhost:4550/
 info:
   description: Modernised DARTS (Digital Audio Recording and Transcription Service).
-  version: "0.0.1"
+  version: ${version}
   title: Modernised DARTS
 
 paths:
@@ -31,7 +31,7 @@ paths:
           schema:
             type: integer
         - in: query
-          name: event_id
+          name: audit_activity_id
           schema:
             type: integer
       responses:
@@ -62,7 +62,7 @@ components:
           type: string
           format: date-time
           example: '2023-05-31T09:00:00Z'
-        event_id:
+        audit_activity_id:
           type: integer
         user_id:
           type: integer
@@ -83,5 +83,5 @@ components:
           type: string
           format: date-time
           example: '2023-05-31T09:00:00Z'
-        event_id:
+        audit_activity_id:
           type: integer

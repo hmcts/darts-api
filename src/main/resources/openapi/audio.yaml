@@ -5,11 +5,11 @@ servers:
 
 info:
   description: Modernised DARTS (Digital Audio Recording and Transcription Service).
-  version: "0.0.1"
+  version: ${version}
   title: Modernised DARTS
 
 paths:
-  /audio/request:
+  /audio-requests:
     post:
       tags:
         - Audio
@@ -174,7 +174,7 @@ components:
         - requestor
         - start_time
         - end_time
-        - requestType
+        - request_type
       properties:
         hearing_id:
           type: integer
@@ -190,7 +190,7 @@ components:
           type: string
           format: date-time
           example: '2023-05-31T12:00:00Z'
-        requestType:
+        request_type:
           $ref: '#/components/schemas/AudioRequestType'
 
     AudioRequestId:

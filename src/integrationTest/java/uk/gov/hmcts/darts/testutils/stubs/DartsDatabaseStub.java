@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.audio.util.AudioTestDataUtil;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -39,6 +38,8 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
+import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 
@@ -94,6 +96,8 @@ public class DartsDatabaseStub {
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
@@ -102,11 +106,14 @@ public class DartsDatabaseStub {
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
     private final CourthouseStub courthouseStub;
     private final AuditStub auditStub;
+    private final EventStub eventStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
+        transcriptionWorkflowRepository.deleteAll();
+        transcriptionRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         mediaRequestRepository.deleteAll();
@@ -149,6 +156,10 @@ public class DartsDatabaseStub {
 
     public JudgeEntity createSimpleJudge(String name) {
         return retrieveCoreObjectService.retrieveOrCreateJudge(name);
+    }
+
+    public EventEntity createEvent(HearingEntity hearing) {
+        return eventStub.createEvent(hearing);
     }
 
     @Transactional
@@ -290,7 +301,7 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         return save(
-            AudioTestDataUtil.createCurrentMediaRequest(
+            AudioTestData.createCurrentMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -302,7 +313,7 @@ public class DartsDatabaseStub {
                                                                      UserAccountEntity requestor) {
         OffsetDateTime now = OffsetDateTime.now(UTC);
         return save(
-            AudioTestDataUtil.createExpiredMediaRequest(
+            AudioTestData.createExpiredMediaRequest(
                 hearing,
                 requestor,
                 now.minusDays(5),
@@ -426,4 +437,6 @@ public class DartsDatabaseStub {
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
+
+
 }

@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 
 import java.util.List;
 
@@ -28,4 +29,6 @@ public interface CaseService {
     List<EventResponse> getEvents(Integer hearingId);
 
     SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject);
+
+    CourtCaseEntity getCourtCaseById(Integer caseId);
 }

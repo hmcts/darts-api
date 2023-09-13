@@ -37,18 +37,20 @@ spring:
             response-mode: form_post
             prompt: login
             issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
+            claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
             client-id: ${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}
             client-secret: ${AAD_CLIENT_SECRET:}
-            scope: openid
+            scope: api://${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}/dartsinternaluser
             redirect-uri: ${darts.portal.url}/auth/callback
             logout-redirect-uri: ${darts.portal.url}/auth/logout-callback
             authorization-grant-type: authorization_code
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0/
+            issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0
+            claims: preferred_username
             provider: internal-azure-ad-provider
         provider:
           external-azure-ad-provider:
