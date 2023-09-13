@@ -270,5 +270,15 @@ public class CommonTestDataUtil {
         return dailyListEntity;
     }
 
+    public DailyListEntity createInvalidXmlDailyList(LocalTime time) {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
+        dailyListEntity.setXmlContent("blah");
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setSource(String.valueOf(SourceType.XHB));
+        return dailyListEntity;
+    }
+
 
 }
