@@ -232,8 +232,9 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     public int getCaseId() {
-        int caseId = 0;
-        List<Integer> ids = buildRequestWithAuth()
+        int caseId;
+
+        List<Integer> caseIds = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_URI + SEARCH))
@@ -245,14 +246,14 @@ class CasesFunctionalTest  extends FunctionalTest {
             .getBody()
             .jsonPath().get("case_id");
 
-        int len = ids.size();
-        caseId = len > 0 ? ids.get(--len) : -1;
+        caseId = getIdFromList(caseIds);
 
         return caseId;
     }
 
     Integer getCaseHearingId() {
-        int hearingId = 0;
+        int hearingId;
+
         int caseId = getCaseId();
 
         if (caseId == -1) {
@@ -270,9 +271,20 @@ class CasesFunctionalTest  extends FunctionalTest {
             .getBody()
             .jsonPath().get("id");
 
-        int len = hearingIds.size();
-        hearingId = len > 0 ? hearingIds.get(--len) : -1;
+        hearingId = getIdFromList(hearingIds);
 
         return hearingId;
+    }
+
+    private static int getIdFromList(List<Integer> listIds) {
+        int listId;
+        int len;
+        if(!listIds.isEmpty()) {
+            len = listIds.size();
+            listId = listIds.get(--len);
+        } else {
+            listId = -1;
+        }
+        return listId;
     }
 }
