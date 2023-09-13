@@ -117,17 +117,17 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         if (caseId == -1) {
             assertEquals(NOT_FOUND, 404);
+        } else {
+            Response response = buildRequestWithAuth()
+                .contentType(ContentType.JSON)
+                .when()
+                .baseUri(getUri(CASES_URI + "/" + caseId))
+                .get()
+                .then()
+                .extract().response();
+
+            assertEquals(OK, response.statusCode());
         }
-
-        Response response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_URI + "/" + caseId))
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(OK, response.statusCode());
     }
 
     @Test
@@ -151,22 +151,22 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         if (caseId == -1) {
             assertEquals(NOT_FOUND, 404);
+        } else {
+            Response response = buildRequestWithAuth()
+                .contentType(ContentType.JSON)
+                .when()
+                .baseUri(getUri(CASES_URI + "/" + caseId))
+                .body("""
+                          {
+                            "retain_until": "2023-11-07T11:49:44.618Z"
+                          }
+                          """)
+                .patch()
+                .then()
+                .extract().response();
+
+            assertEquals(OK, response.statusCode());
         }
-
-        Response response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_URI + "/" + caseId))
-            .body("""
-                      {
-                        "retain_until": "2023-11-07T11:49:44.618Z"
-                      }
-                      """)
-            .patch()
-            .then()
-            .extract().response();
-
-        assertEquals(OK, response.statusCode());
     }
 
     @Test
@@ -198,17 +198,17 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         if (caseId == -1) {
             assertEquals(NOT_FOUND, 404);
+        } else {
+            Response response = buildRequestWithAuth()
+                .contentType(ContentType.JSON)
+                .when()
+                .baseUri(getUri(CASES_URI + "/" + caseId + HEARINGS))
+                .get()
+                .then()
+                .extract().response();
+
+            assertEquals(OK, response.statusCode());
         }
-
-        Response response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_URI + "/" + caseId + HEARINGS))
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(OK, response.statusCode());
     }
 
     @Test
@@ -218,17 +218,17 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         if (hearingId == -1) {
             assertEquals(NOT_FOUND, 404);
+        } else {
+            Response response = buildRequestWithAuth()
+                .contentType(ContentType.JSON)
+                .when()
+                .baseUri(getUri(CASES_URI + HEARINGS + "/" + hearingId + EVENTS))
+                .get()
+                .then()
+                .extract().response();
+
+            assertEquals(OK, response.statusCode());
         }
-
-        Response response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_URI + HEARINGS + "/" + hearingId + EVENTS))
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(OK, response.statusCode());
     }
 
     public int getCaseId() {
