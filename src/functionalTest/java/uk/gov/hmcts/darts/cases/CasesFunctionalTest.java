@@ -115,6 +115,10 @@ class CasesFunctionalTest  extends FunctionalTest {
     void getExistingCase() {
         int caseId = getCaseId();
 
+        if (caseId == -1) {
+            assertEquals(NOT_FOUND, 404);
+        }
+
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -144,6 +148,11 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Order(6)
     void patchCase() {
         int caseId = getCaseId();
+
+        if (caseId == -1) {
+            assertEquals(NOT_FOUND, 404);
+        }
+
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -186,6 +195,11 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Order(8)
     void getCaseHearing() {
         int caseId = getCaseId();
+
+        if (caseId == -1) {
+            assertEquals(NOT_FOUND, 404);
+        }
+
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -202,6 +216,10 @@ class CasesFunctionalTest  extends FunctionalTest {
     void getCaseHearingEvents() {
         int hearingId = getCaseHearingId();
 
+        if (hearingId == -1) {
+            assertEquals(NOT_FOUND, 404);
+        }
+
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -213,8 +231,6 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(OK, response.statusCode());
     }
 
-    @Test
-    @Order(10)
     public int getCaseId() {
         int caseId = 0;
         List<Integer> ids = buildRequestWithAuth()
@@ -232,18 +248,16 @@ class CasesFunctionalTest  extends FunctionalTest {
         int len = ids.size();
         caseId = len > 0 ? ids.get(--len) : -1;
 
-        if (caseId == -1) {
-            assertEquals(NOT_FOUND, 404);
-        }
-
         return caseId;
     }
 
-    @Test
-    @Order(11)
     Integer getCaseHearingId() {
         int hearingId = 0;
         int caseId = getCaseId();
+
+        if (caseId == -1) {
+            return -1;
+        }
 
         List<Integer> hearingIds = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -258,10 +272,6 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         int len = hearingIds.size();
         hearingId = len > 0 ? hearingIds.get(--len) : -1;
-
-        if (hearingId == -1) {
-            assertEquals(NOT_FOUND, 404);
-        }
 
         return hearingId;
     }
