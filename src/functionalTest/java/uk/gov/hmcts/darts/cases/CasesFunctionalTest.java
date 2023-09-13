@@ -14,23 +14,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 class CasesFunctionalTest  extends FunctionalTest {
     public static final String CASES_URI = "/cases";
-    public static final String ENDPOINT_URL = "/events";
     public static final String SEARCH = "/search";
     public static final String HEARINGS = "/hearings";
     public static final String EVENTS = "/events";
     public static final String COURTHOUSE = "courthouse";
     public static final String COURTROOM = "courtroom";
     public static final String CASE_DATE = "date";
-    public static final String COURTHOUSE1 = "SWANSEA";
-    public static final String COURTHOUSE_ROOM = "1";
-    public static final String DATE1 = "2020-06-20"; //Hearing
+    public static final String COURTHOUSE1 = "LEEDS";
+    public static final String COURTHOUSE_ROOM = "ROOM_A";
+    public static final String DATE1 = "2023-09-12";
     public static final int NOT_FOUND = 404;
     public static final int OK = 200;
     public static final int CREATED = 201;
-    public static final String CASE_ID = "/41";
     public static final String CASE_BAD_ID = "/0";
-    public static final String HEARING_ID = "/1";
-
 
 
     @Test
