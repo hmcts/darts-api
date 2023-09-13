@@ -134,5 +134,50 @@
         ]
       }
     ]
+  },
+  {
+    "case_number": "case7",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "aJudge"
+    ],
+    "hearings": [
+      {
+        "date": "2023-10-21",
+        "courtroom": "courtroom1",
+        "judges": [
+          "aJudge"
+        ]
+      },
+      {
+        "date": "2023-10-23",
+        "courtroom": "courtroom1",
+        "judges": [
+          "aJudge"
+        ]
+      }
+    ]
+  },
+  {
+    "case_number": "case8",
+    "courthouse": "SWANSEA",
+    "defendants": [
+      "aDefendant"
+    ],
+    "judges": [
+      "aJudge"
+    ],
+    "hearings": [
+      {
+        "date": "2023-10-22",
+        "courtroom": "courtroom1",
+        "judges": [
+          "aJudge"
+        ]
+      }
+    ]
   }
 ]

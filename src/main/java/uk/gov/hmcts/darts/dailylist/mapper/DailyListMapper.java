@@ -23,10 +23,11 @@ public class DailyListMapper {
     private final ObjectMapper objectMapper;
 
 
-    public DailyListEntity mapToDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse) {
+    public DailyListEntity createDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse) {
 
         DailyListEntity dailyListEntity = new DailyListEntity();
-        mapToExistingDailyListEntity(postRequest, courthouse, dailyListEntity);
+        dailyListEntity.setXmlContent(postRequest.getDailyListXml());
+        updateDailyListEntity(postRequest, courthouse, dailyListEntity);
         return dailyListEntity;
     }
 
@@ -52,15 +53,16 @@ public class DailyListMapper {
         }
     }
 
-    public void mapToExistingDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse,
-                                             DailyListEntity dailyListEntity) {
+    public void updateDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse,
+                                      DailyListEntity dailyListEntity) {
         dailyListEntity.setCourthouse(courthouse);
         dailyListEntity.setSource(postRequest.getSourceSystem());
+        dailyListEntity.setXmlContent(postRequest.getDailyListXml());
         updateDailyListEntity(dailyListEntity, postRequest.getDailyListJson(), courthouse);
     }
 
-    public void mapToExistingDailyListEntity(DailyListPatchRequest patchRequest,
-                                             DailyListEntity dailyListEntity) {
+    public void updateDailyListEntity(DailyListPatchRequest patchRequest,
+                                      DailyListEntity dailyListEntity) {
         updateDailyListEntity(dailyListEntity, patchRequest.getDailyListJson(), dailyListEntity.getCourthouse());
     }
 

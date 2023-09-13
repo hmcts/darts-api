@@ -251,7 +251,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @SuppressWarnings("PMD.LawOfDemeter")
     private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
                                             Map<MediaEntity, Path> downloadedMedias)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
 
@@ -266,7 +266,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     private Path handleDownload(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         List<List<AudioFileInfo>> processedAudio = outboundFileProcessor.processAudioForDownload(
             downloadedMedias,
@@ -278,7 +278,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime, OffsetDateTime endTime)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(
             downloadedMedias,
@@ -290,7 +290,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
         return handlePlayback(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
     }
 

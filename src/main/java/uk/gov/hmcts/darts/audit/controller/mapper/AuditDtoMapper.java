@@ -22,7 +22,9 @@ public interface AuditDtoMapper {
 
     @Mappings({
         @Mapping(source = "createdDateTime", target = "createdAt"),
-        @Mapping(source = "auditActivity", target = "eventId")
+        @Mapping(source = "auditActivity.id", target = "auditActivityId"),
+        @Mapping(source = "courtCase.id", target = "caseId"),
+        @Mapping(source = "user.id", target = "userId")
     })
     SearchResult map(AuditEntity auditEntity);
 

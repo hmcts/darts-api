@@ -11,8 +11,10 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
+import uk.gov.hmcts.darts.common.entity.AuditActivityEntity_;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity_;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class AuditServiceImpl implements AuditService {
         List<Predicate> predicates = new ArrayList<>();
         if (auditSearchQuery.getCaseId() != null) {
 
-            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.caseId), auditSearchQuery.getCaseId()));
+            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.courtCase).get(CourtCaseEntity_.id), auditSearchQuery.getCaseId()));
         }
 
         if (auditSearchQuery.getFromDate() != null && auditSearchQuery.getToDate() != null) {
@@ -55,8 +57,8 @@ public class AuditServiceImpl implements AuditService {
             ));
         }
 
-        if (auditSearchQuery.getEventId() != null) {
-            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.auditActivity), auditSearchQuery.getEventId()));
+        if (auditSearchQuery.getAuditActivityId() != null) {
+            predicates.add(criteriaBuilder.equal(root.get(AuditEntity_.auditActivity).get(AuditActivityEntity_.id), auditSearchQuery.getAuditActivityId()));
         }
         return predicates;
     }

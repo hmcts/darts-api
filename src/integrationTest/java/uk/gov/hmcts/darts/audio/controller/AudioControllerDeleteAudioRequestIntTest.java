@@ -46,7 +46,7 @@ class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
             String.format("/audio-requests/%d", mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk());
+            .andExpect(status().is2xxSuccessful());
 
     }
 

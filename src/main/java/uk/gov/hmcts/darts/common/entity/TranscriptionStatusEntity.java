@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +15,7 @@ import lombok.Setter;
 @Table(name = "transcription_status")
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = false)
 public class TranscriptionStatusEntity {
 
     @Id

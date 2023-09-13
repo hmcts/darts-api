@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "39b658ff-eee8-43e6-8bcd-f66d924987c4",
+		"_postman_id": "76b91877-23da-4e42-afde-2aa74b635913",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -323,13 +323,13 @@
 			"name": "Audio",
 			"item": [
 				{
-					"name": "/audio/request",
+					"name": "/audio-requests",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"requestType\": \"DOWNLOAD\"\n}",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -337,13 +337,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{serverUrl}}/audio/request",
+							"raw": "{{serverUrl}}/audio-requests",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
-								"audio",
-								"request"
+								"audio-requests"
 							]
 						}
 					},
