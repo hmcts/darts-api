@@ -30,19 +30,84 @@ paths:
               $ref: '#/components/schemas/AudioRequestDetails'
         description: Audio Request item to add
 
-  /audio/download:
+  /audio-requests:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Audio
+      operationId: getUserAudioRequests
+      description: 'Audio requests for a user to view whether Current / Expired'
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+        - in: query
+          name: expired
+          schema:
+            type: boolean
+          description: if true, will retrieve expired audio requests only, if false will get current requests only
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AudioRequestSummary'
+        '400':
+          description: A required parameter is missing or an invalid.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "about:blank"
+                title: "Bad Request"
+                status: 400
+                detail: "Required parameter 'expired' is not present."
+                instance: "/audio-requests"
+
+  /audio-requests/{audio_request_id}:
+    delete:
+      tags:
+        - Audio
+      description: 'Delete Audio Request and Processed Audio'
+      operationId: deleteAudioRequest
+      parameters:
+        - in: path
+          name: audio_request_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: audio request has been deleted
+        '400':
+          description: required parameter is missing or an invalid datatype or value was provided for property.
+        '404':
+          description: resource with the provided id does not exist.
+        '500':
+          description: internal server error
+
+  /audio/download/{audio_request_id}:
     get:
       tags:
         - Audio
-      summary: Download audio
-      operationId: download
-      description: Download audio
+      summary: Download audio output that has been generated for an audio request
+      operationId: getProcessedAudio
+      description: Download audio output that has been generated for an audio request
       parameters:
-        - in: query
-          name: audioRequestId
-          required: true
+        - in: path
+          name: audio_request_id
           schema:
-            $ref: '#/components/schemas/AudioRequestId'
+            type: integer
+          required: true
       responses:
         200:
           description: OK
@@ -71,7 +136,7 @@ paths:
       tags:
         - Audio
       summary: Media metadata for provided hearing
-      operationId: getAudioMetadata
+      operationId: getAudiosByHearing
       description: Media metadata for provided hearing
       parameters:
         - in: path
@@ -140,6 +205,12 @@ paths:
                 status: 500
 
 components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     AudioRequestType:
       type: string
@@ -189,3 +260,43 @@ components:
         media_end_timestamp:
           type: string
           format: date-time
+
+    AudioRequestSummary:
+      type: object
+      properties:
+        media_request_id:
+          type: integer
+          example: 12345
+        case_number:
+          type: string
+          example: "T20200190"
+        courthouse_name:
+          type: string
+          example: "Manchester Minshull Street"
+        hearing_date:
+          type: string
+          format: date
+          example: "2023-08-17"
+        media_request_start_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T09:00:00Z"
+        media_request_end_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T10:00:00Z"
+        media_request_expiry_ts:
+          type: string
+          format: date-time
+          example: "2023-08-23T09:00:00Z"
+        media_request_status:
+          $ref: '#/components/schemas/MediaRequestStatus'
+
+    MediaRequestStatus:
+      type: string
+      enum:
+        - OPEN
+        - PROCESSING
+        - FAILED
+        - COMPLETED
+        - EXPIRED

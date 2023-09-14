@@ -1,19 +1,17 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
+import uk.gov.hmcts.darts.audio.component.AudioRequestSummaryMapper;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
-import uk.gov.hmcts.darts.audio.service.AudioService;
+import uk.gov.hmcts.darts.audio.model.AudioRequestSummary;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -26,9 +24,9 @@ import java.util.List;
 public class AudioController implements AudioApi {
 
     private final MediaRequestService mediaRequestService;
-    private final AudioService audioService;
     private final AudioTransformationService audioTransformationService;
     private final AudioResponseMapper audioResponseMapper;
+    private final AudioRequestSummaryMapper audioRequestSummaryMapper;
 
     @Override
     public ResponseEntity<Void> addAudioRequest(AudioRequestDetails audioRequestDetails) {
@@ -42,15 +40,21 @@ public class AudioController implements AudioApi {
     }
 
     @Override
-    public ResponseEntity<Resource> download(Integer audioRequestId) {
-        InputStream audioFileStream = audioService.download(audioRequestId);
+    public ResponseEntity<Void> deleteAudioRequest(Integer audioRequestId) {
+        mediaRequestService.deleteAudioRequest(audioRequestId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Resource> getProcessedAudio(Integer audioRequestId) {
+        InputStream audioFileStream = mediaRequestService.getProcessedAudio(audioRequestId);
 
         return new ResponseEntity<>(new InputStreamResource(audioFileStream),
                                     HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
+    public ResponseEntity<List<AudioMetadata>> getAudiosByHearing(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingId);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
 
@@ -58,11 +62,15 @@ public class AudioController implements AudioApi {
     }
 
     @Override
-    public ResponseEntity<org.springframework.core.io.Resource> preview(
-        @Parameter(name = "media_id", description = "Internal identifier for media",
-            required = true, in = ParameterIn.PATH) @PathVariable("media_id") Integer mediaId
-    ) {
-        InputStream audioMediaFile = audioService.preview(mediaId);
+    public ResponseEntity<List<AudioRequestSummary>> getUserAudioRequests(Integer userId, Boolean expired) {
+
+        return new ResponseEntity<>(audioRequestSummaryMapper.mapToAudioRequestSummary(
+            mediaRequestService.viewAudioRequests(userId, expired)), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<org.springframework.core.io.Resource> preview(Integer mediaId) {
+        InputStream audioMediaFile = mediaRequestService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
     }
 

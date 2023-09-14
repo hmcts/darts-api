@@ -23,9 +23,7 @@ public interface AudioTransformationService {
     TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest, UUID externalLocation);
 
     List<MediaEntity> getMediaMetadata(Integer hearingId);
-
-    Optional<UUID> getMediaLocation(MediaEntity media);
-
+    
     Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
 
     UUID saveProcessedData(MediaRequestEntity mediaRequest, BinaryData binaryData);

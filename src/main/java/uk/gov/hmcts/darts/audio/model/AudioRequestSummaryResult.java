@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.service.impl;
+package uk.gov.hmcts.darts.audio.model;
 
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 

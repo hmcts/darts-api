@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class AudioControllerGetMetadataIntTest extends IntegrationBase {
+class AudioControllerGetAudiosByHearingIntTest extends IntegrationBase {
 
     private static final OffsetDateTime MEDIA_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime MEDIA_END_TIME = MEDIA_START_TIME.plusHours(1);

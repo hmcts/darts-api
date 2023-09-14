@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.audio.component;
 
-import uk.gov.hmcts.darts.audio.service.impl.AudioRequestSummaryResult;
-import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
+import uk.gov.hmcts.darts.audio.model.AudioRequestSummary;
+import uk.gov.hmcts.darts.audio.model.AudioRequestSummaryResult;
 
 import java.util.List;
 

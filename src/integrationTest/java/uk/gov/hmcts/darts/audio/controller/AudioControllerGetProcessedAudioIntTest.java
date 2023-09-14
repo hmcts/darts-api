@@ -22,7 +22,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-class AudioControllerDownloadIntTest extends IntegrationBase {
+class AudioControllerGetProcessedAudioIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio/download");
     @Autowired
@@ -46,8 +46,8 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
                 blobId
             ));
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("audioRequestId", String.valueOf(mediaRequestEntity.getId()));
+        MockHttpServletRequestBuilder requestBuilder = get(
+            String.format("/audio/download/%d", String.valueOf(mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk());
@@ -55,8 +55,8 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     void audioDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("audioRequestId", "666");
+        MockHttpServletRequestBuilder requestBuilder = get(
+            String.format("/audio/download/%s", "1234567"));
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -66,11 +66,10 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     void audioDownloadGetShouldReturnBadRequestWhenNoRequestBodyIsProvided() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT);
+        MockHttpServletRequestBuilder requestBuilder = get(String.format("/audio/download/"));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isNotFound());
     }
 
 }

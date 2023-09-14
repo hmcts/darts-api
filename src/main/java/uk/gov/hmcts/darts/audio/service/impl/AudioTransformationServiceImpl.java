@@ -67,10 +67,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final FileOperationService fileOperationService;
 
     private final MediaRepository mediaRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final UserAccountRepository userAccountRepository;
 
     private final DataManagementApi dataManagementApi;
     private final NotificationApi notificationApi;
@@ -181,32 +177,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public Optional<UUID> getMediaLocation(MediaEntity media) {
-        Optional<UUID> externalLocation = Optional.empty();
-
-        ObjectDirectoryStatusEntity objectDirectoryStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
-        ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
-            media, objectDirectoryStatus, externalLocationType
-        );
-
-        if (!externalObjectDirectoryEntityList.isEmpty()) {
-            if (externalObjectDirectoryEntityList.size() != 1) {
-                log.warn(
-                    "Only one External Object Directory expected, but found {} for mediaId={}, statusEnum={}, externalLocationTypeId={}",
-                    externalObjectDirectoryEntityList.size(),
-                    media.getId(),
-                    STORED,
-                    externalLocationType.getId()
-                );
-            }
-            externalLocation = Optional.ofNullable(externalObjectDirectoryEntityList.get(0).getExternalLocation());
-        }
-
-        return externalLocation;
-    }
-
-    @Override
     public Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
 
         return fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
@@ -235,7 +205,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
-        UUID id = getMediaLocation(mediaEntity).orElseThrow(
+        UUID id = dataManagementApi.getMediaLocation(mediaEntity).orElseThrow(
             () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
             )));
 

@@ -22,7 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class DataManagementServiceImplTest {
+class   DataManagementServiceImplTest {
 
     @InjectMocks
     private DataManagementServiceImpl dataManagementService;

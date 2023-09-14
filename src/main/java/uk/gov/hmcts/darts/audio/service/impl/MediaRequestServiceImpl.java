@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import com.azure.core.util.BinaryData;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -15,26 +16,30 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.audio.model.AudioRequestSummaryResult;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.audio.service.AudioOperationService;
+import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity_;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity_;
-import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.*;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
 
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
@@ -49,6 +54,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final EntityManager entityManager;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final DataManagementApiImpl dataManagementApi;
+    private final FileOperationService fileOperationService;
+    private final MediaRepository mediaRepository;
+    private final AudioOperationService audioOperationService;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -157,6 +165,63 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         query.setParameter(paramRequestor, userAccountRepository.getReferenceById(userId));
 
         return query.getResultList();
+    }
+
+    @Override
+    public InputStream getProcessedAudio(Integer audioRequestId) {
+        var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(audioRequestId)
+            .orElseThrow(() -> new DartsApiException(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+
+        UUID blobId = transientObjectEntity.getExternalLocation();
+        if (blobId == null) {
+            throw new DartsApiException(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED);
+        }
+
+        return dataManagementApi.getBlobDataFromUnstructuredContainer(blobId)
+            .toStream();
+    }
+
+    @Override
+    public InputStream preview(Integer mediaId) {
+        MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
+            () -> new DartsApiException(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+        BinaryData mediaBinaryData;
+        try {
+            UUID id = dataManagementApi.getMediaLocation(mediaEntity).orElseThrow(
+                () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
+                )));
+
+            BinaryData binaryData = dataManagementApi.getBlobDataFromOutboundContainer(id);
+
+            Path downloadPath = fileOperationService.saveFileToTempWorkspace(binaryData, id.toString());
+
+            AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
+            String workspaceDir = downloadPath.toFile().getParent();
+
+            AudioFileInfo encodedAudioFileInfo;
+
+            try {
+                encodedAudioFileInfo = audioOperationService.reEncode(workspaceDir, audioFileInfo);
+            } catch (ExecutionException | InterruptedException e) {
+                // For Sonar rule S2142
+                throw e;
+            }
+            Path encodedAudioPath = Path.of(encodedAudioFileInfo.getFileName());
+
+            mediaBinaryData = fileOperationService.saveFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
+        } catch (Exception exception) {
+            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+        }
+
+        return mediaBinaryData.toStream();
+    }
+
+    private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
+        return new AudioFileInfo(
+            mediaEntity.getStart().toInstant(),
+            mediaEntity.getEnd().toInstant(),
+            downloadPath.toFile().getAbsolutePath(),
+            mediaEntity.getChannel());
     }
 
     private Predicate expiredPredicate(Boolean expired, CriteriaBuilder criteriaBuilder,

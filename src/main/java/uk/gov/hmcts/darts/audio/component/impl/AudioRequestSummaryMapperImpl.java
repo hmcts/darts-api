@@ -2,9 +2,9 @@ package uk.gov.hmcts.darts.audio.component.impl;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.AudioRequestSummaryMapper;
-import uk.gov.hmcts.darts.audio.service.impl.AudioRequestSummaryResult;
-import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
-import uk.gov.hmcts.darts.audiorequests.model.MediaRequestStatus;
+import uk.gov.hmcts.darts.audio.model.AudioRequestSummary;
+import uk.gov.hmcts.darts.audio.model.MediaRequestStatus;
+import uk.gov.hmcts.darts.audio.model.AudioRequestSummaryResult;
 
 import java.util.List;
 

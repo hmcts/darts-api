@@ -182,6 +182,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
         assertEquals(
             externalObjectDirectoryEntity.getExternalLocation(),
+
             audioTransformationService.getMediaLocation(given.getMediaEntity1()).get()
         );
     }
