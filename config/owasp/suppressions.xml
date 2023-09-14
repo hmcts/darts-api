@@ -18,7 +18,7 @@
   </suppress>
 
   <!--Please add all the temporary suppression under the below section-->
-  <suppress until="2023-09-14">
+  <suppress until="2023-10-14">
     <notes>Waiting for spring boot version to pull in Spring Framework v6.0.7</notes>
     <packageUrl regex="true">^pkg:maven/commons-fileupload/commons-fileupload@.*$</packageUrl>
     <vulnerabilityName>CVE-2023-24998</vulnerabilityName>
@@ -29,13 +29,13 @@
     <vulnerabilityName>CVE-2023-41080</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-09-14">
+  <suppress until="2023-10-14">
     <notes>Looks like a new security issue which involves DOS attacks</notes>
     <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
     <vulnerabilityName>CVE-2023-35116</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-09-14">
+  <suppress until="2023-10-14">
     <notes>The exploitation depends on the structure of the target LDAP directory, as well as what kind of errors are
       exposed to the user.
     </notes>
@@ -43,7 +43,7 @@
     <vulnerabilityName>CVE-2023-33201</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-09-14">
+  <suppress until="2023-10-14">
     <notes>Latest Release: pgJDBC v42.6.0 17 March 2023
       - https://www.cve.org/CVERecord?id=CVE-2020-21469
       An issue was discovered in PostgreSQL 12.2 allows attackers to cause a denial of service via repeatedly sending
@@ -53,7 +53,7 @@
     <vulnerabilityName>CVE-2020-21469</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-09-14">
+  <suppress until="2023-10-14">
     <notes>A vulnerability was found in the Hot Rod client. This security issue occurs as the Hot Rod client does not
       enable hostname validation when using TLS, possibly resulting in a man-in-the-middle (MITM) attack. Will have to
       wait until azure-sdk-bom is updated to use newer netty library.
