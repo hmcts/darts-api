@@ -17,6 +17,11 @@ plugins {
 group = 'uk.gov.hmcts'
 version = '0.0.1'
 
+compileJava   {
+  sourceCompatibility = '17'
+  targetCompatibility = '17'
+}
+
 java {
   toolchain {
     languageVersion = JavaLanguageVersion.of(17)
@@ -383,8 +388,6 @@ publishing {
 task updateOpenSpecificationsWithVersion() {
 
   doLast {
-    println("HITS!!!");
-
     def fileDir = "$projectDir/src/main/resources/openapi/"
 
     File openFile = new File(fileDir)
