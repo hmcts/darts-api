@@ -19,7 +19,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 public class DailyListTestData {
     public DailyListEntity createDailyList(LocalTime time, String source, CourthouseEntity courthouse, String fileLocation) throws IOException {
         DailyListEntity dailyListEntity = new DailyListEntity();
-        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setStartDate(LocalDate.now());
         dailyListEntity.setEndDate(LocalDate.now());
         dailyListEntity.setCourthouse(courthouse);

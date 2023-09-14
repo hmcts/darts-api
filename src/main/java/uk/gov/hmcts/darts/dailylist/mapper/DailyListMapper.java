@@ -40,7 +40,7 @@ public class DailyListMapper {
         dailyListEntity.setPublishedTimestamp(documentId.getTimeStamp());
         dailyListEntity.setStartDate(dailyList.getListHeader().getStartDate());
         dailyListEntity.setEndDate(dailyList.getListHeader().getEndDate());
-        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setStatus(JobStatusType.NEW);
         try {
             dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList));
         } catch (JsonProcessingException e) {
