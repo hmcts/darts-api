@@ -57,7 +57,8 @@ class CasesFunctionalTest  extends FunctionalTest {
         String uniqueCaseNum = generateUniquesCaseNum();
 
         String casePayload = "{ \"" + COURTHOUSE + "\" : \"LEEDS\",\"" + CASE_NUMBER + "\" : \"" + uniqueCaseNum +
-            "\"," + DEFENDANTS + ": [" + DEFENDANT_C + "]," + JUDGES + ": [" + JUDGE_C + "]," + PROSECUTORS + ": [" + PROSECUTOR_C + "]," + DEFENDERS + ": [" + DEFENDER_C + "]}";
+            "\"," + DEFENDANTS + ": [" + DEFENDANT_C + "]," + JUDGES + ": [" + JUDGE_C + "]," +
+            PROSECUTORS + ": [" + PROSECUTOR_C + "]," + DEFENDERS + ": [" + DEFENDER_C + "]}";
 
         Response caseResponse = buildRequestWithAuth()
             .contentType(ContentType.JSON)
