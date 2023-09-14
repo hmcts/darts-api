@@ -38,6 +38,9 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final int NOT_FOUND = 404;
     public static final int OK = 200;
     public static final int CREATED = 201;
+    public static final String EVENT_TEXT = "\"Functional Test Setup\"";
+    public static final String EVENT_DATE_TIME = "\"2023-09-12T12:57:18.596Z\"";
+    public static final String CASE_RETENTION_FIXED_POLICY = "\"case_retention_fixed_policy\"";
 
 
     @Test
@@ -58,7 +61,11 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         assertEquals(CREATED, caseResponse.statusCode());
 
-        String eventsPayload = "{\"message_id\": \"54321\",\"type\": \"1000\",\"sub_type\": \"1002\",\"event_id\": \"12345\",\"" + COURTHOUSE + "\": \"" + COURTHOUSE1 + "\",\"" + COURTROOM + "\" : \"" + COURTHOUSE_ROOM + "\",\"" + CASE_NUMBERS + "\": [\"" + uniqueCaseNum + "\"],\"event_text\": \"FunctionalTestSetup2\",\"date_time\": \"2023-09-12T12:57:18.596Z\",\"retention_policy\": {\"case_retention_fixed_policy\": \"unknown\",\"case_total_sentence\": \"unknown\"}}";
+        String eventsPayload = "{\"message_id\": \"54321\",\"type\": \"1000\",\"sub_type\": \"1002\",\"event_id\": \"12345\",\"" +
+            COURTHOUSE + "\": \"" + COURTHOUSE1 + "\",\"" + COURTROOM + "\" : \"" + COURTHOUSE_ROOM + "\",\"" +
+            CASE_NUMBERS + "\": [\"" + uniqueCaseNum +
+            "\"],\"event_text\": \"FunctionalTestSetup2\",\"date_time\": " + EVENT_DATE_TIME + ",\"retention_policy\": {" +
+            CASE_RETENTION_FIXED_POLICY + ": \"unknown\",\"case_total_sentence\": \"unknown\"}}";
         Response eventResponse = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -76,7 +83,11 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Order(2)
     void createEvent() {
         String caseNum = getCaseNumber();
-        String payload = "{\"message_id\": \"54321\",\"type \": \"1000\",\"sub_type\": \"1002\",\"event_id\": \"12345\",\"" + COURTHOUSE + "\": \"" + COURTHOUSE1 + "\",\"" + COURTROOM + "\": \"" + COURTHOUSE_ROOM + "\",\"" + CASE_NUMBER + "\": [\"" + caseNum + "\"],\"event_text\": \"Functional Test Setup\",\"date_time\": \"2023-09-12T12:57:18.596Z\",\"retention_policy\": {\"case_retention_fixed_policy\": \"unknown\",\"case_total_sentence\": \"unknown\"}}";
+        String payload = "{\"message_id\": \"54321\",\"type \": \"1000\",\"sub_type\": \"1002\",\"event_id\": \"12345\",\"" +
+            COURTHOUSE + "\": \"" + COURTHOUSE1 + "\",\"" + COURTROOM + "\": \"" + COURTHOUSE_ROOM + "\",\"" + CASE_NUMBER + "\": [\"" +
+            caseNum + "\"],\"event_text\": " + EVENT_TEXT + ",\"date_time\": " +
+            EVENT_DATE_TIME + ",\"retention_policy\": {" +
+            CASE_RETENTION_FIXED_POLICY + ": \"unknown\",\"case_total_sentence\": \"unknown\"}}";
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
             .when()
@@ -229,15 +240,12 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     private static String generateUniquesCaseNum() {
-        String generateUUIDNo = String.format("%010d",
-                                              new BigInteger(UUID.randomUUID().
-                                                                 toString().
-                                                                 replace("-", ""),
-                                                             16));
+        String generateUniqueNo = String.format("%010d",
+                                              new BigInteger(UUID.randomUUID().toString().replace("-", ""),16));
 
-        generateUUIDNo = generateUUIDNo.substring( generateUUIDNo.length() - 15);
+        generateUniqueNo = generateUniqueNo.substring( generateUniqueNo.length() - 15);
 
-        return generateUUIDNo;
+        return generateUniqueNo;
     }
 
     public String getCaseNumber() {
@@ -263,7 +271,7 @@ class CasesFunctionalTest  extends FunctionalTest {
 
     public int getCaseId() {
         String caseNum = getCaseNumber();
-        if("-1".equals(caseNum)) {
+        if ("-1".equals(caseNum)) {
             assertEquals(NOT_FOUND, 404);
         }
 
