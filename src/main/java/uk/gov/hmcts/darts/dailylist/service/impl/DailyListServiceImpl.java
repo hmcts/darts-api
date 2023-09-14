@@ -91,7 +91,7 @@ public class DailyListServiceImpl implements DailyListService {
         dailyListEntity.setCourthouse(courthouse);
         dailyListEntity.setXmlContent(postRequest.getDailyListXml());
         dailyListEntity.setSource(postRequest.getSourceSystem());
-        dailyListEntity.setStatus(JobStatusType.NEW.name());
+        dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setStartDate(postRequest.getHearingDate());
         dailyListEntity.setUniqueId(postRequest.getUniqueId());
         dailyListEntity.setPublishedTimestamp(postRequest.getPublishedDateTime());

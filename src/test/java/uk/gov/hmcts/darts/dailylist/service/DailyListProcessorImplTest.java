@@ -121,22 +121,22 @@ class DailyListProcessorImplTest {
         ));
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             2, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(Collections.emptyList());
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             2, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
@@ -159,7 +159,7 @@ class DailyListProcessorImplTest {
         assertEquals("1", savedHearing.getCourtroom().getName());
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
+        assertEquals(JobStatusType.PROCESSED, dailyListEntities.get(0).getStatus());
     }
 
 
@@ -206,12 +206,12 @@ class DailyListProcessorImplTest {
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
@@ -232,12 +232,12 @@ class DailyListProcessorImplTest {
         assertEquals(LocalDate.now(), savedHearing.getHearingDate());
         assertEquals("1", savedHearing.getCourtroom().getName());
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
-        assertEquals(String.valueOf(JobStatusType.IGNORED), oldDailyList.getStatus());
+        assertEquals(JobStatusType.IGNORED, oldDailyList.getStatus());
         assertEquals(1, savedHearing.getJudges().size());
         assertEquals(LocalTime.of(11, 0), savedHearing.getScheduledStartTime());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
-        assertEquals(String.valueOf(JobStatusType.IGNORED), dailyListEntities.get(1).getStatus());
+        assertEquals(JobStatusType.PROCESSED, dailyListEntities.get(0).getStatus());
+        assertEquals(JobStatusType.IGNORED, dailyListEntities.get(1).getStatus());
     }
 
     @Test
@@ -288,23 +288,23 @@ class DailyListProcessorImplTest {
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             2, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             2, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             2, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(Collections.emptyList());
 
 
@@ -325,12 +325,12 @@ class DailyListProcessorImplTest {
         assertEquals(LocalDate.now(), savedHearing.getHearingDate());
         assertEquals("1", savedHearing.getCourtroom().getName());
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
-        assertEquals(String.valueOf(JobStatusType.IGNORED), oldDailyList.getStatus());
+        assertEquals(JobStatusType.IGNORED, oldDailyList.getStatus());
         assertEquals(1, savedHearing.getJudges().size());
         assertEquals(LocalTime.of(11, 0), savedHearing.getScheduledStartTime());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
-        assertEquals(String.valueOf(JobStatusType.IGNORED), dailyListEntities.get(1).getStatus());
+        assertEquals(JobStatusType.PROCESSED, dailyListEntities.get(0).getStatus());
+        assertEquals(JobStatusType.IGNORED, dailyListEntities.get(1).getStatus());
     }
 
 
@@ -373,8 +373,7 @@ class DailyListProcessorImplTest {
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
                              1,
-                             String.valueOf(
-                                 JobStatusType.NEW),
+                             JobStatusType.NEW,
                              LocalDate.now(),
                              String.valueOf(
                                  SourceType.XHB)
@@ -383,7 +382,7 @@ class DailyListProcessorImplTest {
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
@@ -406,7 +405,7 @@ class DailyListProcessorImplTest {
         assertEquals("1", savedHearing.getCourtroom().getName());
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
+        assertEquals(JobStatusType.PROCESSED, dailyListEntities.get(0).getStatus());
     }
 
 
@@ -435,19 +434,19 @@ class DailyListProcessorImplTest {
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(dailyListEntities);
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(hearingRepository, Mockito.never()).saveAndFlush(any());
 
-        assertEquals(String.valueOf(JobStatusType.PARTIALLY_PROCESSED), dailyListEntities.get(0).getStatus());
+        assertEquals(JobStatusType.PARTIALLY_PROCESSED, dailyListEntities.get(0).getStatus());
     }
 
 
@@ -467,18 +466,18 @@ class DailyListProcessorImplTest {
         DailyListEntity invalidDailyList = CommonTestDataUtil.createInvalidDailyList(LocalTime.now());
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(List.of(invalidDailyList));
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(hearingRepository, Mockito.never()).saveAndFlush(hearingEntityArgumentCaptor.capture());
-        assertEquals(String.valueOf(JobStatusType.FAILED), invalidDailyList.getStatus());
+        assertEquals(JobStatusType.FAILED, invalidDailyList.getStatus());
     }
 
     @Test
@@ -497,18 +496,18 @@ class DailyListProcessorImplTest {
         DailyListEntity invalidDailyList = CommonTestDataUtil.createInvalidXmlDailyList(LocalTime.now());
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(List.of(invalidDailyList));
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
         dailyListProcessor.processAllDailyLists(LocalDate.now());
 
         Mockito.verify(hearingRepository, Mockito.never()).saveAndFlush(hearingEntityArgumentCaptor.capture());
-        assertEquals(String.valueOf(JobStatusType.FAILED), invalidDailyList.getStatus());
+        assertEquals(JobStatusType.FAILED, invalidDailyList.getStatus());
     }
 
     @Test
@@ -544,12 +543,12 @@ class DailyListProcessorImplTest {
         ));
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.XHB)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.XHB)))
             .thenReturn(dailyListEntities);
 
         Mockito.when(dailyListRepository
                          .findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-                             1, String.valueOf(JobStatusType.NEW), LocalDate.now(), String.valueOf(SourceType.CPP)))
+                             1, JobStatusType.NEW, LocalDate.now(), String.valueOf(SourceType.CPP)))
             .thenReturn(Collections.emptyList());
 
         dailyListProcessor.processAllDailyListForCourthouse(swansea);
@@ -572,7 +571,7 @@ class DailyListProcessorImplTest {
         assertEquals("1", savedHearing.getCourtroom().getName());
         assertEquals(swanseaCourtroom, savedHearing.getCourtroom());
 
-        assertEquals(String.valueOf(JobStatusType.PROCESSED), dailyListEntities.get(0).getStatus());
+        assertEquals(JobStatusType.PROCESSED, dailyListEntities.get(0).getStatus());
     }
 
 
