@@ -70,15 +70,15 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             for (SourceType source : SourceType.values()) {
                 List<DailyListEntity> dailyLists = dailyListRepository.findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
                     courthouse.getId(),
-                    String.valueOf(JobStatusType.NEW),
+                    JobStatusType.NEW,
                     date, String.valueOf(source)
                 );
                 // Daily lists are being ordered descending by date so first item will be the most recent version
                 if (!dailyLists.isEmpty()) {
                     try {
                         processDailyList(dailyLists.get(0));
-                    } catch (JsonProcessingException e) {
-                        dailyLists.get(0).setStatus(String.valueOf(JobStatusType.FAILED));
+                    } catch (JsonProcessingException | IllegalArgumentException e) {
+                        dailyLists.get(0).setStatus(JobStatusType.FAILED);
                         log.error("Failed to process dailylist for courthouse: {} with dailylist id: {}",
                                   courthouse.getCourthouseName(), dailyLists.get(0).getId(), e
                         );
@@ -96,12 +96,12 @@ public class DailyListProcessorImpl implements DailyListProcessor {
 
     private void ignoreOldDailyList(List<DailyListEntity> dailyLists) {
         for (DailyListEntity dailyList : dailyLists) {
-            dailyList.setStatus(String.valueOf(JobStatusType.IGNORED));
+            dailyList.setStatus(JobStatusType.IGNORED);
         }
     }
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
-    private void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException {
+    private void processDailyList(DailyListEntity dailyListEntity) throws JsonProcessingException, IllegalArgumentException {
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListEntity.getContent(), DailyListJsonObject.class);
         JobStatusType statusType = JobStatusType.PROCESSED;
 
@@ -139,7 +139,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                           + dailyListEntity.getId() + " has not been processed");
             }
         }
-        dailyListEntity.setStatus(statusType.name());
+        dailyListEntity.setStatus(statusType);
     }
 
 
@@ -204,7 +204,7 @@ public class DailyListProcessorImpl implements DailyListProcessor {
             } else {
                 String urn = hearing.getDefendants().get(0).getUrn();
                 if (StringUtils.isBlank(urn)) {
-                    dailyListEntity.setStatus(String.valueOf(JobStatusType.PARTIALLY_PROCESSED));
+                    dailyListEntity.setStatus(JobStatusType.PARTIALLY_PROCESSED);
                     log.error("Hearing not added - HearingInfo does not contain a URN value");
                 } else {
                     return urn;
