@@ -2,8 +2,8 @@ package uk.gov.hmcts.darts.events;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,7 +14,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
     public static final String ENDPOINT_URL = "/events";
 
     @Test
-    @Disabled
+    @DisabledIfEnvironmentVariable(named = "TEST_URL", matches = "https://darts-api-staging.staging.platform.hmcts.net")
     void success() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)

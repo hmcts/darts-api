@@ -3,8 +3,8 @@ package uk.gov.hmcts.darts.hearings;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +16,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     public static final String CASE_SEARCH_URL = "/cases/search";
 
     @Test
-    @Disabled
+    @DisabledIfEnvironmentVariable(named = "TEST_URL", matches = "https://darts-api-staging.staging.platform.hmcts.net")
     void success() {
 
         String randomCaseNumber = RandomStringUtils.randomAlphanumeric(15);

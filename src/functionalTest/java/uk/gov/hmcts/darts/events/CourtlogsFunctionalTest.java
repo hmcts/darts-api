@@ -2,9 +2,9 @@ package uk.gov.hmcts.darts.events;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +16,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     public static final String ENDPOINT_URL = "/courtlogs";
 
     @Test
-    @Disabled
+    @DisabledIfEnvironmentVariable(named = "TEST_URL", matches = "https://darts-api-staging.staging.platform.hmcts.net")
     @Order(1)
     void postSuccess() {
         Response response = buildRequestWithAuth()
@@ -67,7 +67,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Disabled
+    @DisabledIfEnvironmentVariable(named = "TEST_URL", matches = "https://darts-api-staging.staging.platform.hmcts.net")
     @Order(3)
     void getSuccess() {
         Response response = buildRequestWithAuth()
