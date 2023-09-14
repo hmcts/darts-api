@@ -114,6 +114,17 @@
 --    added table transcription_status
 --    removed column transcription.current_state
 --    added column transcription.trs_id and FK to transcription_status
+--v48 remove grant on cra_seq, removed in v47
+--    remove transcription.trs_id and FK from transcription_status
+--    remove transcription-workflow.workflow_stage, and replace with transcription_status.trs_id
+--    add FK from transcription_status to transcription_workflow
+--    add Not Null to CAS.case_number, CAS.case_closed, CAS.interpreter_used
+--    add NN to DAL.cth_id, DAL.job_status
+--    add default of "DAR" to DER.device_type
+--    add NN to HEA.hearing_is_actual, HEA.hearing_date
+--    add NN to MED.channel and MED.total_channels, MED.start_ts, MED.end_ts
+--    remove transcription.current_state_ts to be inferred from transcription_workflow
+--    
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -340,9 +351,9 @@ CREATE TABLE court_case
 ,cth_id                      INTEGER                       NOT NULL
 ,evh_id                      INTEGER               -- must map to one of the reporting restriction elements found on event_handler
 ,case_object_id              CHARACTER VARYING(16)
-,case_number                 CHARACTER VARYING     -- maps to c_case_id in legacy                    
-,case_closed                 BOOLEAN
-,interpreter_used            BOOLEAN
+,case_number                 CHARACTER VARYING             NOT NULL  -- maps to c_case_id in legacy                    
+,case_closed                 BOOLEAN                       NOT NULL
+,interpreter_used            BOOLEAN                       NOT NULL
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
 ,retain_until_ts             TIMESTAMP WITH TIME ZONE
 ,version_label               CHARACTER VARYING(32)
@@ -423,7 +434,7 @@ CREATE TABLE daily_list
 ,daily_list_object_id        CHARACTER VARYING(16)
 ,unique_id                   CHARACTER VARYING
 --,c_crown_court_name        CHARACTER VARYING        -- removed, normalised to courthouses, but note that in legacy there is mismatch between moj_courthouse_s.c_id and moj_daily_list_s.c_crown_court_name to be resolved
-,job_status                  CHARACTER VARYING        -- one of "New","Partially Processed","Processed","Ignored","Invalid"
+,job_status                  CHARACTER VARYING             NOT NULL  -- one of "New","Partially Processed","Processed","Ignored","Invalid"
 ,published_ts                TIMESTAMP WITH TIME ZONE 
 ,start_dt                    DATE   
 ,end_dt                      DATE -- all values match c_start_date
@@ -506,7 +517,7 @@ IS 'foreign key from court_case';
 CREATE TABLE device_register
 (node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not der_id
 ,ctr_id                      INTEGER                       NOT NULL
-,device_type                 CHARACTER VARYING             NOT NULL
+,device_type                 CHARACTER VARYING             NOT NULL   DEFAULT 'DAR'
 ,hostname                    CHARACTER VARYING             NOT NULL
 ,ip_address                  CHARACTER VARYING             NOT NULL
 ,mac_address                 CHARACTER VARYING             NOT NULL
@@ -689,15 +700,15 @@ CREATE TABLE hearing
 (hea_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                       NOT NULL
-,hearing_date                DATE     -- to record only DATE component of hearings, both scheduled and actual
-,scheduled_start_time        TIME     -- to record only TIME component of hearings, while they are scheduled only
-,hearing_is_actual           BOOLEAN  -- TRUE for actual hearings, FALSE for scheduled hearings
+,hearing_date                DATE                          NOT NULL   -- to record only DATE component of hearings, both scheduled and actual
+,scheduled_start_time        TIME                                     -- to record only TIME component of hearings, while they are scheduled only
+,hearing_is_actual           BOOLEAN                       NOT NULL   -- TRUE for actual hearings, FALSE for scheduled hearings
 ,judge_hearing_date          CHARACTER VARYING
 --,UNIQUE(moj_cas_id,moj_ctr,c_hearing_date)
-,created_ts                  TIMESTAMP WITH TIME ZONE       NOT NULL
-,created_by                  INTEGER                        NOT NULL
-,last_modified_ts            TIMESTAMP WITH TIME ZONE       NOT NULL
-,last_modified_by            INTEGER                        NOT NULL
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN hearing.hea_id
@@ -764,11 +775,11 @@ CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER
 ,media_object_id             CHARACTER VARYING(16)
-,channel                     INTEGER
-,total_channels              INTEGER                       --99.9% are "4" in legacy 
+,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
+,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
 ,reference_id                CHARACTER VARYING             --all nulls in legacy
-,start_ts                    TIMESTAMP WITH TIME ZONE 
-,end_ts                      TIMESTAMP WITH TIME ZONE
+,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
+,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
 ,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -982,14 +993,12 @@ CREATE TABLE transcription
 (tra_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,trt_id                      INTEGER                       NOT NULL
-,trs_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                  
 ,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)       
 ,hea_id                      INTEGER                                -- remains nullable, until migration is complete
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
 ,company                     CHARACTER VARYING                      -- effectively unused in legacy, either null or "<this field will be completed by the system>"
 ,requestor                   CHARACTER VARYING                      -- 1055 distinct, from <forname><surname> to <AAANNA>
-,current_state_ts            TIMESTAMP WITH TIME ZONE               -- date & time record entered the current c_current_state
 ,hearing_date                TIMESTAMP WITH TIME ZONE               -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
 ,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
@@ -1008,9 +1017,6 @@ IS 'foreign key from case';
 
 COMMENT ON COLUMN transcription.trt_id
 IS 'foreign key to transcription_type, sourced from moj_transcription_s.c_type';
-
-COMMENT ON COLUMN transcription.trs_id
-IS 'foreign key to transcription_status';
 
 COMMENT ON COLUMN transcription.ctr_id
 IS 'foreign key from courtroom';
@@ -1116,7 +1122,7 @@ IS 'inherited from tbl_moj_urgency.description';
 CREATE TABLE transcription_workflow
 (trw_id                      INTEGER                       NOT NULL 
 ,tra_id                      INTEGER                       NOT NULL  -- FK to transcription 
-,workflow_stage              CHARACTER VARYING             NOT NULL  -- will include REQUEST, APPROVAL etc
+,trs_id                      INTEGER                       NOT NULL  -- FK to transciption_status
 ,workflow_comment            CHARACTER VARYING             
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -1735,10 +1741,6 @@ ALTER TABLE transcription
 ADD CONSTRAINT transcription_transcription_type_fk
 FOREIGN KEY (trt_id) REFERENCES transcription_type(trt_id);
 
-ALTER TABLE transcription               
-ADD CONSTRAINT transcription_transcription_status_fk
-FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
-
 ALTER TABLE transcription_comment       
 ADD CONSTRAINT transcription_comment_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
@@ -1782,6 +1784,10 @@ FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE transcription_workflow               
+ADD CONSTRAINT transcription_workflow_transcription_status_fk
+FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
 
 ALTER TABLE transient_object_directory
 ADD CONSTRAINT transient_object_directory_created_by_fk
@@ -1876,7 +1882,6 @@ GRANT SELECT,UPDATE ON  aud_seq TO darts_user;
 GRANT SELECT,UPDATE ON  aut_seq TO darts_user;
 GRANT SELECT,UPDATE ON  car_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cas_seq TO darts_user;
-GRANT SELECT,UPDATE ON  cra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cre_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cth_seq TO darts_user;
 GRANT SELECT,UPDATE ON  ctr_seq TO darts_user;

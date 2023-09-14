@@ -10,12 +10,17 @@ plugins {
   id 'org.sonarqube' version '4.3.1.3277'
   id "io.freefair.lombok" version "8.3"
   id "org.openapi.generator" version "7.0.0"
-  id "org.flywaydb.flyway" version "9.22.0"
+  id "org.flywaydb.flyway" version "9.22.1"
   id 'maven-publish'
 }
 
 group = 'uk.gov.hmcts'
 version = '0.0.1'
+
+compileJava   {
+  sourceCompatibility = '17'
+  targetCompatibility = '17'
+}
 
 java {
   toolchain {
@@ -383,8 +388,6 @@ publishing {
 task updateOpenSpecificationsWithVersion() {
 
   doLast {
-    println("HITS!!!");
-
     def fileDir = "$projectDir/src/main/resources/openapi/"
 
     File openFile = new File(fileDir)
