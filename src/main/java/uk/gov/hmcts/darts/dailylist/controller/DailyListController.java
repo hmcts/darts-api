@@ -20,7 +20,6 @@ import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.api.DailyListsApi;
-import uk.gov.hmcts.darts.dailylist.model.CourtList;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
@@ -109,34 +108,6 @@ public class DailyListController implements DailyListsApi {
         return new ResponseEntity<>(postDailyListResponse, HttpStatus.OK);
 
     }
-
-    @Override
-    @Operation(
-        operationId = "dailylistsGetCasesGet",
-        summary = "Retrieves the case list for the specified courthouse, courtroom and a hearing date.",
-        description = "description",
-        tags = {"DailyLists"},
-        responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CourtList.class))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/dailylists/getCases",
-        produces = {"application/json"}
-    )
-    public ResponseEntity<CourtList> dailylistsGetCasesGet(
-        @NotNull @Parameter(name = "court_house_code", description = "The CourtHouseCode to get the daily list for.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "court_house_code", required = true) Integer courtHouseCode,
-        @Parameter(name = "court_room_number", description = "The CourtRoomNumber to get the daily list for.<br>This is optional, if not provided, the daily list for all court rooms in the court house will be provided.", in = ParameterIn.QUERY) @Valid @RequestParam(value = "court_room_number", required = false) String courtRoomNumber,
-        @Parameter(name = "hearing_date", description = "The date to get the daily list for.<br>This is optional, if not provided, the daily list for today will be provided.", in = ParameterIn.QUERY) @Valid @RequestParam(value = "hearing_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hearingDate
-    ) {
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
-
-    }
-
 
     public ResponseEntity<Void> dailylistsHousekeepingPost() {
         dailyListService.runHouseKeepingNow();

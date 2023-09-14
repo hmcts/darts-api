@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,20 +35,6 @@ class DailyListEntityTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         assertThat(response.getResponse().getContentAsString()).contains("dal_id");
-    }
-
-    @Test
-    void dailyListGetCasesEndpoint() throws Exception {
-        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
-
-        MockHttpServletRequestBuilder requestBuilder = get("/dailylists/getCases")
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .queryParam("court_house_code", "457")
-            .queryParam("court_room_number", "1")
-            .queryParam("hearing_date", "2023-02-02");
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotImplemented()).andReturn();
-
-        assertThat(response.getResponse().getContentAsString()).isEqualTo("");
     }
 
     private String getContentsFromFile(String filelocation) throws IOException {
