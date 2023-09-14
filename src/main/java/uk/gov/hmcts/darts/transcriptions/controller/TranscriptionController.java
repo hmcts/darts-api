@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
-import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionError;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
@@ -42,7 +42,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     private boolean validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
-            throw new DartsApiException(TranscriptionError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (!isNull(transcriptionRequestDetails.getHearingId())) {
             hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
         } else {
@@ -52,12 +52,17 @@ public class TranscriptionController implements TranscriptionApi {
         Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
 
         if (transcriptionTypesThatRequireDates(transcriptionTypeId)
-            && !transcriptionDatesAreSet(transcriptionRequestDetails.getStartDateTime(), transcriptionRequestDetails.getEndDateTime())
+            && !transcriptionDatesAreSet(
+            transcriptionRequestDetails.getStartDateTime(),
+            transcriptionRequestDetails.getEndDateTime()
+        )
         ) {
             log.error("This transcription type {} requires both the start date ({}) and end dates ({})",
-                      transcriptionRequestDetails.getTranscriptionTypeId(), transcriptionRequestDetails.getStartDateTime(),
-                      transcriptionRequestDetails.getEndDateTime());
-            throw new DartsApiException(TranscriptionError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
+                      transcriptionRequestDetails.getTranscriptionTypeId(),
+                      transcriptionRequestDetails.getStartDateTime(),
+                      transcriptionRequestDetails.getEndDateTime()
+            );
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
 
         return true;

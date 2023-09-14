@@ -47,7 +47,7 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
             ));
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("audioRequestId", String.valueOf(mediaRequestEntity.getId()));
+            .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk());
@@ -56,7 +56,7 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
     @Test
     void audioDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("audioRequestId", "666");
+            .queryParam("media_request_id", "666");
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))

@@ -9,4 +9,10 @@ public interface Authorisation {
 
     void authoriseByHearingId(Integer hearingId);
 
+    void authoriseByMediaRequestId(Integer mediaRequestId);
+
+    void authoriseByMediaId(Integer mediaId);
+
+    void authoriseByTranscriptionId(Integer transcriptionId);
+
 }

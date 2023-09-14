@@ -14,15 +14,30 @@ public enum AuthorisationError implements DartsApiError {
         HttpStatus.UNAUTHORIZED,
         "User is not authorised for the associated courthouse"
     ),
-    BAD_CASE_ID_REQUEST(
+    BAD_REQUEST_CASE_ID(
         "101",
         HttpStatus.BAD_REQUEST,
         "Failed to check authorisation for the case"
     ),
-    BAD_HEARING_ID_REQUEST(
+    BAD_REQUEST_HEARING_ID(
         "102",
         HttpStatus.BAD_REQUEST,
         "Failed to check authorisation for the hearing"
+    ),
+    BAD_REQUEST_MEDIA_REQUEST_ID(
+        "103",
+        HttpStatus.BAD_REQUEST,
+        "Failed to check authorisation for the media request"
+    ),
+    BAD_REQUEST_MEDIA_ID(
+        "104",
+        HttpStatus.BAD_REQUEST,
+        "Failed to check authorisation for the media"
+    ),
+    BAD_REQUEST_TRANSCRIPTION_ID(
+        "105",
+        HttpStatus.BAD_REQUEST,
+        "Failed to check authorisation for the transcription"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

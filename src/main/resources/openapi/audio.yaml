@@ -39,12 +39,12 @@ paths:
       description: Download audio
       parameters:
         - in: query
-          name: audioRequestId
+          name: media_request_id
           required: true
           schema:
-            $ref: '#/components/schemas/AudioRequestId'
+            type: integer
       responses:
-        200:
+        '200':
           description: OK
           content:
             audio/mpeg:
@@ -55,7 +55,37 @@ paths:
               schema:
                 type: string
                 format: binary
-        500:
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_103"
+                title: "Failed to check authorisation for the media request"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
+        '500':
           description: The requested data cannot be located
           content:
             application/json+problem:
@@ -99,6 +129,16 @@ paths:
                   summary: No media metadata exists for the given hearing id
                   value:
                     [ ]
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_102"
+                title: "Failed to check authorisation for the hearing"
+                status: 400
         '401':
           description: Unauthorised Error
           content:
@@ -116,7 +156,7 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                type: "CASE_105"
+                type: "HEARING_100"
                 title: "The requested hearing cannot be found"
                 status: 404
   /audio/preview/{media_id}:
@@ -192,10 +232,6 @@ components:
           example: '2023-05-31T12:00:00Z'
         request_type:
           $ref: '#/components/schemas/AudioRequestType'
-
-    AudioRequestId:
-      type: integer
-      example: 12345
 
     AudioMetadata:
       type: object

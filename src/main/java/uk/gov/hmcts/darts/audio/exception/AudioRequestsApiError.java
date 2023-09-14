@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.transcriptions.exception;
+package uk.gov.hmcts.darts.audio.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,12 +7,15 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
 @RequiredArgsConstructor
-public enum TranscriptionError implements DartsApiError {
-    FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST("100",
-                                             HttpStatus.BAD_REQUEST,
-                                             "Failed to validate transcription request");
+public enum AudioRequestsApiError implements DartsApiError {
 
-    private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";
+    MEDIA_REQUEST_NOT_FOUND(
+        "100",
+        HttpStatus.NOT_FOUND,
+        "The requested audio request cannot be found"
+    );
+
+    private static final String ERROR_TYPE_PREFIX = "AUDIO_REQUESTS";
 
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;

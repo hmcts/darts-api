@@ -18,8 +18,11 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_CASE_ID_REQUEST;
-import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_HEARING_ID_REQUEST;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_CASE_ID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_HEARING_ID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_MEDIA_ID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_MEDIA_REQUEST_ID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_TRANSCRIPTION_ID;
 
 @Aspect
 @Configuration
@@ -27,21 +30,42 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 @Slf4j
 public class AuthorisationAspect {
 
+    /**
+     * Regex to capture any path param which may not have a trailing slash e.g. /cases/{case_id}
+     */
+    private static final String PATH_PARAM_REGEX = "(?<=\\/%s\\/)(\\d+?)(?=\\/|$)";
+
+    private static final String CASES_PATH = "cases";
     private static final String CASE_ID_PARAM = "case_id";
+
+    private static final String HEARINGS_PATH = "hearings";
     private static final String HEARING_ID_PARAM = "hearing_id";
 
+    private static final String AUDIO_REQUESTS_PATH = "audio-requests";
+    private static final String AUDIO_REQUEST_ID_PARAM = "media_request_id";
+
+    private static final String AUDIOS_PATH = "audio/preview"; //FIXME should probably be "audios"
+    private static final String AUDIO_ID_PARAM = "media_id";
+
+    private static final String TRANSCRIPTIONS_PATH = "transcriptions";
+    private static final String TRANSCRIPTION_ID_PARAM = "transcription_id";
+
+    private static final Pattern CASES_ID_PATH_PATTERN = Pattern.compile(
+        String.format(PATH_PARAM_REGEX, CASES_PATH));
+
+    private static final Pattern HEARINGS_ID_PATH_PATTERN = Pattern.compile(
+        String.format(PATH_PARAM_REGEX, HEARINGS_PATH));
+
+    private static final Pattern AUDIO_REQUESTS_ID_PATH_PATTERN = Pattern.compile(
+        String.format(PATH_PARAM_REGEX, AUDIO_REQUESTS_PATH));
+
+    private static final Pattern AUDIOS_ID_PATH_PATTERN = Pattern.compile(
+        String.format(PATH_PARAM_REGEX, AUDIOS_PATH));
+
+    private static final Pattern TRANSCRIPTIONS_ID_PATH_PATTERN = Pattern.compile(
+        String.format(PATH_PARAM_REGEX, TRANSCRIPTIONS_PATH));
+
     private final Authorisation authorisation;
-
-    /**
-     * Regex to capture any {case_id} path param which may not have a trailing slash e.g. /cases/{case_id}
-     */
-    private static final Pattern CASES_ID_PATH_PATTERN = Pattern.compile("(?<=\\/cases\\/)(\\d+?)(?=\\/|$)");
-    /**
-     * Regex to capture any {hearing_id} path param which may not have a trailing slash e.g.
-     * /hearings/{hearing_id}/events
-     */
-    private static final Pattern HEARINGS_ID_PATH_PATTERN = Pattern.compile("(?<=\\/hearings\\/)(\\d+?)(?=\\/|$)");
-
 
     @Before("@annotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation)")
     public void authorisation(JoinPoint joinPoint) throws Throwable {
@@ -58,12 +82,20 @@ public class AuthorisationAspect {
             case HEARING_ID:
                 checkAuthorisationByHearingId(request);
                 break;
+            case MEDIA_REQUEST_ID:
+                checkAuthorisationByMediaRequestId(request);
+                break;
+            case MEDIA_ID:
+                checkAuthorisationByMediaId(request);
+                break;
+            case TRANSCRIPTION_ID:
+                checkAuthorisationByTranscriptionId(request);
+                break;
             default:
                 log.warn("Unrecognised contextId");
                 break;
         }
     }
-
 
     private void checkAuthorisationByCaseId(HttpServletRequest request) {
         Optional<String> caseIdParamOptional = Optional.empty();
@@ -83,7 +115,6 @@ public class AuthorisationAspect {
             caseIdParamOptional = Optional.ofNullable(request.getHeader(CASE_ID_PARAM));
             checkAuthorisationByCaseId(caseIdParamOptional);
         }
-
     }
 
     private void checkAuthorisationByCaseId(Optional<String> caseIdParamOptional) {
@@ -93,7 +124,7 @@ public class AuthorisationAspect {
                 authorisation.authoriseByCaseId(caseId);
             } catch (NumberFormatException e) {
                 log.error("Unable to parse case_id for checkAuthorisation", e);
-                throw new DartsApiException(BAD_CASE_ID_REQUEST);
+                throw new DartsApiException(BAD_REQUEST_CASE_ID);
             }
         }
     }
@@ -116,7 +147,6 @@ public class AuthorisationAspect {
             hearingIdParamOptional = Optional.ofNullable(request.getHeader(HEARING_ID_PARAM));
             checkAuthorisationByHearingId(hearingIdParamOptional);
         }
-
     }
 
     private void checkAuthorisationByHearingId(Optional<String> hearingIdParamOptional) {
@@ -126,7 +156,103 @@ public class AuthorisationAspect {
                 authorisation.authoriseByHearingId(hearingId);
             } catch (NumberFormatException e) {
                 log.error("Unable to parse hearing_id for checkAuthorisation", e);
-                throw new DartsApiException(BAD_HEARING_ID_REQUEST);
+                throw new DartsApiException(BAD_REQUEST_HEARING_ID);
+            }
+        }
+    }
+
+    private void checkAuthorisationByMediaRequestId(HttpServletRequest request) {
+        Optional<String> mediaRequestIdParamOptional = Optional.empty();
+
+        Matcher matcher = AUDIO_REQUESTS_ID_PATH_PATTERN.matcher(request.getRequestURI());
+        if (matcher.find()) {
+            mediaRequestIdParamOptional = Optional.ofNullable(matcher.group(0));
+            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional);
+        }
+
+        if (mediaRequestIdParamOptional.isEmpty()) {
+            mediaRequestIdParamOptional = Optional.ofNullable(request.getParameter(AUDIO_REQUEST_ID_PARAM));
+            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional);
+        }
+
+        if (mediaRequestIdParamOptional.isEmpty()) {
+            mediaRequestIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_REQUEST_ID_PARAM));
+            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional);
+        }
+    }
+
+    private void checkAuthorisationByMediaRequestId(Optional<String> mediaRequestIdParamOptional) {
+        if (mediaRequestIdParamOptional.isPresent()) {
+            try {
+                Integer mediaRequestId = Integer.valueOf(mediaRequestIdParamOptional.get());
+                authorisation.authoriseByMediaRequestId(mediaRequestId);
+            } catch (NumberFormatException e) {
+                log.error("Unable to parse audio_request_id for checkAuthorisation", e);
+                throw new DartsApiException(BAD_REQUEST_MEDIA_REQUEST_ID);
+            }
+        }
+    }
+
+    private void checkAuthorisationByMediaId(HttpServletRequest request) {
+        Optional<String> mediaIdParamOptional = Optional.empty();
+
+        Matcher matcher = AUDIOS_ID_PATH_PATTERN.matcher(request.getRequestURI());
+        if (matcher.find()) {
+            mediaIdParamOptional = Optional.ofNullable(matcher.group(0));
+            checkAuthorisationByMediaId(mediaIdParamOptional);
+        }
+
+        if (mediaIdParamOptional.isEmpty()) {
+            mediaIdParamOptional = Optional.ofNullable(request.getParameter(AUDIO_ID_PARAM));
+            checkAuthorisationByMediaId(mediaIdParamOptional);
+        }
+
+        if (mediaIdParamOptional.isEmpty()) {
+            mediaIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_ID_PARAM));
+            checkAuthorisationByMediaId(mediaIdParamOptional);
+        }
+    }
+
+    private void checkAuthorisationByMediaId(Optional<String> mediaIdParamOptional) {
+        if (mediaIdParamOptional.isPresent()) {
+            try {
+                Integer mediaId = Integer.valueOf(mediaIdParamOptional.get());
+                authorisation.authoriseByMediaId(mediaId);
+            } catch (NumberFormatException e) {
+                log.error("Unable to parse media_id for checkAuthorisation", e);
+                throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
+            }
+        }
+    }
+
+    private void checkAuthorisationByTranscriptionId(HttpServletRequest request) {
+        Optional<String> transcriptionIdParamOptional = Optional.empty();
+
+        Matcher matcher = TRANSCRIPTIONS_ID_PATH_PATTERN.matcher(request.getRequestURI());
+        if (matcher.find()) {
+            transcriptionIdParamOptional = Optional.ofNullable(matcher.group(0));
+            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional);
+        }
+
+        if (transcriptionIdParamOptional.isEmpty()) {
+            transcriptionIdParamOptional = Optional.ofNullable(request.getParameter(TRANSCRIPTION_ID_PARAM));
+            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional);
+        }
+
+        if (transcriptionIdParamOptional.isEmpty()) {
+            transcriptionIdParamOptional = Optional.ofNullable(request.getHeader(TRANSCRIPTION_ID_PARAM));
+            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional);
+        }
+    }
+
+    private void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional) {
+        if (transcriptionIdParamOptional.isPresent()) {
+            try {
+                Integer transcriptionId = Integer.valueOf(transcriptionIdParamOptional.get());
+                authorisation.authoriseByTranscriptionId(transcriptionId);
+            } catch (NumberFormatException e) {
+                log.error("Unable to parse transcription_id for checkAuthorisation", e);
+                throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
             }
         }
     }

@@ -111,6 +111,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_101"
+                title: "Failed to check authorisation for the case"
+                status: 400
         '401':
           description: Unauthorised Error
           content:

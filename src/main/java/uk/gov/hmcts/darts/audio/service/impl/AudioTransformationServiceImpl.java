@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
@@ -115,7 +115,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             List<MediaEntity> mediaEntitiesForRequest = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForRequest.isEmpty()) {
-                throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
+                throw new DartsApiException(
+                    AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
+                    "No media present to process"
+                );
             }
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(mediaEntitiesForRequest);
@@ -144,7 +147,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), notificationFailureTemplateId);
             }
 
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
 
         mediaRequestService.updateAudioRequestStatus(mediaRequestEntity.getId(), COMPLETED);
@@ -277,7 +280,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity);
     }
 
-    public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime, OffsetDateTime endTime)
+    public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
+                               OffsetDateTime endTime)
         throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(
