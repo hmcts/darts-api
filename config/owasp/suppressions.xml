@@ -2,26 +2,14 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
   <!--Please add all the false positives under the below section-->
   <suppress>
-    <notes>False Positives
-      CVE-2016-1000027 - https://github.com/spring-projects/spring-framework/issues/24434#issuecomment-579669626
-    </notes>
-    <cve>CVE-2016-1000027</cve>
-  </suppress>
-  <suppress>
     <notes>Dependency brought in through gov-notify, so we can't control this.</notes>
     <cve>CVE-2022-45688</cve>
   </suppress>
+
   <suppress>
     <notes>The vulnerability only affects applications that use an LDAP CertStore from Bouncy Castle to validate X.509 certificates.
     I have spoken to Hemanta who has confirmed we don't do this.</notes>
     <cve>CVE-2023-33201</cve>
-  </suppress>
-
-  <!--Please add all the temporary suppression under the below section-->
-  <suppress until="2023-10-14">
-    <notes>Waiting for spring boot version to pull in Spring Framework v6.0.7</notes>
-    <packageUrl regex="true">^pkg:maven/commons-fileupload/commons-fileupload@.*$</packageUrl>
-    <vulnerabilityName>CVE-2023-24998</vulnerabilityName>
   </suppress>
 
   <suppress until="2023-12-14">
@@ -33,16 +21,6 @@
     <notes>Looks like a new security issue which involves DOS attacks</notes>
     <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
     <vulnerabilityName>CVE-2023-35116</vulnerabilityName>
-  </suppress>
-
-  <suppress until="2023-10-14">
-    <notes>Latest Release: pgJDBC v42.6.0 17 March 2023
-      - https://www.cve.org/CVERecord?id=CVE-2020-21469
-      An issue was discovered in PostgreSQL 12.2 allows attackers to cause a denial of service via repeatedly sending
-      SIGHUP signals.
-    </notes>
-    <packageUrl regex="true">pkg:maven/org.postgresql/postgresql@42.6.0</packageUrl>
-    <vulnerabilityName>CVE-2020-21469</vulnerabilityName>
   </suppress>
 
   <suppress until="2023-10-14">
