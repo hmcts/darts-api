@@ -88,31 +88,8 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(CREATED, eventResponse.statusCode());
     }
 
-
     @Test
     @Order(2)
-    void createEvent() {
-        String caseNum = getCaseNumber();
-        String payload = "{\"message_id\": \"54321\",\"type \": \"1000\",\"sub_type\": \"1002\",\"event_id\": \"12345\",\"" +
-            COURTHOUSE + "\": \"" + COURTHOUSE1 + "\",\"" + COURTROOM + "\": \"" + COURTHOUSE_ROOM + "\",\"" + CASE_NUMBER + "\": [\"" +
-            caseNum + "\"],\"event_text\": " + EVENT_TEXT + ",\"date_time\": " +
-            EVENT_DATE_TIME + ",\"retention_policy\": {" +
-            CASE_RETENTION_FIXED_POLICY + ": \"unknown\",\"case_total_sentence\": \"unknown\"}}";
-        Response response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(EVENTS))
-            .body(payload)
-            .post()
-            .then()
-            .extract().response();
-
-        assertEquals(CREATED, response.statusCode());
-    }
-
-
-    @Test
-    @Order(3)
     void getAllCases() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -129,7 +106,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(4)
+    @Order(3)
     void getExistingCase() {
         int caseId = getCaseId();
 
@@ -149,7 +126,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(5)
+    @Order(4)
     void getCaseBadRequest() {
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -163,7 +140,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     void patchCase() {
         int caseId = getCaseId();
 
@@ -186,7 +163,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(7)
+    @Order(6)
     void searchCase() {
         String caseNum = getCaseNumber();
 
@@ -210,7 +187,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(8)
+    @Order(7)
     void getCaseHearing() {
         int caseId = getCaseId();
 
@@ -230,7 +207,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(9)
+    @Order(8)
     void getCaseHearingEvents() {
         int hearingId = getCaseHearingId();
 
