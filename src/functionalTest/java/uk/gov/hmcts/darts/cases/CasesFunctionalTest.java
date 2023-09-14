@@ -41,6 +41,14 @@ class CasesFunctionalTest  extends FunctionalTest {
     public static final String EVENT_TEXT = "\"Functional Test Setup\"";
     public static final String EVENT_DATE_TIME = "\"2023-09-12T12:57:18.596Z\"";
     public static final String CASE_RETENTION_FIXED_POLICY = "\"case_retention_fixed_policy\"";
+    public static final String DEFENDERS = "\"defenders\"";
+    public static final String PROSECUTORS = "\"prosecutors\"";
+    public static final String JUDGES = "\"judges\"";
+    public static final String DEFENDANTS = "\"defendants\"";
+    public static final String DEFENDANT_C = "\"defendantC\"";
+    public static final String JUDGE_C = "\"judgeC\"";
+    public static final String PROSECUTOR_C = "\"prosecutorC\"";
+    public static final String DEFENDER_C = "\"defenderC\"";
 
 
     @Test
@@ -49,7 +57,7 @@ class CasesFunctionalTest  extends FunctionalTest {
         String uniqueCaseNum = generateUniquesCaseNum();
 
         String casePayload = "{ \"" + COURTHOUSE + "\" : \"LEEDS\",\"" + CASE_NUMBER + "\" : \"" + uniqueCaseNum +
-            "\",\"defendants\": [\"defendantC\"],\"judges\": [\"judgeC\"],\"prosecutors\": [\"prosecutorC\"],\"defenders\": [\"defenderC\"]}";
+            "\"," + DEFENDANTS + ": [" + DEFENDANT_C + "]," + JUDGES + ": [" + JUDGE_C + "]," + PROSECUTORS + ": [" + PROSECUTOR_C + "]," + DEFENDERS + ": [" + DEFENDER_C + "]}";
 
         Response caseResponse = buildRequestWithAuth()
             .contentType(ContentType.JSON)
