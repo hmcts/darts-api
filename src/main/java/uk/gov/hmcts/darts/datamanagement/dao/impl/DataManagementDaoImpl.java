@@ -21,11 +21,11 @@ public class DataManagementDaoImpl implements DataManagementDao {
     private BlobServiceClient blobServiceClient;
 
     @Override
-    public BlobContainerClient getBlobContainerClient(String containerName) {
+    public BlobServiceClient getBlobClient() {
         if (blobServiceClient == null) {
             blobServiceClient = getBlobServiceClient();
         }
-        return blobServiceClient.getBlobContainerClient(containerName);
+        return blobServiceClient;
     }
 
     @Override
@@ -33,7 +33,17 @@ public class DataManagementDaoImpl implements DataManagementDao {
         return containerClient.getBlobClient(String.valueOf(blobId));
     }
 
+    @Override
+    public BlobContainerClient getBlobContainerClient(String containerName) {
+        if (blobServiceClient == null) {
+            blobServiceClient = getBlobServiceClient();
+        }
+        return blobServiceClient.getBlobContainerClient(containerName);
+    }
+
+
     private BlobServiceClient getBlobServiceClient() {
+        log.info("dataManagementConfiguration.getBlobStorageAccountConnectionString() " + dataManagementConfiguration.getBlobStorageAccountConnectionString());
         return new BlobServiceClientBuilder()
             .connectionString(dataManagementConfiguration.getBlobStorageAccountConnectionString())
             .buildClient();

@@ -33,6 +33,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         UUID uniqueBlobId = UUID.randomUUID();
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
+        log.info("containerClient.getAccountName()" + containerClient.getAccountName());
         BlobClient client = dataManagementDao.getBlobClient(containerClient, uniqueBlobId);
         client.upload(binaryData);
 
@@ -45,5 +46,9 @@ public class DataManagementServiceImpl implements DataManagementService {
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
         BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
         blobClient.delete();
+    }
+
+    public void createContainer(String containerName) {
+        dataManagementDao.getBlobClient().createBlobContainerIfNotExists(containerName);
     }
 }

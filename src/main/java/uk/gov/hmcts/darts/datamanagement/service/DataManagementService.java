@@ -10,4 +10,6 @@ public interface DataManagementService {
     UUID saveBlobData(String containerName, BinaryData binaryData);
 
     void deleteBlobData(String containerName, UUID blobId);
+
+    void createContainer(String containerName);
 }
