@@ -48,7 +48,8 @@ class CasesFunctionalTest  extends FunctionalTest {
     void createCaseAndEvent() {
         String uniqueCaseNum = generateUniquesCaseNum();
 
-        String casePayload = "{ \"" + COURTHOUSE + "\" : \"LEEDS\",\"" + CASE_NUMBER + "\" : \"" + uniqueCaseNum + "\",\"defendants\": [\"defendantC\"],\"judges\": [\"judgeC\"],\"prosecutors\": [\"prosecutorC\"],\"defenders\": [\"defenderC\"]}";
+        String casePayload = "{ \"" + COURTHOUSE + "\" : \"LEEDS\",\"" + CASE_NUMBER + "\" : \"" + uniqueCaseNum +
+            "\",\"defendants\": [\"defendantC\"],\"judges\": [\"judgeC\"],\"prosecutors\": [\"prosecutorC\"],\"defenders\": [\"defenderC\"]}";
 
         Response caseResponse = buildRequestWithAuth()
             .contentType(ContentType.JSON)
@@ -242,8 +243,8 @@ class CasesFunctionalTest  extends FunctionalTest {
     private static String generateUniquesCaseNum() {
         String generateUniqueNo = String.format("%010d",
                                               new BigInteger(UUID.randomUUID().toString().replace("-", ""),16));
-
-        generateUniqueNo = generateUniqueNo.substring( generateUniqueNo.length() - 15);
+        int len = generateUniqueNo.length() - 15;
+        generateUniqueNo = generateUniqueNo.substring(len);
 
         return generateUniqueNo;
     }
