@@ -21,9 +21,6 @@ spring:
     name: Darts Api
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/discovery/v2.0/keys
       client:
         registration:
           external-azure-ad:
@@ -36,7 +33,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt: login
-            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
+            issuer-uri: ${darts.azure.active-directory-b2c-base-uri}/89b8de2e-eb1b-42fb-a59c-813ea2b82a56/v2.0/
             claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
