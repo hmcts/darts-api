@@ -32,14 +32,14 @@ class SecurityRoleRepositoryTest {
     void shouldFindAllCourtManagerPermissions() {
         SecurityRoleEntity courtManagerRole = securityRoleRepository.findById(COURT_MANAGER.getId()).orElseThrow();
         final List<SecurityPermissionEntity> securityPermissionEntities = courtManagerRole.getSecurityPermissionEntities();
-        assertEquals(10, securityPermissionEntities.size());
+        assertEquals(11, securityPermissionEntities.size());
     }
 
     @Test
     void shouldFindAllJudgePermissions() {
         SecurityRoleEntity judgeRole = securityRoleRepository.findById(JUDGE.getId()).orElseThrow();
         final List<SecurityPermissionEntity> securityPermissionEntities = judgeRole.getSecurityPermissionEntities();
-        assertEquals(11, securityPermissionEntities.size());
+        assertEquals(12, securityPermissionEntities.size());
     }
 
 }
