@@ -192,22 +192,5 @@ class CasesMapperTest {
             "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
-
-    @Test
-    void testMapToEvents() throws IOException {
-        EventHandlerEntity eventType = new EventHandlerEntity();
-        eventType.setEventName("TestName");
-
-        HearingEntity hearingEntity = CommonTestDataUtil.createHearing("TEST_1", LocalTime.NOON);
-        EventEntity eventEntity = CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType);
-
-        List<EventResponse> eventResponses = caseMapper.mapToEvents(List.of(eventEntity));
-
-        String actualResponse = objectMapper.writeValueAsString(eventResponses);
-        String expectedResponse = getContentsFromFile(
-            "Tests/cases/CasesMapperTest/testMapToEvents/expectedResponse.json");
-
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
-    }
-
+    
 }

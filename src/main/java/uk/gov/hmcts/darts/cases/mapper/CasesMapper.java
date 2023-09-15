@@ -106,19 +106,6 @@ public class CasesMapper {
         return singleCase;
     }
 
-    public List<EventResponse> mapToEvents(List<EventEntity> eventEntities) {
-        return emptyIfNull(eventEntities).stream().map(this::mapToEvent).collect(Collectors.toList());
-    }
-
-    public EventResponse mapToEvent(EventEntity eventEntity) {
-        EventResponse eventResponse = new EventResponse();
-        eventResponse.setId(eventEntity.getId());
-        eventResponse.setTimestamp(eventEntity.getTimestamp());
-        eventResponse.setName(eventEntity.getEventType().getEventName());
-        eventResponse.setText(eventEntity.getEventText());
-        return eventResponse;
-    }
-
     private DefenceEntity createNewDefence(String newProsecutor, CourtCaseEntity caseEntity) {
         DefenceEntity defence = new DefenceEntity();
         defence.setCourtCase(caseEntity);
