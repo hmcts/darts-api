@@ -270,36 +270,6 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-
-  /cases/hearings/{hearing_id}/events:
-    get:
-      tags:
-        - Cases
-      summary: Allows the retrieval of events for a given hearingId
-      operationId: getEvents
-      description: |-
-        Retrieves all events for a given hearingId.
-      parameters:
-        - in: path
-          name: hearing_id
-          schema:
-            type: integer
-          description: "hearingId is the internal hea_id of the hearing."
-          required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events_response'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
 components:
   schemas:
     add_case_request:

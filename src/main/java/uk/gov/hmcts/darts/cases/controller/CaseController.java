@@ -108,10 +108,6 @@ public class CaseController implements CasesApi {
 
     }
 
-    @Override
-    public ResponseEntity<List<EventResponse>> getEvents(@Parameter(name = "hearing_id", description = "hearingId is the internal hea_id of the hearing.", required = true, in = ParameterIn.PATH) @PathVariable("hearing_id") Integer hearingId) {
-        return new ResponseEntity<>(caseService.getEvents(hearingId), HttpStatus.OK);
-    }
 
     @Override
     public ResponseEntity<SingleCase> casesCaseIdPatch(Integer caseId, PatchRequestObject patchRequestObject) {
