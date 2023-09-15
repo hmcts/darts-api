@@ -175,8 +175,6 @@ The following Spring Profiles are defined. "External Components" are defined as 
 | `intTest`        | `src/integrationTest/resources/application-intTest.yaml`       | For running integration tests under `src/integrationTest`.                                     | No interaction required or permitted, all external calls are mocked via embedded wiremock (for HTTP requests), an embedded database (for db queries) or `@MockBeans` for anything else. Spring Security is explicitly disabled. |
 | `functionalTest` | `src/functionalTest/resources/application-functionalTest.yaml` | For running functional tests under `src/functionalTest`.                                       | Functional tests execute API calls against the application deployed in the PR environment. That application is deployed with the `dev` profile (see below).                                                                     |
 | `dev`            | `src/main/resources/application-dev.yaml`                      | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
-| `stg`            | `src/main/resources/application-stg.yaml`                      | For running the application in the staging environment.                                        | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
-
 
 ## License
 
