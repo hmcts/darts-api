@@ -69,13 +69,7 @@ public class CaseServiceImpl implements CaseService {
         List<HearingEntity> hearingList = hearingRepository.findByCaseIds(List.of(caseId));
 
         if (hearingList.isEmpty()) {
-
-            Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
-
-            if (caseEntity.isEmpty()) {
-                throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
-            }
-
+            getCourtCaseById(caseId);
         }
 
         return HearingEntityToCaseHearing.mapToHearingList(hearingList);
@@ -84,14 +78,17 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public SingleCase getCasesById(Integer caseId) {
+        CourtCaseEntity caseEntity = getCourtCaseById(caseId);
+        return casesMapper.mapToSingleCase(caseEntity);
+    }
 
+    public CourtCaseEntity getCourtCaseById(Integer caseId) {
         Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
 
         if (caseEntity.isEmpty()) {
             throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         }
-
-        return casesMapper.mapToSingleCase(caseEntity.get());
+        return caseEntity.get();
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
@@ -144,11 +141,7 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
-        Optional<CourtCaseEntity> foundCaseOpt = caseRepository.findById(caseId);
-        if (foundCaseOpt.isEmpty()) {
-            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
-        }
-        CourtCaseEntity foundCase = foundCaseOpt.get();
+        CourtCaseEntity foundCase = getCourtCaseById(caseId);
         foundCase.setRetainUntilTimestamp(patchRequestObject.getRetainUntil());
         caseRepository.save(foundCase);
         return casesMapper.mapToSingleCase(foundCase);

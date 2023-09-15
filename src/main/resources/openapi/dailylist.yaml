@@ -2,7 +2,7 @@ openapi: 3.0.1
 
 info:
 
-  version: 0.0.1
+  version: ${version}
   title: Modernised DARTS
   description: |-
     Modernised DARTS (Digital Audio Recording and Transcription Service).
@@ -109,50 +109,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostDailyListResponse'
-
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
-  /dailylists/getCases:
-    get:
-      tags:
-        - DailyLists
-      summary: Retrieves the case list for the specified courthouse, courtroom and a hearing date.
-      description: |-
-        description
-      parameters:
-        - in: query
-          name: court_house_code
-          schema:
-            type: integer
-          description: "The CourtHouseCode to get the daily list for."
-          required: true
-          example: 457
-        - in: query
-          name: court_room_number
-          schema:
-            type: string
-          description: "The CourtRoomNumber to get the daily list for.<br>This is optional, if not provided, the daily list for all court rooms in the court house will be provided."
-          example: 1
-        - in: query
-          name: hearing_date
-          schema:
-            type: string
-            format: date
-          description: "The date to get the daily list for.<br>This is optional, if not provided, the daily list for today will be provided."
-          example: 2023-01-01
-
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourtList'
 
         '500':
           description: Internal Server Error

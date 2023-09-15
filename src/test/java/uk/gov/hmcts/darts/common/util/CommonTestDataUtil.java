@@ -251,7 +251,7 @@ public class CommonTestDataUtil {
 
     public DailyListEntity createDailyList(LocalTime time, String source, String filelocation) throws IOException {
         DailyListEntity dailyListEntity = new DailyListEntity();
-        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
         dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(filelocation)));
         dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
@@ -262,9 +262,19 @@ public class CommonTestDataUtil {
 
     public DailyListEntity createInvalidDailyList(LocalTime time) {
         DailyListEntity dailyListEntity = new DailyListEntity();
-        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
         dailyListEntity.setContent("blah");
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setSource(String.valueOf(SourceType.XHB));
+        return dailyListEntity;
+    }
+
+    public DailyListEntity createInvalidXmlDailyList(LocalTime time) {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(JobStatusType.NEW);
+        dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
+        dailyListEntity.setXmlContent("blah");
         dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
         dailyListEntity.setSource(String.valueOf(SourceType.XHB));
         return dailyListEntity;

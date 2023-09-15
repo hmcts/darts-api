@@ -161,9 +161,7 @@ class DailyListServiceTest extends IntegrationBase {
         DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
-            service.saveDailyListToDatabase(request);
-        });
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> service.saveDailyListToDatabase(request));
 
         assertThat(exception.getMessage(), containsString("invalid courthouse 'test'"));
     }
