@@ -572,7 +572,7 @@ components:
       enum:
         - "CASE_101"
         - "CASE_102"
-      x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND, CASE_DOCUMENT_CANT_PARSED]
+      x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND, CASE_DOCUMENT_CANT_BE_PARSED]
 
     ProcessGetCasesErrorCode:
       type: string

@@ -469,7 +469,7 @@ components:
         - "DAILYLIST_101"
         - "DAILYLIST_102"
         - "DAILYLIST_103"
-      x-enum-varnames: [DAILYLIST_COURT_HOUSE_NOT_FOUND, DAILYLIST_DOCUMENT_CANT_PARSED, DAILYLIST_PROCESSOR_NOT_FOUND]
+      x-enum-varnames: [DAILYLIST_COURT_HOUSE_NOT_FOUND, DAILYLIST_DOCUMENT_CANT_BE_PARSED, DAILYLIST_PROCESSOR_NOT_FOUND]
     ProcessAddDailyListErrorCodeProblem:
       allOf:
         - $ref: './problem.yaml'

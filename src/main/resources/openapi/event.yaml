@@ -362,7 +362,7 @@ components:
         - "COURTLOG_101"
         - "COURTLOG_102"
         - "COURTLOG_103"
-      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_PARSED]
+      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED]
 
     ProcessPostCourtLogProblem:
       allOf:
