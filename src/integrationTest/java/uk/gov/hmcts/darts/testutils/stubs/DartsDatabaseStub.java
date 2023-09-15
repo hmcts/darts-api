@@ -20,7 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -63,7 +63,6 @@ import java.util.Optional;
 import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
@@ -73,9 +72,6 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
-
-    private static final int SYSTEM_USER_ID = 0;
-    private static final String INTEGRATIONTEST_USER_EMAIL = "integrationtest.user@example.com";
 
     private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
@@ -321,67 +317,6 @@ public class DartsDatabaseStub {
             ));
     }
 
-    public UserAccountEntity createSystemUserAccountEntity() {
-
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findById(SYSTEM_USER_ID);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("System User");
-            newUser.setEmailAddress("system.user@example.com");
-            return userAccountRepository.saveAndFlush(newUser);
-        }
-    }
-
-    public UserAccountEntity createIntegrationTestUserAccountEntity(UserAccountEntity systemUser) {
-
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCase(
-            INTEGRATIONTEST_USER_EMAIL);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("IntegrationTest User");
-            newUser.setEmailAddress(INTEGRATIONTEST_USER_EMAIL);
-            newUser.setCreatedBy(systemUser);
-            newUser.setLastModifiedBy(systemUser);
-            return userAccountRepository.saveAndFlush(newUser);
-        }
-    }
-
-    public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
-        final SecurityGroupRepository securityGroupRepository = getSecurityGroupRepository();
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
-        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
-        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
-
-        final UserAccountRepository userAccountRepository = getUserAccountRepository();
-        var systemUser = createSystemUserAccountEntity();
-        var testUser = createIntegrationTestUserAccountEntity(systemUser);
-        testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
-        return testUser;
-    }
-
-    public UserAccountEntity createUnauthorisedIntegrationTestUser() {
-
-        final SecurityGroupRepository securityGroupRepository = getSecurityGroupRepository();
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
-        securityGroupEntity.getCourthouseEntities().clear();
-        securityGroupRepository.saveAndFlush(securityGroupEntity);
-
-        final UserAccountRepository userAccountRepository = getUserAccountRepository();
-        var systemUser = createSystemUserAccountEntity();
-        var testUser = createIntegrationTestUserAccountEntity(systemUser);
-        testUser.getSecurityGroupEntities().clear();
-        testUser = userAccountRepository.saveAndFlush(testUser);
-        return testUser;
-    }
-
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
         mediaRepository.save(mediaEntity);
         hearing.addMedia(mediaEntity);
@@ -420,6 +355,10 @@ public class DartsDatabaseStub {
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         return hearingRepository.saveAndFlush(hearingEntity);
+    }
+
+    public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
     public void saveAll(HearingEntity... hearingEntities) {

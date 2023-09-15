@@ -11,8 +11,11 @@ import uk.gov.hmcts.darts.audio.component.AudioRequestSummaryMapper;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.api.AudioRequestsApi;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
+import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 
 import java.util.List;
+
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     }
 
     @Override
+    @Authorisation(contextId = MEDIA_REQUEST_ID)
     public ResponseEntity<Void> deleteAudioRequest(
         @Parameter(name = "audio_request_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("audio_request_id") Integer audioRequestId
     ) {

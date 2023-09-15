@@ -113,9 +113,8 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @Test
     void shouldSaveTransientDataLocation() {
-
-        var systemUser = dartsDatabase.createSystemUserAccountEntity();
-        var testUser = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(testUser);
 
         when(mockTransientObjectDirectoryService.saveTransientDataLocation(

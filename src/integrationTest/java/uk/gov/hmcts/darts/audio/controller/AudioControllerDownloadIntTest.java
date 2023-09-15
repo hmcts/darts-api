@@ -35,8 +35,7 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
     void audioDownloadGetShouldReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
-        var systemUser = dartsDatabase.createSystemUserAccountEntity();
-        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()

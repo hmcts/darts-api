@@ -62,7 +62,8 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
-        UserAccountEntity testUser = dartsDatabase.createAuthorisedIntegrationTestUser(courthouseEntity);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(courthouseEntity);
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
     }
 
@@ -80,7 +81,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @Test
     void casesSearchGetEndpointUserIsNotAuthorisedForCourthouse() throws Exception {
 
-        dartsDatabase.createUnauthorisedIntegrationTestUser();
+        dartsDatabase.getUserAccountStub().createUnauthorisedIntegrationTestUser();
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 

@@ -66,9 +66,9 @@ public class AudioTransformationServiceProcessAudioRequestGivenBuilder {
             .saveAndFlush(externalObjectDirectoryEntity);
     }
 
-    public UserAccountEntity aUserAccount(UserAccountEntity systemUser, String emailAddress) {
+    public UserAccountEntity aUserAccount(String emailAddress) {
 
-        userAccountEntity = dartsDatabaseStub.createIntegrationTestUserAccountEntity(systemUser);
+        userAccountEntity = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
         userAccountEntity.setEmailAddress(emailAddress);
 
         dartsDatabaseStub.getUserAccountRepository()

@@ -52,7 +52,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
-        UserAccountEntity testUser = dartsDatabase.createAuthorisedIntegrationTestUser(courthouseEntity);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(courthouseEntity);
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
     }
 
@@ -124,8 +125,8 @@ class CaseControllerGetCaseHearingsTest extends IntegrationBase {
 
         String courthouseName = "25";
         CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists(courthouseName);
-        dartsDatabase.createUnauthorisedIntegrationTestUser();
-        dartsDatabase.createAuthorisedIntegrationTestUser(courthouseEntity);
+        dartsDatabase.getUserAccountStub().createUnauthorisedIntegrationTestUser();
+        dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUser(courthouseEntity);
 
         CourtCaseEntity courtCase = dartsDatabase.createCase(courthouseName, "Test");
 

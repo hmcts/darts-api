@@ -13,6 +13,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class TransientObjectDirectoryStub {
+
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountStub userAccountStub;
 
@@ -21,7 +22,7 @@ public class TransientObjectDirectoryStub {
                                                                                UUID externalLocation) {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
-        transientObjectDirectoryEntity.setLastModifiedBy(userAccountStub.getDefaultUser());
+        transientObjectDirectoryEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         transientObjectDirectoryEntity.setStatus(objectDirectoryStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.now());

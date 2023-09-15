@@ -55,15 +55,15 @@ class AuthorisationServiceTest {
 
     @BeforeAll
     void beforeAll() {
-        var systemUser = dartsDatabaseStub.createSystemUserAccountEntity();
-        var testUser = dartsDatabaseStub.createIntegrationTestUserAccountEntity(systemUser);
+        dartsDatabaseStub.getUserAccountStub().getSystemUserAccountEntity();
+        var testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
         SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(36);
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setUsername("Test Judge");
         judgeUserAccount.setEmailAddress(TEST_JUDGE_EMAIL);
-        judgeUserAccount.setSecurityGroupEntities(List.of(judgesSecurityGroup));
+        judgeUserAccount.setSecurityGroupEntities(Set.of(judgesSecurityGroup));
         judgeUserAccount.setCreatedBy(testUser);
         judgeUserAccount.setLastModifiedBy(testUser);
         UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
@@ -74,7 +74,7 @@ class AuthorisationServiceTest {
         UserAccountEntity bristolUserAccount = new UserAccountEntity();
         bristolUserAccount.setUsername("Test Bristol");
         bristolUserAccount.setEmailAddress(TEST_BRISTOL_EMAIL);
-        bristolUserAccount.setSecurityGroupEntities(List.of(bristolStaff, bristolAppr));
+        bristolUserAccount.setSecurityGroupEntities(Set.of(bristolStaff, bristolAppr));
         bristolUserAccount.setCreatedBy(testUser);
         bristolUserAccount.setLastModifiedBy(testUser);
         userAccountRepository.saveAndFlush(bristolUserAccount);
@@ -162,8 +162,9 @@ class AuthorisationServiceTest {
 
         var bristolUser = dartsDatabaseStub.getUserAccountRepository().findByEmailAddressIgnoreCase(emailAddress)
             .orElseThrow();
-        bristolUser.getSecurityGroupEntities().get(0).getCourthouseEntities().addAll(List.of(a1Court, b2Court));
-        bristolUser.getSecurityGroupEntities().get(1).getCourthouseEntities().addAll(List.of(b2Court, c3Court));
+        final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
+        bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
+        bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
         dartsDatabaseStub.getUserAccountRepository().saveAndFlush(bristolUser);
 
         assertDoesNotThrow(() -> authorisationService.checkAuthorisation(List.of(a1Court, c3Court)));

@@ -15,8 +15,8 @@ import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "user_account")
@@ -52,6 +52,6 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @JoinTable(name = "security_group_user_account_ae",
         joinColumns = {@JoinColumn(name = "usr_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
-    private List<SecurityGroupEntity> securityGroupEntities = new ArrayList<>();
+    private Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
 
 }

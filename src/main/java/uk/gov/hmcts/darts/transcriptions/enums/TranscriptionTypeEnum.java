@@ -17,6 +17,5 @@ public enum TranscriptionTypeEnum {
     SPECIFIED_TIMES(9),
     OTHER(999);
 
-    private final Integer transcriptionTypeKey;
-
+    private final Integer id;
 }

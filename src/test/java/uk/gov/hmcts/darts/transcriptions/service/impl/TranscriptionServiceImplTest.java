@@ -103,11 +103,11 @@ class TranscriptionServiceImplTest {
         when(caseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -120,8 +120,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -150,11 +150,11 @@ class TranscriptionServiceImplTest {
         when(caseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -168,8 +168,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -198,11 +198,11 @@ class TranscriptionServiceImplTest {
         when(hearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -216,8 +216,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -250,11 +250,11 @@ class TranscriptionServiceImplTest {
         when(caseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -267,8 +267,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -295,11 +295,11 @@ class TranscriptionServiceImplTest {
     void saveTranscriptionRequestWithNullCaseAndNullHearingAndCourtLogTypeThrowsException() {
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey())).thenReturn(
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId())).thenReturn(
             mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -318,8 +318,8 @@ class TranscriptionServiceImplTest {
                 transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
                     hearingId,
                     caseId,
-                    transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-                    transcriptionTypeEnum.getTranscriptionTypeKey(),
+                    transcriptionUrgencyEnum.getId(),
+                    transcriptionTypeEnum.getId(),
                     comment,
                     startDateTime,
                     endDateTime
