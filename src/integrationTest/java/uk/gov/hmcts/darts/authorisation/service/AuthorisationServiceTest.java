@@ -87,11 +87,11 @@ class AuthorisationServiceTest {
         assertEquals(11, judgePermissions.size());
         assertTrue(judgePermissions.contains(Permission.builder()
                                                  .permissionId(5)
-                                                 .permissionName("Read Judges Notes")
+                                                 .permissionName("READ_JUDGES_NOTES")
                                                  .build()));
         assertTrue(judgePermissions.contains(Permission.builder()
                                                  .permissionId(11)
-                                                 .permissionName("Upload Judges Notes")
+                                                 .permissionName("UPLOAD_JUDGES_NOTES")
                                                  .build()));
     }
 
@@ -109,7 +109,7 @@ class AuthorisationServiceTest {
         assertEquals(10, courtManagerPermissions.size());
         assertTrue(courtManagerPermissions.contains(Permission.builder()
                                                         .permissionId(2)
-                                                        .permissionName("Approve/Reject Transcription Request")
+                                                        .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
                                                         .build()));
 
         Role courtClerkRole = roleIterator.next();
@@ -118,7 +118,7 @@ class AuthorisationServiceTest {
         assertEquals(9, courtClerkPermissions.size());
         assertFalse(courtClerkPermissions.contains(Permission.builder()
                                                        .permissionId(2)
-                                                       .permissionName("Approve/Reject Transcription Request")
+                                                       .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
                                                        .build()));
     }
 
