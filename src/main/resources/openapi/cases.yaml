@@ -489,25 +489,3 @@ components:
           type: string
         transcript_count:
           type: integer
-
-    events_response:
-      type: array
-      default: []
-      items:
-        $ref: '#/components/schemas/event_response'
-    event_response:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        timestamp:
-          type: string
-          format: date-time
-          example: 2023-07-31T14:32:24.620Z
-        name:
-          type: string
-          example: Case called on
-        text:
-          type: string
-          example: Record:New Case

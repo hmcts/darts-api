@@ -26,8 +26,6 @@ public interface CaseService {
 
     SingleCase getCasesById(Integer caseId);
 
-    List<EventResponse> getEvents(Integer hearingId);
-
     SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject);
 
     CourtCaseEntity getCourtCaseById(Integer caseId);

@@ -131,14 +131,6 @@ public class CaseServiceImpl implements CaseService {
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
-    public List<EventResponse> getEvents(Integer hearingId) {
-        Optional<HearingEntity> hearingEntity = hearingRepository.findById(hearingId);
-        if (hearingEntity.isEmpty()) {
-            throw new DartsApiException(CaseApiError.HEARING_NOT_FOUND);
-        }
-        return casesMapper.mapToEvents(hearingEntity.get().getEventList());
-    }
-
     @Override
     public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
         CourtCaseEntity foundCase = getCourtCaseById(caseId);
