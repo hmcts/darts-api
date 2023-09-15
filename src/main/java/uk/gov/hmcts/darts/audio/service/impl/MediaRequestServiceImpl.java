@@ -67,7 +67,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Transactional
     @Override
-    public Integer saveAudioRequest(AudioRequestDetails request) {
+    public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
 
         var audioRequest = saveAudioRequestToDb(
             hearingRepository.getReferenceById(request.getHearingId()),
@@ -77,7 +77,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             request.getRequestType()
         );
 
-        return audioRequest.getId();
+        return audioRequest;
     }
 
     @Transactional
