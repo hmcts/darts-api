@@ -74,12 +74,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
 
+        '400':
+          description: Bad Request- Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessEventCodeProblem'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessEventCodeProblem'
+
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                $ref: '#/components/schemas/ProcessEventCodeProblem'
 
   /courtlogs:
     get:
@@ -121,8 +135,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/CourtLogs'
 
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessGetCourtLogProblem'
+
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessGetCourtLogProblem'
+
 
     post:
       tags:
@@ -161,6 +187,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
+
+        '400':
+          description: Bad Request- Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessPostCourtLogProblem'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessPostCourtLogProblem'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessPostCourtLogProblem'
 
 
 components:
@@ -273,3 +320,56 @@ components:
     Courtroom:
       type: string
       maxLength: 25
+
+    ProcessEventErrorCode:
+      type: string
+      enum:
+        - "EVENT_101"
+        - "EVENT_102"
+        - "EVENT_103"
+      x-enum-varnames: [EVENT_COURT_HOUSE_NOT_FOUND, EVENT_DOCUMENT_CANT_PARSED, PROCESSOR_NOT_FOUND]
+
+    ProcessEventCodeProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - type
+          properties:
+            type:
+              type: 'ProcessEventErrorCode'
+
+    ProcessGetCourtLogsErrorCode:
+      type: string
+      enum:
+        - "COURTLOG_101"
+        - "COURTLOG_102"
+      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND]
+
+    ProcessGetCourtLogProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - type
+          properties:
+            type:
+              type: 'ProcessGetCourtLogsErrorCode'
+
+    ProcessPostCourtLogsErrorCode:
+      type: string
+      enum:
+        - "COURTLOG_101"
+        - "COURTLOG_102"
+        - "COURTLOG_103"
+      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_PARSED]
+
+    ProcessPostCourtLogProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - type
+          properties:
+            type:
+              type: 'ProcessPostCourtLogsErrorCode'

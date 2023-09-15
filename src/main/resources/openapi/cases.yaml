@@ -47,12 +47,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/cases'
+
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "COMMON_100"
+                title: "Provided courthouse does not exist"
+                status: 400
+                detail: "Courthouse '' not found."
+
+        '404':
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessGetCasesErrorCode'
+
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                $ref: '#/components/schemas/ProcessGetCasesErrorCode'
     post:
       tags:
         - Cases
@@ -72,23 +92,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/post_case_response'
+
         '400':
-          description: A required parameter is missing or an invalid datatype or value was provided for property.
+          description: Bad Request - Invalid XML Document
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
-              example:
-                type: "COMMON_100"
-                title: "Provided courthouse does not exist"
-                status: 400
-                detail: "Courthouse '' not found."
+                $ref: '#/components/schemas/ProcessAddCasesErrorCodeProblem'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessAddCasesErrorCodeProblem'
+
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                $ref: '#/components/schemas/ProcessAddCasesErrorCodeProblem'
+
 
   /cases/{case_id}:
     get:
@@ -541,3 +566,36 @@ components:
         text:
           type: string
           example: Record:New Case
+
+    ProcessAddCasesErrorCode:
+      type: string
+      enum:
+        - "CASE_101"
+        - "CASE_102"
+      x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND, CASE_DOCUMENT_CANT_PARSED]
+
+    ProcessGetCasesErrorCode:
+      type: string
+      enum:
+        - "CASE_101"
+      x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND]
+
+    ProcessAddCasesErrorCodeProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - type
+          properties:
+            type:
+              type: 'ProcessAddCasesErrorCode'
+
+    ProcessGetCasesErrorCodeProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - type
+          properties:
+            type:
+              type: 'ProcessGetCasesErrorCode'

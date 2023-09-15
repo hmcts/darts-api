@@ -74,12 +74,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/PostDailyListResponse'
 
+        '400':
+          description: Bad Request - Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessAddDailyListErrorCodeProblem'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: '#/components/schemas/ProcessAddDailyListErrorCodeProblem'
+
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                $ref: '#/components/schemas/ProcessAddDailyListErrorCodeProblem'
 
     patch:
       tags:
@@ -449,3 +463,19 @@ components:
         is_masked:
           type: boolean
           example: false
+    ProcessAddDailyListErrorCode:
+      type: string
+      enum:
+        - "DAILYLIST_101"
+        - "DAILYLIST_102"
+        - "DAILYLIST_103"
+      x-enum-varnames: [DAILYLIST_COURT_HOUSE_NOT_FOUND, DAILYLIST_DOCUMENT_CANT_PARSED, DAILYLIST_PROCESSOR_NOT_FOUND]
+    ProcessAddDailyListErrorCodeProblem:
+      allOf:
+        - $ref: './problem.yaml'
+        - type: object
+          required:
+            - type
+          properties:
+            type:
+              type: 'ProcessAddDailyListErrorCode'
