@@ -44,8 +44,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private final CaseService caseService;
     private final HearingsService hearingsService;
-    private HearingEntity hearing;
-
 
     @Transactional
     @Override
