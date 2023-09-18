@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
 @SuppressWarnings("PMD.ExcessiveImports")
@@ -79,8 +79,8 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
                                                 .userId(-1)
                                                 .userName("Test User")
                                                 .roles(Set.of(Role.builder()
-                                                                  .roleId(TRANSCRIPTION_COMPANY.getId())
-                                                                  .roleName(TRANSCRIPTION_COMPANY.toString())
+                                                                  .roleId(TRANSCRIBER.getId())
+                                                                  .roleName(TRANSCRIBER.toString())
                                                                   .permissions(new HashSet<>())
                                                                   .build()))
                                                 .build())

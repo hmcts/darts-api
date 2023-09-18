@@ -31,9 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_CLERK;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -115,17 +115,17 @@ class AuthorisationServiceTest {
 
         Iterator<Role> roleIterator = userState.getRoles().iterator();
 
-        Role courtManagerRole = roleIterator.next();
-        assertEquals(COURT_MANAGER.getId(), courtManagerRole.getRoleId());
-        Set<Permission> courtManagerPermissions = courtManagerRole.getPermissions();
-        assertEquals(11, courtManagerPermissions.size());
-        assertTrue(courtManagerPermissions.contains(Permission.builder()
-                                                        .permissionId(2)
-                                                        .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                                                        .build()));
+        Role approverRole = roleIterator.next();
+        assertEquals(APPROVER.getId(), approverRole.getRoleId());
+        Set<Permission> approverPermissions = approverRole.getPermissions();
+        assertEquals(11, approverPermissions.size());
+        assertTrue(approverPermissions.contains(Permission.builder()
+                                                    .permissionId(2)
+                                                    .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+                                                    .build()));
 
         Role courtClerkRole = roleIterator.next();
-        assertEquals(COURT_CLERK.getId(), courtClerkRole.getRoleId());
+        assertEquals(REQUESTER.getId(), courtClerkRole.getRoleId());
         Set<Permission> courtClerkPermissions = courtClerkRole.getPermissions();
         assertEquals(10, courtClerkPermissions.size());
         assertFalse(courtClerkPermissions.contains(Permission.builder()
