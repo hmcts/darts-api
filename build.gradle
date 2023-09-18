@@ -9,7 +9,7 @@ plugins {
   id 'com.github.ben-manes.versions' version '0.48.0'
   id 'org.sonarqube' version '4.3.1.3277'
   id "io.freefair.lombok" version "8.3"
-  id "org.openapi.generator" version "7.0.0"
+  id "org.openapi.generator" version "7.0.1"
   id "org.flywaydb.flyway" version "9.22.1"
   id 'maven-publish'
 }
