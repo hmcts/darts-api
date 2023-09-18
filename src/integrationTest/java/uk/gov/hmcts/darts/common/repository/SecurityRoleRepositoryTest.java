@@ -25,21 +25,21 @@ class SecurityRoleRepositoryTest {
     @Test
     void shouldFindAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
-        assertEquals(6, securityRoleEntityList.size());
+        assertEquals(5, securityRoleEntityList.size());
     }
 
     @Test
     void shouldFindAllCourtManagerPermissions() {
         SecurityRoleEntity courtManagerRole = securityRoleRepository.findById(COURT_MANAGER.getId()).orElseThrow();
         final List<SecurityPermissionEntity> securityPermissionEntities = courtManagerRole.getSecurityPermissionEntities();
-        assertEquals(11, securityPermissionEntities.size());
+        assertEquals(10, securityPermissionEntities.size());
     }
 
     @Test
     void shouldFindAllJudgePermissions() {
         SecurityRoleEntity judgeRole = securityRoleRepository.findById(JUDGE.getId()).orElseThrow();
         final List<SecurityPermissionEntity> securityPermissionEntities = judgeRole.getSecurityPermissionEntities();
-        assertEquals(12, securityPermissionEntities.size());
+        assertEquals(11, securityPermissionEntities.size());
     }
 
 }

@@ -21,11 +21,11 @@ class RoleTest {
             .permissions(Set.of(
                 Permission.builder()
                     .permissionId(2)
-                    .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+                    .permissionName("Approve/Reject Transcription Request")
                     .build(),
                 Permission.builder()
                     .permissionId(4)
-                    .permissionName("LISTEN_TO_AUDIO_FOR_PLAYBACK")
+                    .permissionName("Listen to Audio for Playback")
                     .build()
             ))
             .build();

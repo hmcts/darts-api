@@ -84,14 +84,14 @@ class AuthorisationServiceTest {
         Role judgeRole = judgeUserState.getRoles().iterator().next();
         assertEquals(JUDGE.getId(), judgeRole.getRoleId());
         Set<Permission> judgePermissions = judgeRole.getPermissions();
-        assertEquals(12, judgePermissions.size());
+        assertEquals(11, judgePermissions.size());
         assertTrue(judgePermissions.contains(Permission.builder()
                                                  .permissionId(5)
-                                                 .permissionName("READ_JUDGES_NOTES")
+                                                 .permissionName("Read Judges Notes")
                                                  .build()));
         assertTrue(judgePermissions.contains(Permission.builder()
                                                  .permissionId(11)
-                                                 .permissionName("UPLOAD_JUDGES_NOTES")
+                                                 .permissionName("Upload Judges Notes")
                                                  .build()));
     }
 
@@ -106,19 +106,19 @@ class AuthorisationServiceTest {
         Role courtManagerRole = roleIterator.next();
         assertEquals(COURT_MANAGER.getId(), courtManagerRole.getRoleId());
         Set<Permission> courtManagerPermissions = courtManagerRole.getPermissions();
-        assertEquals(11, courtManagerPermissions.size());
+        assertEquals(10, courtManagerPermissions.size());
         assertTrue(courtManagerPermissions.contains(Permission.builder()
                                                         .permissionId(2)
-                                                        .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+                                                        .permissionName("Approve/Reject Transcription Request")
                                                         .build()));
 
         Role courtClerkRole = roleIterator.next();
         assertEquals(COURT_CLERK.getId(), courtClerkRole.getRoleId());
         Set<Permission> courtClerkPermissions = courtClerkRole.getPermissions();
-        assertEquals(10, courtClerkPermissions.size());
+        assertEquals(9, courtClerkPermissions.size());
         assertFalse(courtClerkPermissions.contains(Permission.builder()
                                                        .permissionId(2)
-                                                       .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+                                                       .permissionName("Approve/Reject Transcription Request")
                                                        .build()));
     }
 
