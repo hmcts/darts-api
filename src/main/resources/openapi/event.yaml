@@ -79,21 +79,21 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessEventCodeProblem'
+                $ref: './problem.yaml'
 
         '404':
           description: Not Found - Courthouse not found
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessEventCodeProblem'
+                $ref: './problem.yaml'
 
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessEventCodeProblem'
+                $ref: './problem.yaml'
 
   /courtlogs:
     get:
@@ -140,14 +140,14 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessGetCourtLogProblem'
+                $ref: './problem.yaml'
 
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessGetCourtLogProblem'
+                $ref: './problem.yaml'
 
 
     post:
@@ -193,21 +193,21 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessPostCourtLogProblem'
+                $ref: './problem.yaml'
 
         '404':
           description: Not Found - Courthouse not found
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessPostCourtLogProblem'
+                $ref: './problem.yaml'
 
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessPostCourtLogProblem'
+                $ref: './problem.yaml'
 
 
 components:
@@ -321,55 +321,27 @@ components:
       type: string
       maxLength: 25
 
-    ProcessEventErrorCode:
+    EventErrorCode:
       type: string
       enum:
-        - "EVENT_101"
-        - "EVENT_102"
-        - "EVENT_103"
+        - "ADD_EVENT_101"
+        - "ADD_EVENT_102"
+        - "ADD_EVENT_103"
       x-enum-varnames: [EVENT_COURT_HOUSE_NOT_FOUND, EVENT_DOCUMENT_CANT_PARSED, PROCESSOR_NOT_FOUND]
 
-    ProcessEventCodeProblem:
-      allOf:
-        - $ref: './problem.yaml'
-        - type: object
-          required:
-            - type
-          properties:
-            type:
-              type: 'ProcessEventErrorCode'
 
-    ProcessGetCourtLogsErrorCode:
+    GetCourtLogsErrorCode:
       type: string
       enum:
-        - "COURTLOG_101"
-        - "COURTLOG_102"
+        - "GET_COURTLOG_101"
+        - "GET_COURTLOG_102"
       x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND]
 
-    ProcessGetCourtLogProblem:
-      allOf:
-        - $ref: './problem.yaml'
-        - type: object
-          required:
-            - type
-          properties:
-            type:
-              type: 'ProcessGetCourtLogsErrorCode'
 
-    ProcessPostCourtLogsErrorCode:
+    PostCourtLogsErrorCode:
       type: string
       enum:
-        - "COURTLOG_101"
-        - "COURTLOG_102"
-        - "COURTLOG_103"
+        - "ADD_COURTLOG_101"
+        - "ADD_COURTLOG_102"
+        - "ADD_COURTLOG_103"
       x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED]
-
-    ProcessPostCourtLogProblem:
-      allOf:
-        - $ref: './problem.yaml'
-        - type: object
-          required:
-            - type
-          properties:
-            type:
-              type: 'ProcessPostCourtLogsErrorCode'

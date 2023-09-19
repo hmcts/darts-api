@@ -65,14 +65,14 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessGetCasesErrorCode'
+                $ref: './problem.yaml'
 
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessGetCasesErrorCode'
+                $ref: './problem.yaml'
     post:
       tags:
         - Cases
@@ -98,21 +98,21 @@ paths:
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessAddCasesErrorCodeProblem'
+                $ref: './problem.yaml'
 
         '404':
           description: Not Found - Courthouse not found
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessAddCasesErrorCodeProblem'
+                $ref: './problem.yaml'
 
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
-                $ref: '#/components/schemas/ProcessAddCasesErrorCodeProblem'
+                $ref: './problem.yaml'
 
 
   /cases/{case_id}:
@@ -567,35 +567,15 @@ components:
           type: string
           example: Record:New Case
 
-    ProcessAddCasesErrorCode:
+    PostCasesErrorCode:
       type: string
       enum:
-        - "CASE_101"
-        - "CASE_102"
+        - "ADD_CASE_101"
+        - "ADD_CASE_102"
       x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND, CASE_DOCUMENT_CANT_BE_PARSED]
 
-    ProcessGetCasesErrorCode:
+    GetCasesErrorCode:
       type: string
       enum:
-        - "CASE_101"
+        - "GET_CASE_101"
       x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND]
-
-    ProcessAddCasesErrorCodeProblem:
-      allOf:
-        - $ref: './problem.yaml'
-        - type: object
-          required:
-            - type
-          properties:
-            type:
-              type: 'ProcessAddCasesErrorCode'
-
-    ProcessGetCasesErrorCodeProblem:
-      allOf:
-        - $ref: './problem.yaml'
-        - type: object
-          required:
-            - type
-          properties:
-            type:
-              type: 'ProcessGetCasesErrorCode'
