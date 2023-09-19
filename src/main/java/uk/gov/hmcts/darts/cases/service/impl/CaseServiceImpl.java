@@ -12,7 +12,6 @@ import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
-import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -129,14 +128,6 @@ public class CaseServiceImpl implements CaseService {
         List<Integer> caseIds = CourtCaseUtil.getCaseIdList(courtCaseEntities);
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
-    }
-
-    public List<EventResponse> getEvents(Integer hearingId) {
-        Optional<HearingEntity> hearingEntity = hearingRepository.findById(hearingId);
-        if (hearingEntity.isEmpty()) {
-            throw new DartsApiException(CaseApiError.HEARING_NOT_FOUND);
-        }
-        return casesMapper.mapToEvents(hearingEntity.get().getEventList());
     }
 
     @Override
