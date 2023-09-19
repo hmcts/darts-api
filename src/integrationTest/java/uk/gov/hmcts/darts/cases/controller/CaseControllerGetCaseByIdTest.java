@@ -3,40 +3,24 @@ package uk.gov.hmcts.darts.cases.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-@Transactional
 class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Autowired
     private transient MockMvc mockMvc;
-
-    @MockBean
-    private UserIdentity mockUserIdentity;
 
     private static String endpointUrl = "/cases/{case_id}";
 
@@ -47,6 +31,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
+
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,
@@ -58,13 +43,6 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         courtCase.addDefendant("aDefendant");
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
-
-        CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
-
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
-            .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
     }
 
     @Test
@@ -72,36 +50,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk());
-
-        verify(mockUserIdentity).getEmailAddress();
-
-    }
-
-    @Test
-    void casesSearchGetEndpointUserIsNotAuthorisedForCourthouse() throws Exception {
-
-        dartsDatabase.getUserAccountStub().createUnauthorisedIntegrationTestUser();
-
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
-
-        MvcResult response = mockMvc.perform(requestBuilder)
-            .andExpect(status().isUnauthorized())
-            .andReturn();
-
-        String actualResponseBody = response.getResponse().getContentAsString();
-
-        String expectedResponseBody = """
-            {
-                "type": "AUTHORISATION_100",
-                "title": "User is not authorised for the associated courthouse",
-                "status": 401
-            }
-            """;
-
-        JSONAssert.assertEquals(expectedResponseBody, actualResponseBody, JSONCompareMode.NON_EXTENSIBLE);
-
-        verify(mockUserIdentity).getEmailAddress();
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
 
     }
 
@@ -112,7 +61,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, caseId);
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.case_id", Matchers.is(caseId)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges", Matchers.hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1judge1")))
@@ -130,7 +79,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, 25);
 
-        mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
 
     }
 

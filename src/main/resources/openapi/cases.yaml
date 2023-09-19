@@ -111,26 +111,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
-        '400':
-          description: Bad Request Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUTHORISATION_101"
-                title: "Failed to check authorisation for the case"
-                status: 400
-        '401':
-          description: Unauthorised Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUTHORISATION_100"
-                title: "User is not authorised for the associated courthouse"
-                status: 401
         '404':
           description: Not Found Error
           content:
@@ -546,7 +526,7 @@ components:
 
     events_response:
       type: array
-      default: [ ]
+      default: []
       items:
         $ref: '#/components/schemas/event_response'
     event_response:
