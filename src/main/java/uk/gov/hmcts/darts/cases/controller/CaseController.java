@@ -36,6 +36,12 @@ import java.util.List;
 import java.util.Locale;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @RestController
 @RequiredArgsConstructor
@@ -94,13 +100,15 @@ public class CaseController implements CasesApi {
     }
 
     @Override
-    @Authorisation(contextId = CASE_ID)
+    @Authorisation(contextId = CASE_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getCaseHearings(caseId), HttpStatus.OK);
     }
 
     @Override
-    @Authorisation(contextId = CASE_ID)
+    @Authorisation(contextId = CASE_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getCasesById(caseId), HttpStatus.OK);
     }

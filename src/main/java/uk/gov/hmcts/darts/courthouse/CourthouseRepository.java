@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface CourthouseRepository extends JpaRepository<CourthouseEntity, Integer> {
@@ -20,8 +21,10 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
         FROM UserAccountEntity userAccount
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.courthouseEntities courthouse
+        JOIN securityGroup.securityRoleEntity securityRole
         WHERE lower(userAccount.emailAddress) = lower(:emailAddress)
+        AND securityRole.id IN (:roleIds)
         """)
-    List<CourthouseEntity> findAuthorisedCourthousesForEmailAddress(String emailAddress);
+    List<CourthouseEntity> findAuthorisedCourthousesForEmailAddress(String emailAddress, Set<Integer> roleIds);
 
 }

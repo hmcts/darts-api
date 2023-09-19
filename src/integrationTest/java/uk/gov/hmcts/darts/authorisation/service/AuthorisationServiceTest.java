@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -124,14 +125,14 @@ class AuthorisationServiceTest {
                                                     .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
                                                     .build()));
 
-        Role courtClerkRole = roleIterator.next();
-        assertEquals(REQUESTER.getId(), courtClerkRole.getRoleId());
-        Set<Permission> courtClerkPermissions = courtClerkRole.getPermissions();
-        assertEquals(10, courtClerkPermissions.size());
-        assertFalse(courtClerkPermissions.contains(Permission.builder()
-                                                       .permissionId(2)
-                                                       .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
-                                                       .build()));
+        Role requesterRole = roleIterator.next();
+        assertEquals(REQUESTER.getId(), requesterRole.getRoleId());
+        Set<Permission> requesterPermissions = requesterRole.getPermissions();
+        assertEquals(10, requesterPermissions.size());
+        assertFalse(requesterPermissions.contains(Permission.builder()
+                                                      .permissionId(2)
+                                                      .permissionName("APPROVE_REJECT_TRANSCRIPTION_REQUEST")
+                                                      .build()));
     }
 
     @Test
@@ -167,7 +168,10 @@ class AuthorisationServiceTest {
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
         dartsDatabaseStub.getUserAccountRepository().saveAndFlush(bristolUser);
 
-        assertDoesNotThrow(() -> authorisationService.checkAuthorisation(List.of(a1Court, c3Court)));
+        assertDoesNotThrow(() -> authorisationService.checkAuthorisation(
+            List.of(a1Court, c3Court),
+            Set.of(APPROVER, REQUESTER)
+        ));
     }
 
     @Test
@@ -179,7 +183,10 @@ class AuthorisationServiceTest {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> authorisationService.checkAuthorisation(List.of(a1Court, b2Court))
+            () -> authorisationService.checkAuthorisation(
+                List.of(a1Court, b2Court),
+                Collections.emptySet()
+            )
         );
         assertEquals("User is not authorised for the associated courthouse", exception.getMessage());
     }

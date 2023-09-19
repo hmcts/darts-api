@@ -12,9 +12,11 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,23 +75,25 @@ public class AuthorisationAspect {
 
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
             .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
+
         ContextIdEnum contextId = authorisationAnnotation.contextId();
+        Set<SecurityRoleEnum> roles = Set.of(authorisationAnnotation.securityRoles());
 
         switch (contextId) {
             case CASE_ID:
-                checkAuthorisationByCaseId(request);
+                checkAuthorisationByCaseId(request, roles);
                 break;
             case HEARING_ID:
-                checkAuthorisationByHearingId(request);
+                checkAuthorisationByHearingId(request, roles);
                 break;
             case MEDIA_REQUEST_ID:
-                checkAuthorisationByMediaRequestId(request);
+                checkAuthorisationByMediaRequestId(request, roles);
                 break;
             case MEDIA_ID:
-                checkAuthorisationByMediaId(request);
+                checkAuthorisationByMediaId(request, roles);
                 break;
             case TRANSCRIPTION_ID:
-                checkAuthorisationByTranscriptionId(request);
+                checkAuthorisationByTranscriptionId(request, roles);
                 break;
             default:
                 log.warn("Unrecognised contextId");
@@ -97,31 +101,31 @@ public class AuthorisationAspect {
         }
     }
 
-    private void checkAuthorisationByCaseId(HttpServletRequest request) {
+    private void checkAuthorisationByCaseId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> caseIdParamOptional = Optional.empty();
 
         Matcher matcher = CASES_ID_PATH_PATTERN.matcher(request.getRequestURI());
         if (matcher.find()) {
             caseIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByCaseId(caseIdParamOptional);
+            checkAuthorisationByCaseId(caseIdParamOptional, roles);
         }
 
         if (caseIdParamOptional.isEmpty()) {
             caseIdParamOptional = Optional.ofNullable(request.getParameter(CASE_ID_PARAM));
-            checkAuthorisationByCaseId(caseIdParamOptional);
+            checkAuthorisationByCaseId(caseIdParamOptional, roles);
         }
 
         if (caseIdParamOptional.isEmpty()) {
             caseIdParamOptional = Optional.ofNullable(request.getHeader(CASE_ID_PARAM));
-            checkAuthorisationByCaseId(caseIdParamOptional);
+            checkAuthorisationByCaseId(caseIdParamOptional, roles);
         }
     }
 
-    private void checkAuthorisationByCaseId(Optional<String> caseIdParamOptional) {
+    private void checkAuthorisationByCaseId(Optional<String> caseIdParamOptional, Set<SecurityRoleEnum> roles) {
         if (caseIdParamOptional.isPresent()) {
             try {
                 Integer caseId = Integer.valueOf(caseIdParamOptional.get());
-                authorisation.authoriseByCaseId(caseId);
+                authorisation.authoriseByCaseId(caseId, roles);
             } catch (NumberFormatException e) {
                 log.error("Unable to parse case_id for checkAuthorisation", e);
                 throw new DartsApiException(BAD_REQUEST_CASE_ID);
@@ -129,31 +133,31 @@ public class AuthorisationAspect {
         }
     }
 
-    private void checkAuthorisationByHearingId(HttpServletRequest request) {
+    private void checkAuthorisationByHearingId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> hearingIdParamOptional = Optional.empty();
 
         Matcher matcher = HEARINGS_ID_PATH_PATTERN.matcher(request.getRequestURI());
         if (matcher.find()) {
             hearingIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByHearingId(hearingIdParamOptional);
+            checkAuthorisationByHearingId(hearingIdParamOptional, roles);
         }
 
         if (hearingIdParamOptional.isEmpty()) {
             hearingIdParamOptional = Optional.ofNullable(request.getParameter(HEARING_ID_PARAM));
-            checkAuthorisationByHearingId(hearingIdParamOptional);
+            checkAuthorisationByHearingId(hearingIdParamOptional, roles);
         }
 
         if (hearingIdParamOptional.isEmpty()) {
             hearingIdParamOptional = Optional.ofNullable(request.getHeader(HEARING_ID_PARAM));
-            checkAuthorisationByHearingId(hearingIdParamOptional);
+            checkAuthorisationByHearingId(hearingIdParamOptional, roles);
         }
     }
 
-    private void checkAuthorisationByHearingId(Optional<String> hearingIdParamOptional) {
+    private void checkAuthorisationByHearingId(Optional<String> hearingIdParamOptional, Set<SecurityRoleEnum> roles) {
         if (hearingIdParamOptional.isPresent()) {
             try {
                 Integer hearingId = Integer.valueOf(hearingIdParamOptional.get());
-                authorisation.authoriseByHearingId(hearingId);
+                authorisation.authoriseByHearingId(hearingId, roles);
             } catch (NumberFormatException e) {
                 log.error("Unable to parse hearing_id for checkAuthorisation", e);
                 throw new DartsApiException(BAD_REQUEST_HEARING_ID);
@@ -161,31 +165,32 @@ public class AuthorisationAspect {
         }
     }
 
-    private void checkAuthorisationByMediaRequestId(HttpServletRequest request) {
+    private void checkAuthorisationByMediaRequestId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> mediaRequestIdParamOptional = Optional.empty();
 
         Matcher matcher = AUDIO_REQUESTS_ID_PATH_PATTERN.matcher(request.getRequestURI());
         if (matcher.find()) {
             mediaRequestIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional);
+            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
         }
 
         if (mediaRequestIdParamOptional.isEmpty()) {
             mediaRequestIdParamOptional = Optional.ofNullable(request.getParameter(AUDIO_REQUEST_ID_PARAM));
-            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional);
+            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
         }
 
         if (mediaRequestIdParamOptional.isEmpty()) {
             mediaRequestIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_REQUEST_ID_PARAM));
-            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional);
+            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
         }
     }
 
-    private void checkAuthorisationByMediaRequestId(Optional<String> mediaRequestIdParamOptional) {
+    private void checkAuthorisationByMediaRequestId(Optional<String> mediaRequestIdParamOptional,
+                                                    Set<SecurityRoleEnum> roles) {
         if (mediaRequestIdParamOptional.isPresent()) {
             try {
                 Integer mediaRequestId = Integer.valueOf(mediaRequestIdParamOptional.get());
-                authorisation.authoriseByMediaRequestId(mediaRequestId);
+                authorisation.authoriseByMediaRequestId(mediaRequestId, roles);
             } catch (NumberFormatException e) {
                 log.error("Unable to parse audio_request_id for checkAuthorisation", e);
                 throw new DartsApiException(BAD_REQUEST_MEDIA_REQUEST_ID);
@@ -193,31 +198,31 @@ public class AuthorisationAspect {
         }
     }
 
-    private void checkAuthorisationByMediaId(HttpServletRequest request) {
+    private void checkAuthorisationByMediaId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> mediaIdParamOptional = Optional.empty();
 
         Matcher matcher = AUDIOS_ID_PATH_PATTERN.matcher(request.getRequestURI());
         if (matcher.find()) {
             mediaIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByMediaId(mediaIdParamOptional);
+            checkAuthorisationByMediaId(mediaIdParamOptional, roles);
         }
 
         if (mediaIdParamOptional.isEmpty()) {
             mediaIdParamOptional = Optional.ofNullable(request.getParameter(AUDIO_ID_PARAM));
-            checkAuthorisationByMediaId(mediaIdParamOptional);
+            checkAuthorisationByMediaId(mediaIdParamOptional, roles);
         }
 
         if (mediaIdParamOptional.isEmpty()) {
             mediaIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_ID_PARAM));
-            checkAuthorisationByMediaId(mediaIdParamOptional);
+            checkAuthorisationByMediaId(mediaIdParamOptional, roles);
         }
     }
 
-    private void checkAuthorisationByMediaId(Optional<String> mediaIdParamOptional) {
+    private void checkAuthorisationByMediaId(Optional<String> mediaIdParamOptional, Set<SecurityRoleEnum> roles) {
         if (mediaIdParamOptional.isPresent()) {
             try {
                 Integer mediaId = Integer.valueOf(mediaIdParamOptional.get());
-                authorisation.authoriseByMediaId(mediaId);
+                authorisation.authoriseByMediaId(mediaId, roles);
             } catch (NumberFormatException e) {
                 log.error("Unable to parse media_id for checkAuthorisation", e);
                 throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
@@ -225,31 +230,32 @@ public class AuthorisationAspect {
         }
     }
 
-    private void checkAuthorisationByTranscriptionId(HttpServletRequest request) {
+    private void checkAuthorisationByTranscriptionId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> transcriptionIdParamOptional = Optional.empty();
 
         Matcher matcher = TRANSCRIPTIONS_ID_PATH_PATTERN.matcher(request.getRequestURI());
         if (matcher.find()) {
             transcriptionIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional);
+            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
         }
 
         if (transcriptionIdParamOptional.isEmpty()) {
             transcriptionIdParamOptional = Optional.ofNullable(request.getParameter(TRANSCRIPTION_ID_PARAM));
-            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional);
+            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
         }
 
         if (transcriptionIdParamOptional.isEmpty()) {
             transcriptionIdParamOptional = Optional.ofNullable(request.getHeader(TRANSCRIPTION_ID_PARAM));
-            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional);
+            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
         }
     }
 
-    private void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional) {
+    private void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional,
+                                                     Set<SecurityRoleEnum> roles) {
         if (transcriptionIdParamOptional.isPresent()) {
             try {
                 Integer transcriptionId = Integer.valueOf(transcriptionIdParamOptional.get());
-                authorisation.authoriseByTranscriptionId(transcriptionId);
+                authorisation.authoriseByTranscriptionId(transcriptionId, roles);
             } catch (NumberFormatException e) {
                 log.error("Unable to parse transcription_id for checkAuthorisation", e);
                 throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);

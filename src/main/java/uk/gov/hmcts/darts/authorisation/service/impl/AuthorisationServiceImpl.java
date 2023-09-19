@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
@@ -34,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -55,7 +57,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             JoinType.LEFT
         );
         Join<SecurityGroupEntity, SecurityRoleEntity> securityRole = securityGroup.join(
-            SecurityGroupEntity_.securityRoleId,
+            SecurityGroupEntity_.securityRoleEntity,
             JoinType.LEFT
         );
         Join<SecurityRoleEntity, SecurityPermissionEntity> securityPermission = securityRole.join(
@@ -131,18 +133,19 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     }
 
     @Override
-    public void checkAuthorisation(List<CourthouseEntity> courthouses) {
+    public void checkAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles) {
         String emailAddress = userIdentity.getEmailAddress();
 
         List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(
-            emailAddress);
+            emailAddress, securityRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet()));
 
         if (new HashSet<>(authorisedCourthouses).containsAll(courthouses)) {
             return;
         }
 
-        log.debug("User {} is not authorised for courthouses {}", emailAddress,
-                  courthouses.stream().map(CourthouseEntity::getCourthouseName).toList()
+        log.debug("User {} is not authorised for courthouses {}, securityRoles {}", emailAddress,
+                  courthouses.stream().map(CourthouseEntity::getCourthouseName).toList(),
+                  securityRoles
         );
         throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
     }

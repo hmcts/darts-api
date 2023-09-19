@@ -16,6 +16,12 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,7 +38,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     }
 
     @Override
-    @Authorisation(contextId = MEDIA_REQUEST_ID)
+    @Authorisation(contextId = MEDIA_REQUEST_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<Void> deleteAudioRequest(
         @Parameter(name = "audio_request_id", description = "", required = true, in = ParameterIn.PATH) @PathVariable("audio_request_id") Integer audioRequestId
     ) {

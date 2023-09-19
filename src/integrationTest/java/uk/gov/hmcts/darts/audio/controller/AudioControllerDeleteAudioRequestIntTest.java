@@ -16,6 +16,7 @@ import java.net.URI;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -38,7 +39,7 @@ class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
 
     @Test
     void audioRequestDeleteShouldReturnSuccess() throws Exception {
-        doNothing().when(authorisationApi).checkAuthorisation(anyList());
+        doNothing().when(authorisationApi).checkAuthorisation(anyList(), anySet());
 
         var blobId = UUID.randomUUID();
 
@@ -58,7 +59,7 @@ class AudioControllerDeleteAudioRequestIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().is2xxSuccessful());
 
-        verify(authorisationApi).checkAuthorisation(anyList());
+        verify(authorisationApi).checkAuthorisation(anyList(), anySet());
     }
 
     @Test

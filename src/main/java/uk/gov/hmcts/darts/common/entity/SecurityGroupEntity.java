@@ -35,7 +35,7 @@ public class SecurityGroupEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rol_id", nullable = false, foreignKey = @ForeignKey(name = "security_group_role_fk"))
-    private SecurityRoleEntity securityRoleId;
+    private SecurityRoleEntity securityRoleEntity;
 
     @Column(name = "r_dm_group_s_object_id", length = 16)
     private String legacyObjectId;
