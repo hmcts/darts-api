@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -44,7 +45,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final CaseService caseService;
     private final HearingsService hearingsService;
 
-
     @Transactional
     @Override
     public void saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails) {
@@ -81,12 +81,17 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         TranscriptionEntity transcription = new TranscriptionEntity();
-
+        HearingEntity hearing = null;
         if (!isNull(transcriptionRequestDetails.getHearingId())) {
-            transcription.setHearing(hearingsService.getHearingById(transcriptionRequestDetails.getHearingId()));
+            hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            transcription.setHearing(hearing);
         }
         if (!isNull(transcriptionRequestDetails.getCaseId())) {
             transcription.setCourtCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));
+        } else if (!isNull(hearing)) {
+            transcription.setCourtCase(hearing.getCourtCase());
+        } else {
+            throw new DartsApiException(TranscriptionError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
 
         transcription.setStart(transcriptionRequestDetails.getStartDateTime());
