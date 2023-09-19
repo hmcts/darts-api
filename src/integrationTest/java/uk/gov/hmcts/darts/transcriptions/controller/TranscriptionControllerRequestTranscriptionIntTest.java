@@ -332,6 +332,25 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    @Order(11)
+    @Transactional
+    void transcriptionRequestWithValidHearingAndNullCaseIdShouldReturnSuccess() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), null, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
+            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+    }
+
     private static void assertTranscriptionFailed100Error(String actualJson) {
         String expectedJson = """
             {
