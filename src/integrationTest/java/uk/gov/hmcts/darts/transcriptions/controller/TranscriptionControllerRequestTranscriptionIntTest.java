@@ -336,8 +336,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), null, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)

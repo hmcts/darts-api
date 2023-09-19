@@ -12,6 +12,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
+import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
@@ -76,28 +77,20 @@ public class AuthorisationAspect {
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
             .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
 
-        ContextIdEnum contextId = authorisationAnnotation.contextId();
         Set<SecurityRoleEnum> roles = Set.of(authorisationAnnotation.securityRoles());
+        if (roles.isEmpty()) {
+            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
+        }
+
+        ContextIdEnum contextId = authorisationAnnotation.contextId();
 
         switch (contextId) {
-            case CASE_ID:
-                checkAuthorisationByCaseId(request, roles);
-                break;
-            case HEARING_ID:
-                checkAuthorisationByHearingId(request, roles);
-                break;
-            case MEDIA_REQUEST_ID:
-                checkAuthorisationByMediaRequestId(request, roles);
-                break;
-            case MEDIA_ID:
-                checkAuthorisationByMediaId(request, roles);
-                break;
-            case TRANSCRIPTION_ID:
-                checkAuthorisationByTranscriptionId(request, roles);
-                break;
-            default:
-                log.warn("Unrecognised contextId");
-                break;
+            case CASE_ID -> checkAuthorisationByCaseId(request, roles);
+            case HEARING_ID -> checkAuthorisationByHearingId(request, roles);
+            case MEDIA_REQUEST_ID -> checkAuthorisationByMediaRequestId(request, roles);
+            case MEDIA_ID -> checkAuthorisationByMediaId(request, roles);
+            case TRANSCRIPTION_ID -> checkAuthorisationByTranscriptionId(request, roles);
+            default -> log.warn("Unrecognised contextId");
         }
     }
 

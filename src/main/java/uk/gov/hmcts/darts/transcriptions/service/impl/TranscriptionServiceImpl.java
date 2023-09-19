@@ -91,7 +91,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         } else if (!isNull(hearing)) {
             transcription.setCourtCase(hearing.getCourtCase());
         } else {
-            throw new DartsApiException(TranscriptionError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
 
         transcription.setStart(transcriptionRequestDetails.getStartDateTime());

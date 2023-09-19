@@ -1,13 +1,10 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
@@ -23,6 +20,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
@@ -51,8 +50,10 @@ public class AudioController implements AudioApi {
     }
 
     @Override
-    public ResponseEntity<Resource> download(Integer audioRequestId) {
-        InputStream audioFileStream = audioService.download(audioRequestId);
+    @Authorisation(contextId = MEDIA_REQUEST_ID,
+        securityRoles = {TRANSCRIBER})
+    public ResponseEntity<Resource> download(Integer mediaRequestId) {
+        InputStream audioFileStream = audioService.download(mediaRequestId);
 
         return new ResponseEntity<>(
             new InputStreamResource(audioFileStream),
@@ -71,10 +72,9 @@ public class AudioController implements AudioApi {
     }
 
     @Override
-    public ResponseEntity<org.springframework.core.io.Resource> preview(
-        @Parameter(name = "media_id", description = "Internal identifier for media",
-            required = true, in = ParameterIn.PATH) @PathVariable("media_id") Integer mediaId
-    ) {
+    @Authorisation(contextId = MEDIA_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+    public ResponseEntity<org.springframework.core.io.Resource> preview(Integer mediaId) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
     }

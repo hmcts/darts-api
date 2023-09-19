@@ -32,9 +32,9 @@ public class AudioServiceImpl implements AudioService {
     private final FileOperationService fileOperationService;
 
     @Override
-    public InputStream download(Integer audioRequestId) {
+    public InputStream download(Integer mediaRequestId) {
         var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
-                audioRequestId)
+                mediaRequestId)
             .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
 
         UUID blobId = transientObjectEntity.getExternalLocation();
