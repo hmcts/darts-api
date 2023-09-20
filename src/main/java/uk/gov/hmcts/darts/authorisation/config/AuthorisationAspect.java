@@ -90,7 +90,10 @@ public class AuthorisationAspect {
             case MEDIA_REQUEST_ID -> checkAuthorisationByMediaRequestId(request, roles);
             case MEDIA_ID -> checkAuthorisationByMediaId(request, roles);
             case TRANSCRIPTION_ID -> checkAuthorisationByTranscriptionId(request, roles);
-            default -> log.warn("Unrecognised contextId");
+            default -> throw new IllegalStateException(String.format(
+                "The Authorisation annotation contextId is not known: %s",
+                contextId
+            ));
         }
     }
 
