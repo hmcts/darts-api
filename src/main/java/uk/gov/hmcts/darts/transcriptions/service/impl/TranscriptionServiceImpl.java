@@ -23,7 +23,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
-import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionError;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
@@ -54,14 +54,20 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         TranscriptionUrgencyEntity transcriptionUrgency = getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId());
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(TranscriptionStatusEnum.REQUESTED);
         TranscriptionTypeEntity transcriptionType = getTranscriptionType(transcriptionRequestDetails.getTranscriptionTypeId());
-        TranscriptionEntity transcription = saveTranscription(userAccount,
-                                                              transcriptionRequestDetails,
-                                                              transcriptionUrgency,
-                                                              transcriptionStatus,
-                                                              transcriptionType
+        TranscriptionEntity transcription = saveTranscription(
+            userAccount,
+            transcriptionRequestDetails,
+            transcriptionUrgency,
+            transcriptionStatus,
+            transcriptionType
         );
 
-        saveTranscriptionWorkflow(userAccount, transcriptionRequestDetails, transcription, TranscriptionWorkflowStageEnum.REQUESTED);
+        saveTranscriptionWorkflow(
+            userAccount,
+            transcriptionRequestDetails,
+            transcription,
+            TranscriptionWorkflowStageEnum.REQUESTED
+        );
     }
 
     private TranscriptionEntity saveTranscription(UserAccountEntity userAccount,
@@ -69,9 +75,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                                                   TranscriptionUrgencyEntity transcriptionUrgency,
                                                   TranscriptionStatusEntity transcriptionStatus,
                                                   TranscriptionTypeEntity transcriptionType
-                                                  ) {
+    ) {
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
-            throw new DartsApiException(TranscriptionError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
 
         TranscriptionEntity transcription = new TranscriptionEntity();
@@ -85,7 +91,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         } else if (!isNull(hearing)) {
             transcription.setCourtCase(hearing.getCourtCase());
         } else {
-            throw new DartsApiException(TranscriptionError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
 
         transcription.setStart(transcriptionRequestDetails.getStartDateTime());

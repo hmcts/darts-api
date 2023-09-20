@@ -7,14 +7,23 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
 @RequiredArgsConstructor
-public enum AudioError implements DartsApiError {
+public enum AudioApiError implements DartsApiError {
 
-    FAILED_TO_PROCESS_AUDIO_REQUEST("100",
-                                  null,
-                                  "Failed to process audio request"),
-    REQUESTED_DATA_CANNOT_BE_LOCATED("101",
-                                     HttpStatus.INTERNAL_SERVER_ERROR,
-                                    "The requested data cannot be located");
+    FAILED_TO_PROCESS_AUDIO_REQUEST(
+        "100",
+        null,
+        "Failed to process audio request"
+    ),
+    REQUESTED_DATA_CANNOT_BE_LOCATED(
+        "101",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "The requested data cannot be located"
+    ),
+    MEDIA_NOT_FOUND(
+        "102",
+        HttpStatus.NOT_FOUND,
+        "The requested media cannot be found"
+    );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO";
 

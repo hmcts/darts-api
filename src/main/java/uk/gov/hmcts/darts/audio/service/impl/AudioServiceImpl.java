@@ -4,7 +4,7 @@ import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -32,13 +32,14 @@ public class AudioServiceImpl implements AudioService {
     private final FileOperationService fileOperationService;
 
     @Override
-    public InputStream download(Integer audioRequestId) {
-        var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(audioRequestId)
-            .orElseThrow(() -> new DartsApiException(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+    public InputStream download(Integer mediaRequestId) {
+        var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
+                mediaRequestId)
+            .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
 
         UUID blobId = transientObjectEntity.getExternalLocation();
         if (blobId == null) {
-            throw new DartsApiException(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED);
+            throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
         }
 
         return audioTransformationService.getAudioBlobData(blobId)
@@ -48,7 +49,7 @@ public class AudioServiceImpl implements AudioService {
     @Override
     public InputStream preview(Integer mediaId) {
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
-            () -> new DartsApiException(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+            () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
         try {
             Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
@@ -66,7 +67,7 @@ public class AudioServiceImpl implements AudioService {
 
             mediaBinaryData = fileOperationService.saveFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
         } catch (Exception exception) {
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
 
         return mediaBinaryData.toStream();
@@ -77,7 +78,8 @@ public class AudioServiceImpl implements AudioService {
             mediaEntity.getStart().toInstant(),
             mediaEntity.getEnd().toInstant(),
             downloadPath.toFile().getAbsolutePath(),
-            mediaEntity.getChannel());
+            mediaEntity.getChannel()
+        );
         return audioFileInfo;
     }
 

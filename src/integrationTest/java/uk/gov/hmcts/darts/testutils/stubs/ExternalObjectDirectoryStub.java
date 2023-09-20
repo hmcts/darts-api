@@ -6,7 +6,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.UUID;
 
@@ -28,7 +27,7 @@ public class ExternalObjectDirectoryStub {
         externalObjectDirectory.setChecksum(null);
         externalObjectDirectory.setTransferAttempts(null);
 
-        UserAccountEntity user = userAccountStub.getDefaultUser();
+        var user = userAccountStub.getIntegrationTestUserAccountEntity();
         externalObjectDirectory.setCreatedBy(user);
         externalObjectDirectory.setLastModifiedBy(user);
 

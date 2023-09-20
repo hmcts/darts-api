@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -95,7 +95,7 @@ class AudioServiceImplTest {
             () -> audioService.download(mediaRequestId)
         );
 
-        assertEquals(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
+        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
     }
 
     @Test
@@ -112,7 +112,7 @@ class AudioServiceImplTest {
             () -> audioService.download(mediaRequestId)
         );
 
-        assertEquals(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
+        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
     }
 
 
@@ -131,7 +131,6 @@ class AudioServiceImplTest {
 
         AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), "test", 1);
         when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
-
 
         byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
@@ -161,7 +160,7 @@ class AudioServiceImplTest {
             () -> audioService.preview(mediaRequestId)
         );
 
-        assertEquals(AudioError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
+        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
     }
 
 }

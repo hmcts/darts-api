@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -36,6 +37,8 @@ import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -71,9 +74,6 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 @Slf4j
 public class DartsDatabaseStub {
 
-    private static final int SYSTEM_USER_ID = 0;
-    private static final String INTEGRATIONTEST_USER_EMAIL = "integrationtest.user@example.com";
-
     private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
     private final CourthouseRepository courthouseRepository;
@@ -97,6 +97,8 @@ public class DartsDatabaseStub {
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
+    private final SecurityGroupRepository securityGroupRepository;
+    private final SecurityRoleRepository securityRoleRepository;
 
     private final UserAccountStub userAccountStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
@@ -317,37 +319,6 @@ public class DartsDatabaseStub {
             ));
     }
 
-    public UserAccountEntity createSystemUserAccountEntity() {
-
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findById(SYSTEM_USER_ID);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("System User");
-            newUser.setEmailAddress("system.user@example.com");
-            return userAccountRepository.saveAndFlush(newUser);
-        }
-    }
-
-    public UserAccountEntity createIntegrationTestUserAccountEntity(UserAccountEntity systemUser) {
-
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddress(
-            INTEGRATIONTEST_USER_EMAIL);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("IntegrationTest User");
-            newUser.setEmailAddress(INTEGRATIONTEST_USER_EMAIL);
-            newUser.setCreatedBy(systemUser);
-            newUser.setLastModifiedBy(systemUser);
-            return userAccountRepository.saveAndFlush(newUser);
-        }
-    }
-
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
         mediaRepository.save(mediaEntity);
         hearing.addMedia(mediaEntity);
@@ -386,6 +357,10 @@ public class DartsDatabaseStub {
     @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         return hearingRepository.saveAndFlush(hearingEntity);
+    }
+
+    public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
     public void saveAll(HearingEntity... hearingEntities) {

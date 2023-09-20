@@ -86,8 +86,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
@@ -107,8 +107,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, null, null
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
@@ -127,8 +127,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            null, null, transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
@@ -148,19 +148,19 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
     @Order(4)
     @Transactional
-    void transcriptionRequestWithNullStartDateAndRequiredDatesTranscriptionTypeShouldThrowException(TranscriptionTypeEnum transcriptionTypeEnum)
+    void transcriptionRequestWithNullStartDateAndRequiredDatesTranscriptionTypeShouldThrowException(
+        TranscriptionTypeEnum transcriptionTypeEnum)
         throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, null, END_TIME
+            null, null, transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, null, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -175,13 +175,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
     @Order(5)
     @Transactional
-    void transcriptionRequestWithNullEndDateAndRequiredDatesTranscriptionTypeShouldThrowException(TranscriptionTypeEnum transcriptionTypeEnum)
+    void transcriptionRequestWithNullEndDateAndRequiredDatesTranscriptionTypeShouldThrowException(
+        TranscriptionTypeEnum transcriptionTypeEnum)
         throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, null
+            null, null, transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, null
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
@@ -205,13 +206,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), 123,
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -228,13 +228,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), null,
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -250,14 +249,13 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
             123, TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -274,14 +272,13 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            789, null, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            789, null, transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -307,14 +304,13 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, 789, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            null, 789, transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -340,8 +336,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            hearing.getId(), null, transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(), TEST_COMMENT, START_TIME, END_TIME
+            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
@@ -369,7 +365,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
                                                                           String comment,
                                                                           OffsetDateTime startDateTime,
                                                                           OffsetDateTime endDateTime
-                                                                          ) {
+    ) {
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
         transcriptionRequestDetails.setHearingId(hearingId);
         transcriptionRequestDetails.setCaseId(caseId);

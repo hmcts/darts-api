@@ -30,7 +30,7 @@ import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
-import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionError;
+import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.time.OffsetDateTime;
@@ -103,11 +103,11 @@ class TranscriptionServiceImplTest {
         when(caseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -120,8 +120,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -150,11 +150,11 @@ class TranscriptionServiceImplTest {
         when(caseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -168,8 +168,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -198,11 +198,11 @@ class TranscriptionServiceImplTest {
         when(hearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -216,8 +216,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -250,11 +250,11 @@ class TranscriptionServiceImplTest {
         when(caseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey()))
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -267,8 +267,8 @@ class TranscriptionServiceImplTest {
         transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
             hearingId,
             caseId,
-            transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-            transcriptionTypeEnum.getTranscriptionTypeKey(),
+            transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(),
             comment,
             startDateTime,
             endDateTime
@@ -295,10 +295,11 @@ class TranscriptionServiceImplTest {
     void saveTranscriptionRequestWithNullCaseAndNullHearingAndCourtLogTypeThrowsException() {
 
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getTranscriptionUrgencyKey())).thenReturn(mockTranscriptionUrgency);
+        when(transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId())).thenReturn(
+            mockTranscriptionUrgency);
 
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
-        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getTranscriptionTypeKey()))
+        when(transcriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
         when(transcriptionStatusRepository.getReferenceById(TranscriptionStatusEnum.REQUESTED.getId()))
@@ -315,17 +316,17 @@ class TranscriptionServiceImplTest {
             DartsApiException.class,
             () ->
                 transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
-                hearingId,
-                caseId,
-                transcriptionUrgencyEnum.getTranscriptionUrgencyKey(),
-                transcriptionTypeEnum.getTranscriptionTypeKey(),
-                comment,
-                startDateTime,
-                endDateTime
-            ))
+                    hearingId,
+                    caseId,
+                    transcriptionUrgencyEnum.getId(),
+                    transcriptionTypeEnum.getId(),
+                    comment,
+                    startDateTime,
+                    endDateTime
+                ))
         );
 
-        assertEquals(TranscriptionError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, exception.getError());
+        assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, exception.getError());
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
