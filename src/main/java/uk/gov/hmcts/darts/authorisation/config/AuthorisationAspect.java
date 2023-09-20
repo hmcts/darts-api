@@ -10,16 +10,16 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.HandlerMapping;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_CASE_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_HEARING_ID;
@@ -33,40 +33,11 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 @Slf4j
 public class AuthorisationAspect {
 
-    /**
-     * Regex to capture any path param which may not have a trailing slash e.g. /cases/{case_id}
-     */
-    private static final String PATH_PARAM_REGEX = "(?<=\\/%s\\/)(\\d+?)(?=\\/|$)";
-
-    private static final String CASES_PATH = "cases";
     private static final String CASE_ID_PARAM = "case_id";
-
-    private static final String HEARINGS_PATH = "hearings";
     private static final String HEARING_ID_PARAM = "hearing_id";
-
-    private static final String AUDIO_REQUESTS_PATH = "audio-requests";
-    private static final String AUDIO_REQUEST_ID_PARAM = "media_request_id";
-
-    private static final String AUDIOS_PATH = "audio/preview"; //FIXME should probably be "audios"
-    private static final String AUDIO_ID_PARAM = "media_id";
-
-    private static final String TRANSCRIPTIONS_PATH = "transcriptions";
+    private static final String MEDIA_REQUEST_ID_PARAM = "media_request_id";
+    private static final String MEDIA_ID_PARAM = "media_id";
     private static final String TRANSCRIPTION_ID_PARAM = "transcription_id";
-
-    private static final Pattern CASES_ID_PATH_PATTERN = Pattern.compile(
-        String.format(PATH_PARAM_REGEX, CASES_PATH));
-
-    private static final Pattern HEARINGS_ID_PATH_PATTERN = Pattern.compile(
-        String.format(PATH_PARAM_REGEX, HEARINGS_PATH));
-
-    private static final Pattern AUDIO_REQUESTS_ID_PATH_PATTERN = Pattern.compile(
-        String.format(PATH_PARAM_REGEX, AUDIO_REQUESTS_PATH));
-
-    private static final Pattern AUDIOS_ID_PATH_PATTERN = Pattern.compile(
-        String.format(PATH_PARAM_REGEX, AUDIOS_PATH));
-
-    private static final Pattern TRANSCRIPTIONS_ID_PATH_PATTERN = Pattern.compile(
-        String.format(PATH_PARAM_REGEX, TRANSCRIPTIONS_PATH));
 
     private static final String BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE =
         "Unable to extract the %s in request path, query or header params for this Authorisation endpoint: %s";
@@ -101,13 +72,8 @@ public class AuthorisationAspect {
     }
 
     private void checkAuthorisationByCaseId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> caseIdParamOptional = Optional.empty();
-
-        Matcher matcher = CASES_ID_PATH_PATTERN.matcher(request.getRequestURI());
-        if (matcher.find()) {
-            caseIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByCaseId(caseIdParamOptional, roles);
-        }
+        Optional<String> caseIdParamOptional = getPathParamValue(request, CASE_ID_PARAM);
+        checkAuthorisationByCaseId(caseIdParamOptional, roles);
 
         if (caseIdParamOptional.isEmpty()) {
             caseIdParamOptional = Optional.ofNullable(request.getParameter(CASE_ID_PARAM));
@@ -142,13 +108,8 @@ public class AuthorisationAspect {
     }
 
     private void checkAuthorisationByHearingId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> hearingIdParamOptional = Optional.empty();
-
-        Matcher matcher = HEARINGS_ID_PATH_PATTERN.matcher(request.getRequestURI());
-        if (matcher.find()) {
-            hearingIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByHearingId(hearingIdParamOptional, roles);
-        }
+        Optional<String> hearingIdParamOptional = getPathParamValue(request, HEARING_ID_PARAM);
+        checkAuthorisationByHearingId(hearingIdParamOptional, roles);
 
         if (hearingIdParamOptional.isEmpty()) {
             hearingIdParamOptional = Optional.ofNullable(request.getParameter(HEARING_ID_PARAM));
@@ -183,28 +144,23 @@ public class AuthorisationAspect {
     }
 
     private void checkAuthorisationByMediaRequestId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> mediaRequestIdParamOptional = Optional.empty();
+        Optional<String> mediaRequestIdParamOptional = getPathParamValue(request, MEDIA_REQUEST_ID_PARAM);
+        checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
 
-        Matcher matcher = AUDIO_REQUESTS_ID_PATH_PATTERN.matcher(request.getRequestURI());
-        if (matcher.find()) {
-            mediaRequestIdParamOptional = Optional.ofNullable(matcher.group(0));
+        if (mediaRequestIdParamOptional.isEmpty()) {
+            mediaRequestIdParamOptional = Optional.ofNullable(request.getParameter(MEDIA_REQUEST_ID_PARAM));
             checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
         }
 
         if (mediaRequestIdParamOptional.isEmpty()) {
-            mediaRequestIdParamOptional = Optional.ofNullable(request.getParameter(AUDIO_REQUEST_ID_PARAM));
-            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
-        }
-
-        if (mediaRequestIdParamOptional.isEmpty()) {
-            mediaRequestIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_REQUEST_ID_PARAM));
+            mediaRequestIdParamOptional = Optional.ofNullable(request.getHeader(MEDIA_REQUEST_ID_PARAM));
             checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
         }
 
         if (mediaRequestIdParamOptional.isEmpty()) {
             log.error(String.format(
                 BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
-                AUDIO_REQUEST_ID_PARAM,
+                MEDIA_REQUEST_ID_PARAM,
                 request.getRequestURI()
             ));
             throw new DartsApiException(BAD_REQUEST_MEDIA_REQUEST_ID);
@@ -225,28 +181,23 @@ public class AuthorisationAspect {
     }
 
     private void checkAuthorisationByMediaId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> mediaIdParamOptional = Optional.empty();
+        Optional<String> mediaIdParamOptional = getPathParamValue(request, MEDIA_ID_PARAM);
+        checkAuthorisationByMediaId(mediaIdParamOptional, roles);
 
-        Matcher matcher = AUDIOS_ID_PATH_PATTERN.matcher(request.getRequestURI());
-        if (matcher.find()) {
-            mediaIdParamOptional = Optional.ofNullable(matcher.group(0));
+        if (mediaIdParamOptional.isEmpty()) {
+            mediaIdParamOptional = Optional.ofNullable(request.getParameter(MEDIA_ID_PARAM));
             checkAuthorisationByMediaId(mediaIdParamOptional, roles);
         }
 
         if (mediaIdParamOptional.isEmpty()) {
-            mediaIdParamOptional = Optional.ofNullable(request.getParameter(AUDIO_ID_PARAM));
-            checkAuthorisationByMediaId(mediaIdParamOptional, roles);
-        }
-
-        if (mediaIdParamOptional.isEmpty()) {
-            mediaIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_ID_PARAM));
+            mediaIdParamOptional = Optional.ofNullable(request.getHeader(MEDIA_ID_PARAM));
             checkAuthorisationByMediaId(mediaIdParamOptional, roles);
         }
 
         if (mediaIdParamOptional.isEmpty()) {
             log.error(String.format(
                 BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
-                AUDIO_ID_PARAM,
+                MEDIA_ID_PARAM,
                 request.getRequestURI()
             ));
             throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
@@ -266,13 +217,8 @@ public class AuthorisationAspect {
     }
 
     private void checkAuthorisationByTranscriptionId(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> transcriptionIdParamOptional = Optional.empty();
-
-        Matcher matcher = TRANSCRIPTIONS_ID_PATH_PATTERN.matcher(request.getRequestURI());
-        if (matcher.find()) {
-            transcriptionIdParamOptional = Optional.ofNullable(matcher.group(0));
-            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
-        }
+        Optional<String> transcriptionIdParamOptional = getPathParamValue(request, TRANSCRIPTION_ID_PARAM);
+        checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
 
         if (transcriptionIdParamOptional.isEmpty()) {
             transcriptionIdParamOptional = Optional.ofNullable(request.getParameter(TRANSCRIPTION_ID_PARAM));
@@ -305,6 +251,12 @@ public class AuthorisationAspect {
                 throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
             }
         }
+    }
+
+    private Optional<String> getPathParamValue(HttpServletRequest request, String pathParam) {
+        Map pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        String pathParamValue = (String) pathVariables.get(pathParam);
+        return Optional.ofNullable(pathParamValue);
     }
 
 }
