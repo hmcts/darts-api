@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -31,14 +33,17 @@ public class AudioController implements AudioApi {
     private final AudioResponseMapper audioResponseMapper;
 
     @Override
-    public ResponseEntity<Void> addAudioRequest(AudioRequestDetails audioRequestDetails) {
+    public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
+        AddAudioResponse addAudioResponse = null;
         try {
-            mediaRequestService.saveAudioRequest(audioRequestDetails);
+            MediaRequestEntity audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
+            addAudioResponse = audioResponseMapper.mapToAddAudioResponse(audioRequest);
+
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
     }
 
     @Override

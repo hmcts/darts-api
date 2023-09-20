@@ -14,7 +14,7 @@ public interface MediaRequestService {
 
     MediaRequestEntity updateAudioRequestStatus(Integer id, AudioRequestStatus audioRequestStatus);
 
-    Integer saveAudioRequest(AudioRequestDetails audioRequestDetails);
+    MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails);
 
     void deleteAudioRequest(Integer mediaRequestId);
 

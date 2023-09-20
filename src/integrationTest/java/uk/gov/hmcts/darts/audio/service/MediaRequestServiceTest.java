@@ -46,9 +46,9 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
-        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
+        var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -66,9 +66,9 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
 
-        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
+        var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -88,9 +88,9 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
 
-        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
+        var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -109,9 +109,9 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-10-29T02:15:00Z"));
 
-        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
+        var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
         assertTrue(mediaRequestEntity.getId() > 0);
         assertEquals(OPEN, mediaRequestEntity.getStatus());
         assertEquals(requestDetails.getHearingId(), mediaRequestEntity.getHearing().getId());
@@ -143,13 +143,13 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
 
-        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
+        var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
         assertNotNull(mediaRequestEntity);
 
-        mediaRequestService.deleteAudioRequest(requestId);
-        assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(requestId));
+        mediaRequestService.deleteAudioRequest(request.getId());
+        assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(request.getId()));
     }
 
 }

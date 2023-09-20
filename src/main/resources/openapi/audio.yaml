@@ -17,8 +17,12 @@ paths:
       operationId: addAudioRequest
       description: Adds a user audio request for processing
       responses:
-        '201':
-          description: audio request created
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddAudioResponse'
         '400':
           description: 'invalid input, object invalid'
         '409':
@@ -189,3 +193,44 @@ components:
         media_end_timestamp:
           type: string
           format: date-time
+
+    AddAudioResponse:
+      type: object
+      required:
+        - request_id
+        - case_id
+        - courthouse_name
+        - defendants
+        - hearing_date
+        - start_time
+        - end_time
+      properties:
+        request_id:
+          type: integer
+          example: 1234
+        case_id:
+          type: string
+          example: T4565443
+        courthouse_name:
+          type: string
+          example: "Swansea"
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        hearing_date:
+          type: string
+          format: date
+          example: '10-05-2023'
+        start_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T10:00:00Z'
+
+    defendant:
+      type: string
+      example: Joe Bloggs
