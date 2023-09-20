@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.authorisation.configuration;
+package uk.gov.hmcts.darts.authorisation.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
