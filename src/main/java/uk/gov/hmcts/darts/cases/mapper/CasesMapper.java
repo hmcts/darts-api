@@ -3,14 +3,12 @@ package uk.gov.hmcts.darts.cases.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
-import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -18,7 +16,6 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
@@ -104,19 +101,6 @@ public class CasesMapper {
         }
 
         return singleCase;
-    }
-
-    public List<EventResponse> mapToEvents(List<EventEntity> eventEntities) {
-        return emptyIfNull(eventEntities).stream().map(this::mapToEvent).collect(Collectors.toList());
-    }
-
-    public EventResponse mapToEvent(EventEntity eventEntity) {
-        EventResponse eventResponse = new EventResponse();
-        eventResponse.setId(eventEntity.getId());
-        eventResponse.setTimestamp(eventEntity.getTimestamp());
-        eventResponse.setName(eventEntity.getEventType().getEventName());
-        eventResponse.setText(eventEntity.getEventText());
-        return eventResponse;
     }
 
     private DefenceEntity createNewDefence(String newProsecutor, CourtCaseEntity caseEntity) {

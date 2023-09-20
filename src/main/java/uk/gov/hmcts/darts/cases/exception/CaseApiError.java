@@ -34,11 +34,6 @@ public enum CaseApiError implements DartsApiError {
         HttpStatus.NOT_FOUND,
         "The requested case cannot be found"
     ),
-    HEARING_NOT_FOUND(
-        "105",
-        HttpStatus.NOT_FOUND,
-        "The requested hearing cannot be found"
-    ),
     PATCH_CRITERIA_NOT_MET(
         "106",
         HttpStatus.BAD_REQUEST,
