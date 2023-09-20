@@ -93,9 +93,9 @@ class MediaRequestServiceImplTest {
         when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
         when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
-        var requestId = mediaRequestService.saveAudioRequest(requestDetails);
+        var request = mediaRequestService.saveAudioRequest(requestDetails);
 
-        assertEquals(requestId, mockMediaRequestEntity.getId());
+        assertEquals(request.getId(), mockMediaRequestEntity.getId());
         verify(mockHearingRepository).getReferenceById(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
