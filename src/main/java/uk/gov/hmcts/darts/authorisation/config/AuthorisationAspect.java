@@ -68,6 +68,9 @@ public class AuthorisationAspect {
     private static final Pattern TRANSCRIPTIONS_ID_PATH_PATTERN = Pattern.compile(
         String.format(PATH_PARAM_REGEX, TRANSCRIPTIONS_PATH));
 
+    private static final String BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE =
+        "Unable to extract the %s in request path, query or header params for this Authorisation endpoint: %s";
+
     private final Authorisation authorisation;
 
     @Before("@annotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation)")
@@ -115,6 +118,15 @@ public class AuthorisationAspect {
             caseIdParamOptional = Optional.ofNullable(request.getHeader(CASE_ID_PARAM));
             checkAuthorisationByCaseId(caseIdParamOptional, roles);
         }
+
+        if (caseIdParamOptional.isEmpty()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                CASE_ID_PARAM,
+                request.getRequestURI()
+            ));
+            throw new DartsApiException(BAD_REQUEST_CASE_ID);
+        }
     }
 
     private void checkAuthorisationByCaseId(Optional<String> caseIdParamOptional, Set<SecurityRoleEnum> roles) {
@@ -147,6 +159,15 @@ public class AuthorisationAspect {
             hearingIdParamOptional = Optional.ofNullable(request.getHeader(HEARING_ID_PARAM));
             checkAuthorisationByHearingId(hearingIdParamOptional, roles);
         }
+
+        if (hearingIdParamOptional.isEmpty()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                HEARING_ID_PARAM,
+                request.getRequestURI()
+            ));
+            throw new DartsApiException(BAD_REQUEST_HEARING_ID);
+        }
     }
 
     private void checkAuthorisationByHearingId(Optional<String> hearingIdParamOptional, Set<SecurityRoleEnum> roles) {
@@ -178,6 +199,15 @@ public class AuthorisationAspect {
         if (mediaRequestIdParamOptional.isEmpty()) {
             mediaRequestIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_REQUEST_ID_PARAM));
             checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
+        }
+
+        if (mediaRequestIdParamOptional.isEmpty()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                AUDIO_REQUEST_ID_PARAM,
+                request.getRequestURI()
+            ));
+            throw new DartsApiException(BAD_REQUEST_MEDIA_REQUEST_ID);
         }
     }
 
@@ -212,6 +242,15 @@ public class AuthorisationAspect {
             mediaIdParamOptional = Optional.ofNullable(request.getHeader(AUDIO_ID_PARAM));
             checkAuthorisationByMediaId(mediaIdParamOptional, roles);
         }
+
+        if (mediaIdParamOptional.isEmpty()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                AUDIO_ID_PARAM,
+                request.getRequestURI()
+            ));
+            throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
+        }
     }
 
     private void checkAuthorisationByMediaId(Optional<String> mediaIdParamOptional, Set<SecurityRoleEnum> roles) {
@@ -243,6 +282,15 @@ public class AuthorisationAspect {
         if (transcriptionIdParamOptional.isEmpty()) {
             transcriptionIdParamOptional = Optional.ofNullable(request.getHeader(TRANSCRIPTION_ID_PARAM));
             checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
+        }
+
+        if (transcriptionIdParamOptional.isEmpty()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
+                TRANSCRIPTION_ID_PARAM,
+                request.getRequestURI()
+            ));
+            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
         }
     }
 
