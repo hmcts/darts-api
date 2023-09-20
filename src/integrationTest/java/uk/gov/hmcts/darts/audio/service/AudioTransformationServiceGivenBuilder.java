@@ -37,6 +37,8 @@ public class AudioTransformationServiceGivenBuilder {
 
     private HearingEntity hearingEntityWithMedia1;
     private HearingEntity hearingEntityWithMedia2;
+    private MediaEntity mediaEntity1Hearing2;
+    private MediaEntity mediaEntity2Hearing2;
     private HearingEntity hearingEntityWithoutMedia;
     private MediaEntity mediaEntity1;
     private MediaEntity mediaEntity2;
@@ -76,7 +78,11 @@ public class AudioTransformationServiceGivenBuilder {
 
         mediaEntity1 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaWith(
             courtroomAtNewcastle, MEDIA_START_TIME, MEDIA_END_TIME, channel));
+
         mediaEntity2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia1, createMediaFor(courtroomAtNewcastle));
+
+        mediaEntity1Hearing2 = dartsDatabase.addMediaToHearing(hearingEntityWithMedia2, createMediaWith(
+            courtroomAtNewcastle, MEDIA_START_TIME, MEDIA_END_TIME, channel));
 
         mediaEntity3 = createMediaFor(courtroomAtNewcastle);
     }
