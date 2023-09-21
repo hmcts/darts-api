@@ -23,8 +23,6 @@ class DailylistFunctionalTest extends FunctionalTest {
         String todayDateString = LocalDate.now().toString();
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
 
-
-        //String xmlDocument = getContentsFromFile("EmptyDailyList-Document.xml");
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
         Response response = buildRequestWithAuth()
@@ -84,8 +82,6 @@ class DailylistFunctionalTest extends FunctionalTest {
         String todayDateString = LocalDate.now().toString();
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
 
-
-        //String xmlDocument = getContentsFromFile("EmptyDailyList-Document.xml");
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
         Response response = buildRequestWithAuth()
@@ -109,10 +105,6 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         String todayDateString = LocalDate.now().toString();
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
-
-
-        //String xmlDocument = getContentsFromFile("EmptyDailyList-Document.xml");
-        String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)

@@ -1,4 +1,0 @@
-<cs:DailyList xmlns:apd="http://www.govtalk.gov.uk/people/AddressAndPersonalDetails"
-  xmlns:cs="http://www.courtservice.gov.uk/schemas/courtservice"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.courtservice.gov.uk/schemas/courtservice DailyList-v5-2.xsd">
-</cs:DailyList>
