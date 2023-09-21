@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -41,9 +40,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioServiceImplTest {
 
     public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
@@ -193,7 +194,7 @@ class AudioServiceImplTest {
 
         AddAudioRequest addAudioRequest = createAddAudioRequest(startedAt, endedAt);
         HearingEntity hearingEntity = new HearingEntity();
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
             anyString(),
@@ -201,10 +202,10 @@ class AudioServiceImplTest {
         )).thenReturn(hearingEntity);
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
 
-        Mockito.when(mapper.mapToMedia(any())).thenReturn(mediaEntity);
+        when(mapper.mapToMedia(any())).thenReturn(mediaEntity);
         audioService.addAudio(addAudioRequest);
 
-        Mockito.verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+        verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
 
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
@@ -248,11 +249,11 @@ class AudioServiceImplTest {
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
         HearingEntity hearing = new HearingEntity();
-        Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
             anyString(),
             anyString(),
-            STARTED_AT.toLocalDate()
+            any()
         )).thenReturn(hearing);
         audioService.linkAudioAndHearing(audioRequest, mediaEntity);
         assertEquals(3, hearing.getMediaList().size());
