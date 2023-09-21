@@ -1,0 +1,107 @@
+{
+  "document_id": {
+    "document_name": "DailyList_457_20210219174938.xml",
+    "unique_id": "CSDDL1613756980160",
+    "document_type": "DL",
+    "time_stamp": "<<TODAY>>T17:49:38.391+01:00"
+  },
+  "list_header": {
+    "list_category": "Criminal",
+    "start_date": "2023-09-21",
+    "end_date": "2023-09-21",
+    "version": "NOT VERSIONED",
+    "published_time": "<<TODAY>>T17:49:38.767+01:00"
+  },
+  "crown_court": {
+    "court_house_type": "Crown Court",
+    "court_house_code": {
+      "court_house_short_name": "SWANS",
+      "code": 1
+    },
+    "court_house_name": "SWANSEA"
+  },
+  "court_lists": [
+    {
+      "court_house": {
+        "court_house_type": "Crown Court",
+        "court_house_code": {
+          "court_house_short_name": "SWANS",
+          "code": 1
+        },
+        "court_house_name": "SWANSEA"
+      },
+      "sittings": [
+        {
+          "court_room_number": 1,
+          "sitting_sequence_no": 1,
+          "sitting_at": "11:00:00",
+          "sitting_priority": "T",
+          "judiciary": [
+            {
+              "citizen_name_forename": "Susan Katherine",
+              "citizen_name_surname": "Bonnell",
+              "citizen_name_requested_name": "Mrs Susan Katherine Bonnell JP"
+            }
+          ],
+          "hearings": [
+            {
+              "hearing_sequence_number": 1,
+              "hearing_details": {
+                "hearing_type": "PTR",
+                "hearing_description": "For Pre-Trial Review",
+                "hearing_date": "<<TOMORROW>>"
+              },
+              "time_marking_note": "NOT BEFORE 11:00 AM",
+              "case_number": "CPP",
+              "prosecution": {
+                "prosecuting_authority": "Crown Prosecution Service",
+                "prosecuting_reference": "Crown Prosecution Service",
+                "prosecuting_organisation": {
+                  "organisation_name": "Crown Prosecution Service"
+                },
+                "advocates": [
+                  {
+                    "name": {
+                      "citizen_name_forename": "ProsecutorName",
+                      "citizen_name_surname": "Surname",
+                      "citizen_name_requested_name": ""
+                    }
+                  }
+                ]
+              },
+              "defendants": [
+                {
+                  "personal_details": {
+                    "name": {
+                      "citizen_name_forename": "Susan Katherine",
+                      "citizen_name_surname": "Bonnell",
+                      "citizen_name_requested_name": "Mrs Susan Katherine Bonnell JP"
+                    },
+                    "is_masked": "false"
+                  },
+                  "urn": "42GD2391421",
+                  "charges": [
+                    {
+                      "indictment_count_number": 1,
+                      "cjsoffence_code": "CA03014",
+                      "offence_statement": "Fail    / refuse give assistance to person executing Communications Act search warrant"
+                    }
+                  ],
+                  "counsel": [
+                    {
+                      "name": {
+                        "citizen_name_forename": "DefenceName",
+                        "citizen_name_surname": "Surname",
+                        "citizen_name_requested_name": ""
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
