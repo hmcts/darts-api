@@ -38,6 +38,18 @@ java:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: XhibitUserName
+          alias: XHIBIT_USER_NAME
+        - name: XhibitPassword
+          alias: XHIBIT_PASSWORD
+        - name: CppUserName
+          alias: CPP_USER_NAME
+        - name: CppPassword
+          alias: CPP_PASSWORD
+        - name: DarPcUserName
+          alias: DARPC_USER_NAME
+        - name: DarPcPassword
+          alias: DARPC_PASSWORD
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -89,6 +101,18 @@ function:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: XhibitUserName
+          alias: XHIBIT_USER_NAME
+        - name: XhibitPassword
+          alias: XHIBIT_PASSWORD
+        - name: CppUserName
+          alias: CPP_USER_NAME
+        - name: CppPassword
+          alias: CPP_PASSWORD
+        - name: DarPcUserName
+          alias: DARPC_USER_NAME
+        - name: DarPcPassword
+          alias: DARPC_PASSWORD
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require
