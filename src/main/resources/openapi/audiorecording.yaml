@@ -1,0 +1,130 @@
+openapi: 3.0.1
+info:
+  title: Audio Recording Service
+  version: v0.1.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /audios:
+    post:
+      tags:
+        - audio-recording
+      summary: Upload an audio recording
+      operationId: addAudio
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAudioRequest'
+      responses:
+        200:
+          description: Recording accepted
+        400:
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              examples:
+                'Specified court house not found':
+                  value:
+                    status: 400
+                    type: 'courthouse-not-found'
+                'Audio not provided':
+                  value:
+                    status: 400
+                    type: 'audio-not-provided'
+                'Unexpected file type':
+                  value:
+                    status: 400
+                    type: 'unexpected-file-type'
+                'Audio file size outwith allowable bounds':
+                  value:
+                    status: 400
+                    type: 'filesize-out-of-bounds'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+              examples:
+                'Failure to write to inbound data store':
+                  value:
+                    status: 500
+                    type: 'inbound-datastore-failure'
+components:
+  schemas:
+    AddAudioRequest:
+      type: object
+      required:
+        - started_at
+        - ended_at
+        - channel
+        - total_channels
+        - format
+        - filename
+        - courthouse
+        - courtroom
+        - cases
+      properties:
+        started_at:
+          type: string
+          format: date-time
+          description: 'Start timestamp of the audio recording'
+        ended_at:
+          type: string
+          format: date-time
+          description: 'End timestamp of the audio recording'
+        channel:
+          type: integer
+          format: int32
+          description: 'Channel number of the audio recording'
+        total_channels:
+          type: integer
+          format: int32
+          description: 'Number of channels making up the complete audio that this recording is part of'
+        format:
+          type: string
+          description: 'Media format of the audio recording'
+          maxLength: 64
+        filename:
+          type: string
+          description: 'Filename of the audio recording'
+          maxLength: 255
+        courthouse:
+          type: string
+          description: 'Courthouse the audio was recorded in'
+          maxLength: 255
+        courtroom:
+          type: string
+          description: 'Courtroom the audio was recorded in'
+          maxLength: 64
+        cases:
+          type: array
+          items:
+            type: string
+          description: 'List of associated case numbers'
+          minItems: 1
+          maxLength: 255
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        properties:
+          type: object
+          additionalProperties:
+            type: object

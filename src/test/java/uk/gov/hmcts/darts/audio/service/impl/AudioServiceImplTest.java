@@ -4,25 +4,35 @@ import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audiorecording.model.AddAudioRequest;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -36,11 +46,17 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AudioServiceImplTest {
 
+    public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
+    public static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
     private static final String DUMMY_FILE_CONTENT = "DUMMY FILE CONTENT";
 
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
+    @Mock
+    AddAudioRequestMapper mapper;
 
+    @Captor
+    ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Mock
     private AudioTransformationService audioTransformationService;
 
@@ -55,14 +71,20 @@ class AudioServiceImplTest {
 
     @Mock
     private FileOperationService fileOperationService;
-
+    @Mock
+    private RetrieveCoreObjectService retrieveCoreObjectService;
     private AudioService audioService;
 
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
-            audioTransformationService, transientObjectDirectoryRepository,
-            mediaRepository, audioOperationService, fileOperationService
+            audioTransformationService,
+            transientObjectDirectoryRepository,
+            mediaRepository,
+            audioOperationService,
+            fileOperationService,
+            retrieveCoreObjectService,
+            mapper
         );
     }
 
@@ -163,4 +185,76 @@ class AudioServiceImplTest {
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
     }
 
+
+    @Test
+    void addAudio() {
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        AddAudioRequest addAudioRequest = createAddAudioRequest(startedAt, endedAt);
+        HearingEntity hearingEntity = new HearingEntity();
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            anyString(),
+            any()
+        )).thenReturn(hearingEntity);
+        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+
+        Mockito.when(mapper.mapToMedia(any())).thenReturn(mediaEntity);
+        audioService.addAudio(addAudioRequest);
+
+        Mockito.verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+
+        MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
+        assertEquals(startedAt, savedMedia.getStart());
+        assertEquals(endedAt, savedMedia.getEnd());
+        assertEquals(1, savedMedia.getChannel());
+        assertEquals(2, savedMedia.getTotalChannels());
+        assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
+        assertEquals("1", savedMedia.getCourtroom().getName());
+
+    }
+
+    private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setStart(startedAt);
+        mediaEntity.setEnd(endedAt);
+        mediaEntity.setChannel(1);
+        mediaEntity.setTotalChannels(2);
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        mediaEntity.setCourtroom(new CourtroomEntity(1, "1", courthouse));
+        return mediaEntity;
+    }
+
+    private AddAudioRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt) {
+        AddAudioRequest addAudioRequest = new AddAudioRequest();
+        addAudioRequest.startedAt(startedAt);
+        addAudioRequest.endedAt(endedAt);
+        addAudioRequest.setChannel(1);
+        addAudioRequest.totalChannels(2);
+        addAudioRequest.format("mp3");
+        addAudioRequest.filename("test");
+        addAudioRequest.courthouse("SWANSEA");
+        addAudioRequest.courtroom("1");
+        addAudioRequest.cases(List.of("1", "2", "3"));
+        return addAudioRequest;
+    }
+
+    @Test
+    void linkAudioAndHearing() {
+        AddAudioRequest audioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        HearingEntity hearing = new HearingEntity();
+        Mockito.when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            anyString(),
+            STARTED_AT.toLocalDate()
+        )).thenReturn(hearing);
+        audioService.linkAudioAndHearing(audioRequest, mediaEntity);
+        assertEquals(3, hearing.getMediaList().size());
+    }
 }
