@@ -1,31 +1,39 @@
 package uk.gov.hmcts.darts.audio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createListOfDefendantsForCase;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
+@Slf4j
 class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests");
@@ -46,15 +54,41 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
             .findAll()
             .size(), "Precondition failed");
 
-        var hearingEntity = dartsDatabase.hasSomeHearing();
+        HearingEntity hearingEntity = dartsDatabase.createHearing(
+            "testCourthouse",
+            "testCourtroom",
+            "testCaseNumber",
+            LocalDate.of(2023, 1, 1)
+        );
+
+        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.setDefendantList(createListOfDefendantsForCase(2, courtCase));
+        dartsDatabase.save(courtCase);
+
         var audioRequestDetails = createAudioRequestDetails(hearingEntity);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(audioRequestDetails));
 
-        mockMvc.perform(requestBuilder)
-            .andExpect(status().isCreated());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            {
+                "request_id": 1,
+                "case_id": "testCaseNumber",
+                "courthouse_name": "testCourthouse",
+                "defendants": ["defendant_testCaseNumber_1","defendant_testCaseNumber_2"],
+                "hearing_date": "2023-01-01",
+                "start_time": "2023-01-01T12:00:00Z",
+                "end_time": "2023-01-01T13:00:00Z"
+            }
+            """;
+        log.info("actual json {}", actualJson);
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         List<MediaRequestEntity> mediaRequestEntities = dartsDatabase.getMediaRequestRepository()
             .findAll();

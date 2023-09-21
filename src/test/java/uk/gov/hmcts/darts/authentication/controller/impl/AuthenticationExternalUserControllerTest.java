@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationExternalUserControllerTest {
@@ -74,8 +74,8 @@ class AuthenticationExternalUserControllerTest {
                                     .userId(-1)
                                     .userName("Test User")
                                     .roles(Set.of(Role.builder()
-                                                      .roleId(TRANSCRIPTION_COMPANY.getId())
-                                                      .roleName(TRANSCRIPTION_COMPANY.toString())
+                                                      .roleId(TRANSCRIBER.getId())
+                                                      .roleName(TRANSCRIBER.toString())
                                                       .permissions(new HashSet<>())
                                                       .build()))
                                     .build())

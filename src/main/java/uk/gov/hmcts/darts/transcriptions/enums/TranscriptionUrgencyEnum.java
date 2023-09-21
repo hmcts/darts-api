@@ -10,6 +10,6 @@ public enum TranscriptionUrgencyEnum {
     OVERNIGHT(2),
     OTHER(3);
 
-    private final Integer transcriptionUrgencyKey;
+    private final Integer id;
 
 }

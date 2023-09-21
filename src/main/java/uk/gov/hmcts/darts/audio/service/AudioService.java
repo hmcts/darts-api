@@ -4,7 +4,7 @@ import java.io.InputStream;
 
 public interface AudioService {
 
-    InputStream download(Integer audioRequestId);
+    InputStream download(Integer mediaRequestId);
 
     InputStream preview(Integer mediaId);
 

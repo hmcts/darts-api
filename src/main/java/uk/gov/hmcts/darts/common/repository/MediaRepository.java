@@ -11,11 +11,11 @@ import java.util.List;
 public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
 
     @Query("""
-           SELECT me FROM MediaEntity me, HearingEntity he
-           JOIN he.mediaList
+           SELECT me
+           FROM HearingEntity he
+           JOIN he.mediaList me
            WHERE he.id = :hearingId
         """)
     List<MediaEntity> findAllByHearingId(Integer hearingId);
 
 }
-

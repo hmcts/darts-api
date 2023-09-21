@@ -10,21 +10,26 @@
 To run the functional tests locally, you must set the following environment variables on your machine.
 The required value of each variable is stored in Azure Key Vault as a Secret.
 
-| Environment Variable Name       | Corresponding Azure Key Vault Secret Name |
-|---------------------------------|-------------------------------------------|
-| GOVUK_NOTIFY_API_KEY            | GovukNotifyTestApiKey                     |
-| FUNC_TEST_ROPC_USERNAME         | api-FUNC-TEST-ROPC-USERNAME               |
-| FUNC_TEST_ROPC_PASSWORD         | api-FUNC-TEST-ROPC-PASSWORD               |
-| AAD_B2C_TENANT_ID_KEY           | AzureAdB2CTenantIdKey                     |
-| AAD_B2C_CLIENT_ID_KEY           | AzureAdB2CClientIdKey                     |
-| AAD_B2C_CLIENT_SECRET_KEY       | AzureAdB2CClientSecretKey                 |
-| AAD_B2C_ROPC_CLIENT_ID_KEY      | AzureAdB2CFuncTestROPCClientIdKey         |
-| AAD_B2C_ROPC_CLIENT_SECRET_KEY  | AzureAdB2CFuncTestROPCClientSecretKey     |
-| AZURE_STORAGE_CONNECTION_STRING | AzureStorageConnectionString              |
-| AAD_TENANT_ID                   | AzureADTenantId                           |
-| AAD_CLIENT_ID                   | AzureADClientId                           |
-| AAD_CLIENT_SECRET               | AzureADClientSecret                       |
-
+| Environment Variable Name        | Corresponding Azure Key Vault Secret Name |
+|----------------------------------|-------------------------------------------|
+| GOVUK_NOTIFY_API_KEY             | GovukNotifyTestApiKey                     |
+| FUNC_TEST_ROPC_USERNAME          | api-FUNC-TEST-ROPC-USERNAME               |
+| FUNC_TEST_ROPC_PASSWORD          | api-FUNC-TEST-ROPC-PASSWORD               |
+| AAD_B2C_TENANT_ID_KEY            | AzureAdB2CTenantIdKey                     |
+| AAD_B2C_CLIENT_ID_KEY            | AzureAdB2CClientIdKey                     |
+| AAD_B2C_CLIENT_SECRET_KEY        | AzureAdB2CClientSecretKey                 |
+| AAD_B2C_ROPC_CLIENT_ID_KEY       | AzureAdB2CFuncTestROPCClientIdKey         |
+| AAD_B2C_ROPC_CLIENT_SECRET_KEY   | AzureAdB2CFuncTestROPCClientSecretKey     |
+| AZURE_STORAGE_CONNECTION_STRING  | AzureStorageConnectionString              |
+| AAD_TENANT_ID                    | AzureADTenantId                           |
+| AAD_CLIENT_ID                    | AzureADClientId                           |
+| AAD_CLIENT_SECRET                | AzureADClientSecret                       |
+| XHIBIT_USER_NAME                 | XhibitUserName                            |
+| XHIBIT_PASSWORD                  | XhibitPassword                            |
+| CPP_USER_NAME                    | CppUserName                               |
+| CPP_PASSWORD                     | CppPassword                               |
+| DARPC_USER_NAME                  | DarPcUserName                             |
+| DARPC_PASSWORD                   | DarPcPassword                             |
 
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
@@ -58,6 +63,12 @@ export AAD_B2C_ROPC_CLIENT_SECRET_KEY=
 export AAD_TENANT_ID=
 export AAD_CLIENT_ID=
 export AAD_CLIENT_SECRET=
+export XHIBIT_USER_NAME=
+export XHIBIT_PASSWORD=
+export CPP_USER_NAME=
+export CPP_PASSWORD=
+export DARPC_USER_NAME=
+export DARPC_PASSWORD=
 ```
 
 ### Storage Account

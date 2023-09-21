@@ -7,11 +7,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SecurityRoleEnum {
 
-    COURT_MANAGER(1),
-    COURT_CLERK(2),
+    APPROVER(1),
+    REQUESTER(2),
     JUDGE(3),
-    TRANSCRIPTION_COMPANY(4),
-    LANGUAGE_SHOP(5);
+    TRANSCRIBER(4),
+    LANGUAGE_SHOP_USER(5),
+    RCJ_APPEALS(6);
 
     private final Integer id;
 

@@ -22,6 +22,12 @@ services:
       - AAD_TENANT_ID
       - AAD_CLIENT_ID
       - AAD_CLIENT_SECRET
+      - XHIBIT_USER_NAME
+      - XHIBIT_PASSWORD
+      - CPP_USER_NAME
+      - CPP_PASSWORD
+      - DARPC_USER_NAME
+      - DARPC_PASSWORD
     build:
       context: .
       dockerfile: Dockerfile

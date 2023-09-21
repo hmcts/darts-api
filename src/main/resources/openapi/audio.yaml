@@ -17,8 +17,12 @@ paths:
       operationId: addAudioRequest
       description: Adds a user audio request for processing
       responses:
-        '201':
-          description: audio request created
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddAudioResponse'
         '400':
           description: 'invalid input, object invalid'
         '409':
@@ -39,12 +43,12 @@ paths:
       description: Download audio
       parameters:
         - in: query
-          name: audioRequestId
+          name: media_request_id
           required: true
           schema:
-            $ref: '#/components/schemas/AudioRequestId'
+            type: integer
       responses:
-        200:
+        '200':
           description: OK
           content:
             audio/mpeg:
@@ -55,7 +59,37 @@ paths:
               schema:
                 type: string
                 format: binary
-        500:
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_103"
+                title: "Failed to check authorisation for the media request"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
+        '500':
           description: The requested data cannot be located
           content:
             application/json+problem:
@@ -80,7 +114,7 @@ paths:
             type: integer
           required: true
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -99,6 +133,36 @@ paths:
                   summary: No media metadata exists for the given hearing id
                   value:
                     [ ]
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_102"
+                title: "Failed to check authorisation for the hearing"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "HEARING_100"
+                title: "The requested hearing cannot be found"
+                status: 404
   /audio/preview/{media_id}:
     get:
       tags:
@@ -123,11 +187,35 @@ paths:
                 type: string
                 format: binary
         '400':
-          description: A required parameter is invalid.
+          description: Bad Request Error
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_104"
+                title: "Failed to check authorisation for the media"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_102"
+                title: "The requested media cannot be found"
+                status: 404
         500:
           description: The requested data cannot be located
           content:
@@ -173,10 +261,6 @@ components:
         request_type:
           $ref: '#/components/schemas/AudioRequestType'
 
-    AudioRequestId:
-      type: integer
-      example: 12345
-
     AudioMetadata:
       type: object
       properties:
@@ -189,3 +273,44 @@ components:
         media_end_timestamp:
           type: string
           format: date-time
+
+    AddAudioResponse:
+      type: object
+      required:
+        - request_id
+        - case_id
+        - courthouse_name
+        - defendants
+        - hearing_date
+        - start_time
+        - end_time
+      properties:
+        request_id:
+          type: integer
+          example: 1234
+        case_id:
+          type: string
+          example: T4565443
+        courthouse_name:
+          type: string
+          example: "Swansea"
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        hearing_date:
+          type: string
+          format: date
+          example: '10-05-2023'
+        start_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T10:00:00Z'
+
+    defendant:
+      type: string
+      example: Joe Bloggs

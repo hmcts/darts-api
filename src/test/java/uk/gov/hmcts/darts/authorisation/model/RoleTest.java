@@ -7,17 +7,17 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_CLERK;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
 class RoleTest {
 
     @Test
     void builder() {
         Role role = Role.builder()
-            .roleId(COURT_MANAGER.getId())
-            .roleName(COURT_MANAGER.toString())
+            .roleId(APPROVER.getId())
+            .roleName(APPROVER.toString())
             .permissions(Set.of(
                 Permission.builder()
                     .permissionId(2)
@@ -30,8 +30,8 @@ class RoleTest {
             ))
             .build();
 
-        assertEquals(COURT_MANAGER.getId(), role.getRoleId());
-        assertEquals(COURT_MANAGER.toString(), role.getRoleName());
+        assertEquals(APPROVER.getId(), role.getRoleId());
+        assertEquals(APPROVER.toString(), role.getRoleName());
         assertEquals(2, role.getPermissions().size());
     }
 
@@ -54,7 +54,7 @@ class RoleTest {
             .permissions(Collections.emptySet())
             .build();
 
-        assertNotEquals(role, new Role(COURT_CLERK.getId(), COURT_CLERK.toString(), Collections.emptySet()));
+        assertNotEquals(role, new Role(REQUESTER.getId(), REQUESTER.toString(), Collections.emptySet()));
     }
 
 }

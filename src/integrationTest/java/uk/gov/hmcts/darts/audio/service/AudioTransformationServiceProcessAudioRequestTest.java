@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.impl.AudioTransformationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
@@ -43,12 +42,11 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     @Autowired
     private AudioTransformationServiceImpl audioTransformationService;
 
-    private UserAccountEntity systemUser;
     private HearingEntity hearing;
 
     @BeforeEach
     void setUp() {
-        systemUser = dartsDatabase.createSystemUserAccountEntity();
+        dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom");
     }
 
@@ -58,7 +56,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(
         AudioRequestType audioRequestType) {
         given.aMediaEntityGraph();
-        var userAccountEntity = given.aUserAccount(systemUser, EMAIL_ADDRESS);
+        var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
             hearing,
             audioRequestType,
@@ -91,7 +89,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     @Transactional
     void processAudioRequestShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
-        var userAccountEntity = given.aUserAccount(systemUser, EMAIL_ADDRESS);
+        var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
             hearing,
             audioRequestType,

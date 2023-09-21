@@ -18,6 +18,8 @@ import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.LocalDate;
@@ -25,8 +27,6 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Objects.isNull;
 
 @Entity
 @Table(name = "hearing")
@@ -72,6 +72,9 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARING)
     private List<TranscriptionEntity> transcriptions = new ArrayList<>();
 
+    @OneToMany(mappedBy = MediaRequestEntity_.HEARING)
+    private List<MediaRequestEntity> mediaRequests = new ArrayList<>();
+
     @Transient
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
 
@@ -90,9 +93,6 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     }
 
     public void addMedia(MediaEntity mediaEntity) {
-        if (isNull(mediaList)) {
-            mediaList = new ArrayList<>();
-        }
         mediaList.add(mediaEntity);
     }
 

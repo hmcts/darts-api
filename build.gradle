@@ -211,7 +211,7 @@ ext {
 }
 
 ext['snakeyaml.version'] = '2.0'
-ext['spring-security.version'] = '6.0.5' // https://spring.io/security/cve-2023-20862
+ext['spring-security.version'] = '6.0.7' // https://spring.io/security/cve-2023-20862
 
 //here we are going to store swagger files
 def swaggerList = []
@@ -278,8 +278,8 @@ dependencies {
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.4'
   implementation 'org.springframework.retry:spring-retry:2.0.3'
 
-  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.7.0'
-  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.7.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-spring:5.8.0'
+  implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.8.0'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
@@ -291,7 +291,7 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.22.1'
-  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.5.2'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.5.3'
 
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
@@ -300,7 +300,7 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.3.0.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.3.1.Final')
 
   testImplementation 'com.h2database:h2:2.2.224'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.6.0'
