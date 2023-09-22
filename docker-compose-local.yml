@@ -28,6 +28,8 @@ services:
       - CPP_PASSWORD
       - DARPC_USER_NAME
       - DARPC_PASSWORD
+      - AZURE_AD_FUNCTIONAL_TEST_USERNAME
+      - AZURE_AD_FUNCTIONAL_TEST_PASSWORD
     build:
       context: .
       dockerfile: Dockerfile
