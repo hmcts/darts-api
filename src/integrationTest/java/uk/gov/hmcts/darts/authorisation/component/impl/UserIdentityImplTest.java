@@ -57,4 +57,29 @@ class UserIdentityImplTest {
         assertEquals("Could not obtain email address from principal", exception.getMessage());
     }
 
+    @Test
+    void getEmailAddressForInternalUser() {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("preferred_username", "test.user@example.com")
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        assertEquals("test.user@example.com", userIdentity.getEmailAddress());
+    }
+
+    @Test
+    void getEmailAddressEmptyClaims() {
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("sub", UUID.randomUUID().toString())
+            .claim("emails", List.of(1))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddress());
+        assertEquals("Could not obtain email address from principal", exception.getMessage());
+    }
+
 }
