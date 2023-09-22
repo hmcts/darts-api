@@ -135,7 +135,6 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     @Override
     public void checkAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles) {
         String emailAddress = userIdentity.getEmailAddress();
-
         List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(
             emailAddress, securityRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet()));
 
