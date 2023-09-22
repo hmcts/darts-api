@@ -7,8 +7,8 @@
   },
   "list_header": {
     "list_category": "Criminal",
-    "start_date": "2023-09-21",
-    "end_date": "2023-09-21",
+    "start_date": "<<TODAY>>",
+    "end_date": "<<TODAY>>",
     "version": "NOT VERSIONED",
     "published_time": "<<TODAY>>T17:49:38.767+01:00"
   },
@@ -40,7 +40,7 @@
             {
               "citizen_name_forename": "Susan Katherine",
               "citizen_name_surname": "Bonnell",
-              "citizen_name_requested_name": "Mrs Susan Katherine Bonnell JP"
+              "citizen_name_requested_name": "<<JUDGENAME>>"
             }
           ],
           "hearings": [
@@ -52,7 +52,7 @@
                 "hearing_date": "<<TOMORROW>>"
               },
               "time_marking_note": "NOT BEFORE 11:00 AM",
-              "case_number": "CPP",
+              "case_number": "<<CASENUMBER>>",
               "prosecution": {
                 "prosecuting_authority": "Crown Prosecution Service",
                 "prosecuting_reference": "Crown Prosecution Service",

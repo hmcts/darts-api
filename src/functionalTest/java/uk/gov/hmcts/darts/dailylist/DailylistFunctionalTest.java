@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.FunctionalTest;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,6 +47,10 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         jsonDocument = jsonDocument.replace("<<TODAY>>", todayDateString);
         jsonDocument = jsonDocument.replace("<<TOMORROW>>", tomorrowDateString);
+        jsonDocument = jsonDocument.replace("<<CASENUMBER>>", UUID.randomUUID().toString());
+        jsonDocument = jsonDocument.replace("<<JUDGENAME>>", UUID.randomUUID().toString());
+
+
 
 
         //then patch it with JSON
