@@ -14,6 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.ModelAndView;
+import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthConfigurationPropertiesStrategy;
+import uk.gov.hmcts.darts.authentication.config.external.ExternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -21,6 +25,7 @@ import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +43,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class AuthenticationExternalUserControllerTest {
 
     private static final URI DUMMY_AUTHORIZATION_URI = URI.create("https://www.example.com/authorization?param=value");
@@ -52,6 +58,12 @@ class AuthenticationExternalUserControllerTest {
     private AuthenticationService authenticationService;
     @Mock
     private AuthorisationApi authorisationApi;
+
+    @Mock
+    private AuthStrategySelector locator;
+
+    @Mock
+    private ExternalAuthConfigurationProperties externalAuthConfigurationProperties;
 
     @Test
     void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
@@ -68,6 +80,9 @@ class AuthenticationExternalUserControllerTest {
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
             .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
+            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+        when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
             Optional.ofNullable(UserState.builder()
@@ -92,10 +107,14 @@ class AuthenticationExternalUserControllerTest {
 
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
+        String accessToken = createDummyAccessToken(List.of("test.missing@example.com"));
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken(List.of("test.missing@example.com")));
+            .thenReturn(accessToken);
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(Optional.empty());
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
+            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+        when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
         assertNotNull(securityToken);
@@ -126,6 +145,37 @@ class AuthenticationExternalUserControllerTest {
 
         assertNotNull(modelAndView);
         assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
+    }
+
+    @Test
+    void handleOauthCodeFromAzureWhenCodeIsReturnedWithNullClaim() throws JOSEException {
+        when(authenticationService.handleOauthCode(anyString()))
+            .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
+            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
+        assertNotNull(securityToken);
+        assertNotNull(securityToken.getAccessToken());
+        assertNull(securityToken.getUserState());
+
+        verify(authenticationService).handleOauthCode(DUMMY_CODE);
+    }
+
+    @Test
+    void handleOauthCodeFromAzureWhenCodeIsReturnedWithEmptyClaim() throws JOSEException {
+        when(authenticationService.handleOauthCode(anyString()))
+            .thenReturn(createDummyAccessToken(new ArrayList<>()));
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
+            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
+        when(externalAuthConfigurationProperties.getClaims()).thenReturn("emails");
+
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
+        assertNotNull(securityToken);
+        assertNotNull(securityToken.getAccessToken());
+        assertNull(securityToken.getUserState());
+
+        verify(authenticationService).handleOauthCode(DUMMY_CODE);
     }
 
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
