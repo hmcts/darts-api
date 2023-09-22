@@ -20,7 +20,6 @@ class DailylistFunctionalTest extends FunctionalTest {
 
     @Test
     void postDailyList() throws IOException {
-
         String todayDateString = LocalDate.now().toString();
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
 
@@ -43,15 +42,7 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         Integer dalId = response.jsonPath().get("dal_id");
 
-        String jsonDocument = getContentsFromFile("DailyListRequest.json");
-
-        jsonDocument = jsonDocument.replace("<<TODAY>>", todayDateString);
-        jsonDocument = jsonDocument.replace("<<TOMORROW>>", tomorrowDateString);
-        jsonDocument = jsonDocument.replace("<<CASENUMBER>>", UUID.randomUUID().toString());
-        jsonDocument = jsonDocument.replace("<<JUDGENAME>>", UUID.randomUUID().toString());
-
-
-
+        String jsonDocument = getJsonDocumentWithValues(todayDateString, tomorrowDateString);
 
         //then patch it with JSON
         response = buildRequestWithAuth()
@@ -79,6 +70,16 @@ class DailylistFunctionalTest extends FunctionalTest {
         //how do we know this succeeded? We get a 202 when it fails to process
         // could do a util type GET call to check the dal_id before cleaning it up
         assertEquals(202, response.getStatusCode());
+    }
+
+    private String getJsonDocumentWithValues(String todayDateString, String tomorrowDateString) throws IOException {
+        String jsonDocument = getContentsFromFile("DailyListRequest.json");
+
+        jsonDocument = jsonDocument.replace("<<TODAY>>", todayDateString);
+        jsonDocument = jsonDocument.replace("<<TOMORROW>>", tomorrowDateString);
+        jsonDocument = jsonDocument.replace("<<CASENUMBER>>", UUID.randomUUID().toString());
+        jsonDocument = jsonDocument.replace("<<JUDGENAME>>", UUID.randomUUID().toString());
+        return jsonDocument;
     }
 
     @Test
