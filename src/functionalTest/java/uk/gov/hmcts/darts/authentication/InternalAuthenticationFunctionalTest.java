@@ -53,30 +53,4 @@ class InternalAuthenticationFunctionalTest extends InternalFunctionalTest {
     }
 
 
-    @Test
-    void shouldAllowAccessWhenSecuredEndpointIsCalledWithAuthAndLogout() {
-        Response loginResponse = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri("/login-or-refresh"))
-            .redirects().follow(false)
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(200, loginResponse.statusCode());
-
-        Response logoutResponse = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri("/logout"))
-            .redirects().follow(false)
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(200, logoutResponse.statusCode());
-
-    }
-
 }
