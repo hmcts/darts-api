@@ -3,7 +3,10 @@ package uk.gov.hmcts.darts.dailylist;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import uk.gov.hmcts.darts.FunctionalTest;
+import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -16,10 +19,9 @@ class DailylistFunctionalTest extends FunctionalTest {
 
     public static final String POST_DAILYLIST_URL = "/dailylists";
 
-    public static final String POST_DAILYLIST_RUN_URL = "/dailylists/run";
-
-    @Test
-    void postDailyList() throws IOException {
+    @ParameterizedTest
+    @EnumSource(names = {"CPP", "XHB"})
+    void postDailyList(SourceType sourceType) throws IOException {
         String todayDateString = LocalDate.now().toString();
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
 
@@ -27,7 +29,7 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         Response response = buildRequestWithAuth()
             .contentType(ContentType.JSON)
-            .queryParam("source_system", "XHB")
+            .queryParam("source_system", sourceType)
             .queryParam("courthouse", "Swansea")
             .queryParam("hearing_date", tomorrowDateString)
             .queryParam("unique_id", "1111111")
@@ -55,21 +57,6 @@ class DailylistFunctionalTest extends FunctionalTest {
             .patch().then().extract().response();
 
         assertEquals(200, response.getStatusCode());
-
-        Integer cthId = 1;
-
-        //process dailylist
-        response = buildRequestWithAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("courthouse_id", cthId)
-            .when()
-            .baseUri(getUri(POST_DAILYLIST_RUN_URL))
-            .redirects().follow(false)
-            .post().then().extract().response();
-
-        //how do we know this succeeded? We get a 202 when it fails to process
-        // could do a util type GET call to check the dal_id before cleaning it up
-        assertEquals(202, response.getStatusCode());
     }
 
     private String getJsonDocumentWithValues(String todayDateString, String tomorrowDateString) throws IOException {
