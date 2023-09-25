@@ -10,11 +10,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audiorecording.model.AddAudioRequest;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -192,7 +192,7 @@ class AudioServiceImplTest {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
 
-        AddAudioRequest addAudioRequest = createAddAudioRequest(startedAt, endedAt);
+        AddAudioMetaDataRequest addAudioRequest = createAddAudioRequest(startedAt, endedAt);
         HearingEntity hearingEntity = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
@@ -229,8 +229,8 @@ class AudioServiceImplTest {
         return mediaEntity;
     }
 
-    private AddAudioRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt) {
-        AddAudioRequest addAudioRequest = new AddAudioRequest();
+    private AddAudioMetaDataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt) {
+        AddAudioMetaDataRequest addAudioRequest = new AddAudioMetaDataRequest();
         addAudioRequest.startedAt(startedAt);
         addAudioRequest.endedAt(endedAt);
         addAudioRequest.setChannel(1);
@@ -245,7 +245,7 @@ class AudioServiceImplTest {
 
     @Test
     void linkAudioAndHearing() {
-        AddAudioRequest audioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        AddAudioMetaDataRequest audioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
         HearingEntity hearing = new HearingEntity();

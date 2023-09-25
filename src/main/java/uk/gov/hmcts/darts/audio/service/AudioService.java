@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
-import uk.gov.hmcts.darts.audiorecording.model.AddAudioRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
@@ -11,7 +11,7 @@ public interface AudioService {
 
     InputStream preview(Integer mediaId);
 
-    void addAudio(AddAudioRequest addAudioRequest);
+    void addAudio(AddAudioMetaDataRequest addAudioMetaDataRequest);
 
-    void linkAudioAndHearing(AddAudioRequest addAudioRequest, MediaEntity savedMedia);
+    void linkAudioAndHearing(AddAudioMetaDataRequest addAudioMetaDataRequest, MediaEntity savedMedia);
 }

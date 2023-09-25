@@ -6,11 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audiorecording.model.AddAudioRequest;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -89,19 +89,19 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public void addAudio(AddAudioRequest addAudioRequest) {
-        MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioRequest));
-        linkAudioAndHearing(addAudioRequest, savedMedia);
+    public void addAudio(AddAudioMetaDataRequest addAudioMetaDataRequest) {
+        MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetaDataRequest));
+        linkAudioAndHearing(addAudioMetaDataRequest, savedMedia);
     }
 
     @Override
-    public void linkAudioAndHearing(AddAudioRequest addAudioRequest, MediaEntity savedMedia) {
-        for (String caseId : addAudioRequest.getCases()) {
+    public void linkAudioAndHearing(AddAudioMetaDataRequest addAudioMetaDataRequest, MediaEntity savedMedia) {
+        for (String caseId : addAudioMetaDataRequest.getCases()) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                addAudioRequest.getCourthouse(),
-                addAudioRequest.getCourtroom(),
+                addAudioMetaDataRequest.getCourthouse(),
+                addAudioMetaDataRequest.getCourtroom(),
                 caseId,
-                addAudioRequest.getStartedAt().toLocalDate()
+                addAudioMetaDataRequest.getStartedAt().toLocalDate()
             );
             hearing.addMedia(savedMedia);
         }

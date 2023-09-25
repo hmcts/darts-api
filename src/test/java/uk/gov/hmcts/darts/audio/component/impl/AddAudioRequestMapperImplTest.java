@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audiorecording.model.AddAudioRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -52,7 +52,7 @@ class AddAudioRequestMapperImplTest {
         media.setCaseIdList(List.of("case1,case2"));
 
         MediaEntity result = addAudioRequestMapperImpl.mapToMedia(
-            new AddAudioRequest(
+            new AddAudioMetaDataRequest(
                 start,
                 endDate,
                 1,

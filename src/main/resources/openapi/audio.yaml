@@ -226,6 +226,32 @@ paths:
                 type: "AUDIO_101"
                 title: "The requested data cannot be located"
                 status: 500
+  /audios:
+    post:
+      tags:
+        - audio
+      summary: Upload a audio meta data
+      operationId: addAudioMetaData
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAudioMetaDataRequest'
+      responses:
+        200:
+          description: Recording accepted
+        400:
+          description: Bad request
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        500:
+          description: Internal server error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
 components:
   schemas:
@@ -234,7 +260,6 @@ components:
       enum:
         - DOWNLOAD
         - PLAYBACK
-
     AudioRequestDetails:
       type: object
       required:
@@ -273,7 +298,6 @@ components:
         media_end_timestamp:
           type: string
           format: date-time
-
     AddAudioResponse:
       type: object
       required:
@@ -310,7 +334,58 @@ components:
           type: string
           format: date-time
           example: '2023-05-31T10:00:00Z'
-
     defendant:
       type: string
       example: Joe Bloggs
+    AddAudioMetaDataRequest:
+      type: object
+      required:
+        - started_at
+        - ended_at
+        - channel
+        - total_channels
+        - format
+        - filename
+        - courthouse
+        - courtroom
+        - cases
+      properties:
+        started_at:
+          type: string
+          format: date-time
+          description: 'Start timestamp of the audio recording'
+        ended_at:
+          type: string
+          format: date-time
+          description: 'End timestamp of the audio recording'
+        channel:
+          type: integer
+          format: int32
+          description: 'Channel number of the audio recording'
+        total_channels:
+          type: integer
+          format: int32
+          description: 'Number of channels making up the complete audio that this recording is part of'
+        format:
+          type: string
+          description: 'Media format of the audio recording'
+          maxLength: 64
+        filename:
+          type: string
+          description: 'Filename of the audio recording'
+          maxLength: 255
+        courthouse:
+          type: string
+          description: 'Courthouse the audio was recorded in'
+          maxLength: 255
+        courtroom:
+          type: string
+          description: 'Courtroom the audio was recorded in'
+          maxLength: 64
+        cases:
+          type: array
+          items:
+            type: string
+          description: 'List of associated case numbers'
+          minItems: 1
+          maxLength: 255
