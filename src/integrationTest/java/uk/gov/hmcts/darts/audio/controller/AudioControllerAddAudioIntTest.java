@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audiorecording.model.AddAudioRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -45,7 +45,7 @@ class AudioControllerAddAudioIntTest extends IntegrationBase {
         dartsDatabase.createCase("SWANSEA", "case2");
         dartsDatabase.createCase("SWANSEA", "case3");
 
-        AddAudioRequest addAudioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "SWANSEA");
+        AddAudioMetaDataRequest addAudioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "SWANSEA");
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(addAudioRequest));
@@ -71,7 +71,7 @@ class AudioControllerAddAudioIntTest extends IntegrationBase {
 
     @Test
     void addAudioNonExistingCourthouse() throws Exception {
-        AddAudioRequest addAudioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST");
+        AddAudioMetaDataRequest addAudioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST");
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(addAudioRequest));
@@ -87,8 +87,8 @@ class AudioControllerAddAudioIntTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    private AddAudioRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse) {
-        AddAudioRequest addAudioRequest = new AddAudioRequest();
+    private AddAudioMetaDataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse) {
+        AddAudioMetaDataRequest addAudioRequest = new AddAudioMetaDataRequest();
         addAudioRequest.startedAt(startedAt);
         addAudioRequest.endedAt(endedAt);
         addAudioRequest.setChannel(1);
