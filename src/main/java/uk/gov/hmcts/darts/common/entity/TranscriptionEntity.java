@@ -34,16 +34,12 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private CourtCaseEntity courtCase;
 
     @ManyToOne
-    @JoinColumn(name = "ctr_id", nullable = false)
-    private CourtroomEntity courtroom;
-
-    @ManyToOne
     @JoinColumn(name = "trt_id", nullable = false)
     private TranscriptionTypeEntity transcriptionType;
 
     @ManyToOne
-    @JoinColumn(name = "trs_id", nullable = false)
-    private TranscriptionStatusEntity transcriptionStatus;
+    @JoinColumn(name = "ctr_id", nullable = false)
+    private CourtroomEntity courtroom;
 
     @ManyToOne
     @JoinColumn(name = "tru_id")
@@ -53,20 +49,15 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "hea_id")
     private HearingEntity hearing;
 
+    @ManyToOne
+    @JoinColumn(name = "trs_id", insertable = false, updatable = false)
+    private TranscriptionStatusEntity transcriptionStatus;
+
     @Column(name = "transcription_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "company")
-    private String company;
-
     @Column(name = "requestor")
     private String requestor;
-
-    @Column(name = "current_state")
-    private String currentState;
-
-    @Column(name = "current_state_ts")
-    private OffsetDateTime currentStateTimestamp;
 
     @Column(name = "hearing_date")
     private OffsetDateTime hearingDate;
