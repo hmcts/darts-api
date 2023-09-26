@@ -38,7 +38,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private TranscriptionTypeEntity transcriptionType;
 
     @ManyToOne
-    @JoinColumn(name = "ctr_id", nullable = false)
+    @JoinColumn(name = "ctr_id")
     private CourtroomEntity courtroom;
 
     @ManyToOne
