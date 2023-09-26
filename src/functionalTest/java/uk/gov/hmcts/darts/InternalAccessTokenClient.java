@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Profile;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @TestComponent
 @Profile("functionalTest")
+@Slf4j
 public class InternalAccessTokenClient {
 
     private final String tokenUri;
