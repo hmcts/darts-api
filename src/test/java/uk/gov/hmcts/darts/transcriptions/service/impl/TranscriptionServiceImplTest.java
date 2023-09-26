@@ -136,9 +136,11 @@ class TranscriptionServiceImplTest {
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
         assertThat(transcriptionEntity.getHearing()).isNotNull();
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
-        assertThat(transcriptionEntity.getCourtroom()).isNotNull();
-        assertThat(transcriptionEntity.getTranscriptionType()).isNotNull();
-        assertThat(transcriptionEntity.getTranscriptionUrgency()).isNotNull();
+        assertThat(transcriptionEntity.getCourtroom()).isNull();
+        assertThat(transcriptionEntity.getHearingDate()).isNull();
+        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(mockTranscriptionStatus);
+        assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
+        assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
 
@@ -235,8 +237,11 @@ class TranscriptionServiceImplTest {
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
         assertThat(transcriptionEntity.getHearing()).isNotNull();
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
-        assertThat(transcriptionEntity.getCourtroom()).isNotNull();
-        assertThat(transcriptionEntity.getTranscriptionUrgency()).isNotNull();
+        assertThat(transcriptionEntity.getCourtroom()).isNull();
+        assertThat(transcriptionEntity.getHearingDate()).isNull();
+        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(mockTranscriptionStatus);
+        assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
+        assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
 
@@ -285,9 +290,12 @@ class TranscriptionServiceImplTest {
 
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
         assertThat(transcriptionEntity.getHearing()).isNotNull();
-        assertThat(transcriptionEntity.getCourtroom()).isNotNull();
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
-        assertThat(transcriptionEntity.getTranscriptionUrgency()).isNotNull();
+        assertThat(transcriptionEntity.getCourtroom()).isNull();
+        assertThat(transcriptionEntity.getHearingDate()).isNull();
+        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(mockTranscriptionStatus);
+        assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
+        assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
 

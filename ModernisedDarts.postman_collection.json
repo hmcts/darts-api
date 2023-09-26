@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "76b91877-23da-4e42-afde-2aa74b635913",
+		"_postman_id": "4a42973a-0d04-4075-bd70-9df873c2ecfc",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -680,6 +680,37 @@
 							""
 						]
 					}
+				}
+			]
+		},
+		{
+			"name": "Transcriptions",
+			"item": [
+				{
+					"name": "/transcriptions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-05-31T09:00:00Z\",\n  \"end_date_time\": \"2023-05-31T12:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
