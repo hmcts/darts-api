@@ -1,11 +1,7 @@
 package uk.gov.hmcts.darts;
 
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
-import uk.gov.hmcts.darts.audio.service.MediaRequestService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,6 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 
 import java.util.TimeZone;
 
@@ -22,10 +20,10 @@ import static java.time.ZoneOffset.UTC;
 @EnableTransactionManagement
 @Slf4j
 @SuppressWarnings("HideUtilityClassConstructor") // Spring needs a constructor, its not a utility class
-@RequiredArgsConstructor
 public class Application implements CommandLineRunner {
 
-    private final MediaRequestService mediaRequestService;
+    @Autowired
+    private MediaRequestService mediaRequestService;
 
     @PostConstruct
     public void started() {

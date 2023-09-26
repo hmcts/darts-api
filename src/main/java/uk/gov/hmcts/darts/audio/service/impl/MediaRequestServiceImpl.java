@@ -53,8 +53,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public List<MediaRequestEntity> getMediaRequestsByStatus(AudioRequestStatus status) {
-        return mediaRequestRepository.findByStatusByCreatedDateTimeAsc(status).orElseThrow();
-    };
+        return mediaRequestRepository.findByStatusOrderByCreatedDateTimeAsc(status);
+    }
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
