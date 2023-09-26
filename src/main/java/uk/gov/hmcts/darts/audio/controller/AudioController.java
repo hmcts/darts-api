@@ -1,18 +1,15 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
@@ -90,9 +87,8 @@ public class AudioController implements AudioApi {
 
 
     @Override
-    public ResponseEntity<Void> addAudioMetaData(
-        @Parameter(name = "AddAudioMetaDataRequest", description = "") @Valid @RequestBody(required = false) AddAudioMetaDataRequest addAudioMetaDataRequest) {
-        audioService.addAudio(addAudioMetaDataRequest);
+    public ResponseEntity<Void> addAudioMetaData(AddAudioMetadataRequest addAudioMetadataRequest) {
+        audioService.addAudio(addAudioMetadataRequest);
         return new ResponseEntity<>(HttpStatus.OK);
 
     }

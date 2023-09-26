@@ -230,16 +230,17 @@ paths:
     post:
       tags:
         - audio
-      summary: Upload a audio meta data
+      summary: Upload audio metadata
       operationId: addAudioMetaData
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddAudioMetaDataRequest'
+              $ref: '#/components/schemas/AddAudioMetadataRequest'
       responses:
         200:
-          description: Recording accepted
+          description: Audio metadata accepted
         400:
           description: Bad request
           content:
@@ -337,7 +338,7 @@ components:
     defendant:
       type: string
       example: Joe Bloggs
-    AddAudioMetaDataRequest:
+    AddAudioMetadataRequest:
       type: object
       required:
         - started_at

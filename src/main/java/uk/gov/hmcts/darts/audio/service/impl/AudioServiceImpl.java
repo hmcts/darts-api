@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
-import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -89,19 +89,19 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public void addAudio(AddAudioMetaDataRequest addAudioMetaDataRequest) {
-        MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetaDataRequest));
-        linkAudioAndHearing(addAudioMetaDataRequest, savedMedia);
+    public void addAudio(AddAudioMetadataRequest addAudioMetadataRequest) {
+        MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
+        linkAudioAndHearing(addAudioMetadataRequest, savedMedia);
     }
 
     @Override
-    public void linkAudioAndHearing(AddAudioMetaDataRequest addAudioMetaDataRequest, MediaEntity savedMedia) {
-        for (String caseId : addAudioMetaDataRequest.getCases()) {
+    public void linkAudioAndHearing(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
+        for (String caseId : addAudioMetadataRequest.getCases()) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                addAudioMetaDataRequest.getCourthouse(),
-                addAudioMetaDataRequest.getCourtroom(),
+                addAudioMetadataRequest.getCourthouse(),
+                addAudioMetadataRequest.getCourtroom(),
                 caseId,
-                addAudioMetaDataRequest.getStartedAt().toLocalDate()
+                addAudioMetadataRequest.getStartedAt().toLocalDate()
             );
             hearing.addMedia(savedMedia);
         }

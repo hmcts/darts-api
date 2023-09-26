@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-class AudioControllerAddAudioMetaDataIntTest extends IntegrationBase {
+class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");
     private static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
@@ -45,10 +45,10 @@ class AudioControllerAddAudioMetaDataIntTest extends IntegrationBase {
         dartsDatabase.createCase("SWANSEA", "case2");
         dartsDatabase.createCase("SWANSEA", "case3");
 
-        AddAudioMetaDataRequest addAudioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "SWANSEA");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "SWANSEA");
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(addAudioRequest));
+            .content(objectMapper.writeValueAsString(addAudioMetadataRequest));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
@@ -71,10 +71,10 @@ class AudioControllerAddAudioMetaDataIntTest extends IntegrationBase {
 
     @Test
     void addAudioNonExistingCourthouse() throws Exception {
-        AddAudioMetaDataRequest addAudioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST");
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(addAudioRequest));
+            .content(objectMapper.writeValueAsString(addAudioMetadataRequest));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isBadRequest())
@@ -87,17 +87,17 @@ class AudioControllerAddAudioMetaDataIntTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    private AddAudioMetaDataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse) {
-        AddAudioMetaDataRequest addAudioRequest = new AddAudioMetaDataRequest();
-        addAudioRequest.startedAt(startedAt);
-        addAudioRequest.endedAt(endedAt);
-        addAudioRequest.setChannel(1);
-        addAudioRequest.totalChannels(2);
-        addAudioRequest.format("mp3");
-        addAudioRequest.filename("test");
-        addAudioRequest.courthouse(courthouse);
-        addAudioRequest.courtroom("1");
-        addAudioRequest.cases(List.of("case1", "case2", "case3"));
-        return addAudioRequest;
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt, String courthouse) {
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.startedAt(startedAt);
+        addAudioMetadataRequest.endedAt(endedAt);
+        addAudioMetadataRequest.setChannel(1);
+        addAudioMetadataRequest.totalChannels(2);
+        addAudioMetadataRequest.format("mp3");
+        addAudioMetadataRequest.filename("test");
+        addAudioMetadataRequest.courthouse(courthouse);
+        addAudioMetadataRequest.courtroom("1");
+        addAudioMetadataRequest.cases(List.of("case1", "case2", "case3"));
+        return addAudioMetadataRequest;
     }
 }

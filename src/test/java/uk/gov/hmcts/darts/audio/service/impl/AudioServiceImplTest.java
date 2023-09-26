@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
-import uk.gov.hmcts.darts.audio.model.AddAudioMetaDataRequest;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -192,7 +192,7 @@ class AudioServiceImplTest {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
 
-        AddAudioMetaDataRequest addAudioRequest = createAddAudioRequest(startedAt, endedAt);
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
         HearingEntity hearingEntity = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
@@ -203,7 +203,7 @@ class AudioServiceImplTest {
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
 
         when(mapper.mapToMedia(any())).thenReturn(mediaEntity);
-        audioService.addAudio(addAudioRequest);
+        audioService.addAudio(addAudioMetadataRequest);
 
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
 
@@ -229,23 +229,23 @@ class AudioServiceImplTest {
         return mediaEntity;
     }
 
-    private AddAudioMetaDataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt) {
-        AddAudioMetaDataRequest addAudioRequest = new AddAudioMetaDataRequest();
-        addAudioRequest.startedAt(startedAt);
-        addAudioRequest.endedAt(endedAt);
-        addAudioRequest.setChannel(1);
-        addAudioRequest.totalChannels(2);
-        addAudioRequest.format("mp3");
-        addAudioRequest.filename("test");
-        addAudioRequest.courthouse("SWANSEA");
-        addAudioRequest.courtroom("1");
-        addAudioRequest.cases(List.of("1", "2", "3"));
-        return addAudioRequest;
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt) {
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.startedAt(startedAt);
+        addAudioMetadataRequest.endedAt(endedAt);
+        addAudioMetadataRequest.setChannel(1);
+        addAudioMetadataRequest.totalChannels(2);
+        addAudioMetadataRequest.format("mp3");
+        addAudioMetadataRequest.filename("test");
+        addAudioMetadataRequest.courthouse("SWANSEA");
+        addAudioMetadataRequest.courtroom("1");
+        addAudioMetadataRequest.cases(List.of("1", "2", "3"));
+        return addAudioMetadataRequest;
     }
 
     @Test
     void linkAudioAndHearing() {
-        AddAudioMetaDataRequest audioRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
         HearingEntity hearing = new HearingEntity();
@@ -255,7 +255,7 @@ class AudioServiceImplTest {
             anyString(),
             any()
         )).thenReturn(hearing);
-        audioService.linkAudioAndHearing(audioRequest, mediaEntity);
+        audioService.linkAudioAndHearing(addAudioMetadataRequest, mediaEntity);
         assertEquals(3, hearing.getMediaList().size());
     }
 }

@@ -34,7 +34,7 @@ import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createListOfDe
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Slf4j
-class AudioControllerAudioRequestIntTest extends IntegrationBase {
+class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests");
     private static final AudioRequestType AUDIO_REQUEST_TYPE = AudioRequestType.PLAYBACK;
