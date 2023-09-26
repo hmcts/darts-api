@@ -8,10 +8,11 @@ import lombok.Getter;
 public enum TranscriptionStatusEnum {
     REQUESTED(1),
     AWAITING_AUTHORISATION(2),
-    WITH_TRANSCRIBER(3),
-    COMPLETE(4),
-    REJECTED(5),
-    CLOSED(6);
+    APPROVED(3),
+    REJECTED(4),
+    WITH_TRANSCRIBER(5),
+    COMPLETE(6),
+    CLOSED(7);
 
     private final Integer id;
 
