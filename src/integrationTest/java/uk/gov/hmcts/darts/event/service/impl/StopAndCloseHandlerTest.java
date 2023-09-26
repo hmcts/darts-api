@@ -16,6 +16,7 @@ import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
@@ -45,7 +46,7 @@ class StopAndCloseHandlerTest extends IntegrationBase {
     @Test
     void shouldNotifyDarStopRecordingForHearingEndedAndCaseClosedFlagAndDate() {
         CourtCaseEntity courtCaseEntity = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CASE_NUMBER);
-        assertNull(courtCaseEntity.getClosed());
+        assertFalse(courtCaseEntity.getClosed());
         assertNull(courtCaseEntity.getCaseClosedTimestamp());
 
         dartsGateway.darNotificationReturnsSuccess();

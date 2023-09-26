@@ -59,14 +59,14 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = CASE_OBJECT_ID, length = 16)
     private String legacyCaseObjectId;
 
-    @Column(name = CASE_NUMBER)
+    @Column(name = CASE_NUMBER, nullable = false)
     private String caseNumber;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = CTH_ID)
     private CourthouseEntity courthouse;
 
-    @Column(name = CASE_CLOSED)
+    @Column(name = CASE_CLOSED, nullable = false)
     private Boolean closed;
 
     @Column(name = INTERPRETER_USED)

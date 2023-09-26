@@ -39,13 +39,13 @@ public class NodeRegisterEntity {
     @SequenceGenerator(name = NODE_GENERATOR, sequenceName = NODE_SEQUENCE, allocationSize = 1)
     private int nodeId;
 
-    @Column(name = HOSTNAME)
+    @Column(name = HOSTNAME, nullable = false)
     private String hostname;
 
-    @Column(name = IP_ADDRESS)
+    @Column(name = IP_ADDRESS, nullable = false)
     private String ipAddress;
 
-    @Column(name = MAC_ADDRESS)
+    @Column(name = MAC_ADDRESS, nullable = false)
     private String macAddress;
 
     @Column(name = DEVICE_TYPE)

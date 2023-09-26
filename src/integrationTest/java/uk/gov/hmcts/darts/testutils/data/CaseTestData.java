@@ -20,6 +20,7 @@ public class CaseTestData {
         courtCaseEntity.addDefendant(createDefendantForCaseWithName(courtCaseEntity, "aDefendant"));
         courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
+        courtCaseEntity.setClosed(false);
         return courtCaseEntity;
     }
 

@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
@@ -74,12 +75,16 @@ public class AuthorisationStub {
         var yesterday = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0).withSecond(0);
         courtCaseEntity.setCaseNumber(String.format("T%s", yesterday.format(BASIC_ISO_DATE)));
         courtCaseEntity.setCourthouse(courthouseEntity);
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
         dartsDatabaseStub.save(courtCaseEntity);
 
         hearingEntity = new HearingEntity();
         hearingEntity.setCourtCase(courtCaseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
         hearingEntity.setHearingDate(LocalDate.now());
+        hearingEntity.setHearingIsActual(false);
+        hearingEntity.setScheduledStartTime(LocalTime.now());
         dartsDatabaseStub.save(hearingEntity);
 
         mediaRequestEntity = new MediaRequestEntity();
@@ -101,7 +106,11 @@ public class AuthorisationStub {
         dartsDatabaseStub.save(mediaRequestEntitySystemUser);
 
         mediaEntity = new MediaEntity();
+        mediaEntity.setChannel(1);
+        mediaEntity.setTotalChannels(2);
         mediaEntity.setCourtroom(courtroomEntity);
+        mediaEntity.setStart(OffsetDateTime.now());
+        mediaEntity.setEnd(OffsetDateTime.now());
         dartsDatabaseStub.save(mediaEntity);
 
         hearingEntity.addMedia(mediaEntity);
