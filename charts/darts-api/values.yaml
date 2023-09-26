@@ -60,7 +60,7 @@ function:
   scaleType: Job
   image: 'sdshmctspublic.azurecr.io/darts/api:latest'
   aadIdentityName: darts
-  pollingInterval: 300 # every 5 mins, but this should probably be configurable per env
+  pollingInterval: 30
   minReplicaCount: 0
   maxReplicaCount: 2
   scalingStrategy: accurate
