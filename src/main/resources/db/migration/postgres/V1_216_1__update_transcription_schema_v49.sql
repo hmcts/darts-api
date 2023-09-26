@@ -8,7 +8,7 @@ END;
 $$
 LANGUAGE 'plpgsql';
 
-CREATE OR REPLACE TRIGGER trw_ar_trg
+CREATE TRIGGER trw_ar_trg
 AFTER INSERT ON transcription_workflow
 FOR EACH ROW
 EXECUTE PROCEDURE tra_trw_sync_fnc();
