@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface MediaRequestService {
 
+    List<MediaRequestEntity> getMediaRequestsByStatus(AudioRequestStatus status);
+
     MediaRequestEntity getMediaRequestById(Integer id);
 
     MediaRequestEntity updateAudioRequestStatus(Integer id, AudioRequestStatus audioRequestStatus);
