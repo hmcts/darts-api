@@ -5,6 +5,7 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +13,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
+import java.text.MessageFormat;
 
 @SpringBootTest(
     classes = {AccessTokenClient.class},
@@ -46,6 +51,17 @@ public class FunctionalTest {
     private void configureRestAssured() {
         RestAssured.useRelaxedHTTPSValidation();
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+    }
+
+    public String getContentsFromFile(String filelocation) throws IOException {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL resource = classLoader.getResource(filelocation);
+        if (resource == null) {
+            throw new IOException(MessageFormat.format("File not found {0}", filelocation));
+        }
+        File file = new File(resource.getFile());
+        return FileUtils.readFileToString(file, "UTF-8");
+
     }
 
 }
