@@ -13,7 +13,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.common.enums.TranscriptionWorkflowStageEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -22,12 +21,16 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
-import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
+import java.time.OffsetDateTime;
+
+import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 @RequiredArgsConstructor
 @Service
@@ -50,59 +53,54 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     public void saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails) {
 
         UserAccountEntity userAccount = getUserAccount();
+        TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
 
-        TranscriptionUrgencyEntity transcriptionUrgency = getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId());
-        TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(TranscriptionStatusEnum.REQUESTED);
-        TranscriptionTypeEntity transcriptionType = getTranscriptionType(transcriptionRequestDetails.getTranscriptionTypeId());
         TranscriptionEntity transcription = saveTranscription(
             userAccount,
             transcriptionRequestDetails,
-            transcriptionUrgency,
             transcriptionStatus,
-            transcriptionType
+            getTranscriptionType(transcriptionRequestDetails.getTranscriptionTypeId()),
+            getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId())
         );
 
         saveTranscriptionWorkflow(
             userAccount,
             transcriptionRequestDetails,
             transcription,
-            TranscriptionWorkflowStageEnum.REQUESTED
+            transcriptionStatus
         );
     }
 
     private TranscriptionEntity saveTranscription(UserAccountEntity userAccount,
                                                   TranscriptionRequestDetails transcriptionRequestDetails,
-                                                  TranscriptionUrgencyEntity transcriptionUrgency,
                                                   TranscriptionStatusEntity transcriptionStatus,
-                                                  TranscriptionTypeEntity transcriptionType
-    ) {
+                                                  TranscriptionTypeEntity transcriptionType,
+                                                  TranscriptionUrgencyEntity transcriptionUrgency) {
+
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
 
         TranscriptionEntity transcription = new TranscriptionEntity();
-        HearingEntity hearing = null;
-        if (!isNull(transcriptionRequestDetails.getHearingId())) {
-            hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
-            transcription.setHearing(hearing);
-        }
-        if (!isNull(transcriptionRequestDetails.getCaseId())) {
-            transcription.setCourtCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));
-        } else if (!isNull(hearing)) {
-            transcription.setCourtCase(hearing.getCourtCase());
-        } else {
-            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
-        }
-
-        transcription.setStart(transcriptionRequestDetails.getStartDateTime());
-        transcription.setEnd(transcriptionRequestDetails.getEndDateTime());
-
-        transcription.setTranscriptionUrgency(transcriptionUrgency);
         transcription.setTranscriptionStatus(transcriptionStatus);
         transcription.setTranscriptionType(transcriptionType);
-
+        transcription.setTranscriptionUrgency(transcriptionUrgency);
+        transcription.setStart(transcriptionRequestDetails.getStartDateTime());
+        transcription.setEnd(transcriptionRequestDetails.getEndDateTime());
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
+
+        if (nonNull(transcriptionRequestDetails.getCaseId())) {
+            transcription.setCourtCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));
+        }
+
+        if (nonNull(transcriptionRequestDetails.getHearingId())) {
+            HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            transcription.setHearing(hearing);
+            if (isNull(transcription.getCourtCase())) {
+                transcription.setCourtCase(hearing.getCourtCase());
+            }
+        }
 
         return transcriptionRepository.saveAndFlush(transcription);
     }
@@ -110,13 +108,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private void saveTranscriptionWorkflow(UserAccountEntity userAccount,
                                            TranscriptionRequestDetails transcriptionRequestDetails,
                                            TranscriptionEntity transcription,
-                                           TranscriptionWorkflowStageEnum workflowStageEnum) {
+                                           TranscriptionStatusEntity transcriptionStatus) {
+
         TranscriptionWorkflowEntity transcriptionWorkflow = new TranscriptionWorkflowEntity();
-
         transcriptionWorkflow.setTranscription(transcription);
+        transcriptionWorkflow.setTranscriptionStatus(transcriptionStatus);
+        transcriptionWorkflow.setWorkflowActor(userAccount);
+        transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now(UTC));
         transcriptionWorkflow.setWorkflowComment(transcriptionRequestDetails.getComment());
-        transcriptionWorkflow.setWorkflowStage(workflowStageEnum);
-
         transcriptionWorkflow.setCreatedBy(userAccount);
         transcriptionWorkflow.setLastModifiedBy(userAccount);
 
@@ -132,8 +131,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionUrgencyRepository.getReferenceById(urgencyId);
     }
 
-    private TranscriptionStatusEntity getTranscriptionStatusById(TranscriptionStatusEnum transcriptionStatusEnum) {
-        return transcriptionStatusRepository.getReferenceById(transcriptionStatusEnum.getId());
+    private TranscriptionStatusEntity getTranscriptionStatusById(Integer transcriptionStatusId) {
+        return transcriptionStatusRepository.getReferenceById(transcriptionStatusId);
     }
 
     private TranscriptionTypeEntity getTranscriptionType(Integer transcriptionTypeId) {

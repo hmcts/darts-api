@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -132,13 +133,26 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
+    void shouldGetMediaRequestsByStatus() {
+        requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
+        requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
+
+        mediaRequestService.saveAudioRequest(requestDetails);
+
+        List<MediaRequestEntity> mediaRequests = mediaRequestService.getMediaRequestsByStatus(OPEN);
+
+        assertEquals(OPEN, mediaRequests.get(0).getStatus());
+    }
+
+    @Test
+    @Order(7)
     void shouldThrowExceptionWhenGetMediaRequestByIdInvalid() {
         assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(-3));
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     void shouldDeleteAudioRequestById() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
