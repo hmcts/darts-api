@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
@@ -82,6 +83,14 @@ public class AudioController implements AudioApi {
     public ResponseEntity<org.springframework.core.io.Resource> preview(Integer mediaId) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
+    }
+
+
+    @Override
+    public ResponseEntity<Void> addAudioMetaData(AddAudioMetadataRequest addAudioMetadataRequest) {
+        audioService.addAudio(addAudioMetadataRequest);
+        return new ResponseEntity<>(HttpStatus.OK);
+
     }
 
 }
