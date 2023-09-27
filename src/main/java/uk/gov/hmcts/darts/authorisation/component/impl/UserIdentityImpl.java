@@ -1,18 +1,25 @@
 package uk.gov.hmcts.darts.authorisation.component.impl;
 
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
+@AllArgsConstructor
 public class UserIdentityImpl implements UserIdentity {
 
     private static final String EMAILS = "emails";
     private static final String PREFERRED_USERNAME = "preferred_username";
+
+    private final UserAccountRepository userAccountRepository;
 
     @Override
     public String getEmailAddress() {
@@ -46,4 +53,12 @@ public class UserIdentityImpl implements UserIdentity {
         throw new IllegalStateException("Could not obtain email address from principal");
     }
 
+    public UserAccountEntity getUserAccount() {
+        String emailAddress = getEmailAddress();
+        Optional<UserAccountEntity> userAccount = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
+        if (userAccount.isEmpty()) {
+            throw new IllegalStateException("Could not obtain user details");
+        }
+        return userAccount.get();
+    }
 }
