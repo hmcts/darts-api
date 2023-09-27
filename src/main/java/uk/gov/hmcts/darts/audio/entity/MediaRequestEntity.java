@@ -69,9 +69,6 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     @Enumerated(EnumType.STRING)
     private AudioRequestType requestType;
 
-    @Column(name = CREATED_TS_COLUMN_NAME, nullable = false)
-    private OffsetDateTime createdDateTime;
-
     @Column(name = REQ_PROC_ATTEMPTS_COLUMN_NAME)
     private Integer attempts;
 
