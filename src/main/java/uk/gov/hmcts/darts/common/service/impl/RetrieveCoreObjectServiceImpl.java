@@ -118,6 +118,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         courtCase.setCaseNumber(caseNumber);
         courtCase.setCourthouse(foundCourthouse);
         courtCase.setClosed(false);
+        courtCase.setInterpreterUsed(false);
         caseRepository.saveAndFlush(courtCase);
         return courtCase;
     }

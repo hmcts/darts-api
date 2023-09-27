@@ -1,7 +1,7 @@
 -- V48 without transcription changes.
 ALTER TABLE court_case ALTER COLUMN case_number SET NOT NULL;
 ALTER TABLE court_case ALTER COLUMN case_closed SET NOT NULL;
---ALTER TABLE court_case ALTER COLUMN interpreter_used SET NOT NULL;
+ALTER TABLE court_case ALTER COLUMN interpreter_used SET NOT NULL;
 
 ALTER TABLE node_register ALTER COLUMN device_type SET DEFAULT 'DAR';
 

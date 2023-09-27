@@ -69,7 +69,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = CASE_CLOSED, nullable = false)
     private Boolean closed;
 
-    @Column(name = INTERPRETER_USED)
+    @Column(name = INTERPRETER_USED, nullable = false)
     private Boolean interpreterUsed;
 
     @Column(name = CASE_CLOSED_TS)

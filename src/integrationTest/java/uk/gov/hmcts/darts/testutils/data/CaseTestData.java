@@ -21,6 +21,7 @@ public class CaseTestData {
         courtCaseEntity.addDefence(createDefenceForCaseWithName(courtCaseEntity, "aDefence"));
         courtCaseEntity.addProsecutor(createProsecutorForCaseWithName(courtCaseEntity, "aProsecutor"));
         courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
         return courtCaseEntity;
     }
 
