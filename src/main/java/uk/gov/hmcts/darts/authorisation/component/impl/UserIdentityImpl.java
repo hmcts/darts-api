@@ -20,6 +20,7 @@ public class UserIdentityImpl implements UserIdentity {
 
     private static final String EMAILS = "emails";
     private static final String PREFERRED_USERNAME = "preferred_username";
+    public static final String OID = "oid";
 
     private final UserAccountRepository userAccountRepository;
 
@@ -33,6 +34,9 @@ public class UserIdentityImpl implements UserIdentity {
             Object emailsAddressesObject = jwt.getClaims().get(EMAILS);
             if (emailsAddressesObject == null) {
                 emailsAddressesObject = jwt.getClaims().get(PREFERRED_USERNAME);
+            }
+            if (emailsAddressesObject == null) {
+                emailsAddressesObject = jwt.getClaims().get(OID);
             }
 
             if (emailsAddressesObject instanceof List<?> emails) {
