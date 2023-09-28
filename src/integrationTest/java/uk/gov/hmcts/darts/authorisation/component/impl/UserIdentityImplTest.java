@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest()
-class UserIdentityImplTest {
+class UserIdentityImplTest extends IntegrationBase {
 
     @Autowired
     private UserIdentity userIdentity;
@@ -27,7 +28,7 @@ class UserIdentityImplTest {
     private UserAccountRepository userAccountRepository;
 
     @Autowired
-    DartsDatabaseStub dartsDatabaseStub;
+    private DartsDatabaseStub dartsDatabaseStub;
 
     @Test
     void getEmailAddress() {

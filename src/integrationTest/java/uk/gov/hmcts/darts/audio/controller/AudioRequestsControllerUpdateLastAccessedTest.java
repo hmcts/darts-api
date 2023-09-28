@@ -36,7 +36,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
 @Slf4j
-class AudioRequestsControllerUpdateLastAccessed extends IntegrationBase {
+class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
@@ -44,7 +44,6 @@ class AudioRequestsControllerUpdateLastAccessed extends IntegrationBase {
     private Authorisation authorisation;
 
     private UserAccountEntity systemUser;
-    private UserAccountEntity requestor;
     private MediaRequestEntity mediaRequestEntity;
 
 
@@ -52,7 +51,7 @@ class AudioRequestsControllerUpdateLastAccessed extends IntegrationBase {
     @BeforeEach
     void beforeEach() {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
     }
 
