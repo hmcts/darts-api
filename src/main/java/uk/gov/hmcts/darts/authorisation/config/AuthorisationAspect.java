@@ -165,6 +165,8 @@ public class AuthorisationAspect {
             ));
             throw new DartsApiException(BAD_REQUEST_MEDIA_REQUEST_ID);
         }
+        Integer mediaRequestId = Integer.valueOf(mediaRequestIdParamOptional.get());
+        authorisation.authoriseMediaRequestAgainstUser(mediaRequestId);
     }
 
     private void checkAuthorisationByMediaRequestId(Optional<String> mediaRequestIdParamOptional,
