@@ -11,7 +11,7 @@ paths:
     post:
       tags:
         - Devices
-      summary: Registers a device
+      summary: Registers a device on the network
       description: |-
         Description
       parameters:
