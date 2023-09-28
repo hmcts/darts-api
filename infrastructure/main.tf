@@ -88,5 +88,5 @@ module "postgresql_flexible" {
     }
   ]
 
-  pgsql_version = "latest"
+  pgsql_version = "14"
 }
