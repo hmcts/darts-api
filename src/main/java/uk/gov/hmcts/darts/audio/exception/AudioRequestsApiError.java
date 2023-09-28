@@ -13,6 +13,11 @@ public enum AudioRequestsApiError implements DartsApiError {
         "100",
         HttpStatus.NOT_FOUND,
         "The requested audio request cannot be found"
+    ),
+    MEDIA_REQUEST_NOT_VALID_FOR_USER(
+        "101",
+        HttpStatus.UNAUTHORIZED,
+        "The audio request is not valid for this user"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO_REQUESTS";

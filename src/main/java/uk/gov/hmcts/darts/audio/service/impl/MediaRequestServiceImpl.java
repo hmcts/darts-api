@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
@@ -34,6 +36,7 @@ import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
@@ -163,6 +166,19 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         query.setParameter(paramRequestor, userAccountRepository.getReferenceById(userId));
 
         return query.getResultList();
+    }
+
+
+    @Transactional
+    @Override
+    public void updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
+        try {
+            MediaRequestEntity mediaRequestEntity = getMediaRequestById(mediaRequestId);
+            mediaRequestEntity.setLastAccessedDateTime(OffsetDateTime.now());
+            mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+        } catch (NoSuchElementException e) {
+            throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND);
+        }
     }
 
     private Predicate expiredPredicate(Boolean expired, CriteriaBuilder criteriaBuilder,

@@ -97,6 +97,50 @@ paths:
                 type: "AUDIO_REQUESTS_100"
                 title: "The requested audio request cannot be found"
                 status: 404
+    patch:
+      tags:
+        - Audio Requests
+      description: 'Update Audio Request last accessed timestamp'
+      operationId: updateAudioRequestLastAccessedTimestamp
+      parameters:
+        - in: path
+          name: media_request_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: audio request has been deleted
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_103"
+                title: "Failed to check authorisation for the media request"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
 
 components:
   securitySchemes:

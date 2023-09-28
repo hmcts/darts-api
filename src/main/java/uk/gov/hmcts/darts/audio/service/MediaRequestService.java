@@ -22,4 +22,5 @@ public interface MediaRequestService {
 
     List<AudioRequestSummaryResult> viewAudioRequests(Integer userId, Boolean expired);
 
+    void updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId);
 }
