@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -35,6 +36,7 @@ public class AudioServiceImpl implements AudioService {
     private final AudioOperationService audioOperationService;
     private final FileOperationService fileOperationService;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final HearingRepository hearingRepository;
     private final AddAudioRequestMapper mapper;
 
     private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
@@ -104,6 +106,7 @@ public class AudioServiceImpl implements AudioService {
                 addAudioMetadataRequest.getStartedAt().toLocalDate()
             );
             hearing.addMedia(savedMedia);
+            hearingRepository.saveAndFlush(hearing);
         }
     }
 
