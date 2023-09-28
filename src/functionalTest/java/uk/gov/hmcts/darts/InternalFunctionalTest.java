@@ -11,11 +11,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.configuration.AccessTokenClientConfiguration;
+import uk.gov.hmcts.darts.configuration.AzureAdAuthenticationProperties;
+import uk.gov.hmcts.darts.configuration.AzureAdB2CAuthenticationProperties;
 
 import java.net.URI;
 
 @SpringBootTest(
-    classes = {InternalAccessTokenClient.class},
+    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class, AzureAdB2CAuthenticationProperties.class },
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
@@ -23,7 +26,7 @@ import java.net.URI;
 public class InternalFunctionalTest {
 
     @Autowired
-    private InternalAccessTokenClient internalAccessTokenClient;
+    private AccessTokenClient internalAccessTokenClient;
 
     @Value("${deployed-application-uri}")
     private URI baseUri;

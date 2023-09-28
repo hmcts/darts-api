@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.configuration.AccessTokenClientConfiguration;
+import uk.gov.hmcts.darts.configuration.AzureAdAuthenticationProperties;
+import uk.gov.hmcts.darts.configuration.AzureAdB2CAuthenticationProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +23,7 @@ import java.net.URL;
 import java.text.MessageFormat;
 
 @SpringBootTest(
-    classes = {AccessTokenClient.class},
+    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class, AzureAdB2CAuthenticationProperties.class },
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
@@ -28,7 +31,7 @@ import java.text.MessageFormat;
 public class FunctionalTest {
 
     @Autowired
-    private AccessTokenClient accessTokenClient;
+    private AccessTokenClient externalAccessTokenClient;
 
     @Value("${deployed-application-uri}")
     private URI baseUri;
@@ -45,7 +48,7 @@ public class FunctionalTest {
 
     public RequestSpecification buildRequestWithAuth() {
         return RestAssured.given()
-            .header("Authorization", String.format("Bearer %s", accessTokenClient.getAccessToken()));
+            .header("Authorization", String.format("Bearer %s", externalAccessTokenClient.getAccessToken()));
     }
 
     private void configureRestAssured() {
