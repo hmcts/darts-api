@@ -7,10 +7,12 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.List;
-import java.util.Optional;
+
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
 
 @Component
 @AllArgsConstructor
@@ -55,10 +57,9 @@ public class UserIdentityImpl implements UserIdentity {
 
     public UserAccountEntity getUserAccount() {
         String emailAddress = getEmailAddress();
-        Optional<UserAccountEntity> userAccount = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress);
-        if (userAccount.isEmpty()) {
-            throw new IllegalStateException("Could not obtain user details");
-        }
-        return userAccount.get();
+        UserAccountEntity userAccount = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress)
+            .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
+
+        return userAccount;
     }
 }

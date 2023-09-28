@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
 
 @SpringBootTest()
 class UserIdentityImplTest extends IntegrationBase {
@@ -124,10 +126,13 @@ class UserIdentityImplTest extends IntegrationBase {
 
         dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        assertThrows(
-            IllegalStateException.class,
+        var exception = assertThrows(
+            DartsApiException.class,
             () -> userIdentity.getUserAccount()
         );
+
+        assertEquals(USER_DETAILS_INVALID.getTitle(), exception.getMessage());
+        assertEquals(USER_DETAILS_INVALID, exception.getError());
 
     }
 }
