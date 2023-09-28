@@ -4,25 +4,34 @@ import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -31,16 +40,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioServiceImplTest {
 
+    public static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
+    public static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
     private static final String DUMMY_FILE_CONTENT = "DUMMY FILE CONTENT";
 
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
+    @Mock
+    AddAudioRequestMapper mapper;
 
+    @Captor
+    ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Mock
     private AudioTransformationService audioTransformationService;
 
@@ -55,14 +72,20 @@ class AudioServiceImplTest {
 
     @Mock
     private FileOperationService fileOperationService;
-
+    @Mock
+    private RetrieveCoreObjectService retrieveCoreObjectService;
     private AudioService audioService;
 
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
-            audioTransformationService, transientObjectDirectoryRepository,
-            mediaRepository, audioOperationService, fileOperationService
+            audioTransformationService,
+            transientObjectDirectoryRepository,
+            mediaRepository,
+            audioOperationService,
+            fileOperationService,
+            retrieveCoreObjectService,
+            mapper
         );
     }
 
@@ -163,4 +186,76 @@ class AudioServiceImplTest {
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
     }
 
+
+    @Test
+    void addAudio() {
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
+        HearingEntity hearingEntity = new HearingEntity();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            anyString(),
+            any()
+        )).thenReturn(hearingEntity);
+        MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+
+        when(mapper.mapToMedia(any())).thenReturn(mediaEntity);
+        audioService.addAudio(addAudioMetadataRequest);
+
+        verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
+
+        MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
+        assertEquals(startedAt, savedMedia.getStart());
+        assertEquals(endedAt, savedMedia.getEnd());
+        assertEquals(1, savedMedia.getChannel());
+        assertEquals(2, savedMedia.getTotalChannels());
+        assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
+        assertEquals("1", savedMedia.getCourtroom().getName());
+
+    }
+
+    private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setStart(startedAt);
+        mediaEntity.setEnd(endedAt);
+        mediaEntity.setChannel(1);
+        mediaEntity.setTotalChannels(2);
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        mediaEntity.setCourtroom(new CourtroomEntity(1, "1", courthouse));
+        return mediaEntity;
+    }
+
+    private AddAudioMetadataRequest createAddAudioRequest(OffsetDateTime startedAt, OffsetDateTime endedAt) {
+        AddAudioMetadataRequest addAudioMetadataRequest = new AddAudioMetadataRequest();
+        addAudioMetadataRequest.startedAt(startedAt);
+        addAudioMetadataRequest.endedAt(endedAt);
+        addAudioMetadataRequest.setChannel(1);
+        addAudioMetadataRequest.totalChannels(2);
+        addAudioMetadataRequest.format("mp3");
+        addAudioMetadataRequest.filename("test");
+        addAudioMetadataRequest.courthouse("SWANSEA");
+        addAudioMetadataRequest.courtroom("1");
+        addAudioMetadataRequest.cases(List.of("1", "2", "3"));
+        return addAudioMetadataRequest;
+    }
+
+    @Test
+    void linkAudioAndHearing() {
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        HearingEntity hearing = new HearingEntity();
+        when(retrieveCoreObjectService.retrieveOrCreateHearing(
+            anyString(),
+            anyString(),
+            anyString(),
+            any()
+        )).thenReturn(hearing);
+        audioService.linkAudioAndHearing(addAudioMetadataRequest, mediaEntity);
+        assertEquals(3, hearing.getMediaList().size());
+    }
 }

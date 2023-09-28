@@ -190,15 +190,17 @@ public class CommonTestDataUtil {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
-        hearing1.setTranscriptions(createTranscriptionList());
+        hearing1.setTranscriptions(createTranscriptionList(hearing1));
         hearing1.addJudges(createJudges(2));
         return hearing1;
     }
 
-    public List<TranscriptionEntity> createTranscriptionList() {
+    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setCompany("Transcription company");
+        transcription.setCourtCase(hearing.getCourtCase());
         transcription.setTranscriptionType(new TranscriptionTypeEntity());
+        transcription.setCourtroom(hearing.getCourtroom());
+        transcription.setHearing(hearing);
         return List.of(transcription);
     }
 

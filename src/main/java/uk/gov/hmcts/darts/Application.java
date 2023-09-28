@@ -2,12 +2,15 @@ package uk.gov.hmcts.darts;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 
 import java.util.TimeZone;
 
@@ -18,6 +21,9 @@ import static java.time.ZoneOffset.UTC;
 @Slf4j
 @SuppressWarnings("HideUtilityClassConstructor") // Spring needs a constructor, its not a utility class
 public class Application implements CommandLineRunner {
+
+    @Autowired
+    private MediaRequestService mediaRequestService;
 
     @PostConstruct
     public void started() {
@@ -39,6 +45,9 @@ public class Application implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (System.getenv("ATS_MODE") != null) {
             log.info("ATS_MODE activated");
+            // Temporary workaround to prevent many media requests in OPEN state
+            var openAudioRequests = mediaRequestService.getMediaRequestsByStatus(AudioRequestStatus.OPEN);
+            mediaRequestService.updateAudioRequestStatus(openAudioRequests.get(0).getId(), AudioRequestStatus.PROCESSING);
         }
     }
 

@@ -103,6 +103,8 @@ public class AuthorisationStub {
         transcriptionEntity.setHearing(hearingEntity);
         transcriptionEntity.setTranscriptionType(transcriptionTypeRepository.getReferenceById(SPECIFIED_TIMES.getId()));
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusRepository.getReferenceById(REQUESTED.getId()));
+        transcriptionEntity.setCreatedBy(testUser);
+        transcriptionEntity.setLastModifiedBy(testUser);
         dartsDatabaseStub.save(transcriptionEntity);
     }
 
