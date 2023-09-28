@@ -33,6 +33,9 @@ public class FunctionalTest {
     @Autowired
     private AccessTokenClient externalAccessTokenClient;
 
+    @Autowired
+    private AccessTokenClient internalAccessTokenClient;
+
     @Value("${deployed-application-uri}")
     private URI baseUri;
 
@@ -46,9 +49,17 @@ public class FunctionalTest {
         return baseUri + endpoint;
     }
 
-    public RequestSpecification buildRequestWithAuth() {
+    public RequestSpecification buildRequestWithExternalAuth() {
+        return buildRequestWithAuth(externalAccessTokenClient);
+    }
+
+    public RequestSpecification buildRequestWithInternalAuth() {
+        return buildRequestWithAuth(internalAccessTokenClient);
+    }
+
+    private RequestSpecification buildRequestWithAuth(AccessTokenClient accessTokenClient) {
         return RestAssured.given()
-            .header("Authorization", String.format("Bearer %s", externalAccessTokenClient.getAccessToken()));
+            .header("Authorization", String.format("Bearer %s", accessTokenClient.getAccessToken()));
     }
 
     private void configureRestAssured() {

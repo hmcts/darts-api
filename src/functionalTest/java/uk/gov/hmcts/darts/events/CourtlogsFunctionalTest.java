@@ -19,7 +19,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Disabled
     @Order(1)
     void postSuccess() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body("""
                       {
@@ -44,7 +44,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Test
     @Order(2)
     void postFail() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body("""
                       {
@@ -70,7 +70,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Disabled
     @Order(3)
     void getSuccess() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .param("courthouse", "liverpool")
             .param("case_number", "CASE1001")
@@ -97,7 +97,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Test
     @Order(4)
     void getFail() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .param("courthouse", "liverpool")
             .param("case_number", "CASE1001")

@@ -40,7 +40,7 @@ class ExternalAuthenticationFunctionalTest extends FunctionalTest {
 
     @Test
     void shouldAllowAccessWhenSecuredEndpointIsCalledWithAuth() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri("/dummy-secured-endpoint"))

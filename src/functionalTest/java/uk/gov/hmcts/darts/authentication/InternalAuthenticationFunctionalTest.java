@@ -3,13 +3,13 @@ package uk.gov.hmcts.darts.authentication;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.darts.InternalFunctionalTest;
+import uk.gov.hmcts.darts.FunctionalTest;
 
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class InternalAuthenticationFunctionalTest extends InternalFunctionalTest {
+class InternalAuthenticationFunctionalTest extends FunctionalTest {
 
     @Test
     void shouldAllowAccessWhenUnprotectedEndpointIsCalledWithoutAuth() {
@@ -40,7 +40,7 @@ class InternalAuthenticationFunctionalTest extends InternalFunctionalTest {
 
     @Test
     void shouldAllowAccessWhenSecuredEndpointIsCalledWithAuthThenFailInvalidEndpoint() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithInternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri("/dummy-secured-endpoint"))
