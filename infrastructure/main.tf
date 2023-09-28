@@ -66,7 +66,7 @@ resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
   value        = local.db_name
   key_vault_id = data.azurerm_key_vault.key_vault.id
 }
-
+//sample changes
 module "postgresql_flexible" {
   providers = {
     azurerm.postgres_network = azurerm.postgres_network
@@ -88,5 +88,5 @@ module "postgresql_flexible" {
     }
   ]
 
-  pgsql_version = "14"
+  pgsql_version = "latest"
 }
