@@ -71,7 +71,13 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
-    @OneToMany(mappedBy = "transcription")
-    private List<TranscriptionCommentEntity> transcriptionComments;
+    @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
+    private List<TranscriptionCommentEntity> transcriptionCommentEntities;
+
+    @OneToMany(mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
+    private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities;
+
+    @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.TRANSCRIPTION)
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
 
 }

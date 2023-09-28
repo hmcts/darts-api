@@ -88,7 +88,7 @@ public class AuthorisationImpl implements Authorisation {
     public void authoriseByTranscriptionId(Integer transcriptionId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = List.of(transcriptionRepository.getReferenceById(transcriptionId)
-                                                                   .getCourtroom().getCourthouse());
+                                                                   .getCourtCase().getCourthouse());
             authorisationApi.checkAuthorisation(courthouses, securityRoles);
         } catch (EntityNotFoundException e) {
             log.error("Unable to find Transcription-Courtroom-Courthouse for checkAuthorisation", e);
