@@ -59,7 +59,7 @@ public class AudioServiceImpl implements AudioService {
             throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
         }
 
-        return audioTransformationService.getAudioBlobData(blobId)
+        return audioTransformationService.getOutboundAudioBlob(blobId)
             .toStream();
     }
 
