@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
@@ -40,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -74,6 +76,8 @@ class AudioServiceImplTest {
     private FileOperationService fileOperationService;
     @Mock
     private RetrieveCoreObjectService retrieveCoreObjectService;
+    @Mock
+    private HearingRepository hearingRepository;
     private AudioService audioService;
 
     @BeforeEach
@@ -85,6 +89,7 @@ class AudioServiceImplTest {
             audioOperationService,
             fileOperationService,
             retrieveCoreObjectService,
+            hearingRepository,
             mapper
         );
     }
@@ -206,7 +211,7 @@ class AudioServiceImplTest {
         audioService.addAudio(addAudioMetadataRequest);
 
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
-
+        verify(hearingRepository,times(3)).saveAndFlush(any());
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
         assertEquals(endedAt, savedMedia.getEnd());
@@ -256,6 +261,7 @@ class AudioServiceImplTest {
             any()
         )).thenReturn(hearing);
         audioService.linkAudioAndHearing(addAudioMetadataRequest, mediaEntity);
+        verify(hearingRepository,times(3)).saveAndFlush(any());
         assertEquals(3, hearing.getMediaList().size());
     }
 }
