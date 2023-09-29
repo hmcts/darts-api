@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPEC
 @Getter
 public class AuthorisationStub {
 
+    public static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0).withSecond(0);
     private final DartsDatabaseStub dartsDatabaseStub;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -73,25 +75,17 @@ public class AuthorisationStub {
         testUser.getSecurityGroupEntities().addAll(List.of(bristolStaff, bristolAppr));
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
-        courtCaseEntity = new CourtCaseEntity();
-        var yesterday = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0).withSecond(0);
-        courtCaseEntity.setCaseNumber(String.format("T%s", yesterday.format(BASIC_ISO_DATE)));
-        courtCaseEntity.setCourthouse(courthouseEntity);
-        dartsDatabaseStub.save(courtCaseEntity);
+        createCourtCase();
 
-        hearingEntity = new HearingEntity();
-        hearingEntity.setCourtCase(courtCaseEntity);
-        hearingEntity.setCourtroom(courtroomEntity);
-        hearingEntity.setHearingDate(LocalDate.now());
-        dartsDatabaseStub.save(hearingEntity);
+        createHearing();
 
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(testUser);
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(DOWNLOAD);
-        mediaRequestEntity.setStartTime(yesterday);
-        mediaRequestEntity.setEndTime(yesterday.plusHours(1));
+        mediaRequestEntity.setStartTime(YESTERDAY);
+        mediaRequestEntity.setEndTime(YESTERDAY.plusHours(1));
         dartsDatabaseStub.save(mediaRequestEntity);
 
         mediaRequestEntitySystemUser = new MediaRequestEntity();
@@ -99,12 +93,16 @@ public class AuthorisationStub {
         mediaRequestEntitySystemUser.setRequestor(systemUser);
         mediaRequestEntitySystemUser.setStatus(OPEN);
         mediaRequestEntitySystemUser.setRequestType(DOWNLOAD);
-        mediaRequestEntitySystemUser.setStartTime(yesterday);
-        mediaRequestEntitySystemUser.setEndTime(yesterday.plusHours(1));
+        mediaRequestEntitySystemUser.setStartTime(YESTERDAY);
+        mediaRequestEntitySystemUser.setEndTime(YESTERDAY.plusHours(1));
         dartsDatabaseStub.save(mediaRequestEntitySystemUser);
 
         mediaEntity = new MediaEntity();
+        mediaEntity.setChannel(1);
+        mediaEntity.setTotalChannels(2);
         mediaEntity.setCourtroom(courtroomEntity);
+        mediaEntity.setStart(OffsetDateTime.now());
+        mediaEntity.setEnd(OffsetDateTime.now());
         dartsDatabaseStub.save(mediaEntity);
 
         hearingEntity.addMedia(mediaEntity);
@@ -156,6 +154,25 @@ public class AuthorisationStub {
         transcriptionWorkflowEntity.setWorkflowActor(testUser);
         transcriptionWorkflowEntity.setWorkflowTimestamp(timestamp);
         return transcriptionWorkflowEntity;
+    }
+
+    private void createHearing() {
+        hearingEntity = new HearingEntity();
+        hearingEntity.setCourtCase(courtCaseEntity);
+        hearingEntity.setCourtroom(courtroomEntity);
+        hearingEntity.setHearingDate(LocalDate.now());
+        hearingEntity.setHearingIsActual(false);
+        hearingEntity.setScheduledStartTime(LocalTime.now());
+        dartsDatabaseStub.save(hearingEntity);
+    }
+
+    private void createCourtCase() {
+        courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setCaseNumber(String.format("T%s", YESTERDAY.format(BASIC_ISO_DATE)));
+        courtCaseEntity.setCourthouse(courthouseEntity);
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
+        dartsDatabaseStub.save(courtCaseEntity);
     }
 
 }
