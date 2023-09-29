@@ -100,12 +100,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_STATUS);
         }
 
+        TranscriptionStatusEntity transcriptionStatusEntity = getTranscriptionStatusById(transcriptionStatusEnum.getId());
+        transcription.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
             getUserAccount(),
             transcription,
-            getTranscriptionStatusById(transcriptionStatusEnum.getId()),
+            transcriptionStatusEntity,
             updateTranscription.getWorkflowComment()
         );
+        transcription.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());

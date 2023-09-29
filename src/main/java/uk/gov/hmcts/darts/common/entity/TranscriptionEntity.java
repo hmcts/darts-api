@@ -15,7 +15,10 @@ import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
 @Table(name = "transcription")
@@ -72,12 +75,12 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private String legacyVersionLabel;
 
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
-    private List<TranscriptionCommentEntity> transcriptionCommentEntities;
+    private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
 
-    @OneToMany(mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
-    private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities;
+    @OneToMany(cascade = {PERSIST}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
+    private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
 
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.TRANSCRIPTION)
-    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities;
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
 }
