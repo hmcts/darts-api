@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -12,14 +13,12 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -54,10 +53,11 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
-    private final UserAccountRepository userAccountRepository;
 
     private final CaseService caseService;
     private final HearingsService hearingsService;
+
+    private final UserIdentity userIdentity;
 
     @Transactional
     @Override
@@ -70,7 +70,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             userAccount,
             transcriptionRequestDetails,
             transcriptionStatus,
-            getTranscriptionType(transcriptionRequestDetails.getTranscriptionTypeId()),
+            getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
             getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId())
         );
 
@@ -166,9 +166,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflow);
     }
 
-    // TODO This needs to be replaced by the actual users account when this has been implemented
     private UserAccountEntity getUserAccount() {
-        return userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
+        return userIdentity.getUserAccount();
     }
 
     private TranscriptionUrgencyEntity getTranscriptionUrgencyById(Integer urgencyId) {
@@ -179,7 +178,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionStatusRepository.getReferenceById(transcriptionStatusId);
     }
 
-    private TranscriptionTypeEntity getTranscriptionType(Integer transcriptionTypeId) {
+    private TranscriptionTypeEntity getTranscriptionTypeById(Integer transcriptionTypeId) {
         return transcriptionTypeRepository.getReferenceById(transcriptionTypeId);
     }
 

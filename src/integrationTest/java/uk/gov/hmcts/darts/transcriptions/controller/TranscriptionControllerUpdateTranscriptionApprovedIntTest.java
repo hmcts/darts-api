@@ -16,8 +16,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -32,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -60,7 +63,11 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
     private Integer transcriptionId;
+    private Integer testUserId;
 
     @BeforeEach
     void beforeEach() {
@@ -71,8 +78,14 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         assertEquals(2, transcriptionEntity.getTranscriptionWorkflowEntities().size());
 
         transcriptionId = transcriptionEntity.getId();
+
         doNothing().when(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER));
+
+        UserAccountEntity testUser = authorisationStub.getTestUser();
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        testUserId = testUser.getId();
     }
 
     @Test
@@ -101,6 +114,8 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         final TranscriptionEntity approvedTranscriptionEntity = dartsDatabaseStub.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(APPROVED.getId(), approvedTranscriptionEntity.getTranscriptionStatus().getId());
+        assertEquals(testUserId, approvedTranscriptionEntity.getCreatedBy().getId());
+        assertEquals(testUserId, approvedTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = approvedTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
@@ -110,6 +125,9 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertNull(transcriptionWorkflowEntity.getWorkflowComment());
+        assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
+        assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
+        assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
     }
 
     @Test
@@ -139,6 +157,8 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         final TranscriptionEntity approvedTranscriptionEntity = dartsDatabaseStub.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(APPROVED.getId(), approvedTranscriptionEntity.getTranscriptionStatus().getId());
+        assertEquals(testUserId, approvedTranscriptionEntity.getCreatedBy().getId());
+        assertEquals(testUserId, approvedTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = approvedTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
@@ -148,6 +168,9 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(updateTranscription.getWorkflowComment(), transcriptionWorkflowEntity.getWorkflowComment());
+        assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
+        assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
+        assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
     }
 
     @Test

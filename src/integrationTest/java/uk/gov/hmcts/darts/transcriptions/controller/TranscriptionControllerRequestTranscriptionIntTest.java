@@ -12,31 +12,27 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 
 
 @AutoConfigureMockMvc
@@ -44,38 +40,38 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNam
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase {
 
-    private static final String ENDPOINT = "/transcriptions";
-
-    private static final URI ENDPOINT_URI = URI.create(ENDPOINT);
+    private static final URI ENDPOINT_URI = URI.create("/transcriptions");
 
     private static final String TEST_COMMENT = "Test comment";
 
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-07-31T14:32Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
-    private static final String SOME_COURTROOM = "some-courtroom";
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @Autowired
+    private AuthorisationStub authorisationStub;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     private CourtCaseEntity courtCase;
     private HearingEntity hearing;
 
     @BeforeEach
     void setupData() {
-        CourthouseEntity someCourthouse = someMinimalCourthouse();
-        someCourthouse.setCourthouseName(SOME_COURTHOUSE);
+        authorisationStub.givenTestSchema();
 
-        CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(someCourthouse, SOME_COURTROOM);
+        courtCase = authorisationStub.getCourtCaseEntity();
+        hearing = authorisationStub.getHearingEntity();
+        UserAccountEntity testUser = authorisationStub.getTestUser();
 
-        courtCase = createCaseAt(someCourthouse);
-        courtCase.setCaseNumber("Case1");
-
-        JudgeEntity judge = createJudgeWithName("aJudge");
-        hearing = createHearingWithDefaults(courtCase, courtroom1, LocalDate.of(2023, 5, 20), judge);
-
-        dartsDatabase.saveAll(hearing);
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test

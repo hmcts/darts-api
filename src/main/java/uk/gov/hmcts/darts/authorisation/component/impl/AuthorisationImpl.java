@@ -39,7 +39,6 @@ public class AuthorisationImpl implements Authorisation {
     private final MediaRepository mediaRepository;
     private final TranscriptionRepository transcriptionRepository;
     private final AuthorisationApi authorisationApi;
-
     private final UserIdentity userIdentity;
 
     @Override
@@ -110,7 +109,7 @@ public class AuthorisationImpl implements Authorisation {
             if (!mediaRequest.getRequestor().getId().equals(userAccount.getId())) {
                 throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
             }
-        }  catch (EntityNotFoundException | IllegalStateException e) {
+        } catch (EntityNotFoundException | IllegalStateException e) {
             log.error("Unable to validate media requests for user", e);
             throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
         }
