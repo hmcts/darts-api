@@ -45,13 +45,13 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private CourtroomEntity courtroom;
 
-    @Column(name = "hearing_date")
+    @Column(name = "hearing_date", nullable = false)
     private LocalDate hearingDate;
 
     @Column(name = "scheduled_start_time")
     private LocalTime scheduledStartTime;
 
-    @Column(name = "hearing_is_actual")
+    @Column(name = "hearing_is_actual", nullable = false)
     private Boolean hearingIsActual;
 
     @Column(name = "judge_hearing_date")

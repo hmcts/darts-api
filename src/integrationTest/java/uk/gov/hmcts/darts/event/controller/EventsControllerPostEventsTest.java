@@ -103,6 +103,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber("CaseNumber");
+        courtCase.setClosed(false);
+        courtCase.setInterpreterUsed(false);
         courtCase.setCourthouse(courthouse);
         dartsDatabase.getCaseRepository().save(courtCase);
 

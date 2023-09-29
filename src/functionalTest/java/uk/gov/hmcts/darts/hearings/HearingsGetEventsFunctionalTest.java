@@ -38,7 +38,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
         String randomEventText1 = RandomStringUtils.randomAlphanumeric(15);
         requestBody = requestBody.replace("<<eventText>>", randomEventText1);
-        buildRequestWithAuth()
+        buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)
             .when()
@@ -65,7 +65,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
         String randomEventText2 = RandomStringUtils.randomAlphanumeric(15);
         requestBody = requestBody.replace("<<eventText>>", randomEventText2);
-        buildRequestWithAuth()
+        buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)
             .when()
@@ -75,7 +75,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
 
         int hearingId = getHearingIdByCaseNumber(randomCaseNumber);
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .pathParam("hearingId", hearingId)
             .when()
             .redirects().follow(false)
@@ -89,7 +89,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     }
 
     private int getHearingIdByCaseNumber(String caseNumber) {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .param("case_number", caseNumber)
             .when()

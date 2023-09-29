@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND;
+import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -44,6 +45,7 @@ class AuthorisationImplTest extends IntegrationBase {
     void beforeEach() {
         authorisationStub.givenTestSchema();
         when(mockUserIdentity.getEmailAddress()).thenReturn(authorisationStub.getTestUser().getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(authorisationStub.getTestUser());
     }
 
     @Test
@@ -134,6 +136,25 @@ class AuthorisationImplTest extends IntegrationBase {
 
         assertEquals(MEDIA_REQUEST_NOT_FOUND.getTitle(), exception.getMessage());
         assertEquals(MEDIA_REQUEST_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    void authoriseMediaRequestAgainstUser() {
+        assertDoesNotThrow(() -> authorisationToTest.authoriseMediaRequestAgainstUser(
+            authorisationStub.getMediaRequestEntity().getId()));
+    }
+
+    @Test
+    void authoriseMediaRequestAgainstUserShouldThrowAudioRequestsApiErrorMediaRequestNotValidForUser() {
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> authorisationToTest.authoriseMediaRequestAgainstUser(
+                authorisationStub.getMediaRequestEntitySystemUser().getId())
+        );
+
+        assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER.getTitle(), exception.getMessage());
+        assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER, exception.getError());
     }
 
     @Test

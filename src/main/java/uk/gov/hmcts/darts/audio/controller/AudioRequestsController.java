@@ -42,4 +42,11 @@ public class AudioRequestsController implements AudioRequestsApi {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @Override
+    @Authorisation(contextId = MEDIA_REQUEST_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+    public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
+        mediaRequestService.updateAudioRequestLastAccessedTimestamp(mediaRequestId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
