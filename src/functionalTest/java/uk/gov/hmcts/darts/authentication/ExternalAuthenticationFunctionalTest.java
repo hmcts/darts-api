@@ -9,7 +9,7 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class AuthenticationFunctionalTest extends FunctionalTest {
+class ExternalAuthenticationFunctionalTest extends FunctionalTest {
 
     @Test
     void shouldAllowAccessWhenUnprotectedEndpointIsCalledWithoutAuth() {
@@ -40,7 +40,7 @@ class AuthenticationFunctionalTest extends FunctionalTest {
 
     @Test
     void shouldAllowAccessWhenSecuredEndpointIsCalledWithAuth() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri("/dummy-secured-endpoint"))
