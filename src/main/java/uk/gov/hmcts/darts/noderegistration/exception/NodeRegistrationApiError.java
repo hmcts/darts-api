@@ -15,7 +15,7 @@ public enum NodeRegistrationApiError implements DartsApiError {
         "Could not find the courtroom."
     );
 
-    private static final String ERROR_TYPE_PREFIX = "NODEREGISTRATION";
+    private static final String ERROR_TYPE_PREFIX = "NODE_REGISTRATION";
 
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;

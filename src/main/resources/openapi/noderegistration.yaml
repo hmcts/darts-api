@@ -65,6 +65,16 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "NODE_REGISTRATION_100"
+                title: "Could not find the courtroom."
+                status: 400
 components:
   schemas:
     PostNodeRegistrationResponse:
