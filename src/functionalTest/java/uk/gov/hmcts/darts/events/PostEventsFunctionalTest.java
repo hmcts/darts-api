@@ -16,7 +16,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
     @Test
     @Disabled
     void success() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body("""
                       {
@@ -44,7 +44,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
 
     @Test
     void fail() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body("""
                       {

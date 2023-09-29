@@ -27,7 +27,7 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .queryParam("source_system", sourceType)
             .queryParam("courthouse", "Swansea")
@@ -47,7 +47,7 @@ class DailylistFunctionalTest extends FunctionalTest {
         String jsonDocument = getJsonDocumentWithValues(todayDateString, tomorrowDateString);
 
         //then patch it with JSON
-        response = buildRequestWithAuth()
+        response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .queryParam("dal_id", dalId)
             .header("json_document", jsonDocument)
@@ -77,7 +77,7 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         String xmlDocument = getContentsFromFile("DailyList-Document.xml");
 
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .queryParam("source_system", "XHB")
             .queryParam("courthouse", "doesnotexist")
@@ -99,7 +99,7 @@ class DailylistFunctionalTest extends FunctionalTest {
         String todayDateString = LocalDate.now().toString();
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
 
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .queryParam("source_system", "XHB")
             .queryParam("courthouse", "Swansea")
