@@ -16,7 +16,9 @@ public interface AudioTransformationService {
 
     UUID processAudioRequest(Integer requestId) throws ExecutionException, InterruptedException;
 
-    BinaryData getAudioBlobData(UUID location);
+    BinaryData getUnstructuredAudioBlob(UUID location);
+
+    BinaryData getOutboundAudioBlob(UUID location);
 
     UUID saveAudioBlobData(BinaryData binaryData);
 

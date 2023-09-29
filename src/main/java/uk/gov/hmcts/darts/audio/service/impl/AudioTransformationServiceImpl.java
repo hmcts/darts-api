@@ -163,8 +163,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public BinaryData getAudioBlobData(UUID location) {
+    public BinaryData getUnstructuredAudioBlob(UUID location) {
         return dataManagementApi.getBlobDataFromUnstructuredContainer(location);
+    }
+
+    @Override
+    public BinaryData getOutboundAudioBlob(UUID location) {
+        return dataManagementApi.getBlobDataFromOutboundContainer(location);
     }
 
     @Override
@@ -243,7 +248,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             )));
 
         log.debug("Downloading audio blob for {}", id);
-        BinaryData binaryData = getAudioBlobData(id);
+        BinaryData binaryData = getUnstructuredAudioBlob(id);
         log.debug("Download audio blob complete for {}", id);
 
         Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());

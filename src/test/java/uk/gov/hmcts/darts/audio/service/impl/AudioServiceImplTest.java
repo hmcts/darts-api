@@ -103,7 +103,7 @@ class AudioServiceImplTest {
         var mediaRequestId = 1;
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
-        when(audioTransformationService.getAudioBlobData(blobUuid))
+        when(audioTransformationService.getOutboundAudioBlob(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
 
         try (InputStream inputStream = audioService.download(mediaRequestId)) {

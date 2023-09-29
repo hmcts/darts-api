@@ -5,11 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
@@ -18,6 +20,8 @@ import java.net.URI;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -47,8 +51,11 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
+    @SpyBean
+    private DataManagementService dataManagementService;
+
     @Test
-    void audioDownloadGetShouldReturnSuccess() throws Exception {
+    void audioDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -69,6 +76,8 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk());
+
+        verify(dataManagementService).getBlobData(eq("darts-outbound"), any());
 
         verify(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),

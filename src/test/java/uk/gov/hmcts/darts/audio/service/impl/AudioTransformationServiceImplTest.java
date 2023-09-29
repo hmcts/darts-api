@@ -51,7 +51,7 @@ class AudioTransformationServiceImplTest {
         when(mockDataManagementApi.getBlobDataFromUnstructuredContainer(BLOB_LOCATION))
             .thenReturn(BINARY_DATA);
 
-        BinaryData binaryData = audioTransformationService.getAudioBlobData(BLOB_LOCATION);
+        BinaryData binaryData = audioTransformationService.getUnstructuredAudioBlob(BLOB_LOCATION);
         assertEquals(BINARY_DATA, binaryData);
     }
 
