@@ -37,7 +37,9 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPEC
 @Getter
 public class AuthorisationStub {
 
-    public static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0).withSecond(0);
+    private static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0)
+        .withSecond(0);
+
     private final DartsDatabaseStub dartsDatabaseStub;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -122,14 +124,14 @@ public class AuthorisationStub {
 
         TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
             transcriptionEntity,
-            yesterday,
+            YESTERDAY,
             transcriptionStatusRepository.getReferenceById(REQUESTED.getId()),
             "Please expedite my transcription request"
         );
 
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
             transcriptionEntity,
-            yesterday,
+            YESTERDAY,
             awaitingAuthorisationTranscriptionStatus,
             null
         );
