@@ -49,6 +49,7 @@ public class AuthorisationStub {
     private CourtCaseEntity courtCaseEntity;
     private HearingEntity hearingEntity;
     private MediaRequestEntity mediaRequestEntity;
+    private MediaRequestEntity mediaRequestEntitySystemUser;
     private MediaEntity mediaEntity;
     private TranscriptionEntity transcriptionEntity;
 
@@ -92,6 +93,15 @@ public class AuthorisationStub {
         mediaRequestEntity.setStartTime(yesterday);
         mediaRequestEntity.setEndTime(yesterday.plusHours(1));
         dartsDatabaseStub.save(mediaRequestEntity);
+
+        mediaRequestEntitySystemUser = new MediaRequestEntity();
+        mediaRequestEntitySystemUser.setHearing(hearingEntity);
+        mediaRequestEntitySystemUser.setRequestor(systemUser);
+        mediaRequestEntitySystemUser.setStatus(OPEN);
+        mediaRequestEntitySystemUser.setRequestType(DOWNLOAD);
+        mediaRequestEntitySystemUser.setStartTime(yesterday);
+        mediaRequestEntitySystemUser.setEndTime(yesterday.plusHours(1));
+        dartsDatabaseStub.save(mediaRequestEntitySystemUser);
 
         mediaEntity = new MediaEntity();
         mediaEntity.setCourtroom(courtroomEntity);
