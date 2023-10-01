@@ -10,11 +10,10 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AddAudioRequestMapperImplTest {
     @Mock
-    CourtroomRepository courtroomRepository;
+    RetrieveCoreObjectService courtroomRepository;
 
     AddAudioRequestMapperImpl addAudioRequestMapperImpl;
 
@@ -37,8 +36,8 @@ class AddAudioRequestMapperImplTest {
         courthouse.setCourthouseName("SWANSEA");
 
         CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
-        when(courtroomRepository.findByCourthouseNameAndCourtroomName(anyString(), anyString())).thenReturn(Optional.of(
-            courtroomEntity));
+        when(courtroomRepository.retrieveOrCreateCourtroom(anyString(), anyString())).thenReturn(
+            courtroomEntity);
 
         OffsetDateTime start = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endDate = OffsetDateTime.now();
