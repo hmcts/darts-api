@@ -18,10 +18,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.OTHE
 public class WorkflowValidator {
 
     public boolean isAutomatedTranscription(TranscriptionEntity transcription) {
-        if (OTHER.getId().equals(transcription.getTranscriptionType().getId())) {
-            return true;
-        }
-        return false;
+        return OTHER.getId().equals(transcription.getTranscriptionType().getId());
     }
 
     public void validateChangeToWorkflowStatus(TranscriptionEntity transcription, TranscriptionStatusEnum expectedTranscriptionStatus) {
@@ -42,15 +39,15 @@ public class WorkflowValidator {
         handleInvalidTranscriptionWorkflow(transcription);
     }
 
-    private static boolean isExpectedTranscriptionStatuses(TranscriptionEntity transcription,
-                                                           Set<TranscriptionStatusEnum> expectedPreviousStatuses) {
-        return expectedPreviousStatuses.contains(TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()));
+    private static boolean isNotExpectedTranscriptionStatuses(TranscriptionEntity transcription,
+                                                              Set<TranscriptionStatusEnum> expectedPreviousStatuses) {
+        return !expectedPreviousStatuses.contains(TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()));
     }
 
     private void validateChangingToAwaitingAuthorisationStatus(TranscriptionEntity transcription) {
         Set<TranscriptionStatusEnum> expectedPreviousStatuses = Set.of(REQUESTED);
         if (isAutomatedTranscription(transcription)
-            || !isExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
+            || isNotExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
             handleInvalidTranscriptionWorkflow(transcription);
         }
     }
@@ -60,24 +57,24 @@ public class WorkflowValidator {
         Set<TranscriptionStatusEnum> expectedPreviousManualStatuses = Set.of(AWAITING_AUTHORISATION);
 
         if (isAutomatedTranscription(transcription)
-            && !isExpectedTranscriptionStatuses(transcription, expectedPreviousAutomatedStatuses)) {
+            && isNotExpectedTranscriptionStatuses(transcription, expectedPreviousAutomatedStatuses)) {
             handleInvalidTranscriptionWorkflow(transcription);
         } else if (!isAutomatedTranscription(transcription)
-            && !isExpectedTranscriptionStatuses(transcription, expectedPreviousManualStatuses)) {
+            && isNotExpectedTranscriptionStatuses(transcription, expectedPreviousManualStatuses)) {
             handleInvalidTranscriptionWorkflow(transcription);
         }
     }
 
     private void validateChangingToWithTranscriberStatus(TranscriptionEntity transcription) {
         Set<TranscriptionStatusEnum> expectedPreviousStatuses = Set.of(APPROVED);
-        if (!isExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
+        if (isNotExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
             handleInvalidTranscriptionWorkflow(transcription);
         }
     }
 
     private void validateChangingToCompleteStatus(TranscriptionEntity transcription) {
         Set<TranscriptionStatusEnum> expectedPreviousStatuses = Set.of(WITH_TRANSCRIBER);
-        if (!isExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
+        if (isNotExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
             handleInvalidTranscriptionWorkflow(transcription);
         }
     }
@@ -85,14 +82,14 @@ public class WorkflowValidator {
     private void validateChangingToRejectedStatus(TranscriptionEntity transcription) {
         Set<TranscriptionStatusEnum> expectedPreviousStatuses = Set.of(AWAITING_AUTHORISATION);
         if (isAutomatedTranscription(transcription)
-            || !isExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
+            || isNotExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
             handleInvalidTranscriptionWorkflow(transcription);
         }
     }
 
     private void validateChangingToClosedStatus(TranscriptionEntity transcription) {
         Set<TranscriptionStatusEnum> expectedPreviousStatuses = Set.of(REQUESTED, AWAITING_AUTHORISATION, APPROVED, WITH_TRANSCRIBER);
-        if (!isExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
+        if (isNotExpectedTranscriptionStatuses(transcription, expectedPreviousStatuses)) {
             handleInvalidTranscriptionWorkflow(transcription);
         }
     }
