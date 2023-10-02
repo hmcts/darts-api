@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -18,11 +19,14 @@ import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,6 +52,9 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Value("${darts.notification.gov-notify.template-map.audio_request_being_processed}")
+    private String notificationId;
+
     @Test
     void addAudioRequestPostShouldReturnSuccess() throws Exception {
         assertEquals(0, dartsDatabase.getMediaRequestRepository()
@@ -64,6 +71,7 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
         CourtCaseEntity courtCase = hearingEntity.getCourtCase();
         courtCase.setDefendantList(createListOfDefendantsForCase(2, courtCase));
         dartsDatabase.save(courtCase);
+        dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         var audioRequestDetails = createAudioRequestDetails(hearingEntity);
 
@@ -102,6 +110,12 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(AUDIO_REQUEST_TYPE, mediaRequestEntity.getRequestType());
         assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
         assertEquals(0, mediaRequestEntity.getAttempts());
+
+        List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository().findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
+        assertEquals(1, notifications.size());
+        assertEquals(notificationId, notifications.get(0).getEventId());
+        assertEquals(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(), notifications.get(0).getEmailAddress());
+        assertEquals(mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(), notifications.get(0).getCourtCase().getCaseNumber());
     }
 
     private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity) {
