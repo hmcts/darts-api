@@ -50,8 +50,7 @@ public class WorkflowValidator {
         }
     }
 
-    private static boolean isNotExpectedTranscriptionStatuses(TranscriptionEntity transcription,
-                                                              Set<TranscriptionStatusEnum> expectedPreviousStatuses) {
+    private static boolean isNotExpectedTranscriptionStatuses(TranscriptionEntity transcription, Set<TranscriptionStatusEnum> expectedPreviousStatuses) {
         return isNull(transcription.getTranscriptionStatus())
         || !expectedPreviousStatuses.contains(TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()));
     }
