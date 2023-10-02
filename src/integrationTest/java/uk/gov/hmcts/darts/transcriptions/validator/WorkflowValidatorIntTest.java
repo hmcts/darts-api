@@ -133,7 +133,7 @@ class WorkflowValidatorIntTest extends IntegrationBase {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.SENTENCING_REMARKS, currentTranscriptionStatus,  AWAITING_AUTHORISATION)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.SENTENCING_REMARKS, currentTranscriptionStatus, AWAITING_AUTHORISATION)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -430,7 +430,7 @@ class WorkflowValidatorIntTest extends IntegrationBase {
 
     @ParameterizedTest
     @Order(21)
-    @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "WITH_TRANSCRIBER"})
+    @EnumSource(names = {"REQUESTED", "APPROVED", "WITH_TRANSCRIBER"})
     void validateAutomaticChangeToWorkflowStatusClosedSuccess(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(

@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,41 +25,44 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.OTHE
 @Slf4j
 public class WorkflowValidator {
 
-    // Creates a map defining the transition rules, from any given current state to a list of allowable target states
-    final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> manualWorkflowTransitionRules = new HashMap<>();
+    // Create a map defining the transition rules, from any given current state to a list of allowable target states
+    private final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> manualWorkflowTransitionRules = new HashMap<>();
 
-    final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> automaticWorkflowTransitionRules = new HashMap<>();
+    private final Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> automaticWorkflowTransitionRules = new HashMap<>();
 
     public WorkflowValidator() {
-        manualWorkflowTransitionRules.put(REQUESTED, Set.of(REQUESTED));
-        manualWorkflowTransitionRules.put(AWAITING_AUTHORISATION, Set.of(REQUESTED));
-        manualWorkflowTransitionRules.put(APPROVED, Set.of(AWAITING_AUTHORISATION));
-        manualWorkflowTransitionRules.put(REJECTED, Set.of(AWAITING_AUTHORISATION));
-        manualWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(APPROVED));
-        manualWorkflowTransitionRules.put(COMPLETE, Set.of(WITH_TRANSCRIBER));
-        manualWorkflowTransitionRules.put(CLOSED, Set.of(REQUESTED, AWAITING_AUTHORISATION, APPROVED, WITH_TRANSCRIBER));
+        manualWorkflowTransitionRules.put(REQUESTED, Set.of(REQUESTED, AWAITING_AUTHORISATION, CLOSED));
+        manualWorkflowTransitionRules.put(AWAITING_AUTHORISATION, Set.of(APPROVED, REJECTED, CLOSED));
+        manualWorkflowTransitionRules.put(APPROVED, Set.of(WITH_TRANSCRIBER, CLOSED));
+        manualWorkflowTransitionRules.put(REJECTED, Collections.emptySet());
+        manualWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED));
+        manualWorkflowTransitionRules.put(COMPLETE, Collections.emptySet());
+        manualWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
 
-        automaticWorkflowTransitionRules.put(REQUESTED, Set.of(REQUESTED));
-        automaticWorkflowTransitionRules.put(APPROVED, Set.of(REQUESTED));
-        automaticWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(APPROVED));
-        automaticWorkflowTransitionRules.put(COMPLETE, Set.of(WITH_TRANSCRIBER));
-        automaticWorkflowTransitionRules.put(CLOSED, Set.of(REQUESTED, APPROVED, WITH_TRANSCRIBER));
+        automaticWorkflowTransitionRules.put(REQUESTED, Set.of(REQUESTED, APPROVED, CLOSED));
+        automaticWorkflowTransitionRules.put(AWAITING_AUTHORISATION, Collections.emptySet());
+        automaticWorkflowTransitionRules.put(APPROVED, Set.of(WITH_TRANSCRIBER, CLOSED));
+        automaticWorkflowTransitionRules.put(REJECTED, Collections.emptySet());
+        automaticWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED));
+        automaticWorkflowTransitionRules.put(COMPLETE, Collections.emptySet());
+        automaticWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
     }
 
     public boolean isAutomatedTranscription(TranscriptionTypeEnum transcriptionTypeEnum) {
         return OTHER.equals(transcriptionTypeEnum);
     }
 
-    public void validateChangeToWorkflowStatus(TranscriptionTypeEnum transcriptionTypeEnum,
+    public boolean validateChangeToWorkflowStatus(TranscriptionTypeEnum transcriptionTypeEnum,
                                                TranscriptionStatusEnum currentTranscriptionStatus,
                                                TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
-        if (isAutomatedTranscription(transcriptionTypeEnum)
-            && !automaticWorkflowTransitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus)) {
-            handleInvalidTranscriptionWorkflow(transcriptionTypeEnum, currentTranscriptionStatus, desiredTargetTranscriptionStatus);
+        if (isAutomatedTranscription(transcriptionTypeEnum)) {
+            if (!automaticWorkflowTransitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus)) {
+                handleInvalidTranscriptionWorkflow(transcriptionTypeEnum, currentTranscriptionStatus, desiredTargetTranscriptionStatus);
+            }
         } else if (!manualWorkflowTransitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus)) {
             handleInvalidTranscriptionWorkflow(transcriptionTypeEnum, currentTranscriptionStatus, desiredTargetTranscriptionStatus);
         }
-
+        return true;
     }
 
 
@@ -66,7 +70,7 @@ public class WorkflowValidator {
                                                     TranscriptionStatusEnum currentTranscriptionStatus,
                                                     TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
 
-        log.warn("Unable to go from workflow state {} to {} for type", currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum);
+        log.warn("Unable to go from workflow state {} to {} for type {}", currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum);
         throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
     }
 
