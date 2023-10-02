@@ -10,8 +10,8 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -140,9 +140,10 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         mediaRequestService.saveAudioRequest(requestDetails);
 
-        List<MediaRequestEntity> mediaRequests = mediaRequestService.getMediaRequestsByStatus(OPEN);
+        Optional<MediaRequestEntity> mediaRequest = mediaRequestService.getOldestMediaRequestByStatus(OPEN);
 
-        assertEquals(OPEN, mediaRequests.get(0).getStatus());
+        assertTrue(mediaRequest.isPresent());
+        assertEquals(OPEN, mediaRequest.get().getStatus());
     }
 
     @Test
