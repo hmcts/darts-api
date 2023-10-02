@@ -17,6 +17,11 @@ public enum TranscriptionApiError implements DartsApiError {
         "101",
         HttpStatus.NOT_FOUND,
         "The requested transcription cannot be found"
+    ),
+    BAD_REQUEST_TRANSCRIPTION_STATUS(
+        "102",
+        HttpStatus.BAD_REQUEST,
+        "Unexpected transcription status for this workflow"
     );
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";

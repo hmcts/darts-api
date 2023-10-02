@@ -349,7 +349,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /audio/hearings/:hearingId/audios",
+					"name": "/audio/hearings/{hearing_id}/audios",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -360,15 +360,21 @@
 							}
 						],
 						"url": {
-							"raw": "{{serverUrl}}/audio/hearings/1/audios",
+							"raw": "{{serverUrl}}/audio/hearings/:hearing_id/audios",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
 								"audio",
 								"hearings",
-								"1",
+								":hearing_id",
 								"audios"
+							],
+							"variable": [
+								{
+									"key": "hearing_id",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -620,22 +626,22 @@
 					"response": []
 				},
 				{
-					"name": "/audio-requests/-1",
+					"name": "/audio-requests/{media_request_id}",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{serverUrl}}/audio-requests/:audio_request_id",
+							"raw": "{{serverUrl}}/audio-requests/:media_request_id",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
 								"audio-requests",
-								":audio_request_id"
+								":media_request_id"
 							],
 							"variable": [
 								{
-									"key": "audio_request_id",
+									"key": "media_request_id",
 									"value": "-1"
 								}
 							]
@@ -707,6 +713,72 @@
 							],
 							"path": [
 								"transcriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} APPROVED",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"APPROVED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "41"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} REJECTED",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 4,\n  \"workflow_comment\": \"REJECTED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "41"
+								}
 							]
 						}
 					},

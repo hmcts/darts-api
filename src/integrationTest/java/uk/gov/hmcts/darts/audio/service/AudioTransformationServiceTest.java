@@ -82,7 +82,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
             BLOB_LOCATION
         )).thenReturn(BINARY_DATA);
 
-        BinaryData binaryData = audioTransformationService.getAudioBlobData(BLOB_LOCATION);
+        BinaryData binaryData = audioTransformationService.getUnstructuredAudioBlob(BLOB_LOCATION);
 
         assertEquals(BINARY_DATA, binaryData);
         verify(mockDataManagementService).getBlobData(

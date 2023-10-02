@@ -13,9 +13,8 @@ paths:
     post:
       tags:
         - Transcription
-      summary: Users can request transcription
+      summary: Requesters can request transcription
       operationId: requestTranscription
-      description: Adds a user transcription request for processing
       responses:
         '200':
           description: OK
@@ -24,11 +23,36 @@ paths:
         '404':
           description: Resource with the provided id does not exist.
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/TranscriptionRequestDetails'
-        description: Transcription Request item to add
+  /transcriptions/{transcription_id}:
+    patch:
+      tags:
+        - Transcription
+      summary: Workflow actors can add a comment against the transcription status
+      operationId: updateTranscription
+      parameters:
+        - in: path
+          name: transcription_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateTranscriptionResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTranscription'
 components:
   schemas:
     TranscriptionRequestDetails:
@@ -60,4 +84,20 @@ components:
           type: string
           format: date-time
           example: '2023-07-31T14:32:24.000Z'
-
+    UpdateTranscription:
+      type: object
+      required:
+        - transcription_status_id
+      properties:
+        transcription_status_id:
+          type: integer
+          example: 3
+        workflow_comment:
+          type: string
+    UpdateTranscriptionResponse:
+      type: object
+      required:
+        - transcription_workflow_id
+      properties:
+        transcription_workflow_id:
+          type: integer

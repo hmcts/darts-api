@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -26,6 +28,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
 
@@ -34,7 +37,9 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPEC
 @Getter
 public class AuthorisationStub {
 
-    public static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0).withSecond(0);
+    private static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0)
+        .withSecond(0);
+
     private final DartsDatabaseStub dartsDatabaseStub;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -105,15 +110,52 @@ public class AuthorisationStub {
         hearingEntity.addMedia(mediaEntity);
         dartsDatabaseStub.save(hearingEntity);
 
+        final TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus = transcriptionStatusRepository.getReferenceById(
+            AWAITING_AUTHORISATION.getId());
+
         transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.setCourtCase(courtCaseEntity);
         transcriptionEntity.setCourtroom(courtroomEntity);
         transcriptionEntity.setHearing(hearingEntity);
         transcriptionEntity.setTranscriptionType(transcriptionTypeRepository.getReferenceById(SPECIFIED_TIMES.getId()));
-        transcriptionEntity.setTranscriptionStatus(transcriptionStatusRepository.getReferenceById(REQUESTED.getId()));
+        transcriptionEntity.setTranscriptionStatus(awaitingAuthorisationTranscriptionStatus);
         transcriptionEntity.setCreatedBy(testUser);
         transcriptionEntity.setLastModifiedBy(testUser);
-        dartsDatabaseStub.save(transcriptionEntity);
+
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+            transcriptionEntity,
+            YESTERDAY,
+            transcriptionStatusRepository.getReferenceById(REQUESTED.getId()),
+            "Please expedite my transcription request"
+        );
+
+        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+            transcriptionEntity,
+            YESTERDAY,
+            awaitingAuthorisationTranscriptionStatus,
+            null
+        );
+
+        transcriptionEntity.getTranscriptionWorkflowEntities()
+            .addAll(List.of(requestedTranscriptionWorkflowEntity, awaitingAuthorisationTranscriptionWorkflowEntity));
+        transcriptionEntity = dartsDatabaseStub.save(transcriptionEntity);
+    }
+
+    private TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
+                                                                          OffsetDateTime timestamp,
+                                                                          TranscriptionStatusEntity transcriptionStatus,
+                                                                          String workflowComment) {
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity.setTranscription(transcriptionEntity);
+        transcriptionWorkflowEntity.setWorkflowComment(workflowComment);
+        transcriptionWorkflowEntity.setCreatedDateTime(timestamp);
+        transcriptionWorkflowEntity.setCreatedBy(testUser);
+        transcriptionWorkflowEntity.setLastModifiedDateTime(timestamp);
+        transcriptionWorkflowEntity.setLastModifiedBy(testUser);
+        transcriptionWorkflowEntity.setTranscriptionStatus(transcriptionStatus);
+        transcriptionWorkflowEntity.setWorkflowActor(testUser);
+        transcriptionWorkflowEntity.setWorkflowTimestamp(timestamp);
+        return transcriptionWorkflowEntity;
     }
 
     private void createHearing() {
