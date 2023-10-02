@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -91,6 +92,7 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
+    @Transactional
     public void addAudio(AddAudioMetadataRequest addAudioMetadataRequest) {
         MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
         linkAudioAndHearing(addAudioMetadataRequest, savedMedia);
