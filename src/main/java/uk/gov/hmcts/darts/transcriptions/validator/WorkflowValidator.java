@@ -2,10 +2,8 @@ package uk.gov.hmcts.darts.transcriptions.validator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
-import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,23 +53,24 @@ public class WorkflowValidator {
     public boolean validateChangeToWorkflowStatus(TranscriptionTypeEnum transcriptionTypeEnum,
                                                TranscriptionStatusEnum currentTranscriptionStatus,
                                                TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
+        boolean success = true;
         if (isAutomatedTranscription(transcriptionTypeEnum)) {
             if (!automaticWorkflowTransitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus)) {
-                handleInvalidTranscriptionWorkflow(transcriptionTypeEnum, currentTranscriptionStatus, desiredTargetTranscriptionStatus);
+                success = logInvalidTranscriptionWorkflow(transcriptionTypeEnum, currentTranscriptionStatus, desiredTargetTranscriptionStatus);
             }
         } else if (!manualWorkflowTransitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus)) {
-            handleInvalidTranscriptionWorkflow(transcriptionTypeEnum, currentTranscriptionStatus, desiredTargetTranscriptionStatus);
+            success = logInvalidTranscriptionWorkflow(transcriptionTypeEnum, currentTranscriptionStatus, desiredTargetTranscriptionStatus);
         }
-        return true;
+        return success;
     }
 
 
-    private void handleInvalidTranscriptionWorkflow(TranscriptionTypeEnum transcriptionTypeEnum,
+    private boolean logInvalidTranscriptionWorkflow(TranscriptionTypeEnum transcriptionTypeEnum,
                                                     TranscriptionStatusEnum currentTranscriptionStatus,
                                                     TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
 
         log.warn("Unable to go from workflow state {} to {} for type {}", currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum);
-        throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
+        return false;
     }
 
 }
