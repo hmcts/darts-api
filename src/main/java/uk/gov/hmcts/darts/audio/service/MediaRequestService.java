@@ -18,6 +18,8 @@ public interface MediaRequestService {
 
     MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails);
 
+    void scheduleMediaRequestPendingNotification(MediaRequestEntity mediaRequest);
+
     void deleteAudioRequest(Integer mediaRequestId);
 
     List<AudioRequestSummaryResult> viewAudioRequests(Integer userId, Boolean expired);
