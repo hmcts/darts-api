@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
+@Transactional
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");
@@ -39,7 +40,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private ObjectMapper objectMapper;
 
     @Test
-    @Transactional
     void addAudio() throws Exception {
         dartsDatabase.createCase("SWANSEA", "case1");
         dartsDatabase.createCase("SWANSEA", "case2");
@@ -66,6 +66,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
             assertEquals(3, media.getCaseIdList().size());
+            assertEquals("1", media.getCourtroom().getName());
         }
     }
 
