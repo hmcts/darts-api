@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.transcriptions.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
@@ -40,6 +41,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_STATUS;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 
 @RequiredArgsConstructor
@@ -90,17 +92,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> expectedStatuses = new HashMap<>();
-        expectedStatuses.put(AWAITING_AUTHORISATION, Set.of(APPROVED, REJECTED));
+        validateUpdateTranscription(transcription.getTranscriptionStatus().getId(), updateTranscription);
 
-        TranscriptionStatusEnum transcriptionStatusEnum = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
-        Set<TranscriptionStatusEnum> allowed = expectedStatuses.get(
-            TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()));
-        if (allowed == null || !allowed.contains(transcriptionStatusEnum)) {
-            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_STATUS);
-        }
-
-        TranscriptionStatusEntity transcriptionStatusEntity = getTranscriptionStatusById(transcriptionStatusEnum.getId());
+        TranscriptionStatusEntity transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
         transcription.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
             getUserAccount(),
@@ -113,6 +107,25 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
         return updateTranscriptionResponse;
+    }
+
+    private void validateUpdateTranscription(Integer currentTranscriptionStatusId,
+                                             UpdateTranscription updateTranscription) {
+
+        Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> expectedStatuses = new HashMap<>();
+        expectedStatuses.put(AWAITING_AUTHORISATION, Set.of(APPROVED, REJECTED));
+
+        TranscriptionStatusEnum transcriptionStatusEnum = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
+        Set<TranscriptionStatusEnum> allowed = expectedStatuses.get(
+            TranscriptionStatusEnum.fromId(currentTranscriptionStatusId));
+        if (allowed == null || !allowed.contains(transcriptionStatusEnum)) {
+            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_STATUS);
+        }
+
+        if (REJECTED.getId().equals(updateTranscription.getTranscriptionStatusId())
+            && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
+            throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
+        }
     }
 
     private TranscriptionEntity saveTranscription(UserAccountEntity userAccount,
