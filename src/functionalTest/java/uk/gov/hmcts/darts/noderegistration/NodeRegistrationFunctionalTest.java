@@ -15,7 +15,7 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
     void testRegisterDevice() {
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
         String ipAddress = "192.0.0.1";
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithInternalAuth()
             .contentType(ContentType.JSON)
             .queryParam("node_type", "DAR")
             .queryParam("courthouse", "Swansea")
