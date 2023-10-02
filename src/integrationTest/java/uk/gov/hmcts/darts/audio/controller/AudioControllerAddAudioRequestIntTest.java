@@ -87,7 +87,8 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
         String expectedJson = """
             {
                 "request_id": 1,
-                "case_id": "testCaseNumber",
+                "case_id": 1,
+                "case_number": "testCaseNumber",
                 "courthouse_name": "testCourthouse",
                 "defendants": ["defendant_testCaseNumber_1","defendant_testCaseNumber_2"],
                 "hearing_date": "2023-01-01",
