@@ -20,7 +20,7 @@ public class UserIdentityImpl implements UserIdentity {
 
     private static final String EMAILS = "emails";
     private static final String PREFERRED_USERNAME = "preferred_username";
-    public static final String OID = "oid";
+    private static final String OID = "oid";
 
     private final UserAccountRepository userAccountRepository;
 
@@ -60,10 +60,7 @@ public class UserIdentityImpl implements UserIdentity {
     }
 
     public UserAccountEntity getUserAccount() {
-        String emailAddress = getEmailAddress();
-        UserAccountEntity userAccount = userAccountRepository.findByEmailAddressIgnoreCase(emailAddress)
+        return userAccountRepository.findByEmailAddressIgnoreCase(getEmailAddress())
             .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
-
-        return userAccount;
     }
 }
