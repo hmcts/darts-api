@@ -28,6 +28,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping(value = "/functional-tests")
 @Slf4j
 @RequiredArgsConstructor
+@ConditionalOnExpression("${testing-support-endpoints.enabled:false}")
 public class TestSupportController {
 
     private final SessionFactory sessionFactory;
@@ -40,7 +41,6 @@ public class TestSupportController {
 
 
     @DeleteMapping(value = "/clean")
-    @ConditionalOnExpression("${testing-support-endpoints.enabled:true}")
     public void cleanUpDataAfterFunctionalTests() {
 
         Session session = sessionFactory.openSession();
@@ -62,7 +62,6 @@ public class TestSupportController {
     }
 
     @PostMapping(value = "/courthouse/{courthouse_name}/courtroom/{courtroom_name}")
-    @ConditionalOnExpression("${testing-support-endpoints.enabled:true}")
     @Transactional
     public ResponseEntity<String> createCourthouseAndCourtroom(
         @PathVariable(name = "courthouse_name") String courthouseName,
