@@ -40,7 +40,7 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
     private static final AudioRequestType AUDIO_REQUEST_TYPE = AudioRequestType.PLAYBACK;
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
-    private static final int REQUESTOR = 1;
+    private static final int REQUESTOR = 0;
 
     @Autowired
     private MockMvc mockMvc;
@@ -102,6 +102,8 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(AUDIO_REQUEST_TYPE, mediaRequestEntity.getRequestType());
         assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
         assertEquals(0, mediaRequestEntity.getAttempts());
+
+        assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
     }
 
     private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity) {

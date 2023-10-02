@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
@@ -36,21 +39,26 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class AudioController implements AudioApi {
 
     private final MediaRequestService mediaRequestService;
     private final AudioService audioService;
     private final AudioTransformationService audioTransformationService;
     private final AudioResponseMapper audioResponseMapper;
+    private final AuditService auditService;
 
     @Override
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
-        AddAudioResponse addAudioResponse = null;
+        AddAudioResponse addAudioResponse;
         try {
             MediaRequestEntity audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
             addAudioResponse = audioResponseMapper.mapToAddAudioResponse(audioRequest);
-
+            auditService.recordAuditRequestAudio(AuditActivityEnum.REQUEST_AUDIO,
+                                                 audioRequestDetails.getRequestor(), audioRequestDetails.getHearingId()
+            );
         } catch (Exception e) {
+            log.error("Failed to request audio", e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
