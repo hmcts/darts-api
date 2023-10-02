@@ -2,42 +2,55 @@ package uk.gov.hmcts.darts.hearings;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
     public static final String ENDPOINT_URL = "/hearings/{hearingId}/events";
     public static final String ADD_EVENT_URL = "/events";
     public static final String CASE_SEARCH_URL = "/cases/search";
 
-    @Test
-    @Disabled
-    void success() {
+    @AfterEach
+    void cleanData() {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/clean"))
+            .redirects().follow(false)
+            .delete();
+    }
 
-        String randomCaseNumber = RandomStringUtils.randomAlphanumeric(15);
-        String requestBody = """
+    @Test
+    void success() {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/courthouse/" + COURTHOUSE_SWANSEA + "/courtroom/1"))
+            .redirects().follow(false)
+            .post();
+
+        String randomCaseNumber = randomCaseNumber();
+        String randomEventText1 = randomAlphanumeric(15);
+        String requestBody = String.format(
+            """
             {
               "message_id": "12345",
               "type": "1000",
               "sub_type": "1002",
               "event_id": "12345",
-              "courthouse": "swansea",
+              "courthouse": "%s",
               "courtroom": "1",
               "case_numbers": [
-                "<<caseNumber>>"
+                "%s"
               ],
-              "event_text": "<<eventText>>",
+              "event_text": "%s",
               "date_time": "2023-08-08T14:01:06.085Z"
-            }""";
+            }""",
+            COURTHOUSE_SWANSEA, randomCaseNumber, randomEventText1);
 
-        requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
-        String randomEventText1 = RandomStringUtils.randomAlphanumeric(15);
-        requestBody = requestBody.replace("<<eventText>>", randomEventText1);
         buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)
@@ -47,24 +60,24 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             .post();
 
 
-        requestBody = """
+        String randomEventText2 = randomAlphanumeric(15);
+        requestBody = String.format(
+            """
             {
               "message_id": "12345",
               "type": "1000",
               "sub_type": "1002",
               "event_id": "12345",
-              "courthouse": "swansea",
+              "courthouse": "%s",
               "courtroom": "1",
               "case_numbers": [
-                "<<caseNumber>>"
+                "%s"
               ],
-              "event_text": "<<eventText>>",
+              "event_text": "%s",
               "date_time": "2023-08-08T14:01:06.085Z"
-            }""";
+            }""",
+            COURTHOUSE_SWANSEA, randomCaseNumber, randomEventText2);
 
-        requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
-        String randomEventText2 = RandomStringUtils.randomAlphanumeric(15);
-        requestBody = requestBody.replace("<<eventText>>", randomEventText2);
         buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)

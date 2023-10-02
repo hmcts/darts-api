@@ -22,6 +22,8 @@ import java.net.URI;
 import java.net.URL;
 import java.text.MessageFormat;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+
 @SpringBootTest(
     classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class, AzureAdB2CAuthenticationProperties.class },
     webEnvironment = WebEnvironment.NONE
@@ -29,6 +31,8 @@ import java.text.MessageFormat;
 @ActiveProfiles({"dev", "functionalTest"})
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class FunctionalTest {
+
+    protected static final String COURTHOUSE_SWANSEA = "func-swansea";
 
     @Autowired
     private AccessTokenClient externalAccessTokenClient;
@@ -76,6 +80,10 @@ public class FunctionalTest {
         File file = new File(resource.getFile());
         return FileUtils.readFileToString(file, "UTF-8");
 
+    }
+
+    protected static String randomCaseNumber() {
+        return "func-case-" + randomAlphanumeric(7);
     }
 
 }
