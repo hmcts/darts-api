@@ -42,6 +42,7 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
 
 
+    @SuppressWarnings("unchecked")
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
 
@@ -57,7 +58,6 @@ public class TestSupportController {
         removeHearings(session, hearingIds);
         removeCases(session, caseIds);
 
-        @SuppressWarnings("unchecked")
         List nodeRegisterIds =  nodeRegisterIdsToBeDeleted(session, courtroomTrash);
         removeNodeRegisters(nodeRegisterIds);
 
