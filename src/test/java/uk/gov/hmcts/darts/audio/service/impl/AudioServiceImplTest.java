@@ -15,6 +15,9 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -80,6 +83,11 @@ class AudioServiceImplTest {
     private HearingRepository hearingRepository;
     private AudioService audioService;
 
+    private AuditService auditService;
+    @Mock
+    private MediaRequestService mediaRequestService;
+    private UserIdentity userIdentity;
+
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
@@ -90,7 +98,10 @@ class AudioServiceImplTest {
             fileOperationService,
             retrieveCoreObjectService,
             hearingRepository,
-            mapper
+            mapper,
+            auditService,
+            mediaRequestService,
+            userIdentity
         );
     }
 
@@ -105,6 +116,14 @@ class AudioServiceImplTest {
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
         when(audioTransformationService.getOutboundAudioBlob(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
+
+        /*
+        MediaRequestEntity mediaRequestEntity =  new MediaRequestEntity();
+        mediaRequestEntity.setId(mediaRequestId);
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        when(mediaRequestService.getMediaRequestById(mediaRequestId)).thenReturn()
+
+         */
 
         try (InputStream inputStream = audioService.download(mediaRequestId)) {
             byte[] bytes = inputStream.readAllBytes();
