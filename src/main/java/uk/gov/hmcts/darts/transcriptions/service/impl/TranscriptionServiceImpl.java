@@ -29,7 +29,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -112,7 +112,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private void validateUpdateTranscription(Integer currentTranscriptionStatusId,
                                              UpdateTranscription updateTranscription) {
 
-        Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> expectedStatuses = new HashMap<>();
+        Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> expectedStatuses = new EnumMap<>(
+            TranscriptionStatusEnum.class);
         expectedStatuses.put(AWAITING_AUTHORISATION, Set.of(APPROVED, REJECTED));
 
         TranscriptionStatusEnum transcriptionStatusEnum = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
