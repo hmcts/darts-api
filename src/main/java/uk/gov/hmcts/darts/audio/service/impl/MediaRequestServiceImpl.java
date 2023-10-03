@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.ParameterExpression;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,8 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
+import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -42,6 +45,7 @@ import java.util.UUID;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MediaRequestServiceImpl implements MediaRequestService {
@@ -52,6 +56,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final EntityManager entityManager;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final DataManagementApiImpl dataManagementApi;
+    private final NotificationApi notificationApi;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -77,16 +82,29 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional
     @Override
     public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
-
-        var audioRequest = saveAudioRequestToDb(
+        return saveAudioRequestToDb(
             hearingRepository.getReferenceById(request.getHearingId()),
             userAccountRepository.getReferenceById(request.getRequestor()),
             request.getStartTime(),
             request.getEndTime(),
             request.getRequestType()
         );
+    }
 
-        return audioRequest;
+    @Override
+    public void scheduleMediaRequestPendingNotification(MediaRequestEntity mediaRequest) {
+        try {
+            var hearingEntity = mediaRequest.getHearing();
+            var courtCase = hearingEntity.getCourtCase();
+            var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
+                .eventId(notificationApi.getNotificationTemplateIdByName("audio_request_being_processed"))
+                .caseId(courtCase.getId())
+                .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
+                .build();
+            notificationApi.scheduleNotification(saveNotificationToDbRequest);
+        } catch (Exception e) {
+            log.error("Unable to schedule media request pending notification: {}", e.getMessage());
+        }
     }
 
     @Transactional
