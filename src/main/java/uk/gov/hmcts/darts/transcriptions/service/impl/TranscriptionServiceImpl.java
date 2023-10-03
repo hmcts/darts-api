@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -14,6 +16,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -21,6 +24,8 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
+import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -31,10 +36,19 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.REQUEST_TO_TRANSCRIBER;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_APPROVED;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_REJECTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
@@ -52,6 +66,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
+    private final AuthorisationApi authorisationApi;
+    private final NotificationApi notificationApi;
 
     private final CaseService caseService;
     private final HearingsService hearingsService;
@@ -106,6 +122,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
+
+        TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
+
+        if (newStatusEnum == APPROVED) {
+            notifyTranscriptionCompanyForCourthouse(transcription.getCourtCase());
+            notifyRequestor(transcription, TRANSCRIPTION_REQUEST_APPROVED);
+        } else if (newStatusEnum == REJECTED) {
+            notifyRequestor(transcription, TRANSCRIPTION_REQUEST_REJECTED);
+        }
         return updateTranscriptionResponse;
     }
 
@@ -124,6 +149,38 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
+    }
+
+    private void notifyRequestor(TranscriptionEntity transcription, String templateName) {
+        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
+            .eventId(templateName)
+            .userAccountsToEmail(List.of(transcription.getCreatedBy()))
+            .caseId(transcription.getCourtCase().getId())
+            .build();
+        notificationApi.scheduleNotification(request);
+    }
+
+    private void notifyTranscriptionCompanyForCourthouse(CourtCaseEntity courtCase) {
+        //find users to notify
+        List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
+            SecurityRoleEnum.TRANSCRIBER,
+            courtCase.getCourthouse()
+        );
+        if (usersToNotify.isEmpty()) {
+            log.error(
+                "No Transcription company users could be found for courthouse {}",
+                courtCase.getCourthouse().getCourthouseName()
+            );
+            return;
+        }
+
+        //schedule notification
+        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
+            .eventId(REQUEST_TO_TRANSCRIBER)
+            .userAccountsToEmail(usersToNotify)
+            .caseId(courtCase.getId())
+            .build();
+        notificationApi.scheduleNotification(request);
     }
 
     private TranscriptionEntity saveTranscription(UserAccountEntity userAccount,

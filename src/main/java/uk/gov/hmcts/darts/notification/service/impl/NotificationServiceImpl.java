@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.darts.notification.service.GovNotifyService;
 import uk.gov.hmcts.darts.notification.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,9 +52,8 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void scheduleNotification(SaveNotificationToDbRequest request) {
-        String emailAddresses = request.getEmailAddresses();
-        String[] emailAddressList = emailAddresses.split(",");
-        for (String emailAddress : emailAddressList) {
+        List<String> emailAddresses = getEmailAddresses(request);
+        for (String emailAddress : emailAddresses) {
             saveNotificationToDb(
                 request.getEventId(),
                 request.getCaseId(),
@@ -59,6 +61,25 @@ public class NotificationServiceImpl implements NotificationService {
                 request.getTemplateValues()
             );
         }
+    }
+
+    private List<String> getEmailAddresses(SaveNotificationToDbRequest request) {
+        String emailAddressesStr = request.getEmailAddresses();
+        List<String> emailAddressList = new ArrayList<>();
+        if (StringUtils.isNotBlank(emailAddressesStr)) {
+            CollectionUtils.addAll(emailAddressList, StringUtils.split(emailAddressesStr, ","));
+        }
+        if (request.getUserAccountsToEmail() != null) {
+            CollectionUtils.addAll(
+                emailAddressList,
+                request.getUserAccountsToEmail().stream()
+                    .filter(userAccount -> userAccount.getId() > 0)
+                    .map(UserAccountEntity::getEmailAddress)
+                    .toList()
+            );
+        }
+
+        return emailAddressList;
     }
 
     private NotificationEntity saveNotificationToDb(String eventId, Integer caseId, String emailAddress, String templateValues) {

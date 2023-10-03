@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.notification.service;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -96,15 +97,15 @@ class NotificationServiceTest extends IntegrationBase {
             .caseId(caseId)
             .emailAddresses(TEST_EMAIL_ADDRESS)
             .templateValues(
-                  """
-                  {
-                    "key1": "value1",
-                    "key2": "value2",
-                    "key3": "value3",
-                    "key4": "value4",
-                    "key5": "value5"
-                  }
-                  """)
+                """
+                    {
+                      "key1": "value1",
+                      "key2": "value2",
+                      "key3": "value3",
+                      "key4": "value4",
+                      "key5": "value5"
+                    }
+                    """)
             .build();
 
         service.scheduleNotification(request);
@@ -119,9 +120,9 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationToGovNotifyInvalidTemplateId() throws TemplateNotFoundException, NotificationClientException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME))
-              .thenReturn("INVALID-TEMPLATE-ID");
+            .thenReturn("INVALID-TEMPLATE-ID");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
-              .thenThrow(new NotificationClientException(""));
+            .thenThrow(new NotificationClientException(""));
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)
             .caseId(caseId)
@@ -142,9 +143,9 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationToGovNotifyFailureRetryExceeded() throws TemplateNotFoundException, NotificationClientException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME))
-              .thenReturn("976bf288-1234-1234-1234-c5529abf14cf");
+            .thenReturn("976bf288-1234-1234-1234-c5529abf14cf");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
-              .thenThrow(new NotificationClientException(""));
+            .thenThrow(new NotificationClientException(""));
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(REQUEST_TO_TRANSCRIBER_TEMPLATE_NAME)
@@ -189,7 +190,7 @@ class NotificationServiceTest extends IntegrationBase {
     void sendNotificationToGovNotifyInvalidTemplateName() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
         when(templateIdHelper.findTemplateId("invalid"))
-              .thenThrow(new TemplateNotFoundException("oh no"));
+            .thenThrow(new TemplateNotFoundException("oh no"));
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("invalid")
             .caseId(caseId)
@@ -205,5 +206,58 @@ class NotificationServiceTest extends IntegrationBase {
         assertEquals(NotificationStatus.FAILED, result.getStatus());
         assertEquals(0, result.getAttempts());
         verify(templateIdHelper).findTemplateId(anyString());
+    }
+
+    @Test
+    void sendNotificationUsingUserAccounts() throws TemplateNotFoundException {
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+
+        UserAccountEntity userAccount1 = new UserAccountEntity();
+        userAccount1.setId(10);
+        userAccount1.setEmailAddress("testEmail1@test.com");
+        UserAccountEntity userAccount2 = new UserAccountEntity();
+        userAccount2.setId(11);
+        userAccount2.setEmailAddress("testEmail2@test.com");
+
+        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
+            .eventId("An eventId")
+            .caseId(caseId)
+            .userAccountsToEmail(List.of(userAccount1, userAccount2))
+            .templateValues("a json string")
+            .build();
+        service.scheduleNotification(request);
+
+        List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
+        List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
+        assertTrue(emailList.contains("testEmail1@test.com"));
+        assertTrue(emailList.contains("testEmail2@test.com"));
+    }
+
+    @Test
+    void sendNotificationUsingUserAccountsAnEmails() throws TemplateNotFoundException {
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+
+        UserAccountEntity userAccount1 = new UserAccountEntity();
+        userAccount1.setId(10);
+        userAccount1.setEmailAddress("testEmail1@test.com");
+        UserAccountEntity userAccount2 = new UserAccountEntity();
+        userAccount2.setId(11);
+        userAccount2.setEmailAddress("testEmail2@test.com");
+
+        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
+            .eventId("An eventId")
+            .caseId(caseId)
+            .emailAddresses("testEmail3@test.com, testEmail4@test.com")
+            .userAccountsToEmail(List.of(userAccount1, userAccount2))
+            .templateValues("a json string")
+            .build();
+        service.scheduleNotification(request);
+
+        List<NotificationEntity> resultList = dartsDatabase.getNotificationsForCase(caseId);
+        List<String> emailList = resultList.stream().map(NotificationEntity::getEmailAddress).toList();
+        assertTrue(emailList.contains("testEmail1@test.com"));
+        assertTrue(emailList.contains("testEmail2@test.com"));
+        assertTrue(emailList.contains("testEmail3@test.com"));
+        assertTrue(emailList.contains("testEmail4@test.com"));
     }
 }
