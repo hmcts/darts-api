@@ -36,7 +36,6 @@ public class FunctionalTest {
 
     @Autowired
     private AccessTokenClient externalAccessTokenClient;
-    protected static final String COURTHOUSE_SWANSEA = "func-swansea";
 
     @Autowired
     private AccessTokenClient internalAccessTokenClient;

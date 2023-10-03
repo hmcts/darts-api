@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.noderegistration.repository.NodeRegistrationRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping(value = "/functional-tests")
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnExpression("${testing-support-endpoints.enabled:false}")
+@ConditionalOnExpression("${testing-support-endpoints.enabled:true}")
 public class TestSupportController {
 
     private final SessionFactory sessionFactory;
@@ -144,7 +145,7 @@ public class TestSupportController {
     private void removeNodeRegisters(List<Integer> nodeIds) {
         nodeRegistrationRepository.deleteAllById(nodeIds);
     }
-                                  
+
     private static List eventIdsToBeDeleted(Session session, List heaIds) {
         return session.createNativeQuery("""
                                              select eve_id from darts.hearing_event_ae where hea_id in (?)

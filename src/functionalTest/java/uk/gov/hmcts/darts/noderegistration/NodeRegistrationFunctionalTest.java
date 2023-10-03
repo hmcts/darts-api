@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.noderegistration;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.aspectj.lang.annotation.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
@@ -13,12 +15,18 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
 
     @Test
     void testRegisterDevice() {
+        //create courtroom and courthouse
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/courthouse/func-liverpool/courtroom/1"))
+            .redirects().follow(false)
+            .post();
+
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
         String ipAddress = "192.0.0.1";
-        Response response = buildRequestWithInternalAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .queryParam("node_type", "DAR")
-            .queryParam("courthouse", "Swansea")
+            .queryParam("courthouse", "func-liverpool")
             .queryParam("court_room", "1")
             .queryParam("host_name", "XXXXX.MMM.net")
             .queryParam("mac_address", "6A-5F-90-A4-2C-12")
@@ -29,5 +37,13 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
             .post().then().extract().response();
 
         assertEquals(200, response.getStatusCode());
+    }
+
+    @AfterEach
+    void cleanUp() {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/clean"))
+            .redirects().follow(false)
+            .delete();
     }
 }
