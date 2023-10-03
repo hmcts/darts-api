@@ -16,7 +16,5 @@ public interface AuditService {
     @Transactional
     void recordAudit(AuditActivityEnum activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase);
 
-    void recordAuditDownload(AuditActivityEnum activity, Integer userId, Integer hearingId);
-
     List<AuditEntity> search(AuditSearchQuery auditSearchQuery);
 }

@@ -64,20 +64,6 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public void recordAuditDownload(AuditActivityEnum activity, Integer userId, Integer hearingId) {
-        Optional<HearingEntity> hearing = hearingRepository.findById(
-            hearingId);
-
-        Optional<UserAccountEntity> user = userAccountRepository.findById(userId);
-        if (hearing.isPresent() && user.isPresent()) {
-            recordAudit(activity, user.get(), hearing.get().getCourtCase());
-        } else {
-            //throw new exception
-            throw new DartsApiException(AuditApiError.NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT);
-        }
-    }
-
-    @Override
     public List<AuditEntity> search(AuditSearchQuery auditSearchQuery) {
         Specification<AuditEntity> specification = isCourtCase(auditSearchQuery.getCaseId())
             .and(isWithInDates(auditSearchQuery.getFromDate(), auditSearchQuery.getToDate()))

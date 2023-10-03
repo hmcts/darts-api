@@ -82,12 +82,7 @@ class AudioServiceImplTest {
     @Mock
     private HearingRepository hearingRepository;
     private AudioService audioService;
-
-    private AuditService auditService;
-    @Mock
-    private MediaRequestService mediaRequestService;
-    private UserIdentity userIdentity;
-
+    
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
@@ -113,14 +108,6 @@ class AudioServiceImplTest {
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
         when(audioTransformationService.getOutboundAudioBlob(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
-
-        /*
-        MediaRequestEntity mediaRequestEntity =  new MediaRequestEntity();
-        mediaRequestEntity.setId(mediaRequestId);
-        UserAccountEntity userAccountEntity = new UserAccountEntity();
-        when(mediaRequestService.getMediaRequestById(mediaRequestId)).thenReturn()
-
-         */
 
         try (InputStream inputStream = audioService.download(mediaRequestId)) {
             byte[] bytes = inputStream.readAllBytes();
