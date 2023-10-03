@@ -117,6 +117,9 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(notificationId, notifications.get(0).getEventId());
         assertEquals(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(), notifications.get(0).getEmailAddress());
         assertEquals(mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(), notifications.get(0).getCourtCase().getCaseNumber());
+
+        assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
+
     }
 
     private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity) {
