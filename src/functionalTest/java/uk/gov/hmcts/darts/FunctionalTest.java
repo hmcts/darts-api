@@ -32,6 +32,8 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class FunctionalTest {
 
+    protected static final String COURTHOUSE_SWANSEA = "func-swansea";
+
     @Autowired
     private AccessTokenClient externalAccessTokenClient;
     protected static final String COURTHOUSE_SWANSEA = "func-swansea";

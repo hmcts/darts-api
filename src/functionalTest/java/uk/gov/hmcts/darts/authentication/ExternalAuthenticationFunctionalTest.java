@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ExternalAuthenticationFunctionalTest extends FunctionalTest {
 
-
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()

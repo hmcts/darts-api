@@ -280,7 +280,7 @@ public class DartsDatabaseStub {
 
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
-        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).get();
+        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).orElse(null);
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {

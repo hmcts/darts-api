@@ -46,6 +46,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
