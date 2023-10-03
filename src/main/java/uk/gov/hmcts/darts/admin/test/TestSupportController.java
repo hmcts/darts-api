@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping(value = "/functional-tests")
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnExpression("${darts.testing-support-endpoints.enabled:false}")
+@ConditionalOnExpression("${testing-support-endpoints.enabled:false}")
 public class TestSupportController {
 
     private final SessionFactory sessionFactory;
