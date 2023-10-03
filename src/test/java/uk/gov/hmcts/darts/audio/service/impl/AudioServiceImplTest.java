@@ -98,10 +98,7 @@ class AudioServiceImplTest {
             fileOperationService,
             retrieveCoreObjectService,
             hearingRepository,
-            mapper,
-            auditService,
-            mediaRequestService,
-            userIdentity
+            mapper
         );
     }
 

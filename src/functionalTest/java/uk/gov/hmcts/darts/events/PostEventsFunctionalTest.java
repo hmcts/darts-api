@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.events;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
@@ -12,6 +13,14 @@ class PostEventsFunctionalTest extends FunctionalTest {
 
 
     public static final String ENDPOINT_URL = "/events";
+
+    @AfterEach
+    void cleanData() {
+        buildRequestWithExternalAuth()
+                .baseUri(getUri("/functional-tests/clean"))
+                .redirects().follow(false)
+                .delete();
+    }
 
     @Test
     @Disabled

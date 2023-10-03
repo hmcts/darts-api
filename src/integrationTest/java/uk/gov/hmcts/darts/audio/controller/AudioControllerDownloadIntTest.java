@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -21,7 +20,6 @@ import java.net.URI;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -44,9 +42,6 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
     @MockBean
     private Authorisation authorisation;
 
-    @MockBean
-    private UserIdentity mockUserIdentity;
-
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
@@ -61,7 +56,6 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     void audioDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
-
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -89,8 +83,6 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
             mediaRequestEntity.getId(),
             Set.of(TRANSCRIBER)
         );
-
-        assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
     }
 
     @Test
