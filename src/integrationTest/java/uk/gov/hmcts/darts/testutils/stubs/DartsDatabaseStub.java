@@ -105,6 +105,7 @@ public class DartsDatabaseStub {
     private final CourthouseStub courthouseStub;
     private final AuditStub auditStub;
     private final EventStub eventStub;
+    private final TranscriptionStub transcriptionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
