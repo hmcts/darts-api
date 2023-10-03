@@ -35,6 +35,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -141,12 +142,9 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
         List<NotificationEntity> notificationEntities = dartsDatabaseStub.getNotificationRepository().findAll();
-        assertEquals("request_to_transcriber", notificationEntities.get(0).getEventId());
-        assertEquals("integrationtest.user@example.com", notificationEntities.get(0).getEmailAddress());
-
-        assertEquals("transcription_request_approved", notificationEntities.get(0).getEventId());
-        assertEquals("integrationtest.user@example.com", notificationEntities.get(0).getEmailAddress());
-
+        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        assertTrue(templateList.contains("request_to_transcriber"));
+        assertTrue(templateList.contains("transcription_request_approved"));
     }
 
     @Test

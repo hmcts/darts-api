@@ -210,7 +210,6 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationUsingUserAccounts() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
 
         UserAccountEntity userAccount1 = new UserAccountEntity();
         userAccount1.setId(10);
@@ -219,6 +218,7 @@ class NotificationServiceTest extends IntegrationBase {
         userAccount2.setId(11);
         userAccount2.setEmailAddress("testEmail2@test.com");
 
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
@@ -235,7 +235,6 @@ class NotificationServiceTest extends IntegrationBase {
 
     @Test
     void sendNotificationUsingUserAccountsAnEmails() throws TemplateNotFoundException {
-        var caseId = dartsDatabase.save(someMinimalCase()).getId();
 
         UserAccountEntity userAccount1 = new UserAccountEntity();
         userAccount1.setId(10);
@@ -244,6 +243,7 @@ class NotificationServiceTest extends IntegrationBase {
         userAccount2.setId(11);
         userAccount2.setEmailAddress("testEmail2@test.com");
 
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId("An eventId")
             .caseId(caseId)
