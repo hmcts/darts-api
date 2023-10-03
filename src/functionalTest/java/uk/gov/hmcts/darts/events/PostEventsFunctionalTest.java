@@ -2,19 +2,28 @@ package uk.gov.hmcts.darts.events;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 class PostEventsFunctionalTest extends FunctionalTest {
 
 
     public static final String ENDPOINT_URL = "/events";
 
+    @AfterEach
+    void cleanData() {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/clean"))
+            .redirects().follow(false)
+            .delete();
+    }
+
     @Test
-    @Disabled
     void success() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -24,10 +33,10 @@ class PostEventsFunctionalTest extends FunctionalTest {
                         "type": "1000",
                         "sub_type": "1002",
                         "event_id": "12345",
-                        "courthouse": "swansea",
+                        "courthouse": "func-swansea",
                         "courtroom": "1",
                         "case_numbers": [
-                          "Swansea_case_1"
+                          "func-Swansea_case_1"
                         ],
                         "event_text": "some text for the event",
                         "date_time": "2023-08-08T14:01:06.085Z"
@@ -55,7 +64,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
                         "courthouse": "",
                         "courtroom": "1",
                         "case_numbers": [
-                          "Swansea_case_1"
+                          "func-Swansea_case_1"
                         ],
                         "event_text": "some text for the event",
                         "date_time": "2023-08-08T14:01:06.085Z"
