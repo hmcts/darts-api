@@ -58,7 +58,7 @@ public class TestSupportController {
         removeCases(session, caseIds);
 
         @SuppressWarnings("unchecked")
-        List<Integer> nodeRegisterIds =  nodeRegisterIdsToBeDeleted(session, courtroomTrash);
+        List nodeRegisterIds =  nodeRegisterIdsToBeDeleted(session, courtroomTrash);
         removeNodeRegisters(nodeRegisterIds);
 
         emptyCourthouseTrash();
