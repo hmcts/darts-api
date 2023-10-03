@@ -39,9 +39,9 @@ public class WorkflowValidator {
         manualWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
 
         automaticWorkflowTransitionRules.put(REQUESTED, Set.of(APPROVED, CLOSED));
-        automaticWorkflowTransitionRules.put(AWAITING_AUTHORISATION, Collections.emptySet());
+        //automaticWorkflowTransitionRules.put(AWAITING_AUTHORISATION, Collections.emptySet());
         automaticWorkflowTransitionRules.put(APPROVED, Set.of(WITH_TRANSCRIBER, CLOSED));
-        automaticWorkflowTransitionRules.put(REJECTED, Collections.emptySet());
+        //automaticWorkflowTransitionRules.put(REJECTED, Collections.emptySet());
         automaticWorkflowTransitionRules.put(WITH_TRANSCRIBER, Set.of(COMPLETE, CLOSED));
         automaticWorkflowTransitionRules.put(COMPLETE, Collections.emptySet());
         automaticWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
@@ -64,7 +64,8 @@ public class WorkflowValidator {
                             TranscriptionStatusEnum currentTranscriptionStatus,
                             TranscriptionStatusEnum desiredTargetTranscriptionStatus,
                             TranscriptionTypeEnum transcriptionTypeEnum) {
-        boolean isValid = transitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus);
+        boolean isValid = transitionRules.get(currentTranscriptionStatus) != null
+            && transitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus);
         if (!isValid) {
             log.warn("Unable to go from workflow state {} to {} for type {}",
                      currentTranscriptionStatus,
