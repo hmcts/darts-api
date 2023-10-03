@@ -45,3 +45,6 @@ logging:
         hmcts:
           darts: DEBUG
 
+testing-support-endpoints:
+  enabled: true
+
