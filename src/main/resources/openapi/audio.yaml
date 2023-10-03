@@ -314,8 +314,11 @@ components:
           type: integer
           example: 1234
         case_id:
+          type: integer
+          example: 1
+        case_number:
           type: string
-          example: T4565443
+          example: 'T4565443'
         courthouse_name:
           type: string
           example: "Swansea"

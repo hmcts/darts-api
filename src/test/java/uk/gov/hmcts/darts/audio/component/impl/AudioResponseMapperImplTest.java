@@ -28,13 +28,12 @@ class AudioResponseMapperImplTest {
 
     private static final OffsetDateTime START_TIME = OffsetDateTime.now();
     private static final OffsetDateTime END_TIME = START_TIME.plusHours(1);
-
     private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final OffsetDateTime TIME_12_10 = OffsetDateTime.parse("2023-01-01T12:10Z");
-    public static final String COURTHOUSE = "SWANSEA";
-    public static final String COURT_CASE = "T20190024";
-    public static final LocalDate HEARING_DATE = LocalDate.of(2023, 1, 1);
-
+    private static final String COURTHOUSE = "SWANSEA";
+    private static final String CASE_NUMBER = "T20190024";
+    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 1, 1);
+    private static final int CASE_ID = 123;
 
     private AudioResponseMapper audioResponseMapper;
 
@@ -67,7 +66,8 @@ class AudioResponseMapperImplTest {
         AddAudioResponse addAudioResponse = audioResponseMapper.mapToAddAudioResponse(audioRequest);
 
         assertEquals(2023, addAudioResponse.getRequestId());
-        assertEquals(COURT_CASE, addAudioResponse.getCaseId());
+        assertEquals(CASE_ID, addAudioResponse.getCaseId());
+        assertEquals(CASE_NUMBER, addAudioResponse.getCaseNumber());
         assertEquals(COURTHOUSE, addAudioResponse.getCourthouseName());
         assertEquals(HEARING_DATE, addAudioResponse.getHearingDate());
         assertEquals(TIME_12_00, addAudioResponse.getStartTime());
@@ -87,8 +87,8 @@ class AudioResponseMapperImplTest {
         CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
         when(mockCourthouseEntity.getCourthouseName()).thenReturn(COURTHOUSE);
-        when(mockCourtCaseEntity.getCaseNumber()).thenReturn(COURT_CASE);
-        when(mockCourtCaseEntity.getId()).thenReturn(123);
+        when(mockCourtCaseEntity.getCaseNumber()).thenReturn(CASE_NUMBER);
+        when(mockCourtCaseEntity.getId()).thenReturn(CASE_ID);
         UserAccountEntity mockUserAccountEntity = mock(UserAccountEntity.class);
 
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();

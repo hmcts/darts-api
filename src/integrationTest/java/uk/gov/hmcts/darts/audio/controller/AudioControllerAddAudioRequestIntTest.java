@@ -87,7 +87,8 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
         String expectedJson = """
             {
                 "request_id": 1,
-                "case_id": "testCaseNumber",
+                "case_id": 1,
+                "case_number": "testCaseNumber",
                 "courthouse_name": "testCourthouse",
                 "defendants": ["defendant_testCaseNumber_1","defendant_testCaseNumber_2"],
                 "hearing_date": "2023-01-01",
@@ -116,6 +117,9 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(notificationId, notifications.get(0).getEventId());
         assertEquals(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(), notifications.get(0).getEmailAddress());
         assertEquals(mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(), notifications.get(0).getCourtCase().getCaseNumber());
+
+        assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
+
     }
 
     private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity) {
