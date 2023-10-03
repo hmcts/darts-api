@@ -22,27 +22,24 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
+import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Set;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_STATUS;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_WORKFLOW_ACTION_INVALID;
 
 @RequiredArgsConstructor
 @Service
@@ -60,6 +57,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final HearingsService hearingsService;
 
     private final UserIdentity userIdentity;
+
+    private final WorkflowValidator workflowValidator;
+
 
     @Transactional
     @Override
@@ -92,7 +92,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        validateUpdateTranscription(transcription.getTranscriptionStatus().getId(), updateTranscription);
+        validateUpdateTranscription(transcription, updateTranscription);
 
         TranscriptionStatusEntity transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
         transcription.setTranscriptionStatus(transcriptionStatusEntity);
@@ -109,21 +109,18 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return updateTranscriptionResponse;
     }
 
-    private void validateUpdateTranscription(Integer currentTranscriptionStatusId,
+    private void validateUpdateTranscription(TranscriptionEntity transcription,
                                              UpdateTranscription updateTranscription) {
 
-        Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> expectedStatuses = new EnumMap<>(
-            TranscriptionStatusEnum.class);
-        expectedStatuses.put(AWAITING_AUTHORISATION, Set.of(APPROVED, REJECTED));
+        TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
-        TranscriptionStatusEnum transcriptionStatusEnum = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
-        Set<TranscriptionStatusEnum> allowed = expectedStatuses.get(
-            TranscriptionStatusEnum.fromId(currentTranscriptionStatusId));
-        if (allowed == null || !allowed.contains(transcriptionStatusEnum)) {
-            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_STATUS);
+        if (!workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId()),
+                                                             TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()),
+                                                             desiredTargetTranscriptionStatus)) {
+            throw new DartsApiException(TRANSCRIPTION_WORKFLOW_ACTION_INVALID);
         }
 
-        if (REJECTED.getId().equals(updateTranscription.getTranscriptionStatusId())
+        if (REJECTED.equals(desiredTargetTranscriptionStatus)
             && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
