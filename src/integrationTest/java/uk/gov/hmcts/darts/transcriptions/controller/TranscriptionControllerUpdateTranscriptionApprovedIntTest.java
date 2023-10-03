@@ -201,7 +201,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
 
     @Test
     @Transactional
-    void updateTranscriptionShouldReturnTranscriptionBadRequestTranscriptionStatusError() throws Exception {
+    void updateTranscriptionShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
         updateTranscription.setWorkflowComment("APPROVED");
