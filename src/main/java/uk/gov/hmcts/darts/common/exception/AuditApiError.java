@@ -19,9 +19,9 @@ public enum AuditApiError implements DartsApiError {
         "When using date filters, both must be provided."
     ),
     NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT(
-        "101",
+        "102",
         HttpStatus.BAD_REQUEST,
-        "No hearing or user found when auditing add audio."
+        "No hearing or user found when auditing 'add audio' request."
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIT";
