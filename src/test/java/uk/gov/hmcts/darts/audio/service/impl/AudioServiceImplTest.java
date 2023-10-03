@@ -15,9 +15,6 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audio.service.MediaRequestService;
-import uk.gov.hmcts.darts.audit.service.AuditService;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -82,7 +79,7 @@ class AudioServiceImplTest {
     @Mock
     private HearingRepository hearingRepository;
     private AudioService audioService;
-    
+
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
