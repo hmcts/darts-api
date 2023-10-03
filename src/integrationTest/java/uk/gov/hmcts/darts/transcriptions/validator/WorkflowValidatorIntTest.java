@@ -80,21 +80,11 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(1)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateManualChangeToWorkflowStatusRequestedThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.COURT_LOG),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateManualChangeToWorkflowStatusRequestedThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, REQUESTED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.COURT_LOG, currentTranscriptionStatus, REQUESTED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -104,21 +94,11 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(2)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateAutomaticChangeToWorkflowStatusRequestedThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateAutomaticChangeToWorkflowStatusRequestedThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, REQUESTED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, REQUESTED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -141,27 +121,19 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, AWAITING_AUTHORISATION);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, AWAITING_AUTHORISATION);
     }
 
     @ParameterizedTest
     @Order(4)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateManualChangeToWorkflowStatusAwaitingAuthorisationThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.SENTENCING_REMARKS),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateManualChangeToWorkflowStatusAwaitingAuthorisationThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, AWAITING_AUTHORISATION)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.SENTENCING_REMARKS, currentTranscriptionStatus,  AWAITING_AUTHORISATION)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -171,21 +143,11 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(5)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateAutomaticChangeToWorkflowStatusAwaitingAuthorisationThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateAutomaticChangeToWorkflowStatusAwaitingAuthorisationThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, AWAITING_AUTHORISATION)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, AWAITING_AUTHORISATION)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -208,7 +170,9 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, APPROVED);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, APPROVED);
     }
 
     @Test
@@ -225,27 +189,19 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, APPROVED);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, APPROVED);
     }
 
     @ParameterizedTest
     @Order(8)
     @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateManualChangeToApprovedWorkflowStatusThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.INCLUDING_VERDICT),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateManualChangeToApprovedWorkflowStatusThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, APPROVED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.INCLUDING_VERDICT, currentTranscriptionStatus, APPROVED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -255,21 +211,11 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(9)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateAutomaticChangeToApprovedWorkflowStatusThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateAutomaticChangeToApprovedWorkflowStatusThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, APPROVED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, APPROVED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -292,27 +238,19 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, REJECTED);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, REJECTED);
     }
 
     @ParameterizedTest
     @Order(11)
     @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateManualChangeToWorkflowStatusRejectedThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.SENTENCING_REMARKS),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateManualChangeToWorkflowStatusRejectedThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, REJECTED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.SENTENCING_REMARKS, currentTranscriptionStatus, REJECTED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -322,21 +260,11 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(12)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateAutomaticChangeToWorkflowStatusRejectedThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateAutomaticChangeToWorkflowStatusRejectedThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, REJECTED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, REJECTED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -359,7 +287,9 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, WITH_TRANSCRIBER);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, WITH_TRANSCRIBER);
     }
 
     @Test
@@ -376,27 +306,20 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, WITH_TRANSCRIBER);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, WITH_TRANSCRIBER);
     }
 
     @ParameterizedTest
     @Order(15)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateManualChangeToWorkflowStatusWithTranscriberThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.COURT_LOG),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateManualChangeToWorkflowStatusWithTranscriberThrowsException(TranscriptionStatusEnum currentTranscriptionStatus
+    ) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, WITH_TRANSCRIBER)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.COURT_LOG, currentTranscriptionStatus, WITH_TRANSCRIBER)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -406,21 +329,11 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(16)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
-    void validateAutomaticChangeToWorkflowStatusWithTranscriberThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateAutomaticChangeToWorkflowStatusWithTranscriberThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, WITH_TRANSCRIBER)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, WITH_TRANSCRIBER)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -443,7 +356,9 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, COMPLETE);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, COMPLETE);
     }
 
     @Test
@@ -460,27 +375,19 @@ class WorkflowValidatorIntTest extends IntegrationBase {
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, COMPLETE);
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, COMPLETE);
     }
 
     @ParameterizedTest
     @Order(19)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED"})
-    void validateManualChangeToWorkflowStatusCompleteThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.COURT_LOG),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateManualChangeToWorkflowStatusCompleteThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, COMPLETE)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.COURT_LOG, currentTranscriptionStatus, COMPLETE)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -490,21 +397,11 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(20)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED"})
-    void validateAutomaticChangeToWorkflowStatusCompleteThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateAutomaticChangeToWorkflowStatusCompleteThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, COMPLETE)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, COMPLETE)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -514,57 +411,51 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(21)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "WITH_TRANSCRIBER"})
-    void validateManualChangeToWorkflowStatusClosedSuccess(TranscriptionStatusEnum transcriptionStatusEnum) {
+    void validateManualChangeToWorkflowStatusClosedSuccess(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
             courtCase,
             courtroom,
             hearing,
             dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.ANTECEDENTS),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
+            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(currentTranscriptionStatus),
             dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, CLOSED);
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, CLOSED);
     }
 
     @ParameterizedTest
     @Order(21)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "WITH_TRANSCRIBER"})
-    void validateAutomaticChangeToWorkflowStatusClosedSuccess(TranscriptionStatusEnum transcriptionStatusEnum) {
+    void validateAutomaticChangeToWorkflowStatusClosedSuccess(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
             courtCase,
             courtroom,
             hearing,
             dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
+            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(currentTranscriptionStatus),
             dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, CLOSED);
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, CLOSED);
     }
 
     @ParameterizedTest
     @Order(22)
     @EnumSource(names = {"REJECTED", "CLOSED"})
-    void validateManualChangeToWorkflowStatusClosedThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.COURT_LOG),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateManualChangeToWorkflowStatusClosedThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, CLOSED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.COURT_LOG, currentTranscriptionStatus, CLOSED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
@@ -574,41 +465,54 @@ class WorkflowValidatorIntTest extends IntegrationBase {
     @ParameterizedTest
     @Order(23)
     @EnumSource(names = {"REJECTED", "CLOSED"})
-    void validateAutomaticChangeToWorkflowStatusClosedThrowsException(TranscriptionStatusEnum transcriptionStatusEnum) {
-
-        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
-            courtCase,
-            courtroom,
-            hearing,
-            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(transcriptionStatusEnum),
-            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
-            testUser
-        );
+    void validateAutomaticChangeToWorkflowStatusClosedThrowsException(TranscriptionStatusEnum currentTranscriptionStatus) {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> workflowValidator.validateChangeToWorkflowStatus(transcription, CLOSED)
+            () -> workflowValidator.validateChangeToWorkflowStatus(TranscriptionTypeEnum.OTHER, currentTranscriptionStatus, CLOSED)
         );
 
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST.getTitle(), exception.getMessage());
         assertEquals(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, exception.getError());
     }
 
-    @Test
+    @ParameterizedTest
     @Order(24)
-    void validateChangeToWorkflowStatusRequestedFromNullSuccess() {
+    @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
+        "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
+    void validateManualChangeToWorkflowStatusRequestedSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
+
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
+            courtCase,
+            courtroom,
+            hearing,
+            dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(transcriptionTypeEnum),
+            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED),
+            dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
+            testUser
+        );
+
+        TranscriptionStatusEnum currentTranscriptionStatus = TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, currentTranscriptionStatus, REQUESTED);
+    }
+
+    @Test
+    @Order(25)
+    void validateAutomaticChangeToWorkflowStatusRequestedSuccess() {
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createAndSaveTranscriptionEntity(
             courtCase,
             courtroom,
             hearing,
             dartsDatabase.getTranscriptionStub().getTranscriptionTypeByEnum(TranscriptionTypeEnum.OTHER),
-            null,
+            dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(REQUESTED),
             dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum.STANDARD),
             testUser
         );
 
-        workflowValidator.validateChangeToWorkflowStatus(transcription, REQUESTED);
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId());
+
+        workflowValidator.validateChangeToWorkflowStatus(transcriptionTypeEnum, REQUESTED, REQUESTED);
     }
 }
