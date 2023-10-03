@@ -29,7 +29,6 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,12 +97,10 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     @Transactional
     void updateTranscriptionApprovedWithoutComment() throws Exception {
 
-        Optional<TranscriptionEntity> existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
-            transcriptionId);
-        if (existingTranscription.isPresent()) {
-            CourthouseEntity courthouse = existingTranscription.get().getCourtCase().getCourthouse();
-            dartsDatabaseStub.getUserAccountStub().createTranscriptionCompanyUser(courthouse);
-        }
+        TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
+            transcriptionId).orElseThrow();
+        CourthouseEntity courthouse = existingTranscription.getCourtCase().getCourthouse();
+        dartsDatabaseStub.getUserAccountStub().createTranscriptionCompanyUser(courthouse);
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
 

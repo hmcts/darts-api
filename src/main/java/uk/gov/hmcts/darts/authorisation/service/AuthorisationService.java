@@ -15,7 +15,5 @@ public interface AuthorisationService {
 
     void checkAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles);
 
-    List<UserAccountEntity> getUsersWithRoleAtCourthouses(SecurityRoleEnum securityRole, List<CourthouseEntity> courthouses);
-
-    List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouses);
+    List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse);
 }

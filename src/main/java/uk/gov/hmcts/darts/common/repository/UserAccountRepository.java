@@ -14,18 +14,18 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
 
     Optional<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
-    //todo find out what user states are valid
+    //todo find out what user states are Active
     @Query("""
         SELECT DISTINCT userAccount
         FROM UserAccountEntity userAccount
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.courthouseEntities courthouse
         JOIN securityGroup.securityRoleEntity securityRole
-        WHERE courthouse in (:courthouses)
+        WHERE courthouse = :courthouse
         AND securityRole.id = :securityRole
         AND userAccount.state = 1
         """)
-    List<UserAccountEntity> findByRoleAndCourthouses(int securityRole, List<CourthouseEntity> courthouses);
+    List<UserAccountEntity> findByRoleAndCourthouse(int securityRole, CourthouseEntity courthouse);
 
 
 }
