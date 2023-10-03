@@ -2,4 +2,5 @@
 java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
-  
+  testing-support-endpoints:
+    enabled: true

@@ -22,6 +22,10 @@ public enum AuditApiError implements DartsApiError {
         "101",
         HttpStatus.BAD_REQUEST,
         "No hearing or user found when auditing add audio."
+      
+        "102",
+        HttpStatus.BAD_REQUEST,
+        "No hearing or user found when auditing 'add audio' request."
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIT";

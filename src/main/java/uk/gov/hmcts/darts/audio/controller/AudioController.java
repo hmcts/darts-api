@@ -51,8 +51,10 @@ public class AudioController implements AudioApi {
     @Override
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
         AddAudioResponse addAudioResponse;
+
+        MediaRequestEntity audioRequest;
         try {
-            MediaRequestEntity audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
+            audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
             addAudioResponse = audioResponseMapper.mapToAddAudioResponse(audioRequest);
             auditService.recordAuditRequestAudio(AuditActivityEnum.REQUEST_AUDIO,
                                                  audioRequestDetails.getRequestor(), audioRequestDetails.getHearingId()
@@ -62,6 +64,7 @@ public class AudioController implements AudioApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        mediaRequestService.scheduleMediaRequestPendingNotification(audioRequest);
         return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
     }
 

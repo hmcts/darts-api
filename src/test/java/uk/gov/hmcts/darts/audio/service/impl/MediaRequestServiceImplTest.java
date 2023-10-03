@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -17,6 +19,8 @@ import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
+import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -50,6 +54,8 @@ class MediaRequestServiceImplTest {
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     @Mock
     private DataManagementApiImpl dataManagementApi;
+    @Mock
+    private NotificationApi notificationApi;
 
     private HearingEntity mockHearingEntity;
     private MediaRequestEntity mockMediaRequestEntity;
@@ -99,6 +105,27 @@ class MediaRequestServiceImplTest {
         verify(mockHearingRepository).getReferenceById(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldScheduleRequestPendingNotification() {
+        var mockCourtCaseEntity = new CourtCaseEntity();
+        mockCourtCaseEntity.setId(1001);
+        mockMediaRequestEntity.getHearing().setCourtCase(mockCourtCaseEntity);
+        var mockUserAccountEntity = new UserAccountEntity();
+        mockUserAccountEntity.setEmailAddress("test@test.com");
+        mockMediaRequestEntity.setRequestor(mockUserAccountEntity);
+        when(notificationApi.getNotificationTemplateIdByName("audio_request_being_processed")).thenReturn("request_pending_template");
+
+        mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
+
+        var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
+            .eventId("request_pending_template")
+            .caseId(1001)
+            .emailAddresses("test@test.com")
+            .build();
+        verify(notificationApi, Mockito.times(1)).scheduleNotification(eq(saveNotificationToDbRequest));
     }
 
     @Test
