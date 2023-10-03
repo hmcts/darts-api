@@ -27,6 +27,11 @@ public enum TranscriptionApiError implements DartsApiError {
         "103",
         HttpStatus.BAD_REQUEST,
         "The workflow comment is required for this transcription update"
+    ),
+    TRANSCRIPTION_WORKFLOW_ACTION_INVALID(
+        "104",
+        HttpStatus.CONFLICT,
+        "Transcription workflow action is not permitted"
     );
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";
