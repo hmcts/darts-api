@@ -18,6 +18,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestTranscriptionResponse'
         '400':
           description: Bad Request Error
           content:
@@ -169,7 +173,9 @@ components:
       type: string
       enum:
         - "TRANSCRIPTION_100"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST ]
+        - "TRANSCRIPTION_104"
+        - "TRANSCRIPTION_106"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY ]
     UpdateTranscription:
       type: object
       required:
@@ -180,6 +186,13 @@ components:
           example: 3
         workflow_comment:
           type: string
+    RequestTranscriptionResponse:
+      type: object
+      required:
+        - transcription_id
+      properties:
+        transcription_id:
+          type: integer
     UpdateTranscriptionResponse:
       type: object
       required:

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,20 +20,32 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.List;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 
 @AutoConfigureMockMvc
@@ -54,6 +67,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private UserIdentity mockUserIdentity;
 
     @Autowired
+    private DartsDatabaseStub dartsDatabaseStub;
+
+    @Autowired
     private AuthorisationStub authorisationStub;
 
     @Autowired
@@ -61,6 +77,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private CourtCaseEntity courtCase;
     private HearingEntity hearing;
+    private UserAccountEntity testUser;
 
     @BeforeEach
     void setupData() {
@@ -68,7 +85,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         courtCase = authorisationStub.getCourtCaseEntity();
         hearing = authorisationStub.getHearingEntity();
-        UserAccountEntity testUser = authorisationStub.getTestUser();
+        testUser = authorisationStub.getTestUser();
 
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
@@ -90,8 +107,37 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
 
+        Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
+            .read("$.transcription_id");
+        assertNotNull(transcriptionId);
+
+        TranscriptionRepository transcriptionRepository = dartsDatabaseStub.getTranscriptionRepository();
+        TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
+        assertEquals(2, transcriptionWorkflowEntities.size());
+        assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
+                                    REQUESTED, testUser, TEST_COMMENT
+        );
+        assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
+                                    AWAITING_AUTHORISATION, testUser, null
+        );
+    }
+
+    private void assertTranscriptionWorkflow(TranscriptionWorkflowEntity transcriptionWorkflowToCheck,
+                                             TranscriptionStatusEnum expectedTranscriptionStatus,
+                                             UserAccountEntity expectedWorkflowActor,
+                                             String expectedWorkflowComment) {
+
+        assertEquals(
+            expectedTranscriptionStatus.getId(),
+            transcriptionWorkflowToCheck.getTranscriptionStatus().getId()
+        );
+        assertEquals(expectedWorkflowActor, transcriptionWorkflowToCheck.getWorkflowActor());
+        assertEquals(expectedWorkflowComment, transcriptionWorkflowToCheck.getWorkflowComment());
     }
 
     @Test
@@ -111,8 +157,13 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
 
+        Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
+            .read("$.transcription_id");
+        assertNotNull(transcriptionId);
     }
 
     @Test
@@ -211,9 +262,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
-
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_106")));
     }
 
     @Test
@@ -255,9 +305,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
-
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_104")));
     }
 
     @Test

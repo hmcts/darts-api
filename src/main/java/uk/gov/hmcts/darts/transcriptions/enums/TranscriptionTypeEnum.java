@@ -30,4 +30,5 @@ public enum TranscriptionTypeEnum {
         }
         throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_TYPE);
     }
+
 }

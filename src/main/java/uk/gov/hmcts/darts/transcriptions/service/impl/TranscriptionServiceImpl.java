@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
@@ -45,6 +46,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateName
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_APPROVED;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
@@ -75,7 +77,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Transactional
     @Override
-    public void saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails) {
+    public RequestTranscriptionResponse saveTranscriptionRequest(
+        TranscriptionRequestDetails transcriptionRequestDetails) {
 
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
@@ -88,12 +91,30 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId())
         );
 
-        saveTranscriptionWorkflow(
-            userAccount,
-            transcription,
-            transcriptionStatus,
-            transcriptionRequestDetails.getComment()
-        );
+        transcription.getTranscriptionWorkflowEntities().add(
+            saveTranscriptionWorkflow(
+                userAccount,
+                transcription,
+                transcriptionStatus,
+                transcriptionRequestDetails.getComment()
+            ));
+
+        if (!workflowValidator.isAutomatedTranscription(TranscriptionTypeEnum.fromId(
+            transcription.getTranscriptionType().getId()))) {
+            transcriptionStatus = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
+
+            transcription.getTranscriptionWorkflowEntities().add(
+                saveTranscriptionWorkflow(
+                    userAccount,
+                    transcription,
+                    transcriptionStatus,
+                    null
+                ));
+        }
+
+        RequestTranscriptionResponse requestTranscriptionResponse = new RequestTranscriptionResponse();
+        requestTranscriptionResponse.setTranscriptionId(transcription.getId());
+        return requestTranscriptionResponse;
     }
 
     @Override
