@@ -29,8 +29,7 @@ java:
     DARTS_API_DB_USERNAME: "{{ .Values.postgresql.auth.username}}"
     DARTS_API_DB_PASSWORD: "{{ .Values.postgresql.auth.password}}"
     spring.profiles.active: dev
-  testing-support-endpoints:
-    enabled: true
+    TESTING_SUPPORT_ENDPOINTS_ENABLED: true
 
 # function:
 #   scaleType: Job

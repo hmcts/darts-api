@@ -150,8 +150,8 @@ darts:
       thread:
         pool:
           size: 5
-testing-support-endpoint:
-  enabled: ${TESTING_SUPPORT_ENDPOINT_ENABLED:false}
+  testing-support-endpoints:
+    enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
 
 dbMigration:
   # When true, the app will run DB migration on startup.
