@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping(value = "/functional-tests")
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnExpression("${darts.testing-support-endpoints.enabled}")
+@ConditionalOnProperty(prefix = "darts.testing-support-endpoints", name = "enabled", havingValue = "true")
 public class TestSupportController {
 
     private final SessionFactory sessionFactory;
