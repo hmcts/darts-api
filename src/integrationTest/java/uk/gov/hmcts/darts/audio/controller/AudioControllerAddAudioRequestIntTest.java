@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -51,9 +50,6 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Value("${darts.notification.gov-notify.template-map.audio_request_being_processed}")
-    private String notificationId;
 
     @Test
     void addAudioRequestPostShouldReturnSuccess() throws Exception {
@@ -114,7 +110,7 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository().findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
         assertEquals(1, notifications.size());
-        assertEquals(notificationId, notifications.get(0).getEventId());
+        assertEquals("audio_request_being_processed", notifications.get(0).getEventId());
         assertEquals(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(), notifications.get(0).getEmailAddress());
         assertEquals(mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(), notifications.get(0).getCourtCase().getCaseNumber());
 

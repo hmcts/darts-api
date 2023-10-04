@@ -97,7 +97,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             var hearingEntity = mediaRequest.getHearing();
             var courtCase = hearingEntity.getCourtCase();
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-                .eventId(notificationApi.getNotificationTemplateIdByName("audio_request_being_processed"))
+                .eventId("audio_request_being_processed")
                 .caseId(courtCase.getId())
                 .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
                 .build();

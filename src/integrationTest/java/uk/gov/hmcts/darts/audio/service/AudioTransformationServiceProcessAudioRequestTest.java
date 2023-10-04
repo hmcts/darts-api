@@ -32,8 +32,8 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase {
 
-    private static final String NOTIFICATION_TEMPLATE_ID_SUCCESS = "66a1864f-24a6-469a-ac55-66bc57c7e4f6";
-    private static final String NOTIFICATION_TEMPLATE_ID_FAILURE = "cb5bc3f6-ae1f-4346-845a-622cf6ad2632";
+    private static final String NOTIFICATION_TEMPLATE_NAME_SUCCESS = "requested_audio_is_available";
+    private static final String NOTIFICATION_TEMPLATE_NAME_FAILURE = "error_processing_audio";
     private static final String EMAIL_ADDRESS = "test@test.com";
 
     @Autowired
@@ -78,7 +78,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
-        assertEquals(NOTIFICATION_TEMPLATE_ID_SUCCESS, notificationEntity.getEventId());
+        assertEquals(NOTIFICATION_TEMPLATE_NAME_SUCCESS, notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
@@ -114,7 +114,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
-        assertEquals(NOTIFICATION_TEMPLATE_ID_FAILURE, notificationEntity.getEventId());
+        assertEquals(NOTIFICATION_TEMPLATE_NAME_FAILURE, notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());

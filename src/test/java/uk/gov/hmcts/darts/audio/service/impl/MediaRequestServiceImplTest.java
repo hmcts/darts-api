@@ -116,12 +116,10 @@ class MediaRequestServiceImplTest {
         var mockUserAccountEntity = new UserAccountEntity();
         mockUserAccountEntity.setEmailAddress("test@test.com");
         mockMediaRequestEntity.setRequestor(mockUserAccountEntity);
-        when(notificationApi.getNotificationTemplateIdByName("audio_request_being_processed")).thenReturn("request_pending_template");
-
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
 
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId("request_pending_template")
+            .eventId("audio_request_being_processed")
             .caseId(1001)
             .emailAddresses("test@test.com")
             .build();
