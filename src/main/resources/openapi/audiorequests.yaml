@@ -109,8 +109,8 @@ paths:
             type: integer
           required: true
       responses:
-        '204':
-          description: audio request has been deleted
+        '200':
+          description: OK
         '400':
           description: Bad Request Error
           content:
