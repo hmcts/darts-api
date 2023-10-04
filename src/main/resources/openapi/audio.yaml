@@ -229,7 +229,7 @@ paths:
   /audios:
     post:
       tags:
-        - audio
+        - Audio
       summary: Upload audio metadata
       operationId: addAudioMetaData
       requestBody:
