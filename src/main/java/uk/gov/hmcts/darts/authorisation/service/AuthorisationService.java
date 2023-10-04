@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.authorisation.service;
 
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface AuthorisationService {
 
     void checkAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles);
 
+    List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse);
 }
