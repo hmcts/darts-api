@@ -47,6 +47,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
+import uk.gov.hmcts.darts.noderegistration.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
@@ -99,6 +100,7 @@ public class DartsDatabaseStub {
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
     private final SecurityRoleRepository securityRoleRepository;
+    private final NodeRegistrationRepository nodeRegistrationRepository;
 
     private final UserAccountStub userAccountStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
@@ -120,6 +122,7 @@ public class DartsDatabaseStub {
         hearingRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
+        nodeRegistrationRepository.deleteAll();
         courtroomRepository.deleteAll();
         defenceRepository.deleteAll();
         defendantRepository.deleteAll();
