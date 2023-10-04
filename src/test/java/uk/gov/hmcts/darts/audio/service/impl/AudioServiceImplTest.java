@@ -9,17 +9,21 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -80,6 +84,9 @@ class AudioServiceImplTest {
     private HearingRepository hearingRepository;
     private AudioService audioService;
 
+    @Mock
+    private AuditService auditService;
+
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
@@ -90,15 +97,37 @@ class AudioServiceImplTest {
             fileOperationService,
             retrieveCoreObjectService,
             hearingRepository,
-            mapper
+            mapper,
+            auditService
         );
     }
 
     @Test
     void downloadShouldReturnExpectedData() throws IOException {
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setStart(START_TIME);
+        mediaEntity.setEnd(END_TIME);
+        mediaEntity.setChannel(1);
+
+        //Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
+        //when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(1);
+        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setId(1);
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setId(1);
+        courtCaseEntity.setHearings(List.of(hearingEntity));
+        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setId(1);
+        mediaRequestEntity.setRequestor(userAccountEntity);
+        mediaRequestEntity.setHearing(hearingEntity);
         var blobUuid = UUID.randomUUID();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);
+        transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
 
         var mediaRequestId = 1;
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))

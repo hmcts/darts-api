@@ -10,16 +10,23 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -35,10 +42,12 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioControllerDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio/download");
 
+    private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivityEnum.EXPORT_AUDIO.getId();
     @MockBean
     private Authorisation authorisation;
 
@@ -53,6 +62,9 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
 
     @SpyBean
     private DataManagementService dataManagementService;
+
+    @Autowired
+    private AuditService auditService;
 
     @Test
     void audioDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
@@ -83,6 +95,17 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
             mediaRequestEntity.getId(),
             Set.of(TRANSCRIBER)
         );
+
+        AuditSearchQuery searchQuery = new AuditSearchQuery();
+        searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
+        searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
+        searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
+        searchQuery.setAuditActivityId(DOWNLOAD_AUDIT_ACTIVITY_ID);
+
+        List<AuditEntity> auditEntities = auditService.search(searchQuery);
+        assertEquals("2", auditEntities.get(0).getCourtCase().getCaseNumber());
+        assertEquals(1, auditEntities.size());
+
     }
 
     @Test

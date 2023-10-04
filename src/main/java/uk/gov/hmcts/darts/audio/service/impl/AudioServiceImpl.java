@@ -6,12 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -39,6 +42,7 @@ public class AudioServiceImpl implements AudioService {
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final HearingRepository hearingRepository;
     private final AddAudioRequestMapper mapper;
+    private final AuditService auditService;
 
     private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return new AudioFileInfo(
@@ -59,6 +63,9 @@ public class AudioServiceImpl implements AudioService {
         if (blobId == null) {
             throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
         }
+        MediaRequestEntity mediaRequestEntity = transientObjectEntity.getMediaRequest();
+
+        auditService.recordAudit(AuditActivityEnum.EXPORT_AUDIO, mediaRequestEntity.getRequestor(), mediaRequestEntity.getHearing().getCourtCase());
 
         return audioTransformationService.getOutboundAudioBlob(blobId)
             .toStream();
