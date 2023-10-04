@@ -60,7 +60,8 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
                     "hearing_date": "2023-06-10",
                     "media_request_start_ts": "2023-06-26T13:00:00Z",
                     "media_request_end_ts": "2023-06-26T13:45:00Z",
-                    "media_request_status": "OPEN"
+                    "media_request_status": "OPEN",
+                    "last_accessed_ts": "2023-06-30T13:00:00Z"
                 }
             ]
             """;

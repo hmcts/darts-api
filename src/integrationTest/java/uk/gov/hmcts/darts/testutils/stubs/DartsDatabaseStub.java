@@ -105,6 +105,7 @@ public class DartsDatabaseStub {
     private final CourthouseStub courthouseStub;
     private final AuditStub auditStub;
     private final EventStub eventStub;
+    private final TranscriptionStub transcriptionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
@@ -303,7 +304,8 @@ public class DartsDatabaseStub {
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z")
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-06-30T13:00:00Z")
             ));
     }
 

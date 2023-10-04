@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
     private final EntityManager em;
     private final CourthouseRepository courthouseRepository;
+    private final UserAccountRepository userAccountRepository;
     private final UserIdentity userIdentity;
 
     @Override
@@ -147,6 +149,11 @@ public class AuthorisationServiceImpl implements AuthorisationService {
                   securityRoles
         );
         throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
+    }
+
+    @Override
+    public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse) {
+        return userAccountRepository.findByRoleAndCourthouse(securityRole.getId(), courthouse);
     }
 
 }

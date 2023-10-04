@@ -165,7 +165,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             mediaRequest.get(MediaRequestEntity_.startTime),
             mediaRequest.get(MediaRequestEntity_.endTime),
             mediaRequest.get(MediaRequestEntity_.expiryTime),
-            mediaRequest.get(MediaRequestEntity_.status)
+            mediaRequest.get(MediaRequestEntity_.status),
+            mediaRequest.get(MediaRequestEntity_.lastAccessedDateTime)
         ));
 
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);
