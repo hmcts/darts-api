@@ -110,9 +110,6 @@ class AudioServiceImplTest {
         mediaEntity.setEnd(END_TIME);
         mediaEntity.setChannel(1);
 
-        //Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
-        //when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
-
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setId(1);
         CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
@@ -240,7 +237,7 @@ class AudioServiceImplTest {
         audioService.addAudio(addAudioMetadataRequest);
 
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
-        verify(hearingRepository,times(3)).saveAndFlush(any());
+        verify(hearingRepository, times(3)).saveAndFlush(any());
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
         assertEquals(endedAt, savedMedia.getEnd());
@@ -290,7 +287,7 @@ class AudioServiceImplTest {
             any()
         )).thenReturn(hearing);
         audioService.linkAudioAndHearing(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository,times(3)).saveAndFlush(any());
+        verify(hearingRepository, times(3)).saveAndFlush(any());
         assertEquals(3, hearing.getMediaList().size());
     }
 }

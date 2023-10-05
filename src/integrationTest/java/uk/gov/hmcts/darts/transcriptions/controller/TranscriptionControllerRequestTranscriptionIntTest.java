@@ -17,7 +17,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -44,6 +47,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
@@ -71,6 +75,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Autowired
     private AuthorisationStub authorisationStub;
+
+    @Autowired
+    private AuditService auditService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -125,6 +132,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
                                     AWAITING_AUTHORISATION, testUser, null
         );
+
+        assertAudit(1);
     }
 
     private void assertTranscriptionWorkflow(TranscriptionWorkflowEntity transcriptionWorkflowToCheck,
@@ -138,6 +147,20 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         );
         assertEquals(expectedWorkflowActor, transcriptionWorkflowToCheck.getWorkflowActor());
         assertEquals(expectedWorkflowComment, transcriptionWorkflowToCheck.getWorkflowComment());
+    }
+
+    private void assertAudit(int expected) {
+        AuditSearchQuery searchQuery = new AuditSearchQuery();
+        searchQuery.setCaseId(courtCase.getId());
+        searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
+        searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
+        searchQuery.setAuditActivityId(REQUEST_TRANSCRIPTION.getId());
+
+        List<AuditEntity> auditEntities = auditService.search(searchQuery);
+        assertEquals(expected, auditEntities.size());
+        if (expected == 1) {
+            assertEquals(testUser, auditEntities.get(0).getUser());
+        }
     }
 
     @Test
@@ -164,6 +187,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
             .read("$.transcription_id");
         assertNotNull(transcriptionId);
+
+        assertAudit(1);
     }
 
     @Test
@@ -189,6 +214,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
+
+        assertAudit(0);
     }
 
     @ParameterizedTest
@@ -216,6 +243,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
+
+        assertAudit(0);
     }
 
     @ParameterizedTest
@@ -243,6 +272,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
+
+        assertAudit(0);
     }
 
     @Test
@@ -264,6 +295,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_106")));
+
+        assertAudit(0);
     }
 
     @Test
@@ -286,6 +319,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andExpect(status().isBadRequest())
             .andReturn();
 
+        assertAudit(0);
     }
 
     @Test
@@ -307,6 +341,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_104")));
+
+        assertAudit(0);
     }
 
     @Test
@@ -339,6 +375,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+        assertAudit(0);
     }
 
     @Test
@@ -371,6 +409,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+        assertAudit(0);
     }
 
     @Test
@@ -390,6 +430,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+        assertAudit(1);
     }
 
     private static void assertTranscriptionFailed100Error(String actualJson) {

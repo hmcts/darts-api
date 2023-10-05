@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -41,9 +42,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
@@ -72,6 +75,9 @@ class TranscriptionServiceImplTest {
     @Mock
     private HearingsService mockHearingsService;
     @Mock
+    private AuditService mockAuditService;
+
+    @Mock
     private UserIdentity mockUserIdentity;
     @Mock
     private WorkflowValidator mockWorkflowValidator;
@@ -82,6 +88,7 @@ class TranscriptionServiceImplTest {
     private TranscriptionTypeEntity mockTranscriptionType;
     private TranscriptionStatusEntity requestedTranscriptionStatus;
     private TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus;
+    private UserAccountEntity testUser;
 
     @Mock
     private TranscriptionEntity mockTranscription;
@@ -98,7 +105,7 @@ class TranscriptionServiceImplTest {
     @BeforeEach
     void setUp() {
 
-        UserAccountEntity testUser = new UserAccountEntity();
+        testUser = new UserAccountEntity();
         testUser.setEmailAddress("test.user@example.com");
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -142,6 +149,9 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
 
+        when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+
         String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
@@ -183,6 +193,8 @@ class TranscriptionServiceImplTest {
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
+
+        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -208,6 +220,10 @@ class TranscriptionServiceImplTest {
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
+
+
+        when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer hearingId = null;
         String comment = TEST_COMMENT;
@@ -248,6 +264,8 @@ class TranscriptionServiceImplTest {
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
+
+        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -273,6 +291,9 @@ class TranscriptionServiceImplTest {
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
+
+        when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer caseId = null;
         String comment = TEST_COMMENT;
@@ -316,6 +337,8 @@ class TranscriptionServiceImplTest {
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
+
+        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -344,6 +367,9 @@ class TranscriptionServiceImplTest {
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
+
+        when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
+        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = null;
@@ -386,6 +412,8 @@ class TranscriptionServiceImplTest {
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
+
+        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
