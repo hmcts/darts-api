@@ -9,4 +9,26 @@ public interface NotificationApi {
 
     void scheduleNotification(SaveNotificationToDbRequest saveNotificationToDbRequest);
 
+    enum NotificationTemplate {
+
+        ERROR_PROCESSING_AUDIO("error_processing_audio"),
+        REQUESTED_AUDIO_AVAILABLE("requested_audio_is_available"),
+        AUDIO_REQUEST_PROCESSING("audio_request_being_processed"),
+        COURT_MANAGER_APPROVE_TRANSCRIPT("court_manager_approve_transcript"),
+        REQUEST_TO_TRANSCRIBER("request_to_transcriber"),
+        TRANSCRIPTION_AVAILABLE("transcription_available"),
+        TRANSCRIPTION_REQUEST_APPROVED("transcription_request_approved"),
+        TRANSCRIPTION_REQUEST_REJECTED("transcription_request_rejected");
+
+        private final String text;
+
+        NotificationTemplate(final String text) {
+            this.text = text;
+        }
+
+        @Override
+        public String toString() {
+            return text;
+        }
+    }
 }
