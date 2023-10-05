@@ -124,7 +124,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             if (mediaRequestEntity != null && hearingEntity != null) {
-                notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), "error_processing_audio");
+                notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
+                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
             }
 
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
@@ -137,7 +138,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             blobId
         );
 
-        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), "requested_audio_is_available");
+        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
         return blobId;
     }

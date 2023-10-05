@@ -109,6 +109,7 @@ class MediaRequestServiceImplTest {
 
     @SneakyThrows
     @Test
+    @SuppressWarnings("PMD.LawOfDemeter")
     void shouldScheduleRequestPendingNotification() {
         var mockCourtCaseEntity = new CourtCaseEntity();
         mockCourtCaseEntity.setId(1001);
@@ -119,7 +120,7 @@ class MediaRequestServiceImplTest {
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
 
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId("audio_request_being_processed")
+            .eventId(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString())
             .caseId(1001)
             .emailAddresses("test@test.com")
             .build();

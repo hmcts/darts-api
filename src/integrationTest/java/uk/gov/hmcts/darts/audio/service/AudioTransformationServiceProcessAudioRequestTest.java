@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.impl.AudioTransformationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -32,8 +33,6 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase {
 
-    private static final String NOTIFICATION_TEMPLATE_NAME_SUCCESS = "requested_audio_is_available";
-    private static final String NOTIFICATION_TEMPLATE_NAME_FAILURE = "error_processing_audio";
     private static final String EMAIL_ADDRESS = "test@test.com";
 
     @Autowired
@@ -53,6 +52,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
     @Transactional
+    @SuppressWarnings("PMD.LawOfDemeter")
     void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(
         AudioRequestType audioRequestType) {
         given.aMediaEntityGraph();
@@ -78,7 +78,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
-        assertEquals(NOTIFICATION_TEMPLATE_NAME_SUCCESS, notificationEntity.getEventId());
+        assertEquals(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
@@ -87,6 +87,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
     @Transactional
+    @SuppressWarnings("PMD.LawOfDemeter")
     void processAudioRequestShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
@@ -114,7 +115,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
-        assertEquals(NOTIFICATION_TEMPLATE_NAME_FAILURE, notificationEntity.getEventId());
+        assertEquals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
