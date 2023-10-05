@@ -17,9 +17,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -32,6 +34,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -92,6 +95,10 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     @Transactional
     void updateTranscriptionApprovedWithoutComment() throws Exception {
 
+        TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
+            transcriptionId).orElseThrow();
+        CourthouseEntity courthouse = existingTranscription.getCourtCase().getCourthouse();
+        dartsDatabaseStub.getUserAccountStub().createTranscriptionCompanyUser(courthouse);
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
 
@@ -128,6 +135,11 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
+
+        List<NotificationEntity> notificationEntities = dartsDatabaseStub.getNotificationRepository().findAll();
+        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        assertTrue(templateList.contains("request_to_transcriber"));
+        assertTrue(templateList.contains("transcription_request_approved"));
     }
 
     @Test
@@ -201,7 +213,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
 
     @Test
     @Transactional
-    void updateTranscriptionShouldReturnTranscriptionBadRequestTranscriptionStatusError() throws Exception {
+    void updateTranscriptionShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
         updateTranscription.setWorkflowComment("APPROVED");
@@ -211,12 +223,12 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isConflict())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_102","title":"Unexpected transcription status for this workflow","status":400}
+            {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

@@ -32,14 +32,19 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 @Slf4j
@@ -68,13 +73,18 @@ class TranscriptionServiceImplTest {
     private HearingsService mockHearingsService;
     @Mock
     private UserIdentity mockUserIdentity;
+    @Mock
+    private WorkflowValidator mockWorkflowValidator;
 
     private HearingEntity mockHearing;
     private CourtCaseEntity mockCourtCase;
     private TranscriptionUrgencyEntity mockTranscriptionUrgency;
     private TranscriptionTypeEntity mockTranscriptionType;
-    private TranscriptionStatusEntity mockTranscriptionStatus;
+    private TranscriptionStatusEntity requestedTranscriptionStatus;
+    private TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus;
 
+    @Mock
+    private TranscriptionEntity mockTranscription;
 
     @InjectMocks
     private TranscriptionServiceImpl transcriptionService;
@@ -99,8 +109,10 @@ class TranscriptionServiceImplTest {
 
         mockTranscriptionUrgency = new TranscriptionUrgencyEntity();
         mockTranscriptionType = new TranscriptionTypeEntity();
-        mockTranscriptionStatus = new TranscriptionStatusEntity();
-        mockTranscriptionStatus.setId(REQUESTED.getId());
+        requestedTranscriptionStatus = new TranscriptionStatusEntity();
+        requestedTranscriptionStatus.setId(REQUESTED.getId());
+        awaitingAuthorisationTranscriptionStatus = new TranscriptionStatusEntity();
+        awaitingAuthorisationTranscriptionStatus.setId(AWAITING_AUTHORISATION.getId());
     }
 
     @Test
@@ -121,7 +133,14 @@ class TranscriptionServiceImplTest {
             .thenReturn(mockTranscriptionType);
 
         when(mockTranscriptionStatusRepository.getReferenceById(REQUESTED.getId()))
-            .thenReturn(mockTranscriptionStatus);
+            .thenReturn(requestedTranscriptionStatus);
+        when(mockTranscriptionStatusRepository.getReferenceById(AWAITING_AUTHORISATION.getId()))
+            .thenReturn(awaitingAuthorisationTranscriptionStatus);
+
+        when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        mockTranscriptionType.setId(transcriptionTypeEnum.getId());
+        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
+        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
 
         String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
@@ -144,17 +163,26 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
         assertThat(transcriptionEntity.getCourtroom()).isNull();
         assertThat(transcriptionEntity.getHearingDate()).isNull();
-        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(mockTranscriptionStatus);
+        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
 
-        verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
+        verify(
+            mockTranscriptionWorkflowRepository,
+            times(2)
+        ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
-        TranscriptionWorkflowEntity transcriptionWorkflow = transcriptionWorkflowEntityArgumentCaptor.getValue();
-        assertThat(transcriptionWorkflow.getWorkflowComment()).isEqualTo(comment);
-        assertThat(transcriptionWorkflow.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
+        assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
+            1);
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
+            AWAITING_AUTHORISATION.getId());
     }
 
     @Test
@@ -172,7 +200,14 @@ class TranscriptionServiceImplTest {
             .thenReturn(mockTranscriptionType);
 
         when(mockTranscriptionStatusRepository.getReferenceById(REQUESTED.getId()))
-            .thenReturn(mockTranscriptionStatus);
+            .thenReturn(requestedTranscriptionStatus);
+        when(mockTranscriptionStatusRepository.getReferenceById(AWAITING_AUTHORISATION.getId()))
+            .thenReturn(awaitingAuthorisationTranscriptionStatus);
+
+        when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        mockTranscriptionType.setId(transcriptionTypeEnum.getId());
+        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
+        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
 
         Integer hearingId = null;
         String comment = TEST_COMMENT;
@@ -199,11 +234,20 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
 
-        verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
+        verify(
+            mockTranscriptionWorkflowRepository,
+            times(2)
+        ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
-        TranscriptionWorkflowEntity transcriptionWorkflow = transcriptionWorkflowEntityArgumentCaptor.getValue();
-        assertThat(transcriptionWorkflow.getWorkflowComment()).isEqualTo(comment);
-        assertThat(transcriptionWorkflow.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
+        assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
+            1);
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
+            AWAITING_AUTHORISATION.getId());
     }
 
     @Test
@@ -221,7 +265,14 @@ class TranscriptionServiceImplTest {
             .thenReturn(mockTranscriptionType);
 
         when(mockTranscriptionStatusRepository.getReferenceById(REQUESTED.getId()))
-            .thenReturn(mockTranscriptionStatus);
+            .thenReturn(requestedTranscriptionStatus);
+        when(mockTranscriptionStatusRepository.getReferenceById(AWAITING_AUTHORISATION.getId()))
+            .thenReturn(awaitingAuthorisationTranscriptionStatus);
+
+        when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        mockTranscriptionType.setId(transcriptionTypeEnum.getId());
+        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
+        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
 
         Integer caseId = null;
         String comment = TEST_COMMENT;
@@ -245,17 +296,26 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
         assertThat(transcriptionEntity.getCourtroom()).isNull();
         assertThat(transcriptionEntity.getHearingDate()).isNull();
-        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(mockTranscriptionStatus);
+        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
 
-        verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
+        verify(
+            mockTranscriptionWorkflowRepository,
+            times(2)
+        ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
-        TranscriptionWorkflowEntity transcriptionWorkflow = transcriptionWorkflowEntityArgumentCaptor.getValue();
-        assertThat(transcriptionWorkflow.getWorkflowComment()).isEqualTo(comment);
-        assertThat(transcriptionWorkflow.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
+        assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
+            1);
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
+            AWAITING_AUTHORISATION.getId());
     }
 
     @Test
@@ -276,7 +336,14 @@ class TranscriptionServiceImplTest {
             .thenReturn(mockTranscriptionType);
 
         when(mockTranscriptionStatusRepository.getReferenceById(REQUESTED.getId()))
-            .thenReturn(mockTranscriptionStatus);
+            .thenReturn(requestedTranscriptionStatus);
+        when(mockTranscriptionStatusRepository.getReferenceById(AWAITING_AUTHORISATION.getId()))
+            .thenReturn(awaitingAuthorisationTranscriptionStatus);
+
+        when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        mockTranscriptionType.setId(transcriptionTypeEnum.getId());
+        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
+        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
 
         String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = null;
@@ -299,17 +366,26 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
         assertThat(transcriptionEntity.getCourtroom()).isNull();
         assertThat(transcriptionEntity.getHearingDate()).isNull();
-        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(mockTranscriptionStatus);
+        assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
 
-        verify(mockTranscriptionWorkflowRepository).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
+        verify(
+            mockTranscriptionWorkflowRepository,
+            times(2)
+        ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
-        TranscriptionWorkflowEntity transcriptionWorkflow = transcriptionWorkflowEntityArgumentCaptor.getValue();
-        assertThat(transcriptionWorkflow.getWorkflowComment()).isEqualTo(comment);
-        assertThat(transcriptionWorkflow.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
+        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
+        assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
+        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
+            1);
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
+        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
+            AWAITING_AUTHORISATION.getId());
     }
 
     @Test

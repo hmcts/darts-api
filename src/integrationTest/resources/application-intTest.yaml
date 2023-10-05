@@ -37,6 +37,8 @@ darts:
     trim-workspace: ${java.io.tmpdir}/audiotransform/trim
     re-encode-workspace: ${java.io.tmpdir}/audiotransform/encode
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
+  testing-support-endpoints:
+    enabled: true
 
 logging:
   level:
@@ -44,7 +46,4 @@ logging:
       gov:
         hmcts:
           darts: DEBUG
-
-testing-support-endpoints:
-  enabled: true
 

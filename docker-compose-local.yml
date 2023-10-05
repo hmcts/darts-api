@@ -30,6 +30,7 @@ services:
       - DARPC_PASSWORD
       - AZURE_AD_FUNCTIONAL_TEST_USERNAME
       - AZURE_AD_FUNCTIONAL_TEST_PASSWORD
+      - TESTING_SUPPORT_ENDPOINTS_ENABLED=true
     build:
       context: .
       dockerfile: Dockerfile
@@ -41,7 +42,7 @@ services:
 
   darts-db:
     container_name: darts-db
-    image: postgres:15.4-alpine
+    image: postgres:16.0-alpine
     restart: always
     environment:
       - POSTGRES_USER=darts

@@ -12,7 +12,10 @@ import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionApi;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
@@ -40,11 +43,14 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<Void> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
+    public ResponseEntity<RequestTranscriptionResponse> requestTranscription(
+        TranscriptionRequestDetails transcriptionRequestDetails) {
         validateTranscriptionRequestValues(transcriptionRequestDetails);
         try {
-            transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(
+                transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails),
+                HttpStatus.OK
+            );
         } catch (EntityNotFoundException exception) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -63,6 +69,7 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
+
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
@@ -72,6 +79,8 @@ public class TranscriptionController implements TranscriptionApi {
         }
 
         Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
+        TranscriptionTypeEnum.fromId(transcriptionTypeId);
+        TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getUrgencyId());
 
         if (transcriptionTypesThatRequireDates(transcriptionTypeId)
             && !transcriptionDatesAreSet(

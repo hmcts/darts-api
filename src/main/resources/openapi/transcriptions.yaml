@@ -18,6 +18,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestTranscriptionResponse'
         '400':
           description: Bad Request Error
           content:
@@ -111,6 +115,23 @@ paths:
                 type: "TRANSCRIPTION_101"
                 title: "The requested transcription cannot be found"
                 status: 404
+        '409':
+          description: Transcription Workflow Action Not Permitted
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription409ErrorCode'
+              example:
+                type: "TRANSCRIPTION_105"
+                title: "Transcription workflow action is not permitted"
+                status: 409
       requestBody:
         required: true
         content:
@@ -152,7 +173,9 @@ components:
       type: string
       enum:
         - "TRANSCRIPTION_100"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST ]
+        - "TRANSCRIPTION_104"
+        - "TRANSCRIPTION_106"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY ]
     UpdateTranscription:
       type: object
       required:
@@ -163,6 +186,13 @@ components:
           example: 3
         workflow_comment:
           type: string
+    RequestTranscriptionResponse:
+      type: object
+      required:
+        - transcription_id
+      properties:
+        transcription_id:
+          type: integer
     UpdateTranscriptionResponse:
       type: object
       required:
@@ -181,9 +211,15 @@ components:
         - "AUTHORISATION_105"
         - "TRANSCRIPTION_102"
         - "TRANSCRIPTION_103"
-      x-enum-varnames: [ BAD_REQUEST_TRANSCRIPTION_ID, BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT ]
+        - "TRANSCRIPTION_104"
+      x-enum-varnames: [ BAD_REQUEST_TRANSCRIPTION_ID, BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE ]
     TranscriptionAuthorisation401ErrorCode:
       type: string
       enum:
         - "AUTHORISATION_100"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
+    UpdateTranscription409ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_105"
+      x-enum-varnames: [ TRANSCRIPTION_WORKFLOW_ACTION_INVALID ]

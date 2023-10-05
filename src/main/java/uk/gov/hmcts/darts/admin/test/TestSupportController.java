@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.noderegistration.repository.NodeRegistrationRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,18 +29,20 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RequestMapping(value = "/functional-tests")
 @Slf4j
 @RequiredArgsConstructor
-@ConditionalOnExpression("${testing-support-endpoints.enabled:false}")
+@ConditionalOnProperty(prefix = "darts.testing-support-endpoints", name = "enabled", havingValue = "true")
 public class TestSupportController {
 
     private final SessionFactory sessionFactory;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
     private final UserAccountRepository userAccountRepository;
+    private final NodeRegistrationRepository nodeRegistrationRepository;
 
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
 
 
+    @SuppressWarnings("unchecked")
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
 
@@ -54,6 +57,9 @@ public class TestSupportController {
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
         removeCases(session, caseIds);
+
+        List nodeRegisterIds =  nodeRegisterIdsToBeDeleted(session, courtroomTrash);
+        removeNodeRegisters(nodeRegisterIds);
 
         emptyCourthouseTrash();
 
@@ -136,6 +142,10 @@ public class TestSupportController {
             .executeUpdate();
     }
 
+    private void removeNodeRegisters(List<Integer> nodeIds) {
+        nodeRegistrationRepository.deleteAllById(nodeIds);
+    }
+
     private static List eventIdsToBeDeleted(Session session, List heaIds) {
         return session.createNativeQuery("""
                                              select eve_id from darts.hearing_event_ae where hea_id in (?)
@@ -149,6 +159,14 @@ public class TestSupportController {
                                              select hea_id from darts.hearing where cas_id in (?)
                                              """)
             .setParameter(1, casIds)
+            .getResultList();
+    }
+
+    private static List nodeRegisterIdsToBeDeleted(Session session, List crtIds) {
+        return session.createNativeQuery("""
+                                             select node_id from darts.node_register where ctr_id in (?)
+                                             """)
+            .setParameter(1, crtIds)
             .getResultList();
     }
 
