@@ -40,7 +40,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private ObjectMapper objectMapper;
 
     @Test
-    void addAudio() throws Exception {
+    void addAudioMetadata() throws Exception {
         dartsDatabase.createCase("SWANSEA", "case1");
         dartsDatabase.createCase("SWANSEA", "case2");
         dartsDatabase.createCase("SWANSEA", "case3");
@@ -71,7 +71,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     }
 
     @Test
-    void addAudioNonExistingCourthouse() throws Exception {
+    void addAudioMetadataNonExistingCourthouse() throws Exception {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST");
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
