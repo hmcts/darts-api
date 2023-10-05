@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.admin.test;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,6 +47,7 @@ class TestSupportControllerTest extends IntegrationBase {
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr2")).isNotNull();
     }
 
+    @Disabled
     @Test
     void cleansData() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))

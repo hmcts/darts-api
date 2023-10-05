@@ -2,41 +2,62 @@ package uk.gov.hmcts.darts.events;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import uk.gov.hmcts.darts.FunctionalTest;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // To do: Not sure how to clean up for tests that are inter-dependent
-@Disabled
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CourtlogsFunctionalTest extends FunctionalTest {
 
 
     public static final String ENDPOINT_URL = "/courtlogs";
+    public final String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+
+
+    @AfterAll
+    void cleanData() {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/clean"))
+            .redirects().follow(false)
+            .delete();
+    }
+
 
     @Test
     @Order(1)
     void postSuccess() {
+
+        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+
+        //create courtroom and courthouse
         buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/func-liverpool/courtroom/1"))
+            .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
             .redirects().follow(false)
             .post();
 
-        Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .body("""
+        String bodyText = """
                       {
                         "log_entry_date_time": "1999-05-23T09:15:25Z",
-                        "courthouse": "func-liverpool",
-                        "courtroom": "1",
+                        "courthouse": "<<courtHouseName>>",
+                        "courtroom": "<<courtroomName>>",
                         "case_numbers": [
                           "func-CASE1001"
                         ],
                         "text": "System : Start Recording : Record: Case Code:0008, New Case"
-                      }""")
+                      }""";
+        bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
+        bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
+
+        Response response = buildRequestWithExternalAuth()
+            .contentType(ContentType.JSON)
+            .body(bodyText)
             .when()
             .baseUri(getUri(ENDPOINT_URL))
             .redirects().follow(false)
@@ -77,7 +98,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     void getSuccess() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
-            .param("courthouse", "func-liverpool")
+            .param("courthouse", courthouseName)
             .param("case_number", "func-CASE1001")
             .param("start_date_time", "1999-05-23T09:15:25Z")
             .param("end_date_time", "1999-05-23T09:15:25Z")
@@ -88,15 +109,17 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        assertEquals("""
+        String expectedResponse = """
                          [
                              {
-                                 "courthouse": "func-liverpool",
+                                 "courthouse": "<<courtHouseName>>",
                                  "caseNumber": "func-CASE1001",
                                  "timestamp": "1999-05-23T09:15:25Z",
                                  "eventText": "System : Start Recording : Record: Case Code:0008, New Case"
                              }
-                         ]""", response.asPrettyString());
+                         ]""";
+        expectedResponse = expectedResponse.replace("<<courtHouseName>>", courthouseName);
+        assertEquals(expectedResponse, response.asPrettyString());
     }
 
     @Test
