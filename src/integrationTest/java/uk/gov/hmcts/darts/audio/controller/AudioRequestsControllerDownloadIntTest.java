@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,7 +44,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
-class AudioControllerDownloadIntTest extends IntegrationBase {
+class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio/download");
 
@@ -67,12 +68,13 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
     private AuditService auditService;
 
     @Test
-    void audioDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
+    void audioRequestDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
+
         dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
                 mediaRequestEntity,
@@ -91,10 +93,9 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
 
         verify(dataManagementService).getBlobData(eq("darts-outbound"), any());
 
-        verify(authorisation).authoriseByMediaRequestId(
+        verify(authorisation, times(2)).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(TRANSCRIBER)
-        );
+            Set.of(TRANSCRIBER));
 
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
@@ -110,7 +111,7 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     @Transactional
-    void audioDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
+    void audioRequestDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
         authorisationStub.givenTestSchema();
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
@@ -124,10 +125,9 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.type").value("AUDIO_101"));
 
-        verify(authorisation).authoriseByMediaRequestId(
+        verify(authorisation, times(2)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER)
-        );
+            Set.of(TRANSCRIBER));
     }
 
     @Test

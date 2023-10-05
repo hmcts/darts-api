@@ -10,7 +10,7 @@ import java.time.OffsetDateTime;
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @UtilityClass
 public class AudioTestData {

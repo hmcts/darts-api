@@ -9,7 +9,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -17,13 +16,10 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audit.service.AuditService;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -38,7 +34,6 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -101,74 +96,6 @@ class AudioServiceImplTest {
             auditService
         );
     }
-
-    @Test
-    void downloadShouldReturnExpectedData() throws IOException {
-        MediaEntity mediaEntity = new MediaEntity();
-        mediaEntity.setId(1);
-        mediaEntity.setStart(START_TIME);
-        mediaEntity.setEnd(END_TIME);
-        mediaEntity.setChannel(1);
-
-        UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setId(1);
-        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
-        courtCaseEntity.setId(1);
-        HearingEntity hearingEntity = new HearingEntity();
-        hearingEntity.setId(1);
-        courtCaseEntity.setHearings(List.of(hearingEntity));
-        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
-        mediaRequestEntity.setId(1);
-        mediaRequestEntity.setRequestor(userAccountEntity);
-        mediaRequestEntity.setHearing(hearingEntity);
-        var blobUuid = UUID.randomUUID();
-        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity.setExternalLocation(blobUuid);
-        transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
-
-        var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
-        when(audioTransformationService.getOutboundAudioBlob(blobUuid))
-            .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
-
-        try (InputStream inputStream = audioService.download(mediaRequestId)) {
-            byte[] bytes = inputStream.readAllBytes();
-            assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
-        }
-    }
-
-    @Test
-    void downloadShouldThrowExceptionWhenRelatedTransientObjectCannotBeFound() {
-        var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.empty());
-
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioService.download(mediaRequestId)
-        );
-
-        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
-    }
-
-    @Test
-    void downloadShouldThrowExceptionWhenTransientObjectHasNoExternalLocationValue() {
-        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity.setExternalLocation(null);
-
-        var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
-
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioService.download(mediaRequestId)
-        );
-
-        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
-    }
-
 
     @Test
     void previewShouldReturnExpectedData() throws IOException, ExecutionException, InterruptedException {
