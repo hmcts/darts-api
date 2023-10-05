@@ -218,7 +218,7 @@ class MediaRequestServiceImplTest {
         var mediaRequestId = 1;
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
-        //when(auditService.recordAudit(any(), any(), any()))
+        
         doNothing().when(auditService).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
