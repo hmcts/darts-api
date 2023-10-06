@@ -149,15 +149,14 @@ public class AdvancedSearchRequestHelper {
     private List<Predicate> addHearingDateCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (request.getDateFrom() != null || request.getDateTo() != null) {
+            Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
             if (request.getDateFrom() != null) {
-                Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
                 predicateList.add(criteriaBuilder.greaterThanOrEqualTo(
                     hearingJoin.get(HearingEntity_.HEARING_DATE),
                     request.getDateFrom()
                 ));
             }
             if (request.getDateTo() != null) {
-                Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
                 predicateList.add(criteriaBuilder.lessThanOrEqualTo(
                     hearingJoin.get(HearingEntity_.HEARING_DATE),
                     request.getDateTo()
