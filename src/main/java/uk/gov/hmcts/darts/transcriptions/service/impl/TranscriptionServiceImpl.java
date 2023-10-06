@@ -77,7 +77,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private final WorkflowValidator workflowValidator;
 
-
     @Transactional
     @Override
     public RequestTranscriptionResponse saveTranscriptionRequest(
@@ -221,8 +220,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setTranscriptionStatus(transcriptionStatus);
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionUrgency(transcriptionUrgency);
-        transcription.setStart(transcriptionRequestDetails.getStartDateTime());
-        transcription.setEnd(transcriptionRequestDetails.getEndDateTime());
+        transcription.setStartTime(transcriptionRequestDetails.getStartDateTime());
+        transcription.setEndTime(transcriptionRequestDetails.getEndDateTime());
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
 

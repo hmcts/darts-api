@@ -19,8 +19,8 @@ public class StopAndCloseHandler extends EventHandlerBase {
     @Override
     @Transactional
     public void handle(DartsEvent dartsEvent) {
-        var result = getOrCreateCourtroomCourtHouseAndCases(dartsEvent); // saveEvent
-        var courtCase = result.getCourtCaseEntity();
+        var hearing = createHearing(dartsEvent); // saveEvent
+        var courtCase = hearing.getHearingEntity().getCourtCase();
 
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING);
         eventPublisher.publishEvent(notifyEvent);

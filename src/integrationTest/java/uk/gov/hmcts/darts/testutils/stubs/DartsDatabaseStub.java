@@ -384,5 +384,16 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
+    public void createTestUserAccount() {
+        Optional<UserAccountEntity> foundAccount = userAccountRepository.findByEmailAddressIgnoreCase(
+            "test.user@example.com");
+        if (foundAccount.isPresent()) {
+            return;
+        }
+        UserAccountEntity testUser = new UserAccountEntity();
+        testUser.setEmailAddress("test.user@example.com");
+        testUser.setUsername("testuser");
+        userAccountRepository.saveAndFlush(testUser);
+    }
 
 }

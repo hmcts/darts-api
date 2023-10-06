@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
+import uk.gov.hmcts.darts.event.model.CreatedHearing;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
 @Slf4j
@@ -17,8 +17,8 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
     @Transactional
     @Override
     public void handle(DartsEvent dartsEvent) {
-        CourtroomCourthouseCourtcase courtroomCourthouseCourtcase = getOrCreateCourtroomCourtHouseAndCases(dartsEvent);
-        CourtCaseEntity courtCaseEntity = courtroomCourthouseCourtcase.getCourtCaseEntity();
+        CreatedHearing createdHearing = createHearing(dartsEvent);
+        CourtCaseEntity courtCaseEntity = createdHearing.getHearingEntity().getCourtCase();
         EventHandlerEntity eventHandlerEntity = handlerMap.eventTypeReference(dartsEvent);
         courtCaseEntity.setReportingRestrictions(eventHandlerEntity);
         caseRepository.saveAndFlush(courtCaseEntity);

@@ -176,8 +176,8 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
-        assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
-        assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
+        assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
+        assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -247,8 +247,8 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getCourtCase()).isNotNull();
         assertThat(transcriptionEntity.getCourtroom()).isNull();
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isNotNull();
-        assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
-        assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
+        assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
+        assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -320,8 +320,8 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
-        assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
-        assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
+        assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
+        assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -395,8 +395,8 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionStatus()).isEqualTo(requestedTranscriptionStatus);
         assertThat(transcriptionEntity.getTranscriptionType()).isEqualTo(mockTranscriptionType);
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
-        assertThat(transcriptionEntity.getStart()).isEqualTo(startDateTime);
-        assertThat(transcriptionEntity.getEnd()).isEqualTo(endDateTime);
+        assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
+        assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
 
         verify(
             mockTranscriptionWorkflowRepository,
