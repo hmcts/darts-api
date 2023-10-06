@@ -78,6 +78,7 @@ public class AudioController implements AudioApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<Void> addAudioMetaData(AddAudioMetadataRequest addAudioMetadataRequest) {
         audioService.addAudio(addAudioMetadataRequest);
         return new ResponseEntity<>(HttpStatus.OK);

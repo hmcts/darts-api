@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "4a42973a-0d04-4075-bd70-9df873c2ecfc",
+		"_postman_id": "f3b86088-28e9-4c59-ae47-cfeeb9a708c3",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -323,32 +323,6 @@
 			"name": "Audio",
 			"item": [
 				{
-					"name": "/audio-requests",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{serverUrl}}/audio-requests",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio-requests"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "/audio/hearings/{hearing_id}/audios",
 					"request": {
 						"method": "GET",
@@ -570,6 +544,32 @@
 			"name": "Audio Requests",
 			"item": [
 				{
+					"name": "/audio-requests",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "/audio-requests?expired=false",
 					"request": {
 						"method": "GET",
@@ -640,6 +640,54 @@
 								":media_request_id"
 							],
 							"variable": [
+								{
+									"key": "media_request_id",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/{media_request_id}",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/:media_request_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								":media_request_id"
+							],
+							"variable": [
+								{
+									"key": "media_request_id",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/download",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/download?media_request_id=-1",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								"download"
+							],
+							"query": [
 								{
 									"key": "media_request_id",
 									"value": "-1"
