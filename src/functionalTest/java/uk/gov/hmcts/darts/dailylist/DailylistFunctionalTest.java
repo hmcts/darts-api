@@ -36,7 +36,6 @@ class DailylistFunctionalTest extends FunctionalTest {
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
 
-        //create courtroom and courthouse
         createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String todayDateString = LocalDate.now().toString();
