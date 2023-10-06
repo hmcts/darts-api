@@ -1,3 +1,1 @@
 UPDATE darts.event_handler SET handler = 'TranscriptionRequestHandler', last_modified_ts = current_timestamp, last_modified_by = 0 where evh_id = 78;
-INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, created_ts, last_modified_ts, last_login_ts, last_modified_by, created_by) VALUES (-5, NULL, 'system', NULL, 'CPP', null, null, null, null, NULL, NULL);
-INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, created_ts, last_modified_ts, last_login_ts, last_modified_by, created_by) VALUES (-6, NULL, 'system', NULL, 'XHIBIT', null, null, null, null, NULL, NULL);
