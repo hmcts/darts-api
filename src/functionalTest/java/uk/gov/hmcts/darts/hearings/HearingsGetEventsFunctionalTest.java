@@ -28,11 +28,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
         String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
 
-        //create courtroom and courthouse
-        buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
-            .redirects().follow(false)
-            .post();
+        createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String randomCaseNumber = randomCaseNumber();
         String randomEventText1 = randomAlphanumeric(15);

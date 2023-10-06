@@ -36,11 +36,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
 
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
 
-        //create courtroom and courthouse
-        buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
-            .redirects().follow(false)
-            .post();
+        createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String bodyText = """
                       {

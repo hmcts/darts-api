@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodeRegistrationFunctionalTest extends FunctionalTest {
@@ -14,11 +15,10 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
 
     @Test
     void testRegisterDevice() {
-        //create courtroom and courthouse
-        buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/func-liverpool/courtroom/1"))
-            .redirects().follow(false)
-            .post();
+        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+
+        createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
         String ipAddress = "192.0.0.1";

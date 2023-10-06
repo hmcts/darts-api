@@ -37,10 +37,7 @@ class DailylistFunctionalTest extends FunctionalTest {
         String uniqueId = "func-unique-id-" + randomAlphanumeric(7);
 
         //create courtroom and courthouse
-        buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
-            .redirects().follow(false)
-            .post();
+        createCourtroomAndCourthouse(courthouseName, courtroomName);
 
         String todayDateString = LocalDate.now().toString();
         String tomorrowDateString = LocalDate.now().plusDays(1).toString();
@@ -78,6 +75,7 @@ class DailylistFunctionalTest extends FunctionalTest {
 
         assertEquals(200, response.getStatusCode());
     }
+
 
     private String getJsonDocumentWithValues(String todayDateString, String tomorrowDateString, String uniqueId) throws IOException {
         String jsonDocument = getContentsFromFile("DailyListRequest.json");
