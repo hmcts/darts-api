@@ -45,53 +45,38 @@ public class TestSupportController {
     @SuppressWarnings("unchecked")
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
-
-        log.info("Cleaning");
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
         var caseIds = getCaseIdsToBeDeleted(session);
-        caseIds.forEach(c -> log.info("case id " + c));
-        log.info("Cleaning get caseids");
         var hearingIds = hearingIdsToBeDeleted(session, caseIds);
-        hearingIds.forEach(c -> log.info("hearing id " + c));
-        log.info("Cleaning get hearings");
         var eventIds = eventIdsToBeDeleted(session, hearingIds);
-        eventIds.forEach(c -> log.info("event id " + c));
-
-        log.info("1 courtroomTrash.size()" + courtroomTrash.size());
-        log.info("1 courthouseTrash.size()" + courthouseTrash.size());
-
 
         removeHearingEventJoins(session, hearingIds);
-        log.info("Cleaning hearing joins");
-
-        log.info("Cleaning get events");
         removeEvents(session, eventIds);
-        log.info("Cleaning events");
         removeHearings(session, hearingIds);
-        log.info("Cleaning hearings");
 
         removeCases(session, caseIds);
-        log.info("Cleaning cases");
-
-        log.info("2 courtroomTrash.size()" + courtroomTrash.size());
-        log.info("2 courthouseTrash.size()" + courthouseTrash.size());
 
         List nodeRegisterIds =  nodeRegisterIdsToBeDeleted(session, courtroomTrash);
         removeNodeRegisters(nodeRegisterIds);
-        log.info("Cleaning node register");
+
+        removeDailyLists(session);
 
         removeCourtHouses(session);
-        //emptyCourthouseTrash();
-        log.info("Cleaning court house");
 
         session.getTransaction().commit();
         session.close();
     }
 
+    private void removeDailyLists(Session session) {
+        session.createNativeQuery("""
+                                      delete from darts.daily_list where unique_id like 'func-%'
+                                      """)
+            .executeUpdate();
+    }
+
     private void removeCourtHouses(Session session) {
-        log.info("removeCourtHouses");
         session.createNativeQuery("""
                                       delete from darts.courtroom where courtroom_name like 'func-%'
                                       """)
@@ -122,16 +107,6 @@ public class TestSupportController {
         }
 
         return new ResponseEntity<>(CREATED);
-    }
-
-    private void emptyCourthouseTrash() {
-        log.info("emptyCourthouseTrash");
-        log.info("courtroomTrash.size()" + courtroomTrash.size());
-        courtroomTrash.forEach(c -> log.info("courtroom id " + c));
-        courtroomRepository.deleteAllById(courtroomTrash);
-        log.info("courthouseTrash.size()" + courthouseTrash.size());
-        courthouseTrash.forEach(c -> log.info("courthouse id " + c));
-        courthouseRepository.deleteAllById(courthouseTrash);
     }
 
     private CourthouseEntity newCourthouse(String courthouseName) {
