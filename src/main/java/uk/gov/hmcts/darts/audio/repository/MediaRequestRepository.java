@@ -5,11 +5,11 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 
-import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity, Integer> {
 
-    List<MediaRequestEntity> findByStatusOrderByCreatedDateTimeAsc(AudioRequestStatus status);
+    Optional<MediaRequestEntity> findTopByStatusOrderByCreatedDateTimeAsc(AudioRequestStatus status);
 
 }

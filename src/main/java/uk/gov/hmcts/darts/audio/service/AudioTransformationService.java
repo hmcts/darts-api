@@ -10,11 +10,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 public interface AudioTransformationService {
-
-    UUID processAudioRequest(Integer requestId) throws ExecutionException, InterruptedException;
 
     BinaryData getUnstructuredAudioBlob(UUID location);
 
@@ -33,4 +30,7 @@ public interface AudioTransformationService {
     UUID saveProcessedData(MediaRequestEntity mediaRequest, BinaryData binaryData);
 
     Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException;
+
+    void handleKedaInvocationForMediaRequests();
+
 }

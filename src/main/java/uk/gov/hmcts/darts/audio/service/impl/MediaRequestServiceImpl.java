@@ -44,6 +44,7 @@ import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
@@ -66,8 +67,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public List<MediaRequestEntity> getMediaRequestsByStatus(AudioRequestStatus status) {
-        return mediaRequestRepository.findByStatusOrderByCreatedDateTimeAsc(status);
+    public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(AudioRequestStatus status) {
+        return mediaRequestRepository.findTopByStatusOrderByCreatedDateTimeAsc(status);
     }
 
     @Override
@@ -117,10 +118,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public void deleteAudioRequest(Integer mediaRequestId) {
 
-        var transientObject = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId);
+        var transientObject = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
+            mediaRequestId);
 
         if (transientObject.isPresent()) {
-            TransientObjectDirectoryEntity mediaTransientObject  = transientObject.get();
+            TransientObjectDirectoryEntity mediaTransientObject = transientObject.get();
             UUID blobId = mediaTransientObject.getExternalLocation();
 
             if (blobId != null) {
