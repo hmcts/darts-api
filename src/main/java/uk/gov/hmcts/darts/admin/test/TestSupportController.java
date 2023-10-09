@@ -12,8 +12,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.repository.AuditActivityRepository;
+import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
@@ -37,6 +43,9 @@ public class TestSupportController {
     private final CourtroomRepository courtroomRepository;
     private final UserAccountRepository userAccountRepository;
     private final NodeRegistrationRepository nodeRegistrationRepository;
+    private final AuditActivityRepository auditActivityRepository;
+    private final AuditRepository auditRepository;
+    private final CaseRepository caseRepository;
 
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
@@ -48,6 +57,7 @@ public class TestSupportController {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
+        auditRepository.deleteAll();
         var caseIds = getCaseIdsToBeDeleted(session);
         var hearingIds = hearingIdsToBeDeleted(session, caseIds);
         var eventIds = eventIdsToBeDeleted(session, hearingIds);
@@ -58,7 +68,7 @@ public class TestSupportController {
 
         removeCases(session, caseIds);
 
-        List nodeRegisterIds =  nodeRegisterIdsToBeDeleted(session, courtroomTrash);
+        List nodeRegisterIds = nodeRegisterIdsToBeDeleted(session, courtroomTrash);
         removeNodeRegisters(nodeRegisterIds);
 
         removeDailyLists(session);
@@ -105,6 +115,29 @@ public class TestSupportController {
 
             courthouseTrash.add(courthouse.getId());
         }
+
+        return new ResponseEntity<>(CREATED);
+    }
+
+    @PostMapping(value = "/audit/{audit_activity}/courthouse/{courthouse_name}")
+    @Transactional
+    public ResponseEntity<String> createAudit(@PathVariable(name = "audit_activity") String auditActivity,
+                                              @PathVariable(name = "courthouse_name") String courthouseName) {
+
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber("func-case1");
+        courtCase.setClosed(false);
+        courtCase.setInterpreterUsed(false);
+        courtCase.setCourthouse(courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName).get());
+
+        CourtCaseEntity savedCase = caseRepository.saveAndFlush(courtCase);
+
+        AuditEntity audit = new AuditEntity();
+        audit.setCourtCase(savedCase);
+        audit.setUser(userAccountRepository.getReferenceById(0));
+        audit.setAuditActivity(auditActivityRepository.findById(AuditActivityEnum.valueOf(auditActivity).getId()).get());
+        audit.setApplicationServer("not available");
+        auditRepository.saveAndFlush(audit);
 
         return new ResponseEntity<>(CREATED);
     }
