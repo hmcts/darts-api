@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.darts.noderegistration.repository.NodeRegistrationRepository
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -128,14 +130,29 @@ public class TestSupportController {
         courtCase.setCaseNumber("func-case1");
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
-        courtCase.setCourthouse(courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName).get());
+
+        Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(
+            courthouseName);
+        if (foundCourthouse.isPresent()) {
+            courtCase.setCourthouse(foundCourthouse.get());
+        } else {
+            return new ResponseEntity<>(BAD_REQUEST);
+        }
 
         CourtCaseEntity savedCase = caseRepository.saveAndFlush(courtCase);
 
         AuditEntity audit = new AuditEntity();
         audit.setCourtCase(savedCase);
         audit.setUser(userAccountRepository.getReferenceById(0));
-        audit.setAuditActivity(auditActivityRepository.findById(AuditActivityEnum.valueOf(auditActivity).getId()).get());
+        Optional<AuditActivityEntity> foundAuditActivity = auditActivityRepository.findById(AuditActivityEnum.valueOf(
+            auditActivity).getId());
+
+        if (foundAuditActivity.isPresent()) {
+            audit.setAuditActivity(foundAuditActivity.get());
+        } else {
+            return new ResponseEntity<>(BAD_REQUEST);
+        }
+
         audit.setApplicationServer("not available");
         auditRepository.saveAndFlush(audit);
 
