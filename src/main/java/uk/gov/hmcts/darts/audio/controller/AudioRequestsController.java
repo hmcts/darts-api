@@ -67,7 +67,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
         mediaRequestService.updateAudioRequestLastAccessedTimestamp(mediaRequestId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
