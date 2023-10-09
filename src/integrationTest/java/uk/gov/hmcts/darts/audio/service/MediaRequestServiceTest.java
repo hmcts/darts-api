@@ -37,7 +37,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         requestDetails = new AudioRequestDetails(null, null, null, null, null);
         requestDetails.setHearingId(hearing.getId());
-        requestDetails.setRequestor(1234);
+        requestDetails.setRequestor(0);
         requestDetails.setRequestType(DOWNLOAD);
     }
 

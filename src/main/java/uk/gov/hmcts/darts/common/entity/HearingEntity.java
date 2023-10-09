@@ -78,7 +78,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @Transient
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},
         inverseJoinColumns = {@JoinColumn(name = "eve_id")})
