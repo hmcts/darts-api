@@ -45,8 +45,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
 
     private UserAccountEntity systemUser;
     private MediaRequestEntity mediaRequestEntity;
-
-
+    
 
     @BeforeEach
     void beforeEach() {
@@ -65,7 +64,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
             String.format("/audio-requests/%d", mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isOk())
+            .andExpect(status().isNoContent())
             .andReturn();
 
     }
