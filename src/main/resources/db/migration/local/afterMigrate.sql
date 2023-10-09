@@ -4,16 +4,6 @@ where sg.grp_id not in (select sgua.grp_id from darts.security_group_user_accoun
 ORDER BY 2;
 
 INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
-SELECT -6, sg.grp_id FROM darts.security_group sg
-where sg.grp_id not in (select sgua.grp_id from darts.security_group_user_account_ae sgua where sgua.usr_id = -6)
-ORDER BY 2;
-
-INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
-SELECT -5, sg.grp_id FROM darts.security_group sg
-where sg.grp_id not in (select sgua.grp_id from darts.security_group_user_account_ae sgua where sgua.usr_id = -5)
-ORDER BY 2;
-
-INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
 SELECT -4, sg.grp_id FROM darts.security_group sg
 where sg.grp_id not in (select sgua.grp_id from darts.security_group_user_account_ae sgua where sgua.usr_id = -4)
 ORDER BY 2;
