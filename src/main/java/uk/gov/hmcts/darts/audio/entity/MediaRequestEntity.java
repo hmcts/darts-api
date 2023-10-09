@@ -57,7 +57,7 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = HEARING_ID_COLUMN_NAME, nullable = false)
     private HearingEntity hearing;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = REQUESTOR_COLUMN_NAME, nullable = false)
     private UserAccountEntity requestor;
 
