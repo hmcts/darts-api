@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -79,7 +80,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         transcriptionId = transcriptionEntity.getId();
 
         doNothing().when(authorisation).authoriseByTranscriptionId(
-            transcriptionId, Set.of(APPROVER));
+            transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
         UserAccountEntity testUser = authorisationStub.getTestUser();
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
@@ -109,7 +110,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(authorisation).authoriseByTranscriptionId(
-            transcriptionId, Set.of(APPROVER)
+            transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
     }
 
@@ -134,7 +135,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         assertNotNull(transcriptionWorkflowId);
 
         verify(authorisation).authoriseByTranscriptionId(
-            transcriptionId, Set.of(APPROVER)
+            transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
 
         final TranscriptionEntity rejectedTranscriptionEntity = dartsDatabaseStub.getTranscriptionRepository()
@@ -178,7 +179,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(authorisation).authoriseByTranscriptionId(
-            -1, Set.of(APPROVER)
+            -1, Set.of(APPROVER, TRANSCRIBER)
         );
     }
 
@@ -204,7 +205,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
         verify(authorisation).authoriseByTranscriptionId(
-            transcriptionId, Set.of(APPROVER)
+            transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
     }
 

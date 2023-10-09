@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
+
+import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -46,6 +49,24 @@ public class TranscriptionStub {
         transcription.setLastModifiedBy(testUser);
         transcriptionRepository.saveAndFlush(transcription);
         return transcription;
+    }
+
+    public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
+                                                                         UserAccountEntity user,
+                                                                         OffsetDateTime timestamp,
+                                                                         TranscriptionStatusEntity transcriptionStatus,
+                                                                         String workflowComment) {
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity.setTranscription(transcriptionEntity);
+        transcriptionWorkflowEntity.setWorkflowComment(workflowComment);
+        transcriptionWorkflowEntity.setCreatedDateTime(timestamp);
+        transcriptionWorkflowEntity.setCreatedBy(user);
+        transcriptionWorkflowEntity.setLastModifiedDateTime(timestamp);
+        transcriptionWorkflowEntity.setLastModifiedBy(user);
+        transcriptionWorkflowEntity.setTranscriptionStatus(transcriptionStatus);
+        transcriptionWorkflowEntity.setWorkflowActor(user);
+        transcriptionWorkflowEntity.setWorkflowTimestamp(timestamp);
+        return transcriptionWorkflowEntity;
     }
 
     public TranscriptionStatusEntity getTranscriptionStatusByEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
