@@ -27,7 +27,7 @@ public class NodeRegisterEntity {
     public static final String HOSTNAME = "hostname";
     public static final String IP_ADDRESS = "ip_address";
     public static final String MAC_ADDRESS = "mac_address";
-    public static final String DEVICE_TYPE = "device_type";
+    public static final String NODE_TYPE = "node_type";
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = COURTROOM_ID, nullable = false)
@@ -48,7 +48,7 @@ public class NodeRegisterEntity {
     @Column(name = MAC_ADDRESS, nullable = false)
     private String macAddress;
 
-    @Column(name = DEVICE_TYPE)
-    private String deviceType;
+    @Column(name = NODE_TYPE)
+    private String nodeType;
 
 }
