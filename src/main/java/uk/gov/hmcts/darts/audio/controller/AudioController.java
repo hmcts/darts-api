@@ -10,16 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
-import uk.gov.hmcts.darts.audio.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
-import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audio.service.MediaRequestService;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
@@ -42,29 +38,15 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @Slf4j
 public class AudioController implements AudioApi {
 
-    private final MediaRequestService mediaRequestService;
     private final AudioService audioService;
     private final AudioTransformationService audioTransformationService;
     private final AudioResponseMapper audioResponseMapper;
-    private final AuditService auditService;
 
-    @Override
+    // TODO Used where audio was moved to audio-requests and should be removed when frontend is updated
+    private final AudioRequestsController audioRequestsController;
+
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
-        AddAudioResponse addAudioResponse;
-        MediaRequestEntity audioRequest;
-        try {
-            audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
-            addAudioResponse = audioResponseMapper.mapToAddAudioResponse(audioRequest);
-            auditService.recordAuditRequestAudio(AuditActivityEnum.REQUEST_AUDIO,
-                                                 audioRequestDetails.getRequestor(), audioRequestDetails.getHearingId()
-            );
-        } catch (Exception e) {
-            log.error("Failed to request audio", e);
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        mediaRequestService.scheduleMediaRequestPendingNotification(audioRequest);
-        return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
+        return audioRequestsController.addAudioRequest(audioRequestDetails);
     }
 
     @Override
@@ -72,12 +54,7 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = MEDIA_REQUEST_ID,
         securityRoles = {TRANSCRIBER})
     public ResponseEntity<Resource> download(Integer mediaRequestId) {
-        InputStream audioFileStream = audioService.download(mediaRequestId);
-
-        return new ResponseEntity<>(
-            new InputStreamResource(audioFileStream),
-            HttpStatus.OK
-        );
+        return audioRequestsController.download(mediaRequestId);
     }
 
     @Override
@@ -95,13 +72,13 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
-    public ResponseEntity<org.springframework.core.io.Resource> preview(Integer mediaId) {
+    public ResponseEntity<Resource> preview(Integer mediaId) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
     }
 
-
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<Void> addAudioMetaData(AddAudioMetadataRequest addAudioMetadataRequest) {
         audioService.addAudio(addAudioMetadataRequest);
         return new ResponseEntity<>(HttpStatus.OK);

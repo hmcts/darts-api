@@ -7,8 +7,6 @@ import java.io.InputStream;
 
 public interface AudioService {
 
-    InputStream download(Integer mediaRequestId);
-
     InputStream preview(Integer mediaId);
 
     void addAudio(AddAudioMetadataRequest addAudioMetadataRequest);

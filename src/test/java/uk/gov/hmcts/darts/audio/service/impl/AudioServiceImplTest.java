@@ -15,11 +15,11 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -34,7 +34,6 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -80,6 +79,9 @@ class AudioServiceImplTest {
     private HearingRepository hearingRepository;
     private AudioService audioService;
 
+    @Mock
+    private AuditService auditService;
+
     @BeforeEach
     void setUp() {
         audioService = new AudioServiceImpl(
@@ -90,59 +92,10 @@ class AudioServiceImplTest {
             fileOperationService,
             retrieveCoreObjectService,
             hearingRepository,
-            mapper
+            mapper,
+            auditService
         );
     }
-
-    @Test
-    void downloadShouldReturnExpectedData() throws IOException {
-        var blobUuid = UUID.randomUUID();
-        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity.setExternalLocation(blobUuid);
-
-        var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
-        when(audioTransformationService.getOutboundAudioBlob(blobUuid))
-            .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
-
-        try (InputStream inputStream = audioService.download(mediaRequestId)) {
-            byte[] bytes = inputStream.readAllBytes();
-            assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
-        }
-    }
-
-    @Test
-    void downloadShouldThrowExceptionWhenRelatedTransientObjectCannotBeFound() {
-        var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.empty());
-
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioService.download(mediaRequestId)
-        );
-
-        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
-    }
-
-    @Test
-    void downloadShouldThrowExceptionWhenTransientObjectHasNoExternalLocationValue() {
-        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity.setExternalLocation(null);
-
-        var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
-
-        var exception = assertThrows(
-            DartsApiException.class,
-            () -> audioService.download(mediaRequestId)
-        );
-
-        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
-    }
-
 
     @Test
     void previewShouldReturnExpectedData() throws IOException, ExecutionException, InterruptedException {
@@ -211,7 +164,7 @@ class AudioServiceImplTest {
         audioService.addAudio(addAudioMetadataRequest);
 
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
-        verify(hearingRepository,times(3)).saveAndFlush(any());
+        verify(hearingRepository, times(3)).saveAndFlush(any());
         MediaEntity savedMedia = mediaEntityArgumentCaptor.getValue();
         assertEquals(startedAt, savedMedia.getStart());
         assertEquals(endedAt, savedMedia.getEnd());
@@ -261,7 +214,7 @@ class AudioServiceImplTest {
             any()
         )).thenReturn(hearing);
         audioService.linkAudioAndHearing(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository,times(3)).saveAndFlush(any());
+        verify(hearingRepository, times(3)).saveAndFlush(any());
         assertEquals(3, hearing.getMediaList().size());
     }
 }

@@ -89,8 +89,6 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
-
-
     }
 
     @Test

@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
-import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
+import uk.gov.hmcts.darts.event.model.CreatedHearing;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 
@@ -49,7 +49,7 @@ public abstract class EventHandlerBase implements EventHandler {
         return event;
     }
 
-    protected CourtroomCourthouseCourtcase getOrCreateCourtroomCourtHouseAndCases(DartsEvent dartsEvent) {
+    protected CreatedHearing createHearing(DartsEvent dartsEvent) {
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {
@@ -68,10 +68,8 @@ public abstract class EventHandlerBase implements EventHandler {
         setHearingToActive(hearingEntity);
 
 
-        return CourtroomCourthouseCourtcase.builder()
-            .courthouseEntity(hearingEntity.getCourtroom().getCourthouse())
-            .courtroomEntity(hearingEntity.getCourtroom())
-            .courtCaseEntity(hearingEntity.getCourtCase())
+        return CreatedHearing.builder()
+            .hearingEntity(hearingEntity)
             .isHearingNew(hearingEntity.isNew())
             .isCourtroomDifferentFromHearing(false)//for now always creating a new one
             .build();

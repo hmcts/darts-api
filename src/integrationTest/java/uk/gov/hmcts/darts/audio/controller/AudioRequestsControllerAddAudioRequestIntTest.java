@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,10 +14,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
-import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
-import uk.gov.hmcts.darts.audio.model.AudioRequestType;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -38,7 +38,7 @@ import static uk.gov.hmcts.darts.testutils.data.DefendantTestData.createListOfDe
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Slf4j
-class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
+class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests");
     private static final AudioRequestType AUDIO_REQUEST_TYPE = AudioRequestType.PLAYBACK;
@@ -52,9 +52,7 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("${darts.notification.gov-notify.template-map.audio_request_being_processed}")
-    private String notificationId;
-
+    @SuppressWarnings("PMD.LawOfDemeter")
     @Test
     void addAudioRequestPostShouldReturnSuccess() throws Exception {
         assertEquals(0, dartsDatabase.getMediaRequestRepository()
@@ -114,7 +112,7 @@ class AudioControllerAddAudioRequestIntTest extends IntegrationBase {
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository().findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
         assertEquals(1, notifications.size());
-        assertEquals(notificationId, notifications.get(0).getEventId());
+        assertEquals(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(), notifications.get(0).getEventId());
         assertEquals(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(), notifications.get(0).getEmailAddress());
         assertEquals(mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(), notifications.get(0).getCourtCase().getCaseNumber());
 

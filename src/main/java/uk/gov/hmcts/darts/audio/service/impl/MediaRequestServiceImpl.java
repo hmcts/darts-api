@@ -16,11 +16,14 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
-import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
-import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -37,9 +40,11 @@ import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
@@ -58,10 +63,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final DataManagementApiImpl dataManagementApi;
     private final NotificationApi notificationApi;
 
+    private final AuditService auditService;
+
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public List<MediaRequestEntity> getMediaRequestsByStatus(AudioRequestStatus status) {
-        return mediaRequestRepository.findByStatusOrderByCreatedDateTimeAsc(status);
+    public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(AudioRequestStatus status) {
+        return mediaRequestRepository.findTopByStatusOrderByCreatedDateTimeAsc(status);
     }
 
     @Override
@@ -97,7 +104,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             var hearingEntity = mediaRequest.getHearing();
             var courtCase = hearingEntity.getCourtCase();
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-                .eventId(notificationApi.getNotificationTemplateIdByName("audio_request_being_processed"))
+                .eventId(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString())
                 .caseId(courtCase.getId())
                 .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
                 .build();
@@ -111,10 +118,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     public void deleteAudioRequest(Integer mediaRequestId) {
 
-        var transientObject = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId);
+        var transientObject = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
+            mediaRequestId);
 
         if (transientObject.isPresent()) {
-            TransientObjectDirectoryEntity mediaTransientObject  = transientObject.get();
+            TransientObjectDirectoryEntity mediaTransientObject = transientObject.get();
             UUID blobId = mediaTransientObject.getExternalLocation();
 
             if (blobId != null) {
@@ -212,4 +220,20 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return expiredPredicate;
     }
 
+    @Override
+    public InputStream download(Integer mediaRequestId) {
+        var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
+                mediaRequestId)
+            .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+
+        UUID blobId = transientObjectEntity.getExternalLocation();
+        if (blobId == null) {
+            throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
+        }
+
+        MediaRequestEntity mediaRequestEntity = transientObjectEntity.getMediaRequest();
+
+        auditService.recordAudit(AuditActivityEnum.EXPORT_AUDIO, mediaRequestEntity.getRequestor(), mediaRequestEntity.getHearing().getCourtCase());
+        return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
+    }
 }

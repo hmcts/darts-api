@@ -9,31 +9,6 @@ info:
   title: Modernised DARTS
 
 paths:
-  /audio-requests:
-    post:
-      tags:
-        - Audio
-      summary: Users can request audio for specific cases and date/time periods
-      operationId: addAudioRequest
-      description: Adds a user audio request for processing
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AddAudioResponse'
-        '400':
-          description: 'invalid input, object invalid'
-        '409':
-          description: audio request item already exists
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AudioRequestDetails'
-        description: Audio Request item to add
-
   /audio/download:
     get:
       tags:
@@ -229,7 +204,7 @@ paths:
   /audios:
     post:
       tags:
-        - audio
+        - Audio
       summary: Upload audio metadata
       operationId: addAudioMetaData
       requestBody:

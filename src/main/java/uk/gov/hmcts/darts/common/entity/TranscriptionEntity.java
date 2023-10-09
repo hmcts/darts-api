@@ -66,10 +66,10 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private OffsetDateTime hearingDate;
 
     @Column(name = "start_ts")
-    private OffsetDateTime start;
+    private OffsetDateTime startTime;
 
     @Column(name = "end_ts")
-    private OffsetDateTime end;
+    private OffsetDateTime endTime;
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;

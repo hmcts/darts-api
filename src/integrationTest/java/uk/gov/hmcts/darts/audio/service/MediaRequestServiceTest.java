@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.model.AudioRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
-import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 class MediaRequestServiceTest extends IntegrationPerClassBase {
 
@@ -37,7 +37,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         requestDetails = new AudioRequestDetails(null, null, null, null, null);
         requestDetails.setHearingId(hearing.getId());
-        requestDetails.setRequestor(1234);
+        requestDetails.setRequestor(0);
         requestDetails.setRequestType(DOWNLOAD);
     }
 
@@ -140,9 +140,10 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         mediaRequestService.saveAudioRequest(requestDetails);
 
-        List<MediaRequestEntity> mediaRequests = mediaRequestService.getMediaRequestsByStatus(OPEN);
+        Optional<MediaRequestEntity> mediaRequest = mediaRequestService.getOldestMediaRequestByStatus(OPEN);
 
-        assertEquals(OPEN, mediaRequests.get(0).getStatus());
+        assertTrue(mediaRequest.isPresent());
+        assertEquals(OPEN, mediaRequest.get().getStatus());
     }
 
     @Test
