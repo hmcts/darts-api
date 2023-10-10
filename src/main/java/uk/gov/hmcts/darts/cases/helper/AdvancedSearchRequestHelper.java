@@ -145,13 +145,12 @@ public class AdvancedSearchRequestHelper {
     }
 
     private List<Predicate> addUserSecurityRolesCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
-        String userAccount = userIdentity.getEmailAddress();
 
         List<Predicate> predicateList = new ArrayList<>();
         Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
         predicateList.add(criteriaBuilder.equal(
                               userJoin.get(UserAccountEntity_.EMAIL_ADDRESS),
-                              userAccount
+                              userIdentity.getEmailAddress()
                           )
         );
         return predicateList;
