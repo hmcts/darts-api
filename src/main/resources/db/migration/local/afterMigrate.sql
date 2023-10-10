@@ -23,3 +23,7 @@ SELECT -1, sg.grp_id FROM darts.security_group sg
 where sg.grp_id not in (select sgua.grp_id from darts.security_group_user_account_ae sgua where sgua.usr_id = -1)
 ORDER BY 2;
 
+INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
+SELECT sg.grp_id, 1 FROM darts.security_group sg
+where sg.grp_id not in (select sgc.grp_id from darts.security_group_courthouse_ae sgc where sgc.cth_id = 1 )
+ORDER BY 1;
