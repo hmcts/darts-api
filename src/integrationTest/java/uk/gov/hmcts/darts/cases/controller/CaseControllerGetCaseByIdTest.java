@@ -22,7 +22,7 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    private static String endpointUrl = "/cases/{caseId}";
+    private static String endpointUrl = "/cases/{case_id}";
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
@@ -57,14 +57,12 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     @Test
     void casesSearchGetEndpointCheckListsAreCorrectSize() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+        final Integer caseId = getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE);
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, caseId);
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath(
-                "$.case_id",
-                Matchers.is(getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE))
-            ))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.case_id", Matchers.is(caseId)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges", Matchers.hasSize(1)))
             .andExpect(MockMvcResultMatchers.jsonPath("$.judges[0]", Matchers.is("1judge1")))
             .andExpect(MockMvcResultMatchers.jsonPath("$.prosecutors", Matchers.hasSize(1)))

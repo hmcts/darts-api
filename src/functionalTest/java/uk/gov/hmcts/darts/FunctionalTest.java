@@ -5,25 +5,40 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.configuration.AccessTokenClientConfiguration;
+import uk.gov.hmcts.darts.configuration.AzureAdAuthenticationProperties;
+import uk.gov.hmcts.darts.configuration.AzureAdB2CAuthenticationProperties;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
+import java.text.MessageFormat;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @SpringBootTest(
-    classes = {AccessTokenClient.class},
+    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class, AzureAdB2CAuthenticationProperties.class },
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class FunctionalTest {
 
+    protected static final String COURTHOUSE_SWANSEA = "func-swansea";
+
     @Autowired
-    private AccessTokenClient accessTokenClient;
+    private AccessTokenClient externalAccessTokenClient;
+
+    @Autowired
+    private AccessTokenClient internalAccessTokenClient;
 
     @Value("${deployed-application-uri}")
     private URI baseUri;
@@ -38,7 +53,15 @@ public class FunctionalTest {
         return baseUri + endpoint;
     }
 
-    public RequestSpecification buildRequestWithAuth() {
+    public RequestSpecification buildRequestWithExternalAuth() {
+        return buildRequestWithAuth(externalAccessTokenClient);
+    }
+
+    public RequestSpecification buildRequestWithInternalAuth() {
+        return buildRequestWithAuth(internalAccessTokenClient);
+    }
+
+    private RequestSpecification buildRequestWithAuth(AccessTokenClient accessTokenClient) {
         return RestAssured.given()
             .header("Authorization", String.format("Bearer %s", accessTokenClient.getAccessToken()));
     }
@@ -46,6 +69,28 @@ public class FunctionalTest {
     private void configureRestAssured() {
         RestAssured.useRelaxedHTTPSValidation();
         RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
+    }
+
+    public String getContentsFromFile(String filelocation) throws IOException {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        URL resource = classLoader.getResource(filelocation);
+        if (resource == null) {
+            throw new IOException(MessageFormat.format("File not found {0}", filelocation));
+        }
+        File file = new File(resource.getFile());
+        return FileUtils.readFileToString(file, "UTF-8");
+
+    }
+
+    protected static String randomCaseNumber() {
+        return "func-case-" + randomAlphanumeric(7);
+    }
+
+    protected void createCourtroomAndCourthouse(String courthouseName, String courtroomName) {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
+            .redirects().follow(false)
+            .post();
     }
 
 }

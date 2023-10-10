@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
@@ -22,7 +23,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals"})
+@SuppressWarnings({"PMD.LawOfDemeter", "PMD.AvoidDuplicateLiterals"})
 class GovNotifyServiceTest {
 
     public static final String EMAIL_ADDRESS = "test@test.com";
@@ -35,7 +36,7 @@ class GovNotifyServiceTest {
     @Test
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
 
-        SendEmailResponse emailResponse = createAndSend("court_manager_approve_transcript");
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
         assertEquals("DARTS: New Transcription Request Submitted and Awaiting Review", emailResponse.getSubject());
         compare("""
                     Hello,
@@ -71,7 +72,7 @@ class GovNotifyServiceTest {
 
     @Test
     void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("request_to_transcriber");
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
         assertEquals("DARTS: New Transcription Request", emailResponse.getSubject());
         compare("""
                     Hello,
@@ -84,7 +85,7 @@ class GovNotifyServiceTest {
 
     @Test
     void requestedAudioIsAvailable() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("requested_audio_is_available");
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
         assertEquals("DARTS: Requested Audio is Available", emailResponse.getSubject());
         compare("""
                     Hello,
@@ -96,7 +97,7 @@ class GovNotifyServiceTest {
 
     @Test
     void transcriptionAvailable() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("transcription_available");
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE.toString());
         assertEquals("DARTS: Transcribed Document Available", emailResponse.getSubject());
         compare("""
                     Hello,
@@ -109,7 +110,7 @@ class GovNotifyServiceTest {
 
     @Test
     void transcriptionRequestApproved() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("transcription_request_approved");
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED.toString());
         assertEquals("DARTS: Transcript Request Approved", emailResponse.getSubject());
         compare("""
                     Hello,
@@ -124,7 +125,7 @@ class GovNotifyServiceTest {
     void transcriptionRequestRejected() throws NotificationClientException, TemplateNotFoundException {
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
         parameterMap.put("rejection_reason", "TheRejectionReason");
-        SendEmailResponse emailResponse = createAndSend("transcription_request_rejected", parameterMap);
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED.toString(), parameterMap);
         assertEquals("DARTS: Transcript Request Rejected", emailResponse.getSubject());
         compare("""
                     Hello,
@@ -138,7 +139,7 @@ class GovNotifyServiceTest {
 
     @Test
     void audioRequestBeingProcessed() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("audio_request_being_processed");
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString());
         assertEquals("DARTS: Audio Request Being Processed", emailResponse.getSubject());
         compare("""
                     Hello,
@@ -150,7 +151,7 @@ class GovNotifyServiceTest {
 
     @Test
     void errorProcessingAudio() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend("error_processing_audio");
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
         assertEquals("DARTS: Audio Request has Failed", emailResponse.getSubject());
         compare("""
                     Hello,

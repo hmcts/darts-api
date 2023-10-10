@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import uk.gov.hmcts.darts.audio.api.AudioInternalApi;
 
 import java.util.TimeZone;
 
@@ -16,8 +18,10 @@ import static java.time.ZoneOffset.UTC;
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class})
 @EnableTransactionManagement
 @Slf4j
-@SuppressWarnings("HideUtilityClassConstructor") // Spring needs a constructor, its not a utility class
+@RequiredArgsConstructor
 public class Application implements CommandLineRunner {
+
+    private final AudioInternalApi audioInternalApi;
 
     @PostConstruct
     public void started() {
@@ -36,9 +40,10 @@ public class Application implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         if (System.getenv("ATS_MODE") != null) {
             log.info("ATS_MODE activated");
+            audioInternalApi.handleKedaInvocationForMediaRequests();
         }
     }
 
