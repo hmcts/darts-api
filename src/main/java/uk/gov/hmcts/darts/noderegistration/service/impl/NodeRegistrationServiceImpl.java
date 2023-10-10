@@ -29,7 +29,7 @@ public class NodeRegistrationServiceImpl implements NodeRegistrationService {
         if (courtroomEntity.isPresent()) {
             NodeRegisterEntity nodeRegisterEntity = new NodeRegisterEntity();
             nodeRegisterEntity.setCourtroom(courtroomEntity.get());
-            nodeRegisterEntity.setDeviceType(nodeType);
+            nodeRegisterEntity.setNodeType(nodeType);
             nodeRegisterEntity.setHostname(hostName);
             nodeRegisterEntity.setIpAddress(ipAddress);
             nodeRegisterEntity.setMacAddress(macAddress);

@@ -48,7 +48,7 @@ class TestSupportControllerTest extends IntegrationBase {
 
     @Test
     void cleansData() throws Exception {
-        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/func-cr1"))
             .andExpect(status().isCreated());
 
         mockMvc.perform(delete(ENDPOINT_URL + "/clean"))

@@ -86,4 +86,11 @@ public class FunctionalTest {
         return "func-case-" + randomAlphanumeric(7);
     }
 
+    protected void createCourtroomAndCourthouse(String courthouseName, String courtroomName) {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
+            .redirects().follow(false)
+            .post();
+    }
+
 }
