@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
+import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.model.SearchResult;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 
@@ -27,5 +28,8 @@ public interface AuditDtoMapper {
         @Mapping(source = "user.id", target = "userId")
     })
     SearchResult map(AuditEntity auditEntity);
+
+
+    AuditEntity map(AuditSearchQuery auditSearchQuery);
 
 }

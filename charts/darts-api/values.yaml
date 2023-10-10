@@ -38,17 +38,30 @@ java:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: XhibitUserName
+          alias: XHIBIT_USER_NAME
+        - name: XhibitPassword
+          alias: XHIBIT_PASSWORD
+        - name: CppUserName
+          alias: CPP_USER_NAME
+        - name: CppPassword
+          alias: CPP_PASSWORD
+        - name: DarPcUserName
+          alias: DARPC_USER_NAME
+        - name: DarPcPassword
+          alias: DARPC_PASSWORD
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
+    TESTING_SUPPORT_ENDPOINT_ENABLED: true
 
 function:
   scaleType: Job
   image: 'sdshmctspublic.azurecr.io/darts/api:latest'
   aadIdentityName: darts
-  pollingInterval: 300 # every 5 mins, but this should probably be configurable per env
+  pollingInterval: 60
   minReplicaCount: 0
   maxReplicaCount: 2
   scalingStrategy: accurate
@@ -89,6 +102,18 @@ function:
           alias: AAD_CLIENT_ID
         - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: XhibitUserName
+          alias: XHIBIT_USER_NAME
+        - name: XhibitPassword
+          alias: XHIBIT_PASSWORD
+        - name: CppUserName
+          alias: CPP_USER_NAME
+        - name: CppPassword
+          alias: CPP_PASSWORD
+        - name: DarPcUserName
+          alias: DARPC_USER_NAME
+        - name: DarPcPassword
+          alias: DARPC_PASSWORD
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require

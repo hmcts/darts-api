@@ -2,11 +2,11 @@ package uk.gov.hmcts.darts.hearings;
 
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HearingsGetEventsFunctionalTest extends FunctionalTest {
@@ -15,30 +15,41 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     public static final String ADD_EVENT_URL = "/events";
     public static final String CASE_SEARCH_URL = "/cases/search";
 
-    @Test
-    @Disabled
-    void success() {
+    @AfterEach
+    void cleanData() {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/clean"))
+            .redirects().follow(false)
+            .delete();
+    }
 
-        String randomCaseNumber = RandomStringUtils.randomAlphanumeric(15);
-        String requestBody = """
+    @Test
+    void success() {
+        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
+        String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
+
+        createCourtroomAndCourthouse(courthouseName, courtroomName);
+
+        String randomCaseNumber = randomCaseNumber();
+        String randomEventText1 = randomAlphanumeric(15);
+        String requestBody = String.format(
+            """
             {
               "message_id": "12345",
               "type": "1000",
               "sub_type": "1002",
               "event_id": "12345",
-              "courthouse": "swansea",
-              "courtroom": "1",
+              "courthouse": "%s",
+              "courtroom": "%s",
               "case_numbers": [
-                "<<caseNumber>>"
+                "%s"
               ],
-              "event_text": "<<eventText>>",
+              "event_text": "%s",
               "date_time": "2023-08-08T14:01:06.085Z"
-            }""";
+            }""",
+            courthouseName, courtroomName, randomCaseNumber, randomEventText1);
 
-        requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
-        String randomEventText1 = RandomStringUtils.randomAlphanumeric(15);
-        requestBody = requestBody.replace("<<eventText>>", randomEventText1);
-        buildRequestWithAuth()
+        buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)
             .when()
@@ -47,25 +58,25 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             .post();
 
 
-        requestBody = """
+        String randomEventText2 = randomAlphanumeric(15);
+        requestBody = String.format(
+            """
             {
               "message_id": "12345",
               "type": "1000",
               "sub_type": "1002",
               "event_id": "12345",
-              "courthouse": "swansea",
-              "courtroom": "1",
+              "courthouse": "%s",
+              "courtroom": "%s",
               "case_numbers": [
-                "<<caseNumber>>"
+                "%s"
               ],
-              "event_text": "<<eventText>>",
+              "event_text": "%s",
               "date_time": "2023-08-08T14:01:06.085Z"
-            }""";
+            }""",
+            courthouseName, courtroomName, randomCaseNumber, randomEventText2);
 
-        requestBody = requestBody.replace("<<caseNumber>>", randomCaseNumber);
-        String randomEventText2 = RandomStringUtils.randomAlphanumeric(15);
-        requestBody = requestBody.replace("<<eventText>>", randomEventText2);
-        buildRequestWithAuth()
+        buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)
             .when()
@@ -75,7 +86,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
 
         int hearingId = getHearingIdByCaseNumber(randomCaseNumber);
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .pathParam("hearingId", hearingId)
             .when()
             .redirects().follow(false)
@@ -89,7 +100,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     }
 
     private int getHearingIdByCaseNumber(String caseNumber) {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .param("case_number", caseNumber)
             .when()

@@ -37,7 +37,7 @@ public class DailyListMapper {
         }
         DocumentID documentId = dailyList.getDocumentId();
         dailyListEntity.setUniqueId(documentId.getUniqueId());
-        dailyListEntity.setPublishedTimestamp(documentId.getTimeStamp());
+        dailyListEntity.setPublishedTimestamp(dailyList.getListHeader().getPublishedTime());
         dailyListEntity.setStartDate(dailyList.getListHeader().getStartDate());
         dailyListEntity.setEndDate(dailyList.getListHeader().getEndDate());
         dailyListEntity.setStatus(JobStatusType.NEW);

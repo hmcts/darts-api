@@ -111,12 +111,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
-        '500':
-          description: Internal Server Error
+        '404':
+          description: Not Found Error
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested case cannot be found"
+                status: 404
 
     patch:
       tags:
@@ -263,36 +267,6 @@ paths:
                 type: "CASE_100"
                 title: "Too many results have been returned. Please change search criteria."
                 status: 400
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
-
-  /cases/hearings/{hearing_id}/events:
-    get:
-      tags:
-        - Cases
-      summary: Allows the retrieval of events for a given hearingId
-      operationId: getEvents
-      description: |-
-        Retrieves all events for a given hearingId.
-      parameters:
-        - in: path
-          name: hearing_id
-          schema:
-            type: integer
-          description: "hearingId is the internal hea_id of the hearing."
-          required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events_response'
         '500':
           description: Internal Server Error
           content:
@@ -519,25 +493,3 @@ components:
           type: string
         transcript_count:
           type: integer
-
-    events_response:
-      type: array
-      default: []
-      items:
-        $ref: '#/components/schemas/event_response'
-    event_response:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        timestamp:
-          type: string
-          format: date-time
-          example: 2023-07-31T14:32:24.620Z
-        name:
-          type: string
-          example: Case called on
-        text:
-          type: string
-          example: Record:New Case

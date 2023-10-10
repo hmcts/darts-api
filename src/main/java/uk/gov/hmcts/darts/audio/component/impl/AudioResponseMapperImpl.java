@@ -10,6 +10,7 @@ import java.util.List;
 @Component
 public class AudioResponseMapperImpl implements AudioResponseMapper {
 
+
     @Override
     public List<AudioMetadata> mapToAudioMetadata(List<MediaEntity> mediaEntities) {
         return mediaEntities.stream()

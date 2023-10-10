@@ -42,19 +42,19 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "media_object_id", length = 16)
     private String legacyObjectId;
 
-    @Column(name = "channel")
+    @Column(name = "channel", nullable = false)
     private Integer channel;
 
-    @Column(name = "total_channels")
+    @Column(name = "total_channels", nullable = false)
     private Integer totalChannels;
 
     @Column(name = "reference_id")
     private String referenceId;
 
-    @Column(name = "start_ts")
+    @Column(name = "start_ts", nullable = false)
     private OffsetDateTime start;
 
-    @Column(name = "end_ts")
+    @Column(name = "end_ts", nullable = false)
     private OffsetDateTime end;
 
     @Type(ListArrayType.class)

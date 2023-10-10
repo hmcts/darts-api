@@ -14,6 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.ModelAndView;
+import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
+import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurationProperties;
+import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthConfigurationPropertiesStrategy;
+import uk.gov.hmcts.darts.authentication.config.internal.InternalAuthProviderConfigurationProperties;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
 import uk.gov.hmcts.darts.authentication.service.AuthenticationService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
@@ -23,7 +27,6 @@ import uk.gov.hmcts.darts.authorisation.model.UserState;
 import java.net.URI;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -35,9 +38,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIPTION_COMPANY;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class AuthenticationInternalUserControllerTest {
 
     private static final URI DUMMY_AUTHORIZATION_URI = URI.create("https://www.example.com/authorization?param=value");
@@ -46,12 +50,16 @@ class AuthenticationInternalUserControllerTest {
     private static final String DUMMY_TOKEN = "token";
 
     @InjectMocks
-    private AuthenticationExternalUserController controller;
+    private AuthenticationInternalUserController controller;
 
     @Mock
     private AuthenticationService authenticationService;
     @Mock
     private AuthorisationApi authorisationApi;
+    @Mock
+    private AuthStrategySelector locator;
+    @Mock
+    private InternalAuthConfigurationProperties internalAuthConfigurationProperties;
 
     @Test
     void loginAndRefreshShouldReturnLoginPageAsRedirectWhenAuthHeaderIsNotSet() {
@@ -67,15 +75,18 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndUserState() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken(List.of("test.user@example.com")));
+            .thenReturn(createDummyAccessToken("test.user@example.com"));
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
+            internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
+        when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
 
         when(authorisationApi.getAuthorisation(anyString())).thenReturn(
             Optional.ofNullable(UserState.builder()
                                     .userId(-1)
                                     .userName("Test User")
                                     .roles(Set.of(Role.builder()
-                                                      .roleId(TRANSCRIPTION_COMPANY.getId())
-                                                      .roleName(TRANSCRIPTION_COMPANY.toString())
+                                                      .roleId(TRANSCRIBER.getId())
+                                                      .roleName(TRANSCRIBER.toString())
                                                       .permissions(new HashSet<>())
                                                       .build()))
                                     .build())
@@ -93,9 +104,10 @@ class AuthenticationInternalUserControllerTest {
     @Test
     void handleOauthCodeFromAzureWhenCodeIsReturnedWithAccessTokenAndNoUserState() throws JOSEException {
         when(authenticationService.handleOauthCode(anyString()))
-            .thenReturn(createDummyAccessToken(List.of("test.missing@example.com")));
-
-        when(authorisationApi.getAuthorisation(anyString())).thenReturn(Optional.empty());
+            .thenReturn(createDummyAccessToken("test.missing@example.com"));
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
+            internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
+        when(internalAuthConfigurationProperties.getClaims()).thenReturn("preferred_username");
 
         SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
         assertNotNull(securityToken);
@@ -103,7 +115,6 @@ class AuthenticationInternalUserControllerTest {
         assertNull(securityToken.getUserState());
 
         verify(authenticationService).handleOauthCode(DUMMY_CODE);
-        verify(authorisationApi).getAuthorisation("test.missing@example.com");
     }
 
     @Test
@@ -128,8 +139,23 @@ class AuthenticationInternalUserControllerTest {
         assertEquals("redirect:https://www.example.com/authorization?param=value", modelAndView.getViewName());
     }
 
+    @Test
+    void handleOauthCodeFromAzureWhenCodeIsReturnedWithoutClaim() throws JOSEException {
+        when(authenticationService.handleOauthCode(anyString()))
+            .thenReturn(createDummyAccessToken("test.missing@example.com"));
+        when(locator.locateAuthenticationConfiguration()).thenReturn(new InternalAuthConfigurationPropertiesStrategy(
+            internalAuthConfigurationProperties, new InternalAuthProviderConfigurationProperties()));
+
+        SecurityToken securityToken = controller.handleOauthCode(DUMMY_CODE);
+        assertNotNull(securityToken);
+        assertNotNull(securityToken.getAccessToken());
+        assertNull(securityToken.getUserState());
+
+        verify(authenticationService).handleOauthCode(DUMMY_CODE);
+    }
+
     @SuppressWarnings("PMD.UseUnderscoresInNumericLiterals")
-    private String createDummyAccessToken(List<String> emails) throws JOSEException {
+    private String createDummyAccessToken(String emails) throws JOSEException {
         RSAKey rsaKey = new RSAKeyGenerator(2048)
             .keyID("123")
             .generate();
@@ -143,7 +169,7 @@ class AuthenticationInternalUserControllerTest {
             .claim("nonce", "defaultNonce")
             .issueTime(new Date(1690969893))
             .claim("auth_time", new Date(1690969893))
-            .claim("emails", emails)
+            .claim("preferred_username", emails)
             .claim("name", "Test User")
             .claim("given_name", "Test")
             .claim("family_name", "User")

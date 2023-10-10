@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
@@ -27,9 +28,11 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     private Integer id;
 
     @Column(name = "courthouse_code", unique = true)
+    @EqualsAndHashCode.Include
     private Integer code;
 
     @Column(name = "courthouse_name", unique = true)
+    @EqualsAndHashCode.Include
     private String courthouseName;
 
     @OneToMany(mappedBy = "courthouse")

@@ -5,26 +5,41 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
+import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
+import java.util.Set;
 
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 class AudioControllerPreviewIntTest extends IntegrationBase {
+
     @Autowired
     private AudioTransformationServiceGivenBuilder given;
+
+    @MockBean
+    private Authorisation authorisation;
 
     private MediaEntity mediaEntity;
 
@@ -36,6 +51,10 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         given.setupTest();
         mediaEntity = given.getMediaEntity1();
         given.externalObjectDirForMedia(mediaEntity);
+        doNothing().when(authorisation).authoriseByMediaId(
+            mediaEntity.getId(),
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
     }
 
     @Test
@@ -45,6 +64,11 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
             String.format("/audio/preview/%d", mediaEntity.getId())));
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+        verify(authorisation).authoriseByMediaId(
+            mediaEntity.getId(),
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
     }
 
     @Test

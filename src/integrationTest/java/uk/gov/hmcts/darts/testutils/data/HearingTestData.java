@@ -56,6 +56,7 @@ public class HearingTestData {
 
         hearing.setHearingDate(Objects.requireNonNullElseGet(hearingDate, LocalDate::now));
 
+        hearing.setHearingIsActual(false);
         hearing.addJudge(judge);
 
         return hearing;

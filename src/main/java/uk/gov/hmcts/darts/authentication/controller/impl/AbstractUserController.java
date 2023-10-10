@@ -1,9 +1,9 @@
 package uk.gov.hmcts.darts.authentication.controller.impl;
 
-import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
+import uk.gov.hmcts.darts.authentication.config.AuthStrategySelector;
 import uk.gov.hmcts.darts.authentication.controller.AuthenticationController;
 import uk.gov.hmcts.darts.authentication.exception.AuthenticationError;
 import uk.gov.hmcts.darts.authentication.model.SecurityToken;
@@ -14,17 +14,18 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.net.URI;
 import java.text.ParseException;
-import java.util.List;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public abstract class AbstractUserController implements AuthenticationController {
 
-    private static final String EMAILS_CLAIM_NAME = "emails";
-
     private final AuthenticationService authenticationService;
     private final AuthorisationApi authorisationApi;
+
+    protected final AuthStrategySelector locator;
+
+    abstract Optional<String> parseEmailAddressFromAccessToken(String accessToken) throws ParseException;
 
     @Override
     public ModelAndView loginOrRefresh(String authHeaderValue, String redirectUri) {
@@ -66,14 +67,5 @@ public abstract class AbstractUserController implements AuthenticationController
     public ModelAndView resetPassword(String redirectUri) {
         URI url = authenticationService.resetPassword(redirectUri);
         return new ModelAndView("redirect:" + url.toString());
-    }
-
-    private Optional<String> parseEmailAddressFromAccessToken(String accessToken) throws ParseException {
-        SignedJWT jwt = SignedJWT.parse(accessToken);
-        final List<String> emailAddresses = jwt.getJWTClaimsSet().getStringListClaim(EMAILS_CLAIM_NAME);
-        if (emailAddresses == null || emailAddresses.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(emailAddresses.get(0));
     }
 }

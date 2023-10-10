@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audio.api.AudioInternalApi;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.CourtLogsService;
@@ -33,6 +34,9 @@ class EventsControllerTest {
 
     @MockBean
     private CourtLogsService courtLogsService;
+
+    @MockBean
+    private AudioInternalApi audioInternalApi;
 
     @MockBean
     private DartsEventMapper dartsEventMapper;

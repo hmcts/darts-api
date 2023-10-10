@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "76b91877-23da-4e42-afde-2aa74b635913",
+		"_postman_id": "f3b86088-28e9-4c59-ae47-cfeeb9a708c3",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -323,33 +323,7 @@
 			"name": "Audio",
 			"item": [
 				{
-					"name": "/audio-requests",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{serverUrl}}/audio-requests",
-							"host": [
-								"{{serverUrl}}"
-							],
-							"path": [
-								"audio-requests"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET /audio/hearings/:hearingId/audios",
+					"name": "/audio/hearings/{hearing_id}/audios",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -360,15 +334,21 @@
 							}
 						],
 						"url": {
-							"raw": "{{serverUrl}}/audio/hearings/1/audios",
+							"raw": "{{serverUrl}}/audio/hearings/:hearing_id/audios",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
 								"audio",
 								"hearings",
-								"1",
+								":hearing_id",
 								"audios"
+							],
+							"variable": [
+								{
+									"key": "hearing_id",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -564,6 +544,32 @@
 			"name": "Audio Requests",
 			"item": [
 				{
+					"name": "/audio-requests",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"requestor\": -10,\n  \"start_time\": \"2023-05-31T09:00:00Z\",\n  \"end_time\": \"2023-05-31T12:00:00Z\",\n  \"request_type\": \"DOWNLOAD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "/audio-requests?expired=false",
 					"request": {
 						"method": "GET",
@@ -620,22 +626,70 @@
 					"response": []
 				},
 				{
-					"name": "/audio-requests/-1",
+					"name": "/audio-requests/{media_request_id}",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{serverUrl}}/audio-requests/:audio_request_id",
+							"raw": "{{serverUrl}}/audio-requests/:media_request_id",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
 								"audio-requests",
-								":audio_request_id"
+								":media_request_id"
 							],
 							"variable": [
 								{
-									"key": "audio_request_id",
+									"key": "media_request_id",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/{media_request_id}",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/:media_request_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								":media_request_id"
+							],
+							"variable": [
+								{
+									"key": "media_request_id",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio-requests/download",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/audio-requests/download?media_request_id=-1",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio-requests",
+								"download"
+							],
+							"query": [
+								{
+									"key": "media_request_id",
 									"value": "-1"
 								}
 							]
@@ -657,14 +711,20 @@
 							"INSERT INTO courthouse (cth_id, courthouse_name, created_ts, last_modified_ts)",
 							"VALUES (-1, 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
 							"",
-							"INSERT INTO court_case (cas_id, cth_id, case_number)",
-							"VALUES (-1, -1, 'T20230907-1');",
+							"INSERT INTO security_group_courthouse_ae (grp_id, cth_id)",
+							"VALUES (-4, -1);",
+							"",
+							"INSERT INTO security_group_user_account_ae (usr_id, grp_id)",
+							"VALUES (-10, -4);",
+							"",
+							"INSERT INTO court_case (cas_id, cth_id, case_number, case_closed, interpreter_used)",
+							"VALUES (-1, -1, 'T20231009-1', '0', '0');",
 							"",
 							"INSERT INTO courtroom (ctr_id, cth_id, courtroom_name)",
 							"VALUES (-1, -1, 'Court 1');",
 							"",
-							"INSERT INTO hearing (hea_id, cas_id, ctr_id, hearing_date)",
-							"VALUES (-1, -1, -1, CURRENT_DATE);",
+							"INSERT INTO hearing (hea_id, cas_id, ctr_id, hearing_date, hearing_is_actual)",
+							"VALUES (-1, -1, -1, CURRENT_DATE, '1');",
 							"",
 							"INSERT INTO media_request (mer_id, hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_modified_ts)",
 							"VALUES (-1, -1, -10, 'OPEN', 'DOWNLOAD', '2023-05-31T09:00:00Z', '2023-05-31T12:00:00Z', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
@@ -680,6 +740,136 @@
 							""
 						]
 					}
+				}
+			]
+		},
+		{
+			"name": "Transcriptions",
+			"item": [
+				{
+					"name": "/transcriptions",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-05-31T09:00:00Z\",\n  \"end_date_time\": \"2023-05-31T12:00:00Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 3 | Approved",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"APPROVED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 4 | Rejected",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 4,\n  \"workflow_comment\": \"REJECTED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "41"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 5 | With Transcriber",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}

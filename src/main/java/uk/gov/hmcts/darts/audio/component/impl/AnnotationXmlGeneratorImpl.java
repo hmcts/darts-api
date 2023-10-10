@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -53,7 +53,7 @@ public class AnnotationXmlGeneratorImpl extends AbstractDocumentGenerator {
         throws ParserConfigurationException, IOException, TransformerException {
 
         if (!(data instanceof ViqAnnotationData)) {
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
         }
 
         DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();

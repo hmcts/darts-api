@@ -5,8 +5,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -19,4 +24,16 @@ public class AuthorisationApiImpl implements AuthorisationApi {
         return authorisationService.getAuthorisation(emailAddress);
     }
 
+    @Override
+    public void checkAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles) {
+        authorisationService.checkAuthorisation(
+            courthouses,
+            securityRoles
+        );
+    }
+
+    @Override
+    public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse) {
+        return authorisationService.getUsersWithRoleAtCourthouse(securityRole, courthouse);
+    }
 }

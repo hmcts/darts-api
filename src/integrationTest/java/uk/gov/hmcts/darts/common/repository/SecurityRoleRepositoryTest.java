@@ -9,9 +9,10 @@ import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 
 @SpringBootTest
@@ -25,21 +26,21 @@ class SecurityRoleRepositoryTest {
     @Test
     void shouldFindAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
-        assertEquals(5, securityRoleEntityList.size());
+        assertEquals(6, securityRoleEntityList.size());
     }
 
     @Test
-    void shouldFindAllCourtManagerPermissions() {
-        SecurityRoleEntity courtManagerRole = securityRoleRepository.findById(COURT_MANAGER.getId()).orElseThrow();
-        final List<SecurityPermissionEntity> securityPermissionEntities = courtManagerRole.getSecurityPermissionEntities();
-        assertEquals(10, securityPermissionEntities.size());
+    void shouldFindAllApproverPermissions() {
+        SecurityRoleEntity courtManagerRole = securityRoleRepository.findById(APPROVER.getId()).orElseThrow();
+        final Set<SecurityPermissionEntity> securityPermissionEntities = courtManagerRole.getSecurityPermissionEntities();
+        assertEquals(11, securityPermissionEntities.size());
     }
 
     @Test
     void shouldFindAllJudgePermissions() {
         SecurityRoleEntity judgeRole = securityRoleRepository.findById(JUDGE.getId()).orElseThrow();
-        final List<SecurityPermissionEntity> securityPermissionEntities = judgeRole.getSecurityPermissionEntities();
-        assertEquals(11, securityPermissionEntities.size());
+        final Set<SecurityPermissionEntity> securityPermissionEntities = judgeRole.getSecurityPermissionEntities();
+        assertEquals(12, securityPermissionEntities.size());
     }
 
 }
