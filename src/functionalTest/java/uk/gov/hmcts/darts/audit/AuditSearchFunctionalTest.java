@@ -31,7 +31,7 @@ class AuditSearchFunctionalTest extends FunctionalTest {
 
         Response response;
         response = buildRequestWithExternalAuth()
-            .baseUri(getUri("/functional-tests/courthouse/func-swansea/courtroom/1"))
+            .baseUri(getUri("/functional-tests/courthouse/func-swansea/courtroom/func-1"))
             .redirects().follow(false)
             .post();
 
