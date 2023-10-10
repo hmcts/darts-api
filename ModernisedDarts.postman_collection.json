@@ -711,14 +711,20 @@
 							"INSERT INTO courthouse (cth_id, courthouse_name, created_ts, last_modified_ts)",
 							"VALUES (-1, 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
 							"",
-							"INSERT INTO court_case (cas_id, cth_id, case_number)",
-							"VALUES (-1, -1, 'T20230907-1');",
+							"INSERT INTO security_group_courthouse_ae (grp_id, cth_id)",
+							"VALUES (-4, -1);",
+							"",
+							"INSERT INTO security_group_user_account_ae (usr_id, grp_id)",
+							"VALUES (-10, -4);",
+							"",
+							"INSERT INTO court_case (cas_id, cth_id, case_number, case_closed, interpreter_used)",
+							"VALUES (-1, -1, 'T20231009-1', '0', '0');",
 							"",
 							"INSERT INTO courtroom (ctr_id, cth_id, courtroom_name)",
 							"VALUES (-1, -1, 'Court 1');",
 							"",
-							"INSERT INTO hearing (hea_id, cas_id, ctr_id, hearing_date)",
-							"VALUES (-1, -1, -1, CURRENT_DATE);",
+							"INSERT INTO hearing (hea_id, cas_id, ctr_id, hearing_date, hearing_is_actual)",
+							"VALUES (-1, -1, -1, CURRENT_DATE, '1');",
 							"",
 							"INSERT INTO media_request (mer_id, hea_id, requestor, request_status, request_type, start_ts, end_ts, created_ts, last_modified_ts)",
 							"VALUES (-1, -1, -10, 'OPEN', 'DOWNLOAD', '2023-05-31T09:00:00Z', '2023-05-31T12:00:00Z', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
@@ -767,13 +773,46 @@
 					"response": []
 				},
 				{
-					"name": "/transcriptions/{transcription_id} APPROVED",
+					"name": "/transcriptions/{transcription_id} 3 | Approved",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"APPROVED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 4 | Rejected",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 4,\n  \"workflow_comment\": \"REJECTED\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -800,13 +839,13 @@
 					"response": []
 				},
 				{
-					"name": "/transcriptions/{transcription_id} REJECTED",
+					"name": "/transcriptions/{transcription_id} 5 | With Transcriber",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"transcription_status_id\": 4,\n  \"workflow_comment\": \"REJECTED\"\n}",
+							"raw": "{\n  \"transcription_status_id\": 5\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -825,7 +864,7 @@
 							"variable": [
 								{
 									"key": "transcription_id",
-									"value": "41"
+									"value": "1"
 								}
 							]
 						}

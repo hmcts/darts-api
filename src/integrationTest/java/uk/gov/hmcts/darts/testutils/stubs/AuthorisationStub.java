@@ -15,8 +15,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
-import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -41,8 +39,6 @@ public class AuthorisationStub {
         .withSecond(0);
 
     private final DartsDatabaseStub dartsDatabaseStub;
-    private final TranscriptionTypeRepository transcriptionTypeRepository;
-    private final TranscriptionStatusRepository transcriptionStatusRepository;
 
     private UserAccountEntity systemUser;
     private UserAccountEntity testUser;
@@ -110,27 +106,30 @@ public class AuthorisationStub {
         hearingEntity.addMedia(mediaEntity);
         dartsDatabaseStub.save(hearingEntity);
 
-        final TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus = transcriptionStatusRepository.getReferenceById(
-            AWAITING_AUTHORISATION.getId());
+        TranscriptionStub transcriptionStub = dartsDatabaseStub.getTranscriptionStub();
+        final TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus = transcriptionStub.getTranscriptionStatusByEnum(
+            AWAITING_AUTHORISATION);
 
         transcriptionEntity = new TranscriptionEntity();
         transcriptionEntity.setCourtCase(courtCaseEntity);
         transcriptionEntity.setCourtroom(courtroomEntity);
         transcriptionEntity.setHearing(hearingEntity);
-        transcriptionEntity.setTranscriptionType(transcriptionTypeRepository.getReferenceById(SPECIFIED_TIMES.getId()));
+        transcriptionEntity.setTranscriptionType(transcriptionStub.getTranscriptionTypeByEnum(SPECIFIED_TIMES));
         transcriptionEntity.setTranscriptionStatus(awaitingAuthorisationTranscriptionStatus);
         transcriptionEntity.setCreatedBy(testUser);
         transcriptionEntity.setLastModifiedBy(testUser);
 
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
+            testUser,
             YESTERDAY,
-            transcriptionStatusRepository.getReferenceById(REQUESTED.getId()),
+            transcriptionStub.getTranscriptionStatusByEnum(REQUESTED),
             "Please expedite my transcription request"
         );
 
-        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
+            testUser,
             YESTERDAY,
             awaitingAuthorisationTranscriptionStatus,
             null
@@ -139,23 +138,6 @@ public class AuthorisationStub {
         transcriptionEntity.getTranscriptionWorkflowEntities()
             .addAll(List.of(requestedTranscriptionWorkflowEntity, awaitingAuthorisationTranscriptionWorkflowEntity));
         transcriptionEntity = dartsDatabaseStub.save(transcriptionEntity);
-    }
-
-    private TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
-                                                                          OffsetDateTime timestamp,
-                                                                          TranscriptionStatusEntity transcriptionStatus,
-                                                                          String workflowComment) {
-        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
-        transcriptionWorkflowEntity.setTranscription(transcriptionEntity);
-        transcriptionWorkflowEntity.setWorkflowComment(workflowComment);
-        transcriptionWorkflowEntity.setCreatedDateTime(timestamp);
-        transcriptionWorkflowEntity.setCreatedBy(testUser);
-        transcriptionWorkflowEntity.setLastModifiedDateTime(timestamp);
-        transcriptionWorkflowEntity.setLastModifiedBy(testUser);
-        transcriptionWorkflowEntity.setTranscriptionStatus(transcriptionStatus);
-        transcriptionWorkflowEntity.setWorkflowActor(testUser);
-        transcriptionWorkflowEntity.setWorkflowTimestamp(timestamp);
-        return transcriptionWorkflowEntity;
     }
 
     private void createHearing() {

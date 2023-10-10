@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
@@ -77,7 +78,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
     private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
 
-    @OneToMany(cascade = {PERSIST}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
+    @OneToMany(cascade = {PERSIST, MERGE}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
     private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
 
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.TRANSCRIPTION)
