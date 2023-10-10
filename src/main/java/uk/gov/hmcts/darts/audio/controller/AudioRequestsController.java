@@ -95,7 +95,7 @@ public class AudioRequestsController implements AudioRequestsApi {
                                                  audioRequestDetails.getRequestor(), audioRequestDetails.getHearingId()
             );
         } catch (Exception e) {
-            log.error("Failed to request audio", e.getMessage());
+            log.error("Failed to request audio {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
