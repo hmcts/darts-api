@@ -24,11 +24,12 @@ DROP TABLE defence;
 DROP TABLE defendant;
 DROP TABLE prosecutor;
 DROP TABLE judge;
-DROP TABLE device_register;
+DROP TABLE node_register;
 DROP TABLE transient_object_directory;
 DROP TABLE external_object_directory;  
 DROP TABLE object_directory_status; 
 DROP TABLE external_location_type;  
+DROP TABLE annotation_document;
 DROP TABLE annotation ;
 DROP TABLE media_request;
 DROP TABLE hearing_event_ae;
@@ -37,8 +38,11 @@ DROP TABLE courthouse_region_ae;
 DROP TABLE region;
 DROP TABLE daily_list  ;              
 DROP TABLE event       ; 
+
+DROP TABLE transcription_document;
+DROP TABLE transcription_comment ;
 DROP TABLE transcription_workflow;
-DROP TABLE transcription_comment ;  
+  
 DROP TABLE transcription ; 
 DROP TABLE transcription_urgency;
 DROP TABLE hearing     ;              
@@ -60,6 +64,7 @@ DROP TABLE courthouse;
 DROP TABLE user_account;
  
 DROP SEQUENCE ann_seq;
+DROP SEQUENCE ado_seq;
 DROP SEQUENCE aud_seq;
 DROP SEQUENCE aua_seq;
 DROP SEQUENCE aut_seq;
@@ -90,6 +95,7 @@ DROP SEQUENCE rtp_seq;
 DROP SEQUENCE tod_seq;
 DROP SEQUENCE tra_seq;
 DROP SEQUENCE trc_seq;
+DROP SEQUENCE trd_seq;
 DROP SEQUENCE trw_seq;
 DROP SEQUENCE usr_seq;
 
