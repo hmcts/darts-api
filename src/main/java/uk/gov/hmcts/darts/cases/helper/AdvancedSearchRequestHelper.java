@@ -9,9 +9,11 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
@@ -27,6 +29,10 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity_;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,9 +41,12 @@ import java.util.Optional;
 
 @Component
 @SuppressWarnings({"PMD.TooManyMethods"})
+@RequiredArgsConstructor
 public class AdvancedSearchRequestHelper {
     @PersistenceContext
     private EntityManager entityManager;
+
+    private final UserIdentity userIdentity;
 
     public List<CourtCaseEntity> getMatchingCourtCases(GetCasesSearchRequest request) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -134,6 +143,19 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
+    private List<Predicate> addPermissionsCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+        String userAccount = userIdentity.getEmailAddress();
+
+        List<Predicate> predicateList = new ArrayList<>();
+        Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
+        predicateList.add(criteriaBuilder.equal(
+                              userJoin.get(UserAccountEntity_.EMAIL_ADDRESS),
+                              userAccount
+                          )
+        );
+        return predicateList;
+    }
+
     private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getJudgeName())) {
@@ -179,6 +201,18 @@ public class AdvancedSearchRequestHelper {
         return caseRoot.join(CourtCaseEntity_.JUDGES, JoinType.INNER);
     }
 
+    private Join<CourtCaseEntity, UserAccountEntity> joinUser(Root<CourtCaseEntity> caseRoot) {
+        //case -> courthouse -> securityGroups -> user
+        Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
+
+        Join<CourthouseEntity, SecurityGroupEntity> securityGroupJoin = courthouseJoin.join(
+            CourthouseEntity_.SECURITY_GROUPS,
+            JoinType.INNER
+        );
+        return securityGroupJoin.join(SecurityGroupEntity_.USERS, JoinType.INNER);
+    }
+
+
     @SuppressWarnings("unchecked")
     private Join<HearingEntity, CourtroomEntity> joinCourtroom(Root<CourtCaseEntity> caseRoot) {
         Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
@@ -190,8 +224,12 @@ public class AdvancedSearchRequestHelper {
 
     }
 
+    @SuppressWarnings("unchecked")
     private Join<CourtCaseEntity, CourthouseEntity> joinCourthouse(Root<CourtCaseEntity> caseRoot) {
-        return caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER);
+        Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
+            CourtroomEntity_.COURTHOUSE)).findAny();
+        return foundJoin.map(join -> (Join<CourtCaseEntity, CourthouseEntity>) join)
+            .orElseGet(() -> caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER));
     }
 
     private Join<CourtCaseEntity, DefendantEntity> joinDefendantEntity(Root<CourtCaseEntity> caseRoot) {
