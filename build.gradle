@@ -12,7 +12,6 @@ plugins {
   id "org.openapi.generator" version "7.0.1"
   id "org.flywaydb.flyway" version "9.22.1"
   id 'maven-publish'
-  id "org.flywaydb.flyway" version "9.22.0"
   id("com.dorongold.task-tree") version "2.1.1"
 }
 
