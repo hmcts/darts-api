@@ -2,17 +2,14 @@ package uk.gov.hmcts.darts.cases.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
@@ -44,9 +41,7 @@ import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWit
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 
 @ExtendWith(MockitoExtension.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
-@Transactional
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
@@ -57,14 +52,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     CourthouseEntity swanseaCourthouse;
     ObjectMapper objectMapper;
 
-    @BeforeAll
-    void beforeAll() {
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
-    }
-
     @BeforeEach
     void setupData() {
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        objectMapper = objectMapperConfig.objectMapper();
+
         swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
 

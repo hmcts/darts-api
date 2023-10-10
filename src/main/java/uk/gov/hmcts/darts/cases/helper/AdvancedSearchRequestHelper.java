@@ -44,7 +44,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdvancedSearchRequestHelper {
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
 
     private final UserIdentity userIdentity;
 
@@ -69,6 +69,7 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
+        CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(request, criteriaBuilder, caseRoot));
         return predicates;
 
     }
@@ -143,7 +144,7 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addPermissionsCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addUserSecurityRolesCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         String userAccount = userIdentity.getEmailAddress();
 
         List<Predicate> predicateList = new ArrayList<>();
