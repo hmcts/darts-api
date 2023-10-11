@@ -7,6 +7,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,10 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class TestSupportControllerTest extends IntegrationBase {
 
+    private static final String ENDPOINT_URL = "/functional-tests";
     @Autowired
     private transient MockMvc mockMvc;
-
-    private static final String ENDPOINT_URL = "/functional-tests";
 
     @Test
     void rejectsCourthousesNotPrefixedCorrectly() throws Exception {
@@ -44,6 +44,21 @@ class TestSupportControllerTest extends IntegrationBase {
 
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNotNull();
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr2")).isNotNull();
+    }
+
+
+    @Test
+    void createsAudit() throws Exception {
+
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
+            .andExpect(status().isCreated());
+
+
+        mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/func-swansea"))
+            .andExpect(status().isCreated());
+
+        assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
+
     }
 
     @Test
