@@ -8,6 +8,8 @@ public interface DataManagementApi {
 
     BinaryData getBlobDataFromUnstructuredContainer(UUID blobId);
 
+    BinaryData getBlobDataFromOutboundContainer(UUID blobId);
+
     UUID saveBlobDataToOutboundContainer(BinaryData binaryData);
 
     void deleteBlobDataFromOutboundContainer(UUID blobId);

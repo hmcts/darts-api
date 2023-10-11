@@ -77,7 +77,7 @@ class DarStopHandlerTest extends IntegrationBase {
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
 
-        assertThat(persistedCase.getClosed()).isNull();
+        assertThat(persistedCase.getClosed()).isFalse();
         assertThat(persistedCase.getCaseClosedTimestamp()).isNull();
 
         dartsGateway.verifyReceivedNotificationType(2);

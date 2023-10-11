@@ -124,7 +124,15 @@
 --    add NN to HEA.hearing_is_actual, HEA.hearing_date
 --    add NN to MED.channel and MED.total_channels, MED.start_ts, MED.end_ts
 --    remove transcription.current_state_ts to be inferred from transcription_workflow
---    
+--v49 remove transcription.company, no legacy data to migrated and a transcription co linked to a CTH can be derived elsewhere
+--    add transcription.trs_id, this is a system managed attribute, to be populated and maintained by
+--    a trigger on transcription_workflow only
+--    add transcription_workflow.workflow_actor & workflow_ts
+--    amend user_account.user_name to NN
+--    remove sequences trtseq, truseq, trsseq PK values must match values from legacy
+--    add created* & last_modified* to transcription_status
+--    add tablespace clause to transcription_status & transcription_type
+--    add trigger and associated function to transcription_workflow
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -996,8 +1004,8 @@ CREATE TABLE transcription
 ,ctr_id                      INTEGER                  
 ,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)       
 ,hea_id                      INTEGER                                -- remains nullable, until migration is complete
+,trs_id                      INTEGER                                -- to be set according to trigger on transcription_workflow only
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
-,company                     CHARACTER VARYING                      -- effectively unused in legacy, either null or "<this field will be completed by the system>"
 ,requestor                   CHARACTER VARYING                      -- 1055 distinct, from <forname><surname> to <AAANNA>
 ,hearing_date                TIMESTAMP WITH TIME ZONE               -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
@@ -1027,9 +1035,6 @@ IS 'foreign key from transcription_urgency';
 COMMENT ON COLUMN transcription.transcription_object_id
 IS 'internal Documentum primary key from moj_transcription_s';
     
-COMMENT ON COLUMN transcription.company
-IS 'directly sourced from moj_transcription_s';
-
 COMMENT ON COLUMN transcription.requestor
 IS 'directly sourced from moj_transcription_s';
 
@@ -1076,7 +1081,11 @@ IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 CREATE TABLE transcription_status
 (trs_id                      INTEGER                       NOT NULL
 ,status_type                 CHARACTER VARYING             NOT NULL
-);
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
+)TABLESPACE darts_tables; 
 
 COMMENT ON TABLE transcription_status
 IS 'standing data table';
@@ -1092,7 +1101,7 @@ CREATE TABLE transcription_type
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
 ,last_modified_by            INTEGER                       NOT NULL
-);
+)TABLESPACE darts_tables;
 
 COMMENT ON TABLE transcription_type
 IS 'standing data table, migrated from tbl_moj_transcription_type';
@@ -1123,6 +1132,8 @@ CREATE TABLE transcription_workflow
 (trw_id                      INTEGER                       NOT NULL 
 ,tra_id                      INTEGER                       NOT NULL  -- FK to transcription 
 ,trs_id                      INTEGER                       NOT NULL  -- FK to transciption_status
+,workflow_actor              INTEGER                       NOT NULL  -- FK to account_user
+,workflow_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ,workflow_comment            CHARACTER VARYING             
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -1149,7 +1160,7 @@ CREATE TABLE transient_object_directory
 CREATE TABLE user_account
 (usr_id                      INTEGER                       NOT NULL
 ,dm_user_s_object_id         CHARACTER VARYING(16)
-,user_name                   CHARACTER VARYING
+,user_name                   CHARACTER VARYING             NOT NULL
 ,user_email_address          CHARACTER VARYING
 ,description                 CHARACTER VARYING
 ,user_state                  INTEGER
@@ -1327,9 +1338,6 @@ CREATE SEQUENCE rtp_seq CACHE 20;
 CREATE SEQUENCE tod_seq CACHE 20;
 CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
-CREATE SEQUENCE trs_seq CACHE 20;
-CREATE SEQUENCE trt_seq CACHE 20;
-CREATE SEQUENCE tru_seq CACHE 20;
 CREATE SEQUENCE trw_seq CACHE 20;
 CREATE SEQUENCE usr_seq CACHE 20;
 
@@ -1722,6 +1730,10 @@ ADD CONSTRAINT transcription_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
 ALTER TABLE transcription               
+ADD CONSTRAINT transcription_transcription_status_fk
+FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
+
+ALTER TABLE transcription               
 ADD CONSTRAINT transcription_urgency_fk
 FOREIGN KEY (tru_id) REFERENCES transcription_urgency(tru_id);
 
@@ -1788,6 +1800,10 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 ALTER TABLE transcription_workflow               
 ADD CONSTRAINT transcription_workflow_transcription_status_fk
 FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
+
+ALTER TABLE transcription_workflow               
+ADD CONSTRAINT transcription_workflow_workflow_actor_fk
+FOREIGN KEY (workflow_actor) REFERENCES user_account(usr_id);
 
 ALTER TABLE transient_object_directory
 ADD CONSTRAINT transient_object_directory_created_by_fk
@@ -1907,13 +1923,25 @@ GRANT SELECT,UPDATE ON  rtp_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trc_seq TO darts_user;
-GRANT SELECT,UPDATE ON  trs_seq TO darts_user;
-GRANT SELECT,UPDATE ON  trt_seq TO darts_user;
-GRANT SELECT,UPDATE ON  tru_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trw_seq TO darts_user;
 GRANT SELECT,UPDATE ON  usr_seq TO darts_user;
 
 GRANT USAGE ON SCHEMA DARTS TO darts_user;
+
+CREATE OR REPLACE FUNCTION tra_trw_sync_fnc()
+RETURNS trigger AS
+$$
+BEGIN
+UPDATE transcription SET trs_id = NEW.trs_id WHERE tra_id = NEW.tra_id;
+RETURN NEW;
+END;
+$$
+LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE TRIGGER trw_ar_trg
+AFTER INSERT ON transcription_workflow
+FOR EACH ROW
+EXECUTE PROCEDURE tra_trw_sync_fnc();
 
 SET ROLE DARTS_USER;
 SET SEARCH_PATH TO darts;

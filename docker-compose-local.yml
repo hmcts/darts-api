@@ -22,6 +22,15 @@ services:
       - AAD_TENANT_ID
       - AAD_CLIENT_ID
       - AAD_CLIENT_SECRET
+      - XHIBIT_USER_NAME
+      - XHIBIT_PASSWORD
+      - CPP_USER_NAME
+      - CPP_PASSWORD
+      - DARPC_USER_NAME
+      - DARPC_PASSWORD
+      - AZURE_AD_FUNCTIONAL_TEST_USERNAME
+      - AZURE_AD_FUNCTIONAL_TEST_PASSWORD
+      - TESTING_SUPPORT_ENDPOINTS_ENABLED=true
     build:
       context: .
       dockerfile: Dockerfile
@@ -33,7 +42,7 @@ services:
 
   darts-db:
     container_name: darts-db
-    image: postgres:15.4-alpine
+    image: postgres:14.8-alpine # Maintain this such that we track the version deployed in higher environments
     restart: always
     environment:
       - POSTGRES_USER=darts

@@ -10,13 +10,13 @@ import java.time.OffsetDateTime;
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audio.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @UtilityClass
 public class AudioTestData {
 
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime) {
+                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
@@ -27,7 +27,7 @@ public class AudioTestData {
         mediaRequestEntity.setEndTime(endTime);
         mediaRequestEntity.setOutputFormat(null);
         mediaRequestEntity.setOutputFilename(null);
-        mediaRequestEntity.setLastAccessedDateTime(null);
+        mediaRequestEntity.setLastAccessedDateTime(lastAccessedTime);
         mediaRequestEntity.setExpiryTime(null);
         mediaRequestEntity.setCreatedBy(requestor);
         mediaRequestEntity.setLastModifiedBy(requestor);

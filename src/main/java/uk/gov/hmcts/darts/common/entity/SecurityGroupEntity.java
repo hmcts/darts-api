@@ -13,12 +13,13 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "security_group")
@@ -34,12 +35,13 @@ public class SecurityGroupEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rol_id", nullable = false, foreignKey = @ForeignKey(name = "security_group_role_fk"))
-    private SecurityRoleEntity securityRoleId;
+    private SecurityRoleEntity securityRoleEntity;
 
     @Column(name = "r_dm_group_s_object_id", length = 16)
     private String legacyObjectId;
 
     @Column(name = "group_name", nullable = false)
+    @EqualsAndHashCode.Include
     private String groupName;
 
     @Column(name = "is_private")
@@ -64,6 +66,6 @@ public class SecurityGroupEntity {
     @JoinTable(name = "security_group_courthouse_ae",
         joinColumns = {@JoinColumn(name = "grp_id")},
         inverseJoinColumns = {@JoinColumn(name = "cth_id")})
-    private List<CourthouseEntity> courthouseEntities = new ArrayList<>();
+    private Set<CourthouseEntity> courthouseEntities = new LinkedHashSet<>();
 
 }

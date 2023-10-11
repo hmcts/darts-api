@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
@@ -74,7 +74,7 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
             return outputPath;
         } catch (IOException e) {
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
     }
 

@@ -1,0 +1,86 @@
+openapi: 3.0.1
+info:
+  version: ${version}
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+servers:
+  - url: http://localhost:4550/
+paths:
+  /register-devices:
+    post:
+      tags:
+        - Devices
+      summary: Registers a device on the network
+      description: |-
+        Description
+      parameters:
+        - in: query
+          name: node_type
+          schema:
+            type: string
+          description: ""
+          required: true
+        - in: query
+          name: courthouse
+          schema:
+            type: string
+          description: ""
+          required: true
+        - in: query
+          name: court_room
+          schema:
+            type: string
+          description: ""
+          required: true
+        - in: query
+          name: host_name
+          schema:
+            type: string
+          description: ""
+          required: true
+        - in: query
+          name: ip_address
+          schema:
+            type: string
+          description: ""
+          required: true
+        - in: query
+          name: mac_address
+          schema:
+            type: string
+          description: ""
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostNodeRegistrationResponse'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "NODE_REGISTRATION_100"
+                title: "Could not find the courtroom."
+                status: 400
+components:
+  schemas:
+    PostNodeRegistrationResponse:
+      type: object
+      properties:
+        node_id:
+          description: ID of the registered device.
+          type: integer
+          example: 42

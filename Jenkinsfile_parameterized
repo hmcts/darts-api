@@ -22,7 +22,15 @@ def secrets = [
     secret('AzureStorageConnectionString', 'AZURE_STORAGE_CONNECTION_STRING'),
     secret('AzureADTenantId', 'AAD_TENANT_ID'),
     secret('AzureADClientId', 'AAD_CLIENT_ID'),
-    secret('AzureADClientSecret', 'AAD_CLIENT_SECRET')
+    secret('AzureADClientSecret', 'AAD_CLIENT_SECRET'),
+    secret('XhibitUserName', 'XHIBIT_USER_NAME'),
+    secret('XhibitPassword','XHIBIT_PASSWORD'),
+    secret('CppUserName', 'CPP_USER_NAME'),
+    secret('CppPassword', 'CPP_PASSWORD'),
+    secret('DarPcUserName', 'DARPC_USER_NAME'),
+    secret('DarPcPassword', 'DARPC_PASSWORD'),
+    secret('AzureADFunctionalTestUsername', 'AZURE_AD_FUNCTIONAL_TEST_USERNAME'),
+    secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD')
   ],
 ]
 

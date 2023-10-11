@@ -82,7 +82,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
             BLOB_LOCATION
         )).thenReturn(BINARY_DATA);
 
-        BinaryData binaryData = audioTransformationService.getAudioBlobData(BLOB_LOCATION);
+        BinaryData binaryData = audioTransformationService.getUnstructuredAudioBlob(BLOB_LOCATION);
 
         assertEquals(BINARY_DATA, binaryData);
         verify(mockDataManagementService).getBlobData(
@@ -113,9 +113,8 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
     @Test
     void shouldSaveTransientDataLocation() {
-
-        var systemUser = dartsDatabase.createSystemUserAccountEntity();
-        var testUser = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(testUser);
 
         when(mockTransientObjectDirectoryService.saveTransientDataLocation(

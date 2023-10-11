@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,6 +24,7 @@ public class SecurityPermissionEntity {
     private Integer id;
 
     @Column(name = "permission_name", nullable = false)
+    @EqualsAndHashCode.Include
     private String permissionName;
 
 }

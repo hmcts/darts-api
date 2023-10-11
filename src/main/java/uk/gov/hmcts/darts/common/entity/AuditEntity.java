@@ -26,18 +26,18 @@ public class AuditEntity extends CreatedModifiedBaseEntity {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "cas_id")
+    @JoinColumn(name = "cas_id", nullable = false)
     private CourtCaseEntity courtCase;
 
     @ManyToOne
-    @JoinColumn(name = "aua_id")
+    @JoinColumn(name = "aua_id", nullable = false)
     private AuditActivityEntity auditActivity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usr_id")
+    @JoinColumn(name = "usr_id", nullable = false)
     private UserAccountEntity user;
 
-    @Column(name = "application_server")
+    @Column(name = "application_server", nullable = false)
     private String applicationServer;
 
     @Column(name = "additional_data")

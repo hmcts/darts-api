@@ -2,18 +2,22 @@ spring:
   datasource:
     username: darts
     password: darts
+  flyway:
+    locations: classpath:db/migration/common,db/migration/postgres,db/migration/local
   jpa:
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
 darts:
   daily-list:
     housekeeping:
       enabled: false
       cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:4 0/2 * * * MON-FRI}
+  testing-support-endpoints:
+    enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:true}
 
 logging:
   level:
