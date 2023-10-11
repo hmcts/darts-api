@@ -15,7 +15,11 @@ import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import static jakarta.persistence.CascadeType.MERGE;
+import static jakarta.persistence.CascadeType.PERSIST;
 
 @Entity
 @Table(name = "transcription")
@@ -63,15 +67,21 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private OffsetDateTime hearingDate;
 
     @Column(name = "start_ts")
-    private OffsetDateTime start;
+    private OffsetDateTime startTime;
 
     @Column(name = "end_ts")
-    private OffsetDateTime end;
+    private OffsetDateTime endTime;
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
-    @OneToMany(mappedBy = "transcription")
-    private List<TranscriptionCommentEntity> transcriptionComments;
+    @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
+    private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
+
+    @OneToMany(cascade = {PERSIST, MERGE}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
+    private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
+
+    @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.TRANSCRIPTION)
+    private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
 }

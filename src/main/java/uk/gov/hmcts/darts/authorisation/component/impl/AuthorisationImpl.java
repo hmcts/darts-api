@@ -4,11 +4,14 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -20,6 +23,7 @@ import java.util.Set;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND;
+import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
 import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
 import static uk.gov.hmcts.darts.hearings.exception.HearingApiError.HEARING_NOT_FOUND;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
@@ -35,6 +39,7 @@ public class AuthorisationImpl implements Authorisation {
     private final MediaRepository mediaRepository;
     private final TranscriptionRepository transcriptionRepository;
     private final AuthorisationApi authorisationApi;
+    private final UserIdentity userIdentity;
 
     @Override
     public void authoriseByCaseId(Integer caseId, Set<SecurityRoleEnum> securityRoles) {
@@ -88,7 +93,7 @@ public class AuthorisationImpl implements Authorisation {
     public void authoriseByTranscriptionId(Integer transcriptionId, Set<SecurityRoleEnum> securityRoles) {
         try {
             final List<CourthouseEntity> courthouses = List.of(transcriptionRepository.getReferenceById(transcriptionId)
-                                                                   .getCourtroom().getCourthouse());
+                                                                   .getCourtCase().getCourthouse());
             authorisationApi.checkAuthorisation(courthouses, securityRoles);
         } catch (EntityNotFoundException e) {
             log.error("Unable to find Transcription-Courtroom-Courthouse for checkAuthorisation", e);
@@ -96,4 +101,17 @@ public class AuthorisationImpl implements Authorisation {
         }
     }
 
+    public void authoriseMediaRequestAgainstUser(Integer mediaRequestId) {
+        try {
+            MediaRequestEntity mediaRequest = mediaRequestRepository.getReferenceById(mediaRequestId);
+            UserAccountEntity userAccount = userIdentity.getUserAccount();
+
+            if (!mediaRequest.getRequestor().getId().equals(userAccount.getId())) {
+                throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
+            }
+        } catch (EntityNotFoundException | IllegalStateException e) {
+            log.error("Unable to validate media requests for user", e);
+            throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
+        }
+    }
 }

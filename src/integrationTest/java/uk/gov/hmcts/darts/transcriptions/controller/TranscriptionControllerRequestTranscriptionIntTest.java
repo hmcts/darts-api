@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,31 +13,43 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
+import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 
 @AutoConfigureMockMvc
@@ -44,38 +57,45 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNam
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase {
 
-    private static final String ENDPOINT = "/transcriptions";
-
-    private static final URI ENDPOINT_URI = URI.create(ENDPOINT);
+    private static final URI ENDPOINT_URI = URI.create("/transcriptions");
 
     private static final String TEST_COMMENT = "Test comment";
 
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-07-31T14:32Z");
-    private static final String SOME_COURTHOUSE = "some-courthouse";
-    private static final String SOME_COURTROOM = "some-courtroom";
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @Autowired
+    private DartsDatabaseStub dartsDatabaseStub;
+
+    @Autowired
+    private AuthorisationStub authorisationStub;
+
+    @Autowired
+    private AuditService auditService;
+
     @Autowired
     private ObjectMapper objectMapper;
+
     private CourtCaseEntity courtCase;
     private HearingEntity hearing;
+    private UserAccountEntity testUser;
 
     @BeforeEach
     void setupData() {
-        CourthouseEntity someCourthouse = someMinimalCourthouse();
-        someCourthouse.setCourthouseName(SOME_COURTHOUSE);
+        authorisationStub.givenTestSchema();
 
-        CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(someCourthouse, SOME_COURTROOM);
+        courtCase = authorisationStub.getCourtCaseEntity();
+        hearing = authorisationStub.getHearingEntity();
+        testUser = authorisationStub.getTestUser();
 
-        courtCase = createCaseAt(someCourthouse);
-        courtCase.setCaseNumber("Case1");
-
-        JudgeEntity judge = createJudgeWithName("aJudge");
-        hearing = createHearingWithDefaults(courtCase, courtroom1, LocalDate.of(2023, 5, 20), judge);
-
-        dartsDatabase.saveAll(hearing);
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
@@ -94,8 +114,53 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
 
+        Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
+            .read("$.transcription_id");
+        assertNotNull(transcriptionId);
+
+        TranscriptionRepository transcriptionRepository = dartsDatabaseStub.getTranscriptionRepository();
+        TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
+        assertEquals(2, transcriptionWorkflowEntities.size());
+        assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
+                                    REQUESTED, testUser, TEST_COMMENT
+        );
+        assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
+                                    AWAITING_AUTHORISATION, testUser, null
+        );
+
+        assertAudit(1);
+    }
+
+    private void assertTranscriptionWorkflow(TranscriptionWorkflowEntity transcriptionWorkflowToCheck,
+                                             TranscriptionStatusEnum expectedTranscriptionStatus,
+                                             UserAccountEntity expectedWorkflowActor,
+                                             String expectedWorkflowComment) {
+
+        assertEquals(
+            expectedTranscriptionStatus.getId(),
+            transcriptionWorkflowToCheck.getTranscriptionStatus().getId()
+        );
+        assertEquals(expectedWorkflowActor, transcriptionWorkflowToCheck.getWorkflowActor());
+        assertEquals(expectedWorkflowComment, transcriptionWorkflowToCheck.getWorkflowComment());
+    }
+
+    private void assertAudit(int expected) {
+        AuditSearchQuery searchQuery = new AuditSearchQuery();
+        searchQuery.setCaseId(courtCase.getId());
+        searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
+        searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
+        searchQuery.setAuditActivityId(REQUEST_TRANSCRIPTION.getId());
+
+        List<AuditEntity> auditEntities = auditService.search(searchQuery);
+        assertEquals(expected, auditEntities.size());
+        if (expected == 1) {
+            assertEquals(testUser, auditEntities.get(0).getUser());
+        }
     }
 
     @Test
@@ -115,8 +180,15 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
 
+        Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
+            .read("$.transcription_id");
+        assertNotNull(transcriptionId);
+
+        assertAudit(1);
     }
 
     @Test
@@ -142,6 +214,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
+
+        assertAudit(0);
     }
 
     @ParameterizedTest
@@ -169,6 +243,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
+
+        assertAudit(0);
     }
 
     @ParameterizedTest
@@ -196,6 +272,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         assertTranscriptionFailed100Error(actualJson);
+
+        assertAudit(0);
     }
 
     @Test
@@ -215,9 +293,10 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_106")));
 
+        assertAudit(0);
     }
 
     @Test
@@ -240,6 +319,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andExpect(status().isBadRequest())
             .andReturn();
 
+        assertAudit(0);
     }
 
     @Test
@@ -259,9 +339,10 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isInternalServerError())
-            .andReturn();
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_104")));
 
+        assertAudit(0);
     }
 
     @Test
@@ -294,6 +375,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+        assertAudit(0);
     }
 
     @Test
@@ -326,6 +409,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+        assertAudit(0);
     }
 
     @Test
@@ -345,6 +430,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
+
+        assertAudit(1);
     }
 
     private static void assertTranscriptionFailed100Error(String actualJson) {

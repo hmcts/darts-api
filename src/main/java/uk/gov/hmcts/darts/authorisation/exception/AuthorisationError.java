@@ -38,6 +38,11 @@ public enum AuthorisationError implements DartsApiError {
         "105",
         HttpStatus.BAD_REQUEST,
         "Failed to check authorisation for the transcription"
+    ),
+    USER_DETAILS_INVALID(
+        "106",
+        HttpStatus.UNAUTHORIZED,
+        "Could not obtain user details"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";

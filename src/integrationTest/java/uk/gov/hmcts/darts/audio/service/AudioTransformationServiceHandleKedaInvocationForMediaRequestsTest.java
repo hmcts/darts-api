@@ -6,41 +6,45 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audio.model.AudioRequestType;
-import uk.gov.hmcts.darts.audio.service.impl.AudioTransformationServiceImpl;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 
 
 @Import(SystemCommandExecutorStubImpl.class)
 @ExtendWith(MockitoExtension.class)
-class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase {
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
+class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
 
-    private static final String NOTIFICATION_TEMPLATE_ID_SUCCESS = "66a1864f-24a6-469a-ac55-66bc57c7e4f6";
-    private static final String NOTIFICATION_TEMPLATE_ID_FAILURE = "cb5bc3f6-ae1f-4346-845a-622cf6ad2632";
     private static final String EMAIL_ADDRESS = "test@test.com";
 
     @Autowired
-    private AudioTransformationServiceProcessAudioRequestGivenBuilder given;
+    private AudioTransformationServiceHandleKedaInvocationForMediaRequestsGivenBuilder given;
 
     @Autowired
-    private AudioTransformationServiceImpl audioTransformationService;
+    private AudioTransformationService audioTransformationService;
+
+    @SpyBean
+    private MediaRequestService mediaRequestService;
 
     private HearingEntity hearing;
 
@@ -53,7 +57,8 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
     @Transactional
-    void processAudioRequestShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(
+    @SuppressWarnings("PMD.LawOfDemeter")
+    public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(
         AudioRequestType audioRequestType) {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
@@ -65,8 +70,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
 
-        UUID blobId = audioTransformationService.processAudioRequest(mediaRequestId);
-        assertNotNull(blobId);
+        audioTransformationService.handleKedaInvocationForMediaRequests();
 
         var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
             .findById(mediaRequestId)
@@ -78,7 +82,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
-        assertEquals(NOTIFICATION_TEMPLATE_ID_SUCCESS, notificationEntity.getEventId());
+        assertEquals(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
@@ -87,7 +91,8 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
     @ParameterizedTest
     @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
     @Transactional
-    void processAudioRequestShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
+    @SuppressWarnings("PMD.LawOfDemeter")
+    public void handleKedaInvocationForMediaRequestsShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
@@ -99,7 +104,7 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         Integer mediaRequestId = given.getMediaRequestEntity().getId();
         var exception = assertThrows(
             DartsApiException.class,
-            () -> audioTransformationService.processAudioRequest(mediaRequestId)
+            () -> audioTransformationService.handleKedaInvocationForMediaRequests()
         );
 
         assertEquals("Failed to process audio request", exception.getMessage());
@@ -114,10 +119,22 @@ class AudioTransformationServiceProcessAudioRequestTest extends IntegrationBase 
         assertEquals(1, scheduledNotifications.size());
 
         var notificationEntity = scheduledNotifications.get(0);
-        assertEquals(NOTIFICATION_TEMPLATE_ID_FAILURE, notificationEntity.getEventId());
+        assertEquals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(), notificationEntity.getEventId());
         assertNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
+    @Transactional
+    public void handleKedaInvocationForMediaRequestsShouldNotInvokeProcessAudioRequestWhenNoOpenMediaRequestsExist(
+        AudioRequestType audioRequestType) {
+        given.aUserAccount(EMAIL_ADDRESS);
+
+        audioTransformationService.handleKedaInvocationForMediaRequests();
+
+        verify(mediaRequestService, never()).updateAudioRequestStatus(any(), any());
     }
 
 }

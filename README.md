@@ -108,6 +108,18 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
+### Jacoco Coverage Report
+
+A local jacoco coverage report can be generated using the following command:-
+
+```bash
+  ./gradlew jacocoTestReport
+```
+
+The report will be available under ./build/jacocoHtml/index.html. The report incorporates both unit test
+and integration test coverage
+
+
 ### Running the application in docker
 
 Create the image of the application by executing the following command:
@@ -187,9 +199,12 @@ The following Spring Profiles are defined. "External Components" are defined as 
 | `functionalTest` | `src/functionalTest/resources/application-functionalTest.yaml` | For running functional tests under `src/functionalTest`.                                       | Functional tests execute API calls against the application deployed in the PR environment. That application is deployed with the `dev` profile (see below).                                                                     |
 | `dev`            | `src/main/resources/application-dev.yaml`                      | For running the application in the Pull Request (dev) environment.                             | Interaction permitted with "real" components, which may be services deployed to a test environment.                                                                                                                             |
 
+## Functional testing
+
+The functional tests module is run by default in the dev and staging environments.  Unlike the integration tests the functional tests will hit the deployed darts-api and postgres database.  This requires some management of the data created by these tests.  To this end the following conventions should be used:
+
+ - If a courthouse needs to pre-exist for a functional test it can be created from within the tests using `/functional-tests/courthouse/{courthouse_name}/courtroom/{courtroom_name}`. The courthouse_name must be prefixed with `func-`. This data will be cleaned after the test has executed.
+ - If a case needs to pre-exist for a functional test then however it is created the case_number should also pre-fixed with `func-`.  There is a random case_number generator that will provide case_numbers with this prefix.  These cases and their associated hearings and events will be cleaned up automatically after the test has executed.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
-
-

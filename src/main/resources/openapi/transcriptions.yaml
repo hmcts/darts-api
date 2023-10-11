@@ -13,22 +13,131 @@ paths:
     post:
       tags:
         - Transcription
-      summary: Users can request transcription
+      summary: Requesters can request transcription
       operationId: requestTranscription
-      description: Adds a user transcription request for processing
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestTranscriptionResponse'
         '400':
-          description: Failed to validate transcription request
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/RequestTranscription400ErrorCode'
+        '401':
+          description: Unauthorised Error
         '404':
-          description: Resource with the provided id does not exist.
+          description: Not Found Error
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/TranscriptionRequestDetails'
-        description: Transcription Request item to add
+  /transcriptions/{transcription_id}:
+    patch:
+      tags:
+        - Transcription
+      summary: Workflow actors can add a comment against the transcription status
+      operationId: updateTranscription
+      parameters:
+        - in: path
+          name: transcription_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateTranscriptionResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription400ErrorCode'
+              example:
+                type: "TRANSCRIPTION_103"
+                title: "The workflow comment is required for this transcription update"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation401ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription404ErrorCode'
+              example:
+                type: "TRANSCRIPTION_101"
+                title: "The requested transcription cannot be found"
+                status: 404
+        '409':
+          description: Transcription Workflow Action Not Permitted
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription409ErrorCode'
+              example:
+                type: "TRANSCRIPTION_105"
+                title: "Transcription workflow action is not permitted"
+                status: 409
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTranscription'
 components:
   schemas:
     TranscriptionRequestDetails:
@@ -60,4 +169,57 @@ components:
           type: string
           format: date-time
           example: '2023-07-31T14:32:24.000Z'
-
+    RequestTranscription400ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_100"
+        - "TRANSCRIPTION_104"
+        - "TRANSCRIPTION_106"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY ]
+    UpdateTranscription:
+      type: object
+      required:
+        - transcription_status_id
+      properties:
+        transcription_status_id:
+          type: integer
+          example: 3
+        workflow_comment:
+          type: string
+    RequestTranscriptionResponse:
+      type: object
+      required:
+        - transcription_id
+      properties:
+        transcription_id:
+          type: integer
+    UpdateTranscriptionResponse:
+      type: object
+      required:
+        - transcription_workflow_id
+      properties:
+        transcription_workflow_id:
+          type: integer
+    UpdateTranscription404ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_101"
+      x-enum-varnames: [ TRANSCRIPTION_NOT_FOUND ]
+    UpdateTranscription400ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_105"
+        - "TRANSCRIPTION_102"
+        - "TRANSCRIPTION_103"
+        - "TRANSCRIPTION_104"
+      x-enum-varnames: [ BAD_REQUEST_TRANSCRIPTION_ID, BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE ]
+    TranscriptionAuthorisation401ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_100"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
+    UpdateTranscription409ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_105"
+      x-enum-varnames: [ TRANSCRIPTION_WORKFLOW_ACTION_INVALID ]

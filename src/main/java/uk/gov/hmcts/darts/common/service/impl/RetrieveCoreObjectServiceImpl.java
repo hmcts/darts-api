@@ -65,6 +65,7 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         hearing.setCourtroom(courtroom);
         hearing.setHearingDate(hearingDate);
         hearing.setNew(true);
+        hearing.setHearingIsActual(false);
         hearingRepository.saveAndFlush(hearing);
         return hearing;
     }
@@ -116,6 +117,8 @@ public class RetrieveCoreObjectServiceImpl implements RetrieveCoreObjectService 
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber(caseNumber);
         courtCase.setCourthouse(foundCourthouse);
+        courtCase.setClosed(false);
+        courtCase.setInterpreterUsed(false);
         caseRepository.saveAndFlush(courtCase);
         return courtCase;
     }

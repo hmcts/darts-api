@@ -37,32 +37,38 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCase(
             INTEGRATION_TEST_USER_EMAIL);
 
         if (userAccountEntityOptional.isPresent()) {
             return userAccountEntityOptional.get();
         } else {
+            UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
             var newUser = new UserAccountEntity();
             newUser.setUsername("IntegrationTest User");
             newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
             newUser.setCreatedBy(systemUser);
             newUser.setLastModifiedBy(systemUser);
+            newUser.setState(1);
             return userAccountRepository.saveAndFlush(newUser);
         }
     }
 
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
-        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
-        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
+    }
+
+    private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity, CourthouseEntity courthouseEntity) {
+        if (!securityGroupEntity.getCourthouseEntities().contains(courthouseEntity)) {
+            securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+            securityGroupRepository.saveAndFlush(securityGroupEntity);
+        }
     }
 
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
@@ -72,6 +78,18 @@ public class UserAccountStub {
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
+    public UserAccountEntity createTranscriptionCompanyUser(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(4);
+        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
+        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
     }

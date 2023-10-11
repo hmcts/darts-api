@@ -5,20 +5,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,10 +43,12 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
-class AudioControllerDownloadIntTest extends IntegrationBase {
+@SuppressWarnings({"PMD.ExcessiveImports"})
+class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio/download");
 
+    private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivityEnum.EXPORT_AUDIO.getId();
     @MockBean
     private Authorisation authorisation;
 
@@ -47,13 +61,20 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
+    @SpyBean
+    private DataManagementService dataManagementService;
+
+    @Autowired
+    private AuditService auditService;
+
     @Test
-    void audioDownloadGetShouldReturnSuccess() throws Exception {
+    void audioRequestDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
+
         dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
                 mediaRequestEntity,
@@ -70,15 +91,27 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk());
 
-        verify(authorisation).authoriseByMediaRequestId(
+        verify(dataManagementService).getBlobData(eq("darts-outbound"), any());
+
+        verify(authorisation, times(2)).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(TRANSCRIBER)
-        );
+            Set.of(TRANSCRIBER));
+
+        AuditSearchQuery searchQuery = new AuditSearchQuery();
+        searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
+        searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
+        searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
+        searchQuery.setAuditActivityId(DOWNLOAD_AUDIT_ACTIVITY_ID);
+
+        List<AuditEntity> auditEntities = auditService.search(searchQuery);
+        assertEquals("2", auditEntities.get(0).getCourtCase().getCaseNumber());
+        assertEquals(1, auditEntities.size());
+
     }
 
     @Test
     @Transactional
-    void audioDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
+    void audioRequestDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
         authorisationStub.givenTestSchema();
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
@@ -92,10 +125,9 @@ class AudioControllerDownloadIntTest extends IntegrationBase {
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.type").value("AUDIO_101"));
 
-        verify(authorisation).authoriseByMediaRequestId(
+        verify(authorisation, times(2)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER)
-        );
+            Set.of(TRANSCRIBER));
     }
 
     @Test

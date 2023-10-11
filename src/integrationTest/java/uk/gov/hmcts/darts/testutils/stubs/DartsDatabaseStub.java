@@ -47,6 +47,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
+import uk.gov.hmcts.darts.noderegistration.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
@@ -99,12 +100,14 @@ public class DartsDatabaseStub {
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
     private final SecurityRoleRepository securityRoleRepository;
+    private final NodeRegistrationRepository nodeRegistrationRepository;
 
     private final UserAccountStub userAccountStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
     private final CourthouseStub courthouseStub;
     private final AuditStub auditStub;
     private final EventStub eventStub;
+    private final TranscriptionStub transcriptionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
@@ -119,6 +122,7 @@ public class DartsDatabaseStub {
         hearingRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
+        nodeRegistrationRepository.deleteAll();
         courtroomRepository.deleteAll();
         defenceRepository.deleteAll();
         defendantRepository.deleteAll();
@@ -277,7 +281,7 @@ public class DartsDatabaseStub {
 
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
-        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).get();
+        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).orElse(null);
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {
@@ -303,7 +307,8 @@ public class DartsDatabaseStub {
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z")
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-06-30T13:00:00Z")
             ));
     }
 
@@ -379,5 +384,16 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
+    public void createTestUserAccount() {
+        Optional<UserAccountEntity> foundAccount = userAccountRepository.findByEmailAddressIgnoreCase(
+            "test.user@example.com");
+        if (foundAccount.isPresent()) {
+            return;
+        }
+        UserAccountEntity testUser = new UserAccountEntity();
+        testUser.setEmailAddress("test.user@example.com");
+        testUser.setUsername("testuser");
+        userAccountRepository.saveAndFlush(testUser);
+    }
 
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
@@ -13,7 +12,6 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 @Table(name = "transcription_type")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = false)
 public class TranscriptionTypeEntity extends CreatedModifiedBaseEntity {
 
     @Id

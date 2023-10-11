@@ -27,7 +27,7 @@ public class NodeRegisterEntity {
     public static final String HOSTNAME = "hostname";
     public static final String IP_ADDRESS = "ip_address";
     public static final String MAC_ADDRESS = "mac_address";
-    public static final String DEVICE_TYPE = "device_type";
+    public static final String NODE_TYPE = "node_type";
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = COURTROOM_ID, nullable = false)
@@ -39,16 +39,16 @@ public class NodeRegisterEntity {
     @SequenceGenerator(name = NODE_GENERATOR, sequenceName = NODE_SEQUENCE, allocationSize = 1)
     private int nodeId;
 
-    @Column(name = HOSTNAME)
+    @Column(name = HOSTNAME, nullable = false)
     private String hostname;
 
-    @Column(name = IP_ADDRESS)
+    @Column(name = IP_ADDRESS, nullable = false)
     private String ipAddress;
 
-    @Column(name = MAC_ADDRESS)
+    @Column(name = MAC_ADDRESS, nullable = false)
     private String macAddress;
 
-    @Column(name = DEVICE_TYPE)
-    private String deviceType;
+    @Column(name = NODE_TYPE)
+    private String nodeType;
 
 }
