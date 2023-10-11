@@ -23,7 +23,7 @@
     <vulnerabilityName>CVE-2023-35116</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-10-14">
+  <suppress until="2023-12-14">
     <notes>A vulnerability was found in the Hot Rod client. This security issue occurs as the Hot Rod client does not
       enable hostname validation when using TLS, possibly resulting in a man-in-the-middle (MITM) attack. Will have to
       wait until azure-sdk-bom is updated to use newer netty library.
