@@ -217,7 +217,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             Response response = buildRequestWithExternalAuth()
                 .contentType(ContentType.JSON)
                 .when()
-                .baseUri(getUri(CASES_URI + HEARINGS + "/" + hearingId + EVENTS))
+                .baseUri(getUri(HEARINGS + "/" + hearingId + EVENTS))
                 .get()
                 .then()
                 .extract().response();
