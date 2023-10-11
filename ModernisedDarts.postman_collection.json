@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "f3b86088-28e9-4c59-ae47-cfeeb9a708c3",
+		"_postman_id": "87d2fa73-b40d-4535-baa4-ce37c358ca07",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30362290"
 	},
 	"item": [
 		{
@@ -25,6 +26,33 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"1000\",\n  \"sub_type\": \"1002\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
+								},
+								"url": {
+									"raw": "{{serverUrl}}/events",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"events"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "TranscriptionRequestHandler",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"message_id\": \"100\",\n  \"type\": \"3010\",\n  \"event_id\": \"12345\",\n  \"courthouse\": \"swansea\",\n  \"courtroom\": \"1\",\n  \"case_numbers\": [\n    \"Swansea_case_1\"\n  ],\n  \"event_text\": \"some text for the event\",\n  \"date_time\": \"2023-08-08T14:01:06.085Z\"\n}"
 								},
 								"url": {
 									"raw": "{{serverUrl}}/events",
@@ -461,11 +489,11 @@
 										},
 										{
 											"key": "court_room_number",
-											"value": null
+											"value": ""
 										},
 										{
 											"key": "hearing_date",
-											"value": null
+											"value": ""
 										}
 									]
 								}
