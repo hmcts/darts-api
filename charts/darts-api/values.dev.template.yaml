@@ -24,7 +24,7 @@ java:
     flexibleserver: "darts-preview"
     setup:
       databases:
-      - name: darts
+      - name: "pr-${CHANGE_ID}-darts"
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true

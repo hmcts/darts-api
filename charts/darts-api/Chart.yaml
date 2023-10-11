@@ -14,6 +14,6 @@ dependencies:
     version: 2.4.1
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo'
   - name: postgresql
-    version: 1.0.0
+    version: 1.0.2
     repository: 'https://hmctspublic.azurecr.io/helm/v1/repo/'
     condition: postgresql.enabled
