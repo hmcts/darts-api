@@ -88,6 +88,19 @@ class NodeRegistrationControllerTest  extends IntegrationBase {
         assertNotEquals(resp1, resp2);
     }
 
+    @Test
+    void testEmptyStrings() throws Exception {
+        dartsDatabase.createCourthouseWithTwoCourtrooms();
+
+        CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
+
+        MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
+                                                                    courtroomEntity.getName(), "");
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
+        assertTrue(mvcResult.getResponse().getContentAsString().contains("size must be between 1 and 2147483647"));
+    }
+
     private MockHttpServletRequestBuilder buildRequest(String courthouseName, String courtroomName,
                                                        String nodeType) {
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
