@@ -217,6 +217,7 @@ jacocoTestCoverageVerification.dependsOn jacocoTestReport
 
 sonarqube {
   properties {
+    property 'sonar.gradle.skipCompile', 'true'
     property "sonar.projectName", "Reform :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.exclusions", coverageExclusions.join(', ')
