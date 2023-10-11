@@ -56,14 +56,19 @@ public class UserAccountStub {
 
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
-        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
-        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
-        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+        addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
+    }
+
+    private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity, CourthouseEntity courthouseEntity) {
+        if (!securityGroupEntity.getCourthouseEntities().contains(courthouseEntity)) {
+            securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+            securityGroupRepository.saveAndFlush(securityGroupEntity);
+        }
     }
 
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
