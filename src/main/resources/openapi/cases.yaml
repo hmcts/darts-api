@@ -204,6 +204,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/transcripts'
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested case cannot be found"
+                status: 404
         '500':
           description: Internal Server Error
           content:

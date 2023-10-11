@@ -66,7 +66,7 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpoint() throws Exception {
+    void caseGetTranscriptEndpointNotFound() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
 
@@ -75,7 +75,7 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpointOneObjectReturned() throws Exception {
+    void casesGetTranscriptEndpointOneObjectReturned() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
         dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
@@ -89,7 +89,7 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
     }
 
     @Test
-    void casesSearchGetEndpointTwoObjectsReturned() throws Exception {
+    void casesGetTranscriptEndpointTwoObjectsReturned() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
         dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
         dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
