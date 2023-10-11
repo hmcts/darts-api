@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
-import uk.gov.hmcts.darts.cases.util.CourtCaseUtil;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -123,14 +122,13 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
-        List<CourtCaseEntity> courtCaseEntities = advancedSearchRequestHelper.getMatchingCourtCases(request);
-        if (courtCaseEntities.size() > MAX_RESULTS) {
+        List<Integer> caseIds = advancedSearchRequestHelper.getMatchingCourtCases(request);
+        if (caseIds.size() > MAX_RESULTS) {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
-        if (courtCaseEntities.isEmpty()) {
+        if (caseIds.isEmpty()) {
             return new ArrayList<>();
         }
-        List<Integer> caseIds = CourtCaseUtil.getCaseIdList(courtCaseEntities);
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
