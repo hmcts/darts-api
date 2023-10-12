@@ -42,7 +42,7 @@ services:
 
   darts-db:
     container_name: darts-db
-    image: postgres:14.8-alpine # Maintain this such that we track the version deployed in higher environments
+    image: postgres:16.0-alpine # Maintain this such that we track the version deployed in higher environments
     restart: always
     environment:
       - POSTGRES_USER=darts
