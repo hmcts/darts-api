@@ -136,6 +136,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -173,6 +192,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '500':
           description: Internal Server Error
           content:
@@ -201,6 +239,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/hearings'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '500':
           description: Internal Server Error
           content:
@@ -229,6 +286,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/transcripts'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -592,10 +668,16 @@ components:
       enum:
         - "ADD_CASE_101"
         - "ADD_CASE_102"
-      x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND, CASE_DOCUMENT_CANT_BE_PARSED]
+      x-enum-varnames: [ CASE_COURT_HOUSE_NOT_FOUND, CASE_DOCUMENT_CANT_BE_PARSED ]
 
     GetCasesErrorCode:
       type: string
       enum:
         - "GET_CASE_101"
-      x-enum-varnames: [CASE_COURT_HOUSE_NOT_FOUND]
+      x-enum-varnames: [ CASE_COURT_HOUSE_NOT_FOUND ]
+
+    CasesAuthorisation403ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_100"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]

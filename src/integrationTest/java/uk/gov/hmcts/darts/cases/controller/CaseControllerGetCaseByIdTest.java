@@ -5,18 +5,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
+@Transactional
 class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Autowired
@@ -28,6 +34,9 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "1";
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
 
     @BeforeEach
     void setUp() {
@@ -43,6 +52,20 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
         courtCase.addDefendant("aDefendant");
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+    }
+
+    @Test
+    void casesSearchGetEndpointShouldReturnForbiddenError() throws Exception {
+
+        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
+
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
     @Test
