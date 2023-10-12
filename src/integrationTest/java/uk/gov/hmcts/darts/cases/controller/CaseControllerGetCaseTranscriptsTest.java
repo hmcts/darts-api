@@ -15,11 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,7 +79,9 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
     @Test
     void casesGetTranscriptEndpointOneObjectReturned() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
-        dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(transcription);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
@@ -91,8 +95,12 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
     @Test
     void casesGetTranscriptEndpointTwoObjectsReturned() throws Exception {
         HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
-        dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(transcription);
+        TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(transcription2);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
