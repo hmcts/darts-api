@@ -74,6 +74,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
 
+        '400':
+          description: Bad Request- Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
         '500':
           description: Internal Server Error
           content:
@@ -121,8 +135,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/CourtLogs'
 
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
         '500':
           description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
 
     post:
       tags:
@@ -161,6 +187,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EventsResponse'
+
+        '400':
+          description: Bad Request- Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
 
 
 components:
@@ -279,3 +326,28 @@ components:
     Courtroom:
       type: string
       maxLength: 25
+
+    EventErrorCode:
+      type: string
+      enum:
+        - "ADD_EVENT_101"
+        - "ADD_EVENT_102"
+        - "ADD_EVENT_103"
+      x-enum-varnames: [EVENT_COURT_HOUSE_NOT_FOUND, EVENT_DOCUMENT_CANT_PARSED, PROCESSOR_NOT_FOUND]
+
+
+    GetCourtLogsErrorCode:
+      type: string
+      enum:
+        - "GET_COURTLOG_101"
+        - "GET_COURTLOG_102"
+      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND]
+
+
+    PostCourtLogsErrorCode:
+      type: string
+      enum:
+        - "ADD_COURTLOG_101"
+        - "ADD_COURTLOG_102"
+        - "ADD_COURTLOG_103"
+      x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED]
