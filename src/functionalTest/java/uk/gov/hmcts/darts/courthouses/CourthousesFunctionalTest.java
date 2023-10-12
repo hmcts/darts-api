@@ -139,7 +139,6 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
 
-
     @Test
     @Order(8)
     void getCourthouseIdDoesNotExist() {
@@ -154,7 +153,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
         assertEquals(NOT_FOUND, response.statusCode());
     }
 
-
+    //----------------------------------
     private int getLatestCourthouseID() {
         List<Integer> ids = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
