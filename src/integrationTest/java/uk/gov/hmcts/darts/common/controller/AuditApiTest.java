@@ -39,22 +39,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Sql(scripts = "/sql/remove-audit-and-activity.sql", executionPhase = AFTER_TEST_METHOD)
 class AuditApiTest {
-    public static final int EVENT_ID = 1;
-    public static final int CASE_ID = 1;
+
+    public static final int AUDIT_ACTIVITY_ID = 1;
     public static final int ID = 1;
-    private static final int USER_ID = 1;
+
     @Autowired
     private transient MockMvc mockMvc;
 
     @Autowired
     protected DartsDatabaseStub dartsDatabaseStub;
 
+    private UserAccountEntity defaultUser;
+
     @BeforeEach
     public void before() {
         CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourthouse", "TestCourtCase");
         AuditStub auditStub = dartsDatabaseStub.getAuditStub();
-        UserAccountStub userAccountStub = dartsDatabaseStub.getUserAccountStub();
-        UserAccountEntity defaultUser = userAccountStub.getDefaultUser();
+        defaultUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
         AuditActivityEntity anyAuditActivity = auditStub.getAnyAuditActivity();
 
         AuditEntity auditEntity = auditStub.createAuditEntity(
@@ -72,7 +73,7 @@ class AuditApiTest {
     private static Stream<Arguments> nonExistingId() {
         return Stream.of(
             arguments("case_id", 1111),
-            arguments("event_id", 9999)
+            arguments("audit_activity_id", 9999)
         );
     }
 
@@ -88,7 +89,7 @@ class AuditApiTest {
         CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourthouse", "TestCourtCase2");
         AuditStub auditStub = dartsDatabaseStub.getAuditStub();
         UserAccountStub userAccountStub = dartsDatabaseStub.getUserAccountStub();
-        UserAccountEntity defaultUser = userAccountStub.getDefaultUser();
+        UserAccountEntity defaultUser = userAccountStub.getIntegrationTestUserAccountEntity();
         AuditActivityEntity newAuditActivity = auditStub.createTestAuditActivityEntity();
         AuditEntity auditEntity = auditStub.createAuditEntity(
             courtCase,
@@ -106,21 +107,21 @@ class AuditApiTest {
             .andExpect(jsonPath("$[0].id", is(auditEntity.getId())))
             .andExpect(jsonPath("$[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
-            .andExpect(jsonPath("$[0].event_id", is(auditEntity.getAuditActivity())))
-            .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
+            .andExpect(jsonPath("$[0].audit_activity_id", is(auditEntity.getAuditActivity().getId())))
+            .andExpect(jsonPath("$[0].user_id", is(defaultUser.getId())))
             .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
 
         //get by eventId
         requestBuilder = get("/audit/search")
-            .queryParam("event_id", Integer.toString(auditEntity.getAuditActivity()))
+            .queryParam("audit_activity_id", Integer.toString(auditEntity.getAuditActivity().getId()))
             .contentType(MediaType.APPLICATION_JSON_VALUE);
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id", is(auditEntity.getId())))
             .andExpect(jsonPath("$[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
-            .andExpect(jsonPath("$[0].event_id", is(auditEntity.getAuditActivity())))
-            .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
+            .andExpect(jsonPath("$[0].audit_activity_id", is(auditEntity.getAuditActivity().getId())))
+            .andExpect(jsonPath("$[0].user_id", is(defaultUser.getId())))
             .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
     }
@@ -143,8 +144,8 @@ class AuditApiTest {
         mockMvc.perform(requestBuilder).andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id", is(ID)))
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
-            .andExpect(jsonPath("$[0].event_id", is(EVENT_ID)))
-            .andExpect(jsonPath("$[0].user_id", is(USER_ID)))
+            .andExpect(jsonPath("$[0].audit_activity_id", is(AUDIT_ACTIVITY_ID)))
+            .andExpect(jsonPath("$[0].user_id", is(defaultUser.getId())))
             .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
     }

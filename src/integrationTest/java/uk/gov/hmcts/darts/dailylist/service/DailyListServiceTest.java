@@ -59,10 +59,11 @@ class DailyListServiceTest extends IntegrationBase {
     }
 
     @Test
-    void insert1Ok() throws IOException {
+    void insert1OkJson() throws IOException {
         dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
-        String requestBody = getContentsFromFile("tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
-        DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
+        String dailyListJsonStr = getContentsFromFile(
+            "tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
+        DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
         DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
 
         service.saveDailyListToDatabase(request);
@@ -72,6 +73,44 @@ class DailyListServiceTest extends IntegrationBase {
         DailyListEntity dailyListEntity = resultList.get(0);
 
         String expectedResponseLocation = "tests/dailylist/DailyListServiceTest/insert1_ok/expectedResponse.json";
+        checkExpectedResponse(dailyListEntity, expectedResponseLocation);
+    }
+
+    @Test
+    void insert1OkJsonAndXml() throws IOException {
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        String dailyListJsonStr = getContentsFromFile(
+            "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
+        DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, "someXml", null, null, dailyList);
+
+        service.saveDailyListToDatabase(request);
+
+        List<DailyListEntity> resultList = dailyListRepository.findAll();
+        assertEquals(1, resultList.size());
+        DailyListEntity dailyListEntity = resultList.get(0);
+
+        String expectedResponseLocation = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse.json";
+        checkExpectedResponse(dailyListEntity, expectedResponseLocation);
+    }
+
+    @Test
+    void updateOkJsonWithXml() throws IOException {
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        String dailyListJsonStr = getContentsFromFile(
+            "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
+        DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
+        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
+        service.saveDailyListToDatabase(request);
+
+        request = new DailyListPostRequest(CPP, null, null, "someXml", null, null, dailyList);
+        service.saveDailyListToDatabase(request);
+
+        List<DailyListEntity> resultList = dailyListRepository.findAll();
+        assertEquals(1, resultList.size());
+        DailyListEntity dailyListEntity = resultList.get(0);
+
+        String expectedResponseLocation = "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/expectedResponse.json";
         checkExpectedResponse(dailyListEntity, expectedResponseLocation);
     }
 
@@ -122,9 +161,7 @@ class DailyListServiceTest extends IntegrationBase {
         DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
-            service.saveDailyListToDatabase(request);
-        });
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> service.saveDailyListToDatabase(request));
 
         assertThat(exception.getMessage(), containsString("invalid courthouse 'test'"));
     }

@@ -8,12 +8,16 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ParameterExpression;
 import jakarta.persistence.criteria.Root;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.model.Permission;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
 import uk.gov.hmcts.darts.authorisation.service.AuthorisationService;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
 import uk.gov.hmcts.darts.common.entity.SecurityPermissionEntity;
@@ -22,17 +26,27 @@ import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityRoleEntity_;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class AuthorisationServiceImpl implements AuthorisationService {
 
-    @Autowired
-    private EntityManager em;
+    private final EntityManager em;
+    private final CourthouseRepository courthouseRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final UserIdentity userIdentity;
 
     @Override
     public Optional<UserState> getAuthorisation(String emailAddress) {
@@ -45,7 +59,7 @@ public class AuthorisationServiceImpl implements AuthorisationService {
             JoinType.LEFT
         );
         Join<SecurityGroupEntity, SecurityRoleEntity> securityRole = securityGroup.join(
-            SecurityGroupEntity_.securityRoleId,
+            SecurityGroupEntity_.securityRoleEntity,
             JoinType.LEFT
         );
         Join<SecurityRoleEntity, SecurityPermissionEntity> securityPermission = securityRole.join(
@@ -118,6 +132,28 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         }
 
         return Optional.ofNullable(userStateBuilder.build());
+    }
+
+    @Override
+    public void checkAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles) {
+        String emailAddress = userIdentity.getEmailAddress();
+        List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(
+            emailAddress, securityRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet()));
+
+        if (new HashSet<>(authorisedCourthouses).containsAll(courthouses)) {
+            return;
+        }
+
+        log.debug("User {} is not authorised for courthouses {}, securityRoles {}", emailAddress,
+                  courthouses.stream().map(CourthouseEntity::getCourthouseName).toList(),
+                  securityRoles
+        );
+        throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
+    }
+
+    @Override
+    public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse) {
+        return userAccountRepository.findByRoleAndCourthouse(securityRole.getId(), courthouse);
     }
 
 }

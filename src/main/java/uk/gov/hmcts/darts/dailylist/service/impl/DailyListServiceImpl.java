@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
+import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
 import uk.gov.hmcts.darts.dailylist.model.CourtHouse;
@@ -66,11 +67,11 @@ public class DailyListServiceImpl implements DailyListService {
         if (existingRecordOpt.isPresent()) {
             //update the record
             savedDailyListEntity = existingRecordOpt.get();
-            dailyListMapper.mapToExistingDailyListEntity(postRequest, courthouse, savedDailyListEntity);
+            dailyListMapper.updateDailyListEntity(postRequest, courthouse, savedDailyListEntity);
             dailyListRepository.saveAndFlush(savedDailyListEntity);
         } else {
             //insert new record
-            savedDailyListEntity = dailyListMapper.mapToDailyListEntity(
+            savedDailyListEntity = dailyListMapper.createDailyListEntity(
                 postRequest,
                 courthouse
             );
@@ -90,6 +91,7 @@ public class DailyListServiceImpl implements DailyListService {
         dailyListEntity.setCourthouse(courthouse);
         dailyListEntity.setXmlContent(postRequest.getDailyListXml());
         dailyListEntity.setSource(postRequest.getSourceSystem());
+        dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setStartDate(postRequest.getHearingDate());
         dailyListEntity.setUniqueId(postRequest.getUniqueId());
         dailyListEntity.setPublishedTimestamp(postRequest.getPublishedDateTime());
@@ -109,7 +111,7 @@ public class DailyListServiceImpl implements DailyListService {
         }
 
         DailyListEntity foundDailyList = foundDailyListOpt.get();
-        dailyListMapper.mapToExistingDailyListEntity(patchRequest, foundDailyList);
+        dailyListMapper.updateDailyListEntity(patchRequest, foundDailyList);
         dailyListRepository.saveAndFlush(foundDailyList);
         try {
             foundDailyList.setContent(objectMapper.writeValueAsString(patchRequest.getDailyListJson()));

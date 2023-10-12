@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -36,12 +37,17 @@ import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
+import uk.gov.hmcts.darts.noderegistration.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.repository.NotificationRepository;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
@@ -69,9 +75,6 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 @Slf4j
 public class DartsDatabaseStub {
 
-    private static final int SYSTEM_USER_ID = 0;
-    private static final String INTEGRATIONTEST_USER_EMAIL = "integrationtest.user@example.com";
-
     private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
     private final CourthouseRepository courthouseRepository;
@@ -91,19 +94,27 @@ public class DartsDatabaseStub {
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final TranscriptionRepository transcriptionRepository;
+    private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
+    private final SecurityGroupRepository securityGroupRepository;
+    private final SecurityRoleRepository securityRoleRepository;
+    private final NodeRegistrationRepository nodeRegistrationRepository;
 
     private final UserAccountStub userAccountStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
     private final CourthouseStub courthouseStub;
     private final AuditStub auditStub;
     private final EventStub eventStub;
+    private final TranscriptionStub transcriptionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
+        transcriptionWorkflowRepository.deleteAll();
+        transcriptionRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         mediaRequestRepository.deleteAll();
@@ -111,6 +122,7 @@ public class DartsDatabaseStub {
         hearingRepository.deleteAll();
         mediaRepository.deleteAll();
         notificationRepository.deleteAll();
+        nodeRegistrationRepository.deleteAll();
         courtroomRepository.deleteAll();
         defenceRepository.deleteAll();
         defendantRepository.deleteAll();
@@ -269,7 +281,7 @@ public class DartsDatabaseStub {
 
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
-        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).get();
+        return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).orElse(null);
     }
 
     public CourthouseEntity findCourthouseWithName(String name) {
@@ -295,7 +307,8 @@ public class DartsDatabaseStub {
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z")
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-06-30T13:00:00Z")
             ));
     }
 
@@ -309,37 +322,6 @@ public class DartsDatabaseStub {
                 now.minusDays(5),
                 now.minusDays(4)
             ));
-    }
-
-    public UserAccountEntity createSystemUserAccountEntity() {
-
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findById(SYSTEM_USER_ID);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("System User");
-            newUser.setEmailAddress("system.user@example.com");
-            return userAccountRepository.saveAndFlush(newUser);
-        }
-    }
-
-    public UserAccountEntity createIntegrationTestUserAccountEntity(UserAccountEntity systemUser) {
-
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddress(
-            INTEGRATIONTEST_USER_EMAIL);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("IntegrationTest User");
-            newUser.setEmailAddress(INTEGRATIONTEST_USER_EMAIL);
-            newUser.setCreatedBy(systemUser);
-            newUser.setLastModifiedBy(systemUser);
-            return userAccountRepository.saveAndFlush(newUser);
-        }
     }
 
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
@@ -382,6 +364,10 @@ public class DartsDatabaseStub {
         return hearingRepository.saveAndFlush(hearingEntity);
     }
 
+    public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
     public void saveAll(HearingEntity... hearingEntities) {
         hearingRepository.saveAllAndFlush(asList(hearingEntities));
     }
@@ -398,5 +384,16 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
+    public void createTestUserAccount() {
+        Optional<UserAccountEntity> foundAccount = userAccountRepository.findByEmailAddressIgnoreCase(
+            "test.user@example.com");
+        if (foundAccount.isPresent()) {
+            return;
+        }
+        UserAccountEntity testUser = new UserAccountEntity();
+        testUser.setEmailAddress("test.user@example.com");
+        testUser.setUsername("testuser");
+        userAccountRepository.saveAndFlush(testUser);
+    }
 
 }

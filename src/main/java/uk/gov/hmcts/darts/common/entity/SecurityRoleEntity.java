@@ -10,11 +10,12 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "security_role")
@@ -29,12 +30,13 @@ public class SecurityRoleEntity {
     private Integer id;
 
     @Column(name = "role_name", nullable = false)
+    @EqualsAndHashCode.Include
     private String roleName;
 
     @ManyToMany
     @JoinTable(name = "security_role_permission_ae",
         joinColumns = {@JoinColumn(name = "rol_id")},
         inverseJoinColumns = {@JoinColumn(name = "per_id")})
-    private List<SecurityPermissionEntity> securityPermissionEntities = new ArrayList<>();
+    private Set<SecurityPermissionEntity> securityPermissionEntities = new LinkedHashSet<>();
 
 }

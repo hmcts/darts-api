@@ -10,9 +10,9 @@ import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.AdvancedSearchResponseMapper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.mapper.HearingEntityToCaseHearing;
+import uk.gov.hmcts.darts.cases.mapper.TranscriptionMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
-import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -20,14 +20,16 @@ import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.cases.service.CaseService;
-import uk.gov.hmcts.darts.cases.util.CourtCaseUtil;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ public class CaseServiceImpl implements CaseService {
     private final EventRepository eventRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
+    private final TranscriptionRepository transcriptionRepository;
 
     @Override
     @Transactional
@@ -69,13 +72,7 @@ public class CaseServiceImpl implements CaseService {
         List<HearingEntity> hearingList = hearingRepository.findByCaseIds(List.of(caseId));
 
         if (hearingList.isEmpty()) {
-
-            Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
-
-            if (caseEntity.isEmpty()) {
-                throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
-            }
-
+            getCourtCaseById(caseId);
         }
 
         return HearingEntityToCaseHearing.mapToHearingList(hearingList);
@@ -84,14 +81,17 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public SingleCase getCasesById(Integer caseId) {
+        CourtCaseEntity caseEntity = getCourtCaseById(caseId);
+        return casesMapper.mapToSingleCase(caseEntity);
+    }
 
+    public CourtCaseEntity getCourtCaseById(Integer caseId) {
         Optional<CourtCaseEntity> caseEntity = caseRepository.findById(caseId);
 
         if (caseEntity.isEmpty()) {
             throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
         }
-
-        return casesMapper.mapToSingleCase(caseEntity.get());
+        return caseEntity.get();
     }
 
     private void createCourtroomIfMissing(List<HearingEntity> hearings, GetCasesRequest request) {
@@ -122,35 +122,28 @@ public class CaseServiceImpl implements CaseService {
 
     @Override
     public List<AdvancedSearchResult> advancedSearch(GetCasesSearchRequest request) {
-        List<CourtCaseEntity> courtCaseEntities = advancedSearchRequestHelper.getMatchingCourtCases(request);
-        if (courtCaseEntities.size() > MAX_RESULTS) {
+        List<Integer> caseIds = advancedSearchRequestHelper.getMatchingCourtCases(request);
+        if (caseIds.size() > MAX_RESULTS) {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
-        if (courtCaseEntities.isEmpty()) {
+        if (caseIds.isEmpty()) {
             return new ArrayList<>();
         }
-        List<Integer> caseIds = CourtCaseUtil.getCaseIdList(courtCaseEntities);
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);
     }
 
-    public List<EventResponse> getEvents(Integer hearingId) {
-        Optional<HearingEntity> hearingEntity = hearingRepository.findById(hearingId);
-        if (hearingEntity.isEmpty()) {
-            throw new DartsApiException(CaseApiError.HEARING_NOT_FOUND);
-        }
-        return casesMapper.mapToEvents(hearingEntity.get().getEventList());
-    }
-
     @Override
     public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
-        Optional<CourtCaseEntity> foundCaseOpt = caseRepository.findById(caseId);
-        if (foundCaseOpt.isEmpty()) {
-            throw new DartsApiException(CaseApiError.CASE_NOT_FOUND);
-        }
-        CourtCaseEntity foundCase = foundCaseOpt.get();
+        CourtCaseEntity foundCase = getCourtCaseById(caseId);
         foundCase.setRetainUntilTimestamp(patchRequestObject.getRetainUntil());
         caseRepository.save(foundCase);
         return casesMapper.mapToSingleCase(foundCase);
+    }
+
+    @Override
+    public List<Transcript> getTranscriptsById(Integer caseId) {
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByCaseId(caseId);
+        return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,11 +9,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
-import uk.gov.hmcts.darts.audio.model.AudioRequestType;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -27,13 +27,11 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
-import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,98 +68,18 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final UserAccountRepository userAccountRepository;
 
     private final DataManagementApi dataManagementApi;
     private final NotificationApi notificationApi;
 
-    private String notificationSuccessTemplateId;
-    private String notificationFailureTemplateId;
-
-    @PostConstruct
-    void postConstruct() {
-        try {
-            notificationSuccessTemplateId = notificationApi.getNotificationTemplateIdByName(
-                "requested_audio_is_available");
-            notificationFailureTemplateId = notificationApi.getNotificationTemplateIdByName(
-                "error_processing_audio");
-        } catch (TemplateNotFoundException e) {
-            throw new IllegalStateException("Could not obtain required configuration from notification feature", e);
-        }
-    }
-
-    /**
-     * For all audio related to a given AudioRequest, download, process and upload the processed file to outbound
-     * storage.
-     *
-     * @param requestId The id of the AudioRequest to be processed.
-     * @return The blob storage id representing the location/name of the file uploaded to the outbound data store.
-     */
     @Override
-    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidRethrowingException"})
-    public UUID processAudioRequest(Integer requestId) {
-
-        log.debug("Starting processing for audio request id: {}", requestId);
-        mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
-
-        MediaRequestEntity mediaRequestEntity = null;
-        HearingEntity hearingEntity = null;
-        UUID blobId;
-
-        try {
-            mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
-            hearingEntity = mediaRequestEntity.getHearing();
-
-            List<MediaEntity> mediaEntitiesForRequest = getMediaMetadata(hearingEntity.getId());
-
-            if (mediaEntitiesForRequest.isEmpty()) {
-                throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, "No media present to process");
-            }
-
-            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(mediaEntitiesForRequest);
-
-            Path generatedFilePath;
-            try {
-                generatedFilePath = generateFileForRequestType(mediaRequestEntity, downloadedMedias);
-            } catch (ExecutionException | InterruptedException e) {
-                // For Sonar rule S2142
-                throw e;
-            }
-
-            try (InputStream inputStream = Files.newInputStream(generatedFilePath)) {
-                blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
-            }
-
-        } catch (Exception e) {
-            log.error(
-                "Exception occurred for request id {}. Exception message: {}",
-                requestId,
-                e.getMessage()
-            );
-            mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
-
-            if (mediaRequestEntity != null && hearingEntity != null) {
-                notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), notificationFailureTemplateId);
-            }
-
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
-        }
-
-        mediaRequestService.updateAudioRequestStatus(mediaRequestEntity.getId(), COMPLETED);
-        log.debug(
-            "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
-            requestId,
-            blobId
-        );
-
-        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), notificationSuccessTemplateId);
-
-        return blobId;
-    }
-
-    @Override
-    public BinaryData getAudioBlobData(UUID location) {
+    public BinaryData getUnstructuredAudioBlob(UUID location) {
         return dataManagementApi.getBlobDataFromUnstructuredContainer(location);
+    }
+
+    @Override
+    public BinaryData getOutboundAudioBlob(UUID location) {
+        return dataManagementApi.getBlobDataFromOutboundContainer(location);
     }
 
     @Override
@@ -221,6 +139,84 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return blobId;
     }
 
+    @Override
+    public void handleKedaInvocationForMediaRequests() {
+        mediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN)
+            .ifPresent(openMediaRequests -> processAudioRequest(openMediaRequests.getId()));
+    }
+
+    /**
+     * For all audio related to a given AudioRequest, download, process and upload the processed file to outbound
+     * storage.
+     *
+     * @param requestId The id of the AudioRequest to be processed.
+     * @return The blob storage id representing the location/name of the file uploaded to the outbound data store.
+     */
+    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidRethrowingException"})
+    private UUID processAudioRequest(Integer requestId) {
+
+        log.debug("Starting processing for audio request id: {}", requestId);
+        mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
+
+        MediaRequestEntity mediaRequestEntity = null;
+        HearingEntity hearingEntity = null;
+        UUID blobId;
+
+        try {
+            mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
+            hearingEntity = mediaRequestEntity.getHearing();
+
+            List<MediaEntity> mediaEntitiesForRequest = getMediaMetadata(hearingEntity.getId());
+
+            if (mediaEntitiesForRequest.isEmpty()) {
+                throw new DartsApiException(
+                    AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST,
+                    "No media present to process"
+                );
+            }
+
+            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(mediaEntitiesForRequest);
+
+            Path generatedFilePath;
+            try {
+                generatedFilePath = generateFileForRequestType(mediaRequestEntity, downloadedMedias);
+            } catch (ExecutionException | InterruptedException e) {
+                // For Sonar rule S2142
+                throw e;
+            }
+
+            try (InputStream inputStream = Files.newInputStream(generatedFilePath)) {
+                blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
+            }
+
+        } catch (Exception e) {
+            log.error(
+                "Exception occurred for request id {}. Exception message: {}",
+                requestId,
+                e.getMessage()
+            );
+            mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
+
+            if (mediaRequestEntity != null && hearingEntity != null) {
+                notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
+                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+            }
+
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
+        }
+
+        mediaRequestService.updateAudioRequestStatus(mediaRequestEntity.getId(), COMPLETED);
+        log.debug(
+            "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
+            requestId,
+            blobId
+        );
+
+        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
+
+        return blobId;
+    }
+
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
         throws IOException {
@@ -240,7 +236,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             )));
 
         log.debug("Downloading audio blob for {}", id);
-        BinaryData binaryData = getAudioBlobData(id);
+        BinaryData binaryData = getUnstructuredAudioBlob(id);
         log.debug("Download audio blob complete for {}", id);
 
         Path downloadPath = saveBlobDataToTempWorkspace(binaryData, id.toString());
@@ -251,7 +247,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @SuppressWarnings("PMD.LawOfDemeter")
     private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
                                             Map<MediaEntity, Path> downloadedMedias)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
 
@@ -266,7 +262,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     private Path handleDownload(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
 
         List<List<AudioFileInfo>> processedAudio = outboundFileProcessor.processAudioForDownload(
             downloadedMedias,
@@ -277,8 +273,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity);
     }
 
-    public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime, OffsetDateTime endTime)
-        throws ExecutionException, InterruptedException {
+    public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
+                               OffsetDateTime endTime)
+        throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(
             downloadedMedias,
@@ -290,17 +287,17 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
-        throws ExecutionException, InterruptedException {
+        throws ExecutionException, InterruptedException, IOException {
         return handlePlayback(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
     }
 
     private void notifyUser(MediaRequestEntity mediaRequestEntity,
                             CourtCaseEntity courtCase,
-                            String notificationTemplateId) {
-        log.debug("Scheduling notification for templateId: {}...", notificationTemplateId);
+                            String notificationTemplateName) {
+        log.debug("Scheduling notification for template name: {}...", notificationTemplateName);
 
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId(notificationTemplateId)
+            .eventId(notificationTemplateName)
             .caseId(courtCase.getId())
             .emailAddresses(mediaRequestEntity.getRequestor().getEmailAddress())
             .build();

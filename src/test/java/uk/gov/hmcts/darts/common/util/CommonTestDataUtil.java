@@ -15,9 +15,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -190,16 +194,36 @@ public class CommonTestDataUtil {
         hearing1.setHearingDate(LocalDate.of(2023, 6, 20));
         hearing1.setScheduledStartTime(time);
         hearing1.setId(102);
-        hearing1.setTranscriptions(createTranscriptionList());
+        hearing1.setTranscriptions(createTranscriptionList(hearing1));
         hearing1.addJudges(createJudges(2));
         return hearing1;
     }
 
-    public List<TranscriptionEntity> createTranscriptionList() {
+    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setCompany("Transcription company");
-        transcription.setTranscriptionType(new TranscriptionTypeEntity());
+        transcription.setCourtCase(hearing.getCourtCase());
+        TranscriptionTypeEntity transcriptionType = new TranscriptionTypeEntity();
+        transcriptionType.setId(1);
+        transcriptionType.setDescription(TranscriptionTypeEnum.SENTENCING_REMARKS.name());
+        transcription.setTranscriptionType(transcriptionType);
+        transcription.setCourtroom(hearing.getCourtroom());
+        transcription.setHearing(hearing);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcription.setId(1);
+        transcription.setCreatedBy(createUserAccount());
+
+        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
+        transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
+        transcription.setTranscriptionStatus(transcriptionStatus);
         return List.of(transcription);
+    }
+
+    public UserAccountEntity createUserAccount() {
+        UserAccountEntity userAccount = new UserAccountEntity();
+        userAccount.setUsername("testUsername");
+        userAccount.setEmailAddress("test@test.com");
+        return userAccount;
     }
 
     public List<JudgeEntity> createJudges(int numOfJudges) {
@@ -251,7 +275,7 @@ public class CommonTestDataUtil {
 
     public DailyListEntity createDailyList(LocalTime time, String source, String filelocation) throws IOException {
         DailyListEntity dailyListEntity = new DailyListEntity();
-        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
         dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(filelocation)));
         dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
@@ -262,9 +286,19 @@ public class CommonTestDataUtil {
 
     public DailyListEntity createInvalidDailyList(LocalTime time) {
         DailyListEntity dailyListEntity = new DailyListEntity();
-        dailyListEntity.setStatus(String.valueOf(JobStatusType.NEW));
+        dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
         dailyListEntity.setContent("blah");
+        dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
+        dailyListEntity.setSource(String.valueOf(SourceType.XHB));
+        return dailyListEntity;
+    }
+
+    public DailyListEntity createInvalidXmlDailyList(LocalTime time) {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(JobStatusType.NEW);
+        dailyListEntity.setCourthouse(createCourthouse("SWANSEA"));
+        dailyListEntity.setXmlContent("blah");
         dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
         dailyListEntity.setSource(String.valueOf(SourceType.XHB));
         return dailyListEntity;

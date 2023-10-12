@@ -48,6 +48,9 @@ class AuthenticationServiceImplTest {
     @Mock
     private AuthStrategySelector uriProvider;
 
+    @Mock
+    private ExternalAuthConfigurationProperties externalAuthConfigurationProperties;
+
     @Test
     @SuppressWarnings("unchecked")
     void loginOrRefreshShouldReturnAuthUriWhenNoAuthHeaderExists() {
@@ -105,7 +108,7 @@ class AuthenticationServiceImplTest {
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(true, null));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
-            new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(),
+            new ExternalAuthConfigurationPropertiesStrategy(externalAuthConfigurationProperties,
                                                             new ExternalAuthProviderConfigurationProperties()));
 
         String token = authenticationService.handleOauthCode(DUMMY_CODE);
@@ -120,7 +123,7 @@ class AuthenticationServiceImplTest {
             .thenThrow(AzureDaoException.class);
 
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(new ExternalAuthConfigurationPropertiesStrategy(
-            new ExternalAuthConfigurationProperties(), new ExternalAuthProviderConfigurationProperties()));
+            externalAuthConfigurationProperties, new ExternalAuthProviderConfigurationProperties()));
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
@@ -133,14 +136,15 @@ class AuthenticationServiceImplTest {
     @Test
     @SuppressWarnings("unchecked")
     void handleOauthCodeShouldThrowExceptionWhenValidationFails() throws AzureDaoException {
-
         when(azureDao.fetchAccessToken(anyString(), notNull(), notNull()))
-            .thenReturn(new OAuthProviderRawResponse(null, 0,DUMMY_ID_TOKEN,0));
+            .thenReturn(new OAuthProviderRawResponse(null, 0, DUMMY_ID_TOKEN, 0));
         when(tokenValidator.validate(anyString(), notNull(), notNull()))
             .thenReturn(new JwtValidationResult(false, "validation failure reason"));
         when(uriProvider.locateAuthenticationConfiguration()).thenReturn(
-            new ExternalAuthConfigurationPropertiesStrategy(new ExternalAuthConfigurationProperties(),
-                                                            new ExternalAuthProviderConfigurationProperties()));
+            new ExternalAuthConfigurationPropertiesStrategy(
+                externalAuthConfigurationProperties,
+                new ExternalAuthProviderConfigurationProperties()
+            ));
 
         DartsApiException exception = assertThrows(
             DartsApiException.class,
@@ -181,5 +185,4 @@ class AuthenticationServiceImplTest {
 
         assertEquals(DUMMY_AUTH_URI, uri);
     }
-
 }

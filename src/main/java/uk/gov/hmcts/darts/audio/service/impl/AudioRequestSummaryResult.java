@@ -13,7 +13,8 @@ public record AudioRequestSummaryResult(
     OffsetDateTime mediaRequestStartTs,
     OffsetDateTime mediaRequestEndTs,
     OffsetDateTime mediaRequestExpiryTs,
-    AudioRequestStatus mediaRequestStatus
+    AudioRequestStatus mediaRequestStatus,
+    OffsetDateTime lastAccessedTs
 ) {
 
 }

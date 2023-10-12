@@ -16,6 +16,10 @@ public class MediaTestData {
 
     public static MediaEntity createMediaFor(CourtroomEntity courtroomEntity) {
         MediaEntity media = new MediaEntity();
+        media.setChannel(1);
+        media.setTotalChannels(2);
+        media.setStart(OffsetDateTime.now());
+        media.setEnd(OffsetDateTime.now());
         media.setCourtroom(courtroomEntity);
         return media;
     }
@@ -25,6 +29,7 @@ public class MediaTestData {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(endTime);
         mediaEntity.setChannel(channel);
+        mediaEntity.setTotalChannels(2);
         return mediaEntity;
     }
 
@@ -34,6 +39,7 @@ public class MediaTestData {
         mediaEntity.setStart(startTime);
         mediaEntity.setEnd(endTime);
         mediaEntity.setChannel(channel);
+        mediaEntity.setTotalChannels(2);
         return mediaEntity;
     }
 }

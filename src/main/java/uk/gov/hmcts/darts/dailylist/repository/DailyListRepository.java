@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.dailylist.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -14,7 +15,7 @@ public interface DailyListRepository extends JpaRepository<DailyListEntity, Inte
     Optional<DailyListEntity> findByUniqueId(String uniqueId);
 
     List<DailyListEntity> findByCourthouse_IdAndStatusAndStartDateAndSourceOrderByPublishedTimestampDesc(
-            Integer id, String status, LocalDate date, String source);
+        Integer id, JobStatusType status, LocalDate date, String source);
 
     List<DailyListEntity> deleteByStartDateBefore(LocalDate startDate);
 }

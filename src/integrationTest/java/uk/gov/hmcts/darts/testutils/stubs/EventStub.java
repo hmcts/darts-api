@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 @Component
 @RequiredArgsConstructor
 public class EventStub {
+
     private final EventRepository eventRepository;
     private final EventHandlerRepository eventHandlerRepository;
     private final UserAccountStub userAccountStub;
@@ -24,7 +25,7 @@ public class EventStub {
         eventEntity.setEventName("testEventName");
         eventEntity.setEventType(eventHandlerRepository.findById(10).get());
         eventEntity.setTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        eventEntity.setCreatedBy(userAccountStub.getDefaultUser());
+        eventEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.addHearing(hearing);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;

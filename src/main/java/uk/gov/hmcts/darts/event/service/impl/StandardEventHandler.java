@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.event.model.CourtroomCourthouseCourtcase;
+import uk.gov.hmcts.darts.event.model.CreatedHearing;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
@@ -20,11 +20,11 @@ public class StandardEventHandler extends EventHandlerBase {
 
     @Override
     public void handle(final DartsEvent dartsEvent) {
-        CourtroomCourthouseCourtcase courtroomCourthouseCourtcase = getOrCreateCourtroomCourtHouseAndCases(dartsEvent);
+        CreatedHearing createdHearing = createHearing(dartsEvent);
 
         if (isTheHearingNewOrTheCourtroomIsDifferent(
-            courtroomCourthouseCourtcase.isHearingNew(),
-            courtroomCourthouseCourtcase.isCourtroomDifferentFromHearing()
+            createdHearing.isHearingNew(),
+            createdHearing.isCourtroomDifferentFromHearing()
         )) {
             var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, CASE_UPDATE);
             eventPublisher.publishEvent(notifyEvent);

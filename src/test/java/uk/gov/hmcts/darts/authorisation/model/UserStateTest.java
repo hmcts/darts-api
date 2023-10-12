@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_CLERK;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.COURT_MANAGER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
 class UserStateTest {
 
@@ -15,13 +15,13 @@ class UserStateTest {
     void builder() {
         Set<Role> newRoles = new HashSet<>();
         newRoles.add(Role.builder()
-                         .roleId(COURT_MANAGER.getId())
-                         .roleName(COURT_MANAGER.toString())
+                         .roleId(APPROVER.getId())
+                         .roleName(APPROVER.toString())
                          .permissions(new HashSet<>())
                          .build());
         newRoles.add(Role.builder()
-                         .roleId(COURT_CLERK.getId())
-                         .roleName(COURT_CLERK.toString())
+                         .roleId(REQUESTER.getId())
+                         .roleName(REQUESTER.toString())
                          .permissions(new HashSet<>())
                          .build());
 

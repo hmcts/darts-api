@@ -32,8 +32,8 @@ class TransientObjectDirectoryServiceTest {
 
     @Test
     void shouldSaveTransientDataLocation() {
-        var systemUser = dartsDatabase.createSystemUserAccountEntity();
-        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var mediaRequestEntity1 = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(mediaRequestEntity1.getId());

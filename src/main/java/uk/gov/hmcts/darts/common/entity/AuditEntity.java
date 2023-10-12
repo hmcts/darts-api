@@ -2,9 +2,12 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -22,16 +25,19 @@ public class AuditEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "audit_gen", sequenceName = "audit_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "cas_id")
-    private Integer caseId;
+    @ManyToOne
+    @JoinColumn(name = "cas_id", nullable = false)
+    private CourtCaseEntity courtCase;
 
-    @Column(name = "aua_id")
-    private Integer auditActivity;
+    @ManyToOne
+    @JoinColumn(name = "aua_id", nullable = false)
+    private AuditActivityEntity auditActivity;
 
-    @Column(name = "usr_id")
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usr_id", nullable = false)
+    private UserAccountEntity user;
 
-    @Column(name = "application_server")
+    @Column(name = "application_server", nullable = false)
     private String applicationServer;
 
     @Column(name = "additional_data")

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
-import uk.gov.hmcts.darts.audio.exception.AudioError;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
@@ -82,7 +82,7 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             );
         } catch (JAXBException | IllegalArgumentException exception) {
             log.error("Unable to generate playlist.xml: {}", exception.getMessage());
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
 
         return playlistFile;
@@ -103,7 +103,7 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             return annotationXmlGenerator.generateAndWriteXmlFile(annotationData, Path.of(annotationsOutputFile))
                 .toString();
         } catch (IOException | TransformerException | ParserConfigurationException exception) {
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
     }
 
@@ -135,7 +135,7 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             ));
         } catch (IOException exception) {
             log.error("Unable to generate readme file: {}", readmeFile.getAbsoluteFile(), exception);
-            throw new DartsApiException(AudioError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
         return readmeFile.getAbsolutePath();
     }

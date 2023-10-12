@@ -18,7 +18,7 @@ public class DarStartHandler extends EventHandlerBase {
     @Override
     @Transactional
     public void handle(DartsEvent dartsEvent) {
-        getOrCreateCourtroomCourtHouseAndCases(dartsEvent); // saveEvent
+        createHearing(dartsEvent); // saveEvent
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, START_RECORDING);
         eventPublisher.publishEvent(notifyEvent);
     }

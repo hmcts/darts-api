@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
@@ -30,17 +29,15 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    private UserAccountEntity systemUser;
-
     @BeforeAll
     void beforeAll() {
-        systemUser = dartsDatabase.createSystemUserAccountEntity();
+        dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
     }
 
     @Test
     void getYourAudioCurrent() throws Exception {
 
-        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
@@ -63,7 +60,8 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
                     "hearing_date": "2023-06-10",
                     "media_request_start_ts": "2023-06-26T13:00:00Z",
                     "media_request_end_ts": "2023-06-26T13:45:00Z",
-                    "media_request_status": "OPEN"
+                    "media_request_status": "OPEN",
+                    "last_accessed_ts": "2023-06-30T13:00:00Z"
                 }
             ]
             """;
@@ -73,7 +71,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     @Test
     void getYourAudioExpired() throws Exception {
 
-        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
         var expiredMediaRequest = dartsDatabase.createAndLoadExpiredMediaRequestEntity(
             currentMediaRequest.getHearing(),
@@ -100,7 +98,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     @Test
     void getYourAudioCurrentShouldReturnEmptyArrayInResponseBodyWhenNoCurrentMediaRequestExists() throws Exception {
 
-        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
             .header(
@@ -122,7 +120,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     @Test
     void getYourAudioExpiredShouldReturnEmptyArrayInResponseBodyWhenNoExpiredMediaRequestExists() throws Exception {
 
-        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))
@@ -145,7 +143,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     @Test
     void getYourAudioShouldReturnBadRequestWhenExpiredQueryParamIsNotPresent() throws Exception {
 
-        var requestor = dartsDatabase.createIntegrationTestUserAccountEntity(systemUser);
+        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         var requestBuilder = get(URI.create("/audio-requests"))
             .header(

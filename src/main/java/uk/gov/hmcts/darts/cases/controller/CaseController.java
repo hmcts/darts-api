@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,10 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
-import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.cases.validator.PatchCaseRequestValidator;
@@ -39,6 +41,13 @@ import uk.gov.hmcts.darts.cases.validator.PatchCaseRequestValidator;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
+
+import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @RestController
 @RequiredArgsConstructor
@@ -108,14 +117,18 @@ public class CaseController implements CasesApi {
 
     }
 
-    @Override
-    public ResponseEntity<List<EventResponse>> getEvents(@Parameter(name = "hearing_id", description = "hearingId is the internal hea_id of the hearing.", required = true, in = ParameterIn.PATH) @PathVariable("hearing_id") Integer hearingId) {
-        return new ResponseEntity<>(caseService.getEvents(hearingId), HttpStatus.OK);
-    }
 
     @Override
     public ResponseEntity<SingleCase> casesCaseIdPatch(Integer caseId, PatchRequestObject patchRequestObject) {
         PatchCaseRequestValidator.validate(patchRequestObject);
         return new ResponseEntity<>(caseService.patchCase(caseId, patchRequestObject), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = CASE_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER})
+    public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
+        return new ResponseEntity<>(caseService.getTranscriptsById(caseId), HttpStatus.OK);
     }
 }

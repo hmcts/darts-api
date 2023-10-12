@@ -1,6 +1,9 @@
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO DARTS;
 
+DROP TRIGGER trw_ar_trg ON transcription_workflow;
+DROP FUNCTION tra_trw_sync_fnc;
+
 DROP TABLE security_group_courthouse_ae;
 DROP TABLE security_role_permission_ae;
 DROP TABLE security_group_user_account_ae;
@@ -50,6 +53,7 @@ DROP TABLE external_service_auth_token;
 
 DROP TABLE court_case;
 DROP TABLE event_handler; 
+DROP TABLE transcription_status;
 DROP TABLE transcription_type;
 DROP TABLE courtroom; 
 DROP TABLE courthouse;   
@@ -61,7 +65,6 @@ DROP SEQUENCE aua_seq;
 DROP SEQUENCE aut_seq;
 DROP SEQUENCE car_seq;
 DROP SEQUENCE cas_seq;
-DROP SEQUENCE cra_seq;
 DROP SEQUENCE cre_seq;
 DROP SEQUENCE cth_seq;
 DROP SEQUENCE ctr_seq;
@@ -87,10 +90,10 @@ DROP SEQUENCE rtp_seq;
 DROP SEQUENCE tod_seq;
 DROP SEQUENCE tra_seq;
 DROP SEQUENCE trc_seq;
-DROP SEQUENCE trt_seq;
-DROP SEQUENCE tru_seq;
 DROP SEQUENCE trw_seq;
 DROP SEQUENCE usr_seq;
+
+
 
 
 DROP SCHEMA darts;

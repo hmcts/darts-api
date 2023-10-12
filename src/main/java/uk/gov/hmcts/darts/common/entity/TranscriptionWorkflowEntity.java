@@ -2,8 +2,7 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,7 +13,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
-import uk.gov.hmcts.darts.common.enums.WorkflowStageEnum;
+
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "transcription_workflow")
@@ -32,9 +32,16 @@ public class TranscriptionWorkflowEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "tra_id", nullable = false)
     private TranscriptionEntity transcription;
 
-    @Column(name = "workflow_stage", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private WorkflowStageEnum workflowStage;
+    @ManyToOne
+    @JoinColumn(name = "trs_id", nullable = false)
+    private TranscriptionStatusEntity transcriptionStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workflow_actor", nullable = false)
+    private UserAccountEntity workflowActor;
+
+    @Column(name = "workflow_ts", nullable = false)
+    private OffsetDateTime workflowTimestamp;
 
     @Column(name = "workflow_comment")
     private String workflowComment;

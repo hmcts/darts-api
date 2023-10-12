@@ -2,7 +2,7 @@ openapi: 3.0.1
 
 info:
 
-  version: 0.0.1
+  version: ${version}
   title: Modernised DARTS
   description: |-
     Modernised DARTS (Digital Audio Recording and Transcription Service).
@@ -74,6 +74,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/PostDailyListResponse'
 
+        '400':
+          description: Bad Request - Invalid XML Document
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
         '500':
           description: Internal Server Error
           content:
@@ -109,50 +123,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostDailyListResponse'
-
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-
-  /dailylists/getCases:
-    get:
-      tags:
-        - DailyLists
-      summary: Retrieves the case list for the specified courthouse, courtroom and a hearing date.
-      description: |-
-        description
-      parameters:
-        - in: query
-          name: court_house_code
-          schema:
-            type: integer
-          description: "The CourtHouseCode to get the daily list for."
-          required: true
-          example: 457
-        - in: query
-          name: court_room_number
-          schema:
-            type: string
-          description: "The CourtRoomNumber to get the daily list for.<br>This is optional, if not provided, the daily list for all court rooms in the court house will be provided."
-          example: 1
-        - in: query
-          name: hearing_date
-          schema:
-            type: string
-            format: date
-          description: "The date to get the daily list for.<br>This is optional, if not provided, the daily list for today will be provided."
-          example: 2023-01-01
-
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CourtList'
 
         '500':
           description: Internal Server Error
@@ -493,3 +463,10 @@ components:
         is_masked:
           type: boolean
           example: false
+    PostDailyListErrorCode:
+      type: string
+      enum:
+        - "ADD_DAILYLIST_101"
+        - "ADD_DAILYLIST_102"
+        - "ADD_DAILYLIST_103"
+      x-enum-varnames: [DAILYLIST_COURT_HOUSE_NOT_FOUND, DAILYLIST_DOCUMENT_CANT_BE_PARSED, DAILYLIST_PROCESSOR_NOT_FOUND]

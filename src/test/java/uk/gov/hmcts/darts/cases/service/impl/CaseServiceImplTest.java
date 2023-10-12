@@ -15,7 +15,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.cases.helper.AdvancedSearchRequestHelper;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
-import uk.gov.hmcts.darts.cases.model.EventResponse;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
@@ -25,14 +24,13 @@ import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TestUtils;
@@ -50,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +77,9 @@ class CaseServiceImplTest {
     @Mock
     AdvancedSearchRequestHelper advancedSearchRequestHelper;
 
+    @Mock
+    TranscriptionRepository transcriptionRepository;
+
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
@@ -97,7 +97,8 @@ class CaseServiceImplTest {
             caseRepository,
             eventRepository,
             retrieveCoreObjectService,
-            advancedSearchRequestHelper
+            advancedSearchRequestHelper,
+            transcriptionRepository
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }
@@ -371,36 +372,6 @@ class CaseServiceImplTest {
         assertEquals(3, updatedCaseEntity.getDefendantList().size());
         assertEquals(3, updatedCaseEntity.getProsecutorList().size());
         assertEquals(3, updatedCaseEntity.getDefenceList().size());
-
-    }
-
-    @Test
-    void testGetEventsResponse() {
-        CourthouseEntity courthouseEntity = CommonTestDataUtil.createCourthouse(SWANSEA);
-        CourtroomEntity courtroomEntity = CommonTestDataUtil.createCourtroom(courthouseEntity, "1");
-        CourtCaseEntity caseEntity = CommonTestDataUtil.createCase("case1", courthouseEntity);
-        caseEntity.setId(1);
-
-        HearingEntity hearingEntity = CommonTestDataUtil.createHearing(
-            caseEntity,
-            courtroomEntity,
-            LocalDate.now()
-        );
-        Mockito.when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
-
-        EventHandlerEntity eventType = mock(EventHandlerEntity.class);
-        Mockito.when(eventType.getEventName()).thenReturn("TestEvent");
-
-        List<EventEntity> event = List.of(
-            CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType));
-        hearingEntity.setEventList(event);
-
-        List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());
-        assertEquals(1, eventResponses.size());
-        assertEquals(event.get(0).getId(), eventResponses.get(0).getId());
-        assertEquals("Test", eventResponses.get(0).getText());
-        assertEquals("TestEvent", eventResponses.get(0).getName());
-        assertNotNull(eventResponses.get(0).getTimestamp());
 
     }
 

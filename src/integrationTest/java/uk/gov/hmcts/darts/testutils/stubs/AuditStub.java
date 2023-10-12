@@ -14,6 +14,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class AuditStub {
+
     private final AuditActivityRepository auditActivityRepository;
     private final AuditRepository auditRepository;
     private final UserAccountStub userAccountStub;
@@ -24,21 +25,23 @@ public class AuditStub {
     }
 
     public AuditActivityEntity createTestAuditActivityEntity() {
+        var systemUser = userAccountStub.getSystemUserAccountEntity();
         AuditActivityEntity auditActivity = new AuditActivityEntity();
         auditActivity.setName("Test AuditActivityEntity name");
         auditActivity.setDescription("Test AuditActivityEntity description");
-        auditActivity.setCreatedBy(userAccountStub.getDefaultUser());
-        auditActivity.setLastModifiedBy(userAccountStub.getDefaultUser());
+        auditActivity.setCreatedBy(systemUser);
+        auditActivity.setLastModifiedBy(systemUser);
         auditActivityRepository.saveAndFlush(auditActivity);
         return auditActivity;
     }
 
     public AuditEntity createAuditEntity(CourtCaseEntity courtCase, AuditActivityEntity auditActivity,
-                                         UserAccountEntity userAccount, String applicationServer, String additionalData) {
+                                         UserAccountEntity userAccount, String applicationServer,
+                                         String additionalData) {
         AuditEntity auditEntity = new AuditEntity();
-        auditEntity.setCaseId(courtCase.getId());
-        auditEntity.setAuditActivity(auditActivity.getId());
-        auditEntity.setUserId(userAccount.getId());
+        auditEntity.setCourtCase(courtCase);
+        auditEntity.setAuditActivity(auditActivity);
+        auditEntity.setUser(userAccount);
         auditEntity.setApplicationServer(applicationServer);
         auditEntity.setAdditionalData(additionalData);
         auditEntity.setCreatedBy(userAccount);

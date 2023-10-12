@@ -5,7 +5,7 @@ servers:
 
 info:
   description: Modernised DARTS (Digital Audio Recording and Transcription Service).
-  version: "0.0.1"
+  version: ${version}
   title: Modernised DARTS
 
 paths:
@@ -51,8 +51,31 @@ paths:
                 status: 400
                 detail: "Required parameter 'expired' is not present."
                 instance: "/audio-requests"
+    post:
+      tags:
+        - Audio Requests
+      summary: Users can request audio for specific cases and date/time periods
+      operationId: addAudioRequest
+      description: Adds a user audio request for processing
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddAudioResponse'
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: audio request item already exists
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudioRequestDetails'
+        description: Audio Request item to add
 
-  /audio-requests/{audio_request_id}:
+  /audio-requests/{media_request_id}:
     delete:
       tags:
         - Audio Requests
@@ -60,7 +83,7 @@ paths:
       operationId: deleteAudioRequest
       parameters:
         - in: path
-          name: audio_request_id
+          name: media_request_id
           schema:
             type: integer
           required: true
@@ -68,11 +91,145 @@ paths:
         '204':
           description: audio request has been deleted
         '400':
-          description: required parameter is missing or an invalid datatype or value was provided for property.
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_103"
+                title: "Failed to check authorisation for the media request"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
         '404':
-          description: resource with the provided id does not exist.
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
+    patch:
+      tags:
+        - Audio Requests
+      description: 'Update Audio Request last accessed timestamp'
+      operationId: updateAudioRequestLastAccessedTimestamp
+      parameters:
+        - in: path
+          name: media_request_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_103"
+                title: "Failed to check authorisation for the media request"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
+
+  /audio-requests/download:
+    get:
+      tags:
+        - Audio Requests
+      summary: Download audio
+      operationId: download
+      description: Download audio
+      parameters:
+        - in: query
+          name: media_request_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_103"
+                title: "Failed to check authorisation for the media request"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
         '500':
-          description: internal server error
+          description: The requested data cannot be located
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_101"
+                title: "The requested data cannot be located"
+                status: 500
 
 components:
   securitySchemes:
@@ -112,6 +269,86 @@ components:
           example: "2023-08-23T09:00:00Z"
         media_request_status:
           $ref: '#/components/schemas/MediaRequestStatus'
+        last_accessed_ts:
+          type: string
+          format: date-time
+          example: "2023-08-23T09:00:00Z"
+
+    defendant:
+      type: string
+      example: Joe Bloggs
+
+    AddAudioResponse:
+      type: object
+      required:
+        - request_id
+        - case_id
+        - courthouse_name
+        - defendants
+        - hearing_date
+        - start_time
+        - end_time
+      properties:
+        request_id:
+          type: integer
+          example: 1234
+        case_id:
+          type: integer
+          example: 1
+        case_number:
+          type: string
+          example: 'T4565443'
+        courthouse_name:
+          type: string
+          example: "Swansea"
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        hearing_date:
+          type: string
+          format: date
+          example: '10-05-2023'
+        start_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T10:00:00Z'
+
+    AudioRequestType:
+      type: string
+      enum:
+        - DOWNLOAD
+        - PLAYBACK
+
+    AudioRequestDetails:
+      type: object
+      required:
+        - hearing_id
+        - requestor
+        - start_time
+        - end_time
+        - request_type
+      properties:
+        hearing_id:
+          type: integer
+          example: 12345
+        requestor:
+          type: integer
+          example: 4656
+        start_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T09:00:00Z'
+        end_time:
+          type: string
+          format: date-time
+          example: '2023-05-31T12:00:00Z'
+        request_type:
+          $ref: '#/components/schemas/AudioRequestType'
 
     MediaRequestStatus:
       type: string
