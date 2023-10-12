@@ -10,7 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.noderegistration.model.PostNodeRegistrationResponse;
+import uk.gov.hmcts.darts.noderegistration.model.RegisterNodeResponse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -80,10 +80,10 @@ class NodeRegistrationControllerTest  extends IntegrationBase {
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
         ObjectMapper objectMapper = new ObjectMapper();
 
-        PostNodeRegistrationResponse resp1 = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PostNodeRegistrationResponse.class);
+        RegisterNodeResponse resp1 = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), RegisterNodeResponse.class);
 
         mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is2xxSuccessful()).andReturn();
-        PostNodeRegistrationResponse resp2 = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), PostNodeRegistrationResponse.class);
+        RegisterNodeResponse resp2 = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), RegisterNodeResponse.class);
 
         assertNotEquals(resp1, resp2);
     }

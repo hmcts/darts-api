@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.noderegistration.api.DevicesApi;
-import uk.gov.hmcts.darts.noderegistration.model.PostNodeRegistrationResponse;
+import uk.gov.hmcts.darts.noderegistration.model.RegisterNodeResponse;
 import uk.gov.hmcts.darts.noderegistration.service.NodeRegistrationService;
 
 import javax.validation.Valid;
@@ -20,7 +20,7 @@ public class NodeRegistrationController implements DevicesApi {
     @Autowired
     NodeRegistrationService nodeRegistrationService;
 
-    public ResponseEntity<PostNodeRegistrationResponse> registerDevicesPost(
+    public ResponseEntity<RegisterNodeResponse> registerDevicesPost(
         @Parameter(name = "node_type", description = "The type of device being registered, might just be DAR", in = ParameterIn.QUERY)
         @Valid @RequestParam(value = "node_type") String nodeType,
         @Parameter(name = "courthouse", description = "The name of the location of the courtroom containing the device", in = ParameterIn.QUERY)
@@ -37,7 +37,7 @@ public class NodeRegistrationController implements DevicesApi {
         Integer nodeId = nodeRegistrationService.registerDevices(nodeType, courtHouse, courtRoom,
               hostName, ipAddress, macAddress);
 
-        PostNodeRegistrationResponse postRegisterDeviceResponse = new PostNodeRegistrationResponse();
+        RegisterNodeResponse postRegisterDeviceResponse = new RegisterNodeResponse();
         postRegisterDeviceResponse.setNodeId(nodeId);
         return new ResponseEntity<>(postRegisterDeviceResponse, HttpStatus.OK);
     }

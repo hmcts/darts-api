@@ -63,7 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostNodeRegistrationResponse'
+                $ref: '#/components/schemas/RegisterNodeResponse'
 
         '500':
           description: Internal Server Error
@@ -83,7 +83,7 @@ paths:
                 status: 400
 components:
   schemas:
-    PostNodeRegistrationResponse:
+    RegisterNodeResponse:
       type: object
       properties:
         node_id:
