@@ -33,7 +33,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(1)
     void createCourthouse() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI))
@@ -49,7 +49,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Disabled
     @Order(2)
     void createSameCourthouse() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI))
@@ -66,7 +66,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Order(3)
     void updateCourthouse() {
         int courthouseID = getLatestCourthouseID();
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
@@ -82,7 +82,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Order(4)
     void updateCourthouseWithInvalidBody() {
         int courthouseID = getLatestCourthouseID();
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
@@ -98,7 +98,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Order(5)
     void deleteCourthouse() {
         int courthouseID = getLatestCourthouseID();
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI  + "/" + courthouseID))
@@ -112,7 +112,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(6)
     void getAllCourthouses() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI))
@@ -127,7 +127,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Order(7)
     void getExistingCourthouse() {
         int courthouseID = getLatestCourthouseID();
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
@@ -143,7 +143,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     @Test
     @Order(8)
     void getCourthouseIdDoesNotExist() {
-        Response response = buildRequestWithAuth()
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI + COURTHOUSE_BAD_ID))
@@ -156,7 +156,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
 
     private int getLatestCourthouseID() {
-        List<Integer> ids = buildRequestWithAuth()
+        List<Integer> ids = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI))
