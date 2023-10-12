@@ -97,7 +97,10 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
-
+  data:
+    redis:
+      ssl:
+        enabled: true
 darts:
   audio:
     ffmpeg-executable: ffmpeg
@@ -152,6 +155,17 @@ darts:
           size: 5
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
+  bank-holidays:
+    api:
+      baseurl: https://www.gov.uk
+  cache:
+    bank-holiday:
+      expiry-days: 7
+    redis:
+      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:localhost}
+
+
 
 dbMigration:
   # When true, the app will run DB migration on startup.

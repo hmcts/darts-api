@@ -50,6 +50,10 @@ java:
           alias: DARPC_USER_NAME
         - name: DarPcPassword
           alias: DARPC_PASSWORD
+        - name: redis-port
+          alias: REDIS_PORT
+        - name: redis-host
+          alias: REDIS_HOST
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
