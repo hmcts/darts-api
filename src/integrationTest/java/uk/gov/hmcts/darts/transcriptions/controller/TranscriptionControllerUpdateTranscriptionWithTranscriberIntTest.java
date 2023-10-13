@@ -179,7 +179,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
     @Test
     @Transactional
-    void updateTranscriptionShouldReturnUnauthorisedError() throws Exception {
+    void updateTranscriptionShouldReturnForbiddenError() throws Exception {
 
         UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
         UserAccountEntity testUser = dartsDatabaseStub.getUserAccountRepository().findById(testUserId).orElseThrow();
@@ -194,12 +194,12 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(updateTranscription));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isUnauthorized())
+            .andExpect(status().isForbidden())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":401}
+            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
