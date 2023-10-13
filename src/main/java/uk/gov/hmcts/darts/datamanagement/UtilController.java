@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,12 +48,16 @@ class UtilController {
         return new ResponseEntity<>("{\"uuid\": \"" + uuid + "\"}", HttpStatus.OK);
     }
 
+    /*
     @GetMapping(path = "/process-audio")
     public void processAudioRequest(@RequestParam Integer requestId) {
         log.info("Received request to processAAudioRequest for " + requestId);
         audioTransformationService.processAudioRequest(requestId);
     }
 
+     */
+
+    /*
     @GetMapping(path = "/move-audio")
     public ResponseEntity<String> moveBlobToOutbound(@RequestParam String unstructuredUuid) {
         log.info("Received request to move blob to outbound data storage for " + unstructuredUuid);
@@ -62,6 +65,8 @@ class UtilController {
         UUID outboundUuid = audioTransformationService.saveAudioBlobData(binaryData);
         return new ResponseEntity<>("{\"uuid\": \"" + outboundUuid + "\"}", HttpStatus.OK);
     }
+
+     */
 
     @PostMapping(value = "/create-container", produces = "application/json")
     public void createContainer(@RequestParam String containerName) {
