@@ -8,6 +8,7 @@
 --        ,last_modified_by            INTEGER                       NOT NULL  
 --     moved INSERT statements to new file security_test_data.sql
 --v15 comment preceding lines 
+--v16 removing created* & last_modified* from SECURITY_ROLE, SECURITY_PERMISSION
 
 -- assuming this already exists:
 -- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
@@ -69,19 +70,11 @@ IS 'foreign key from security_group';
 CREATE TABLE security_role
 (rol_id                  INTEGER                         NOT NULL
 ,role_name               CHARACTER VARYING               NOT NULL
-,created_ts              TIMESTAMP WITH TIME ZONE        NOT NULL
-,created_by              INTEGER                         NOT NULL
-,last_modified_ts        TIMESTAMP WITH TIME ZONE        NOT NULL
-,last_modified_by        INTEGER                         NOT NULL  
 ) TABLESPACE darts_tables;
 
 CREATE TABLE security_permission
 (per_id                  INTEGER                         NOT NULL
 ,permission_name         CHARACTER VARYING               NOT NULL
-,created_ts              TIMESTAMP WITH TIME ZONE        NOT NULL
-,created_by              INTEGER                         NOT NULL
-,last_modified_ts        TIMESTAMP WITH TIME ZONE        NOT NULL
-,last_modified_by        INTEGER                         NOT NULL  
 ) TABLESPACE darts_tables;
 
 CREATE TABLE security_role_permission_ae
@@ -147,24 +140,6 @@ FOREIGN KEY (usr_id) REFERENCES user_account(usr_id);
 ALTER TABLE security_group_user_account_ae         
 ADD CONSTRAINT security_group_user_account_ae_group_fk
 FOREIGN KEY (grp_id) REFERENCES security_group(grp_id);
-
-
-ALTER TABLE security_permission
-ADD CONSTRAINT security_permission_created_by_fk
-FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE security_permission
-ADD CONSTRAINT security_permission_modified_by_fk
-FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
-
-ALTER TABLE security_role
-ADD CONSTRAINT security_role_created_by_fk
-FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE security_role
-ADD CONSTRAINT security_role_modified_by_fk
-FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 
 ALTER TABLE security_role_permission_ae          
