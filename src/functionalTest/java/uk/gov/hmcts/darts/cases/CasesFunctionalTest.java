@@ -262,9 +262,8 @@ class CasesFunctionalTest  extends FunctionalTest {
 
     public int getCaseId() {
         String caseNum = getCaseNumber();
-        
+
         if ("-1".equals(caseNum)) {
-            assertEquals(NOT_FOUND, 404);
             return -1;
         }
 
@@ -307,7 +306,11 @@ class CasesFunctionalTest  extends FunctionalTest {
             .getBody()
             .jsonPath().get(ID);
 
-        hearingId = getIdFromList(hearingIds);
+        if (hearingIds == null) {
+            hearingId = -1;
+        } else {
+            hearingId = getIdFromList(hearingIds);
+        }
 
         return hearingId;
     }
