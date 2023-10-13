@@ -145,6 +145,15 @@
 --    add hea_id to annotation and FK to hearing
 --    adding FKs on ado_id, trd_id on external_object_directory
 --    add is_reporting_restriction to event_handler table
+--v52 removed: CREATE SEQUENCE der_seq
+--    added: CREATE SEQUENCE nod_seq
+--    removed comment: ALTER TABLE node_register...last_modified*
+--    added: -- node_register               NOD
+--    removed: -- device_register             DER
+--    removed: GRANT SELECT,UPDATE ON  der_seq TO darts_user;
+--    added: GRANT SELECT,UPDATE ON  nod_seq TO darts_user;
+--    updated annotation_document - all columns NOT NULL
+--    updated transcription_document - all columns NOT NULL
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -162,7 +171,6 @@
 -- daily_list                  DAL
 -- defence                     DFC
 -- defendant                   DFD
--- device_register             DER
 -- event                       EVE
 -- event_handler               EVH
 -- external_object_directory   EOD
@@ -174,6 +182,7 @@
 -- judge                       JUD
 -- media                       MED
 -- media_request               MER
+-- node_register               NOD
 -- notification                NOT
 -- object_directory_status     ODS
 -- prosecutor                  PRN
@@ -182,7 +191,7 @@
 -- retention_policy            RTP
 -- transcription               TRA
 -- transcription_comment       TRC
--- trnascription_document      TRD
+-- transcription_document      TRD
 -- transcription_status        TRS
 -- transcription_type          TRT
 -- transcription_urgency       TRU
@@ -255,17 +264,17 @@ COMMENT ON COLUMN annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 
 CREATE TABLE annotation_document
-(ado_id                      INTEGER
-,ann_id                      INTEGER
-,file_name                   CHARACTER VARYING
-,file_type                   CHARACTER VARYING
-,file_size                   INTEGER
-,uploaded_by                 INTEGER
-,uploaded_ts                 TIMESTAMP WITH TIME ZONE
+(ado_id                      INTEGER      NOT NULL
+,ann_id                      INTEGER      NOT NULL
+,file_name                   CHARACTER VARYING      NOT NULL
+,file_type                   CHARACTER VARYING      NOT NULL
+,file_size                   INTEGER      NOT NULL
+,uploaded_by                 INTEGER      NOT NULL
+,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN annotation_document.ado_id
-IS 'primary key of transcription_document'; 
+IS 'primary key of annotation_document'; 
 
 COMMENT ON COLUMN annotation_document.ann_id
 IS 'foreign key from annotation'; 
@@ -876,7 +885,7 @@ IS 'format of the requested media object, possibly migrated from moj_transformat
 
 
 CREATE TABLE node_register
-(node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not der_id
+(node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not nod_id
 ,ctr_id                      INTEGER                       NOT NULL
 ,node_type                   CHARACTER VARYING             NOT NULL   DEFAULT 'DAR'
 ,hostname                    CHARACTER VARYING             NOT NULL
@@ -890,7 +899,7 @@ COMMENT ON TABLE node_register
 IS 'corresponds to tbl_moj_node from legacy';
 
 COMMENT ON COLUMN node_register.node_id
-IS 'primary key of device_register';
+IS 'primary key of node_register';
 
 COMMENT ON COLUMN node_register.ctr_id 
 IS 'foreign key from moj_courtroom, legacy stored courthouse and courtroon un-normalised';
@@ -1099,13 +1108,13 @@ COMMENT ON COLUMN transcription_comment.transcription_object_id
 IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 
 CREATE TABLE transcription_document
-(trd_id                      INTEGER
-,tra_id                      INTEGER
-,file_name                   CHARACTER VARYING
-,file_type                   CHARACTER VARYING
-,file_size                   INTEGER
-,uploaded_by                 INTEGER
-,uploaded_ts                 TIMESTAMP WITH TIME ZONE
+(trd_id                      INTEGER             NOT NULL
+,tra_id                      INTEGER             NOT NULL
+,file_name                   CHARACTER VARYING             NOT NULL
+,file_type                   CHARACTER VARYING             NOT NULL
+,file_size                   INTEGER             NOT NULL
+,uploaded_by                 INTEGER             NOT NULL
+,uploaded_ts                 TIMESTAMP WITH TIME ZONE             NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN transcription_document.trd_id
@@ -1346,7 +1355,6 @@ CREATE SEQUENCE ctr_seq CACHE 20;
 CREATE SEQUENCE dal_seq CACHE 20;
 CREATE SEQUENCE dfc_seq CACHE 20;
 CREATE SEQUENCE dfd_seq CACHE 20;
-CREATE SEQUENCE der_seq CACHE 20 START WITH 50000;   -- sequence for device_register.node_id
 CREATE SEQUENCE eve_seq CACHE 20;
 CREATE SEQUENCE evh_seq CACHE 20;
 CREATE SEQUENCE eod_seq CACHE 20;
@@ -1356,6 +1364,7 @@ CREATE SEQUENCE jud_seq CACHE 20;
 CREATE SEQUENCE hea_seq CACHE 20;
 CREATE SEQUENCE med_seq CACHE 20;
 CREATE SEQUENCE mer_seq CACHE 20;
+CREATE SEQUENCE nod_seq CACHE 20 START WITH 50000;   -- sequence for node_register.node_id
 CREATE SEQUENCE not_seq CACHE 20;
 CREATE SEQUENCE ods_seq CACHE 20;
 CREATE SEQUENCE prn_seq CACHE 20;
@@ -1696,10 +1705,6 @@ ALTER TABLE node_register
 ADD CONSTRAINT node_register_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
---ALTER TABLE node_register   
---ADD CONSTRAINT node_register_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
 ALTER TABLE notification                
 ADD CONSTRAINT notification_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
@@ -1947,7 +1952,6 @@ GRANT SELECT,UPDATE ON  ctr_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dal_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dfd_seq TO darts_user;
-GRANT SELECT,UPDATE ON  der_seq TO darts_user;
 GRANT SELECT,UPDATE ON  elt_seq TO darts_user;
 GRANT SELECT,UPDATE ON  eod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  esa_seq TO darts_user;
@@ -1957,6 +1961,7 @@ GRANT SELECT,UPDATE ON  hea_seq TO darts_user;
 GRANT SELECT,UPDATE ON  jud_seq TO darts_user;
 GRANT SELECT,UPDATE ON  med_seq TO darts_user;
 GRANT SELECT,UPDATE ON  mer_seq TO darts_user;
+GRANT SELECT,UPDATE ON  nod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  not_seq TO darts_user;
 GRANT SELECT,UPDATE ON  ods_seq TO darts_user;
 GRANT SELECT,UPDATE ON  prn_seq TO darts_user;
