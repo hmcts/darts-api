@@ -65,8 +65,7 @@ class AuditSearchFunctionalTest extends FunctionalTest {
 
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
-            .queryParam("from_date", OffsetDateTime.now().minusHours(1).toString())
-            .queryParam("to_date", OffsetDateTime.now().plusHours(1).toString())
+            .queryParam("case_id", "-99")
             .when()
             .baseUri(getUri(SEARCH_ENDPOINT))
             .redirects().follow(false)
