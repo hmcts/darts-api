@@ -19,12 +19,6 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureADTenantId
           alias: AAD_TENANT_ID
-  postgresql:
-    enabled: true
-    flexibleserver: "darts-modernisation-dev"
-    setup:
-      databases:
-      - name: "pr-${CHANGE_ID}-darts"
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true
@@ -38,6 +32,13 @@ java:
       secretRef: "postgres"
       key: PASSWORD
       disabled: false
+
+postgresql:
+  enabled: true
+  flexibleserver: "darts-modernisation-dev"
+  setup:
+    databases:
+      - name: "pr-${CHANGE_ID}-darts"
 
 # function:
 #   scaleType: Job
