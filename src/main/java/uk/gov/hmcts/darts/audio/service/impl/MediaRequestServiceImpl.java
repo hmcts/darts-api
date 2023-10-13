@@ -167,6 +167,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         criteriaQuery.select(criteriaBuilder.construct(
             AudioRequestSummaryResult.class,
             mediaRequest.get(MediaRequestEntity_.id),
+            courtCase.get(CourtCaseEntity_.id),
             courtCase.get(CourtCaseEntity_.caseNumber),
             courthouse.get(CourthouseEntity_.courthouseName),
             hearing.get(HearingEntity_.hearingDate),
@@ -233,7 +234,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         MediaRequestEntity mediaRequestEntity = transientObjectEntity.getMediaRequest();
 
-        auditService.recordAudit(AuditActivityEnum.EXPORT_AUDIO, mediaRequestEntity.getRequestor(), mediaRequestEntity.getHearing().getCourtCase());
+        auditService.recordAudit(
+            AuditActivityEnum.EXPORT_AUDIO,
+            mediaRequestEntity.getRequestor(),
+            mediaRequestEntity.getHearing().getCourtCase()
+        );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
     }
 }

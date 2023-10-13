@@ -264,6 +264,9 @@ components:
         media_request_id:
           type: integer
           example: 12345
+        case_id:
+          type: integer
+          example: 123
         case_number:
           type: string
           example: "T20200190"
@@ -383,4 +386,3 @@ components:
       enum:
         - "AUTHORISATION_100"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
-

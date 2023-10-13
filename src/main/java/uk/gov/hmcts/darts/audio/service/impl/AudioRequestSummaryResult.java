@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 
 public record AudioRequestSummaryResult(
     Integer mediaRequestId,
+    Integer caseId,
     String caseNumber,
     String courthouseName,
     LocalDate hearingDate,
