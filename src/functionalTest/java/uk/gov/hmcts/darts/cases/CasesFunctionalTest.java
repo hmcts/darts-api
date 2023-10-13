@@ -226,6 +226,8 @@ class CasesFunctionalTest  extends FunctionalTest {
         }
     }
 
+    //=======================================
+
     private static String generateUniquesCaseNum() {
         String generateUniqueNo = String.format("%010d",
                                               new BigInteger(UUID.randomUUID().toString().replace("-", ""),16));
