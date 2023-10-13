@@ -251,7 +251,7 @@ class CasesFunctionalTest  extends FunctionalTest {
             .getBody()
             .jsonPath().get(CASE_NUMBER);
 
-        if(caseNums == null) {
+        if (caseNums == null) {
             caseNum = "-1";
         } else {
             caseNum = getCaseNumberFromList(caseNums);
