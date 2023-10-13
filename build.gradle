@@ -10,7 +10,7 @@ plugins {
   id 'org.sonarqube' version '4.4.1.3373'
   id "io.freefair.lombok" version "8.4"
   id "org.openapi.generator" version "7.0.1"
-  id "org.flywaydb.flyway" version "9.22.1"
+  id "org.flywaydb.flyway" version "9.22.3"
   id 'maven-publish'
   id("com.dorongold.task-tree") version "2.1.1"
 }
@@ -350,7 +350,7 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.22.3'
-  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.5.3'
+  implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.6.0'
 
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
