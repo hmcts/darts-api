@@ -258,8 +258,9 @@ class CasesFunctionalTest  extends FunctionalTest {
 
     public int getCaseId() {
         String caseNum = getCaseNumber();
-        if ("-1".equals(caseNum)) {
+        if (caseNum == null || "-1".equals(caseNum)) {
             assertEquals(NOT_FOUND, 404);
+            return -1;
         }
 
         int caseId;
