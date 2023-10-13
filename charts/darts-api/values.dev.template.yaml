@@ -21,14 +21,14 @@ java:
           alias: AAD_TENANT_ID
   postgresql:
     enabled: true
-    flexibleserver: "darts-preview"
+    flexibleserver: "darts-modernisation-dev"
     setup:
       databases:
       - name: "pr-${CHANGE_ID}-darts"
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true
-    DARTS_API_DB_HOST: "darts-preview.postgres.database.azure.com"
+    DARTS_API_DB_HOST: "darts-modernisation-dev.postgres.database.azure.com"
     DARTS_API_DB_NAME: "pr-${CHANGE_ID}-darts"
     DARTS_API_DB_USERNAME: "hmcts"
     spring.profiles.active: dev
