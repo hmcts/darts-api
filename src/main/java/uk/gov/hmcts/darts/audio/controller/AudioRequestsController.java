@@ -46,6 +46,7 @@ public class AudioRequestsController implements AudioRequestsApi {
 
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<AudioRequestSummary>> getYourAudio(Integer userId, Boolean expired) {
 
         return new ResponseEntity<>(audioRequestSummaryMapper.mapToAudioRequestSummary(
