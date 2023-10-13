@@ -11,7 +11,7 @@ public enum AuthorisationError implements DartsApiError {
 
     USER_NOT_AUTHORISED_FOR_COURTHOUSE(
         "100",
-        HttpStatus.UNAUTHORIZED,
+        HttpStatus.FORBIDDEN,
         "User is not authorised for the associated courthouse"
     ),
     BAD_REQUEST_CASE_ID(

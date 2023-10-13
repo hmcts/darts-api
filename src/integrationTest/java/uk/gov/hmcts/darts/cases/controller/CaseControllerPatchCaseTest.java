@@ -1,31 +1,70 @@
 package uk.gov.hmcts.darts.cases.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@Transactional
 class CaseControllerPatchCaseTest extends IntegrationBase {
 
     public static final String ENDPOINT_URL = "/cases/{case_id}";
     @Autowired
     private transient MockMvc mockMvc;
 
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    private CourtCaseEntity createdCase;
+
+    @BeforeEach
+    void setUp() {
+        createdCase = dartsDatabase.createCase("testCourthouse", "testCaseNumber");
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(createdCase.getCourthouse());
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+    }
+
+    @Test
+    void testForbidden() throws Exception {
+        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+
+        MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content("""
+                         {
+                           "retain_until": "2023-09-06T16:16:57.331Z"
+                         }""");
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isForbidden()).andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = """
+            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            """;
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     @Test
     void testOk() throws Exception {
-        CourtCaseEntity createdCase = dartsDatabase.createCase("testCourthouse", "testCaseNumber");
-
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("""
@@ -44,8 +83,6 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
 
     @Test
     void testFail_emptyRetainUntil() throws Exception {
-        CourtCaseEntity createdCase = dartsDatabase.createCase("testCourthouse", "testCaseNumber");
-
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("""
@@ -63,8 +100,6 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
 
     @Test
     void testFail_extraElement() throws Exception {
-        CourtCaseEntity createdCase = dartsDatabase.createCase("testCourthouse", "testCaseNumber");
-
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("""

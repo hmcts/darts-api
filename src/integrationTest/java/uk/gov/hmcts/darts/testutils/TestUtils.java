@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.util.List;
 
 @SuppressWarnings({"PMD.TestClassWithoutTestCases"})
 public final class TestUtils {
@@ -29,6 +30,14 @@ public final class TestUtils {
     public static String removeIds(String input) {
         return input.replaceAll("\"case_id\".{1,6},", "")
             .replaceAll("\"id\".{1,6},", "");
+    }
+
+    public static String removeTags(List<String> tagsToRemove, String input) {
+        String output = input;
+        for (String tagToRemove : tagsToRemove) {
+            output = output.replaceAll("\"" + tagToRemove + "\".{1,6},", "");
+        }
+        return output;
     }
 
     public static String substituteHearingDateWithToday(String expectedResponse) {
