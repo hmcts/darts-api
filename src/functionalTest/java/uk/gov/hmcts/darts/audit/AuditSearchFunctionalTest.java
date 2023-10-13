@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AuditSearchFunctionalTest extends FunctionalTest {
     private static final String SEARCH_ENDPOINT = "/audit/search";
 
-
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
@@ -65,8 +64,7 @@ class AuditSearchFunctionalTest extends FunctionalTest {
 
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
-            .queryParam("from_date", OffsetDateTime.now().minusHours(1).toString())
-            .queryParam("to_date", OffsetDateTime.now().plusHours(1).toString())
+            .queryParam("case_id", "-99")
             .when()
             .baseUri(getUri(SEARCH_ENDPOINT))
             .redirects().follow(false)
