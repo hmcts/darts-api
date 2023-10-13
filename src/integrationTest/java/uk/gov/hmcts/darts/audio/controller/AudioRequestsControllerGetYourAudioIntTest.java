@@ -55,6 +55,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
             [
                 {
                     "media_request_id": 1,
+                    "case_id": 1,
                     "case_number": "2",
                     "courthouse_name": "NEWCASTLE",
                     "hearing_date": "2023-06-10",
@@ -87,6 +88,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].media_request_id", is(expiredMediaRequest.getId())))
+            .andExpect(jsonPath("$[0].case_id", is(3)))
             .andExpect(jsonPath("$[0].case_number", is("2")))
             .andExpect(jsonPath("$[0].courthouse_name", is("NEWCASTLE")))
             .andExpect(jsonPath("$[0].media_request_start_ts").isString())
