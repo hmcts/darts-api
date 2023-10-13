@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AuditSearchFunctionalTest extends FunctionalTest {
     private static final String SEARCH_ENDPOINT = "/audit/search";
 
+
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
