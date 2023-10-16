@@ -155,11 +155,6 @@ class AutomatedTaskServiceImplTest {
 
     }
 
-    @Test
-    void cancelNonExistingAutomatedTask() {
-        assertFalse(automatedTaskService.cancelAutomatedTask("Test", true));
-    }
-
     private TriggerTask getTriggerTask() {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
@@ -182,6 +177,18 @@ class AutomatedTaskServiceImplTest {
         return new TriggerTask(automatedTask, trigger);
     }
 
+    @Test
+    void cancelNonExistingAutomatedTask() {
+        assertFalse(automatedTaskService.cancelAutomatedTask("Test", true));
+    }
+
+    @Test
+    void getNonExistingAutomatedTaskThrowsException() {
+        AutomatedTask automatedTask = createAutomatedTask("Test");
+        assertThrows(DartsApiException.class, () ->
+            automatedTaskService.getAutomatedTaskCronExpression(automatedTask.getTaskName()));
+    }
+    
     @Test
     void updateNonExistingAutomatedTaskCronExpressionThrowsException() {
 
