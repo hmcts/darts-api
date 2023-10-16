@@ -330,7 +330,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             log.info("Closed off transcription {}", transcriptionToBeClosed.getId());
         } catch (Exception e) {
             log.error("Unable to close transcription {} - {}", transcriptionToBeClosed.getId(), e.getMessage());
-            e.printStackTrace();
         }
     }
 

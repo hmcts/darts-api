@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -107,7 +108,6 @@ class AutomatedTaskServiceImplTest {
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
 
-
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
             mockLockProvider,
@@ -153,6 +153,11 @@ class AutomatedTaskServiceImplTest {
 
         assertTrue(automatedTaskService.cancelAutomatedTask("ProcessDailyList", true));
 
+    }
+
+    @Test
+    void cancelNonExistingAutomatedTask() {
+        assertFalse(automatedTaskService.cancelAutomatedTask("Test", true));
     }
 
     private TriggerTask getTriggerTask() {
