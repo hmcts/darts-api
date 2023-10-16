@@ -1,30 +1,42 @@
 package uk.gov.hmcts.darts.hearings.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
+@Transactional
+@Slf4j
 class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @Autowired
     private transient MockMvc mockMvc;
 
-    private static String endpointUrl = "/hearings/{hearingId}/events";
+    private static final String endpointUrl = "/hearings/{hearingId}/events";
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
 
     @Test
     void okGet() throws Exception {
@@ -38,14 +50,18 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         hearing.addJudge(testJudge);
         dartsDatabase.save(hearing);
 
-        EventEntity event = dartsDatabase.createEvent(hearing);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(hearing.getCourtroom().getCourthouse());
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
 
+        EventEntity event = dartsDatabase.createEvent(hearing);
+        
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearing.getId());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
-
         String actualJson = mvcResult.getResponse().getContentAsString();
+        log.info("actualJson: {}", actualJson);
         String expectedJson = """
             [{"id":<<eventId>>,"timestamp":"2020-06-20T10:00:00Z","name":"Defendant recalled","text":"testEventText"}]
             """;
@@ -56,10 +72,10 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     @Test
     void errorGetNotFound() throws Exception {
+        int hearingId = -1;
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, -1);
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingId);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
-
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
@@ -73,4 +89,34 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
     }
 
+    @Test
+    void hearingEventsGetEndpointShouldReturnForbiddenError() throws Exception {
+
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "testCourthouse",
+            "testCourtroom",
+            "testCaseNumber",
+            LocalDate.of(2020, 6, 20)
+        );
+        JudgeEntity testJudge = dartsDatabase.createSimpleJudge("testJudge");
+        hearing.addJudge(testJudge);
+        dartsDatabase.save(hearing);
+
+        EventEntity event = dartsDatabase.createEvent(hearing);
+
+        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearing.getId());
+        MvcResult response = mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isForbidden())
+            .andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = """
+            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
 }

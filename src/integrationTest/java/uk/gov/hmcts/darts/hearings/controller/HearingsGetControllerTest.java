@@ -10,25 +10,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.LocalDate;
-import java.util.Set;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
 class HearingsGetControllerTest extends IntegrationBase {
@@ -39,10 +29,8 @@ class HearingsGetControllerTest extends IntegrationBase {
     private static final String endpointUrl = "/hearings/{hearingId}";
 
     @MockBean
-    private Authorisation authorisation;
-
-    @MockBean
     private UserIdentity mockUserIdentity;
+
 
     @Test
     void okGet() throws Exception {
@@ -57,14 +45,8 @@ class HearingsGetControllerTest extends IntegrationBase {
         hearing.addJudge(testJudge);
         dartsDatabase.save(hearing);
 
-        doNothing().when(authorisation).authoriseByHearingId(
-            hearing.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
-        );
-
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearing.getId());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
-
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
@@ -85,21 +67,11 @@ class HearingsGetControllerTest extends IntegrationBase {
         expectedJson = expectedJson.replace("98", hearing.getCourtCase().getId().toString());
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
-        verify(authorisation).authoriseByHearingId(
-            hearing.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
-        );
-
     }
 
     @Test
     void errorGetNotFound() throws Exception {
         int hearingId = -1;
-
-        doNothing().when(authorisation).authoriseByHearingId(
-            hearingId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
-        );
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingId);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
@@ -113,17 +85,12 @@ class HearingsGetControllerTest extends IntegrationBase {
             }
             """;
 
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);verify(authorisation).authoriseByHearingId(
-            hearingId,
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
-        );
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
     @Test
     void hearingsGetEndpointShouldReturnForbiddenError() throws Exception {
-
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "testCourthouse",
@@ -131,9 +98,12 @@ class HearingsGetControllerTest extends IntegrationBase {
             "testCaseNumber",
             LocalDate.of(2020, 6, 20)
         );
+
         JudgeEntity testJudge = dartsDatabase.createSimpleJudge("testJudge");
         hearing.addJudge(testJudge);
         dartsDatabase.save(hearing);
+
+        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearing.getId());
 
