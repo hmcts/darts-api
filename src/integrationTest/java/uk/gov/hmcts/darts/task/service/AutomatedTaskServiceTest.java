@@ -251,7 +251,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Test
     @Order(9)
-    void givenConfiguredTaskCancel() {
+    void givenConfiguredTaskCancelCloseUnfinishedTranscriptionsAutomatedTask() {
         AutomatedTask automatedTask =
             new CloseUnfinishedTranscriptionsAutomatedTask(automatedTaskRepository,
                                                            lockProvider,
