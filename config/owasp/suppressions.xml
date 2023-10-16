@@ -20,15 +20,18 @@
     <vulnerabilityName>CVE-2023-41080</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-10-14">
-    <notes>Looks like a new security issue which involves DOS attacks</notes>
-    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
-    <vulnerabilityName>CVE-2023-35116</vulnerabilityName>
-  </suppress>
+  <!--End of temporary suppression section -->
 
-  <suppress until="2023-10-14">
-    <notes>Exposure of data and identity to wrong session in Spring for GraphQL</notes>
+  <!--Please add all the false positives under the below section-->
+  <suppress>
+    <notes>False Positive
+      https://nvd.nist.gov/vuln/detail/CVE-2023-34047 affects GraphQL library, which is unused in this project.</notes>
     <vulnerabilityName>CVE-2023-34047</vulnerabilityName>
   </suppress>
-  <!--End of temporary suppression section -->
+  <suppress>
+    <notes>False positive
+      project does not contain json-java</notes>
+    <cve>CVE-2023-5072</cve>
+  </suppress>
+  <!--End of false positives section -->
 </suppressions>
