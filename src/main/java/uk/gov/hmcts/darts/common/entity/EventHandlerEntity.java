@@ -9,13 +9,13 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 @Entity
 @Table(name = "event_handler")
 @Getter
 @Setter
-public class EventHandlerEntity extends CreatedModifiedBaseEntity {
+public class EventHandlerEntity extends CreatedBaseEntity {
 
     @Id
     @Column(name = "evh_id")

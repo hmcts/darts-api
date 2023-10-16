@@ -32,7 +32,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,10 +77,10 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             transcriptionEntity,
             transcriptionEntity.getLastModifiedBy(),
             transcriptionEntity.getCreatedDateTime().plusHours(1),
-            approvedTranscriptionStatus,
-            null
+            approvedTranscriptionStatus
         );
 
+        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
         transcriptionEntity.getTranscriptionWorkflowEntities().add(approvedTranscriptionWorkflowEntity);
         transcriptionEntity.setTranscriptionStatus(approvedTranscriptionStatus);
         dartsDatabaseStub.getTranscriptionRepository().save(transcriptionEntity);
@@ -129,7 +128,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             updateTranscription.getTranscriptionStatusId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertNull(transcriptionWorkflowEntity.getWorkflowComment());
+        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
@@ -245,7 +244,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             updateTranscription.getTranscriptionStatusId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertNull(transcriptionWorkflowEntity.getWorkflowComment());
+        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());

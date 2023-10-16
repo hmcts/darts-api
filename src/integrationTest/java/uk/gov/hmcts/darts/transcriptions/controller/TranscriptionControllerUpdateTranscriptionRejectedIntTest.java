@@ -151,7 +151,10 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
             updateTranscription.getTranscriptionStatusId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertEquals(updateTranscription.getWorkflowComment(), transcriptionWorkflowEntity.getWorkflowComment());
+        assertEquals(
+            REJECTED.toString(),
+            dartsDatabaseStub.getTranscriptionCommentRepository().findAll().get(0).getComment()
+        );
         assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());

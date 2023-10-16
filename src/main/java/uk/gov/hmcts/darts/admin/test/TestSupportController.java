@@ -169,7 +169,6 @@ public class TestSupportController {
         var courtroom = new CourtroomEntity();
         courtroom.setCourthouse(courthouse);
         courtroom.setName(courtroomName);
-        courtroom.setCreatedBy(userAccountRepository.getReferenceById(0));
         courtroomRepository.save(courtroom);
 
         courtroomTrash.add(courtroom.getId());

@@ -89,11 +89,9 @@ public class TranscriptionStub {
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
                                                                          UserAccountEntity user,
                                                                          OffsetDateTime timestamp,
-                                                                         TranscriptionStatusEntity transcriptionStatus,
-                                                                         String workflowComment) {
+                                                                         TranscriptionStatusEntity transcriptionStatus) {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
         transcriptionWorkflowEntity.setTranscription(transcriptionEntity);
-        transcriptionWorkflowEntity.setWorkflowComment(workflowComment);
         transcriptionWorkflowEntity.setCreatedDateTime(timestamp);
         transcriptionWorkflowEntity.setCreatedBy(user);
         transcriptionWorkflowEntity.setLastModifiedDateTime(timestamp);

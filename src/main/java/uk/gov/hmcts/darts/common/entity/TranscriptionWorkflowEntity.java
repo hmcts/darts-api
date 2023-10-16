@@ -42,8 +42,4 @@ public class TranscriptionWorkflowEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "workflow_ts", nullable = false)
     private OffsetDateTime workflowTimestamp;
-
-    @Column(name = "workflow_comment")
-    private String workflowComment;
-
 }

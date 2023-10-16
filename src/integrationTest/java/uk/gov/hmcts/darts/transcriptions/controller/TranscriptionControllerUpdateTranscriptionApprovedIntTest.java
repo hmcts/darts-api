@@ -33,7 +33,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -132,7 +131,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             updateTranscription.getTranscriptionStatusId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertNull(transcriptionWorkflowEntity.getWorkflowComment());
+        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
@@ -180,7 +179,10 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             updateTranscription.getTranscriptionStatusId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertEquals(updateTranscription.getWorkflowComment(), transcriptionWorkflowEntity.getWorkflowComment());
+        assertEquals(
+            APPROVED.toString(),
+            dartsDatabaseStub.getTranscriptionCommentRepository().findAll().get(0).getComment()
+        );
         assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
