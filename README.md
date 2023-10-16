@@ -30,6 +30,7 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | CPP_PASSWORD                     | CppPassword                               |
 | DARPC_USER_NAME                  | DarPcUserName                             |
 | DARPC_PASSWORD                   | DarPcPassword                             |
+| SYSTEM_USER_EMAIL                | DartsSystemUserEmail                      |
 
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
@@ -69,6 +70,7 @@ export CPP_USER_NAME=
 export CPP_PASSWORD=
 export DARPC_USER_NAME=
 export DARPC_PASSWORD=
+export SYSTEM_USER_EMAIL=
 ```
 
 ### Storage Account

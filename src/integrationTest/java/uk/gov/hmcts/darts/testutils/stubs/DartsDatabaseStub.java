@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -369,6 +370,10 @@ public class DartsDatabaseStub {
 
     public TranscriptionEntity save(TranscriptionEntity transcriptionEntity) {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    public TranscriptionWorkflowEntity save(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
+        return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflowEntity);
     }
 
     public void saveAll(HearingEntity... hearingEntities) {

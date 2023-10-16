@@ -40,6 +40,8 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
@@ -79,6 +81,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final UserIdentity userIdentity;
 
     private final WorkflowValidator workflowValidator;
+
+    private static final int MAX_CREATED_BY_DAYS = 30;
 
     @Transactional
     @Override
@@ -143,6 +147,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             updateTranscription.getWorkflowComment()
         );
         transcription.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+
 
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
@@ -289,6 +294,52 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private TranscriptionTypeEntity getTranscriptionTypeById(Integer transcriptionTypeId) {
         return transcriptionTypeRepository.getReferenceById(transcriptionTypeId);
+    }
+
+    @Override
+    @Transactional
+    public void closeTranscriptions() {
+        try {
+            List<TranscriptionStatusEntity> finishedTranscriptionStatuses = getFinishedTranscriptionStatuses();
+            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now().minus(MAX_CREATED_BY_DAYS, ChronoUnit.DAYS);
+            List<TranscriptionEntity> transcriptionsToBeClosed =
+                transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+                    finishedTranscriptionStatuses,
+                    lastCreatedDateTime
+                );
+            if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
+                log.info("No transcriptions to be closed off");
+            } else {
+                String transcriptionComment = "Automatically closed transcription";
+                log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
+                for (TranscriptionEntity transcriptionToBeClosed : transcriptionsToBeClosed) {
+                    closeTranscription(transcriptionToBeClosed, transcriptionComment);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Unable to close transcriptions {}", e.getMessage());
+        }
+    }
+
+    private void closeTranscription(TranscriptionEntity transcriptionToBeClosed, String transcriptionComment) {
+        try {
+            UpdateTranscription updateTranscription = new UpdateTranscription();
+            updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
+            updateTranscription.setWorkflowComment(transcriptionComment);
+            updateTranscription(transcriptionToBeClosed.getId(), updateTranscription);
+            log.info("Closed off transcription {}", transcriptionToBeClosed.getId());
+        } catch (Exception e) {
+            log.error("Unable to close transcription {} - {}", transcriptionToBeClosed.getId(), e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
+        List<TranscriptionStatusEntity> transcriptionStatuses = new ArrayList<>();
+        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.CLOSED.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.COMPLETE.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.REJECTED.getId()));
+        return transcriptionStatuses;
     }
 
 }

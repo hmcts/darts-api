@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 public class TranscriptionsApiImpl implements TranscriptionsApi {
 
     private final TranscriptionService transcriptionService;
-
+    
     @Override
     public RequestTranscriptionResponse saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails) {
         return transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails);
@@ -23,5 +23,9 @@ public class TranscriptionsApiImpl implements TranscriptionsApi {
     @Override
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription) {
         return transcriptionService.updateTranscription(transcriptionId, updateTranscription);
+    }
+
+    public void closeTranscriptions() {
+        transcriptionService.closeTranscriptions();
     }
 }

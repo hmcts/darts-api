@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import java.time.LocalDate;
 
@@ -17,12 +18,14 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
     private DailyListProcessor dailyListProcessor;
 
 
-    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider) {
-        super(automatedTaskRepository, lockProvider);
+    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
+                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
     }
 
-    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider, DailyListProcessor processor) {
-        super(automatedTaskRepository, lockProvider);
+    public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
+                                         AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, DailyListProcessor processor) {
+        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.dailyListProcessor = processor;
     }
 

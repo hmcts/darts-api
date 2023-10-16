@@ -33,7 +33,8 @@ def secrets = [
     secret('DarPcUserName', 'DARPC_USER_NAME'),
     secret('DarPcPassword', 'DARPC_PASSWORD'),
     secret('AzureADFunctionalTestUsername', 'AZURE_AD_FUNCTIONAL_TEST_USERNAME'),
-    secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD')
+    secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD'),
+    secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL')
 
   ],
 ]

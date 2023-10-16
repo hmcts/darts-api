@@ -6,14 +6,19 @@ import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import javax.validation.constraints.NotNull;
 
@@ -34,9 +39,23 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
 
     private final LockingTaskExecutor lockingTaskExecutor;
 
-    protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider) {
+    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+
+    protected AbstractLockableAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
+                                            AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
         this.automatedTaskRepository = automatedTaskRepository;
-        lockingTaskExecutor = new DefaultLockingTaskExecutor(lockProvider);
+        this.lockingTaskExecutor = new DefaultLockingTaskExecutor(lockProvider);
+        this.automatedTaskConfigurationProperties = automatedTaskConfigurationProperties;
+    }
+
+    private void setupUserAuthentication() {
+
+        Jwt jwt = Jwt.withTokenValue("automated-task")
+            .header("alg", "RS256")
+            .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
+            .build();
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
     }
 
     @Override
@@ -106,6 +125,7 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
     protected abstract void handleException(Exception exception);
 
     private void preRunTask() {
+        setupUserAuthentication();
         start = Instant.now();
         log.info("Task : {} started running at: {}", getTaskName(), LocalDateTime.now());
         setAutomatedTaskStatus(AutomatedTaskStatus.IN_PROGRESS);

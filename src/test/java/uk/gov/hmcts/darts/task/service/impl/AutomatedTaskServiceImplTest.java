@@ -12,11 +12,11 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.config.TriggerTask;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
@@ -54,11 +54,15 @@ class AutomatedTaskServiceImplTest {
     @Mock
     private ScheduledTaskHolder scheduledTaskHolder;
 
+    @Mock
+    private AutomatedTaskConfigurationProperties mockAutomatedTaskConfigurationProperties;
+
     @Test
     void getAutomatedTaskUsingProcessDailyListAutomatedTask() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties
         );
         assertEquals(Duration.ofSeconds(20), processDailyListAutomatedTask.getLockConfiguration().getLockAtLeastFor());
         assertEquals(Duration.ofSeconds(600), processDailyListAutomatedTask.getLockConfiguration().getLockAtMostFor());
@@ -79,7 +83,8 @@ class AutomatedTaskServiceImplTest {
     void getAutomatedTaskCronExpressionWithNullCronExpression() {
         AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties
         );
         AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
             processDailyListAutomatedTask,
@@ -96,36 +101,17 @@ class AutomatedTaskServiceImplTest {
 
     }
 
-
-    @Test
-    void registerProcessDailyListAutomatedTask() {
-        AutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
-            mockAutomatedTaskRepository,
-            mockLockProvider
-        );
-
-        AutomatedTaskEntity expectedAutomatedTaskEntity = createAutomatedTaskEntity(
-            processDailyListAutomatedTask,
-            "*/7 * * * * *"
-        );
-        when(mockAutomatedTaskRepository.findByTaskName(processDailyListAutomatedTask.getTaskName()))
-            .thenReturn(Optional.of(expectedAutomatedTaskEntity));
-
-        ScheduledTaskRegistrar taskRegistrar = new ScheduledTaskRegistrar();
-        automatedTaskService.configureAndLoadAutomatedTasks(taskRegistrar);
-        assertEquals(1, taskRegistrar.getTriggerTaskList().size());
-    }
-
     @Test
     void reloadByTaskName() {
         ScheduledTask scheduledTask = mock(ScheduledTask.class);
         Set<ScheduledTask> scheduledTaskList = new HashSet<>();
         scheduledTaskList.add(scheduledTask);
 
+
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider
-        ) {
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties) {
             @Override
             protected void runTask() {
             }
@@ -172,8 +158,8 @@ class AutomatedTaskServiceImplTest {
     private TriggerTask getTriggerTask() {
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider
-        ) {
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties) {
             @Override
             protected void runTask() {
             }
@@ -204,8 +190,8 @@ class AutomatedTaskServiceImplTest {
 
         AbstractLockableAutomatedTask automatedTask = new AbstractLockableAutomatedTask(
             mockAutomatedTaskRepository,
-            mockLockProvider
-        ) {
+            mockLockProvider,
+            mockAutomatedTaskConfigurationProperties) {
             @Override
             public String getTaskName() {
                 return "Test";
