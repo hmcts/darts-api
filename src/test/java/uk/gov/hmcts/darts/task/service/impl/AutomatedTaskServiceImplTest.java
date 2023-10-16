@@ -184,9 +184,8 @@ class AutomatedTaskServiceImplTest {
 
     @Test
     void getNonExistingAutomatedTaskThrowsException() {
-        AutomatedTask automatedTask = createAutomatedTask("Test");
         assertThrows(DartsApiException.class, () ->
-            automatedTaskService.getAutomatedTaskCronExpression(automatedTask.getTaskName()));
+            automatedTaskService.getAutomatedTaskCronExpression("Test"));
     }
 
     @Test
