@@ -8,11 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -24,11 +20,6 @@ import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomAtCourthouse;
-import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
-import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CLOSED;
@@ -45,12 +36,14 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.S
 class TranscriptionServiceIntTest extends IntegrationBase {
 
     private static final OffsetDateTime CREATED_DATE = OffsetDateTime.parse("2023-07-31T12:00Z");
+    private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-09-01T12:00Z");
+    private static final String SOME_COURTHOUSE = "some-courthouse";
+    private static final String SOME_COURTROOM = "some-courtroom";
+    private static final String SOME_CASE_ID = "1";
 
     @MockBean
     private UserIdentity mockUserIdentity;
 
-    private CourtCaseEntity courtCase;
-    private CourtroomEntity courtroom;
     private HearingEntity hearing;
     private UserAccountEntity systemUser;
 
@@ -65,12 +58,12 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         when(mockUserIdentity.getEmailAddress()).thenReturn(systemUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(systemUser);
 
-        CourthouseEntity courthouse = someMinimalCourthouse();
-        courtroom = createCourtRoomAtCourthouse(courthouse);
-        courtCase = createCaseAt(courthouse);
-
-        JudgeEntity judge = createJudgeWithName("aJudge");
-        var hearingEntity = createHearingWithDefaults(courtCase, courtroom, CREATED_DATE.toLocalDate(), judge);
+        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
+            SOME_CASE_ID,
+            SOME_COURTHOUSE,
+            SOME_COURTROOM,
+            SOME_DATE_TIME.toLocalDate()
+        );
 
         hearing = dartsDatabase.save(hearingEntity);
     }
@@ -82,7 +75,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, requestedTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -112,7 +105,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, requestedTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, requestedTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -133,7 +126,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, awaitingAuthTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, awaitingAuthTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -162,7 +155,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, approvedTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, approvedTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -191,7 +184,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, rejectedTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, rejectedTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -219,7 +212,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         final TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, withTranscriberTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, withTranscriberTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -248,7 +241,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, completeTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, completeTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
@@ -276,7 +269,7 @@ class TranscriptionServiceIntTest extends IntegrationBase {
         TranscriptionUrgencyEntity transcriptionUrgency = dartsDatabase.getTranscriptionStub().getTranscriptionUrgencyByEnum(STANDARD);
 
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub()
-            .createAndSaveTranscriptionEntity(courtCase, courtroom, hearing, transcriptionType, closedTranscriptionStatus,
+            .createAndSaveTranscriptionEntity(hearing, transcriptionType, closedTranscriptionStatus,
                                               transcriptionUrgency, systemUser);
 
         final TranscriptionEntity requestedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()

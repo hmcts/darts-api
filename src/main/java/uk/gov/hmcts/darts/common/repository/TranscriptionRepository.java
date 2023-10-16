@@ -18,6 +18,7 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         """
     )
     List<TranscriptionEntity> findByCaseId(Integer caseId);
+
     @Query("""
            SELECT te
            FROM TranscriptionEntity te
