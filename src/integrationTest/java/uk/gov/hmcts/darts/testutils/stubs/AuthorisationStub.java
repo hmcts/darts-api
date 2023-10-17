@@ -145,7 +145,7 @@ public class AuthorisationStub {
         hearingEntity.setCourtCase(courtCaseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
         hearingEntity.setHearingDate(LocalDate.now());
-        hearingEntity.setHearingIsActual(false);
+        hearingEntity.setHearingIsActual(true);
         hearingEntity.setScheduledStartTime(LocalTime.now());
         dartsDatabaseStub.save(hearingEntity);
     }

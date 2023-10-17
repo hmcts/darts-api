@@ -1,13 +1,19 @@
 package uk.gov.hmcts.darts.authorisation.config;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
@@ -44,12 +50,78 @@ public class AuthorisationAspect {
 
     private final Authorisation authorisation;
 
-    @Before("@annotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation)")
-    public void authorisation(JoinPoint joinPoint) throws Throwable {
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    private final ObjectMapper objectMapper;
 
+    @Pointcut("within(uk.gov.hmcts.darts.*.controller..*)")
+    public void withinControllerPointcut() {
+    }
+
+    @Pointcut("@annotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation)")
+    public void authorisationPointcut() {
+    }
+
+    private boolean handleRequestBodyAuthorisation(String method) {
+        Assert.notNull(method, "Method must not be null");
+        return switch (method) {
+            case "POST", "PUT", "PATCH" -> true;
+            default -> false;
+        };
+    }
+
+    private boolean handleRequestParametersAuthorisation(String method) {
+        Assert.notNull(method, "Method must not be null");
+        return switch (method) {
+            case "GET", "POST", "PUT", "PATCH", "DELETE" -> true;
+            default -> false;
+        };
+    }
+
+    @Around("authorisationPointcut() && withinControllerPointcut() && args(@RequestBody body)")
+    public Object handleRequestBodyAuthorisationAdvice(ProceedingJoinPoint joinPoint, Object body)
+        throws Throwable {
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
             .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        if (!authorisationAnnotation.bodyAuthorisation() || !handleRequestBodyAuthorisation(request.getMethod())) {
+            return joinPoint.proceed();
+        }
+
+        Set<SecurityRoleEnum> roles = Set.of(authorisationAnnotation.securityRoles());
+        if (roles.isEmpty()) {
+            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
+        }
+
+        ContextIdEnum contextId = authorisationAnnotation.contextId();
+
+        JsonNode jsonNode = objectMapper.valueToTree(body);
+
+        switch (contextId) {
+            case CASE_ID -> authorisation.authoriseByCaseId(jsonNode.path(CASE_ID_PARAM).intValue(), roles);
+            case HEARING_ID -> authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
+            case MEDIA_REQUEST_ID ->
+                authorisation.authoriseByMediaRequestId(jsonNode.path(MEDIA_REQUEST_ID_PARAM).intValue(), roles);
+            case MEDIA_ID -> authorisation.authoriseByMediaId(jsonNode.path(MEDIA_ID_PARAM).intValue(), roles);
+            case TRANSCRIPTION_ID ->
+                authorisation.authoriseByTranscriptionId(jsonNode.path(TRANSCRIPTION_ID_PARAM).intValue(), roles);
+            default -> throw new IllegalStateException(String.format(
+                "The Authorisation annotation contextId is not known: %s",
+                contextId
+            ));
+        }
+
+        return joinPoint.proceed();
+    }
+
+    @Before("@annotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation)")
+    public void handleRequestParametersAuthorisationAdvice(JoinPoint joinPoint) throws Throwable {
+        uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()
+            .getAnnotation(uk.gov.hmcts.darts.authorisation.annotation.Authorisation.class);
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        if (authorisationAnnotation.bodyAuthorisation() || !handleRequestParametersAuthorisation(request.getMethod())) {
+            return;
+        }
 
         Set<SecurityRoleEnum> roles = Set.of(authorisationAnnotation.securityRoles());
         if (roles.isEmpty()) {
