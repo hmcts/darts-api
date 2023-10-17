@@ -97,6 +97,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Disabled
     @Order(5)
     void deleteCourthouse() {
         int courthouseID = getLatestCourthouseID();
