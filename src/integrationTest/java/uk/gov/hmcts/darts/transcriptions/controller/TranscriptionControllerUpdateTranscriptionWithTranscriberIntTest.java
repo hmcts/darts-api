@@ -129,8 +129,6 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
     }
 
@@ -245,8 +243,6 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
     }
 

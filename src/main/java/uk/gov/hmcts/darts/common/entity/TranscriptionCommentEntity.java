@@ -29,7 +29,7 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
     private Integer id;
 
     @Column(name = "trw_id")
-    private Integer transcriptionWorkFlowId;
+    private Integer transcriptionWorkflowId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tra_id")

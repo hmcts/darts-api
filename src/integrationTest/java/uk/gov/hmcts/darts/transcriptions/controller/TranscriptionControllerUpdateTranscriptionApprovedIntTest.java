@@ -132,8 +132,6 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
         List<NotificationEntity> notificationEntities = dartsDatabaseStub.getNotificationRepository().findAll();
@@ -183,8 +181,6 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             APPROVED.toString(),
             dartsDatabaseStub.getTranscriptionCommentRepository().findAll().get(0).getComment()
         );
-        assertEquals(testUserId, transcriptionWorkflowEntity.getCreatedBy().getId());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getLastModifiedBy().getId());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
     }
 

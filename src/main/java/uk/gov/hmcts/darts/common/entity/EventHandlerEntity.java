@@ -38,4 +38,9 @@ public class EventHandlerEntity extends CreatedBaseEntity {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
+    @Column(name = "is_reporting_restriction", nullable = false)
+    private Boolean isReportingRestriction;
+
+
+
 }

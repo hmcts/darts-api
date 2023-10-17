@@ -254,14 +254,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionWorkflow.setWorkflowActor(userAccount);
         transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now(UTC));
 
-
-        transcriptionWorkflow.setCreatedBy(userAccount);
-        transcriptionWorkflow.setLastModifiedBy(userAccount);
-
         TranscriptionWorkflowEntity savedTranscriptionWorkFlow = transcriptionWorkflowRepository.saveAndFlush(
             transcriptionWorkflow);
 
-        if (!StringUtils.isBlank(workflowComment) && !StringUtils.isEmpty(workflowComment)) {
+        if (!StringUtils.isBlank(workflowComment)) {
             createAndSaveComment(userAccount, workflowComment, savedTranscriptionWorkFlow);
         }
         return savedTranscriptionWorkFlow;
@@ -270,7 +266,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private void createAndSaveComment(UserAccountEntity userAccount, String workflowComment, TranscriptionWorkflowEntity savedTranscriptionWorkFlow) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment(workflowComment);
-        transcriptionCommentEntity.setTranscriptionWorkFlowId(savedTranscriptionWorkFlow.getId());
+        transcriptionCommentEntity.setTranscriptionWorkflowId(savedTranscriptionWorkFlow.getId());
         transcriptionCommentEntity.setLastModifiedBy(userAccount);
         transcriptionCommentEntity.setCreatedBy(userAccount);
         transcriptionCommentRepository.saveAndFlush(transcriptionCommentEntity);

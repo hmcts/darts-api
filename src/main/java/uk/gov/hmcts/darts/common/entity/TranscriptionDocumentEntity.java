@@ -10,7 +10,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,7 +20,6 @@ import java.time.OffsetDateTime;
 @Table(name = "transcription_document")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = false)
 public class TranscriptionDocumentEntity {
     @Id
     @Column(name = "trd_id")
@@ -35,6 +33,9 @@ public class TranscriptionDocumentEntity {
 
     @Column(name = "file_name", nullable = false)
     private String fileName;
+
+    @Column(name = "file_type", nullable = false)
+    private String fileType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by")

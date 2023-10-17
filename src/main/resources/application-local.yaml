@@ -22,3 +22,4 @@ darts:
 logging:
   level:
     uk.gov.hmcts.darts: DEBUG
+    org.hibernate: TRACE
