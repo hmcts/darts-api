@@ -12,6 +12,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Authorisation {
 
+    boolean bodyAuthorisation() default false;
+
     ContextIdEnum contextId();
 
     SecurityRoleEnum[] securityRoles();
