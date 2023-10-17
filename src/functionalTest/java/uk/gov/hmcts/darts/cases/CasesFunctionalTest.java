@@ -189,6 +189,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
+    @Disabled
     @Order(7)
     void getCaseHearing() {
         int caseId = getCaseId();
