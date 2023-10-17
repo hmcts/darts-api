@@ -9,13 +9,12 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = "external_location_type")
 @Getter
 @Setter
-public class ExternalLocationTypeEntity extends CreatedModifiedBaseEntity {
+public class ExternalLocationTypeEntity {
 
     @Id
     @Column(name = "elt_id")
