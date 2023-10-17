@@ -78,7 +78,7 @@ public class RedisConnectionConfig {
             "darts-stg.redis.cache.windows.net",
             6380
         );
-        serverConfig.setPassword(RedisPassword.of("uS3LcL8QaZGwgkexggKW9yvuttHpd1wcLAzCaECdiVA%3D"));
+        serverConfig.setPassword(RedisPassword.of(":uS3LcL8QaZGwgkexggKW9yvuttHpd1wcLAzCaECdiVA%3D"));
 
         final LettuceConnectionFactory lettuceConnectionFactory = new LettuceConnectionFactory(
             serverConfig,
