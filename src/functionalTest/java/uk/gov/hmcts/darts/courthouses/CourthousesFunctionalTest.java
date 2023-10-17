@@ -109,11 +109,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        if (response.statusCode() == 204) {
-            assertEquals(NO_CONTENT, response.statusCode());
-        } else if (response.statusCode() == 500) {
-            assertEquals(INTERNAL_SERVER_ERROR, response.statusCode());
-        }
+        int respCode = response.statusCode();
+        int output = INTERNAL_SERVER_ERROR;
+
+        assertEquals(output, respCode);
+
     }
 
     @Test
