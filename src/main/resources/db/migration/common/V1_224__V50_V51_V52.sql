@@ -59,6 +59,11 @@ CREATE TABLE IF NOT EXISTS transcription_document
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE             NOT NULL
 );
 
+ALTER TABLE transcription_document
+ADD CONSTRAINT transcription_document_transcription_fk
+FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
+
+
 CREATE TABLE IF NOT EXISTS annotation_document
 (ado_id                      INTEGER      NOT NULL
 ,ann_id                      INTEGER      NOT NULL
@@ -83,7 +88,7 @@ ALTER TABLE event_handler ADD COLUMN is_reporting_restriction boolean NOT NULL D
 CREATE SEQUENCE IF NOT EXISTS ado_seq CACHE 20;
 CREATE SEQUENCE IF NOT EXISTS trd_seq CACHE 20;
 
-DROP SEQUENCE IF EXISTS node_sequence;
+DROP SEQUENCE IF EXISTS node_seq;
 
 ALTER SEQUENCE nod_seq START WITH 50000;
 

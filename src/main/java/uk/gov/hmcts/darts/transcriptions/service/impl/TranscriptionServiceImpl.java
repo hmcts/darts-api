@@ -258,15 +258,18 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             transcriptionWorkflow);
 
         if (!StringUtils.isBlank(workflowComment)) {
-            createAndSaveComment(userAccount, workflowComment, savedTranscriptionWorkFlow);
+            createAndSaveComment(userAccount, workflowComment, savedTranscriptionWorkFlow, transcription);
         }
         return savedTranscriptionWorkFlow;
     }
 
-    private void createAndSaveComment(UserAccountEntity userAccount, String workflowComment, TranscriptionWorkflowEntity savedTranscriptionWorkFlow) {
+    private void createAndSaveComment(UserAccountEntity userAccount, String workflowComment,
+                                      TranscriptionWorkflowEntity savedTranscriptionWorkFlow,
+                                      TranscriptionEntity transcription) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment(workflowComment);
         transcriptionCommentEntity.setTranscriptionWorkflowId(savedTranscriptionWorkFlow.getId());
+        transcriptionCommentEntity.setTranscription(transcription);
         transcriptionCommentEntity.setLastModifiedBy(userAccount);
         transcriptionCommentEntity.setCreatedBy(userAccount);
         transcriptionCommentRepository.saveAndFlush(transcriptionCommentEntity);
