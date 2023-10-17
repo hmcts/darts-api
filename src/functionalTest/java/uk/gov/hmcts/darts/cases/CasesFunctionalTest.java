@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.cases;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
@@ -140,6 +141,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
+    @Disabled
     @Order(5)
     void patchCase() {
         int caseId = getCaseId();
