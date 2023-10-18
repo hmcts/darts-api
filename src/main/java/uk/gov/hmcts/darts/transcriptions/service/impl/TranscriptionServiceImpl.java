@@ -314,7 +314,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             } else {
                 log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
                 for (TranscriptionEntity transcriptionToBeClosed : transcriptionsToBeClosed) {
-                    closeTranscription(transcriptionToBeClosed, AUTOMATICALLY_CLOSED_TRANSCRIPTION);
+                    closeTranscription(transcriptionToBeClosed.getId(), AUTOMATICALLY_CLOSED_TRANSCRIPTION);
                 }
             }
         } catch (Exception e) {
@@ -323,15 +323,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void closeTranscription(TranscriptionEntity transcriptionToBeClosed, String transcriptionComment) {
+    public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
             updateTranscription.setWorkflowComment(transcriptionComment);
-            updateTranscription(transcriptionToBeClosed.getId(), updateTranscription);
-            log.info("Closed off transcription {}", transcriptionToBeClosed.getId());
+            updateTranscription(transcriptionId, updateTranscription);
+            log.info("Closed off transcription {}", transcriptionId);
         } catch (Exception e) {
-            log.error("Unable to close transcription {} - {}", transcriptionToBeClosed.getId(), e.getMessage());
+            log.error("Unable to close transcription {} - {}", transcriptionId, e.getMessage());
         }
     }
 
