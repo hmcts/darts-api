@@ -44,6 +44,8 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
 
+    private static final List<String> TAGS_TO_IGNORE = List.of("tra_id", "hea_id");
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -57,6 +59,7 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
             SOME_DATE_TIME.toLocalDate()
         );
 
+        //?
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
         assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
@@ -84,11 +87,11 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
         dartsDatabase.save(transcription);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getId());
-        String expected = getContentsFromFile(
-            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json");
+        String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
+            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
-        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -103,11 +106,11 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
         dartsDatabase.save(transcription2);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getId());
-        String expected = getContentsFromFile(
-            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json");
+        String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
+            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
-        String actualResponse = mvcResult.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
