@@ -1,10 +1,11 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -65,6 +66,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @SuppressWarnings({"PMD.ExcessiveImports"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
+    public static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
@@ -310,10 +312,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
                 log.info("No transcriptions to be closed off");
             } else {
-                String transcriptionComment = "Automatically closed transcription";
                 log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
                 for (TranscriptionEntity transcriptionToBeClosed : transcriptionsToBeClosed) {
-                    closeTranscription(transcriptionToBeClosed, transcriptionComment);
+                    closeTranscription(transcriptionToBeClosed, AUTOMATICALLY_CLOSED_TRANSCRIPTION);
                 }
             }
         } catch (Exception e) {
@@ -321,6 +322,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void closeTranscription(TranscriptionEntity transcriptionToBeClosed, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
