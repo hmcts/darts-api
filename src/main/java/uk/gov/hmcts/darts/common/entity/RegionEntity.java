@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 
 @Entity
@@ -18,7 +17,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class RegionEntity extends CreatedModifiedBaseEntity {
+public class RegionEntity {
 
     @Id
     @Column(name = "reg_id")

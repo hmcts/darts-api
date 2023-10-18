@@ -123,16 +123,14 @@ public class AuthorisationStub {
             transcriptionEntity,
             testUser,
             YESTERDAY,
-            transcriptionStub.getTranscriptionStatusByEnum(REQUESTED),
-            "Please expedite my transcription request"
+            transcriptionStub.getTranscriptionStatusByEnum(REQUESTED)
         );
 
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
             testUser,
             YESTERDAY,
-            awaitingAuthorisationTranscriptionStatus,
-            null
+            awaitingAuthorisationTranscriptionStatus
         );
 
         transcriptionEntity.getTranscriptionWorkflowEntities()
