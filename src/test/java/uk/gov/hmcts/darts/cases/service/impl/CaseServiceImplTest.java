@@ -30,6 +30,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TestUtils;
@@ -76,6 +77,9 @@ class CaseServiceImplTest {
     @Mock
     AdvancedSearchRequestHelper advancedSearchRequestHelper;
 
+    @Mock
+    TranscriptionRepository transcriptionRepository;
+
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
@@ -93,7 +97,8 @@ class CaseServiceImplTest {
             caseRepository,
             eventRepository,
             retrieveCoreObjectService,
-            advancedSearchRequestHelper
+            advancedSearchRequestHelper,
+            transcriptionRepository
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }

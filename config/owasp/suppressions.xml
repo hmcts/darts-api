@@ -5,36 +5,56 @@
     <notes>Dependency brought in through gov-notify, so we can't control this.</notes>
     <cve>CVE-2022-45688</cve>
   </suppress>
+  <suppress>
+    <cve>CVE-2023-4586</cve>
+  </suppress>
 
   <suppress>
-    <notes>The vulnerability only affects applications that use an LDAP CertStore from Bouncy Castle to validate X.509 certificates.
-    I have spoken to Hemanta who has confirmed we don't do this.</notes>
+    <notes>The vulnerability only affects applications that use an LDAP CertStore from Bouncy Castle to validate X.509
+      certificates.
+      I have spoken to Hemanta who has confirmed we don't do this.
+    </notes>
     <cve>CVE-2023-33201</cve>
   </suppress>
 
   <suppress until="2023-12-14">
-    <notes>URL Redirection to Untrusted Site ('Open Redirect') vulnerability in FORM authentication feature Apache Tomcat.</notes>
+    <notes>URL Redirection to Untrusted Site ('Open Redirect') vulnerability in FORM authentication feature Apache
+      Tomcat.
+    </notes>
     <vulnerabilityName>CVE-2023-41080</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-10-14">
-    <notes>Looks like a new security issue which involves DOS attacks</notes>
-    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
-    <vulnerabilityName>CVE-2023-35116</vulnerabilityName>
-  </suppress>
-
-  <suppress until="2023-10-14">
-    <notes>A vulnerability was found in the Hot Rod client. This security issue occurs as the Hot Rod client does not
-      enable hostname validation when using TLS, possibly resulting in a man-in-the-middle (MITM) attack. Will have to
-      wait until azure-sdk-bom is updated to use newer netty library.
+  <suppress until="2023-10-25">
+    <notes>Fixed in Spring Boot v3.1.5 - Upgrade to Tomcat 10.1.15
+      https://github.com/spring-projects/spring-boot/issues/37902
+      [Spring Boot v3.1.4 (tomcat-embed-core-10.1.13.jar / tomcat-embed-websocket-10.1.13.jar): CVE-2023-42795,
+      CVE-2023-45648]
     </notes>
-    <packageUrl regex="true">pkg:maven/io.netty/netty-handler@4.1.97.Final</packageUrl>
-    <vulnerabilityName>CVE-2023-4586</vulnerabilityName>
+    <vulnerabilityName>CVE-2023-42795</vulnerabilityName>
+  </suppress>
+  <suppress until="2023-10-25">
+    <notes>Fixed in Spring Boot v3.1.5 - Upgrade to Tomcat 10.1.15
+      https://github.com/spring-projects/spring-boot/issues/37902
+      [Spring Boot v3.1.4 (tomcat-embed-core-10.1.13.jar / tomcat-embed-websocket-10.1.13.jar): CVE-2023-42795,
+      CVE-2023-45648]
+    </notes>
+    <vulnerabilityName>CVE-2023-45648</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-10-14">
-    <notes>Exposure of data and identity to wrong session in Spring for GraphQL</notes>
+  <!--End of temporary suppression section -->
+
+  <!--Please add all the false positives under the below section-->
+  <suppress>
+    <notes>False Positive
+      https://nvd.nist.gov/vuln/detail/CVE-2023-34047 affects GraphQL library, which is unused in this project.
+    </notes>
     <vulnerabilityName>CVE-2023-34047</vulnerabilityName>
   </suppress>
-  <!--End of temporary suppression section -->
+  <suppress>
+    <notes>False positive
+      project does not contain json-java
+    </notes>
+    <cve>CVE-2023-5072</cve>
+  </suppress>
+  <!--End of false positives section -->
 </suppressions>

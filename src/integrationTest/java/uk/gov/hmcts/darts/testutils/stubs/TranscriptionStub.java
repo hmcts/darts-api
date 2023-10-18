@@ -2,8 +2,6 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -29,18 +27,55 @@ public class TranscriptionStub {
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
+    private final UserAccountStub userAccountStub;
 
 
-    public TranscriptionEntity createAndSaveTranscriptionEntity(CourtCaseEntity courtCase,
-                                                                CourtroomEntity courtroom,
-                                                                HearingEntity hearing,
-                                                                TranscriptionTypeEntity transcriptionType,
-                                                                TranscriptionStatusEntity transcriptionStatus,
-                                                                TranscriptionUrgencyEntity transcriptionUrgency,
-                                                                UserAccountEntity testUser) {
+    public TranscriptionEntity createTranscription(
+        HearingEntity hearing
+    ) {
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(TranscriptionTypeEnum.SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(TranscriptionStatusEnum.APPROVED);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(TranscriptionUrgencyEnum.STANDARD);
+        UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(hearing.getCourtCase().getCourthouse());
+        return createAndSaveTranscriptionEntity(
+            hearing,
+            transcriptionType,
+            transcriptionStatus,
+            transcriptionUrgencyEntity,
+            authorisedIntegrationTestUser
+        );
+    }
+
+    private TranscriptionUrgencyEntity mapToTranscriptionUrgencyEntity(TranscriptionUrgencyEnum urgencyEnum) {
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
+        transcriptionUrgencyEntity.setId(urgencyEnum.getId());
+        transcriptionUrgencyEntity.setDescription(urgencyEnum.name());
+        return transcriptionUrgencyEntity;
+    }
+
+    private TranscriptionTypeEntity mapToTranscriptionTypeEntity(TranscriptionTypeEnum typeEnum) {
+        TranscriptionTypeEntity transcriptionType = new TranscriptionTypeEntity();
+        transcriptionType.setId(typeEnum.getId());
+        transcriptionType.setDescription(typeEnum.name());
+        return transcriptionType;
+    }
+
+    private TranscriptionStatusEntity mapToTranscriptionStatusEntity(TranscriptionStatusEnum statusEnum) {
+        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+        transcriptionStatus.setId(statusEnum.getId());
+        transcriptionStatus.setStatusType(statusEnum.name());
+        return transcriptionStatus;
+    }
+
+    public TranscriptionEntity createAndSaveTranscriptionEntity(
+        HearingEntity hearing,
+        TranscriptionTypeEntity transcriptionType,
+        TranscriptionStatusEntity transcriptionStatus,
+        TranscriptionUrgencyEntity transcriptionUrgency,
+        UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setCourtCase(courtCase);
-        transcription.setCourtroom(courtroom);
+        transcription.setCourtCase(hearing.getCourtCase());
+        transcription.setCourtroom(hearing.getCourtroom());
         transcription.setHearing(hearing);
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionStatus(transcriptionStatus);

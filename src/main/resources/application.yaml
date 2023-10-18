@@ -116,7 +116,7 @@ darts:
   daily-list:
     housekeeping:
       enabled: true
-      cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:4 4 2 * * SAT}
+      cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:0 30 16 * * *}
       days-to-keep: 30
   gateway:
     url: ${DARTS_GATEWAY_URL:http://localhost:8070}

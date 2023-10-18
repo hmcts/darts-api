@@ -11,8 +11,6 @@ info:
 paths:
   /audio-requests:
     get:
-      security:
-        - bearerAuth: [ ]
       tags:
         - Audio Requests
       operationId: getYourAudio
@@ -51,6 +49,8 @@ paths:
                 status: 400
                 detail: "Required parameter 'expired' is not present."
                 instance: "/audio-requests"
+        '401':
+          description: Unauthorised Error
     post:
       tags:
         - Audio Requests
@@ -58,7 +58,7 @@ paths:
       operationId: addAudioRequest
       description: Adds a user audio request for processing
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
@@ -66,6 +66,8 @@ paths:
                 $ref: '#/components/schemas/AddAudioResponse'
         '400':
           description: 'invalid input, object invalid'
+        '401':
+          description: Unauthorised Error
         '409':
           description: audio request item already exists
       requestBody:
@@ -102,14 +104,23 @@ paths:
                 status: 400
         '401':
           description: Unauthorised Error
+        '403':
+          description: Forbidden Error
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/MediaRequestAuthorisation403ErrorCode'
               example:
                 type: "AUTHORISATION_100"
                 title: "User is not authorised for the associated courthouse"
-                status: 401
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -146,14 +157,23 @@ paths:
                 status: 400
         '401':
           description: Unauthorised Error
+        '403':
+          description: Forbidden Error
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/MediaRequestAuthorisation403ErrorCode'
               example:
                 type: "AUTHORISATION_100"
                 title: "User is not authorised for the associated courthouse"
-                status: 401
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -182,10 +202,6 @@ paths:
         '200':
           description: OK
           content:
-            audio/mpeg:
-              schema:
-                type: string
-                format: binary
             application/zip:
               schema:
                 type: string
@@ -202,14 +218,23 @@ paths:
                 status: 400
         '401':
           description: Unauthorised Error
+        '403':
+          description: Forbidden Error
           content:
             application/json+problem:
               schema:
-                $ref: './problem.yaml'
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/MediaRequestAuthorisation403ErrorCode'
               example:
                 type: "AUTHORISATION_100"
                 title: "User is not authorised for the associated courthouse"
-                status: 401
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -232,12 +257,6 @@ paths:
                 status: 500
 
 components:
-  securitySchemes:
-    bearerAuth: # arbitrary name for the security scheme
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
   schemas:
     AudioRequestSummary:
       type: object
@@ -245,6 +264,9 @@ components:
         media_request_id:
           type: integer
           example: 12345
+        case_id:
+          type: integer
+          example: 123
         case_number:
           type: string
           example: "T20200190"
@@ -358,3 +380,9 @@ components:
         - FAILED
         - COMPLETED
         - EXPIRED
+
+    MediaRequestAuthorisation403ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_100"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
