@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.courthouses;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.darts.FunctionalTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @TestInstance(Lifecycle.PER_CLASS)
@@ -37,12 +37,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
     public static final int INTERNAL_SERVER_ERROR = 500;
 
-    private Integer testCourthouseId;
-
-    @BeforeAll
-    void beforeAll() {
-        testCourthouseId = null;
-    }
+    private int testCourthouseId;
 
     @Test
     @Order(1)
@@ -75,7 +70,7 @@ class CourthousesFunctionalTest extends FunctionalTest {
             .extract()
             .path("id");
 
-        assertNotNull(testCourthouseId);
+        assertTrue(testCourthouseId > 0);
     }
 
     @Test
