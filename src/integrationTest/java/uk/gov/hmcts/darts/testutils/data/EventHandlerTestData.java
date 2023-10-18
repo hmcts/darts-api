@@ -19,8 +19,6 @@ public class EventHandlerTestData {
         entity.setEventName("some-desc");
         entity.setCreatedDateTime(OffsetDateTime.now());
         entity.setCreatedBy(userAccountEntity);
-        entity.setLastModifiedDateTime(OffsetDateTime.now());
-        entity.setLastModifiedBy(userAccountEntity);
         entity.setActive(true);
 
         return entity;

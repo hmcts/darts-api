@@ -12,7 +12,6 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -20,7 +19,7 @@ import java.time.OffsetDateTime;
 @Table(name = "transcription_workflow")
 @Getter
 @Setter
-public class TranscriptionWorkflowEntity extends CreatedModifiedBaseEntity {
+public class TranscriptionWorkflowEntity {
 
     @Id
     @Column(name = "trw_id")
@@ -42,8 +41,4 @@ public class TranscriptionWorkflowEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "workflow_ts", nullable = false)
     private OffsetDateTime workflowTimestamp;
-
-    @Column(name = "workflow_comment")
-    private String workflowComment;
-
 }

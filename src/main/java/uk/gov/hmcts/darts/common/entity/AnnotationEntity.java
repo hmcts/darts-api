@@ -42,6 +42,9 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @Column(name = "annotation_text")
     private String text;
 
+    @Column(name = "hea_id")
+    private Integer hearingId;
+
     @Column(name = "annotation_ts")
     private OffsetDateTime timestamp;
 

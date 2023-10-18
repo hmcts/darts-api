@@ -8,14 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = "object_directory_status")
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class ObjectDirectoryStatusEntity extends CreatedModifiedBaseEntity {
+public class ObjectDirectoryStatusEntity {
 
     @Id
     @Column(name = "ods_id")
