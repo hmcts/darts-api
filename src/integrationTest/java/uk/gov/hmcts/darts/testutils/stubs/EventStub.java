@@ -30,4 +30,5 @@ public class EventStub {
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }
+
 }

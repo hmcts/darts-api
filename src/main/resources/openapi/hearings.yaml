@@ -86,8 +86,6 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-
-
 components:
   schemas:
     get_hearing_response:
@@ -123,7 +121,6 @@ components:
     judge:
       type: string
       example: Mr Judge
-
 
     events_response:
       type: array

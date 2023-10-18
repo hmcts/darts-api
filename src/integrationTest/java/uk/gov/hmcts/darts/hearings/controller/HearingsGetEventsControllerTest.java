@@ -55,7 +55,6 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
 
         EventEntity event = dartsDatabase.createEvent(hearing);
-        
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearing.getId());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
