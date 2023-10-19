@@ -1,10 +1,10 @@
-package uk.gov.hmcts.darts.hearings.mapper;
+package uk.gov.hmcts.darts.common.mapper;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.hearings.model.Transcript;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,4 +49,30 @@ public class TranscriptionMapper {
     }
 
 
+    public static List<uk.gov.hmcts.darts.hearings.model.Transcript> mapHearingResponse(List<TranscriptionEntity> transcriptionEntities) {
+        List<uk.gov.hmcts.darts.hearings.model.Transcript> response = new ArrayList<>();
+        for (TranscriptionEntity transcriptionEntity : transcriptionEntities) {
+            response.add(mapHearingTranscription(transcriptionEntity));
+        }
+        return response;
+    }
+
+    private uk.gov.hmcts.darts.hearings.model.Transcript mapHearingTranscription(TranscriptionEntity transcriptionEntity) {
+        uk.gov.hmcts.darts.hearings.model.Transcript transcript = new uk.gov.hmcts.darts.hearings.model.Transcript();
+        transcript.setTraId(transcriptionEntity.getId());
+        HearingEntity hearing = transcriptionEntity.getHearing();
+        if (hearing == null) {
+            if (transcriptionEntity.getHearingDate() != null) {
+                transcript.setHearingDate(transcriptionEntity.getHearingDate().toLocalDate());
+            }
+        } else {
+            transcript.setHeaId(hearing.getId());
+            transcript.setHearingDate(hearing.getHearingDate());
+        }
+        transcript.setType(transcriptionEntity.getTranscriptionType().getDescription());
+        transcript.setRequestedOn(transcriptionEntity.getCreatedDateTime().toLocalDate());
+        transcript.setRequestedByName(getRequestedBy(transcriptionEntity));
+        transcript.setStatus(transcriptionEntity.getTranscriptionStatus().getStatusType());
+        return transcript;
+    }
 }

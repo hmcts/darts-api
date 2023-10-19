@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.cases.mapper;
+package uk.gov.hmcts.darts.common.mapper;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.cases.model.Transcript;
