@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
@@ -29,6 +30,9 @@ class HearingsServiceImplTest {
 
     @Mock
     HearingRepository hearingRepository;
+    @Mock
+    EventRepository eventRepository;
+
 
     HearingsServiceImpl service;
 
@@ -36,7 +40,8 @@ class HearingsServiceImplTest {
     @BeforeEach
     void setUp() {
         service = new HearingsServiceImpl(
-            hearingRepository
+            hearingRepository,
+            eventRepository
         );
     }
 

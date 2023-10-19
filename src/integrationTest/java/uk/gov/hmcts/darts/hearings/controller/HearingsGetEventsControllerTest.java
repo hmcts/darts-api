@@ -55,13 +55,13 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
             SOME_COURTROOM,
             SOME_DATE_TIME.toLocalDate()
         );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        CourtCaseEntity courtCase = hearing.getCourtCase();
         courtCase.addProsecutor("aProsecutor");
         courtCase.addDefendant("aDefendant");
         courtCase.addDefence("aDefence");
         dartsDatabase.save(courtCase);
 
-        event = dartsDatabase.createEvent(hearingEntity);
+        event = dartsDatabase.createEvent(hearing);
 
         hearingEntity = dartsDatabase.getHearingRepository().findById(hearing.getId()).orElseThrow();
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
