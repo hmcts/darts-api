@@ -41,12 +41,6 @@
     <vulnerabilityName>CVE-2023-45648</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-11-03">
-    <notes>Raised ticket https://tools.hmcts.net/jira/browse/DMP-1342 to do permanent fix.
-    </notes>
-    <cve>CVE-2023-44487</cve>
-  </suppress>
-
   <!--End of temporary suppression section -->
 
   <!--Please add all the false positives under the below section-->
