@@ -33,7 +33,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    private static final String endpointUrl = "/hearings/{hearingId}/events";
+    private static final String ENDPOINT_URL = "/hearings/{hearingId}/events";
 
     @MockBean
     private UserIdentity mockUserIdentity;
@@ -72,7 +72,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
     @Test
     void okGet() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
@@ -89,7 +89,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
     void errorGetNotFound() throws Exception {
         int hearingId = -1;
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingId);
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingId);
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound()).andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
@@ -109,7 +109,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
 
         when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
         MvcResult response = mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isForbidden())
             .andReturn();
