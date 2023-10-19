@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.authorisation.service.impl;
+package uk.gov.hmcts.darts.authorisation.model;
 
 public record GetAuthorisationResult(Integer userId, String userName,
                                      Integer roleId, String roleName,
