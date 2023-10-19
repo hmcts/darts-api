@@ -28,8 +28,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;

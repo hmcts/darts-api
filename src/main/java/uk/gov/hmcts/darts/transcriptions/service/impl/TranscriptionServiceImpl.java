@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -66,6 +68,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
+    private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final AuthorisationApi authorisationApi;
     private final NotificationApi notificationApi;
 
@@ -250,11 +253,26 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionWorkflow.setTranscriptionStatus(transcriptionStatus);
         transcriptionWorkflow.setWorkflowActor(userAccount);
         transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now(UTC));
-        transcriptionWorkflow.setWorkflowComment(workflowComment);
-        transcriptionWorkflow.setCreatedBy(userAccount);
-        transcriptionWorkflow.setLastModifiedBy(userAccount);
 
-        return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflow);
+        TranscriptionWorkflowEntity savedTranscriptionWorkFlow = transcriptionWorkflowRepository.saveAndFlush(
+            transcriptionWorkflow);
+
+        if (!StringUtils.isBlank(workflowComment)) {
+            createAndSaveComment(userAccount, workflowComment, savedTranscriptionWorkFlow, transcription);
+        }
+        return savedTranscriptionWorkFlow;
+    }
+
+    private void createAndSaveComment(UserAccountEntity userAccount, String workflowComment,
+                                      TranscriptionWorkflowEntity savedTranscriptionWorkFlow,
+                                      TranscriptionEntity transcription) {
+        TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
+        transcriptionCommentEntity.setComment(workflowComment);
+        transcriptionCommentEntity.setTranscriptionWorkflowId(savedTranscriptionWorkFlow.getId());
+        transcriptionCommentEntity.setTranscription(transcription);
+        transcriptionCommentEntity.setLastModifiedBy(userAccount);
+        transcriptionCommentEntity.setCreatedBy(userAccount);
+        transcriptionCommentRepository.saveAndFlush(transcriptionCommentEntity);
     }
 
     private UserAccountEntity getUserAccount() {

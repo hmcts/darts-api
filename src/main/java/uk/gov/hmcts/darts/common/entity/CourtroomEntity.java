@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 @Entity
 @Table(name = CourtroomEntity.TABLE_NAME, uniqueConstraints = {@UniqueConstraint(columnNames = {CourtroomEntity.CTH_ID, CourtroomEntity.COURTROOM_NAME})})
@@ -22,7 +22,7 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CourtroomEntity extends CreatedModifiedBaseEntity {
+public class CourtroomEntity extends CreatedBaseEntity {
 
     public static final String CTR_ID = "ctr_id";
     public static final String COURTROOM_NAME = "courtroom_name";

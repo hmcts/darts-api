@@ -3,17 +3,23 @@ package uk.gov.hmcts.darts.courthouses;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.TestMethodOrder;
 import uk.gov.hmcts.darts.FunctionalTest;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
+@TestInstance(Lifecycle.PER_CLASS)
+@TestMethodOrder(OrderAnnotation.class)
 class CourthousesFunctionalTest extends FunctionalTest {
+
     public static final String COURTHOUSES_URI = "/courthouses";
     public static final String COURTHOUSE_BODY = """
         {"courthouse_name": "BIRMINGHAM","code": 5705}""";
@@ -29,25 +35,46 @@ class CourthousesFunctionalTest extends FunctionalTest {
     public static final int NOT_FOUND = 404;
     public static final int RESOURCE_ALREADY_EXISTS = 409;
 
+    public static final int INTERNAL_SERVER_ERROR = 500;
+
+    private int testCourthouseId;
 
     @Test
     @Order(1)
-    void createCourthouse() {
+    void getAllCourthouses() {
         Response response = buildRequestWithExternalAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(COURTHOUSES_URI))
+            .get()
+            .then()
+            .assertThat()
+            .statusCode(OK)
+            .extract().response();
+
+        assertNotNull(response);
+    }
+
+    @Test
+    @Order(2)
+    void createCourthouse() {
+        testCourthouseId = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(COURTHOUSES_URI))
             .body(COURTHOUSE_BODY)
             .post()
             .then()
-            .extract().response();
+            .assertThat()
+            .statusCode(CREATED)
+            .extract()
+            .path("id");
 
-        assertEquals(CREATED, response.statusCode());
+        assertTrue(testCourthouseId > 0);
     }
 
     @Test
-    @Disabled
-    @Order(2)
+    @Order(3)
     void createSameCourthouse() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -62,14 +89,12 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Disabled
-    @Order(3)
+    @Order(4)
     void updateCourthouse() {
-        int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
+            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
             .body(COURTHOUSE_UPDATEBODY)
             .put()
             .then()
@@ -79,13 +104,12 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void updateCourthouseWithInvalidBody() {
-        int courthouseID = getLatestCourthouseID();
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
+            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
             .body(COURTHOUSE_INVALIDBODY)
             .put()
             .then()
@@ -95,52 +119,22 @@ class CourthousesFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Order(5)
-    void deleteCourthouse() {
-        int courthouseID = getLatestCourthouseID();
-        Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(COURTHOUSES_URI  + "/" + courthouseID))
-            .delete()
-            .then()
-            .extract().response();
-
-        assertEquals(NO_CONTENT, response.statusCode());
-    }
-
-    @Test
     @Order(6)
-    void getAllCourthouses() {
+    void getExistingCourthouse() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI))
+            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
             .get()
             .then()
             .extract().response();
 
         assertEquals(OK, response.statusCode());
     }
+
 
     @Test
     @Order(7)
-    void getExistingCourthouse() {
-        int courthouseID = getLatestCourthouseID();
-        Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(COURTHOUSES_URI + "/" + courthouseID))
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(OK, response.statusCode());
-    }
-
-
-    @Test
-    @Order(8)
     void getCourthouseIdDoesNotExist() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -153,20 +147,19 @@ class CourthousesFunctionalTest extends FunctionalTest {
         assertEquals(NOT_FOUND, response.statusCode());
     }
 
-    //----------------------------------
-    private int getLatestCourthouseID() {
-        List<Integer> ids = buildRequestWithExternalAuth()
+    @Test
+    @Order(8)
+    void deleteCourthouse() {
+        Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
             .when()
-            .baseUri(getUri(COURTHOUSES_URI))
-            .get()
+            .baseUri(getUri(COURTHOUSES_URI + "/" + testCourthouseId))
+            .delete()
             .then()
-            .extract()
-            .response()
-            .getBody()
-            .jsonPath().get("id");
+            .statusCode(NO_CONTENT)
+            .extract().response();
 
-        int idLen = ids.size();
-        return ids.get(--idLen);
+        assertNotNull(response);
     }
+
 }

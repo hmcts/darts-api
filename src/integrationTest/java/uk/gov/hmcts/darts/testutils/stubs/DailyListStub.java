@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
+import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
-import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 
 import java.time.LocalDate;
 

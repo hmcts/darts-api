@@ -141,13 +141,15 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     private static EventHandlerEntity getActiveHandler() {
         var activeHandler = getHandlerWithDefaults();
         activeHandler.setActive(true);
+        activeHandler.setIsReportingRestriction(false);
         return activeHandler;
     }
 
     private static EventHandlerEntity getInactiveHandler() {
-        var activeHandler = getHandlerWithDefaults();
-        activeHandler.setActive(false);
-        return activeHandler;
+        var inactiveHandler = getHandlerWithDefaults();
+        inactiveHandler.setActive(false);
+        inactiveHandler.setIsReportingRestriction(false);
+        return inactiveHandler;
     }
 
     private static EventHandlerEntity getHandlerWithDefaults() {

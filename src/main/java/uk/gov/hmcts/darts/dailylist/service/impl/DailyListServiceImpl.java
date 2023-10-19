@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
@@ -24,7 +25,6 @@ import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
-import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 
 import java.text.MessageFormat;
