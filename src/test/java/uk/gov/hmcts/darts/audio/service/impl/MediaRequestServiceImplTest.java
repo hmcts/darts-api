@@ -11,7 +11,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
-import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
@@ -218,7 +218,7 @@ class MediaRequestServiceImplTest {
         var mediaRequestId = 1;
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
-        
+
         doNothing().when(auditService).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))

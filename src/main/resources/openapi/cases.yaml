@@ -47,6 +47,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/cases'
+
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "COMMON_100"
+                title: "Provided courthouse does not exist"
+                status: 400
+                detail: "Courthouse '' not found."
+
+        '404':
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
         '500':
           description: Internal Server Error
           content:
@@ -72,23 +92,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/post_case_response'
+
         '400':
-          description: A required parameter is missing or an invalid datatype or value was provided for property.
+          description: Bad Request - Invalid XML Document
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
-              example:
-                type: "COMMON_100"
-                title: "Provided courthouse does not exist"
-                status: 400
-                detail: "Courthouse '' not found."
+
+        '404':
+          description: Not Found - Courthouse not found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
         '500':
           description: Internal Server Error
           content:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+
 
   /cases/{case_id}:
     get:
@@ -111,6 +136,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -148,6 +192,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/single_case'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '500':
           description: Internal Server Error
           content:
@@ -176,6 +239,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/hearings'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+  /cases/{case_id}/transcripts:
+    get:
+      tags:
+        - Cases
+      summary: Allows the retrieval of transcripts for a given case_id
+      description: |-
+        Retrieves all transcripts for a case_id.
+      parameters:
+        - in: path
+          name: case_id
+          schema:
+            type: integer
+          description: "case_id is the internal cas_id of the case."
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transcripts'
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/CasesAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "CASE_104"
+                title: "The requested case cannot be found"
+                status: 404
         '500':
           description: Internal Server Error
           content:
@@ -461,6 +600,36 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/judge'
+    transcripts:
+      type: array
+      items:
+        $ref: '#/components/schemas/transcript'
+    transcript:
+      type: object
+      properties:
+        tra_id:
+          type: integer
+          example: 1
+        hea_id:
+          type: integer
+          example: 2
+        hearing_date:
+          type: string
+          format: date
+          example: 2022-05-20
+        type:
+          type: string
+          example: "Sentencing remarks"
+        requested_on:
+          type: string
+          format: date
+          example: 2022-05-22
+        requested_by_name:
+          type: string
+          example: "Joe Bloggs"
+        status:
+          type: string
+          example: "Available"
     defendant:
       type: string
       example: Joe Bloggs
@@ -493,3 +662,22 @@ components:
           type: string
         transcript_count:
           type: integer
+
+    PostCasesErrorCode:
+      type: string
+      enum:
+        - "ADD_CASE_101"
+        - "ADD_CASE_102"
+      x-enum-varnames: [ CASE_COURT_HOUSE_NOT_FOUND, CASE_DOCUMENT_CANT_BE_PARSED ]
+
+    GetCasesErrorCode:
+      type: string
+      enum:
+        - "GET_CASE_101"
+      x-enum-varnames: [ CASE_COURT_HOUSE_NOT_FOUND ]
+
+    CasesAuthorisation403ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_100"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]

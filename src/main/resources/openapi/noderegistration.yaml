@@ -19,36 +19,42 @@ paths:
           name: node_type
           schema:
             type: string
+            minLength: 1
           description: ""
           required: true
         - in: query
           name: courthouse
           schema:
             type: string
+            minLength: 1
           description: ""
           required: true
         - in: query
           name: court_room
           schema:
             type: string
+            minLength: 1
           description: ""
           required: true
         - in: query
           name: host_name
           schema:
             type: string
+            minLength: 1
           description: ""
           required: true
         - in: query
           name: ip_address
           schema:
             type: string
+            minLength: 1
           description: ""
           required: true
         - in: query
           name: mac_address
           schema:
             type: string
+            minLength: 1
           description: ""
           required: true
       responses:

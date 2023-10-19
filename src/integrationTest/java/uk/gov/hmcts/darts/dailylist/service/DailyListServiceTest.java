@@ -15,11 +15,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
-import uk.gov.hmcts.darts.dailylist.repository.DailyListRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.IOException;

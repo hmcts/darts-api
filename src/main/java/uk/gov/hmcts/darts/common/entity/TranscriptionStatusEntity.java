@@ -6,13 +6,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 @Entity
 @Table(name = "transcription_status")
 @Getter
 @Setter
-public class TranscriptionStatusEntity extends CreatedModifiedBaseEntity {
+public class TranscriptionStatusEntity {
 
     @Id
     @Column(name = "trs_id", nullable = false)

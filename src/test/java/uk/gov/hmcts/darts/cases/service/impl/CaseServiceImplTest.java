@@ -20,7 +20,6 @@ import uk.gov.hmcts.darts.cases.model.Hearing;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
-import uk.gov.hmcts.darts.cases.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -28,8 +27,10 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.TestUtils;
@@ -76,6 +77,9 @@ class CaseServiceImplTest {
     @Mock
     AdvancedSearchRequestHelper advancedSearchRequestHelper;
 
+    @Mock
+    TranscriptionRepository transcriptionRepository;
+
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
@@ -93,7 +97,8 @@ class CaseServiceImplTest {
             caseRepository,
             eventRepository,
             retrieveCoreObjectService,
-            advancedSearchRequestHelper
+            advancedSearchRequestHelper,
+            transcriptionRepository
         );
         this.objectMapper = TestUtils.getObjectMapper();
     }

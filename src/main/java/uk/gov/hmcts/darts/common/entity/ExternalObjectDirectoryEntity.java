@@ -35,11 +35,11 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     private MediaEntity media;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tra_id", foreignKey = @ForeignKey(name = "eod_transcription_fk"))
-    private TranscriptionEntity transcription;
+    @JoinColumn(name = "trd_id", foreignKey = @ForeignKey(name = "eod_transcription_document_fk"))
+    private TranscriptionDocumentEntity transcriptionDocumentEntity;
 
-    @Column(name = "ann_id")
-    private Integer annotationId;
+    @Column(name = "ado_id")
+    private Integer annotationDocumentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ods_id", foreignKey = @ForeignKey(name = "eod_object_directory_status_fk"), nullable = false)

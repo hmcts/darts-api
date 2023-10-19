@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
-import uk.gov.hmcts.darts.audio.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -34,6 +33,7 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
@@ -167,6 +167,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         criteriaQuery.select(criteriaBuilder.construct(
             AudioRequestSummaryResult.class,
             mediaRequest.get(MediaRequestEntity_.id),
+            courtCase.get(CourtCaseEntity_.id),
             courtCase.get(CourtCaseEntity_.caseNumber),
             courthouse.get(CourthouseEntity_.courthouseName),
             hearing.get(HearingEntity_.hearingDate),
@@ -233,7 +234,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         MediaRequestEntity mediaRequestEntity = transientObjectEntity.getMediaRequest();
 
-        auditService.recordAudit(AuditActivityEnum.EXPORT_AUDIO, mediaRequestEntity.getRequestor(), mediaRequestEntity.getHearing().getCourtCase());
+        auditService.recordAudit(
+            AuditActivityEnum.EXPORT_AUDIO,
+            mediaRequestEntity.getRequestor(),
+            mediaRequestEntity.getHearing().getCourtCase()
+        );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
     }
 }

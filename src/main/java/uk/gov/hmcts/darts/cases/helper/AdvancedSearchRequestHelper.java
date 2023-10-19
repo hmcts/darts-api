@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
@@ -48,15 +49,18 @@ public class AdvancedSearchRequestHelper {
 
     private final UserIdentity userIdentity;
 
-    public List<CourtCaseEntity> getMatchingCourtCases(GetCasesSearchRequest request) {
+    public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<CourtCaseEntity> criteriaQuery = criteriaBuilder.createQuery(CourtCaseEntity.class);
+        CriteriaQuery<Integer> criteriaQuery = criteriaBuilder.createQuery(Integer.class);
         Root<CourtCaseEntity> caseRoot = criteriaQuery.from(CourtCaseEntity.class);
         List<Predicate> predicates = createPredicates(request, criteriaBuilder, caseRoot);
 
         Predicate finalAndPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         criteriaQuery.where(finalAndPredicate);
-        TypedQuery<CourtCaseEntity> query = entityManager.createQuery(criteriaQuery);
+        Path<Integer> namePath = caseRoot.get(CourtCaseEntity_.ID);
+        criteriaQuery.select(namePath);
+
+        TypedQuery<Integer> query = entityManager.createQuery(criteriaQuery);
         return query.getResultList();
     }
 

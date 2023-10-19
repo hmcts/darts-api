@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -39,6 +40,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -86,6 +88,17 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private HearingEntity hearing;
     private UserAccountEntity testUser;
 
+    private static void assertTranscriptionFailed100Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "TRANSCRIPTION_100",
+              "title": "Failed to validate transcription request",
+              "status": 400
+            }""";
+
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     @BeforeEach
     void setupData() {
         authorisationStub.givenTestSchema();
@@ -127,26 +140,31 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
-                                    REQUESTED, testUser, TEST_COMMENT
+                                    REQUESTED, testUser
         );
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
-                                    AWAITING_AUTHORISATION, testUser, null
+                                    AWAITING_AUTHORISATION, testUser
         );
+
+
+        assertThat(dartsDatabaseStub.getTranscriptionCommentRepository().findAll())
+            .hasSize(1)
+            .extracting(TranscriptionCommentEntity::getComment)
+            .containsExactly(TEST_COMMENT);
+
 
         assertAudit(1);
     }
 
     private void assertTranscriptionWorkflow(TranscriptionWorkflowEntity transcriptionWorkflowToCheck,
                                              TranscriptionStatusEnum expectedTranscriptionStatus,
-                                             UserAccountEntity expectedWorkflowActor,
-                                             String expectedWorkflowComment) {
+                                             UserAccountEntity expectedWorkflowActor) {
 
         assertEquals(
             expectedTranscriptionStatus.getId(),
             transcriptionWorkflowToCheck.getTranscriptionStatus().getId()
         );
         assertEquals(expectedWorkflowActor, transcriptionWorkflowToCheck.getWorkflowActor());
-        assertEquals(expectedWorkflowComment, transcriptionWorkflowToCheck.getWorkflowComment());
     }
 
     private void assertAudit(int expected) {
@@ -432,17 +450,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder).andExpect(status().isOk());
 
         assertAudit(1);
-    }
-
-    private static void assertTranscriptionFailed100Error(String actualJson) {
-        String expectedJson = """
-            {
-              "type": "TRANSCRIPTION_100",
-              "title": "Failed to validate transcription request",
-              "status": 400
-            }""";
-
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,

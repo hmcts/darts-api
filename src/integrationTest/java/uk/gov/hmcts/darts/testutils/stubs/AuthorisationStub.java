@@ -123,16 +123,14 @@ public class AuthorisationStub {
             transcriptionEntity,
             testUser,
             YESTERDAY,
-            transcriptionStub.getTranscriptionStatusByEnum(REQUESTED),
-            "Please expedite my transcription request"
+            transcriptionStub.getTranscriptionStatusByEnum(REQUESTED)
         );
 
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
             testUser,
             YESTERDAY,
-            awaitingAuthorisationTranscriptionStatus,
-            null
+            awaitingAuthorisationTranscriptionStatus
         );
 
         transcriptionEntity.getTranscriptionWorkflowEntities()
@@ -145,7 +143,7 @@ public class AuthorisationStub {
         hearingEntity.setCourtCase(courtCaseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
         hearingEntity.setHearingDate(LocalDate.now());
-        hearingEntity.setHearingIsActual(false);
+        hearingEntity.setHearingIsActual(true);
         hearingEntity.setScheduledStartTime(LocalTime.now());
         dartsDatabaseStub.save(hearingEntity);
     }

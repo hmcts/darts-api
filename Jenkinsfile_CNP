@@ -54,6 +54,7 @@ withPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   enableSlackNotifications('#darts-builds')
   syncBranchesWithMaster(branchesToSync)
+  disableCleanupOfHelmReleaseOnFailure()
 
   afterAlways('test') {
     builder.gradle('jacocoTestReport')

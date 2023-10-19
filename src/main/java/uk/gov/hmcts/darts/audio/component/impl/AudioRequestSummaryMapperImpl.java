@@ -21,8 +21,8 @@ public class AudioRequestSummaryMapperImpl implements AudioRequestSummaryMapper 
 
     private AudioRequestSummary mapToAudioRequestSummary(AudioRequestSummaryResult result) {
         var audioRequestSummary = new AudioRequestSummary();
-
         audioRequestSummary.setMediaRequestId(result.mediaRequestId());
+        audioRequestSummary.setCaseId(result.caseId());
         audioRequestSummary.setCaseNumber(result.caseNumber());
         audioRequestSummary.setCourthouseName(result.courthouseName());
         audioRequestSummary.setHearingDate(result.hearingDate());
