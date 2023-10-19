@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 @EnableScheduling
 @AllArgsConstructor
 @Slf4j
-public class AutomatedTaskConfig implements SchedulingConfigurer {
+public class AutomatedTaskConfigurationStrategy implements SchedulingConfigurer {
 
     private final AutomatedTaskService automatedTaskService;
 

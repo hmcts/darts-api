@@ -50,6 +50,8 @@ java:
           alias: DARPC_USER_NAME
         - name: DarPcPassword
           alias: DARPC_PASSWORD
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -114,6 +116,8 @@ function:
           alias: DARPC_USER_NAME
         - name: DarPcPassword
           alias: DARPC_PASSWORD
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require
