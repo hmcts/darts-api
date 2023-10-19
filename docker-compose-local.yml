@@ -31,6 +31,7 @@ services:
       - AZURE_AD_FUNCTIONAL_TEST_USERNAME
       - AZURE_AD_FUNCTIONAL_TEST_PASSWORD
       - TESTING_SUPPORT_ENDPOINTS_ENABLED=true
+      - SYSTEM_USER_EMAIL
     build:
       context: .
       dockerfile: Dockerfile

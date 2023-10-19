@@ -147,9 +147,8 @@ darts:
     url: https://darts-portal.staging.platform.hmcts.net
   automated:
     task:
-      thread:
-        pool:
-          size: 5
+      thread-pool-size: 5
+      system-user-email: ${SYSTEM_USER_EMAIL:}
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
 

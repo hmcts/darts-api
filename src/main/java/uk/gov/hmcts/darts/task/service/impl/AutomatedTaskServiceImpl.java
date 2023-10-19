@@ -17,13 +17,16 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
+import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.model.TriggerAndAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
+import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
 
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
 
@@ -53,13 +57,19 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final TaskScheduler taskScheduler;
 
+    private final AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
+
     private final Map<String, Trigger> taskTriggers = new ConcurrentHashMap<>();
 
     private final DailyListProcessor dailyListProcessor;
 
+    private final TranscriptionsApi transcriptionsApi;
+
+
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
         addProcessDailyListToTaskRegistrar(taskRegistrar);
+        addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -122,6 +132,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     public void reloadTaskByName(String taskName) {
         if (PROCESS_DAILY_LIST_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
             rescheduleProcessDailyListAutomatedTask();
+        } else if (CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
+            rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
         } else {
             throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
@@ -183,11 +195,26 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
             automatedTaskRepository,
             lockProvider,
+            automatedTaskConfigurationProperties,
             dailyListProcessor
         );
         processDailyListAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(processDailyListAutomatedTask));
         Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
         taskRegistrar.addTriggerTask(processDailyListAutomatedTask, trigger);
+    }
+
+
+    private void addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            transcriptionsApi
+        );
+        closeUnfinishedTranscriptionsAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(
+            closeUnfinishedTranscriptionsAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
+        taskRegistrar.addTriggerTask(closeUnfinishedTranscriptionsAutomatedTask, trigger);
     }
 
     private void rescheduleProcessDailyListAutomatedTask() {
@@ -198,10 +225,30 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
                 automatedTaskRepository,
                 lockProvider,
+                automatedTaskConfigurationProperties,
                 dailyListProcessor
             );
             trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
             taskScheduler.schedule(processDailyListAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleCloseNonCompletedTranscriptionsAutomatedTask() {
+        CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask;
+        Trigger trigger;
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(
+            CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                transcriptionsApi
+            );
+            trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
+            taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }
