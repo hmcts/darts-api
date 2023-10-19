@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CasesFunctionalTest  extends FunctionalTest {
-    public static final String CASES_PATH = "/cases";
-    public static final String EVENTS_PATH = "/events";
-    public static final String CASE_NUMBER = "func-case-" + randomAlphanumeric(7);
-    public static final String COURTHOUSE = "Leeds";
-    public static final String COURTROOM = "func-case-1";
-    public static int caseId;
+    private static final String CASES_PATH = "/cases";
+    private static final String EVENTS_PATH = "/events";
+    private static final String CASE_NUMBER = "func-case-" + randomAlphanumeric(7);
+    private static final String COURTHOUSE = "Leeds";
+    private static final String COURTROOM = "func-case-1";
+    private static int caseId;
 
     @AfterAll
     void cleanUp() {
