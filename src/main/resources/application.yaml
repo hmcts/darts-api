@@ -97,7 +97,10 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
-
+  data:
+    redis:
+      connect-timeout: 10000
+      timeout: 10000
 darts:
   audio:
     ffmpeg-executable: ffmpeg
@@ -151,6 +154,14 @@ darts:
       system-user-email: ${SYSTEM_USER_EMAIL:}
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
+  bank-holidays:
+    api:
+      baseurl: https://www.gov.uk
+  cache:
+    bank-holiday:
+      expiry-days: 7
+  redis:
+    connection-string: ${REDIS_CONNECTION_STRING:rediss://:uS3LcL8QaZGwgkexggKW9yvuttHpd1wcLAzCaECdiVA%3D@darts-stg.redis.cache.windows.net:6380?tls=true}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

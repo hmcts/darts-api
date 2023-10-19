@@ -52,6 +52,8 @@ java:
           alias: DARPC_PASSWORD
         - name: DartsSystemUserEmail
           alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
