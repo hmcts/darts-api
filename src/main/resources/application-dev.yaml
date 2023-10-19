@@ -7,6 +7,8 @@ spring:
     exclude:
       - "org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration"
       - "org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"
+  flyway:
+    locations: classpath:db/migration/common,db/migration/postgres,db/migration/local
 
 logging:
   level:
