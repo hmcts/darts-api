@@ -63,7 +63,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.ExcessiveImports", "java:S2229"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
     public static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
