@@ -68,6 +68,10 @@ public class TestSupportController {
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
 
+        removeCaseJudgeJoins(session, caseIds);
+        removeCaseDefence(session, caseIds);
+        removeCaseDefendant(session, caseIds);
+        removeCaseProsecutor(session, caseIds);
         removeCases(session, caseIds);
 
         List nodeRegisterIds = nodeRegisterIdsToBeDeleted(session, courtroomTrash);
@@ -203,6 +207,38 @@ public class TestSupportController {
                                       delete from darts.hearing_event_ae where hea_id in (?)
                                       """, Integer.class)
             .setParameter(1, heaIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseJudgeJoins(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.case_judge_ae where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseDefence(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.defence where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseDefendant(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.defendant where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseProsecutor(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.prosecutor where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
             .executeUpdate();
     }
 
