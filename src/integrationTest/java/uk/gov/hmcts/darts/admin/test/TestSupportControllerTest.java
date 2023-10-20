@@ -3,7 +3,9 @@ package uk.gov.hmcts.darts.admin.test;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +20,8 @@ class TestSupportControllerTest extends IntegrationBase {
     private static final String ENDPOINT_URL = "/functional-tests";
     @Autowired
     private transient MockMvc mockMvc;
+    @MockBean
+    private UserIdentity mockUserIdentity;
 
     @Test
     void rejectsCourthousesNotPrefixedCorrectly() throws Exception {
