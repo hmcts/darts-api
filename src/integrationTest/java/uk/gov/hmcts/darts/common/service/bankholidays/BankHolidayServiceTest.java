@@ -57,4 +57,13 @@ class BankHolidayServiceTest extends IntegrationBase {
 
         assertThat(bankHolidays1.size()).isEqualTo(1);
     }
+
+    @Test
+    void returnEmptyListForNotFoundYear() {
+        bankHolidayApiStub.returns(VALID_BANK_HOLIDAY_JSON);
+
+        var bankHolidays1 = bankHolidaysService.getBankHolidaysFor(1980);
+
+        assertThat(bankHolidays1.size()).isEqualTo(0);
+    }
 }

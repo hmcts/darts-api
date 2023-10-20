@@ -28,7 +28,7 @@ public class BankHolidayCacheConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, RedisCacheConfiguration redisCacheConfiguration) {
-        log.info("Initializing Redis for caching ...");
+        log.debug("Initializing Redis for caching ...");
         return RedisCacheManager
             .builder(redisConnectionFactory)
             .cacheDefaults(redisCacheConfiguration)

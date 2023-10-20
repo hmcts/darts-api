@@ -97,10 +97,7 @@ spring:
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
-  data:
-    redis:
-      connect-timeout: 10000
-      timeout: 10000
+
 darts:
   audio:
     ffmpeg-executable: ffmpeg
@@ -161,7 +158,8 @@ darts:
     bank-holiday:
       expiry-days: 7
   redis:
-    connection-string: ${REDIS_CONNECTION_STRING:rediss://:uS3LcL8QaZGwgkexggKW9yvuttHpd1wcLAzCaECdiVA%3D@darts-stg.redis.cache.windows.net:6380?tls=true}
+    connection-string: ${REDIS_CONNECTION_STRING:redis://localhost:6379}
+    ssl-enabled: ${REDIS_SSL_ENABLED:true}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

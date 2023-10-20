@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.config;
 
 import io.lettuce.core.ClientOptions;
 import io.lettuce.core.ClientOptions.DisconnectedBehavior;
+import io.lettuce.core.RedisURI;
 import io.lettuce.core.SocketOptions;
 import io.lettuce.core.TimeoutOptions;
 import io.lettuce.core.internal.HostAndPort;
@@ -25,9 +26,9 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.function.UnaryOperator;
 
+import static java.nio.charset.Charset.defaultCharset;
 import static java.time.Duration.ofSeconds;
 
 @Configuration
@@ -38,6 +39,8 @@ public class RedisConnectionConfig {
     @Value("${darts.redis.connection-string}")
     private String redisConnectionString;
 
+    @Value("${darts.redis.ssl-enabled}")
+    private boolean sslEnabled;
 
     @Bean
     public LettuceConnectionFactory connectionFactory() {
@@ -62,12 +65,14 @@ public class RedisConnectionConfig {
             .disconnectedBehavior(DisconnectedBehavior.REJECT_COMMANDS)
             .build();
 
-        var clientConfig = LettuceClientConfiguration.builder()
+        var clientConfigurationBuilder = LettuceClientConfiguration.builder();
+        clientConfigurationBuilder
             .commandTimeout(ofSeconds(20))
             .clientOptions(clientOptions)
-            .clientResources(clientResources)
-            .useSsl()
-            .build();
+            .clientResources(clientResources);
+        if (sslEnabled) {
+            clientConfigurationBuilder.useSsl();
+        }
 
         var redisConfig = new RedisStandaloneConfiguration(
             redisConnectionProperties.host(),
@@ -75,7 +80,7 @@ public class RedisConnectionConfig {
         );
         redisConfig.setPassword(RedisPassword.of(redisConnectionProperties.password()));
 
-        return new LettuceConnectionFactory(redisConfig, clientConfig);
+        return new LettuceConnectionFactory(redisConfig, clientConfigurationBuilder.build());
     }
 
     private UnaryOperator<HostAndPort> getHostAndPortMappingFunctionFor(String host) {
@@ -108,40 +113,24 @@ public class RedisConnectionConfig {
     }
 
     static RedisConnectionProperties redisConnectionPropertiesFrom(String redisConnectionString) {
-        String username = "";
-        String password;
-        String host;
-        String port;
-        String[] passwordAndRest;
+        var redisUri = RedisURI.create(redisConnectionString);
 
-        var schemeAndRest = redisConnectionString.split("://", 2);
-        if (schemeAndRest[1].startsWith(":")) { // then empty username
-            var restWithColonRemoved = schemeAndRest[1].replaceFirst(":", "");
-            passwordAndRest = restWithColonRemoved.split("@");
-            password = passwordAndRest[0];
-        } else {
-            var usernameAnRest = schemeAndRest[1].split(":", 2);
-            username = usernameAnRest[0];
-            passwordAndRest = usernameAnRest[1].split("@", 2);
-            password = passwordAndRest[0];
+        var redisPassword = RedisPassword.of(redisUri.getPassword());
+        char[] decodedPasswordChars = {};
+        if (redisPassword.isPresent()) {
+            var encodedPassword = redisPassword.get();
+            var decodedPasswordString = URLDecoder.decode(String.valueOf(encodedPassword), defaultCharset());
+            decodedPasswordChars = decodedPasswordString.toCharArray();
         }
 
-        var hostAndRest = passwordAndRest[1].split(":", 2);
-        host = hostAndRest[0];
-
-        var portAndRest = hostAndRest[1].split("\\?", 2);
-        port = portAndRest[0];
-
         return new RedisConnectionProperties(
-            username,
-            URLDecoder.decode(password, Charset.defaultCharset()),
-            host,
-            Integer.valueOf(port)
-        );
+            redisUri.getUsername(),
+            decodedPasswordChars,
+            redisUri.getHost(),
+            redisUri.getPort());
     }
 
-    public record RedisConnectionProperties(String username, String password, String host, Integer port) {
+    public record RedisConnectionProperties(String username, char[] password, String host, Integer port) {
 
     }
-
 }

@@ -17,24 +17,4 @@ public class BankHolidayApiStub {
                               .withStatus(200)
                               .withBody(bankHolidaysJson)));
     }
-
-    //    public void verifyNoRequestReceived() {
-    //        verify(exactly(0), getRequestedFor(urlEqualTo(BANK_HOLIDAY_API_PATH)));
-    //    }
-    //
-    //    public void verifyRequestReceived() {
-    //        verify(exactly(1), getRequestedFor(urlEqualTo(BANK_HOLIDAY_API_PATH)));
-    //    }
-    //
-    //    public void clearStubs() {
-    //        WireMock.reset();
-    //    }
-    //
-    //    private static void wait(int millis) {
-    //        try {
-    //            Thread.sleep(millis);
-    //        } catch (InterruptedException e) {
-    //            throw new RuntimeException(e);
-    //        }
-    //    }
 }
