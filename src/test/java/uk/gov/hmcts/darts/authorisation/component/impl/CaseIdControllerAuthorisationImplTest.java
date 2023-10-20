@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+import static uk.gov.hmcts.darts.authorisation.component.impl.CaseIdControllerAuthorisationImpl.CASE_ID_PARAM;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_CASE_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -35,6 +36,10 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
 class CaseIdControllerAuthorisationImplTest {
+
+    private static final String METHOD = "POST";
+    private static final String URI = "/cases";
+    private static final String CASE_ID_PARAM_VALUE = "1";
 
     @Mock
     private Authorisation authorisation;
@@ -101,9 +106,9 @@ class CaseIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationPathParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases/1");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/cases/1");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("case_id", "1")
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(CASE_ID_PARAM, CASE_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -113,12 +118,12 @@ class CaseIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationQueryParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.setParameter("case_id", "1");
+        request.setParameter(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -127,12 +132,12 @@ class CaseIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationHeaderParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.addHeader("case_id", "1");
+        request.addHeader(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -141,11 +146,31 @@ class CaseIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationShouldThrowBadRequestWhenCaseIdParameterMissing() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+        );
+
+        assertEquals(BAD_REQUEST_CASE_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_CASE_ID, exception.getError());
+
+        verifyNoInteractions(authorisation);
+    }
+
+    @Test
+    void checkAuthorisationShouldThrowBadRequestWhenCaseIdInvalid() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+        request.setParameter(CASE_ID_PARAM, "");
 
         var exception = assertThrows(
             DartsApiException.class,

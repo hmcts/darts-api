@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+import static uk.gov.hmcts.darts.authorisation.component.impl.TranscriptionIdControllerAuthorisationImpl.TRANSCRIPTION_ID_PARAM;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -35,6 +36,10 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptionIdControllerAuthorisationImplTest {
+
+    private static final String METHOD = "POST";
+    private static final String URI = "/transcriptions";
+    private static final String TRANSCRIPTION_ID_PARAM_VALUE = "5";
 
     @Mock
     private Authorisation authorisation;
@@ -101,9 +106,9 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationPathParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases/1");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/cases/1");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("transcription_id", "5")
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(TRANSCRIPTION_ID_PARAM, TRANSCRIPTION_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -113,12 +118,12 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationQueryParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.setParameter("transcription_id", "5");
+        request.setParameter(TRANSCRIPTION_ID_PARAM, TRANSCRIPTION_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -127,12 +132,12 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationHeaderParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.addHeader("transcription_id", "5");
+        request.addHeader(TRANSCRIPTION_ID_PARAM, TRANSCRIPTION_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -141,11 +146,31 @@ class TranscriptionIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationShouldThrowBadRequestWhenTranscriptionIdParameterMissing() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+        );
+
+        assertEquals(BAD_REQUEST_TRANSCRIPTION_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_TRANSCRIPTION_ID, exception.getError());
+
+        verifyNoInteractions(authorisation);
+    }
+
+    @Test
+    void checkAuthorisationShouldThrowBadRequestWhenTranscriptionIdInvalid() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+        request.setParameter(TRANSCRIPTION_ID_PARAM, "");
 
         var exception = assertThrows(
             DartsApiException.class,

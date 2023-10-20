@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     implements ControllerAuthorisation {
 
-    private static final String TRANSCRIPTION_ID_PARAM = "transcription_id";
+    static final String TRANSCRIPTION_ID_PARAM = "transcription_id";
 
     private final Authorisation authorisation;
 

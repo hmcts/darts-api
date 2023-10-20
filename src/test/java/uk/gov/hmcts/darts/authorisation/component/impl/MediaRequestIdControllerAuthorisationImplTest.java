@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+import static uk.gov.hmcts.darts.authorisation.component.impl.MediaRequestIdControllerAuthorisationImpl.MEDIA_REQUEST_ID_PARAM;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -35,6 +36,10 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
 class MediaRequestIdControllerAuthorisationImplTest {
+
+    private static final String METHOD = "POST";
+    private static final String URI = "/audio-requests";
+    private static final String MEDIA_REQUEST_ID_PARAM_VALUE = "4";
 
     @Mock
     private Authorisation authorisation;
@@ -101,9 +106,9 @@ class MediaRequestIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationPathParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases/1");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/audio-requests/4");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("media_request_id", "4")
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(MEDIA_REQUEST_ID_PARAM, MEDIA_REQUEST_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -113,12 +118,12 @@ class MediaRequestIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationQueryParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.setParameter("media_request_id", "4");
+        request.setParameter(MEDIA_REQUEST_ID_PARAM, MEDIA_REQUEST_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -127,12 +132,12 @@ class MediaRequestIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationHeaderParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.addHeader("media_request_id", "4");
+        request.addHeader(MEDIA_REQUEST_ID_PARAM, MEDIA_REQUEST_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -141,11 +146,31 @@ class MediaRequestIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationShouldThrowBadRequestWhenMediaRequestIdParameterMissing() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+        );
+
+        assertEquals(BAD_REQUEST_MEDIA_REQUEST_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_MEDIA_REQUEST_ID, exception.getError());
+
+        verifyNoInteractions(authorisation);
+    }
+
+    @Test
+    void checkAuthorisationShouldThrowBadRequestWhenMediaRequestIdInvalid() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+        request.setParameter(MEDIA_REQUEST_ID_PARAM, "");
 
         var exception = assertThrows(
             DartsApiException.class,

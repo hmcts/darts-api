@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     implements ControllerAuthorisation {
 
-    private static final String HEARING_ID_PARAM = "hearing_id";
+    static final String HEARING_ID_PARAM = "hearing_id";
 
     private final Authorisation authorisation;
 

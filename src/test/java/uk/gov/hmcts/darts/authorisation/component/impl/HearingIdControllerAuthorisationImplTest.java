@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+import static uk.gov.hmcts.darts.authorisation.component.impl.HearingIdControllerAuthorisationImpl.HEARING_ID_PARAM;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_HEARING_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -35,6 +36,10 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @ExtendWith(MockitoExtension.class)
 class HearingIdControllerAuthorisationImplTest {
+
+    private static final String METHOD = "POST";
+    private static final String URI = "/hearings";
+    private static final String HEARING_ID_PARAM_VALUE = "2";
 
     @Mock
     private Authorisation authorisation;
@@ -101,9 +106,9 @@ class HearingIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationPathParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases/1");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/hearings/2");
         request.setAttribute(
-            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of("hearing_id", "2")
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE)
         );
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
@@ -113,12 +118,12 @@ class HearingIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationQueryParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.setParameter("hearing_id", "2");
+        request.setParameter(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -127,12 +132,12 @@ class HearingIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationHeaderParameter() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
-        request.addHeader("hearing_id", "2");
+        request.addHeader(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
@@ -141,11 +146,31 @@ class HearingIdControllerAuthorisationImplTest {
 
     @Test
     void checkAuthorisationShouldThrowBadRequestWhenHearingIdParameterMissing() {
-        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/cases");
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
         request.setAttribute(
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+        );
+
+        assertEquals(BAD_REQUEST_HEARING_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_HEARING_ID, exception.getError());
+
+        verifyNoInteractions(authorisation);
+    }
+
+    @Test
+    void checkAuthorisationShouldThrowBadRequestWhenHearingIdInvalid() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+        request.setParameter(HEARING_ID_PARAM, "");
 
         var exception = assertThrows(
             DartsApiException.class,

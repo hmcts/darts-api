@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 class CaseIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     implements ControllerAuthorisation {
 
-    private static final String CASE_ID_PARAM = "case_id";
+    static final String CASE_ID_PARAM = "case_id";
 
     private final Authorisation authorisation;
 

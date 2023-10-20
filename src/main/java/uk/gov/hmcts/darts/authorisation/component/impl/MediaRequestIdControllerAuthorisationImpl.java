@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_
 class MediaRequestIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     implements ControllerAuthorisation {
 
-    private static final String MEDIA_REQUEST_ID_PARAM = "media_request_id";
+    static final String MEDIA_REQUEST_ID_PARAM = "media_request_id";
 
     private final Authorisation authorisation;
 
