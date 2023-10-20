@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.authorisation.config;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -13,7 +14,6 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.Assert;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
@@ -83,16 +83,14 @@ public class AuthorisationAspect {
             .checkAuthorisation(request, roles);
     }
 
-    private boolean handleRequestBodyAuthorisation(String method) {
-        Assert.notNull(method, "Method must not be null");
+    private boolean handleRequestBodyAuthorisation(@NotNull String method) {
         return switch (method) {
             case "POST", "PUT", "PATCH" -> true;
             default -> false;
         };
     }
 
-    private boolean handleRequestParametersAuthorisation(String method) {
-        Assert.notNull(method, "Method must not be null");
+    private boolean handleRequestParametersAuthorisation(@NotNull String method) {
         return switch (method) {
             case "GET", "POST", "PUT", "PATCH", "DELETE" -> true;
             default -> false;
