@@ -3,10 +3,11 @@ package uk.gov.hmcts.darts.authorisation.component.impl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.Map;
 import java.util.Optional;
+
+import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 
 @Component
 @NoArgsConstructor
@@ -16,9 +17,9 @@ abstract class BaseControllerAuthorisation {
         "Unable to extract the %s in request path, query or header params for this Authorisation endpoint: %s";
 
     Optional<String> getPathParamValue(HttpServletRequest request, String pathParam) {
-        Map pathVariables = (Map) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        String pathParamValue = (String) pathVariables.get(pathParam);
-        return Optional.ofNullable(pathParamValue);
+        @SuppressWarnings("unchecked")
+        Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        return Optional.ofNullable(pathVariables.get(pathParam));
     }
 
 }
