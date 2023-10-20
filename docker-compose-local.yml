@@ -5,6 +5,7 @@ services:
     container_name: darts-api
     depends_on:
       - darts-db
+      - darts-redis
     environment:
       - DARTS_API_DB_HOST=darts-db
       - DARTS_API_DB_NAME=darts
@@ -32,6 +33,8 @@ services:
       - AZURE_AD_FUNCTIONAL_TEST_PASSWORD
       - TESTING_SUPPORT_ENDPOINTS_ENABLED=true
       - SYSTEM_USER_EMAIL
+      - REDIS_CONNECTION_STRING=redis://darts-redis:6379
+      - REDIS_SSL_ENABLED=false
     build:
       context: .
       dockerfile: Dockerfile
@@ -57,8 +60,21 @@ services:
     networks:
       - darts-network
 
+  darts-redis:
+    container_name: darts-redis
+    image: redis:6.2.14-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - darts-cache:/var/lib/redis/data
+    networks:
+      - darts-network
+
 volumes:
   darts-db:
+    driver: local
+  darts-cache:
     driver: local
 
 networks:
