@@ -39,6 +39,9 @@ darts:
     temp-blob-workspace: ${java.io.tmpdir}/audiotransform/tempworkspace
   testing-support-endpoints:
     enabled: true
+  bank-holidays:
+    api:
+      baseurl: http://localhost:8080
 
 logging:
   level:

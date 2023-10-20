@@ -52,12 +52,14 @@ java:
           alias: DARPC_PASSWORD
         - name: DartsSystemUserEmail
           alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
-    TESTING_SUPPORT_ENDPOINT_ENABLED: true
+    TESTING_SUPPORT_ENDPOINTS_ENABLED: true
 
 function:
   scaleType: Job
