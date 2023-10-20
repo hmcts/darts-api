@@ -51,7 +51,7 @@ launchctl setenv <<env var name>> <<secret value>>
 ```
 You will then need to restart intellij/terminal windows for it to take effect.
 
-to make the changes permanent, make a `.zshrc` file in your users folder and popualte it with this and their values:
+to make the changes permanent, make a `.zshrc` file in your users folder and populate it with this and their values:
 ```
 export GOVUK_NOTIFY_API_KEY=
 export FUNC_TEST_ROPC_USERNAME=
