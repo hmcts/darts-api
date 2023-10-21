@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Slf4j
 @Transactional
-public class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
+class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/not-accessed-count");
     @Autowired
