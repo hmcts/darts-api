@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.configuration;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.darts.AccessTokenClient;
 @EnableConfigurationProperties
 @RequiredArgsConstructor
 @Profile("functionalTest")
+@Slf4j
 public class AccessTokenClientConfiguration {
 
     private final AzureAdAuthenticationProperties adAuthenticationProperties;
@@ -18,6 +20,7 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient internalAccessTokenClient() {
+        log.info("token {}", adAuthenticationProperties.getTokenUri());
         return new AccessTokenClient(adAuthenticationProperties.getTokenUri(),
                               adAuthenticationProperties.getScope(),
                               adAuthenticationProperties.getUsername(),
@@ -28,6 +31,7 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient externalAccessTokenClient() {
+        log.info("token {}", b2cAuthenticationProperties.getTokenUri());
         return new AccessTokenClient(b2cAuthenticationProperties.getTokenUri(),
                                      b2cAuthenticationProperties.getScope(),
                                      b2cAuthenticationProperties.getUsername(),
