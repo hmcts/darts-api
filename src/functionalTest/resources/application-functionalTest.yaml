@@ -15,3 +15,13 @@ azure-ad-auth:
   client-secret: ${AAD_CLIENT_SECRET:#{null}}
 
 deployed-application-uri: ${TEST_URL:http://localhost:4550}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          external-azure-ad:
+            issuer-uri: https://hmctsdartsb2csbox.b2clogin.com/${AAD_B2C_TENANT_ID_KEY:00000000-0000-0000-0000-000000000000}/v2.0/
+          internal-azure-ad:
+            issuer-uri: https://login.microsoftonline.com/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0
