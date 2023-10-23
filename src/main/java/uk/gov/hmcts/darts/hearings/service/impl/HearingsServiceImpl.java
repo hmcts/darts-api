@@ -3,8 +3,10 @@ package uk.gov.hmcts.darts.hearings.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.mapper.GetEventsResponseMapper;
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class HearingsServiceImpl implements HearingsService {
 
     private final HearingRepository hearingRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public GetHearingResponse getHearings(Integer hearingId) {
@@ -39,8 +42,8 @@ public class HearingsServiceImpl implements HearingsService {
 
     @Override
     public List<EventResponse> getEvents(Integer hearingId) {
-        HearingEntity foundHearing = getHearingById(hearingId);
-        return GetEventsResponseMapper.mapToEvents(foundHearing.getEventList());
+        List<EventEntity> eventEntities = eventRepository.findAllByHearingId(hearingId);
+        return GetEventsResponseMapper.mapToEvents(eventEntities);
     }
 
 }
