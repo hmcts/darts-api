@@ -220,7 +220,7 @@ sonarqube {
     property "sonar.projectName", "Reform :: darts-api"
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.exclusions", coverageExclusions.join(', ')
-    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*,uk/gov/hmcts/darts/common/mapper/TranscriptionMapper.java"
+    property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*"
   }
 }
 
