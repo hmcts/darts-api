@@ -50,6 +50,10 @@ java:
           alias: DARPC_USER_NAME
         - name: DarPcPassword
           alias: DARPC_PASSWORD
+        - name: DarMidTierUserName
+          alias: DAR_MIDTIER_USER_NAME
+        - name: DarMidTierPassword
+          alias: DAR_MIDTIER_PASSWORD
         - name: DartsSystemUserEmail
           alias: SYSTEM_USER_EMAIL
         - name: redis-connection-string
@@ -118,6 +122,10 @@ function:
           alias: DARPC_USER_NAME
         - name: DarPcPassword
           alias: DARPC_PASSWORD
+        - name: DarMidTierUserName
+          alias: DAR_MIDTIER_USER_NAME
+        - name: DarMidTierPassword
+          alias: DAR_MIDTIER_PASSWORD
         - name: DartsSystemUserEmail
           alias: SYSTEM_USER_EMAIL
   environment:
