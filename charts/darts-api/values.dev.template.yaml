@@ -19,6 +19,10 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureADTenantId
           alias: AAD_TENANT_ID
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true

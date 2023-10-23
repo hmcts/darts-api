@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
+import uk.gov.hmcts.darts.authorisation.model.GetAuthorisationResult;
 import uk.gov.hmcts.darts.authorisation.model.Permission;
 import uk.gov.hmcts.darts.authorisation.model.Role;
 import uk.gov.hmcts.darts.authorisation.model.UserState;
@@ -152,7 +153,8 @@ public class AuthorisationServiceImpl implements AuthorisationService {
     }
 
     @Override
-    public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse) {
+    public List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole,
+                                                                CourthouseEntity courthouse) {
         return userAccountRepository.findByRoleAndCourthouse(securityRole.getId(), courthouse);
     }
 

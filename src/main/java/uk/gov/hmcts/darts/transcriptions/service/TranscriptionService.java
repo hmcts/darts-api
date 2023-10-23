@@ -11,4 +11,7 @@ public interface TranscriptionService {
 
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription);
 
+    void closeTranscriptions();
+
+    void closeTranscription(Integer transcriptionId, String transcriptionComment);
 }

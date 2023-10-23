@@ -78,6 +78,8 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @Transient
     private boolean isNew; //helper flag to indicate that the entity was just created, and so to notify DAR PC
 
+    //TODO look to remove this
+    @Deprecated()
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = HEA_ID)},

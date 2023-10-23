@@ -8,6 +8,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,13 +29,17 @@ import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
+import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.lang.Integer.parseInt;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping(value = "/functional-tests")
@@ -55,6 +60,7 @@ public class TestSupportController {
 
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
+    private final BankHolidaysService bankHolidaysService;
 
 
     @SuppressWarnings("unchecked")
@@ -72,6 +78,10 @@ public class TestSupportController {
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
 
+        removeCaseJudgeJoins(session, caseIds);
+        removeCaseDefence(session, caseIds);
+        removeCaseDefendant(session, caseIds);
+        removeCaseProsecutor(session, caseIds);
         removeCases(session, caseIds);
 
         List nodeRegisterIds = nodeRegisterIdsToBeDeleted(session, courtroomTrash);
@@ -231,6 +241,38 @@ public class TestSupportController {
             .executeUpdate();
     }
 
+    private void removeCaseJudgeJoins(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.case_judge_ae where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseDefence(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.defence where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseDefendant(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.defendant where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseProsecutor(Session session, List caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.prosecutor where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
     private void removeNodeRegisters(List<Integer> nodeIds) {
         nodeRegistrationRepository.deleteAllById(nodeIds);
     }
@@ -264,5 +306,11 @@ public class TestSupportController {
                                              select cas_id from darts.court_case where case_number like 'func-%'
                                              """, Integer.class)
             .getResultList();
+    }
+
+    @GetMapping(value = "/bank-holidays/{year}")
+    public ResponseEntity<List<Event>> getBankHolidaysForYear(@PathVariable(name = "year") String year) {
+        var bankHolidays = bankHolidaysService.getBankHolidaysFor(parseInt(year));
+        return new ResponseEntity<>(bankHolidays, OK);
     }
 }

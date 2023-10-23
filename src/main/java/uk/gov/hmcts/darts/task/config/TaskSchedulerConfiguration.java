@@ -7,10 +7,10 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
-public class TaskSchedulerConfig {
+public class TaskSchedulerConfiguration {
     private static final String THREAD_POOL_TASK_SCHEDULER_NAME = "ThreadPoolTaskScheduler";
 
-    @Value("${darts.automated.task.thread.pool.size:5}")
+    @Value("${darts.automated.task.thread-pool-size:5}")
     private int threadPoolSize;
 
     @Bean

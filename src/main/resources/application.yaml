@@ -147,11 +147,19 @@ darts:
     url: https://darts-portal.staging.platform.hmcts.net
   automated:
     task:
-      thread:
-        pool:
-          size: 5
+      thread-pool-size: 5
+      system-user-email: ${SYSTEM_USER_EMAIL:}
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
+  bank-holidays:
+    api:
+      baseurl: https://www.gov.uk
+  cache:
+    bank-holiday:
+      expiry-days: 7
+  redis:
+    connection-string: ${REDIS_CONNECTION_STRING:redis://localhost:6379}
+    ssl-enabled: ${REDIS_SSL_ENABLED:true}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

@@ -9,4 +9,7 @@ public interface TranscriptionsApi {
     RequestTranscriptionResponse saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails);
 
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription);
+
+    void closeTranscriptions();
+
 }

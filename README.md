@@ -30,6 +30,9 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | CPP_PASSWORD                     | CppPassword                               |
 | DARPC_USER_NAME                  | DarPcUserName                             |
 | DARPC_PASSWORD                   | DarPcPassword                             |
+| SYSTEM_USER_EMAIL                | DartsSystemUserEmail                      |
+| DAR_MIDTIER_USER_NAME            | DarMidTierUserName                        |
+| DAR_MIDTIER_PASSWORD             | DarMidTierPassword                        |
 
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
@@ -50,7 +53,7 @@ launchctl setenv <<env var name>> <<secret value>>
 ```
 You will then need to restart intellij/terminal windows for it to take effect.
 
-to make the changes permanent, make a `.zshrc` file in your users folder and popualte it with this and their values:
+to make the changes permanent, make a `.zshrc` file in your users folder and populate it with this and their values:
 ```
 export GOVUK_NOTIFY_API_KEY=
 export FUNC_TEST_ROPC_USERNAME=
@@ -69,6 +72,9 @@ export CPP_USER_NAME=
 export CPP_PASSWORD=
 export DARPC_USER_NAME=
 export DARPC_PASSWORD=
+export SYSTEM_USER_EMAIL=
+export DAR_MIDTIER_USER_NAME=
+export DAR_MIDTIER_PASSWORD=
 ```
 
 ### Storage Account
