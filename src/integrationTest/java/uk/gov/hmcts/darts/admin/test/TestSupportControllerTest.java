@@ -1,20 +1,27 @@
 package uk.gov.hmcts.darts.admin.test;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TestSupportControllerTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/functional-tests";
@@ -22,6 +29,24 @@ class TestSupportControllerTest extends IntegrationBase {
     private transient MockMvc mockMvc;
     @MockBean
     private UserIdentity mockUserIdentity;
+    @MockBean
+    private UserAccountEntity mockUserAccountEntity;
+
+    @MockBean
+    private SecurityGroupEntity mockSecurityGroupEntity;
+    @MockBean
+    private CourthouseEntity courthouseEntity;
+
+    @BeforeAll
+    void beforeAll() {
+        when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
+        /*
+        SecurityGroupEntity sge = new SecurityGroupEntity();
+        Set<SecurityGroupEntity> sgeSet = new HashSet<SecurityGroupEntity>();
+        sgeSet.add(sge);
+        when(mockUserAccountEntity.getSecurityGroupEntities()).thenReturn(sgeSet);
+        */
+    }
 
     @Test
     void rejectsCourthousesNotPrefixedCorrectly() throws Exception {
@@ -75,5 +100,4 @@ class TestSupportControllerTest extends IntegrationBase {
 
         assertThat(dartsDatabase.findCourtroomBy("func-swansea", "cr1")).isNull();
     }
-
 }
