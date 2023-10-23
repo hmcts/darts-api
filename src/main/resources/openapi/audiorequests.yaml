@@ -83,7 +83,7 @@ paths:
       operationId: getNonAccessedCount
       description: 'Returns count of audio requests not accessed by user provided'
       parameters:
-        - in: query
+        - in: header
           name: user_id
           schema:
             type: integer

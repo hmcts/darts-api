@@ -33,7 +33,7 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         dartsDatabase.createAndLoadNonAccessedCurrentMediaRequestEntity(requestor);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("user_id", requestor.getId().toString());
+            .header("user_id", requestor.getId().toString());
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
@@ -47,7 +47,7 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
     void getNonAccessedAudioCountForUser_Zero() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("user_id", requestor.getId().toString());
+            .header("user_id", requestor.getId().toString());
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
@@ -61,7 +61,7 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
     void getNonAccessedAudioCountForUser_NonExistingUser() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("user_id", requestor.getId().toString());
+            .header("user_id", requestor.getId().toString());
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
