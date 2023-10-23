@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.hearings.controller;
+package uk.gov.hmcts.darts.transcriptions.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,12 +33,12 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @Slf4j
 @AutoConfigureMockMvc
 @Transactional
-class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
-
+class TranscriptionControllerGetTranscriptsTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
-    private static String endpointUrl = "/hearings/{hearing_id}/transcripts";
+    private static String endpointUrlHearings = "/transcripts/hearings/{hearing_id}";
+    private static String endpointUrlCase = "/transcripts/case/{case_id}";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
@@ -73,7 +73,51 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
     @Test
     void hearingGetTranscriptEndpointNotFound() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrlHearings, "25");
+
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
+
+    }
+
+    @Test
+    void hearingsGetTranscriptEndpointOneObjectReturned() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(transcription);
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrlHearings, hearingEntity.getId());
+        String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
+            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json"));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void hearingsGetTranscriptEndpointTwoObjectsReturned() throws Exception {
+        HearingEntity hearingEntity = dartsDatabase.getHearingRepository().findAll().get(0);
+        TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(transcription);
+        TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
+        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(transcription2);
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrlHearings, hearingEntity.getId());
+        String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
+            "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json"));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+        String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
+        JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void caseGetTranscriptEndpointNotFound() throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrlCase, "25");
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
 
@@ -86,7 +130,7 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrlCase, hearingEntity.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
             "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -105,7 +149,7 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
         transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription2);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getId());
+        MockHttpServletRequestBuilder requestBuilder = get(endpointUrlCase, hearingEntity.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
             "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -113,6 +157,4 @@ class HearingsControllerGetHearingsTranscriptsTest extends IntegrationBase {
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
-
-
 }

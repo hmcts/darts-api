@@ -16,8 +16,8 @@ import uk.gov.hmcts.darts.hearings.mapper.GetEventsResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
-import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
+import uk.gov.hmcts.darts.transcriptions.model.Transcript;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +54,7 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public List<Transcript> getTranscriptsById(Integer hearingId) {
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingId(hearingId);
-        return TranscriptionMapper.mapHearingResponse(transcriptionEntities);
+        return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 
 }

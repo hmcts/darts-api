@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.mapper;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -9,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
+import uk.gov.hmcts.darts.transcriptions.model.Transcript;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

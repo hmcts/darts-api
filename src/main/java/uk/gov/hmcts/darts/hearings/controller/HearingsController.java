@@ -1,15 +1,12 @@
 package uk.gov.hmcts.darts.hearings.controller;
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.hearings.api.HearingsApi;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
-import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
 import java.util.List;
@@ -45,10 +42,4 @@ public class HearingsController implements HearingsApi {
         return new ResponseEntity<>(hearingsService.getEvents(hearingId), HttpStatus.OK);
     }
 
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER})
-    public ResponseEntity<List<Transcript>> hearingsHearingIdTranscriptsGet(Integer hearingId) {
-        return new ResponseEntity<>(hearingsService.getTranscriptsById(hearingId), HttpStatus.OK);
-    }
 }

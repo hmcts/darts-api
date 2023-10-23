@@ -86,62 +86,6 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-  /hearings/{hearing_id}/transcripts:
-    get:
-      tags:
-        - Hearings
-      summary: Allows the retrieval of transcripts for a given hearing_id
-      description: |-
-        Retrieves all transcripts for a hearing_id.
-      parameters:
-        - in: path
-          name: hearing_id
-          schema:
-            type: integer
-          description: "hearing_id is the internal hea_id of the case."
-          required: true
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: 'cases.yaml#/components/schemas/transcripts'
-        '401':
-          description: Unauthorised Error
-        '403':
-          description: Forbidden Error
-          content:
-            application/json+problem:
-              schema:
-                allOf:
-                  - $ref: './problem.yaml'
-                  - type: object
-                    required:
-                      - type
-                    properties:
-                      type:
-                        $ref: '#/components/schemas/HearingsAuthorisation403ErrorCode'
-              example:
-                type: "AUTHORISATION_100"
-                title: "User is not authorised for the associated courthouse"
-                status: 403
-        '404':
-          description: Not Found Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "CASE_104"
-                title: "The requested case cannot be found"
-                status: 404
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
 
 
 components:
@@ -201,11 +145,7 @@ components:
         text:
           type: string
           example: Record:New Case
-    HearingsAuthorisation403ErrorCode:
-      type: string
-      enum:
-        - "AUTHORISATION_100"
-      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
+
 
     HearingAuthorisation403ErrorCode:
       type: string
