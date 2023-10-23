@@ -18,6 +18,8 @@ darts:
       cron: ${DAILY_LIST_HOUSEKEEPING_SCHEDULER_CRON:4 0/2 * * * MON-FRI}
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:true}
+  redis:
+    ssl-enabled: false
 
 logging:
   level:

@@ -2,13 +2,12 @@ package uk.gov.hmcts.darts.common.service.bankholidays;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.BankHolidayApiStub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ActiveProfiles("in-memory-caching")
+
 class BankHolidayServiceTest extends IntegrationBase {
 
     public static final String VALID_BANK_HOLIDAY_JSON = """
