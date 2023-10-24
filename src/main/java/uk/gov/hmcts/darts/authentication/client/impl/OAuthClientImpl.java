@@ -11,7 +11,6 @@ import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.client.OAuthClient;
 import uk.gov.hmcts.darts.authentication.config.AuthProviderConfigurationProperties;
@@ -22,7 +21,6 @@ import java.net.URISyntaxException;
 
 
 @Component
-@Slf4j
 public class OAuthClientImpl implements OAuthClient {
     @SneakyThrows({URISyntaxException.class, IOException.class})
     public HTTPResponse fetchAccessToken(AuthProviderConfigurationProperties providerConfigurationProperties,
@@ -34,7 +32,6 @@ public class OAuthClientImpl implements OAuthClient {
         URI callback = new URI(redirectType);
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
         Scope authScope = new Scope();
-        log.info("fetchAccessToken scope {}", scope);
         authScope.add(scope);
 
         ClientID clientID = new ClientID(clientId);

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -19,7 +18,6 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-@Slf4j
 public class AccessTokenClient {
 
     private final String tokenUri;
@@ -31,7 +29,6 @@ public class AccessTokenClient {
 
     @SneakyThrows
     public String getAccessToken() {
-        log.info("getAccessToken scope {}", scope);
         Map<String, String> params = Map.of("client_id", clientId,
                                             "client_secret", clientSecret,
                                             "scope", scope,
