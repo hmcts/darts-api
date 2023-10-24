@@ -1,8 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
 
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.service.impl.AudioRequestSummaryResult;
@@ -15,7 +13,6 @@ import java.util.Optional;
 
 public interface MediaRequestService {
 
-    @Transactional(propagation = Propagation.SUPPORTS)
     AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId);
 
     MediaRequestEntity getMediaRequestById(Integer id);
