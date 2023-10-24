@@ -25,6 +25,14 @@ java:
           alias: AAD_B2C_CLIENT_SECRET_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
+        - name: api-FUNC-TEST-ROPC-USERNAME
+          alias: FUNC_TEST_ROPC_USERNAME
+        - name: api-FUNC-TEST-ROPC-PASSWORD
+          alias: FUNC_TEST_ROPC_PASSWORD
+        - name: AzureADFunctionalTestUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
+        - name: AzureADFunctionalTestPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureAdB2CFuncTestROPCClientIdKey
           alias: AAD_B2C_ROPC_CLIENT_ID_KEY
         - name: AzureAdB2CFuncTestROPCClientSecretKey
@@ -57,6 +65,8 @@ java:
           alias: DAR_MIDTIER_PASSWORD
         - name: DartsSystemUserEmail
           alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true
