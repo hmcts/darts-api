@@ -24,23 +24,6 @@
     <vulnerabilityName>CVE-2023-41080</vulnerabilityName>
   </suppress>
 
-  <suppress until="2023-10-25">
-    <notes>Fixed in Spring Boot v3.1.5 - Upgrade to Tomcat 10.1.15
-      https://github.com/spring-projects/spring-boot/issues/37902
-      [Spring Boot v3.1.4 (tomcat-embed-core-10.1.13.jar / tomcat-embed-websocket-10.1.13.jar): CVE-2023-42795,
-      CVE-2023-45648]
-    </notes>
-    <vulnerabilityName>CVE-2023-42795</vulnerabilityName>
-  </suppress>
-  <suppress until="2023-10-25">
-    <notes>Fixed in Spring Boot v3.1.5 - Upgrade to Tomcat 10.1.15
-      https://github.com/spring-projects/spring-boot/issues/37902
-      [Spring Boot v3.1.4 (tomcat-embed-core-10.1.13.jar / tomcat-embed-websocket-10.1.13.jar): CVE-2023-42795,
-      CVE-2023-45648]
-    </notes>
-    <vulnerabilityName>CVE-2023-45648</vulnerabilityName>
-  </suppress>
-
   <!--End of temporary suppression section -->
 
   <!--Please add all the false positives under the below section-->
