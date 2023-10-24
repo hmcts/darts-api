@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.admin.test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,7 +18,9 @@ import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +39,7 @@ class TestSupportControllerTest extends IntegrationBase {
     private transient MockMvc mockMvc;
     @MockBean
     private UserIdentity mockUserIdentity;
-    @MockBean
+    @Mock
     private UserAccountEntity mockUserAccountEntity;
     @MockBean
     private BankHolidaysService mockBankHolidaysService;
@@ -48,12 +51,10 @@ class TestSupportControllerTest extends IntegrationBase {
     @BeforeAll
     void beforeAll() {
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
-        /*
-        SecurityGroupEntity sge = new SecurityGroupEntity();
-        Set<SecurityGroupEntity> sgeSet = new HashSet<SecurityGroupEntity>();
-        sgeSet.add(sge);
+        Set<SecurityGroupEntity> sgeSet = new HashSet<>();
+        sgeSet.add(mockSecurityGroupEntity);
         when(mockUserAccountEntity.getSecurityGroupEntities()).thenReturn(sgeSet);
-        */
+
     }
 
     @Test
