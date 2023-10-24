@@ -22,7 +22,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -98,10 +100,10 @@ class TestSupportControllerTest extends IntegrationBase {
 
     @Test
     void getsBankHolidays() throws Exception {
-        Event e = new Event();
-        e.title = "christmas";
+        Event event = new Event();
+        event.title = "christmas";
         List<Event> events = new ArrayList<>();
-        events.add(e);
+        events.add(event);
 
         when(mockBankHolidaysService.getBankHolidaysFor(2023)).thenReturn(events);
 
