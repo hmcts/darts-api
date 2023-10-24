@@ -17,6 +17,8 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
         - name: AzureADFunctionalTestPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
+        - name: AzureAdB2CTenantIdKey
+          alias: AAD_B2C_TENANT_ID_KEY
         - name: AzureADTenantId
           alias: AAD_TENANT_ID
         - name: DartsSystemUserEmail
