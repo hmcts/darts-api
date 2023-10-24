@@ -54,7 +54,7 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public List<Transcript> getTranscriptsById(Integer hearingId) {
         List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingId(hearingId);
-        return TranscriptionMapper.mapResponse(transcriptionEntities);
+        return TranscriptionMapper.mapHearingResponse(transcriptionEntities);
     }
 
 }
