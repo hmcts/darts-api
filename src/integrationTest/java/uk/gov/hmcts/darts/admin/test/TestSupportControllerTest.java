@@ -7,17 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
+import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -31,7 +36,8 @@ class TestSupportControllerTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
     @MockBean
     private UserAccountEntity mockUserAccountEntity;
-
+    @MockBean
+    private BankHolidaysService mockBankHolidaysService;
     @MockBean
     private SecurityGroupEntity mockSecurityGroupEntity;
     @MockBean
@@ -88,6 +94,23 @@ class TestSupportControllerTest extends IntegrationBase {
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
 
+    }
+
+    @Test
+    void getsBankHolidays() throws Exception {
+        Event e = new Event();
+        e.title = "christmas";
+        List<Event> events = new ArrayList<>();
+        events.add(e);
+
+        when(mockBankHolidaysService.getBankHolidaysFor(2023)).thenReturn(events);
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT_URL + "/bank-holidays/2023"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String actualResponseBody = response.getResponse().getContentAsString();
+        assertThat(actualResponseBody.contains("christmas"));
     }
 
     @Test
