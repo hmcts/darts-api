@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -97,6 +98,19 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setCreatedBy(mockUserAccountEntity);
         mockMediaRequestEntity.setLastModifiedDateTime(now);
         mockMediaRequestEntity.setLastModifiedBy(mockUserAccountEntity);
+    }
+
+    @Test
+    void countNonAccessedAudioForUser() {
+        when(mockMediaRequestRepository.countByRequestor_IdAndLastAccessedDateTime(
+            any(),
+            any()
+        )).thenReturn(10L);
+
+        AudioNonAccessedResponse result = mediaRequestService.countNonAccessedAudioForUser(
+            TEST_REQUESTER);
+
+        assertEquals(10, result.getCount());
     }
 
     @Test

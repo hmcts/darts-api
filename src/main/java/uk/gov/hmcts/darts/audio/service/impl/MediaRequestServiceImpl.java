@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
@@ -69,6 +70,14 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(AudioRequestStatus status) {
         return mediaRequestRepository.findTopByStatusOrderByCreatedDateTimeAsc(status);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
+        AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
+        nonAccessedResponse.setCount(mediaRequestRepository.countByRequestor_IdAndLastAccessedDateTime(userId, null));
+        return nonAccessedResponse;
     }
 
     @Override

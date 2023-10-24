@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 @AutoConfigureWireMock(port = 8070)
 @TestInstance(Lifecycle.PER_CLASS)
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationPerClassBase {
 
     protected DartsGatewayStub dartsGateway = new DartsGatewayStub();

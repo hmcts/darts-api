@@ -316,6 +316,21 @@ public class DartsDatabaseStub {
             ));
     }
 
+    @Transactional
+    public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor) {
+
+        HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
+
+        return save(
+            AudioTestData.createCurrentMediaRequest(
+                hearing,
+                requestor,
+                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                null
+            ));
+    }
+
     public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
                                                                      UserAccountEntity requestor) {
         OffsetDateTime now = OffsetDateTime.now(UTC);
