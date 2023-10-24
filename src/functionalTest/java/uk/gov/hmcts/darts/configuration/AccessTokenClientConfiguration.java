@@ -20,7 +20,6 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient internalAccessTokenClient() {
-        log.info("internalAccessTokenClient {}", adAuthenticationProperties.getTokenUri());
         return new AccessTokenClient(adAuthenticationProperties.getTokenUri(),
                               adAuthenticationProperties.getScope(),
                               adAuthenticationProperties.getUsername(),
@@ -31,7 +30,6 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient externalAccessTokenClient() {
-        log.info("externalAccessTokenClient {}", b2cAuthenticationProperties.getTokenUri());
         return new AccessTokenClient(b2cAuthenticationProperties.getTokenUri(),
                                      b2cAuthenticationProperties.getScope(),
                                      b2cAuthenticationProperties.getUsername(),

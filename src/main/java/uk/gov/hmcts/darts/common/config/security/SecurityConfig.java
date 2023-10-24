@@ -101,8 +101,6 @@ public class SecurityConfig {
     }
 
     private JwtIssuerAuthenticationManagerResolver jwtIssuerAuthenticationManagerResolver() {
-        log.info("external issuer {}", externalAuthConfigurationProperties.getIssuerUri());
-        log.info("internal issuer {}", internalAuthConfigurationProperties.getIssuerUri());
         Map<String, AuthenticationManager> authenticationManagers = Map.ofEntries(
             createAuthenticationEntry(externalAuthConfigurationProperties.getIssuerUri(),
                 externalAuthProviderConfigurationProperties.getJwkSetUri()),
