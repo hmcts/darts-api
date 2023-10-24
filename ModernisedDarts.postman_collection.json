@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "87d2fa73-b40d-4535-baa4-ce37c358ca07",
+		"_postman_id": "c3697eb5-22b9-445e-a8c0-65d55d5561ab",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30362290"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -376,6 +375,36 @@
 								{
 									"key": "hearing_id",
 									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/audio/preview/{media_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "audio/mp3"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/audio/preview/:media_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audio",
+								"preview",
+								":media_id"
+							],
+							"variable": [
+								{
+									"key": "media_id",
+									"value": "3"
 								}
 							]
 						}
