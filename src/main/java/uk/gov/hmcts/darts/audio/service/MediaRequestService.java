@@ -4,6 +4,7 @@ package uk.gov.hmcts.darts.audio.service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.service.impl.AudioRequestSummaryResult;
+import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 
 import java.io.InputStream;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MediaRequestService {
+
+    AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId);
 
     MediaRequestEntity getMediaRequestById(Integer id);
 

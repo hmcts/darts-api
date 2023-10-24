@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.api.AudioRequestsApi;
 import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
+import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
 import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
@@ -45,6 +46,11 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     private final AuditService auditService;
 
+    @Override
+    public ResponseEntity<AudioNonAccessedResponse> getNonAccessedCount(Integer userId) {
+        return new ResponseEntity<>(mediaRequestService.countNonAccessedAudioForUser(userId), HttpStatus.OK);
+
+    }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
