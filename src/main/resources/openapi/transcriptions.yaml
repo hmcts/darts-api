@@ -357,46 +357,7 @@ components:
       enum:
         - "TRANSCRIPTION_105"
       x-enum-varnames: [ TRANSCRIPTION_WORKFLOW_ACTION_INVALID ]
-    transcripts:
-      type: array
-      items:
-        $ref: '#/components/schemas/transcript'
-    transcript:
-      type: object
-      properties:
-        tra_id:
-          type: integer
-          example: 1
-        hea_id:
-          type: integer
-          example: 2
-        hearing_date:
-          type: string
-          format: date
-          example: 2022-05-20
-        type:
-          type: string
-          example: "Sentencing remarks"
-        requested_on:
-          type: string
-          format: date
-          example: 2022-05-22
-        requested_by_name:
-          type: string
-          example: "Joe Bloggs"
-        status:
-          type: string
-          example: "Available"
-    CasesAuthorisation403ErrorCode:
-      type: string
-      enum:
-        - "AUTHORISATION_100"
-      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
-    HearingsAuthorisation403ErrorCode:
-      type: string
-      enum:
-        - "AUTHORISATION_100"
-      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
+
 
     TranscriptionTypesResponse:
       type: array
