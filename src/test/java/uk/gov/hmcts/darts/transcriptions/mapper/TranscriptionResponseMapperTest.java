@@ -1,10 +1,8 @@
 package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
@@ -17,8 +15,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Slf4j
+
 class TranscriptionResponseMapperTest {
     ObjectMapper objectMapper;
 

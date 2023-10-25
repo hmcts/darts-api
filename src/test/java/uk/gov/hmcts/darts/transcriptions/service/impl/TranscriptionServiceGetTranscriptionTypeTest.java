@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +21,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
-@Slf4j
 class TranscriptionServiceGetTranscriptionTypeTest {
     ObjectMapper objectMapper;
 
@@ -46,7 +44,7 @@ class TranscriptionServiceGetTranscriptionTypeTest {
 
         List<TranscriptionTypeResponse> transcriptionTypeResponses = transcriptionService.getTranscriptionTypes();
         String actualResponse = objectMapper.writeValueAsString(transcriptionTypeResponses);
-        log.info("actualResponse {}", actualResponse);
+
         String expectedResponse = getContentsFromFile(
             "Tests/transcriptions/service/TranscriptionTypeResponseMapper/expectedResponseMultipleEntities.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);

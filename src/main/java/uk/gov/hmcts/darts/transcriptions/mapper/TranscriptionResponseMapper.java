@@ -18,7 +18,7 @@ public class TranscriptionResponseMapper {
             .collect(Collectors.toList());
     }
 
-    public TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
+    TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
         TranscriptionTypeResponse transcriptionTypeResponse = new TranscriptionTypeResponse();
         transcriptionTypeResponse.setTrtId(transcriptionTypeEntity.getId());
         transcriptionTypeResponse.setDescription(transcriptionTypeEntity.getDescription());
