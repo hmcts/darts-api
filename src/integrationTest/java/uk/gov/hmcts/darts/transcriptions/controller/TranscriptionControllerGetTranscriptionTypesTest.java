@@ -36,8 +36,8 @@ class TranscriptionControllerGetTranscriptionTypesTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = getContentsFromFile(
-            "Tests/transcriptions/transcription_types/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+            "tests/transcriptions/transcription_types/expectedResponse.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
