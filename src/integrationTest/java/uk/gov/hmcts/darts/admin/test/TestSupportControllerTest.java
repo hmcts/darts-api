@@ -1,9 +1,8 @@
 package uk.gov.hmcts.darts.admin.test;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -39,28 +38,24 @@ class TestSupportControllerTest extends IntegrationBase {
     private transient MockMvc mockMvc;
     @MockBean
     private UserIdentity mockUserIdentity;
-    @Mock
-    private UserAccountEntity mockUserAccountEntity;
     @MockBean
     private BankHolidaysService mockBankHolidaysService;
+
+    @MockBean
+    private UserAccountEntity mockUserAccountEntity;
+
     @MockBean
     private SecurityGroupEntity mockSecurityGroupEntity;
     @MockBean
     private CourthouseEntity courthouseEntity;
-    private UserAccountEntity testUser;
 
-    @BeforeAll
+    @BeforeEach
     void beforeEach() {
-
-        testUser = new UserAccountEntity();
-        testUser.setEmailAddress("test.user@example.com");
-
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-
-        Set<SecurityGroupEntity> sgeSet = new HashSet<>();
-        sgeSet.add(mockSecurityGroupEntity);
+        when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
+        SecurityGroupEntity sge = new SecurityGroupEntity();
+        Set<SecurityGroupEntity> sgeSet = new HashSet<SecurityGroupEntity>();
+        sgeSet.add(sge);
         when(mockUserAccountEntity.getSecurityGroupEntities()).thenReturn(sgeSet);
-
     }
 
     @Test
@@ -82,7 +77,6 @@ class TestSupportControllerTest extends IntegrationBase {
     void createsCourtroomForExistingCourthouse() throws Exception {
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
             .andExpect(status().isCreated());
-
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr2"))
             .andExpect(status().isCreated());
 
@@ -93,10 +87,8 @@ class TestSupportControllerTest extends IntegrationBase {
 
     @Test
     void createsAudit() throws Exception {
-
         mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
             .andExpect(status().isCreated());
-
 
         mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/func-swansea"))
             .andExpect(status().isCreated());

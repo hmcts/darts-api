@@ -148,10 +148,12 @@ public class TestSupportController {
 
     private void newUserCourthousePermissions(CourthouseEntity courthouse) {
         UserAccountEntity userAccountEntity = userIdentity.getUserAccount();
-        for (SecurityGroupEntity securityGroupEntity : userAccountEntity.getSecurityGroupEntities()) {
-            courthouse.getSecurityGroups().add(securityGroupEntity);
+        if (userAccountEntity != null) {
+            for (SecurityGroupEntity securityGroupEntity : userAccountEntity.getSecurityGroupEntities()) {
+                courthouse.getSecurityGroups().add(securityGroupEntity);
+            }
         }
-        courthouseRepository.saveAndFlush(courthouse);
+        //courthouseRepository.saveAndFlush(courthouse);
     }
 
     @PostMapping(value = "/audit/{audit_activity}/courthouse/{courthouse_name}")
