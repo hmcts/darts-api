@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.hearings.mapper;
 
 import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
@@ -9,7 +8,6 @@ import uk.gov.hmcts.darts.hearings.model.Transcript;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @UtilityClass
 public class TranscriptionMapper {
 

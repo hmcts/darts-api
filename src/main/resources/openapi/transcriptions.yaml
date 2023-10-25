@@ -243,7 +243,6 @@ components:
         - "TRANSCRIPTION_105"
       x-enum-varnames: [ TRANSCRIPTION_WORKFLOW_ACTION_INVALID ]
 
-
     TranscriptionTypesResponse:
       type: array
       items:

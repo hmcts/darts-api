@@ -71,7 +71,6 @@ public class TranscriptionController implements TranscriptionApi {
         );
     }
 
-
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
 
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {

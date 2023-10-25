@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.cases.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -30,7 +29,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
-@Slf4j
 @AutoConfigureMockMvc
 @Transactional
 class CasesControllerGetTranscriptsTest extends IntegrationBase {
@@ -73,6 +71,7 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, "25");
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
+
     }
 
     @Test
@@ -109,4 +108,6 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
+
+
 }

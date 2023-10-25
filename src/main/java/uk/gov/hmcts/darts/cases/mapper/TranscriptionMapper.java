@@ -47,4 +47,6 @@ public class TranscriptionMapper {
             return transcriptionEntity.getRequestor();
         }
     }
+
+
 }

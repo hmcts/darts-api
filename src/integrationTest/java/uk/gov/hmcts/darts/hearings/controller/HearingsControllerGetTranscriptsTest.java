@@ -64,8 +64,6 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
-
-
     }
 
     @Test
@@ -74,7 +72,6 @@ class HearingsControllerGetTranscriptsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_HEARINGS, "25");
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
-
     }
 
     @Test
