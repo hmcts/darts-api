@@ -29,9 +29,9 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime);
 
     @Query("""
-        SELECT t FROM TranscriptionEntity t, CourtCaseEntity case
+        SELECT t FROM TranscriptionEntity t, HearingEntity hearing
         WHERE hearing.id = :hearingId
-        AND t.courtCase = case
+        AND t.hearing = hearing
         """
     )
     List<TranscriptionEntity> findByHearingId(Integer hearingId);
