@@ -140,6 +140,23 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateTranscription'
+
+  /transcriptions/types:
+    get:
+      tags:
+        - Transcription
+      summary: Gets a list of the transcription types
+      operationId: getTranscriptionTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionTypesResponse'
+        '401':
+          description: Unauthorised Error
+
 components:
   schemas:
     TranscriptionRequestDetails:
@@ -225,3 +242,18 @@ components:
       enum:
         - "TRANSCRIPTION_105"
       x-enum-varnames: [ TRANSCRIPTION_WORKFLOW_ACTION_INVALID ]
+
+    TranscriptionTypesResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/TranscriptionTypeResponse'
+    TranscriptionTypeResponse:
+      type: object
+      properties:
+        trt_id:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: Sentencing remarks
+
