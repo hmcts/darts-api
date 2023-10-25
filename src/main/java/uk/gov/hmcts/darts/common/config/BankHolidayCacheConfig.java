@@ -23,8 +23,8 @@ import java.time.Duration;
 @Slf4j
 public class BankHolidayCacheConfig {
 
-    @Value("${darts.cache.bank-holiday.expiry-minutes}")
-    private int bankHolidayExpiryMinutes;
+    @Value("${darts.cache.bank-holiday.expiry}")
+    private Duration bankHolidayExpiry;
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, RedisCacheConfiguration redisCacheConfiguration) {
@@ -38,7 +38,7 @@ public class BankHolidayCacheConfig {
     @Bean
     public RedisCacheConfiguration cacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofMinutes(bankHolidayExpiryMinutes))
+            .entryTtl(bankHolidayExpiry)
             .disableCachingNullValues()
             .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer()));
     }
