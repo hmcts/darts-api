@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -18,8 +17,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
-@Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerGetTranscriptionTypesTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/types");
