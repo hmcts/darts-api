@@ -156,7 +156,7 @@ darts:
       baseurl: https://www.gov.uk
   cache:
     bank-holiday:
-      expiry-days: 7
+      expiry-minutes: 10080  # 7 days
   redis:
     connection-string: ${REDIS_CONNECTION_STRING:redis://localhost:6379}
     ssl-enabled: ${REDIS_SSL_ENABLED:true}
