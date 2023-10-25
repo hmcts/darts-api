@@ -47,10 +47,16 @@ class TestSupportControllerTest extends IntegrationBase {
     private SecurityGroupEntity mockSecurityGroupEntity;
     @MockBean
     private CourthouseEntity courthouseEntity;
+    private UserAccountEntity testUser;
 
     @BeforeAll
-    void beforeAll() {
-        when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
+    void beforeEach() {
+
+        testUser = new UserAccountEntity();
+        testUser.setEmailAddress("test.user@example.com");
+
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
         Set<SecurityGroupEntity> sgeSet = new HashSet<>();
         sgeSet.add(mockSecurityGroupEntity);
         when(mockUserAccountEntity.getSecurityGroupEntities()).thenReturn(sgeSet);
