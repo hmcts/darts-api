@@ -73,7 +73,7 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
-        CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(request, criteriaBuilder, caseRoot));
+        CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
         return predicates;
 
     }
@@ -148,7 +148,7 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
-    private List<Predicate> addUserSecurityRolesCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> addUserSecurityRolesCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
 
         List<Predicate> predicateList = new ArrayList<>();
         Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
