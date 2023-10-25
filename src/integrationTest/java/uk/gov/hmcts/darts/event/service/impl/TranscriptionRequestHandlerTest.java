@@ -74,8 +74,10 @@ class TranscriptionRequestHandlerTest extends IntegrationBase {
             TranscriptionStatusEnum.APPROVED.getId(),
             persistedTranscriptionWorkflow.getTranscriptionStatus().getId()
         );
-        assertEquals("Transcription Automatically approved", persistedTranscriptionWorkflow.getWorkflowComment());
-
+        assertEquals(
+            "Transcription Automatically approved",
+            dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
+        );
     }
 
 }

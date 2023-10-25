@@ -67,12 +67,11 @@ public class TranscriptionStub {
         return transcriptionStatus;
     }
 
-    public TranscriptionEntity createAndSaveTranscriptionEntity(
-        HearingEntity hearing,
-        TranscriptionTypeEntity transcriptionType,
-        TranscriptionStatusEntity transcriptionStatus,
-        TranscriptionUrgencyEntity transcriptionUrgency,
-        UserAccountEntity testUser) {
+    public TranscriptionEntity createAndSaveTranscriptionEntity(HearingEntity hearing,
+                                                                TranscriptionTypeEntity transcriptionType,
+                                                                TranscriptionStatusEntity transcriptionStatus,
+                                                                TranscriptionUrgencyEntity transcriptionUrgency,
+                                                                UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtCase(hearing.getCourtCase());
         transcription.setCourtroom(hearing.getCourtroom());
@@ -82,22 +81,16 @@ public class TranscriptionStub {
         transcription.setTranscriptionUrgency(transcriptionUrgency);
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
-        transcriptionRepository.saveAndFlush(transcription);
-        return transcription;
+        return transcriptionRepository.saveAndFlush(transcription);
     }
+
 
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
                                                                          UserAccountEntity user,
                                                                          OffsetDateTime timestamp,
-                                                                         TranscriptionStatusEntity transcriptionStatus,
-                                                                         String workflowComment) {
+                                                                         TranscriptionStatusEntity transcriptionStatus) {
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
         transcriptionWorkflowEntity.setTranscription(transcriptionEntity);
-        transcriptionWorkflowEntity.setWorkflowComment(workflowComment);
-        transcriptionWorkflowEntity.setCreatedDateTime(timestamp);
-        transcriptionWorkflowEntity.setCreatedBy(user);
-        transcriptionWorkflowEntity.setLastModifiedDateTime(timestamp);
-        transcriptionWorkflowEntity.setLastModifiedBy(user);
         transcriptionWorkflowEntity.setTranscriptionStatus(transcriptionStatus);
         transcriptionWorkflowEntity.setWorkflowActor(user);
         transcriptionWorkflowEntity.setWorkflowTimestamp(timestamp);

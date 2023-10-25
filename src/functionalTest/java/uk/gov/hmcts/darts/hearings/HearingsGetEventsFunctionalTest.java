@@ -15,6 +15,8 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     public static final String ADD_EVENT_URL = "/events";
     public static final String CASE_SEARCH_URL = "/cases/search";
 
+    private static final String COURTHOUSE = "Swansea";
+
     @AfterEach
     void cleanData() {
         buildRequestWithExternalAuth()
@@ -25,10 +27,9 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
 
     @Test
     void success() {
-        String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
 
-        createCourtroomAndCourthouse(courthouseName, courtroomName);
+        createCourtroomAndCourthouse(COURTHOUSE, courtroomName);
 
         String randomCaseNumber = randomCaseNumber();
         String randomEventText1 = randomAlphanumeric(15);
@@ -47,7 +48,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
               "event_text": "%s",
               "date_time": "2023-08-08T14:01:06.085Z"
             }""",
-            courthouseName, courtroomName, randomCaseNumber, randomEventText1);
+            COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1);
 
         buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -74,7 +75,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
               "event_text": "%s",
               "date_time": "2023-08-08T14:01:06.085Z"
             }""",
-            courthouseName, courtroomName, randomCaseNumber, randomEventText2);
+            COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
 
         buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)

@@ -30,6 +30,9 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | CPP_PASSWORD                     | CppPassword                               |
 | DARPC_USER_NAME                  | DarPcUserName                             |
 | DARPC_PASSWORD                   | DarPcPassword                             |
+| SYSTEM_USER_EMAIL                | DartsSystemUserEmail                      |
+| DAR_MIDTIER_USER_NAME            | DarMidTierUserName                        |
+| DAR_MIDTIER_PASSWORD             | DarMidTierPassword                        |
 
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
@@ -50,7 +53,7 @@ launchctl setenv <<env var name>> <<secret value>>
 ```
 You will then need to restart intellij/terminal windows for it to take effect.
 
-to make the changes permanent, make a `.zshrc` file in your users folder and popualte it with this and their values:
+to make the changes permanent, make a `.zshrc` file in your users folder and populate it with this and their values:
 ```
 export GOVUK_NOTIFY_API_KEY=
 export FUNC_TEST_ROPC_USERNAME=
@@ -69,6 +72,9 @@ export CPP_USER_NAME=
 export CPP_PASSWORD=
 export DARPC_USER_NAME=
 export DARPC_PASSWORD=
+export SYSTEM_USER_EMAIL=
+export DAR_MIDTIER_USER_NAME=
+export DAR_MIDTIER_PASSWORD=
 ```
 
 ### Storage Account
@@ -205,6 +211,26 @@ The functional tests module is run by default in the dev and staging environment
 
  - If a courthouse needs to pre-exist for a functional test it can be created from within the tests using `/functional-tests/courthouse/{courthouse_name}/courtroom/{courtroom_name}`. The courthouse_name must be prefixed with `func-`. This data will be cleaned after the test has executed.
  - If a case needs to pre-exist for a functional test then however it is created the case_number should also pre-fixed with `func-`.  There is a random case_number generator that will provide case_numbers with this prefix.  These cases and their associated hearings and events will be cleaned up automatically after the test has executed.
+
+## Caching
+
+Redis has been configured as the default caching provider.  When running docker-compose with the local configuration a Redis container will be started.  If starting the darts-api from Intellij or the command line you have the following options:
+
+ 1. Start the Redis service as follows:
+ ```bash
+ docker compose -f docker-compose-local.yml up darts-redis
+ ```
+Then start the darts-api ensuring that the `local` profile is activated.
+
+ 2. Alternatively the darts-api can be run using a simple in-memory cache by starting the application with the profile `in-memory-caching`.
+
+To view the cache - when running against local Redis - Intellij has a free plugin called `Redis Helper`. However, if you want to view the cache in staging the plugin doesn't support SSL. Instead, install:
+
+```bash
+brew install --cask another-redis-desktop-manager
+sudo xattr -rd com.apple.quarantine /Applications/Another\ Redis\ Desktop\ Manager.app
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details

@@ -26,12 +26,22 @@ java:
           alias: AAD_B2C_CLIENT_SECRET_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
+        - name: api-FUNC-TEST-ROPC-USERNAME
+          alias: FUNC_TEST_ROPC_USERNAME
+        - name: api-FUNC-TEST-ROPC-PASSWORD
+          alias: FUNC_TEST_ROPC_PASSWORD
+        - name: AzureADFunctionalTestUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
+        - name: AzureADFunctionalTestPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureAdB2CFuncTestROPCClientIdKey
           alias: AAD_B2C_ROPC_CLIENT_ID_KEY
         - name: AzureAdB2CFuncTestROPCClientSecretKey
           alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
         - name: AzureStorageConnectionString
           alias: AZURE_STORAGE_CONNECTION_STRING
+        - name: api-POSTGRES-CONNECTION-STRING
+          alias: DARTS_API_DB_CONNECTION_STRING
         - name: AzureADTenantId
           alias: AAD_TENANT_ID
         - name: AzureADClientId
@@ -50,12 +60,20 @@ java:
           alias: DARPC_USER_NAME
         - name: DarPcPassword
           alias: DARPC_PASSWORD
+        - name: DarMidTierUserName
+          alias: DAR_MIDTIER_USER_NAME
+        - name: DarMidTierPassword
+          alias: DAR_MIDTIER_PASSWORD
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
     RUN_DB_MIGRATION_ON_STARTUP: false
     DARTS_GATEWAY_URL: https://darts-gateway.{{ .Values.global.environment }}.platform.hmcts.net
-    TESTING_SUPPORT_ENDPOINT_ENABLED: true
+    TESTING_SUPPORT_ENDPOINTS_ENABLED: true
 
 function:
   scaleType: Job
@@ -88,6 +106,14 @@ function:
           alias: AAD_B2C_CLIENT_SECRET_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
+        - name: api-FUNC-TEST-ROPC-USERNAME
+          alias: FUNC_TEST_ROPC_USERNAME
+        - name: api-FUNC-TEST-ROPC-PASSWORD
+          alias: FUNC_TEST_ROPC_PASSWORD
+        - name: AzureADFunctionalTestUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
+        - name: AzureADFunctionalTestPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
         - name: AzureAdB2CFuncTestROPCClientIdKey
           alias: AAD_B2C_ROPC_CLIENT_ID_KEY
         - name: AzureAdB2CFuncTestROPCClientSecretKey
@@ -114,6 +140,14 @@ function:
           alias: DARPC_USER_NAME
         - name: DarPcPassword
           alias: DARPC_PASSWORD
+        - name: DarMidTierUserName
+          alias: DAR_MIDTIER_USER_NAME
+        - name: DarMidTierPassword
+          alias: DAR_MIDTIER_PASSWORD
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require

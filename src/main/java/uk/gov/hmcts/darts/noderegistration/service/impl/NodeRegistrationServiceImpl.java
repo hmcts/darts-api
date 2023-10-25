@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.NodeRegisterEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
-import uk.gov.hmcts.darts.courthouse.CourthouseRepository;
+import uk.gov.hmcts.darts.common.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.noderegistration.exception.NodeRegistrationApiError;
-import uk.gov.hmcts.darts.noderegistration.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.noderegistration.service.NodeRegistrationService;
 
 import java.util.Optional;

@@ -76,7 +76,40 @@ paths:
             schema:
               $ref: '#/components/schemas/AudioRequestDetails'
         description: Audio Request item to add
-
+  /audio-requests/not-accessed-count:
+    get:
+      tags:
+        - Audio Requests
+      operationId: getNonAccessedCount
+      description: 'Returns count of audio requests not accessed by user provided'
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioNonAccessedResponse'
+        '400':
+          description: A required parameter is missing or an invalid.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "about:blank"
+                title: "Bad Request"
+                status: 400
+                detail: "Required parameter 'expired' is not present."
+                instance: "/audio-requests/not-accessed-count"
+        '401':
+          description: Unauthorised Error
   /audio-requests/{media_request_id}:
     delete:
       tags:
@@ -299,6 +332,14 @@ components:
     defendant:
       type: string
       example: Joe Bloggs
+
+    AudioNonAccessedResponse:
+      type: object
+      properties:
+        count:
+          type: long
+          example: 1
+
 
     AddAudioResponse:
       type: object

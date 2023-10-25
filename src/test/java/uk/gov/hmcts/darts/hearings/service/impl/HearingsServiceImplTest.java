@@ -12,13 +12,13 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -29,6 +29,9 @@ class HearingsServiceImplTest {
 
     @Mock
     HearingRepository hearingRepository;
+    @Mock
+    EventRepository eventRepository;
+
 
     HearingsServiceImpl service;
 
@@ -36,7 +39,8 @@ class HearingsServiceImplTest {
     @BeforeEach
     void setUp() {
         service = new HearingsServiceImpl(
-            hearingRepository
+            hearingRepository,
+            eventRepository
         );
     }
 
@@ -52,14 +56,13 @@ class HearingsServiceImplTest {
             courtroomEntity,
             LocalDate.now()
         );
-        Mockito.when(hearingRepository.findById(hearingEntity.getId())).thenReturn(Optional.of(hearingEntity));
 
         EventHandlerEntity eventType = mock(EventHandlerEntity.class);
         Mockito.when(eventType.getEventName()).thenReturn("TestEvent");
 
         List<EventEntity> event = List.of(
             CommonTestDataUtil.createEventWith("LOG", "Test", hearingEntity, eventType));
-        hearingEntity.setEventList(event);
+        Mockito.when(eventRepository.findAllByHearingId(hearingEntity.getId())).thenReturn(event);
 
         List<EventResponse> eventResponses = service.getEvents(hearingEntity.getId());
         assertEquals(1, eventResponses.size());
@@ -69,6 +72,5 @@ class HearingsServiceImplTest {
         assertNotNull(eventResponses.get(0).getTimestamp());
 
     }
-
 
 }

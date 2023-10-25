@@ -15,6 +15,7 @@ import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -71,6 +73,12 @@ class TranscriptionServiceImplTest {
     private TranscriptionWorkflowRepository mockTranscriptionWorkflowRepository;
 
     @Mock
+    private TranscriptionCommentRepository mockTranscriptionCommentRepository;
+
+    @Mock
+    private TranscriptionWorkflowEntity mockTranscriptionWorkflowEntity;
+
+    @Mock
     private CaseService mockCaseService;
     @Mock
     private HearingsService mockHearingsService;
@@ -102,6 +110,9 @@ class TranscriptionServiceImplTest {
     @Captor
     private ArgumentCaptor<TranscriptionWorkflowEntity> transcriptionWorkflowEntityArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<TranscriptionCommentEntity> transcriptionCommentEntityArgumentCaptor;
+
     @BeforeEach
     void setUp() {
 
@@ -120,6 +131,7 @@ class TranscriptionServiceImplTest {
         requestedTranscriptionStatus.setId(REQUESTED.getId());
         awaitingAuthorisationTranscriptionStatus = new TranscriptionStatusEntity();
         awaitingAuthorisationTranscriptionStatus.setId(AWAITING_AUTHORISATION.getId());
+
     }
 
     @Test
@@ -145,6 +157,9 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1,2);
+        when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
+
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
@@ -152,7 +167,6 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
-        String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
@@ -161,7 +175,7 @@ class TranscriptionServiceImplTest {
             caseId,
             transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(),
-            comment,
+            TEST_COMMENT,
             startDateTime,
             endDateTime
         ));
@@ -184,15 +198,21 @@ class TranscriptionServiceImplTest {
             times(2)
         ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
+        verify(
+            mockTranscriptionCommentRepository,
+            times(1)
+        ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
+
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
         TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
-        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
-        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
+
+
+        assertTranscriptionComments();
 
         verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
@@ -217,6 +237,9 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1, 2);
+        when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
+
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
@@ -226,7 +249,6 @@ class TranscriptionServiceImplTest {
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer hearingId = null;
-        String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
@@ -235,7 +257,7 @@ class TranscriptionServiceImplTest {
             caseId,
             transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(),
-            comment,
+            TEST_COMMENT,
             startDateTime,
             endDateTime
         ));
@@ -255,15 +277,20 @@ class TranscriptionServiceImplTest {
             times(2)
         ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
+        verify(
+            mockTranscriptionCommentRepository,
+            times(1)
+        ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
+
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
         TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
-        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
-        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
+
+        assertTranscriptionComments();
 
         verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
@@ -288,6 +315,9 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1,2);
+        when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
+
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
@@ -296,7 +326,6 @@ class TranscriptionServiceImplTest {
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer caseId = null;
-        String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
@@ -305,7 +334,7 @@ class TranscriptionServiceImplTest {
             caseId,
             transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(),
-            comment,
+            TEST_COMMENT,
             startDateTime,
             endDateTime
         ));
@@ -328,15 +357,21 @@ class TranscriptionServiceImplTest {
             times(2)
         ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
+        verify(
+            mockTranscriptionCommentRepository,
+            times(1)
+        ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
+
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
         TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
-        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
-        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
+
+
+        assertTranscriptionComments();
 
         verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
@@ -364,6 +399,9 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
+        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1,2);
+        when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
+
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
         when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
         when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
@@ -371,7 +409,6 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
-        String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = null;
         OffsetDateTime endDateTime = null;
 
@@ -380,7 +417,7 @@ class TranscriptionServiceImplTest {
             caseId,
             transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(),
-            comment,
+            TEST_COMMENT,
             startDateTime,
             endDateTime
         ));
@@ -403,17 +440,33 @@ class TranscriptionServiceImplTest {
             times(2)
         ).saveAndFlush(transcriptionWorkflowEntityArgumentCaptor.capture());
 
+        verify(
+            mockTranscriptionCommentRepository,
+            times(1)
+        ).saveAndFlush(transcriptionCommentEntityArgumentCaptor.capture());
+
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionWorkflowEntityArgumentCaptor.getAllValues();
         TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(0);
-        assertThat(requestedTranscriptionWorkflowEntity.getWorkflowComment()).isEqualTo(comment);
         assertThat(requestedTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(REQUESTED.getId());
         TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionWorkflowEntities.get(
             1);
-        assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getWorkflowComment()).isNull();
         assertThat(awaitingAuthorisationTranscriptionWorkflowEntity.getTranscriptionStatus().getId()).isEqualTo(
             AWAITING_AUTHORISATION.getId());
 
+
+        assertTranscriptionComments();
+
+
         verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+    }
+
+    private void assertTranscriptionComments() {
+        List<TranscriptionCommentEntity> transcriptionCommentEntities = transcriptionCommentEntityArgumentCaptor.getAllValues();
+
+        assertThat(transcriptionCommentEntities)
+            .hasSize(1)
+            .extracting(TranscriptionCommentEntity::getComment)
+            .containsExactly(TEST_COMMENT);
     }
 
     @Test
@@ -427,7 +480,6 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionTypeRepository.getReferenceById(transcriptionTypeEnum.getId()))
             .thenReturn(mockTranscriptionType);
 
-        String comment = TEST_COMMENT;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
@@ -442,7 +494,7 @@ class TranscriptionServiceImplTest {
                     caseId,
                     transcriptionUrgencyEnum.getId(),
                     transcriptionTypeEnum.getId(),
-                    comment,
+                    TEST_COMMENT,
                     startDateTime,
                     endDateTime
                 ))
@@ -469,4 +521,6 @@ class TranscriptionServiceImplTest {
         transcriptionRequestDetails.setEndDateTime(endDateTime);
         return transcriptionRequestDetails;
     }
+
+
 }

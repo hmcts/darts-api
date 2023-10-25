@@ -7,6 +7,22 @@ java:
       secrets:
         - name: GovukNotifyTestApiKey
           alias: GOVUK_NOTIFY_API_KEY
+        - name: api-POSTGRES-USER
+          alias: DARTS_API_DB_USERNAME
+        - name: api-POSTGRES-PASS
+          alias: DARTS_API_DB_PASSWORD
+        - name: api-POSTGRES-HOST
+          alias: DARTS_API_DB_HOST
+        - name: api-POSTGRES-DATABASE
+          alias: DARTS_API_DB_NAME
+        - name: api-POSTGRES-SCHEMA
+          alias: DARTS_API_DB_SCHEMA
+        - name: AzureAdB2CTenantIdKey
+          alias: AAD_B2C_TENANT_ID_KEY
+        - name: AzureAdB2CClientIdKey
+          alias: AAD_B2C_CLIENT_ID_KEY
+        - name: AzureAdB2CClientSecretKey
+          alias: AAD_B2C_CLIENT_SECRET_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
         - name: api-FUNC-TEST-ROPC-USERNAME
@@ -17,8 +33,40 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
         - name: AzureADFunctionalTestPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
+        - name: AzureAdB2CFuncTestROPCClientIdKey
+          alias: AAD_B2C_ROPC_CLIENT_ID_KEY
+        - name: AzureAdB2CFuncTestROPCClientSecretKey
+          alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
+        - name: AzureStorageConnectionString
+          alias: AZURE_STORAGE_CONNECTION_STRING
+        - name: api-POSTGRES-CONNECTION-STRING
+          alias: DARTS_API_DB_CONNECTION_STRING
         - name: AzureADTenantId
           alias: AAD_TENANT_ID
+        - name: AzureADClientId
+          alias: AAD_CLIENT_ID
+        - name: AzureADClientSecret
+          alias: AAD_CLIENT_SECRET
+        - name: XhibitUserName
+          alias: XHIBIT_USER_NAME
+        - name: XhibitPassword
+          alias: XHIBIT_PASSWORD
+        - name: CppUserName
+          alias: CPP_USER_NAME
+        - name: CppPassword
+          alias: CPP_PASSWORD
+        - name: DarPcUserName
+          alias: DARPC_USER_NAME
+        - name: DarPcPassword
+          alias: DARPC_PASSWORD
+        - name: DarMidTierUserName
+          alias: DAR_MIDTIER_USER_NAME
+        - name: DarMidTierPassword
+          alias: DAR_MIDTIER_PASSWORD
+        - name: DartsSystemUserEmail
+          alias: SYSTEM_USER_EMAIL
+        - name: redis-connection-string
+          alias: REDIS_CONNECTION_STRING
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true

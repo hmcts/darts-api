@@ -6,11 +6,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsGatewayStub;
+import uk.gov.hmcts.darts.testutils.stubs.wiremock.DartsGatewayStub;
 
 @AutoConfigureWireMock
 @SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
+@ActiveProfiles({"intTest", "h2db", "in-memory-caching"})
 public class IntegrationBase {
 
     protected DartsGatewayStub dartsGateway = new DartsGatewayStub();

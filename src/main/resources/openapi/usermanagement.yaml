@@ -1,0 +1,337 @@
+openapi: 3.0.1
+
+info:
+  title: 'Modernised DARTS'
+  description: 'Modernised DARTS (Digital Audio Recording and Transcription Service).'
+  version: '${version}'
+
+
+########################################################################################################################
+# PATH DEFINITIONS
+########################################################################################################################
+
+paths:
+  /users:
+    get:
+      summary: Get all users
+      tags:
+        - User
+      responses:
+        '200':
+          $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
+    post:
+      summary: Create new user
+      tags:
+        - User
+      requestBody:
+        $ref: '#/components/requestBodies/UserRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/UserSuccessResponseWithId'
+        '400':
+          $ref: '#/components/responses/BadUserRequest'
+
+  /users/{id}:
+    get:
+      summary: Get user by id
+      tags:
+        - User
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserSuccessResponseWithIdAndLastLogin'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+    patch:
+      summary: Modify user by id
+      tags:
+        - User
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/UserPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserSuccessResponseWithIdAndLastLogin'
+        '400':
+          $ref: '#/components/responses/BadUserPatchRequest'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+        '409':
+          $ref: '#/components/responses/UserHasOwnedObjects'
+
+  /users/search:
+    post:
+      summary: Get users by search criteria
+      tags:
+        - User
+      requestBody:
+        $ref: '#/components/requestBodies/UserSearchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
+
+  /users/transfer:
+    put:
+      summary: Transfer all ownership of one user's objects to the target user
+      tags:
+        - User
+      requestBody:
+        $ref: '#/components/requestBodies/UserTransferRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserTransferSuccess'
+
+  /security-groups:
+    get:
+      summary: Get all security groups
+      tags:
+        - SecurityGroup
+      responses:
+        '200':
+          $ref: '#/components/responses/SecurityGroupArraySuccessResponse'
+
+
+########################################################################################################################
+# COMPONENT DEFINITIONS
+########################################################################################################################
+
+components:
+  requestBodies:
+    UserRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    UserPatchRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserPatch'
+    UserSearchRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSearch'
+    UserTransferRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserTransfer'
+
+
+  responses:
+    UserSuccessResponseWithId:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserWithId'
+    UserSuccessResponseWithIdAndLastLogin:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserWithIdAndLastLogin'
+    UserArraySuccessResponseWithIdAndLastLogin:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/UserWithIdAndLastLogin'
+    SecurityGroupArraySuccessResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SecurityGroup'
+    UserTransferSuccess:
+      description: 'Success'
+
+    BadUserRequest:
+      description: Bad Request
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            violations:
+              - field: "emailAddress"
+                message: "must not be null"
+              - field: "state"
+                message: "must not be null"
+              - field: "fullName"
+                message: "must not be null"
+            type: "https://zalando.github.io/problem/constraint-violation"
+            title: "Constraint Violation"
+            status: 400
+    BadUserPatchRequest:
+      description: Bad Request
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            violations:
+              - field: "fullName"
+                message: "size must be between 1 and 256"
+            type: "https://zalando.github.io/problem/constraint-violation"
+            title: "Constraint Violation"
+            status: 400
+    UserNotFound:
+      description: User not found
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            type: "USER_100"
+            title: "User not found"
+            status: 404
+    UserHasOwnedObjects:
+      description: An attempt has been made to disable a user who has ownership of objects.
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            type: "USER_110"
+            title: "A user with owned objects cannot be disabled"
+            status: 409
+
+
+  parameters:
+    Id:
+      in: path
+      required: true
+      name: id
+      schema:
+        type: integer
+    FullName:
+      in: query
+      name: full_name
+      schema:
+        $ref: "#/components/schemas/Name"
+    EmailAddress:
+      in: query
+      name: email_address
+      schema:
+        $ref: "#/components/schemas/EmailAddress"
+
+
+  schemas:
+    Name:
+      minLength: 1
+      maxLength: 256
+      type: string
+    EmailAddress:
+      minLength: 1
+      maxLength: 256
+      type: string
+    Description:
+      minLength: 1
+      maxLength: 256
+      type: string
+    State:
+      type: string
+      enum:
+        - ENABLED
+        - DISABLED
+      default: ENABLED
+    SecurityGroupName:
+      minLength: 1
+      maxLength: 256
+      type: string
+    SecurityGroupDescription:
+      minLength: 1
+      maxLength: 256
+      type: string
+    SecurityGroupDisplayName:
+      minLength: 1
+      maxLength: 256
+      type: string
+    UserId:
+      type: integer
+
+    User:
+      type: object
+      properties:
+        full_name:
+          $ref: '#/components/schemas/Name'
+        email_address:
+          $ref: '#/components/schemas/EmailAddress'
+        description:
+          $ref: '#/components/schemas/Description'
+        state:
+          $ref: '#/components/schemas/State'
+        security_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityGroupName'
+      required:
+        - full_name
+        - email_address
+        - state
+    UserPatch:
+      type: object
+      properties:
+        full_name:
+          $ref: '#/components/schemas/Name'
+        description:
+          $ref: '#/components/schemas/Description'
+        state:
+          $ref: '#/components/schemas/State'
+        security_groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecurityGroupName'
+    UserSearch:
+      type: object
+      properties:
+        full_name:
+          $ref: '#/components/schemas/Name'
+        email_address:
+          $ref: '#/components/schemas/EmailAddress'
+    UserWithId:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UserId'
+      allOf:
+        - $ref: '#/components/schemas/User'
+    UserWithIdAndLastLogin:
+      type: object
+      properties:
+        last_login:
+          type: string
+          format: date-time
+      allOf:
+        - $ref: '#/components/schemas/UserWithId'
+    UserTransfer:
+      type: object
+      properties:
+        from_id:
+          $ref: '#/components/schemas/UserId'
+        to_id:
+            $ref: '#/components/schemas/UserId'
+      required:
+        - from_id
+        - to_id
+    SecurityGroup:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/SecurityGroupName'
+        display_name:
+          $ref: '#/components/schemas/SecurityGroupDisplayName'
+        description:
+          $ref: '#/components/schemas/SecurityGroupDescription'

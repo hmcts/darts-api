@@ -1,16 +1,18 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
@@ -30,14 +33,18 @@ import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.time.ZoneOffset.UTC;
@@ -58,14 +65,16 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.ExcessiveImports", "java:S2229"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
+    public static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
+    private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final AuthorisationApi authorisationApi;
     private final NotificationApi notificationApi;
 
@@ -76,6 +85,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final UserIdentity userIdentity;
 
     private final WorkflowValidator workflowValidator;
+
+    private static final int MAX_CREATED_BY_DAYS = 30;
 
     @Transactional
     @Override
@@ -140,6 +151,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             updateTranscription.getWorkflowComment()
         );
         transcription.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+
 
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
@@ -250,11 +262,26 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionWorkflow.setTranscriptionStatus(transcriptionStatus);
         transcriptionWorkflow.setWorkflowActor(userAccount);
         transcriptionWorkflow.setWorkflowTimestamp(OffsetDateTime.now(UTC));
-        transcriptionWorkflow.setWorkflowComment(workflowComment);
-        transcriptionWorkflow.setCreatedBy(userAccount);
-        transcriptionWorkflow.setLastModifiedBy(userAccount);
 
-        return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflow);
+        TranscriptionWorkflowEntity savedTranscriptionWorkFlow = transcriptionWorkflowRepository.saveAndFlush(
+            transcriptionWorkflow);
+
+        if (!StringUtils.isBlank(workflowComment)) {
+            createAndSaveComment(userAccount, workflowComment, savedTranscriptionWorkFlow, transcription);
+        }
+        return savedTranscriptionWorkFlow;
+    }
+
+    private void createAndSaveComment(UserAccountEntity userAccount, String workflowComment,
+                                      TranscriptionWorkflowEntity savedTranscriptionWorkFlow,
+                                      TranscriptionEntity transcription) {
+        TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
+        transcriptionCommentEntity.setComment(workflowComment);
+        transcriptionCommentEntity.setTranscriptionWorkflowId(savedTranscriptionWorkFlow.getId());
+        transcriptionCommentEntity.setTranscription(transcription);
+        transcriptionCommentEntity.setLastModifiedBy(userAccount);
+        transcriptionCommentEntity.setCreatedBy(userAccount);
+        transcriptionCommentRepository.saveAndFlush(transcriptionCommentEntity);
     }
 
     private UserAccountEntity getUserAccount() {
@@ -271,6 +298,56 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private TranscriptionTypeEntity getTranscriptionTypeById(Integer transcriptionTypeId) {
         return transcriptionTypeRepository.getReferenceById(transcriptionTypeId);
+    }
+
+    @Override
+    @Transactional
+    public void closeTranscriptions() {
+        try {
+            List<TranscriptionStatusEntity> finishedTranscriptionStatuses = getFinishedTranscriptionStatuses();
+            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now().minus(MAX_CREATED_BY_DAYS, ChronoUnit.DAYS);
+            List<TranscriptionEntity> transcriptionsToBeClosed =
+                transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
+                    finishedTranscriptionStatuses,
+                    lastCreatedDateTime
+                );
+            if (isNull(transcriptionsToBeClosed) || transcriptionsToBeClosed.isEmpty()) {
+                log.info("No transcriptions to be closed off");
+            } else {
+                log.info("Number of transcriptions to be closed off: {}", transcriptionsToBeClosed.size());
+                for (TranscriptionEntity transcriptionToBeClosed : transcriptionsToBeClosed) {
+                    closeTranscription(transcriptionToBeClosed.getId(), AUTOMATICALLY_CLOSED_TRANSCRIPTION);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Unable to close transcriptions {}", e.getMessage());
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
+        try {
+            UpdateTranscription updateTranscription = new UpdateTranscription();
+            updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
+            updateTranscription.setWorkflowComment(transcriptionComment);
+            updateTranscription(transcriptionId, updateTranscription);
+            log.info("Closed off transcription {}", transcriptionId);
+        } catch (Exception e) {
+            log.error("Unable to close transcription {} - {}", transcriptionId, e.getMessage());
+        }
+    }
+
+    @Override
+    public List<TranscriptionTypeResponse> getTranscriptionTypes() {
+        return TranscriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeRepository.findAll());
+    }
+
+    private List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
+        List<TranscriptionStatusEntity> transcriptionStatuses = new ArrayList<>();
+        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.CLOSED.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.COMPLETE.getId()));
+        transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.REJECTED.getId()));
+        return transcriptionStatuses;
     }
 
 }
