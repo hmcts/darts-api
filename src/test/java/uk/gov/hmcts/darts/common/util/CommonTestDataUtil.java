@@ -202,10 +202,7 @@ public class CommonTestDataUtil {
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtCase(hearing.getCourtCase());
-        TranscriptionTypeEntity transcriptionType = new TranscriptionTypeEntity();
-        transcriptionType.setId(1);
-        transcriptionType.setDescription(TranscriptionTypeEnum.SENTENCING_REMARKS.name());
-        transcription.setTranscriptionType(transcriptionType);
+        transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
         transcription.setCourtroom(hearing.getCourtroom());
         transcription.setHearing(hearing);
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
@@ -304,5 +301,18 @@ public class CommonTestDataUtil {
         return dailyListEntity;
     }
 
+    public List<TranscriptionTypeEntity> createTranscriptionTypeEntities() {
+        List<TranscriptionTypeEntity> transcriptionTypeEntities = new ArrayList<>();
+        for (TranscriptionTypeEnum transcriptionTypeEnum: TranscriptionTypeEnum.values()) {
+            transcriptionTypeEntities.add(createTranscriptionTypeEntityFromEnum(transcriptionTypeEnum));
+        }
+        return transcriptionTypeEntities;
+    }
 
+    public TranscriptionTypeEntity createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum transcriptionTypeEnum) {
+        TranscriptionTypeEntity transcriptionTypeEntity = new TranscriptionTypeEntity();
+        transcriptionTypeEntity.setId(transcriptionTypeEnum.getId());
+        transcriptionTypeEntity.setDescription(transcriptionTypeEnum.name());
+        return transcriptionTypeEntity;
+    }
 }

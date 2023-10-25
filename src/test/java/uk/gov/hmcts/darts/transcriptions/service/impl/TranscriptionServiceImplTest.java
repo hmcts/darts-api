@@ -131,6 +131,7 @@ class TranscriptionServiceImplTest {
         requestedTranscriptionStatus.setId(REQUESTED.getId());
         awaitingAuthorisationTranscriptionStatus = new TranscriptionStatusEntity();
         awaitingAuthorisationTranscriptionStatus.setId(AWAITING_AUTHORISATION.getId());
+
     }
 
     @Test
@@ -520,4 +521,6 @@ class TranscriptionServiceImplTest {
         transcriptionRequestDetails.setEndDateTime(endDateTime);
         return transcriptionRequestDetails;
     }
+
+
 }
