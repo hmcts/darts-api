@@ -27,4 +27,12 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         """)
     List<TranscriptionEntity> findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
         List<TranscriptionStatusEntity> transcriptionStatuses, OffsetDateTime createdDateTime);
+
+    @Query("""
+        SELECT t FROM TranscriptionEntity t, HearingEntity hearing
+        WHERE hearing.id = :hearingId
+        AND t.hearing = hearing
+        """
+    )
+    List<TranscriptionEntity> findByHearingId(Integer hearingId);
 }
