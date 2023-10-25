@@ -53,7 +53,8 @@ class TestSupportControllerTest extends IntegrationBase {
     void beforeEach() {
         when(mockUserIdentity.getUserAccount()).thenReturn(mockUserAccountEntity);
         SecurityGroupEntity sge = new SecurityGroupEntity();
-        Set<SecurityGroupEntity> sgeSet = new HashSet<SecurityGroupEntity>();
+        sge.setId(1);
+        Set<SecurityGroupEntity> sgeSet = new HashSet<>();
         sgeSet.add(sge);
         when(mockUserAccountEntity.getSecurityGroupEntities()).thenReturn(sgeSet);
     }

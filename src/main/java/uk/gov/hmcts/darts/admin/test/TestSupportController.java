@@ -153,7 +153,7 @@ public class TestSupportController {
                 courthouse.getSecurityGroups().add(securityGroupEntity);
             }
         }
-        //courthouseRepository.saveAndFlush(courthouse);
+        courthouseRepository.saveAndFlush(courthouse);
     }
 
     @PostMapping(value = "/audit/{audit_activity}/courthouse/{courthouse_name}")
