@@ -46,7 +46,7 @@ class TranscriptionServiceGetTranscriptionUrgencyTest {
         String actualResponse = objectMapper.writeValueAsString(transcriptionUrgencyResponses);
 
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/service/TranscriptionUrgencyResponse/expectedResponseMultipleEntities.json");
+            "Tests/transcriptions/service/TranscriptionUrgencyResponse/expectedResponseMultipleEntities.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 }

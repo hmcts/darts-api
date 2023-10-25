@@ -46,7 +46,7 @@ class TranscriptionServiceGetTranscriptionTypeTest {
         String actualResponse = objectMapper.writeValueAsString(transcriptionTypeResponses);
 
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/service/TranscriptionTypeResponse/expectedResponseMultipleEntities.json");
+            "Tests/transcriptions/service/TranscriptionTypeResponse/expectedResponseMultipleEntities.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 }
