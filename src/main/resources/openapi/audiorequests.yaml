@@ -289,6 +289,77 @@ paths:
                 title: "The requested data cannot be located"
                 status: 500
 
+  /audio-requests/playback:
+    get:
+      tags:
+        - Audio Requests
+      summary: Playback audio
+      operationId: playback
+      description: Playback audio
+      parameters:
+        - in: query
+          name: media_request_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_103"
+                title: "Failed to check authorisation for the media request"
+                status: 400
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/MediaRequestAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
+        '500':
+          description: The requested data cannot be located
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_101"
+                title: "The requested data cannot be located"
+                status: 500
+
 components:
   schemas:
     AudioRequestSummary:

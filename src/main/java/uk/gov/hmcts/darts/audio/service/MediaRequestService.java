@@ -33,4 +33,5 @@ public interface MediaRequestService {
 
     InputStream download(Integer mediaRequestId);
 
+    InputStream playback(Integer mediaRequestId);
 }

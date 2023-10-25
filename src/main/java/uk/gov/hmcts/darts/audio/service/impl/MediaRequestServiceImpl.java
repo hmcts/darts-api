@@ -254,4 +254,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
     }
+
+    @Override
+    public InputStream playback(Integer mediaRequestId) {
+
+    }
+
+
 }
