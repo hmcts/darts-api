@@ -40,33 +40,6 @@ public class TranscriptionMapper {
         return transcript;
     }
 
-    public List<Transcript> mapHearingResponse(List<TranscriptionEntity> transcriptionEntities) {
-        List<Transcript> response = new ArrayList<>();
-        for (TranscriptionEntity transcriptionEntity : transcriptionEntities) {
-            response.add(mapHearing(transcriptionEntity));
-        }
-        return response;
-    }
-
-    private Transcript mapHearing(TranscriptionEntity transcriptionEntity) {
-        Transcript transcript = new Transcript();
-        transcript.setTraId(transcriptionEntity.getId());
-        HearingEntity hearing = transcriptionEntity.getHearing();
-        if (hearing == null) {
-            if (transcriptionEntity.getHearingDate() != null) {
-                transcript.setHearingDate(transcriptionEntity.getHearingDate().toLocalDate());
-            }
-        } else {
-            transcript.setHeaId(hearing.getId());
-            transcript.setHearingDate(hearing.getHearingDate());
-        }
-        transcript.setType(transcriptionEntity.getTranscriptionType().getDescription());
-        transcript.setRequestedOn(transcriptionEntity.getCreatedDateTime().toLocalDate());
-        transcript.setRequestedByName(getRequestedBy(transcriptionEntity));
-        transcript.setStatus(transcriptionEntity.getTranscriptionStatus().getStatusType());
-        return transcript;
-    }
-
     private String getRequestedBy(TranscriptionEntity transcriptionEntity) {
         if (transcriptionEntity.getCreatedBy() != null) {
             return transcriptionEntity.getCreatedBy().getUsername();
