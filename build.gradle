@@ -221,6 +221,8 @@ sonarqube {
     property "sonar.projectKey", "uk.gov.hmcts.reform:darts-api"
     property "sonar.exclusions", coverageExclusions.join(', ')
     property 'sonar.coverage.exclusions', "**/entity/*,**/dto/*"
+    //duplicate code here due to OpenAPI codegen that creates identical
+    // objects (Transcript) in different packages
     property "sonar.cpd.exclusions", "**/TranscriptionMapper.java"
   }
 }
