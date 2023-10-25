@@ -10,10 +10,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
-import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
-import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
+import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
 import java.util.List;
 
@@ -21,11 +21,11 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
-class TranscriptionServiceGetTranscriptionTypeTest {
+class TranscriptionServiceGetTranscriptionUrgencyTest {
     ObjectMapper objectMapper;
 
     @Mock
-    private TranscriptionTypeRepository mockTranscriptionTypeRepository;
+    private TranscriptionUrgencyRepository mockTranscriptionUrgencyRepository;
 
     @InjectMocks
     private TranscriptionServiceImpl transcriptionService;
@@ -37,16 +37,16 @@ class TranscriptionServiceGetTranscriptionTypeTest {
     }
 
     @Test
-    void getTranscriptionTypes() throws Exception {
-        List<TranscriptionTypeEntity> transcriptionTypeEntities = CommonTestDataUtil.createTranscriptionTypeEntities();
+    void getTranscriptionUrgency() throws Exception {
+        List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = CommonTestDataUtil.createTranscriptionUrgencyEntities();
 
-        when(mockTranscriptionTypeRepository.findAll()).thenReturn(transcriptionTypeEntities);
+        when(mockTranscriptionUrgencyRepository.findAll()).thenReturn(transcriptionUrgencyEntities);
 
-        List<TranscriptionTypeResponse> transcriptionTypeResponses = transcriptionService.getTranscriptionTypes();
-        String actualResponse = objectMapper.writeValueAsString(transcriptionTypeResponses);
+        List<TranscriptionUrgencyResponse> transcriptionUrgencyResponses = transcriptionService.getTranscriptionUrgencies();
+        String actualResponse = objectMapper.writeValueAsString(transcriptionUrgencyResponses);
 
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/service/TranscriptionTypeResponse/expectedResponseMultipleEntities.json");
+            "tests/transcriptions/service/TranscriptionUrgencyResponse/expectedResponseMultipleEntities.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 }

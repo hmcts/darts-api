@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -17,9 +18,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
-class TranscriptionControllerGetTranscriptionTypesTest extends IntegrationBase {
+@Slf4j
+@SuppressWarnings({"PMD.ExcessiveImports"})
+class TranscriptionControllerGetTranscriptionUrgenciesTest extends IntegrationBase {
 
-    private static final URI ENDPOINT_URI = URI.create("/transcriptions/types");
+    private static final URI ENDPOINT_URI = URI.create("/transcriptions/urgencies");
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,9 +34,9 @@ class TranscriptionControllerGetTranscriptionTypesTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         String actualResponse = response.getResponse().getContentAsString();
-
+        log.info("actualResponse {}", actualResponse);
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/transcription_types/expectedResponse.json");
+            "tests/transcriptions/transcription_urgencies/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }

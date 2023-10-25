@@ -157,6 +157,22 @@ paths:
         '401':
           description: Unauthorised Error
 
+  /transcriptions/urgencies:
+    get:
+      tags:
+        - Transcription
+      summary: Gets a list of the transcription urgency values
+      operationId: getTranscriptionUrgencies
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionUrgenciesResponse'
+        '401':
+          description: Unauthorised Error
+
 components:
   schemas:
     TranscriptionRequestDetails:
@@ -256,4 +272,18 @@ components:
         description:
           type: string
           example: Sentencing remarks
+
+    TranscriptionUrgenciesResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/TranscriptionUrgencyResponse'
+    TranscriptionUrgencyResponse:
+      type: object
+      properties:
+        tru_id:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: Standard
 
