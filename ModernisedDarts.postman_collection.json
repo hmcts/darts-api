@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "c3697eb5-22b9-445e-a8c0-65d55d5561ab",
+		"_postman_id": "fd94be39-6ef6-4885-86da-ecdf7aff2f09",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27348549"
 	},
 	"item": [
 		{
@@ -503,7 +504,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{serverUrl}}/dailylists/getCases?court_house_code=gfdg&court_room_number&hearing_date",
+									"raw": "{{serverUrl}}/dailylists/getCases?court_house_code=gfdg&court_room_number=&hearing_date=",
 									"host": [
 										"{{serverUrl}}"
 									],
@@ -925,6 +926,22 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/types",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/urgencies",
+					"request": {
+						"method": "GET",
+						"header": []
 					},
 					"response": []
 				}

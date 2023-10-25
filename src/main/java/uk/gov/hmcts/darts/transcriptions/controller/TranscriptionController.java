@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
@@ -117,4 +118,14 @@ public class TranscriptionController implements TranscriptionApi {
             HttpStatus.OK
         );
     }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<TranscriptionUrgencyResponse>> getTranscriptionUrgencies() {
+        return new ResponseEntity<>(
+            transcriptionService.getTranscriptionUrgencies(),
+            HttpStatus.OK
+        );
+    }
+
 }
