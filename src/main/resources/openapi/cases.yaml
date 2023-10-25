@@ -265,10 +265,10 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-  /transcripts/case/{case_id}:
+  /cases/{case_id}/transcripts:
     get:
       tags:
-        - Transcription
+        - Cases
       summary: Allows the retrieval of transcripts for a given case_id
       description: |-
         Retrieves all transcripts for a case_id.

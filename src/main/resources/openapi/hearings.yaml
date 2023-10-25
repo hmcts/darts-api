@@ -85,10 +85,10 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
-  /transcripts/hearings/{hearing_id}:
+  /hearings/{hearing_id}/transcripts:
     get:
       tags:
-        - Transcription
+        - Hearings
       summary: Allows the retrieval of transcripts for a given hearing_id
       description: |-
         Retrieves all transcripts for a hearing_id.
@@ -133,7 +133,7 @@ paths:
                 $ref: './problem.yaml'
               example:
                 type: "CASE_104"
-                title: "The requested case cannot be found"
+                title: "The requested hearing cannot be found"
                 status: 404
         '500':
           description: Internal Server Error

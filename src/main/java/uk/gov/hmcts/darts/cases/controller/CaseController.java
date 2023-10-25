@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.cases.model.PatchRequestObject;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.cases.model.Transcript;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.cases.util.RequestValidator;
 import uk.gov.hmcts.darts.cases.validator.PatchCaseRequestValidator;
@@ -120,4 +121,11 @@ public class CaseController implements CasesApi {
         return new ResponseEntity<>(caseService.patchCase(caseId, patchRequestObject), HttpStatus.OK);
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = CASE_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER})
+    public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
+        return new ResponseEntity<>(caseService.getTranscriptsById(caseId), HttpStatus.OK);
+    }
 }
