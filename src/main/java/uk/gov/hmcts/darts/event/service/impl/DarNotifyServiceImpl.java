@@ -30,6 +30,8 @@ public class DarNotifyServiceImpl {
             .caseNumbers(dartsEvent.getCaseNumbers())
             .build();
 
+        log.debug("darNotifyEvent: {}", darNotifyEvent);
         dartsGatewayClient.darNotify(darNotifyEvent);
+        log.debug("darNotifyEvent sent to gateway");
     }
 }
