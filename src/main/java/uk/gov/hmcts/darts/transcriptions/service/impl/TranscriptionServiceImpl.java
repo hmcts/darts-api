@@ -130,7 +130,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
                 getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId())
             );
-        } catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
         }
 
