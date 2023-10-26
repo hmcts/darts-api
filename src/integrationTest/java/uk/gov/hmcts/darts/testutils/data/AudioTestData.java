@@ -68,7 +68,9 @@ public class AudioTestData {
         mediaRequestEntity.setOutputFormat(AudioRequestOutputFormat.ZIP);
         mediaRequestEntity.setOutputFilename("T20231010_0");
         mediaRequestEntity.setLastAccessedDateTime(lastAccessedTime);
-        mediaRequestEntity.setExpiryTime(lastAccessedTime.plusDays(2));
+        if (lastAccessedTime != null) {
+            mediaRequestEntity.setExpiryTime(lastAccessedTime.plusDays(2));
+        }
         mediaRequestEntity.setCreatedBy(requestor);
         mediaRequestEntity.setLastModifiedBy(requestor);
         return mediaRequestEntity;
