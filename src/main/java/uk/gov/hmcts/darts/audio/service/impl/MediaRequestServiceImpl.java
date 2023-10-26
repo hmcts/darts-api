@@ -180,11 +180,15 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             courtCase.get(CourtCaseEntity_.caseNumber),
             courthouse.get(CourthouseEntity_.courthouseName),
             hearing.get(HearingEntity_.hearingDate),
+            hearing.get(HearingEntity_.id),
+            mediaRequest.get(MediaRequestEntity_.requestType),
             mediaRequest.get(MediaRequestEntity_.startTime),
             mediaRequest.get(MediaRequestEntity_.endTime),
             mediaRequest.get(MediaRequestEntity_.expiryTime),
             mediaRequest.get(MediaRequestEntity_.status),
-            mediaRequest.get(MediaRequestEntity_.lastAccessedDateTime)
+            mediaRequest.get(MediaRequestEntity_.lastAccessedDateTime),
+            mediaRequest.get(MediaRequestEntity_.outputFilename),
+            mediaRequest.get(MediaRequestEntity_.outputFormat)
         ));
 
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);

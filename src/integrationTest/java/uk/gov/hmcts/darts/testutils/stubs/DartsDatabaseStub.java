@@ -72,7 +72,7 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings({"PMD.ExcessiveImports"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
@@ -340,6 +340,18 @@ public class DartsDatabaseStub {
                 requestor,
                 now.minusDays(5),
                 now.minusDays(4)
+            ));
+    }
+
+    public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
+                                                                     UserAccountEntity requestor) {
+        return save(
+            AudioTestData.createCompletedMediaRequest(
+                hearing,
+                requestor,
+                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-06-30T13:00:00Z")
             ));
     }
 
