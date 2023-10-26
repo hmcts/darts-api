@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,4 +27,17 @@ public class TranscriptionResponseMapper {
         return transcriptionTypeResponse;
     }
 
+    public List<TranscriptionUrgencyResponse> mapToTranscriptionUrgencyResponses(
+        List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities) {
+        return emptyIfNull(transcriptionUrgencyEntities).stream()
+            .map(TranscriptionResponseMapper::mapToTranscriptionUrgencyResponse)
+            .collect(Collectors.toList());
+    }
+
+    TranscriptionUrgencyResponse mapToTranscriptionUrgencyResponse(TranscriptionUrgencyEntity transcriptionUrgencyEntity) {
+        TranscriptionUrgencyResponse transcriptionUrgencyResponse = new TranscriptionUrgencyResponse();
+        transcriptionUrgencyResponse.setTruId(transcriptionUrgencyEntity.getId());
+        transcriptionUrgencyResponse.setDescription(transcriptionUrgencyEntity.getDescription());
+        return transcriptionUrgencyResponse;
+    }
 }
