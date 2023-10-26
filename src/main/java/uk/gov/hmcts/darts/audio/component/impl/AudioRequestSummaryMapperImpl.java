@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.component.impl;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.AudioRequestSummaryMapper;
 import uk.gov.hmcts.darts.audio.service.impl.AudioRequestSummaryResult;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestStatus;
 
@@ -23,6 +24,8 @@ public class AudioRequestSummaryMapperImpl implements AudioRequestSummaryMapper 
         var audioRequestSummary = new AudioRequestSummary();
         audioRequestSummary.setMediaRequestId(result.mediaRequestId());
         audioRequestSummary.setCaseId(result.caseId());
+        audioRequestSummary.setHearingId(result.hearingId());
+        audioRequestSummary.setRequestType(result.requestType());
         audioRequestSummary.setCaseNumber(result.caseNumber());
         audioRequestSummary.setCourthouseName(result.courthouseName());
         audioRequestSummary.setHearingDate(result.hearingDate());
@@ -31,6 +34,10 @@ public class AudioRequestSummaryMapperImpl implements AudioRequestSummaryMapper 
         audioRequestSummary.setMediaRequestExpiryTs(result.mediaRequestExpiryTs());
         audioRequestSummary.setMediaRequestStatus(MediaRequestStatus.fromValue(result.mediaRequestStatus().toString()));
         audioRequestSummary.setLastAccessedTs(result.lastAccessedTs());
+        audioRequestSummary.setOutputFilename(result.outputFilename());
+        if (result.outputFormat() != null) {
+            audioRequestSummary.setOutputFormat(AudioRequestOutputFormat.fromValue(result.outputFormat().toString()));
+        }
 
         return audioRequestSummary;
     }

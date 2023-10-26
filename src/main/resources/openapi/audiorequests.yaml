@@ -300,6 +300,11 @@ components:
         case_id:
           type: integer
           example: 123
+        hearing_id:
+          type: integer
+          example: 456
+        request_type:
+          $ref: '#/components/schemas/AudioRequestType'
         case_number:
           type: string
           example: "T20200190"
@@ -324,6 +329,11 @@ components:
           example: "2023-08-23T09:00:00Z"
         media_request_status:
           $ref: '#/components/schemas/MediaRequestStatus'
+        output_filename:
+          type: string
+          example: "T20200190.zip"
+        output_format:
+          $ref: '#/components/schemas/AudioRequestOutputFormat'
         last_accessed_ts:
           type: string
           format: date-time
@@ -421,6 +431,12 @@ components:
         - FAILED
         - COMPLETED
         - EXPIRED
+
+    AudioRequestOutputFormat:
+      type: string
+      enum:
+        - MP3
+        - ZIP
 
     MediaRequestAuthorisation403ErrorCode:
       type: string
