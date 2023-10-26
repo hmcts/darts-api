@@ -17,11 +17,13 @@ import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -314,5 +316,20 @@ public class CommonTestDataUtil {
         transcriptionTypeEntity.setId(transcriptionTypeEnum.getId());
         transcriptionTypeEntity.setDescription(transcriptionTypeEnum.name());
         return transcriptionTypeEntity;
+    }
+
+    public List<TranscriptionUrgencyEntity> createTranscriptionUrgencyEntities() {
+        List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = new ArrayList<>();
+        for (TranscriptionUrgencyEnum transcriptionUrgencyEnum : TranscriptionUrgencyEnum.values()) {
+            transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
+        }
+        return transcriptionUrgencyEntities;
+    }
+
+    public TranscriptionUrgencyEntity createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum transcriptionUrgencyEnum) {
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
+        transcriptionUrgencyEntity.setId(transcriptionUrgencyEnum.getId());
+        transcriptionUrgencyEntity.setDescription(transcriptionUrgencyEnum.name());
+        return transcriptionUrgencyEntity;
     }
 }

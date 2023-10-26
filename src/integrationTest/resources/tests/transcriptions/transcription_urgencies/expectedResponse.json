@@ -1,0 +1,14 @@
+[
+  {
+    "tru_id": 1,
+    "description": "Standard"
+  },
+  {
+    "tru_id": 2,
+    "description": "Overnight"
+  },
+  {
+    "tru_id": 3,
+    "description": "Other"
+  }
+]

@@ -5,14 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.hearings.exception.HearingApiError;
 import uk.gov.hmcts.darts.hearings.mapper.GetEventsResponseMapper;
 import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
+import uk.gov.hmcts.darts.hearings.mapper.TranscriptionMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.hearings.model.Transcript;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 
 import java.util.List;
@@ -24,6 +28,7 @@ import java.util.Optional;
 public class HearingsServiceImpl implements HearingsService {
 
     private final HearingRepository hearingRepository;
+    private final TranscriptionRepository transcriptionRepository;
     private final EventRepository eventRepository;
 
     @Override
@@ -44,6 +49,12 @@ public class HearingsServiceImpl implements HearingsService {
     public List<EventResponse> getEvents(Integer hearingId) {
         List<EventEntity> eventEntities = eventRepository.findAllByHearingId(hearingId);
         return GetEventsResponseMapper.mapToEvents(eventEntities);
+    }
+
+    @Override
+    public List<Transcript> getTranscriptsById(Integer hearingId) {
+        List<TranscriptionEntity> transcriptionEntities = transcriptionRepository.findByHearingId(hearingId);
+        return TranscriptionMapper.mapResponse(transcriptionEntities);
     }
 
 }

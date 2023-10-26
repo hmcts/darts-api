@@ -17,9 +17,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
-class TranscriptionControllerGetTranscriptionTypesTest extends IntegrationBase {
+class TranscriptionControllerGetTranscriptionUrgenciesTest extends IntegrationBase {
 
-    private static final URI ENDPOINT_URI = URI.create("/transcriptions/types");
+    private static final URI ENDPOINT_URI = URI.create("/transcriptions/urgencies");
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,7 +33,7 @@ class TranscriptionControllerGetTranscriptionTypesTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = getContentsFromFile(
-            "tests/transcriptions/transcription_types/expectedResponse.json");
+            "tests/transcriptions/transcription_urgencies/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }

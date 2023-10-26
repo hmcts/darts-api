@@ -31,12 +31,10 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
 @Transactional
-class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
-
+class CasesControllerGetTranscriptsTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
-
-    private static String endpointUrl = "/cases/{case_id}/transcripts";
+    private static final String ENDPOINT_URL_CASE = "/cases/{case_id}/transcripts";
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
@@ -70,7 +68,7 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
     @Test
     void caseGetTranscriptEndpointNotFound() throws Exception {
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, "25");
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, "25");
 
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isNotFound());
 
@@ -83,7 +81,7 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearingEntity.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
             "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointOneObjectReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
@@ -102,7 +100,7 @@ class CaseControllerGetCaseTranscriptsTest extends IntegrationBase {
         transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         dartsDatabase.save(transcription2);
 
-        MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, hearingEntity.getCourtCase().getId());
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_CASE, hearingEntity.getCourtCase().getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile(
             "tests/cases/CaseControllerGetCaseTranscriptsTest/casesSearchGetEndpointTwoObjectsReturned.json"));
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk())
