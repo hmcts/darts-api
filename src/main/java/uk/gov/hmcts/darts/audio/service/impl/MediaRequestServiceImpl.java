@@ -76,7 +76,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
         AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
-        nonAccessedResponse.setCount(mediaRequestRepository.countByRequestor_IdAndLastAccessedDateTime(userId, null));
+        nonAccessedResponse.setCount(mediaRequestRepository.countByRequestor_IdAndStatusAndLastAccessedDateTime(userId, AudioRequestStatus.COMPLETED, null));
         return nonAccessedResponse;
     }
 
