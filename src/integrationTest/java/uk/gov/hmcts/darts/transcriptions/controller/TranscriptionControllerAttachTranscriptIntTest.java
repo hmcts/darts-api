@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -37,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.unit.DataSize.ofBytes;
+import static org.springframework.util.unit.DataSize.ofMegabytes;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -50,6 +53,8 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
+    private static final String URL_TEMPLATE = "/transcriptions/{transcription_id}/document";
+
     @Autowired
     private AuthorisationStub authorisationStub;
 
@@ -61,6 +66,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+    @MockBean
+    private MultipartProperties mockMultipartProperties;
 
     private Integer transcriptionId;
     private Integer testUserId;
@@ -109,6 +116,9 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
+
+        when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofMegabytes(10));
+        when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofMegabytes(10));
     }
 
     @Test
@@ -122,7 +132,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final MvcResult mvcResult = mockMvc.perform(
                 multipart(
-                    "/transcriptions/{transcription_id}/document",
+                    URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
             .andExpect(status().isForbidden())
@@ -137,7 +147,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     }
 
     @Test
-    void attachTranscriptShouldReturnBadRequestError() throws Exception {
+    void attachTranscriptShouldReturnBadRequestErrorWithFileExtensionTypeBlocked() throws Exception {
         UserAccountEntity testUser = authorisationStub.getTestUser();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(transcriptionCompany);
@@ -152,7 +162,40 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final MvcResult mvcResult = mockMvc.perform(
                 multipart(
-                    "/transcriptions/{transcription_id}/document",
+                    URL_TEMPLATE,
+                    transcriptionId
+                ).file(transcript))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        String actualResponse = mvcResult.getResponse().getContentAsString();
+
+        String expectedResponse = """
+            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void attachTranscriptShouldReturnBadRequestErrorWithFileSizeLimitExceeded() throws Exception {
+        when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofBytes(5));
+        when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofBytes(5));
+
+        UserAccountEntity testUser = authorisationStub.getTestUser();
+        testUser.getSecurityGroupEntities().clear();
+        testUser.getSecurityGroupEntities().add(transcriptionCompany);
+        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+
+        MockMultipartFile transcript = new MockMultipartFile(
+            "transcript",
+            "Test Document.doc",
+            "application/msword",
+            "Test Document (doc)".getBytes()
+        );
+
+        final MvcResult mvcResult = mockMvc.perform(
+                multipart(
+                    URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
             .andExpect(status().isBadRequest())
@@ -182,7 +225,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final MvcResult mvcResult = mockMvc.perform(
                 multipart(
-                    "/transcriptions/{transcription_id}/document",
+                    URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
             .andExpect(status().isOk())
@@ -247,7 +290,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         final MvcResult mvcResult = mockMvc.perform(
                 multipart(
-                    "/transcriptions/{transcription_id}/document",
+                    URL_TEMPLATE,
                     transcriptionId
                 ).file(transcript))
             .andExpect(status().isOk())

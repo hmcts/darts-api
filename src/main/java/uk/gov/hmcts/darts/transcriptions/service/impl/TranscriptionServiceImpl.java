@@ -39,6 +39,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
+import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -56,7 +57,6 @@ import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -64,6 +64,7 @@ import java.util.UUID;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.REQUEST_TO_TRANSCRIBER;
@@ -86,7 +87,8 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 public class TranscriptionServiceImpl implements TranscriptionService {
 
     private static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
-    private static final int MAX_CREATED_BY_DAYS = 30;
+
+    private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
 
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
@@ -327,7 +329,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     public void closeTranscriptions() {
         try {
             List<TranscriptionStatusEntity> finishedTranscriptionStatuses = getFinishedTranscriptionStatuses();
-            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now().minus(MAX_CREATED_BY_DAYS, ChronoUnit.DAYS);
+            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now()
+                .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
             List<TranscriptionEntity> transcriptionsToBeClosed =
                 transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
                     finishedTranscriptionStatuses,
@@ -401,6 +404,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
+
+        auditService.recordAudit(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         var attachTranscriptResponse = new AttachTranscriptResponse();
         attachTranscriptResponse.setTranscriptionDocumentId(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()

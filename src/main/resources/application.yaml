@@ -148,6 +148,14 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+  transcription:
+    allowed-extensions:
+      - "docx"
+      - "doc"
+    allowed-content-types:
+      - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      - "application/msword"
+    max-created-by-duration: 30d
   portal:
     url: https://darts-portal.staging.platform.hmcts.net
   automated:
