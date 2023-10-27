@@ -42,6 +42,11 @@ public enum TranscriptionApiError implements DartsApiError {
         "106",
         HttpStatus.BAD_REQUEST,
         "Unexpected transcription urgency for this workflow"
+    ),
+    FAILED_TO_ATTACH_TRANSCRIPT(
+        "108",
+        HttpStatus.BAD_REQUEST,
+        "Failed to attach transcript"
     );
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";
