@@ -40,7 +40,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
-        dartsDatabase.createAndLoadCompletedMediaRequestEntity(currentMediaRequest.getHearing(), requestor);
+        dartsDatabase.createAndLoadCompletedMediaRequestEntity(currentMediaRequest.getHearing(), requestor, AudioRequestType.DOWNLOAD);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
             .header(
@@ -96,7 +96,8 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var expiredMediaRequest = dartsDatabase.createAndLoadExpiredMediaRequestEntity(
             currentMediaRequest.getHearing(),
-            currentMediaRequest.getRequestor()
+            currentMediaRequest.getRequestor(),
+            AudioRequestType.DOWNLOAD
         );
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))

@@ -325,7 +325,7 @@ public class DartsDatabaseStub {
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
         return save(
-            AudioTestData.createCompletedMediaRequest(
+            AudioTestData.createCurrentMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
@@ -336,26 +336,30 @@ public class DartsDatabaseStub {
     }
 
     public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
-                                                                     UserAccountEntity requestor) {
+                                                                     UserAccountEntity requestor,
+                                                                     AudioRequestType audioRequestType) {
         OffsetDateTime now = OffsetDateTime.now(UTC);
         return save(
             AudioTestData.createExpiredMediaRequest(
                 hearing,
                 requestor,
                 now.minusDays(5),
-                now.minusDays(4)
+                now.minusDays(4),
+                audioRequestType
             ));
     }
 
     public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
-                                                                     UserAccountEntity requestor) {
+                                                                       UserAccountEntity requestor,
+                                                                       AudioRequestType audioRequestType) {
         return save(
             AudioTestData.createCompletedMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                OffsetDateTime.parse("2023-06-30T13:00:00Z")
+                OffsetDateTime.parse("2023-06-30T13:00:00Z"),
+                audioRequestType
             ));
     }
 

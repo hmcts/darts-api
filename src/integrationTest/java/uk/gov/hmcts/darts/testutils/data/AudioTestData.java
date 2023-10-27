@@ -11,7 +11,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import java.time.OffsetDateTime;
 
 import static java.time.ZoneOffset.UTC;
-import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @UtilityClass
 public class AudioTestData {
@@ -37,14 +36,15 @@ public class AudioTestData {
     }
 
     public MediaRequestEntity createExpiredMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime) {
+                                                        OffsetDateTime startTime, OffsetDateTime endTime,
+                                                        AudioRequestType audioRequestType) {
 
         OffsetDateTime now = OffsetDateTime.now(UTC);
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.EXPIRED);
-        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
@@ -58,12 +58,13 @@ public class AudioTestData {
     }
 
     public MediaRequestEntity createCompletedMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime) {
+                                                          OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime,
+                                                          AudioRequestType audioRequestType) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.COMPLETED);
-        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
