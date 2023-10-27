@@ -16,6 +16,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.service.ControllerAuthorisationFactory;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -58,6 +59,8 @@ public class AuthorisationAspect {
 
         JsonNode jsonNode = objectMapper.valueToTree(body);
 
+        Set<ContextIdEnum> contexts = Set.of(authorisationAnnotation.contextId());
+        for ()
         controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId())
             .checkAuthorisation(jsonNode, roles);
 
