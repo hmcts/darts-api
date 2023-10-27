@@ -157,7 +157,7 @@ paths:
         200:
           description: OK
           content:
-            audio/mp3:
+            audio/mpeg:
               schema:
                 type: string
                 format: binary
