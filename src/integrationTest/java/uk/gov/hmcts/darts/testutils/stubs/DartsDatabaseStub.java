@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -302,7 +303,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public MediaRequestEntity createAndLoadCurrentMediaRequestEntity(UserAccountEntity requestor) {
+    public MediaRequestEntity createAndLoadCurrentMediaRequestEntity(UserAccountEntity requestor, AudioRequestType audioRequestType) {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
@@ -312,46 +313,53 @@ public class DartsDatabaseStub {
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                OffsetDateTime.parse("2023-06-30T13:00:00Z")
+                OffsetDateTime.parse("2023-06-30T13:00:00Z"),
+                audioRequestType
             ));
     }
 
     @Transactional
-    public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor) {
+    public MediaRequestEntity createAndLoadNonAccessedCurrentMediaRequestEntity(UserAccountEntity requestor,
+                                                                                AudioRequestType audioRequestType) {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
-        return save(
-            AudioTestData.createCurrentMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                null
-            ));
-    }
-
-    public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
-                                                                     UserAccountEntity requestor) {
-        OffsetDateTime now = OffsetDateTime.now(UTC);
-        return save(
-            AudioTestData.createExpiredMediaRequest(
-                hearing,
-                requestor,
-                now.minusDays(5),
-                now.minusDays(4)
-            ));
-    }
-
-    public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
-                                                                     UserAccountEntity requestor) {
         return save(
             AudioTestData.createCompletedMediaRequest(
                 hearing,
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                OffsetDateTime.parse("2023-06-30T13:00:00Z")
+                null,
+                audioRequestType
+            ));
+    }
+
+    public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
+                                                                     UserAccountEntity requestor,
+                                                                     AudioRequestType audioRequestType) {
+        OffsetDateTime now = OffsetDateTime.now(UTC);
+        return save(
+            AudioTestData.createExpiredMediaRequest(
+                hearing,
+                requestor,
+                now.minusDays(5),
+                now.minusDays(4),
+                audioRequestType
+            ));
+    }
+
+    public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
+                                                                       UserAccountEntity requestor,
+                                                                       AudioRequestType audioRequestType) {
+        return save(
+            AudioTestData.createCompletedMediaRequest(
+                hearing,
+                requestor,
+                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+                OffsetDateTime.parse("2023-06-30T13:00:00Z"),
+                audioRequestType
             ));
     }
 

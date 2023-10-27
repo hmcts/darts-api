@@ -51,6 +51,7 @@ paths:
                 instance: "/audio-requests"
         '401':
           description: Unauthorised Error
+
     post:
       tags:
         - Audio Requests
@@ -76,6 +77,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AudioRequestDetails'
         description: Audio Request item to add
+
   /audio-requests/not-accessed-count:
     get:
       tags:
@@ -110,6 +112,7 @@ paths:
                 instance: "/audio-requests/not-accessed-count"
         '401':
           description: Unauthorised Error
+
   /audio-requests/{media_request_id}:
     delete:
       tags:
@@ -164,6 +167,7 @@ paths:
                 type: "AUDIO_REQUESTS_100"
                 title: "The requested audio request cannot be found"
                 status: 404
+
     patch:
       tags:
         - Audio Requests
@@ -239,6 +243,71 @@ paths:
               schema:
                 type: string
                 format: binary
+              example:
+                type: "AUDIO_REQUESTS_102"
+                title: "The audio request is not valid for this action"
+                status: 400
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/MediaRequestAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested audio request cannot be found"
+                status: 404
+        '500':
+          description: The requested data cannot be located
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_101"
+                title: "The requested data cannot be located"
+                status: 500
+
+  /audio-requests/playback:
+    get:
+      tags:
+        - Audio Requests
+      summary: Playback audio
+      operationId: playback
+      description: Playback audio
+      parameters:
+        - in: query
+          name: media_request_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
         '400':
           description: Bad Request Error
           content:
@@ -246,8 +315,8 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                type: "AUTHORISATION_103"
-                title: "Failed to check authorisation for the media request"
+                type: "AUDIO_REQUESTS_102"
+                title: "The audio request is not valid for this action"
                 status: 400
         '401':
           description: Unauthorised Error
@@ -349,7 +418,6 @@ components:
         count:
           type: long
           example: 1
-
 
     AddAudioResponse:
       type: object

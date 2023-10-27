@@ -4,24 +4,25 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
 
 import static java.time.ZoneOffset.UTC;
-import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @UtilityClass
 public class AudioTestData {
 
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime) {
+                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime,
+                                                        AudioRequestType audioRequestType) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.OPEN);
-        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
@@ -35,14 +36,15 @@ public class AudioTestData {
     }
 
     public MediaRequestEntity createExpiredMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime) {
+                                                        OffsetDateTime startTime, OffsetDateTime endTime,
+                                                        AudioRequestType audioRequestType) {
 
         OffsetDateTime now = OffsetDateTime.now(UTC);
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.EXPIRED);
-        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
@@ -56,19 +58,22 @@ public class AudioTestData {
     }
 
     public MediaRequestEntity createCompletedMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime) {
+                                                          OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime,
+                                                          AudioRequestType audioRequestType) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.COMPLETED);
-        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
         mediaRequestEntity.setOutputFormat(AudioRequestOutputFormat.ZIP);
         mediaRequestEntity.setOutputFilename("T20231010_0");
         mediaRequestEntity.setLastAccessedDateTime(lastAccessedTime);
-        mediaRequestEntity.setExpiryTime(lastAccessedTime.plusDays(2));
+        if (lastAccessedTime != null) {
+            mediaRequestEntity.setExpiryTime(lastAccessedTime.plusDays(2));
+        }
         mediaRequestEntity.setCreatedBy(requestor);
         mediaRequestEntity.setLastModifiedBy(requestor);
         return mediaRequestEntity;

@@ -18,6 +18,11 @@ public enum AudioRequestsApiError implements DartsApiError {
         "101",
         HttpStatus.UNAUTHORIZED,
         "The audio request is not valid for this user"
+    ),
+    MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT(
+        "102",
+        HttpStatus.BAD_REQUEST,
+        "The audio request is not valid for this action"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO_REQUESTS";

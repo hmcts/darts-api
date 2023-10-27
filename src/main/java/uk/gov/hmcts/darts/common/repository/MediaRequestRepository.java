@@ -13,6 +13,6 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
 
     Optional<MediaRequestEntity> findTopByStatusOrderByCreatedDateTimeAsc(AudioRequestStatus status);
 
-    long countByRequestor_IdAndLastAccessedDateTime(Integer id, OffsetDateTime lastAccessedDateTime);
+    long countByRequestor_IdAndStatusAndLastAccessedDateTime(Integer id, AudioRequestStatus status, OffsetDateTime lastAccessedDateTime);
 
 }
