@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
@@ -16,12 +17,13 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 public class AudioTestData {
 
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime) {
+                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime,
+                                                        AudioRequestType audioRequestType) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.OPEN);
-        mediaRequestEntity.setRequestType(DOWNLOAD);
+        mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);

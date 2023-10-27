@@ -83,7 +83,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public MediaRequestEntity getMediaRequestById(Integer id) {
-        return mediaRequestRepository.findById(id).orElseThrow();
+        return mediaRequestRepository.findById(id).orElseThrow(
+            () -> new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND));
     }
 
     @Transactional
@@ -236,6 +237,17 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public InputStream download(Integer mediaRequestId) {
+        return downloadOrPlayback(mediaRequestId, AuditActivityEnum.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
+    }
+
+    @Override
+    public InputStream playback(Integer mediaRequestId) {
+        return downloadOrPlayback(mediaRequestId, AuditActivityEnum.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
+    }
+
+    private InputStream downloadOrPlayback(Integer mediaRequestId, AuditActivityEnum auditActivityEnum, AudioRequestType expectedType) {
+        MediaRequestEntity mediaRequestEntity = getMediaRequestById(mediaRequestId);
+        validateMediaRequestType(mediaRequestEntity, expectedType);
         var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
                 mediaRequestId)
             .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
@@ -245,20 +257,17 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
         }
 
-        MediaRequestEntity mediaRequestEntity = transientObjectEntity.getMediaRequest();
-
         auditService.recordAudit(
-            AuditActivityEnum.EXPORT_AUDIO,
+            auditActivityEnum,
             mediaRequestEntity.getRequestor(),
             mediaRequestEntity.getHearing().getCourtCase()
         );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
     }
 
-    @Override
-    public InputStream playback(Integer mediaRequestId) {
-
+    private void validateMediaRequestType(MediaRequestEntity mediaRequestEntity, AudioRequestType expectedType) {
+        if (expectedType != mediaRequestEntity.getRequestType()) {
+            throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT);
+        }
     }
-
-
 }
