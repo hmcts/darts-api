@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
@@ -40,17 +39,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
-class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
+class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
-    private static final URI ENDPOINT = URI.create("/audio-requests/download");
+    private static final URI ENDPOINT = URI.create("/audio-requests/playback");
 
-    private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivityEnum.EXPORT_AUDIO.getId();
+    private static final Integer PLAYBACK_AUDIT_ACTIVITY_ID = AuditActivityEnum.AUDIO_PLAYBACK.getId();
     @MockBean
     private Authorisation authorisation;
 
@@ -70,12 +74,13 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     private AuditService auditService;
 
     @Test
-    void audioRequestDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
+    void audioRequestPlaybackShouldPlaybackFromOutboundStorageAndReturnSuccess() throws Exception {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, PLAYBACK);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
+
 
         dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
@@ -85,7 +90,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
             ));
 
         doNothing().when(authorisation)
-            .authoriseByMediaRequestId(mediaRequestEntity.getId(), Set.of(TRANSCRIBER));
+            .authoriseByMediaRequestId(mediaRequestEntity.getId(),
+                    Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
@@ -97,13 +103,13 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
 
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
         searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
         searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
-        searchQuery.setAuditActivityId(DOWNLOAD_AUDIT_ACTIVITY_ID);
+        searchQuery.setAuditActivityId(PLAYBACK_AUDIT_ACTIVITY_ID);
 
         List<AuditEntity> auditEntities = auditService.search(searchQuery);
         assertEquals("2", auditEntities.get(0).getCourtCase().getCaseNumber());
@@ -113,18 +119,15 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     @Test
     @Transactional
-    void audioRequestDownloadGetShouldReturnBadRequestWhenMediaRequestEntityIsPlayback() throws Exception {
+    void audioRequestPlaybackGetShouldReturnBadRequestWhenMediaRequestEntityIsDownload() throws Exception {
         authorisationStub.givenTestSchema();
-
-        var mediaRequestEntity = authorisationStub.getMediaRequestEntity();
-        mediaRequestEntity.setRequestType(PLAYBACK);
-        dartsDatabase.save(mediaRequestEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("media_request_id", String.valueOf(authorisationStub.getMediaRequestEntity().getId()));
 
         doNothing().when(authorisation)
-            .authoriseByMediaRequestId(authorisationStub.getMediaRequestEntity().getId(), Set.of(TRANSCRIBER));
+            .authoriseByMediaRequestId(authorisationStub.getMediaRequestEntity().getId(),
+                                       Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -133,19 +136,23 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
     }
 
     @Test
     @Transactional
-    void audioRequestDownloadGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
+    void audioRequestPlaybackGetShouldReturnErrorWhenNoRelatedTransientObjectExistsInDatabase() throws Exception {
         authorisationStub.givenTestSchema();
+        var mediaRequestEntity = authorisationStub.getMediaRequestEntity();
+        mediaRequestEntity.setRequestType(PLAYBACK);
+        dartsDatabase.save(mediaRequestEntity);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("media_request_id", String.valueOf(authorisationStub.getMediaRequestEntity().getId()));
+            .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
 
         doNothing().when(authorisation)
-            .authoriseByMediaRequestId(authorisationStub.getMediaRequestEntity().getId(), Set.of(TRANSCRIBER));
+            .authoriseByMediaRequestId(mediaRequestEntity.getId(),
+                                       Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -154,11 +161,11 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
     }
 
     @Test
-    void audioDownloadGetShouldReturnBadRequestWhenNoRequestBodyIsProvided() throws Exception {
+    void audioPlaybackGetShouldReturnBadRequestWhenNoRequestBodyIsProvided() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT);
 
         mockMvc.perform(requestBuilder)

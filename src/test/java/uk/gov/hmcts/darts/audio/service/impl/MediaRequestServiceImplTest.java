@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audit.service.AuditService;
@@ -45,6 +46,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -232,6 +234,11 @@ class MediaRequestServiceImplTest {
         transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
 
         var mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
+        mockMediaRequestEntity.setRequestType(DOWNLOAD);
+
+        when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
@@ -247,8 +254,41 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
+    void downloadShouldThrowExceptionWhenMediaRequestCannotBeFound() {
+        var mediaRequestId = 1;
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> mediaRequestService.download(mediaRequestId)
+        );
+
+        assertEquals(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    void downloadShouldThrowExceptionWhenMediaRequestTypeIsPlayback() {
+        var mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
+        mockMediaRequestEntity.setRequestType(PLAYBACK);
+
+        when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> mediaRequestService.download(mediaRequestId)
+        );
+
+        assertEquals(AudioRequestsApiError.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, exception.getError());
+    }
+
+    @Test
     void downloadShouldThrowExceptionWhenRelatedTransientObjectCannotBeFound() {
         var mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
+        mockMediaRequestEntity.setRequestType(DOWNLOAD);
+
+        when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.empty());
 
@@ -262,6 +302,12 @@ class MediaRequestServiceImplTest {
 
     @Test
     void downloadShouldThrowExceptionWhenTransientObjectHasNoExternalLocationValue() {
+
+        mockMediaRequestEntity.setId(1);
+        mockMediaRequestEntity.setRequestType(DOWNLOAD);
+
+        when(mockMediaRequestRepository.findById(1)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(null);
 
@@ -272,6 +318,120 @@ class MediaRequestServiceImplTest {
         var exception = assertThrows(
             DartsApiException.class,
             () -> mediaRequestService.download(mediaRequestId)
+        );
+
+        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
+    }
+
+    @Test
+    void playbackShouldReturnExpectedData() throws IOException {
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setStart(START_TIME);
+        mediaEntity.setEnd(END_TIME);
+        mediaEntity.setChannel(1);
+
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setId(1);
+        CourtCaseEntity courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setId(1);
+        HearingEntity hearingEntity = new HearingEntity();
+        hearingEntity.setId(1);
+        courtCaseEntity.setHearings(List.of(hearingEntity));
+        MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setId(1);
+        mediaRequestEntity.setRequestor(userAccountEntity);
+        mediaRequestEntity.setHearing(hearingEntity);
+        var blobUuid = UUID.randomUUID();
+        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
+        transientObjectDirectoryEntity.setExternalLocation(blobUuid);
+        transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
+
+        var mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
+        mockMediaRequestEntity.setRequestType(PLAYBACK);
+
+        when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
+        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+
+        doNothing().when(auditService).recordAudit(any(), any(), any());
+
+        when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
+            .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
+
+        try (InputStream inputStream = mediaRequestService.playback(mediaRequestId)) {
+            byte[] bytes = inputStream.readAllBytes();
+            assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
+        }
+    }
+
+    @Test
+    void playbackShouldThrowExceptionWhenMediaRequestCannotBeFound() {
+        var mediaRequestId = 1;
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> mediaRequestService.playback(mediaRequestId)
+        );
+
+        assertEquals(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    void playbackShouldThrowExceptionWhenMediaRequestTypeIsDownload() {
+        var mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
+        mockMediaRequestEntity.setRequestType(DOWNLOAD);
+
+        when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> mediaRequestService.playback(mediaRequestId)
+        );
+
+        assertEquals(AudioRequestsApiError.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, exception.getError());
+    }
+
+    @Test
+    void playbackShouldThrowExceptionWhenRelatedTransientObjectCannotBeFound() {
+        var mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
+        mockMediaRequestEntity.setRequestType(PLAYBACK);
+
+        when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
+        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+            .thenReturn(Optional.empty());
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> mediaRequestService.playback(mediaRequestId)
+        );
+
+        assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
+    }
+
+    @Test
+    void playbackShouldThrowExceptionWhenTransientObjectHasNoExternalLocationValue() {
+
+        mockMediaRequestEntity.setId(1);
+        mockMediaRequestEntity.setRequestType(PLAYBACK);
+
+        when(mockMediaRequestRepository.findById(1)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
+
+        var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
+        transientObjectDirectoryEntity.setExternalLocation(null);
+
+        var mediaRequestId = 1;
+        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> mediaRequestService.playback(mediaRequestId)
         );
 
         assertEquals(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED, exception.getError());
