@@ -1,39 +1,49 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
+import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
+import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
+import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
@@ -41,43 +51,57 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
+import uk.gov.hmcts.darts.transcriptions.validator.TranscriptFileValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
+import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.REQUEST_TO_TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_APPROVED;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_WORKFLOW_ACTION_INVALID;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@SuppressWarnings({"PMD.ExcessiveImports", "java:S2229"})
+@SuppressWarnings({"PMD.ExcessiveImports"})
 public class TranscriptionServiceImpl implements TranscriptionService {
 
-    public static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
+    private static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
+
+    private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
+
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionUrgencyRepository transcriptionUrgencyRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
+
     private final AuthorisationApi authorisationApi;
     private final NotificationApi notificationApi;
+    private final DataManagementApi dataManagementApi;
 
     private final CaseService caseService;
     private final HearingsService hearingsService;
@@ -86,11 +110,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final UserIdentity userIdentity;
 
     private final WorkflowValidator workflowValidator;
+    private final TranscriptFileValidator transcriptFileValidator;
 
-    private static final int MAX_CREATED_BY_DAYS = 30;
-
-    @Transactional
     @Override
+    @Transactional
     public RequestTranscriptionResponse saveTranscriptionRequest(
         TranscriptionRequestDetails transcriptionRequestDetails) {
 
@@ -152,7 +175,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             updateTranscription.getWorkflowComment()
         );
         transcription.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
-
 
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
@@ -306,7 +328,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     public void closeTranscriptions() {
         try {
             List<TranscriptionStatusEntity> finishedTranscriptionStatuses = getFinishedTranscriptionStatuses();
-            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now().minus(MAX_CREATED_BY_DAYS, ChronoUnit.DAYS);
+            OffsetDateTime lastCreatedDateTime = OffsetDateTime.now()
+                .minus(transcriptionConfigurationProperties.getMaxCreatedByDuration());
             List<TranscriptionEntity> transcriptionsToBeClosed =
                 transcriptionRepository.findAllByTranscriptionStatusNotInWithCreatedDateTimeBefore(
                     finishedTranscriptionStatuses,
@@ -325,8 +348,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
+    private void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());
@@ -344,8 +366,66 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public List<TranscriptionUrgencyResponse> getTranscriptionUrgencies()  {
+    public List<TranscriptionUrgencyResponse> getTranscriptionUrgencies() {
         return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAll());
+    }
+
+    @Override
+    @Transactional
+    public AttachTranscriptResponse attachTranscript(Integer transcriptionId,
+                                                     MultipartFile transcript) {
+
+        transcriptFileValidator.validate(transcript);
+
+        final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()));
+
+        final UUID externalLocation;
+        try {
+            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(
+                BinaryData.fromStream(transcript.getInputStream()));
+        } catch (IOException e) {
+            throw new DartsApiException(FAILED_TO_ATTACH_TRANSCRIPT, e);
+        }
+
+        var userAccountEntity = getUserAccount();
+
+        TranscriptionEntity transcriptionEntity = transcriptionRepository.getReferenceById(transcriptionId);
+        var transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+        transcriptionDocumentEntity.setFileName(transcript.getOriginalFilename());
+        transcriptionDocumentEntity.setFileType(transcript.getContentType());
+        transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
+        transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
+
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = saveExternalObjectDirectory(
+            externalLocation, userAccountEntity, transcriptionDocumentEntity);
+
+        transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
+        transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
+
+        auditService.recordAudit(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
+
+        var attachTranscriptResponse = new AttachTranscriptResponse();
+        attachTranscriptResponse.setTranscriptionDocumentId(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()
+                                                                .getId());
+        attachTranscriptResponse.setTranscriptionWorkflowId(updateTranscription.getTranscriptionWorkflowId());
+
+        return attachTranscriptResponse;
+    }
+
+    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
+                                                                      UserAccountEntity userAccountEntity,
+                                                                      TranscriptionDocumentEntity transcriptionDocumentEntity) {
+        var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
+        externalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(
+            ObjectDirectoryStatusEnum.STORED.getId()));
+        externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
+        externalObjectDirectoryEntity.setExternalLocation(externalLocation);
+        externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
+        externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
+        externalObjectDirectoryEntity = externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+        return externalObjectDirectoryEntity;
     }
 
     private List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {

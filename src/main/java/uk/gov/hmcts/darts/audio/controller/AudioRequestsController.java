@@ -47,6 +47,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     private final AuditService auditService;
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<AudioNonAccessedResponse> getNonAccessedCount(Integer userId) {
         return new ResponseEntity<>(mediaRequestService.countNonAccessedAudioForUser(userId), HttpStatus.OK);
 

@@ -80,4 +80,8 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @OneToMany(cascade = {PERSIST, MERGE}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
     private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
+
+    @OneToMany(mappedBy = TranscriptionDocumentEntity_.TRANSCRIPTION)
+    private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
+
 }
