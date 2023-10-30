@@ -59,7 +59,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(bodyAuthorisation = true, contextId = {CASE_ID, HEARING_ID},
+    @Authorisation(bodyAuthorisation = true, contextId = { HEARING_ID, CASE_ID },
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(
         TranscriptionRequestDetails transcriptionRequestDetails) {
@@ -168,7 +168,7 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     private boolean transcriptionDatesAreSet(OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
-        return !isNull(startDateTime) || !isNull(endDateTime);
+        return !isNull(startDateTime) && !isNull(endDateTime);
     }
 
 }

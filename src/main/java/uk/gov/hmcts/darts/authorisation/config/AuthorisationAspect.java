@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.authorisation.service.ControllerAuthorisationFactory;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -61,7 +60,7 @@ public class AuthorisationAspect {
 
         JsonNode jsonNode = objectMapper.valueToTree(body);
 
-        authoriseContext(Set.of(authorisationAnnotation.contextId()), roles, jsonNode);
+        authoriseMultipleContext(List.of(authorisationAnnotation.contextId()), roles, jsonNode);
 
         return joinPoint.proceed();
     }
@@ -81,40 +80,42 @@ public class AuthorisationAspect {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
 
-        authoriseContext(Set.of(authorisationAnnotation.contextId()), request, roles);
+        authoriseMultipleContext(List.of(authorisationAnnotation.contextId()), request, roles);
     }
 
-    private void authoriseContext(Set<ContextIdEnum> contextIds, Set<SecurityRoleEnum> roles, JsonNode jsonNode) {
-        List<ContextIdEnum> contexts = new ArrayList<>(contextIds);
-        int lastItem = contexts.size() - 1;
-        for (int index = 0; index < contexts.size(); index++) {
+    private void authoriseMultipleContext(List<ContextIdEnum> contextIds, Set<SecurityRoleEnum> roles, JsonNode jsonNode) {
+
+        int lastContextIndex = contextIds.size() - 1;
+        for (int index = 0; index < contextIds.size(); index++) {
             try {
-                ContextIdEnum contextId = contexts.get(index);
+                ContextIdEnum contextId = contextIds.get(index);
                 controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(jsonNode, roles);
                 break;
             } catch (Exception e) {
-                if (index == lastItem) {
+                if (index == lastContextIndex) {
                     throw e;
                 }
             }
         }
     }
 
-    private void authoriseContext(Set<ContextIdEnum> contextIds, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        List<ContextIdEnum> contexts = new ArrayList<>(contextIds);
-        int lastItem = contexts.size() - 1;
-        for (int index = 0; index < contexts.size(); index++) {
-            try {
-                ContextIdEnum contextId = contexts.get(index);
-                controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles);
-                break;
-            } catch (Exception e) {
-                if (index == lastItem) {
-                    throw e;
-                }
-            }
-        }
+    private void authoriseMultipleContext(List<ContextIdEnum> contextIds, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
+        contextIds.stream()
+            .filter(contextId -> authoriseContext(contextId, request, roles))
+            .findFirst();
     }
+
+    private boolean authoriseContext(ContextIdEnum contextId, Set<SecurityRoleEnum> roles, JsonNode jsonNode) {
+        controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(jsonNode, roles);
+        return true;
+    }
+
+    private boolean authoriseContext(ContextIdEnum contextId, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
+        controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles);
+        return true;
+    }
+
+
 
     private boolean handleRequestBodyAuthorisation(@NotNull String method) {
         return switch (method) {

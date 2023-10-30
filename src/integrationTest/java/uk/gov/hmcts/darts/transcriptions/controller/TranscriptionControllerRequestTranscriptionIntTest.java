@@ -146,7 +146,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
                                     AWAITING_AUTHORISATION, testUser
         );
 
-
         assertThat(dartsDatabaseStub.getTranscriptionCommentRepository().findAll())
             .hasSize(1)
             .extracting(TranscriptionCommentEntity::getComment)
@@ -261,7 +260,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTranscriptionFailed404Error(actualJson);
+        assertCaseNotFound404Error(actualJson);
 
         assertAudit(0);
     }
@@ -276,7 +275,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getId(),
+            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, null, END_TIME
         );
 
@@ -302,10 +301,11 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     void transcriptionRequestWithNullEndDateAndRequiredDatesTranscriptionTypeShouldThrowException(
         TranscriptionTypeEnum transcriptionTypeEnum)
         throws Exception {
+
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getId(),
+            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, null
         );
 
@@ -401,7 +401,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            789, null, transcriptionUrgencyEnum.getId(),
+            999_999, null, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
@@ -415,19 +415,19 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTranscriptionFailed404Error(actualJson);
+        assertCaseNotFound404Error(actualJson);
 
         assertAudit(0);
     }
 
-    private static void assertTranscriptionFailed404Error(String actualJson) {
+    private void assertCaseNotFound404Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "HEARING_100",
-              "title": "The requested hearing cannot be found",
+              "type": "CASE_104",
+              "title": "The requested case cannot be found",
               "status": 404
-            }
-            """;
+            }""";
+
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -439,7 +439,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, 789, transcriptionUrgencyEnum.getId(),
+            null, 999_999, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
@@ -453,15 +453,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {
-              "type": "CASE_104",
-              "title": "The requested case cannot be found",
-              "status": 404
-            }""";
 
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
+        assertCaseNotFound404Error(actualJson);
         assertAudit(0);
     }
 
