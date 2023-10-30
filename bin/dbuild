@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+project_dir=$(pwd)
+mkdir -p ./bin/logs
+
+git clone git@github.com:hmcts/"$1".git &>> "$project_dir"/bin/logs/"$1".log
+
+cd "$1" || exit
+./gradlew assemble &>> "$project_dir"/bin/logs/"$1".log
+docker build -t "$1":master . &>> "$project_dir"/bin/logs/"$1".log
+
+cd ..
+rm -rf "$1"
+

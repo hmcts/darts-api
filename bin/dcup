@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+#./bin/dbuild darts-gateway
+./bin/dbuild darts-stub-services &
+
+#gateway_image="$(docker images -q darts-gateway:master 2> /dev/null)"
+stub_image="$(docker images -q darts-stub-services:master 2> /dev/null)"
+
+#echo "Gateway image: $gateway_image"
+echo "Stub image: $stub_image"
+
+while [[ "$stub_image" == "" ]]
+do
+    sleep 2
+    stub_image="$(docker images -q darts-stub-services:master 2> /dev/null)"
+    echo "Waiting for images to be built"
+done
