@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.service.AuditService;
@@ -349,8 +348,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void closeTranscription(Integer transcriptionId, String transcriptionComment) {
+    private void closeTranscription(Integer transcriptionId, String transcriptionComment) {
         try {
             UpdateTranscription updateTranscription = new UpdateTranscription();
             updateTranscription.setTranscriptionStatusId(TranscriptionStatusEnum.CLOSED.getId());

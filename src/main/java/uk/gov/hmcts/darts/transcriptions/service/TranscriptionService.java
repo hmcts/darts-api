@@ -19,8 +19,6 @@ public interface TranscriptionService {
 
     void closeTranscriptions();
 
-    void closeTranscription(Integer transcriptionId, String transcriptionComment);
-
     List<TranscriptionTypeResponse> getTranscriptionTypes();
 
     List<TranscriptionUrgencyResponse> getTranscriptionUrgencies();
