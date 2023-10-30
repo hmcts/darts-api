@@ -182,6 +182,36 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
+    @Order(12)
+    @Transactional
+    void transcriptionRequestWithDuplicateValues() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilderDup)
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+
+    }
+
+    @Test
     @Order(2)
     @Transactional
     void transcriptionRequestWithNullDatesAndSentencingRemarksTypeShouldReturnSuccess()
@@ -470,4 +500,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         transcriptionRequestDetails.setEndDateTime(endDateTime);
         return transcriptionRequestDetails;
     }
+
+
 }
