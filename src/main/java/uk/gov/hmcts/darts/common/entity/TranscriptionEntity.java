@@ -1,15 +1,6 @@
 package uk.gov.hmcts.darts.common.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
@@ -80,4 +71,11 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @OneToMany(cascade = {PERSIST, MERGE}, mappedBy = TranscriptionWorkflowEntity_.TRANSCRIPTION)
     private List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
+
+    @OneToOne
+    @JoinTable(name = "transcription_document",
+        joinColumns = {@JoinColumn(name = "tra_id")},
+        inverseJoinColumns = {@JoinColumn(name = "tra_id")})
+    private TranscriptionDocumentEntity transcriptionDocument;
+
 }

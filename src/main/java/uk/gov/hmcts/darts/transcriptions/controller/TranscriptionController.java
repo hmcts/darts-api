@@ -1,12 +1,14 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.enums.*;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -15,12 +17,7 @@ import uk.gov.hmcts.darts.transcriptions.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
-import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.*;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
@@ -128,4 +125,15 @@ public class TranscriptionController implements TranscriptionApi {
         );
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<TranscriptionResponse> getTranscription(
+        @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true, in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
+    ) {
+        return new ResponseEntity<>(
+            transcriptionService.getTranscription(transcriptionId),
+            HttpStatus.OK
+        );
+
+    }
 }

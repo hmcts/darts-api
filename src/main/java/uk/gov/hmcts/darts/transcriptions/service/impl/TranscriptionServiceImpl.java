@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.cases.exception.*;
+import uk.gov.hmcts.darts.cases.mapper.*;
+import uk.gov.hmcts.darts.cases.model.*;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -34,19 +37,13 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
-import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.*;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
@@ -346,6 +343,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public List<TranscriptionUrgencyResponse> getTranscriptionUrgencies()  {
         return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAll());
+    }
+
+    @Override
+    public TranscriptionResponse getTranscription(Integer transcriptionId) {
+        TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
+            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
+        return TranscriptionResponseMapper.mapToTranscriptionResponse(transcription);
     }
 
     private List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {

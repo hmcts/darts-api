@@ -46,6 +46,66 @@ paths:
             schema:
               $ref: '#/components/schemas/TranscriptionRequestDetails'
   /transcriptions/{transcription_id}:
+    get:
+      tags:
+        - Transcription
+      summary: Gets details of a transcription
+      parameters:
+        - in: path
+          name: transcription_id
+          schema:
+            type: integer
+          description: "transcription_id is the internal id of the transcription."
+          required: true
+      operationId: getTranscription
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionResponse'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscription404ErrorCode'
+              example:
+                type: "TRANSCRIPTION_101"
+                title: "The requested transcription cannot be found"
+                status: 404
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
     patch:
       tags:
         - Transcription
@@ -287,3 +347,50 @@ components:
           type: string
           example: Standard
 
+    TranscriptionResponse:
+      type: object
+      properties:
+        case_id:
+          type: integer
+          example: 1
+        case_number:
+          type: string
+          example: Swansea_case_1
+        courthouse:
+          type: string
+          example: Swansea
+        defendants:
+          type: array
+          items:
+            $ref: '#/components/schemas/defendant'
+        judges:
+          type: array
+          items:
+            $ref: '#/components/schemas/judge'
+        transcript_file_name:
+          type: string
+          example: file001.docx
+        hearing_date:
+          type: string
+          format: date
+          example: 2023-06-23
+        urgency:
+          type: string
+          example: Standard
+        request_type:
+          type: string
+          example: Specified Times
+        transcription_start_ts:
+          type: string
+          format: time
+          example: 2023-06-26T13:00:00Z
+        transcription_end_ts:
+          type: string
+          format: time
+          example: 2023-06-26T13:00:00Z
+    defendant:
+      type: string
+      example: Joe Bloggs
+    judge:
+      type: string
+      example: Mr Judge
