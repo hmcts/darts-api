@@ -3,22 +3,7 @@ package uk.gov.hmcts.darts.common.util;
 import com.google.common.collect.Lists;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
-import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
-import uk.gov.hmcts.darts.common.entity.DailyListEntity;
-import uk.gov.hmcts.darts.common.entity.DefenceEntity;
-import uk.gov.hmcts.darts.common.entity.DefendantEntity;
-import uk.gov.hmcts.darts.common.entity.EventEntity;
-import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.JudgeEntity;
-import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
-import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.*;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -210,12 +195,21 @@ public class CommonTestDataUtil {
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
         transcription.setId(1);
         transcription.setCreatedBy(createUserAccount());
+        transcription.setTranscriptionDocument(createTranscriptionDocument());
+        transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
+        transcription.setTranscriptionStatus(createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
 
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
         transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
         transcription.setTranscriptionStatus(transcriptionStatus);
         return List.of(transcription);
+    }
+
+    private static TranscriptionDocumentEntity createTranscriptionDocument() {
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setFileName("test.doc");
+        return transcriptionDocumentEntity;
     }
 
     public UserAccountEntity createUserAccount() {
@@ -331,5 +325,12 @@ public class CommonTestDataUtil {
         transcriptionUrgencyEntity.setId(transcriptionUrgencyEnum.getId());
         transcriptionUrgencyEntity.setDescription(transcriptionUrgencyEnum.name());
         return transcriptionUrgencyEntity;
+    }
+
+    public TranscriptionStatusEntity createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
+        TranscriptionStatusEntity transcriptionStatusEntity = new TranscriptionStatusEntity();
+        transcriptionStatusEntity.setId(transcriptionStatusEnum.getId());
+        transcriptionStatusEntity.setStatusType(transcriptionStatusEnum.name());
+        return transcriptionStatusEntity;
     }
 }

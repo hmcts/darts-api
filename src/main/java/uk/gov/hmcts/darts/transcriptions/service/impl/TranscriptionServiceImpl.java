@@ -345,13 +345,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAll());
     }
 
-    @Override
-    public TranscriptionResponse getTranscription(Integer transcriptionId) {
-        TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
-            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
-        return TranscriptionResponseMapper.mapToTranscriptionResponse(transcription);
-    }
-
     private List<TranscriptionStatusEntity> getFinishedTranscriptionStatuses() {
         List<TranscriptionStatusEntity> transcriptionStatuses = new ArrayList<>();
         transcriptionStatuses.add(getTranscriptionStatusById(TranscriptionStatusEnum.CLOSED.getId()));
@@ -360,4 +353,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionStatuses;
     }
 
+    @Override
+    public TranscriptionResponse getTranscription(Integer transcriptionId) {
+        TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
+            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
+        return TranscriptionResponseMapper.mapToTranscriptionResponse(transcription);
+    }
 }

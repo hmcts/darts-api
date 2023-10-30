@@ -5,15 +5,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import uk.gov.hmcts.darts.cases.mapper.*;
+import uk.gov.hmcts.darts.cases.model.*;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
-import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.*;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
+import uk.gov.hmcts.darts.transcriptions.model.*;
 
+import java.time.*;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
@@ -80,6 +81,21 @@ class TranscriptionResponseMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/transcriptions/mapper/TranscriptionUrgencyResponseMapper/expectedResponseSingleEntity.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void mapToTranscriptionResponse() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+
+        TranscriptionResponse transcriptionResponse =
+            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntity.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 }

@@ -52,9 +52,13 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setCourthouse(transcriptionEntity.getCourtCase().getCourthouse().getCourthouseName());
             transcriptionResponse.setDefendants(transcriptionEntity.getCourtCase().getDefendantStringList());
             transcriptionResponse.setJudges(transcriptionEntity.getCourtCase().getJudgeStringList());
-            transcriptionResponse.setTranscriptFileName(transcriptionEntity.getTranscriptionDocument().getFileName());
+            if (transcriptionEntity.getTranscriptionDocument() != null) {
+                transcriptionResponse.setTranscriptFileName(transcriptionEntity.getTranscriptionDocument().getFileName());
+            }
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
-            transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
+            if ( transcriptionEntity.getTranscriptionUrgency() != null) {
+                transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
+            }
             transcriptionResponse.setRequestType(transcriptionEntity.getTranscriptionType().getDescription());
             transcriptionResponse.setTranscriptionStartTs(String.valueOf(transcriptionEntity.getStartTime()));
             transcriptionResponse.setTranscriptionEndTs(String.valueOf(transcriptionEntity.getEndTime()));
