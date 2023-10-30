@@ -63,6 +63,11 @@ spring:
             logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
             reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DARTS_API_DB_HOST:localhost}:5432/${DARTS_API_DB_NAME:darts}${DARTS_API_DB_OPTIONS:}
@@ -143,6 +148,14 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+  transcription:
+    allowed-extensions:
+      - "docx"
+      - "doc"
+    allowed-content-types:
+      - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      - "application/msword"
+    max-created-by-duration: 30d
   portal:
     url: https://darts-portal.staging.platform.hmcts.net
   automated:
