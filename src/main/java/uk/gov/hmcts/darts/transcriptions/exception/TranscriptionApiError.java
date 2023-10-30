@@ -43,6 +43,11 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.BAD_REQUEST,
         "Unexpected transcription urgency for this workflow"
     ),
+    DUPLICATE_TRANSCRIPTION(
+        "107",
+        HttpStatus.CONFLICT,
+        "A transcription already exists with these properties"
+    ),
     FAILED_TO_ATTACH_TRANSCRIPT(
         "108",
         HttpStatus.BAD_REQUEST,

@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -120,13 +121,18 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
 
-        TranscriptionEntity transcription = saveTranscription(
-            userAccount,
-            transcriptionRequestDetails,
-            transcriptionStatus,
-            getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
-            getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId())
-        );
+        TranscriptionEntity transcription;
+        try {
+            transcription = saveTranscription(
+                userAccount,
+                transcriptionRequestDetails,
+                transcriptionStatus,
+                getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
+                getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId())
+            );
+        } catch (DataIntegrityViolationException e) {
+            throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
+        }
 
         transcription.getTranscriptionWorkflowEntities().add(
             saveTranscriptionWorkflow(
