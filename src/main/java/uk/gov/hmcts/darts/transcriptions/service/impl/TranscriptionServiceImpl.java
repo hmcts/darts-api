@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
+import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
@@ -62,21 +64,30 @@ import java.util.List;
 import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.codec.binary.Base64.encodeBase64;
+import static org.apache.commons.codec.digest.DigestUtils.md5;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.ACCEPT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.AUTHORISE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.COMPLETE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.DOWNLOAD_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.IMPORT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REJECT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.REQUEST_TO_TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_APPROVED;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_REJECTED;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_WORKFLOW_ACTION_INVALID;
 
@@ -164,34 +175,51 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
-
-        TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
+        final var userAccountEntity = getUserAccount();
+        final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        validateUpdateTranscription(transcription, updateTranscription);
+        validateUpdateTranscription(transcriptionEntity, updateTranscription);
 
-        TranscriptionStatusEntity transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
-        transcription.setTranscriptionStatus(transcriptionStatusEntity);
+        final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
+        transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = saveTranscriptionWorkflow(
             getUserAccount(),
-            transcription,
+            transcriptionEntity,
             transcriptionStatusEntity,
             updateTranscription.getWorkflowComment()
         );
-        transcription.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
+        transcriptionEntity.getTranscriptionWorkflowEntities().add(transcriptionWorkflowEntity);
 
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
 
         TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
 
-        if (newStatusEnum == APPROVED) {
-            notifyTranscriptionCompanyForCourthouse(transcription.getCourtCase());
-            notifyRequestor(transcription, TRANSCRIPTION_REQUEST_APPROVED);
-        } else if (newStatusEnum == REJECTED) {
-            notifyRequestor(transcription, TRANSCRIPTION_REQUEST_REJECTED);
+        final var courtCaseEntity = transcriptionEntity.getCourtCase();
+        switch (newStatusEnum) {
+            case APPROVED -> {
+                notifyTranscriptionCompanyForCourthouse(courtCaseEntity);
+                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED);
+                auditService.recordAudit(
+                    AUTHORISE_TRANSCRIPTION,
+                    userAccountEntity,
+                    courtCaseEntity
+                );
+            }
+            case REJECTED -> {
+                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED);
+                auditService.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            }
+            case WITH_TRANSCRIBER -> {
+                auditService.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            }
+            case COMPLETE -> {
+                auditService.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            }
         }
         return updateTranscriptionResponse;
     }
@@ -295,7 +323,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         TranscriptionWorkflowEntity savedTranscriptionWorkFlow = transcriptionWorkflowRepository.saveAndFlush(
             transcriptionWorkflow);
 
-        if (!StringUtils.isBlank(workflowComment)) {
+        if (StringUtils.isNotBlank(workflowComment)) {
             createAndSaveComment(userAccount, workflowComment, savedTranscriptionWorkFlow, transcription);
         }
         return savedTranscriptionWorkFlow;
@@ -386,25 +414,27 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()));
 
         final UUID externalLocation;
+        final String checksum;
         try {
-            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(
-                BinaryData.fromStream(transcript.getInputStream()));
+            BinaryData binaryData = BinaryData.fromStream(transcript.getInputStream());
+            checksum = new String(encodeBase64(md5(binaryData.toBytes())));
+            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_ATTACH_TRANSCRIPT, e);
         }
 
-        var userAccountEntity = getUserAccount();
+        final var userAccountEntity = getUserAccount();
+        final var transcriptionEntity = transcriptionRepository.getReferenceById(transcriptionId);
 
-        TranscriptionEntity transcriptionEntity = transcriptionRepository.getReferenceById(transcriptionId);
-        var transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        final var transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(transcript.getOriginalFilename());
         transcriptionDocumentEntity.setFileType(transcript.getContentType());
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
 
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = saveExternalObjectDirectory(
-            externalLocation, userAccountEntity, transcriptionDocumentEntity);
+        final var externalObjectDirectoryEntity = saveExternalObjectDirectory(
+            externalLocation, checksum, userAccountEntity, transcriptionDocumentEntity);
 
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
@@ -419,7 +449,37 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return attachTranscriptResponse;
     }
 
+    @Override
+    public DownloadTranscriptResponse downloadTranscript(Integer transcriptionId) {
+        final var userAccountEntity = getUserAccount();
+        final var transcriptionEntity = transcriptionRepository.getReferenceById(transcriptionId);
+
+        final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
+            .stream()
+            .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))
+            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
+
+        final var externalObjectDirectoryEntity = latestTranscriptionDocumentEntity.getExternalObjectDirectoryEntities()
+            .stream()
+            .filter(externalObjectDirectoryEntity1 -> UNSTRUCTURED.getId()
+                == externalObjectDirectoryEntity1.getExternalLocationType().getId()
+                && nonNull(externalObjectDirectoryEntity1.getExternalLocation()))
+            .max(comparing(ExternalObjectDirectoryEntity::getLastModifiedDateTime))
+            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
+
+        final UUID externalLocation = externalObjectDirectoryEntity.getExternalLocation();
+        auditService.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
+
+        return DownloadTranscriptResponse.builder()
+            .resource(new InputStreamResource(dataManagementApi.getBlobDataFromUnstructuredContainer(externalLocation)
+                                                  .toStream()))
+            .fileName(latestTranscriptionDocumentEntity.getFileName())
+            .externalLocation(externalLocation)
+            .transcriptionDocumentId(latestTranscriptionDocumentEntity.getId()).build();
+    }
+
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
+                                                                      String checksum,
                                                                       UserAccountEntity userAccountEntity,
                                                                       TranscriptionDocumentEntity transcriptionDocumentEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
@@ -428,6 +488,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             ObjectDirectoryStatusEnum.STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
+        externalObjectDirectoryEntity.setChecksum(checksum);
         externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
         externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
         externalObjectDirectoryEntity = externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
