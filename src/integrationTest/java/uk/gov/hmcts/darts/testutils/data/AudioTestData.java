@@ -17,11 +17,11 @@ public class AudioTestData {
 
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
                                                         OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime,
-                                                        AudioRequestType audioRequestType) {
+                                                        AudioRequestType audioRequestType, AudioRequestStatus status) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
-        mediaRequestEntity.setStatus(AudioRequestStatus.OPEN);
+        mediaRequestEntity.setStatus(status);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
         mediaRequestEntity.setStartTime(startTime);
