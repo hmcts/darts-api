@@ -164,6 +164,9 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         throws ExecutionException, InterruptedException, IOException {
         var audioFileStartTime = audioFileInfo.getStartTime();
 
+        log.info("Trimming dates for ATS. Audio file start time is: " + audioFileStartTime.toString() + ", trim period start is: "
+                     + trimPeriodStart.toString() + ", trim period end is: " + trimPeriodEnd.toString());
+
         var trimStartDuration = Duration.between(audioFileStartTime, trimPeriodStart);
         var trimEndDuration = Duration.between(audioFileStartTime, trimPeriodEnd);
 
