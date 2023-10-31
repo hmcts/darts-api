@@ -5,10 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.exception.OutboundDeleterException;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -24,6 +26,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
@@ -88,16 +91,20 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByMediaRequest_idIn(
             mediaRequests);
 
-        UserAccountEntity systemUser = userAccountRepository.findById(0).get();
+        Optional<UserAccountEntity> systemUser = userAccountRepository.findById(0);
+
+        if (systemUser.isEmpty()) {
+            throw new DartsApiException(OutboundDeleterException.MISSING_SYSTEM_USER);
+        }
         ObjectDirectoryStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
             MARKED_FOR_DELETION.getId());
 
 
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
             entity.getMediaRequest().setStatus(AudioRequestStatus.EXPIRED);
-            entity.getMediaRequest().setLastModifiedBy(systemUser);
+            entity.getMediaRequest().setLastModifiedBy(systemUser.get());
 
-            entity.setLastModifiedBy(systemUser);
+            entity.setLastModifiedBy(systemUser.get());
             entity.setStatus(deletionStatus);
 
             deletedValues.add(entity.getMediaRequest());
