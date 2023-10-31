@@ -123,6 +123,9 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     @Test
     void attachTranscriptShouldReturnForbiddenError() throws Exception {
+
+        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
             "Test Document.doc",
