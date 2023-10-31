@@ -3,11 +3,16 @@
 project_dir=$(pwd)
 mkdir -p ./bin/logs
 
-git clone git@github.com:hmcts/"$1".git &>> "$project_dir"/bin/logs/"$1".log
+logfile="$project_dir"/bin/logs/"$1".log
+if [ -f "$logfile" ]; then
+  rm "$logfile"
+fi
+
+git clone git@github.com:hmcts/"$1".git &>> "$logfile"
 
 cd "$1" || exit
-./gradlew assemble &>> "$project_dir"/bin/logs/"$1".log
-docker build -t "$1":master . &>> "$project_dir"/bin/logs/"$1".log
+./gradlew assemble &>> "$logfile"
+docker build -t "$1":master . &>> "$logfile"
 
 cd ..
 rm -rf "$1"
