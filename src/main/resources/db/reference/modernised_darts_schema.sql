@@ -154,6 +154,16 @@
 --    added: GRANT SELECT,UPDATE ON  nod_seq TO darts_user;
 --    updated annotation_document - all columns NOT NULL
 --    updated transcription_document - all columns NOT NULL
+--v53 amend transaction.hearing_date from TIEMSTAMP to DATE, to be consistent with hearing.hearing_date
+--    add transcription.is_manual BOOLEAN 
+--    add media_file, media_format, media_type (as FK to new table), file_size, checksum to media
+--    add media_type table, primary key and fk from media
+--    add is_system_user and account_guid to user_account
+--    add display_name to courthouse
+--v54 add checksum to annotation_document and transcription_document
+--    add display_state to transcription_type and transcription_urgency
+--    add display_name to transcription_status
+
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -182,6 +192,7 @@
 -- judge                       JUD
 -- media                       MED
 -- media_request               MER
+-- media_type                  MET
 -- node_register               NOD
 -- notification                NOT
 -- object_directory_status     ODS
@@ -264,12 +275,13 @@ COMMENT ON COLUMN annotation.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 
 CREATE TABLE annotation_document
-(ado_id                      INTEGER      NOT NULL
-,ann_id                      INTEGER      NOT NULL
-,file_name                   CHARACTER VARYING      NOT NULL
-,file_type                   CHARACTER VARYING      NOT NULL
-,file_size                   INTEGER      NOT NULL
-,uploaded_by                 INTEGER      NOT NULL
+(ado_id                      INTEGER                       NOT NULL
+,ann_id                      INTEGER                       NOT NULL
+,file_name                   CHARACTER VARYING             NOT NULL
+,file_type                   CHARACTER VARYING             NOT NULL
+,file_size                   INTEGER                       NOT NULL
+,checksum                    CHARACTER VARYING             NOT NULL
+,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE darts_tables;
 
@@ -438,6 +450,7 @@ CREATE TABLE courthouse
 (cth_id                      INTEGER                       NOT NULL
 ,courthouse_code             INTEGER                       NOT NULL          UNIQUE
 ,courthouse_name             CHARACTER VARYING             NOT NULL          UNIQUE
+,display_name                CHARACTER VARYING             NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -652,9 +665,9 @@ CREATE TABLE external_object_directory
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 -- additional optional FKs to other relevant internal objects would require columns here
 ,external_location           UUID                          NOT NULL
-,external_file_id            CHARACTER VARYING  
+,external_file_id            CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,external_record_id          CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
-,checksum                    CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
+,checksum                    CHARACTER VARYING                       
 ,transfer_attempts           INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -795,12 +808,17 @@ IS 'primary key of judge';
 CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER
+,met_id                      INTEGER                       NOT NULL
 ,media_object_id             CHARACTER VARYING(16)
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
 ,reference_id                CHARACTER VARYING             --all nulls in legacy
 ,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
+,media_file                  CHARACTER VARYING             NOT NULL
+,media_format                CHARACTER VARYING             NOT NULL
+,file_size                   INTEGER                       NOT NULL
+,checksum                    CHARACTER VARYING
 ,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -883,6 +901,10 @@ IS 'filename of the requested media object, possibly migrated from moj_transform
 COMMENT ON COLUMN media_request.output_format
 IS 'format of the requested media object, possibly migrated from moj_transformation_s';
 
+CREATE TABLE media_type
+(met_id                      INTEGER                       NOT NULL
+,media_type                  CHARACTER VARYING             NOT NULL
+) TABLESPACE darts_tables;
 
 CREATE TABLE node_register
 (node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not nod_id
@@ -1032,9 +1054,10 @@ CREATE TABLE transcription
 ,trs_id                      INTEGER                                -- to be set according to trigger on transcription_workflow only
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
 ,requestor                   CHARACTER VARYING                      -- 1055 distinct, from <forname><surname> to <AAANNA>
-,hearing_date                TIMESTAMP WITH TIME ZONE               -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
+,hearing_date                DATE                                   -- 3k records have time component, but all times are 23:00,so effectively DATE only, will be absolete once moj_hea_id populated
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
 ,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
+,is_manual_transcription     BOOLEAN                       NOT NULL
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -1108,13 +1131,14 @@ COMMENT ON COLUMN transcription_comment.transcription_object_id
 IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 
 CREATE TABLE transcription_document
-(trd_id                      INTEGER             NOT NULL
-,tra_id                      INTEGER             NOT NULL
+(trd_id                      INTEGER                       NOT NULL
+,tra_id                      INTEGER                       NOT NULL
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
-,file_size                   INTEGER             NOT NULL
-,uploaded_by                 INTEGER             NOT NULL
-,uploaded_ts                 TIMESTAMP WITH TIME ZONE             NOT NULL
+,file_size                   INTEGER                       NOT NULL
+,checksum                    CHARACTER VARYING             NOT NULL
+,uploaded_by                 INTEGER                       NOT NULL
+,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN transcription_document.trd_id
@@ -1126,6 +1150,7 @@ IS 'foreign key from transcription';
 CREATE TABLE transcription_status
 (trs_id                      INTEGER                       NOT NULL
 ,status_type                 CHARACTER VARYING             NOT NULL
+,display_name                CHARACTER VARYING             NOT NULL
 )TABLESPACE darts_tables; 
 
 COMMENT ON TABLE transcription_status
@@ -1137,7 +1162,8 @@ IS 'primary key of transcription_status';
 
 CREATE TABLE transcription_type
 (trt_id                      INTEGER                       NOT NULL
-,description                 CHARACTER VARYING        
+,description                 CHARACTER VARYING             NOT NULL
+,display_state               BOOLEAN                       NOT NULL       
 )TABLESPACE darts_tables;
 
 COMMENT ON TABLE transcription_type
@@ -1149,7 +1175,8 @@ IS 'primary key, but not sequence generated';
 
 CREATE TABLE transcription_urgency
 (tru_id                      INTEGER                       NOT NULL
-,description                 CHARACTER VARYING
+,description                 CHARACTER VARYING             NOT NULL
+,display_state               BOOLEAN                       NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON TABLE transcription_urgency 
@@ -1194,6 +1221,8 @@ CREATE TABLE user_account
 ,description                 CHARACTER VARYING
 ,user_state                  INTEGER
 ,last_login_ts               TIMESTAMP WITH TIME ZONE
+,is_system_user              BOOLEAN                       NOT NULL
+,account_guid                CHARACTER VARYING             NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1290,6 +1319,9 @@ ALTER TABLE media                   ADD PRIMARY KEY USING INDEX media_pk;
 
 CREATE UNIQUE INDEX media_request_pk ON media_request(mer_id) TABLESPACE darts_indexes;
 ALTER TABLE media_request           ADD PRIMARY KEY USING INDEX media_request_pk;
+
+CREATE UNIQUE INDEX media_type_pk ON media_type(met_id) TABLESPACE darts_indexes;
+ALTER TABLE media_type           ADD PRIMARY KEY USING INDEX media_type_pk;
 
 CREATE UNIQUE INDEX node_register_pk ON node_register(node_id) TABLESPACE darts_indexes;
 ALTER TABLE node_register         ADD PRIMARY KEY USING INDEX node_register_pk;
@@ -1677,6 +1709,10 @@ ALTER TABLE media
 ADD CONSTRAINT media_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
+ALTER TABLE media   
+ADD CONSTRAINT media_media_type_fk
+FOREIGN KEY (met_id) REFERENCES media_type(met_id);
+
 ALTER TABLE media_request               
 ADD CONSTRAINT media_request_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
@@ -1924,6 +1960,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_media_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON judge TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media_request TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON media_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON node_register TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON notification TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON object_directory_status TO darts_user;
