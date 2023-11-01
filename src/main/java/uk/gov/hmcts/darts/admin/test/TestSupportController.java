@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AuditActivityRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -53,6 +56,7 @@ public class TestSupportController {
     private final AuditActivityRepository auditActivityRepository;
     private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
+    private final UserIdentity userIdentity;
 
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
@@ -85,10 +89,20 @@ public class TestSupportController {
 
         removeDailyLists(session);
 
+        removeUserCourthousePermissions(session, courthouseTrash);
+
         removeCourtHouses(session);
 
         session.getTransaction().commit();
         session.close();
+    }
+
+    private void removeUserCourthousePermissions(Session session,List cthIds) {
+        session.createNativeQuery("""
+                                             delete from darts.security_group_courthouse_ae where cth_id in (?)
+                                             """, Integer.class)
+            .setParameter(1, cthIds)
+            .executeUpdate();
     }
 
     private void removeDailyLists(Session session) {
@@ -123,12 +137,23 @@ public class TestSupportController {
             var courthouse = courthouseRepository.findByCourthouseNameIgnoreCase(courthouseName)
                 .orElseGet(() -> newCourthouse(courthouseName));
 
+            newUserCourthousePermissions(courthouse);
             newCourtroom(courtroomName, courthouse);
 
             courthouseTrash.add(courthouse.getId());
         }
 
         return new ResponseEntity<>(CREATED);
+    }
+
+    private void newUserCourthousePermissions(CourthouseEntity courthouse) {
+        UserAccountEntity userAccountEntity = userIdentity.getUserAccount();
+        if (userAccountEntity != null) {
+            for (SecurityGroupEntity securityGroupEntity : userAccountEntity.getSecurityGroupEntities()) {
+                courthouse.getSecurityGroups().add(securityGroupEntity);
+            }
+        }
+        courthouseRepository.saveAndFlush(courthouse);
     }
 
     @PostMapping(value = "/audit/{audit_activity}/courthouse/{courthouse_name}")

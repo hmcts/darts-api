@@ -43,11 +43,21 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.BAD_REQUEST,
         "Unexpected transcription urgency for this workflow"
     ),
-    INTERNAL_SERVER_ERROR(
+    DUPLICATE_TRANSCRIPTION(
         "107",
+        HttpStatus.CONFLICT,
+        "A transcription already exists with these properties"
+    ),
+    FAILED_TO_ATTACH_TRANSCRIPT(
+        "108",
+        HttpStatus.BAD_REQUEST,
+        "Failed to attach transcript"
+    ),
+    INTERNAL_SERVER_ERROR(
+        "109",
         HttpStatus.INTERNAL_SERVER_ERROR,
         "The requested data cannot be located"
-    ),;
+    );
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";
 

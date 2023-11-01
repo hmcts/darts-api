@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -115,7 +116,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
     void shouldSaveTransientDataLocation() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(testUser);
+        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(testUser, AudioRequestType.DOWNLOAD);
 
         when(mockTransientObjectDirectoryService.saveTransientDataLocation(
             mediaRequestEntity,

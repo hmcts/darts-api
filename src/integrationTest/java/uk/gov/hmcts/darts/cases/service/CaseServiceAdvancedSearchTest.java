@@ -2,15 +2,15 @@ package uk.gov.hmcts.darts.cases.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
@@ -29,6 +30,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
@@ -39,25 +41,23 @@ import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWit
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 
 @ExtendWith(MockitoExtension.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Autowired
     CaseService service;
+    @MockBean
+    private UserIdentity mockUserIdentity;
     CourthouseEntity swanseaCourthouse;
     ObjectMapper objectMapper;
 
-    @BeforeAll
-    void beforeAll() {
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
-    }
-
     @BeforeEach
     void setupData() {
-        CourthouseEntity swanseaCourthouse = someMinimalCourthouse();
+        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+        objectMapper = objectMapperConfig.objectMapper();
+
+        swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
 
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
@@ -156,6 +156,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .caseNumber("sE1")
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -176,11 +177,11 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
     @Test
     void getWithDateRangeFrom() throws IOException {
-
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .dateFrom(LocalDate.of(2023, 7, 21))
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -196,6 +197,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .dateTo(LocalDate.of(2023, 6, 21))
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -212,6 +214,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .dateTo(LocalDate.of(2023, 7, 21))
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -228,6 +231,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .dateTo(LocalDate.of(2023, 10, 22))
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -243,6 +247,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .judgeName("3A")
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -258,6 +263,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .courtroom("roOm2")
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -273,6 +279,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .eventTextContains("nT5b")
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
@@ -290,12 +297,19 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
             .judgeName("dGe6B")
             .build();
 
+        setupUserAccountAndSecurityGroup();
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroomJudge/expectedResponse.json"));
         compareJson(actualResponse, expectedResponse);
+    }
+
+    private void setupUserAccountAndSecurityGroup() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(swanseaCourthouse);
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
     }
 
 }

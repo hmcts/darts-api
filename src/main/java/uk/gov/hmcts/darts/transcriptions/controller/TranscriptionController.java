@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.transcriptions.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
@@ -73,8 +75,31 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscription updateTranscription) {
 
+        return ResponseEntity.ok(transcriptionService.updateTranscription(transcriptionId, updateTranscription));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {TRANSCRIBER})
+    public ResponseEntity<AttachTranscriptResponse> attachTranscript(Integer transcriptionId,
+                                                                     MultipartFile transcript) {
+        return ResponseEntity.ok(transcriptionService.attachTranscript(transcriptionId, transcript));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<TranscriptionTypeResponse>> getTranscriptionTypes() {
         return new ResponseEntity<>(
-            transcriptionService.updateTranscription(transcriptionId, updateTranscription),
+            transcriptionService.getTranscriptionTypes(),
+            HttpStatus.OK
+        );
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<TranscriptionUrgencyResponse>> getTranscriptionUrgencies() {
+        return new ResponseEntity<>(
+            transcriptionService.getTranscriptionUrgencies(),
             HttpStatus.OK
         );
     }
@@ -115,24 +140,6 @@ public class TranscriptionController implements TranscriptionApi {
 
     private boolean transcriptionDatesAreSet(OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
         return !isNull(startDateTime) || !isNull(endDateTime);
-    }
-
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<List<TranscriptionTypeResponse>> getTranscriptionTypes() {
-        return new ResponseEntity<>(
-            transcriptionService.getTranscriptionTypes(),
-            HttpStatus.OK
-        );
-    }
-
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<List<TranscriptionUrgencyResponse>> getTranscriptionUrgencies() {
-        return new ResponseEntity<>(
-            transcriptionService.getTranscriptionUrgencies(),
-            HttpStatus.OK
-        );
     }
 
     @Override

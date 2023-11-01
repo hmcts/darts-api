@@ -200,7 +200,89 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateTranscription'
-
+  /transcriptions/{transcription_id}/document:
+    post:
+      tags:
+        - Transcription
+      summary: Transcribers can upload a transcription document (Attach file and complete)
+      operationId: attachTranscript
+      parameters:
+        - name: transcription_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - transcript
+              type: object
+              properties:
+                transcript:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachTranscriptResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/AttachTranscript400ErrorCode'
+              example:
+                type: "TRANSCRIPTION_108"
+                title: "Failed to attach transcript"
+                status: 400
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/AttachTranscript404ErrorCode'
+              example:
+                type: "TRANSCRIPTION_101"
+                title: "The requested transcription cannot be found"
+                status: 404
   /transcriptions/types:
     get:
       tags:
@@ -270,7 +352,8 @@ components:
         - "TRANSCRIPTION_100"
         - "TRANSCRIPTION_104"
         - "TRANSCRIPTION_106"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY ]
+        - "TRANSCRIPTION_107"
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION ]
     UpdateTranscription:
       type: object
       required:
@@ -318,7 +401,26 @@ components:
       enum:
         - "TRANSCRIPTION_105"
       x-enum-varnames: [ TRANSCRIPTION_WORKFLOW_ACTION_INVALID ]
-
+    AttachTranscriptResponse:
+      type: object
+      required:
+        - transcription_document_id
+        - transcription_workflow_id
+      properties:
+        transcription_document_id:
+          type: integer
+        transcription_workflow_id:
+          type: integer
+    AttachTranscript400ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_108"
+      x-enum-varnames: [ FAILED_TO_ATTACH_TRANSCRIPT ]
+    AttachTranscript404ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_101"
+      x-enum-varnames: [ TRANSCRIPTION_NOT_FOUND ]
     TranscriptionTypesResponse:
       type: array
       items:
@@ -332,7 +434,6 @@ components:
         description:
           type: string
           example: Sentencing remarks
-
     TranscriptionUrgenciesResponse:
       type: array
       items:

@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
@@ -34,7 +35,7 @@ class TransientObjectDirectoryServiceTest {
     void shouldSaveTransientDataLocation() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity1 = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
+        var mediaRequestEntity1 = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(mediaRequestEntity1.getId());
         UUID externalLocation = UUID.fromString("f744a74f-83c0-47e4-8bb2-2fd4d2b68647");

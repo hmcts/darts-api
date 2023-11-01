@@ -12,7 +12,8 @@
     "id": null,
     "code": 457,
     "courthouseName": "SWANSEA",
-    "courtrooms": []
+    "courtrooms": [],
+    "securityGroups": []
   },
   "legacyObjectId": null,
   "uniqueId": "CSDDL1613756980160",

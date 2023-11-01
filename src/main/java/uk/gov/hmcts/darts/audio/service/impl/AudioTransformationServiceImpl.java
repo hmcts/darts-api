@@ -155,7 +155,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidRethrowingException"})
     private UUID processAudioRequest(Integer requestId) {
 
-        log.debug("Starting processing for audio request id: {}", requestId);
+        log.info("Starting processing for audio request id: {}", requestId);
         mediaRequestService.updateAudioRequestStatus(requestId, PROCESSING);
 
         MediaRequestEntity mediaRequestEntity = null;

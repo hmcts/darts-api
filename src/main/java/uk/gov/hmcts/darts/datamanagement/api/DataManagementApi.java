@@ -14,4 +14,6 @@ public interface DataManagementApi {
 
     void deleteBlobDataFromOutboundContainer(UUID blobId);
 
+    UUID saveBlobDataToInboundContainer(BinaryData binaryData);
+
 }

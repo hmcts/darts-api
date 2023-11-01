@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
@@ -26,7 +27,7 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
     @Test
     void getNonAccessedAudioCountForUser() throws Exception {
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        dartsDatabase.createAndLoadNonAccessedCurrentMediaRequestEntity(requestor);
+        dartsDatabase.createAndLoadNonAccessedCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .header("user_id", requestor.getId().toString());
 

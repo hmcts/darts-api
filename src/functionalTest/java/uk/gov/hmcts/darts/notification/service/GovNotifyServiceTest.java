@@ -37,13 +37,10 @@ class GovNotifyServiceTest {
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
 
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
-        assertEquals("DARTS: New Transcription Request Submitted and Awaiting Review", emailResponse.getSubject());
+        assertEquals("New transcript request submitted and awaiting review", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    A new Transcription request has been submitted and is awaiting your review.
-                    Please visit your DARTS Inbox to action this request.
-                    Regards
-                    DARTS""", emailResponse);
+                    There is a new transcript available for you to review.
+                    Sign into the DARTS Portal to access it.""", emailResponse);
     }
 
     private static void compare(String expected, SendEmailResponse emailResponse) {
@@ -73,13 +70,11 @@ class GovNotifyServiceTest {
     @Test
     void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
-        assertEquals("DARTS: New Transcription Request", emailResponse.getSubject());
+        assertEquals("New transcript request", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    A new request has been made for a Transcribed document.
-                    Please visit the My Inbox section from within the DARTS portal to access the request.
-                    Regards
-                    DARTS""", emailResponse);
+                    You have received a new transcription request from the DARTS Portal.\s
+
+                    To access the request, please [sign in to the DARTS Portal]""", emailResponse);
     }
 
 
@@ -111,13 +106,10 @@ class GovNotifyServiceTest {
     @Test
     void transcriptionRequestApproved() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED.toString());
-        assertEquals("DARTS: Transcript Request Approved", emailResponse.getSubject());
+        assertEquals("Transcript Request Approved", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    The transcript that you requested for case TheCaseId, has now been approved and will be available soon.
-                    You will be notified again once the Transcript becomes available on DARTS.
-                    Regards
-                    DARTS""", emailResponse);
+                    Your transcript request for case ID TheCaseId has been approved.
+                    We’ll notify you when it’s available to download.""", emailResponse);
     }
 
 
@@ -125,16 +117,17 @@ class GovNotifyServiceTest {
     void transcriptionRequestRejected() throws NotificationClientException, TemplateNotFoundException {
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
         parameterMap.put("rejection_reason", "TheRejectionReason");
-        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED.toString(), parameterMap);
+        SendEmailResponse emailResponse = createAndSend(
+            NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED.toString(),
+            parameterMap
+        );
         assertEquals("DARTS: Transcript Request Rejected", emailResponse.getSubject());
-        compare("""
-                    Hello,
-                    The Transcript Request you made for case TheCaseId has been rejected.
-                    Rejection Reason: TheRejectionReason
-                    If you still need a transcript for this case, please resubmit your request
-                    taking into account the rejection reason.
-                    Regards
-                    DARTS""", emailResponse);
+        compare(
+            """
+                Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason
+                Please resubmit your request, taking into account the reason for the original request's rejection.""",
+            emailResponse
+        );
     }
 
     @Test

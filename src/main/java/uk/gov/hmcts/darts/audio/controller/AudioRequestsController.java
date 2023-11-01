@@ -47,6 +47,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     private final AuditService auditService;
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<AudioNonAccessedResponse> getNonAccessedCount(Integer userId) {
         return new ResponseEntity<>(mediaRequestService.countNonAccessedAudioForUser(userId), HttpStatus.OK);
 
@@ -112,4 +113,19 @@ public class AudioRequestsController implements AudioRequestsApi {
         mediaRequestService.scheduleMediaRequestPendingNotification(audioRequest);
         return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
     }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = MEDIA_REQUEST_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+    public ResponseEntity<Resource> playback(Integer mediaRequestId) {
+        InputStream audioFileStream = mediaRequestService.playback(mediaRequestId);
+
+        return new ResponseEntity<>(
+            new InputStreamResource(audioFileStream),
+            HttpStatus.OK
+        );
+    }
+
+
 }

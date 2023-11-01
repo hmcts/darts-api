@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
@@ -38,7 +39,8 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     void getYourAudioCurrent() throws Exception {
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
+        var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        dartsDatabase.createAndLoadCompletedMediaRequestEntity(currentMediaRequest.getHearing(), requestor, AudioRequestType.DOWNLOAD);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
             .header(
@@ -56,12 +58,30 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
                 {
                     "media_request_id": 1,
                     "case_id": 1,
+                    "hearing_id": 1,
                     "case_number": "2",
                     "courthouse_name": "NEWCASTLE",
                     "hearing_date": "2023-06-10",
                     "media_request_start_ts": "2023-06-26T13:00:00Z",
                     "media_request_end_ts": "2023-06-26T13:45:00Z",
                     "media_request_status": "OPEN",
+                    "last_accessed_ts": "2023-06-30T13:00:00Z",
+                    "request_type": "DOWNLOAD"
+                },
+                {
+                    "media_request_id": 2,
+                    "case_id": 1,
+                    "hearing_id": 1,
+                    "request_type": "DOWNLOAD",
+                    "case_number": "2",
+                    "courthouse_name": "NEWCASTLE",
+                    "hearing_date": "2023-06-10",
+                    "media_request_start_ts": "2023-06-26T13:00:00Z",
+                    "media_request_end_ts": "2023-06-26T13:45:00Z",
+                    "media_request_expiry_ts": "2023-07-02T13:00:00Z",
+                    "media_request_status": "COMPLETED",
+                    "output_filename": "T20231010_0",
+                    "output_format": "ZIP",
                     "last_accessed_ts": "2023-06-30T13:00:00Z"
                 }
             ]
@@ -73,10 +93,11 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     void getYourAudioExpired() throws Exception {
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
+        var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var expiredMediaRequest = dartsDatabase.createAndLoadExpiredMediaRequestEntity(
             currentMediaRequest.getHearing(),
-            currentMediaRequest.getRequestor()
+            currentMediaRequest.getRequestor(),
+            AudioRequestType.DOWNLOAD
         );
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))
@@ -123,7 +144,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     void getYourAudioExpiredShouldReturnEmptyArrayInResponseBodyWhenNoExpiredMediaRequestExists() throws Exception {
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor);
+        dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))
             .header(

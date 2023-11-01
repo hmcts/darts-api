@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.time.OffsetDateTime;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -149,7 +149,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
     @Order(7)
     void shouldThrowExceptionWhenGetMediaRequestByIdInvalid() {
-        assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(-3));
+        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestById(-3));
     }
 
     @Test
@@ -164,7 +164,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         assertNotNull(mediaRequestEntity);
 
         mediaRequestService.deleteAudioRequest(request.getId());
-        assertThrows(NoSuchElementException.class, () -> mediaRequestService.getMediaRequestById(request.getId()));
+        assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestById(request.getId()));
     }
 
 }

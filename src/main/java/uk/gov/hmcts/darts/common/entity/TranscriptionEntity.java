@@ -89,4 +89,8 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "tra_id")})
     private TranscriptionDocumentEntity transcriptionDocument;
 
+
+    @OneToMany(mappedBy = TranscriptionDocumentEntity_.TRANSCRIPTION)
+    private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
+
 }

@@ -10,9 +10,11 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
@@ -28,6 +30,10 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity_;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity_;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity_;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +42,22 @@ import java.util.Optional;
 
 @Component
 @SuppressWarnings({"PMD.TooManyMethods"})
+@RequiredArgsConstructor
 public class AdvancedSearchRequestHelper {
     @PersistenceContext
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    private final UserIdentity userIdentity;
 
     public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) {
+        return getMatchingCourtCases(request, true);
+    }
+
+    public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request, boolean useRoles) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Integer> criteriaQuery = criteriaBuilder.createQuery(Integer.class);
         Root<CourtCaseEntity> caseRoot = criteriaQuery.from(CourtCaseEntity.class);
-        List<Predicate> predicates = createPredicates(request, criteriaBuilder, caseRoot);
+        List<Predicate> predicates = createPredicates(request, criteriaBuilder, caseRoot, useRoles);
 
         Predicate finalAndPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         criteriaQuery.where(finalAndPredicate);
@@ -55,7 +68,7 @@ public class AdvancedSearchRequestHelper {
         return query.getResultList();
     }
 
-    private List<Predicate> createPredicates(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+    private List<Predicate> createPredicates(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot, boolean useRoles) {
         List<Predicate> predicates = new ArrayList<>();
         CollectionUtils.addAll(predicates, createCaseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, caseRoot));
@@ -64,6 +77,9 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
+        if (useRoles) {
+            CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
+        }
         return predicates;
 
     }
@@ -138,6 +154,18 @@ public class AdvancedSearchRequestHelper {
         return predicateList;
     }
 
+    private List<Predicate> addUserSecurityRolesCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
+
+        List<Predicate> predicateList = new ArrayList<>();
+        Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
+        predicateList.add(criteriaBuilder.equal(
+                              criteriaBuilder.lower(userJoin.get(UserAccountEntity_.EMAIL_ADDRESS)),
+                              userIdentity.getEmailAddress().toLowerCase()
+                          )
+        );
+        return predicateList;
+    }
+
     private List<Predicate> addJudgeCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         if (StringUtils.isNotBlank(request.getJudgeName())) {
@@ -183,6 +211,18 @@ public class AdvancedSearchRequestHelper {
         return caseRoot.join(CourtCaseEntity_.JUDGES, JoinType.INNER);
     }
 
+    private Join<CourtCaseEntity, UserAccountEntity> joinUser(Root<CourtCaseEntity> caseRoot) {
+        //case -> courthouse -> securityGroups -> user
+        Join<CourtCaseEntity, CourthouseEntity> courthouseJoin = joinCourthouse(caseRoot);
+
+        Join<CourthouseEntity, SecurityGroupEntity> securityGroupJoin = courthouseJoin.join(
+            CourthouseEntity_.SECURITY_GROUPS,
+            JoinType.INNER
+        );
+        return securityGroupJoin.join(SecurityGroupEntity_.USERS, JoinType.INNER);
+    }
+
+
     @SuppressWarnings("unchecked")
     private Join<HearingEntity, CourtroomEntity> joinCourtroom(Root<CourtCaseEntity> caseRoot) {
         Join<CourtCaseEntity, HearingEntity> hearingJoin = joinHearing(caseRoot);
@@ -194,8 +234,12 @@ public class AdvancedSearchRequestHelper {
 
     }
 
+    @SuppressWarnings("unchecked")
     private Join<CourtCaseEntity, CourthouseEntity> joinCourthouse(Root<CourtCaseEntity> caseRoot) {
-        return caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER);
+        Optional<Join<CourtCaseEntity, ?>> foundJoin = caseRoot.getJoins().stream().filter(join -> join.getAttribute().getName().equals(
+            CourtroomEntity_.COURTHOUSE)).findAny();
+        return foundJoin.map(join -> (Join<CourtCaseEntity, CourthouseEntity>) join)
+            .orElseGet(() -> caseRoot.join(CourtroomEntity_.COURTHOUSE, JoinType.INNER));
     }
 
     private Join<CourtCaseEntity, DefendantEntity> joinDefendantEntity(Root<CourtCaseEntity> caseRoot) {
