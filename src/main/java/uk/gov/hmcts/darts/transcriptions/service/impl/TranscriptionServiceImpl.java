@@ -197,6 +197,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
 
+        handleNotificationsAndAudit(userAccountEntity, transcriptionEntity, transcriptionStatusEntity);
+        return updateTranscriptionResponse;
+    }
+
+    @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault"})
+    private void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
+                                             TranscriptionEntity transcriptionEntity,
+                                             TranscriptionStatusEntity transcriptionStatusEntity) {
         TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
 
         final var courtCaseEntity = transcriptionEntity.getCourtCase();
@@ -214,14 +222,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED);
                 auditService.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
-            case WITH_TRANSCRIBER -> {
-                auditService.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
-            }
-            case COMPLETE -> {
-                auditService.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
-            }
+            case WITH_TRANSCRIBER -> auditService.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            case COMPLETE -> auditService.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
         }
-        return updateTranscriptionResponse;
     }
 
     private void validateUpdateTranscription(TranscriptionEntity transcription,
@@ -406,6 +409,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
+    @SuppressWarnings({"java:S4790"})
     public AttachTranscriptResponse attachTranscript(Integer transcriptionId,
                                                      MultipartFile transcript) {
 
@@ -414,7 +418,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()));
 
         final UUID externalLocation;
-        final String checksum;
+        final String checksum; // equivalent to the CONTENT-MD5 tag value as a base64 encoded representation of the binary MD5 hash value
         try {
             BinaryData binaryData = BinaryData.fromStream(transcript.getInputStream());
             checksum = new String(encodeBase64(md5(binaryData.toBytes())));
@@ -461,9 +465,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         final var externalObjectDirectoryEntity = latestTranscriptionDocumentEntity.getExternalObjectDirectoryEntities()
             .stream()
-            .filter(externalObjectDirectoryEntity1 -> UNSTRUCTURED.getId()
-                == externalObjectDirectoryEntity1.getExternalLocationType().getId()
-                && nonNull(externalObjectDirectoryEntity1.getExternalLocation()))
+            .filter(externalObjectDirectoryEntity1 ->
+                        UNSTRUCTURED.getId().equals(externalObjectDirectoryEntity1.getExternalLocationType().getId())
+                            && nonNull(externalObjectDirectoryEntity1.getExternalLocation()))
             .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
             .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
