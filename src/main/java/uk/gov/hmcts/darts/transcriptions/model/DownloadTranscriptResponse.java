@@ -12,6 +12,7 @@ public class DownloadTranscriptResponse {
 
     private Resource resource;
     private String fileName;
+    private String contentType;
     private UUID externalLocation;
     private Integer transcriptionDocumentId;
 

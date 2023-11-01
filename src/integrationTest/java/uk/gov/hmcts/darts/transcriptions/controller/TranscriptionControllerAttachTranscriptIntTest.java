@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -35,11 +36,16 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.unit.DataSize.ofBytes;
 import static org.springframework.util.unit.DataSize.ofMegabytes;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.COMPLETE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -68,18 +74,20 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
     @MockBean
     private MultipartProperties mockMultipartProperties;
+    @MockBean
+    private AuditService mockAuditService;
 
     private Integer transcriptionId;
     private Integer testUserId;
 
+    private TranscriptionEntity transcriptionEntity;
     private SecurityGroupEntity transcriptionCompany;
 
     @BeforeEach
-    @Transactional
     void beforeEach() {
         authorisationStub.givenTestSchema();
 
-        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+        transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
         TranscriptionStub transcriptionStub = dartsDatabaseStub.getTranscriptionStub();
 
@@ -119,6 +127,9 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofMegabytes(10));
         when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofMegabytes(10));
+
+        doNothing().when(mockAuditService)
+            .recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -147,6 +158,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(mockAuditService);
     }
 
     @Test
@@ -177,6 +190,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(mockAuditService);
     }
 
     @Test
@@ -210,6 +225,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+        verifyNoInteractions(mockAuditService);
     }
 
     @Test
@@ -275,6 +292,9 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
         assertEquals(INBOUND.getId(), externalObjectDirectoryEntity.getExternalLocationType().getId());
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
+
+        verify(mockAuditService).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditService).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -337,6 +357,9 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
         assertEquals(INBOUND.getId(), externalObjectDirectoryEntity.getExternalLocationType().getId());
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
+
+        verify(mockAuditService).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditService).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
 }

@@ -464,7 +464,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             .filter(externalObjectDirectoryEntity1 -> UNSTRUCTURED.getId()
                 == externalObjectDirectoryEntity1.getExternalLocationType().getId()
                 && nonNull(externalObjectDirectoryEntity1.getExternalLocation()))
-            .max(comparing(ExternalObjectDirectoryEntity::getLastModifiedDateTime))
+            .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
             .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
         final UUID externalLocation = externalObjectDirectoryEntity.getExternalLocation();
@@ -473,6 +473,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return DownloadTranscriptResponse.builder()
             .resource(new InputStreamResource(dataManagementApi.getBlobDataFromUnstructuredContainer(externalLocation)
                                                   .toStream()))
+            .contentType(latestTranscriptionDocumentEntity.getFileType())
             .fileName(latestTranscriptionDocumentEntity.getFileName())
             .externalLocation(externalLocation)
             .transcriptionDocumentId(latestTranscriptionDocumentEntity.getId()).build();

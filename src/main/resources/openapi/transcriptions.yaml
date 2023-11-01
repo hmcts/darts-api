@@ -156,7 +156,15 @@ paths:
         '200':
           description: OK
           content:
+            application/*:
+              schema:
+                type: string
+                format: binary
             application/msword:
+              schema:
+                type: string
+                format: binary
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
               schema:
                 type: string
                 format: binary
