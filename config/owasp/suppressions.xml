@@ -1,30 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
-  <!--Please add all the false positives under the below section-->
-  <suppress>
-    <notes>Dependency brought in through gov-notify, so we can't control this.</notes>
-    <cve>CVE-2022-45688</cve>
-  </suppress>
-  <suppress>
+
+  <suppress until="2024-01-14">
+    <notes>Suppression for netty. Pulled in by springboot on latest version</notes>
     <cve>CVE-2023-4586</cve>
   </suppress>
-
-  <suppress>
-    <notes>The vulnerability only affects applications that use an LDAP CertStore from Bouncy Castle to validate X.509
-      certificates.
-      I have spoken to Hemanta who has confirmed we don't do this.
-    </notes>
-    <cve>CVE-2023-33201</cve>
-  </suppress>
-
-  <suppress until="2023-12-14">
-    <notes>URL Redirection to Untrusted Site ('Open Redirect') vulnerability in FORM authentication feature Apache
-      Tomcat.
-    </notes>
-    <vulnerabilityName>CVE-2023-41080</vulnerabilityName>
-  </suppress>
-
-  <!--End of temporary suppression section -->
 
   <!--Please add all the false positives under the below section-->
   <suppress>
