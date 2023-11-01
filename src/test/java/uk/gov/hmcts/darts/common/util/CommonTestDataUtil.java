@@ -211,7 +211,7 @@ public class CommonTestDataUtil {
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
         transcription.setId(1);
         transcription.setCreatedBy(createUserAccount());
-        transcription.setTranscriptionDocument(createTranscriptionDocument());
+        transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
         transcription.setTranscriptionStatus(createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
 
@@ -222,10 +222,12 @@ public class CommonTestDataUtil {
         return List.of(transcription);
     }
 
-    private static TranscriptionDocumentEntity createTranscriptionDocument() {
+    private static List<TranscriptionDocumentEntity> createTranscriptionDocuments() {
+        List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setFileName("test.doc");
-        return transcriptionDocumentEntity;
+        transcriptionDocumentEntities.add(transcriptionDocumentEntity);
+        return transcriptionDocumentEntities;
     }
 
     public UserAccountEntity createUserAccount() {

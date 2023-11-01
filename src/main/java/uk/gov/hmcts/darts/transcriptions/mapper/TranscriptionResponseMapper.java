@@ -54,8 +54,8 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setCourthouse(transcriptionEntity.getCourtCase().getCourthouse().getCourthouseName());
             transcriptionResponse.setDefendants(transcriptionEntity.getCourtCase().getDefendantStringList());
             transcriptionResponse.setJudges(transcriptionEntity.getCourtCase().getJudgeStringList());
-            if (transcriptionEntity.getTranscriptionDocument() != null) {
-                transcriptionResponse.setTranscriptFileName(transcriptionEntity.getTranscriptionDocument().getFileName());
+            if (!transcriptionEntity.getTranscriptionDocumentEntities().isEmpty()) {
+                transcriptionResponse.setTranscriptFileName(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getFileName());
             }
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
             if (transcriptionEntity.getTranscriptionUrgency() != null) {
