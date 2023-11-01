@@ -96,4 +96,17 @@ public class UserAccountStub {
         return testUser;
     }
 
+    public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(36);
+        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
+        securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().clear();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
 }

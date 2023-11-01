@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
@@ -56,7 +57,8 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
     private static final String SOME_START_TIME = "2023-01-01T12:00:00Z";
     private static final String SOME_END_TIME = "2023-01-01T13:00:00Z";
 
-    private static final AudioRequestType AUDIO_REQUEST_TYPE = AudioRequestType.PLAYBACK;
+    private static final AudioRequestType AUDIO_REQUEST_TYPE_PLAYBACK = AudioRequestType.PLAYBACK;
+    private static final AudioRequestType AUDIO_REQUEST_TYPE_DOWNLOAD = AudioRequestType.DOWNLOAD;
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse(SOME_START_TIME);
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse(SOME_END_TIME);
 
@@ -96,7 +98,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
         when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
 
-        var audioRequestDetails = createAudioRequestDetails(hearingEntity);
+        var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
@@ -108,7 +110,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
     @Test
     void addAudioRequestPostShouldReturnSuccess() throws Exception {
 
-        var audioRequestDetails = createAudioRequestDetails(hearingEntity);
+        var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_PLAYBACK);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
@@ -137,7 +139,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(testUser.getId(), mediaRequestEntity.getRequestor().getId());
         assertEquals(START_TIME, mediaRequestEntity.getStartTime());
         assertEquals(END_TIME, mediaRequestEntity.getEndTime());
-        assertEquals(AUDIO_REQUEST_TYPE, mediaRequestEntity.getRequestType());
+        assertEquals(AUDIO_REQUEST_TYPE_PLAYBACK, mediaRequestEntity.getRequestType());
         assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
         assertEquals(0, mediaRequestEntity.getAttempts());
 
@@ -161,10 +163,82 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
     }
 
-    private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity) {
+    @Test
+    void addAudioRequestDownloadPostShouldReturnSuccessForTranscriber() throws Exception {
+        var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(audioRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.request_id").isNumber())
+            .andExpect(jsonPath("$.case_id").isNumber())
+            .andExpect(jsonPath("$.case_number").value(SOME_CASE_NUMBER))
+            .andExpect(jsonPath("$.courthouse_name").value(SOME_COURTHOUSE))
+            .andExpect(jsonPath("$.defendants").isNotEmpty())
+            .andExpect(jsonPath("$.hearing_date").value(HEARING_DATE))
+            .andExpect(jsonPath("$.start_time").value(SOME_START_TIME))
+            .andExpect(jsonPath("$.end_time").value(SOME_END_TIME))
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        Integer mediaRequestId = JsonPath.parse(actualJson).read("$.request_id");
+        assertNotNull(mediaRequestId);
+
+        MediaRequestEntity mediaRequestEntity = dartsDatabase.getMediaRequestRepository().findById(mediaRequestId)
+            .orElseThrow();
+
+        assertEquals(hearingEntity.getId(), mediaRequestEntity.getHearing().getId());
+        assertEquals(testUser.getId(), mediaRequestEntity.getRequestor().getId());
+        assertEquals(START_TIME, mediaRequestEntity.getStartTime());
+        assertEquals(END_TIME, mediaRequestEntity.getEndTime());
+        assertEquals(AUDIO_REQUEST_TYPE_DOWNLOAD, mediaRequestEntity.getRequestType());
+        assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
+        assertEquals(0, mediaRequestEntity.getAttempts());
+
+        List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()
+            .findByStatusIn(Collections.singletonList(NotificationStatus.OPEN));
+        assertEquals(1, notifications.size());
+        assertEquals(
+            NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString(),
+            notifications.get(0).getEventId()
+        );
+        assertEquals(
+            dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getEmailAddress(),
+            notifications.get(0).getEmailAddress()
+        );
+        assertEquals(
+            mediaRequestEntity.getHearing().getCourtCase().getCaseNumber(),
+            notifications.get(0).getCourtCase().getCaseNumber()
+        );
+
+        assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
+
+    }
+
+    @Test
+    void addAudioRequestDownloadPostShouldThrow403() throws Exception {
+        CourthouseEntity courthouse = dartsDatabase.findCourthouseWithName(SOME_COURTHOUSE);
+        testUser = dartsDatabase.getUserAccountStub().createJudgeUser(courthouse);
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        //testUser = dartsDatabase.getUserAccountStub().createUnauthorisedIntegrationTestUser();
+        var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(audioRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isForbidden())
+            .andReturn();
+    }
+
+    private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity, AudioRequestType audioRequestTypeDownload) {
         var audioRequestDetails = new AudioRequestDetails();
 
-        audioRequestDetails.setRequestType(AUDIO_REQUEST_TYPE);
+        audioRequestDetails.setRequestType(audioRequestTypeDownload);
         audioRequestDetails.setHearingId(hearingEntity.getId());
         audioRequestDetails.setStartTime(START_TIME);
         audioRequestDetails.setEndTime(END_TIME);
