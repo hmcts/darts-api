@@ -60,8 +60,11 @@ public class AuthorisationAspect {
 
         JsonNode jsonNode = objectMapper.valueToTree(body);
 
-        authoriseMultipleContext(List.of(authorisationAnnotation.contextId()), roles, jsonNode);
+        List<ContextIdEnum> contextIds = List.of(authorisationAnnotation.contextId());
 
+        contextIds.stream().forEach(
+            contextId -> controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(jsonNode, roles)
+        );
         return joinPoint.proceed();
     }
 
@@ -80,42 +83,27 @@ public class AuthorisationAspect {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
 
-        authoriseMultipleContext(List.of(authorisationAnnotation.contextId()), request, roles);
+        List<ContextIdEnum> contextIds = List.of(authorisationAnnotation.contextId());
+
+        contextIds.stream().forEach(
+            contextId -> controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles)
+        );
+
+        contextIds.stream().filter(
+            contextId -> handleContext(contextId, request, roles)
+        ).findFirst().orElseThrow(() -> new DartsApiException(AuthorisationError.BAD_REQUEST));
     }
 
-    private void authoriseMultipleContext(List<ContextIdEnum> contextIds, Set<SecurityRoleEnum> roles, JsonNode jsonNode) {
-
-        int lastContextIndex = contextIds.size() - 1;
-        for (int index = 0; index < contextIds.size(); index++) {
-            try {
-                ContextIdEnum contextId = contextIds.get(index);
-                controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(jsonNode, roles);
-                break;
-            } catch (Exception e) {
-                if (index == lastContextIndex) {
-                    throw e;
-                }
-            }
+    private boolean handleContext(ContextIdEnum contextId, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
+        boolean success = false;
+        try {
+            controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles);
+            success = true;
+        } catch (DartsApiException e) {
+            log.error("Unable to authenticate ", e);
         }
+        return success;
     }
-
-    private void authoriseMultipleContext(List<ContextIdEnum> contextIds, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        contextIds.stream()
-            .filter(contextId -> authoriseContext(contextId, request, roles))
-            .findFirst();
-    }
-
-    private boolean authoriseContext(ContextIdEnum contextId, Set<SecurityRoleEnum> roles, JsonNode jsonNode) {
-        controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(jsonNode, roles);
-        return true;
-    }
-
-    private boolean authoriseContext(ContextIdEnum contextId, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles);
-        return true;
-    }
-
-
 
     private boolean handleRequestBodyAuthorisation(@NotNull String method) {
         return switch (method) {

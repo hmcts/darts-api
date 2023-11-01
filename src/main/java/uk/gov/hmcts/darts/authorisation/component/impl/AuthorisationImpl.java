@@ -24,6 +24,7 @@ import java.util.Set;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_HEARING_ID_AND_CASE_ID;
 import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
 import static uk.gov.hmcts.darts.hearings.exception.HearingApiError.HEARING_NOT_FOUND;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
@@ -114,4 +115,20 @@ public class AuthorisationImpl implements Authorisation {
             throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
         }
     }
+
+    @Override
+    public void authoriseByHearingIdOrCaseId(Integer hearingId, Integer caseId, Set<SecurityRoleEnum> securityRoles) {
+        try {
+            authoriseByHearingId(hearingId, securityRoles);
+        } catch (DartsApiException ex1) {
+            log.warn("Unable to validate hearing", ex1.getMessage());
+            try {
+                authoriseByCaseId(caseId, securityRoles);
+            } catch (DartsApiException ex2) {
+                log.error("Unable to validate case id", ex2.getMessage());
+                throw new DartsApiException(BAD_REQUEST_HEARING_ID_AND_CASE_ID);
+            }
+        }
+    }
+
 }

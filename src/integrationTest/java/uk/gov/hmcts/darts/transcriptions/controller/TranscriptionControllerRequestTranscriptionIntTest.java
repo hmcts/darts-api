@@ -256,11 +256,11 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isNotFound())
+            .andExpect(status().isBadRequest())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertCaseNotFound404Error(actualJson);
+        assertAuthorisation400Error(actualJson);
 
         assertAudit(0);
     }
@@ -411,21 +411,21 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isNotFound())
+            .andExpect(status().isBadRequest())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertCaseNotFound404Error(actualJson);
+        assertAuthorisation400Error(actualJson);
 
         assertAudit(0);
     }
 
-    private void assertCaseNotFound404Error(String actualJson) {
+    private void assertAuthorisation400Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "CASE_104",
-              "title": "The requested case cannot be found",
-              "status": 404
+              "type": "AUTHORISATION_107",
+              "title": "Failed to check authorisation for the hearing and case",
+              "status": 400
             }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
@@ -449,12 +449,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isNotFound())
+            .andExpect(status().isBadRequest())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
 
-        assertCaseNotFound404Error(actualJson);
+        assertAuthorisation400Error(actualJson);
         assertAudit(0);
     }
 

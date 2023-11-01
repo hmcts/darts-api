@@ -20,4 +20,6 @@ public interface Authorisation {
 
     void authoriseMediaRequestAgainstUser(Integer mediaRequestId);
 
+    void authoriseByHearingIdOrCaseId(Integer hearingId, Integer caseId, Set<SecurityRoleEnum> securityRoles);
+
 }
