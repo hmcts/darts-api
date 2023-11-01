@@ -67,6 +67,10 @@ sourceSets {
   }
 }
 
+configurations.all {
+  exclude group: 'org.bouncycastle', module: 'bcprov-jdk18on' // bcprov-jdk18on-1.73.jar CVE-2023-33201
+}
+
 configurations {
   functionalTestImplementation.extendsFrom testImplementation
   functionalTestRuntimeOnly.extendsFrom runtimeOnly
