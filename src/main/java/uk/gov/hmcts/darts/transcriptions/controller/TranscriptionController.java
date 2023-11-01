@@ -1,14 +1,15 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import io.swagger.v3.oas.annotations.*;
-import io.swagger.v3.oas.annotations.enums.*;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -17,7 +18,13 @@ import uk.gov.hmcts.darts.transcriptions.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
-import uk.gov.hmcts.darts.transcriptions.model.*;
+import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
@@ -29,7 +36,6 @@ import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -133,7 +139,8 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, REQUESTER, JUDGE, TRANSCRIBER, RCJ_APPEALS})
     public ResponseEntity<TranscriptionResponse> getTranscription(
-        @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true, in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
+        @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
+            in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
     ) {
         return new ResponseEntity<>(
             transcriptionService.getTranscription(transcriptionId),
