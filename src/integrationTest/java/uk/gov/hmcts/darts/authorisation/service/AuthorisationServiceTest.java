@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,6 +68,8 @@ class AuthorisationServiceTest {
         judgeUserAccount.setSecurityGroupEntities(Set.of(judgesSecurityGroup));
         judgeUserAccount.setCreatedBy(testUser);
         judgeUserAccount.setLastModifiedBy(testUser);
+        judgeUserAccount.setAccountGuid(UUID.randomUUID().toString());
+        judgeUserAccount.setIsSystemUser(false);
         UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
@@ -78,6 +81,8 @@ class AuthorisationServiceTest {
         bristolUserAccount.setSecurityGroupEntities(Set.of(bristolStaff, bristolAppr));
         bristolUserAccount.setCreatedBy(testUser);
         bristolUserAccount.setLastModifiedBy(testUser);
+        bristolUserAccount.setAccountGuid(UUID.randomUUID().toString());
+        bristolUserAccount.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(bristolUserAccount);
 
         UserAccountEntity newUser = new UserAccountEntity();
@@ -85,6 +90,8 @@ class AuthorisationServiceTest {
         newUser.setEmailAddress(TEST_NEW_EMAIL);
         newUser.setCreatedBy(testUser);
         newUser.setLastModifiedBy(testUser);
+        newUser.setAccountGuid(UUID.randomUUID().toString());
+        newUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(newUser);
     }
 

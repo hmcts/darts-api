@@ -48,6 +48,12 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "last_login_ts")
     private OffsetDateTime lastLoginTime;
 
+    @Column(name = "account_guid")
+    private String accountGuid;
+
+    @Column(name = "is_system_user")
+    private Boolean isSystemUser;
+
     @ManyToMany
     @JoinTable(name = "security_group_user_account_ae",
         joinColumns = {@JoinColumn(name = "usr_id")},
