@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -49,11 +50,12 @@ public class TranscriptionResponseMapper {
 
         TranscriptionResponse transcriptionResponse = new TranscriptionResponse();
         try {
-            transcriptionResponse.setCaseId(transcriptionEntity.getCourtCase().getId());
-            transcriptionResponse.setCaseNumber(transcriptionEntity.getCourtCase().getCaseNumber());
-            transcriptionResponse.setCourthouse(transcriptionEntity.getCourtCase().getCourthouse().getCourthouseName());
-            transcriptionResponse.setDefendants(transcriptionEntity.getCourtCase().getDefendantStringList());
-            transcriptionResponse.setJudges(transcriptionEntity.getCourtCase().getJudgeStringList());
+            CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
+            transcriptionResponse.setCaseId(courtCase.getId());
+            transcriptionResponse.setCaseNumber(courtCase.getCaseNumber());
+            transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
+            transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
+            transcriptionResponse.setJudges(courtCase.getJudgeStringList());
             if (!transcriptionEntity.getTranscriptionDocumentEntities().isEmpty()) {
                 transcriptionResponse.setTranscriptFileName(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getFileName());
             }
