@@ -5,5 +5,6 @@ public enum ContextIdEnum {
     HEARING_ID,
     MEDIA_REQUEST_ID,
     MEDIA_ID,
-    TRANSCRIPTION_ID
+    TRANSCRIPTION_ID,
+    ANY_ENTITY_ID
 }

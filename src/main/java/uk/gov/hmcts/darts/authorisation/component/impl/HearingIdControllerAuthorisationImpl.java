@@ -32,18 +32,14 @@ class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
         return HEARING_ID;
     }
 
+    public String getEntityIdParam() {
+        return HEARING_ID_PARAM;
+    }
+
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> hearingIdParamOptional = getPathParamValue(request, HEARING_ID_PARAM);
-        checkAuthorisationByHearingId(hearingIdParamOptional, roles);
-
-        if (hearingIdParamOptional.isEmpty()) {
-            hearingIdParamOptional = Optional.ofNullable(request.getParameter(HEARING_ID_PARAM));
-            checkAuthorisationByHearingId(hearingIdParamOptional, roles);
-        }
-
-        if (hearingIdParamOptional.isEmpty()) {
-            hearingIdParamOptional = Optional.ofNullable(request.getHeader(HEARING_ID_PARAM));
+        Optional<String> hearingIdParamOptional = getEntityParamOptional(request, HEARING_ID_PARAM);
+        if (hearingIdParamOptional.isPresent()) {
             checkAuthorisationByHearingId(hearingIdParamOptional, roles);
         }
 
@@ -62,7 +58,7 @@ class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
         authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
     }
 
-    private void checkAuthorisationByHearingId(Optional<String> hearingIdParamOptional, Set<SecurityRoleEnum> roles) {
+    void checkAuthorisationByHearingId(Optional<String> hearingIdParamOptional, Set<SecurityRoleEnum> roles) {
         if (hearingIdParamOptional.isPresent()) {
             try {
                 Integer hearingId = Integer.valueOf(hearingIdParamOptional.get());

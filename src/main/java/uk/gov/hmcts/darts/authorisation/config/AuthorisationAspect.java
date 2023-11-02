@@ -16,13 +16,11 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.service.ControllerAuthorisationFactory;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
-import java.util.List;
 import java.util.Set;
 
 @Aspect
@@ -60,11 +58,9 @@ public class AuthorisationAspect {
 
         JsonNode jsonNode = objectMapper.valueToTree(body);
 
-        List<ContextIdEnum> contextIds = List.of(authorisationAnnotation.contextId());
+        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId())
+            .checkAuthorisation(jsonNode, roles);
 
-        contextIds.stream().forEach(
-            contextId -> controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(jsonNode, roles)
-        );
         return joinPoint.proceed();
     }
 
@@ -83,26 +79,8 @@ public class AuthorisationAspect {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
 
-        List<ContextIdEnum> contextIds = List.of(authorisationAnnotation.contextId());
-
-        contextIds.stream().forEach(
-            contextId -> controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles)
-        );
-
-        contextIds.stream().filter(
-            contextId -> handleContext(contextId, request, roles)
-        ).findFirst().orElseThrow(() -> new DartsApiException(AuthorisationError.BAD_REQUEST));
-    }
-
-    private boolean handleContext(ContextIdEnum contextId, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        boolean success = false;
-        try {
-            controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles);
-            success = true;
-        } catch (DartsApiException e) {
-            log.error("Unable to authenticate ", e);
-        }
-        return success;
+        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId())
+            .checkAuthorisation(request, roles);
     }
 
     private boolean handleRequestBodyAuthorisation(@NotNull String method) {

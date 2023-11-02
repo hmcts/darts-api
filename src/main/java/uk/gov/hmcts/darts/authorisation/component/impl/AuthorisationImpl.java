@@ -116,19 +116,4 @@ public class AuthorisationImpl implements Authorisation {
         }
     }
 
-    @Override
-    public void authoriseByHearingIdOrCaseId(Integer hearingId, Integer caseId, Set<SecurityRoleEnum> securityRoles) {
-        try {
-            authoriseByHearingId(hearingId, securityRoles);
-        } catch (DartsApiException ex1) {
-            log.warn("Unable to validate hearing", ex1.getMessage());
-            try {
-                authoriseByCaseId(caseId, securityRoles);
-            } catch (DartsApiException ex2) {
-                log.error("Unable to validate case id", ex2.getMessage());
-                throw new DartsApiException(BAD_REQUEST_HEARING_ID_AND_CASE_ID);
-            }
-        }
-    }
-
 }

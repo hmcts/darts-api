@@ -44,14 +44,9 @@ public enum AuthorisationError implements DartsApiError {
         HttpStatus.UNAUTHORIZED,
         "Could not obtain user details"
     ),
-    BAD_REQUEST_HEARING_ID_AND_CASE_ID(
-        "107",
-        HttpStatus.BAD_REQUEST,
-        "Failed to check authorisation for the hearing and case"
-    ),
     BAD_REQUEST(
-        "108",
-        HttpStatus.BAD_REQUEST,
+        "107",
+        HttpStatus.UNAUTHORIZED,
         "Failed to check authorisation"
     );
 

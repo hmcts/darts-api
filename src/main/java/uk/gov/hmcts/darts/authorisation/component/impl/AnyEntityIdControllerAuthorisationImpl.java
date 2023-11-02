@@ -1,0 +1,114 @@
+package uk.gov.hmcts.darts.authorisation.component.impl;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.ControllerAuthorisation;
+import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+
+import java.util.Optional;
+import java.util.Set;
+
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthorisation
+    implements ControllerAuthorisation {
+
+    private final Authorisation authorisation;
+
+    private final CaseIdControllerAuthorisationImpl caseIdControllerAuthorisation;
+    private final HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation;
+    private final MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation;
+    private final MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation;
+    private final TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation;
+
+    @Override
+    public ContextIdEnum getContextId() {
+        return ANY_ENTITY_ID;
+    }
+
+    @Override
+    public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
+        Optional<String> hearingIdParamOptional = getEntityParamOptional(request, hearingIdControllerAuthorisation.getEntityIdParam());
+        if (hearingIdParamOptional.isPresent()) {
+            hearingIdControllerAuthorisation.checkAuthorisationByHearingId(hearingIdParamOptional, roles);
+        }
+
+        Optional<String> caseIdParamOptional = getEntityParamOptional(request, caseIdControllerAuthorisation.getEntityIdParam());
+        if (caseIdParamOptional.isPresent()) {
+            caseIdControllerAuthorisation.checkAuthorisationByCaseId(caseIdParamOptional, roles);
+        }
+
+        Optional<String> mediaIdParamOptional = getEntityParamOptional(request, mediaIdControllerAuthorisation.getEntityIdParam());
+        if (mediaIdParamOptional.isPresent()) {
+            mediaIdControllerAuthorisation.checkAuthorisationByMediaId(mediaIdParamOptional, roles);
+        }
+
+        Optional<String> mediaRequestIdParamOptional = getEntityParamOptional(request, mediaRequestIdControllerAuthorisation.getEntityIdParam());
+        if (mediaRequestIdParamOptional.isPresent()) {
+            mediaRequestIdControllerAuthorisation.checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
+        }
+
+        Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, transcriptionIdControllerAuthorisation.getEntityIdParam());
+        if (transcriptionIdParamOptional.isPresent()) {
+            transcriptionIdControllerAuthorisation.checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
+        }
+
+        if (hearingIdParamOptional.isEmpty()
+            && caseIdParamOptional.isEmpty()
+            && mediaIdParamOptional.isEmpty()
+            && mediaRequestIdParamOptional.isEmpty()
+            && transcriptionIdParamOptional.isEmpty()
+        ) {
+            entitiesNotFound("parameters");
+        }
+    }
+
+    @Override
+    public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
+        boolean entityExists = false;
+        if (jsonNode.path(hearingIdControllerAuthorisation.getEntityIdParam()) != null) {
+            authorisation.authoriseByHearingId(jsonNode.path(hearingIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            entityExists = true;
+        }
+
+        if (jsonNode.path(caseIdControllerAuthorisation.getEntityIdParam()) != null) {
+            authorisation.authoriseByCaseId(jsonNode.path(caseIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            entityExists = true;
+        }
+
+        if (jsonNode.path(mediaIdControllerAuthorisation.getEntityIdParam()) != null) {
+            authorisation.authoriseByMediaId(jsonNode.path(mediaIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            entityExists = true;
+        }
+
+        if (jsonNode.path(mediaRequestIdControllerAuthorisation.getEntityIdParam()) != null) {
+            authorisation.authoriseByMediaRequestId(jsonNode.path(mediaRequestIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            entityExists = true;
+        }
+
+        if (jsonNode.path(transcriptionIdControllerAuthorisation.getEntityIdParam()) != null) {
+            authorisation.authoriseByTranscriptionId(jsonNode.path(transcriptionIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            entityExists = true;
+        }
+
+        if (!entityExists) {
+            entitiesNotFound("request body");
+        }
+    }
+
+    private static void entitiesNotFound(String authLocation) {
+        log.error("Unable to find entity/entities in {} for authorisation", authLocation);
+        throw new DartsApiException(BAD_REQUEST);
+    }
+
+}

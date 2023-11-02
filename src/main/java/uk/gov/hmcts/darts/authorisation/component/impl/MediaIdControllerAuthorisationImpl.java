@@ -32,18 +32,14 @@ class MediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
         return MEDIA_ID;
     }
 
+    public String getEntityIdParam() {
+        return MEDIA_ID_PARAM;
+    }
+
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> mediaIdParamOptional = getPathParamValue(request, MEDIA_ID_PARAM);
-        checkAuthorisationByMediaId(mediaIdParamOptional, roles);
-
-        if (mediaIdParamOptional.isEmpty()) {
-            mediaIdParamOptional = Optional.ofNullable(request.getParameter(MEDIA_ID_PARAM));
-            checkAuthorisationByMediaId(mediaIdParamOptional, roles);
-        }
-
-        if (mediaIdParamOptional.isEmpty()) {
-            mediaIdParamOptional = Optional.ofNullable(request.getHeader(MEDIA_ID_PARAM));
+        Optional<String> mediaIdParamOptional = getEntityParamOptional(request, MEDIA_ID_PARAM);
+        if (mediaIdParamOptional.isPresent()) {
             checkAuthorisationByMediaId(mediaIdParamOptional, roles);
         }
 
@@ -62,7 +58,7 @@ class MediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
         authorisation.authoriseByMediaId(jsonNode.path(MEDIA_ID_PARAM).intValue(), roles);
     }
 
-    private void checkAuthorisationByMediaId(Optional<String> mediaIdParamOptional, Set<SecurityRoleEnum> roles) {
+    void checkAuthorisationByMediaId(Optional<String> mediaIdParamOptional, Set<SecurityRoleEnum> roles) {
         if (mediaIdParamOptional.isPresent()) {
             try {
                 Integer mediaId = Integer.valueOf(mediaIdParamOptional.get());

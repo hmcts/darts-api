@@ -32,18 +32,14 @@ class CaseIdControllerAuthorisationImpl extends BaseControllerAuthorisation
         return CASE_ID;
     }
 
+    public String getEntityIdParam() {
+        return CASE_ID_PARAM;
+    }
+
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> caseIdParamOptional = getPathParamValue(request, CASE_ID_PARAM);
-        checkAuthorisationByCaseId(caseIdParamOptional, roles);
-
-        if (caseIdParamOptional.isEmpty()) {
-            caseIdParamOptional = Optional.ofNullable(request.getParameter(CASE_ID_PARAM));
-            checkAuthorisationByCaseId(caseIdParamOptional, roles);
-        }
-
-        if (caseIdParamOptional.isEmpty()) {
-            caseIdParamOptional = Optional.ofNullable(request.getHeader(CASE_ID_PARAM));
+        Optional<String> caseIdParamOptional = getEntityParamOptional(request, CASE_ID_PARAM);
+        if (caseIdParamOptional.isPresent()) {
             checkAuthorisationByCaseId(caseIdParamOptional, roles);
         }
 
@@ -62,7 +58,7 @@ class CaseIdControllerAuthorisationImpl extends BaseControllerAuthorisation
         authorisation.authoriseByCaseId(jsonNode.path(CASE_ID_PARAM).intValue(), roles);
     }
 
-    private void checkAuthorisationByCaseId(Optional<String> caseIdParamOptional, Set<SecurityRoleEnum> roles) {
+    void checkAuthorisationByCaseId(Optional<String> caseIdParamOptional, Set<SecurityRoleEnum> roles) {
         if (caseIdParamOptional.isPresent()) {
             try {
                 Integer caseId = Integer.valueOf(caseIdParamOptional.get());
