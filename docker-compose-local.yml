@@ -37,12 +37,31 @@ services:
       - SYSTEM_USER_EMAIL
       - REDIS_CONNECTION_STRING=redis://darts-redis:6379
       - REDIS_SSL_ENABLED=false
+      - DARTS_GATEWAY_URL=http://darts-gateway:8070
     build:
       context: .
       dockerfile: Dockerfile
     image: darts-api:latest
     ports:
       - "4550:4550"
+    networks:
+      - darts-network
+
+  darts-gateway:
+    container_name: darts-gateway
+    image: darts-gateway:master
+    environment:
+      - DAR_NOTIFY_DEFAULT_URL=http://darts-stub-services:4551/VIQDARNotifyEvent/DARNotifyEvent.asmx
+    ports:
+      - "8070:8070"
+    networks:
+      - darts-network
+
+  darts-stub-services:
+    container_name: darts-stub-services
+    image: darts-stub-services:master
+    ports:
+      - "4551:4551"
     networks:
       - darts-network
 
