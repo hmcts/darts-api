@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparing;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @UtilityClass
@@ -56,9 +58,14 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
             transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
             transcriptionResponse.setJudges(courtCase.getJudgeStringList());
-            if (!transcriptionEntity.getTranscriptionDocumentEntities().isEmpty()) {
-                transcriptionResponse.setTranscriptFileName(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getFileName());
+
+            final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
+                .stream()
+                .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime));
+            if (latestTranscriptionDocumentEntity.isPresent()) {
+                transcriptionResponse.setTranscriptFileName(latestTranscriptionDocumentEntity.get().getFileName());
             }
+
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
             if (transcriptionEntity.getTranscriptionUrgency() != null) {
                 transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
