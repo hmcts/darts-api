@@ -62,9 +62,7 @@ public class TranscriptionResponseMapper {
             final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
                 .stream()
                 .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime));
-            if (latestTranscriptionDocumentEntity.isPresent()) {
-                transcriptionResponse.setTranscriptFileName(latestTranscriptionDocumentEntity.get().getFileName());
-            }
+            latestTranscriptionDocumentEntity.ifPresent(transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
             if (transcriptionEntity.getTranscriptionUrgency() != null) {
