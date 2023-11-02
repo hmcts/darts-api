@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
+import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
@@ -27,5 +28,7 @@ public interface TranscriptionService {
     TranscriptionResponse getTranscription(Integer transcriptionId);
 
     AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript);
+
+    DownloadTranscriptResponse downloadTranscript(Integer transcriptionId);
 
 }
