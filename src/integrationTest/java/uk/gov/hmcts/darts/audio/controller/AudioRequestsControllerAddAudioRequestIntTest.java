@@ -223,7 +223,6 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         CourthouseEntity courthouse = dartsDatabase.findCourthouseWithName(SOME_COURTHOUSE);
         testUser = dartsDatabase.getUserAccountStub().createJudgeUser(courthouse);
         when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
-        //testUser = dartsDatabase.getUserAccountStub().createUnauthorisedIntegrationTestUser();
         var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
