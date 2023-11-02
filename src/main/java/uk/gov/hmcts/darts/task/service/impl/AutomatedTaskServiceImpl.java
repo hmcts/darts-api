@@ -245,17 +245,15 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private void rescheduleProcessDailyListAutomatedTask() {
-        ProcessDailyListAutomatedTask processDailyListAutomatedTask;
-        Trigger trigger;
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+            ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 dailyListProcessor
             );
-            trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
+            Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
             taskScheduler.schedule(processDailyListAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
@@ -263,18 +261,16 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private void rescheduleCloseNonCompletedTranscriptionsAutomatedTask() {
-        CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask;
-        Trigger trigger;
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(
             CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
+            CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 transcriptionsApi
             );
-            trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
+            Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
             taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
@@ -282,17 +278,16 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private void rescheduleOutboundAudioDeleterAutomatedTask() {
-        OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask;
-        Trigger trigger;
+
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(OUTBOUND_AUDIO_DELETER_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            outboundAudioDeleterAutomatedTask = new OutboundAudioDeleterAutomatedTask(
+            OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask = new OutboundAudioDeleterAutomatedTask(
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 outboundAudioDeleterProcessor
             );
-            trigger = createAutomatedTaskTrigger(outboundAudioDeleterAutomatedTask);
+            Trigger trigger = createAutomatedTaskTrigger(outboundAudioDeleterAutomatedTask);
             taskScheduler.schedule(outboundAudioDeleterAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());

@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +27,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OutboundAudioDeleterProcessorImplTest {
     @Mock
+    LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
+    @Mock
     private MediaRequestRepository mediaRequestRepository;
     @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
@@ -37,8 +38,6 @@ class OutboundAudioDeleterProcessorImplTest {
     private UserAccountRepository userAccountRepository;
     @Mock
     private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
-
-
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
 
     @BeforeEach
@@ -46,11 +45,8 @@ class OutboundAudioDeleterProcessorImplTest {
         this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
             mediaRequestRepository,
             transientObjectDirectoryRepository,
-            bankHolidaysService,
             userAccountRepository,
-            objectDirectoryStatusRepository,
-            Clock.systemUTC(),
-            2
+            objectDirectoryStatusRepository, lastAccessedDeletionDayCalculator
         );
     }
 

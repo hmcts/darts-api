@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.service.impl.LastAccessedDeletionDayCalculator;
 import uk.gov.hmcts.darts.audio.service.impl.OutboundAudioDeleterProcessorImpl;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -40,6 +41,8 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
+//Requires transactional as the object is being created manually rather than being autowired.
+// We are doing this, so we can mock out different dates to test the service.
 @Transactional
 @SuppressWarnings("PMD.ExcessiveImports")
 class OutboundAudioDeleterProcessorTest extends IntegrationBase {
@@ -49,6 +52,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
+
     private UserAccountEntity requestor;
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
     private Clock clock;
@@ -65,12 +69,17 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     private OutboundAudioDeleterProcessorImpl createOutboundDeleterService(Clock clock, int lastAccessedDeletionDays) {
-        return new OutboundAudioDeleterProcessorImpl(
-            dartsDatabase.getMediaRequestRepository(), dartsDatabase.getTransientObjectDirectoryRepository(),
-            bankHolidaysService, dartsDatabase.getUserAccountRepository(),
-            dartsDatabase.getObjectDirectoryStatusRepository(), clock, lastAccessedDeletionDays
+        LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator = new LastAccessedDeletionDayCalculator(
+            bankHolidaysService,
+            clock,
+            lastAccessedDeletionDays
         );
-
+        return new OutboundAudioDeleterProcessorImpl(
+            dartsDatabase.getMediaRequestRepository(),
+            dartsDatabase.getTransientObjectDirectoryRepository(),
+            dartsDatabase.getUserAccountRepository(),
+            dartsDatabase.getObjectDirectoryStatusRepository(), lastAccessedDeletionDayCalculator
+        );
     }
 
 
@@ -203,13 +212,13 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
         Event bankHoliday1 = new Event();
-        bankHoliday1.setDate(LocalDate.now().minusDays(1));
+        bankHoliday1.setDate(DATE_27TH_OCTOBER.minusDays(1));
 
         Event bankHoliday2 = new Event();
-        bankHoliday2.setDate(LocalDate.now().minusDays(2));
+        bankHoliday2.setDate(DATE_27TH_OCTOBER.minusDays(2));
 
         Event bankHoliday3 = new Event();
-        bankHoliday3.setDate(LocalDate.now().minusDays(10));
+        bankHoliday3.setDate(DATE_27TH_OCTOBER.minusDays(10));
 
         Mockito.when(bankHolidaysService.getBankHolidaysFor(anyInt())).thenReturn(List.of(
             bankHoliday1,

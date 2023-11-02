@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
@@ -15,19 +14,11 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
-import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 
-import java.time.Clock;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 
@@ -35,56 +26,36 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_F
 public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterProcessor {
     private final MediaRequestRepository mediaRequestRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-    private final BankHolidaysService bankHolidaysService;
     private final UserAccountRepository userAccountRepository;
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
-    private final Clock clock;
-    private final long lastAccessedDeletionDays;
+    private final LastAccessedDeletionDayCalculator deletionDayCalculator;
 
     public OutboundAudioDeleterProcessorImpl(MediaRequestRepository mediaRequestRepository,
                                              TransientObjectDirectoryRepository transientObjectDirectoryRepository,
-                                             BankHolidaysService bankHolidaysService, UserAccountRepository userAccountRepository,
+                                             UserAccountRepository userAccountRepository,
                                              ObjectDirectoryStatusRepository objectDirectoryStatusRepository,
-                                             Clock clock,
-                                             @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}") long lastAccessedDeletionDays) {
+                                             LastAccessedDeletionDayCalculator deletionDayCalculator) {
         this.mediaRequestRepository = mediaRequestRepository;
         this.transientObjectDirectoryRepository = transientObjectDirectoryRepository;
-        this.bankHolidaysService = bankHolidaysService;
         this.userAccountRepository = userAccountRepository;
         this.objectDirectoryStatusRepository = objectDirectoryStatusRepository;
-        this.clock = clock;
-        this.lastAccessedDeletionDays = lastAccessedDeletionDays;
-    }
+        this.deletionDayCalculator = deletionDayCalculator;
 
-
-    private static boolean isBankHolidayBetweenDates(Event bankHoliday, LocalDate cutOff, LocalDate today) {
-        return !bankHoliday.getDate().isBefore(cutOff) && !bankHoliday.getDate().isAfter(today);
-    }
-
-    private static long calculateWeekendDays(LocalDate fromDate, LocalDate toDate) {
-        Set<DayOfWeek> weekend = EnumSet.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
-
-        return fromDate.datesUntil(toDate)
-            .filter(d -> weekend.contains(d.getDayOfWeek()))
-            .count();
     }
 
 
     @Transactional
     public List<MediaRequestEntity> delete() {
         List<MediaRequestEntity> deletedValues = new ArrayList<>();
-        OffsetDateTime lastAccessedDateTime = OffsetDateTime.now(clock)
-            .truncatedTo(ChronoUnit.DAYS)
-            .minusDays(getLastAccessedDeletionDays());
-
+        OffsetDateTime deletionStartDateTime = this.deletionDayCalculator.getStartDateForDeletion();
 
         List<Integer> mediaRequests = mediaRequestRepository.findAllIdsByLastAccessedTimeBeforeAndStatus(
-            lastAccessedDateTime,
+            deletionStartDateTime,
             AudioRequestStatus.COMPLETED
         );
 
         mediaRequests.addAll(mediaRequestRepository.findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(
-            lastAccessedDateTime,
+            deletionStartDateTime,
             AudioRequestStatus.PROCESSING
         ));
 
@@ -110,32 +81,6 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
             deletedValues.add(entity.getMediaRequest());
         }
 
-
         return deletedValues;
     }
-
-    /**
-     * Returns how many of the days since last access were bank holidays or weekends.
-     *
-     * @return long number of days
-     */
-    private long getLastAccessedDeletionDays() {
-        return lastAccessedDeletionDays + howManyOfPreviousDaysAreBankHolidaysOrWeekends();
-    }
-
-    private long howManyOfPreviousDaysAreBankHolidaysOrWeekends() {
-        long bankHolidayOrWeekendCount = 0;
-        LocalDate today = LocalDate.now(clock);
-        LocalDate cutOff = LocalDate.now(clock).minusDays(lastAccessedDeletionDays);
-        List<Event> bankHolidays = bankHolidaysService.getBankHolidaysFor(OffsetDateTime.now().getYear());
-
-        for (Event bankHoliday : bankHolidays) {
-            if (isBankHolidayBetweenDates(bankHoliday, cutOff, today)) {
-                bankHolidayOrWeekendCount++;
-            }
-        }
-        bankHolidayOrWeekendCount += calculateWeekendDays(cutOff, today);
-        return bankHolidayOrWeekendCount;
-    }
-
 }

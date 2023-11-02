@@ -13,8 +13,8 @@ import java.time.LocalDate;
 public class Event {
 
     @JsonProperty("date")
-    public LocalDate date;
+    private LocalDate date;
 
     @JsonProperty("title")
-    public String title;
+    private String title;
 }
