@@ -27,7 +27,8 @@ abstract class BaseControllerAuthorisation {
 
         if (entityIdParamOptional.isEmpty()) {
             entityIdParamOptional = Optional.ofNullable(request.getParameter(entityIdParam));
-        } else if (entityIdParamOptional.isEmpty()) {
+        }
+        if (entityIdParamOptional.isEmpty()) {
             entityIdParamOptional = Optional.ofNullable(request.getHeader(entityIdParam));
         }
         return entityIdParamOptional;

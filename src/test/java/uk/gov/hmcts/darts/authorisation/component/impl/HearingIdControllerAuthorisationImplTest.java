@@ -137,6 +137,7 @@ class HearingIdControllerAuthorisationImplTest {
             URI_TEMPLATE_VARIABLES_ATTRIBUTE,
             Collections.emptyMap()
         );
+
         request.addHeader(HEARING_ID_PARAM, HEARING_ID_PARAM_VALUE);
 
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));

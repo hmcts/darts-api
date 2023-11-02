@@ -76,27 +76,27 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
     @Override
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
         boolean entityExists = false;
-        if (jsonNode.path(hearingIdControllerAuthorisation.getEntityIdParam()) != null) {
+        if (checkEntityExists(jsonNode, hearingIdControllerAuthorisation.getEntityIdParam())) {
             authorisation.authoriseByHearingId(jsonNode.path(hearingIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
             entityExists = true;
         }
 
-        if (jsonNode.path(caseIdControllerAuthorisation.getEntityIdParam()) != null) {
+        if (checkEntityExists(jsonNode, caseIdControllerAuthorisation.getEntityIdParam())) {
             authorisation.authoriseByCaseId(jsonNode.path(caseIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
             entityExists = true;
         }
 
-        if (jsonNode.path(mediaIdControllerAuthorisation.getEntityIdParam()) != null) {
+        if (checkEntityExists(jsonNode, mediaIdControllerAuthorisation.getEntityIdParam())) {
             authorisation.authoriseByMediaId(jsonNode.path(mediaIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
             entityExists = true;
         }
 
-        if (jsonNode.path(mediaRequestIdControllerAuthorisation.getEntityIdParam()) != null) {
+        if (checkEntityExists(jsonNode, mediaRequestIdControllerAuthorisation.getEntityIdParam())) {
             authorisation.authoriseByMediaRequestId(jsonNode.path(mediaRequestIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
             entityExists = true;
         }
 
-        if (jsonNode.path(transcriptionIdControllerAuthorisation.getEntityIdParam()) != null) {
+        if (checkEntityExists(jsonNode, transcriptionIdControllerAuthorisation.getEntityIdParam())) {
             authorisation.authoriseByTranscriptionId(jsonNode.path(transcriptionIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
             entityExists = true;
         }
@@ -104,6 +104,11 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         if (!entityExists) {
             entitiesNotFound("request body");
         }
+    }
+
+    private boolean checkEntityExists(JsonNode jsonNode, String entityIdParam) {
+        return jsonNode.path(entityIdParam) != null
+            && jsonNode.path(entityIdParam).intValue() != 0;
     }
 
     private static void entitiesNotFound(String authLocation) {

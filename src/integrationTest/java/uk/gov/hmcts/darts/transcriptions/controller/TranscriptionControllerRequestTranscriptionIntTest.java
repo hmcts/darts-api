@@ -256,13 +256,24 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isUnauthorized())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertAuthorisation400Error(actualJson);
+        assertFailedAuthentication100Error(actualJson);
 
         assertAudit(0);
+    }
+
+    private void assertFailedAuthentication100Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "AUTHORISATION_107",
+              "title": "Failed to check authorisation",
+              "status": 401
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @ParameterizedTest
@@ -411,23 +422,35 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertAuthorisation400Error(actualJson);
+        assertHearingNotFound404Error(actualJson);
 
         assertAudit(0);
     }
 
-    private void assertAuthorisation400Error(String actualJson) {
+    private void assertHearingNotFound404Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "AUTHORISATION_107",
-              "title": "Failed to check authorisation for the hearing and case",
-              "status": 400
-            }""";
+              "type": "HEARING_100",
+              "title": "The requested hearing cannot be found",
+              "status": 404
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
+    }
+
+    private void assertCaseNotFound404Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "CASE_104",
+              "title": "The requested case cannot be found",
+              "status": 404
+            }
+            """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -449,12 +472,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
 
-        assertAuthorisation400Error(actualJson);
+        assertCaseNotFound404Error(actualJson);
         assertAudit(0);
     }
 
