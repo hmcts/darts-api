@@ -50,12 +50,6 @@ class AnyEntityIdControllerAuthorisationImplTest {
 
     private ControllerAuthorisation controllerAuthorisation;
 
-    private CaseIdControllerAuthorisationImpl caseIdControllerAuthorisation;
-    private HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation;
-    private MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation;
-    private MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation;
-    private TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation;
-
     @BeforeEach
     void setUp() {
         roles = Set.of(
@@ -66,17 +60,23 @@ class AnyEntityIdControllerAuthorisationImplTest {
             LANGUAGE_SHOP_USER,
             RCJ_APPEALS
         );
-        caseIdControllerAuthorisation = new CaseIdControllerAuthorisationImpl(authorisation);
-        hearingIdControllerAuthorisation = new HearingIdControllerAuthorisationImpl(authorisation);
-        mediaIdControllerAuthorisation = new MediaIdControllerAuthorisationImpl(authorisation);
-        mediaRequestIdControllerAuthorisation = new MediaRequestIdControllerAuthorisationImpl(authorisation);
-        transcriptionIdControllerAuthorisation = new TranscriptionIdControllerAuthorisationImpl(authorisation);
+        CaseIdControllerAuthorisationImpl caseIdControllerAuthorisation = new CaseIdControllerAuthorisationImpl(
+            authorisation);
+        HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation = new HearingIdControllerAuthorisationImpl(
+            authorisation);
+        MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation = new MediaIdControllerAuthorisationImpl(
+            authorisation);
+        MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation = new MediaRequestIdControllerAuthorisationImpl(
+            authorisation);
+        TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation = new TranscriptionIdControllerAuthorisationImpl(
+            authorisation);
         controllerAuthorisation = new AnyEntityIdControllerAuthorisationImpl(authorisation,
                                                                              caseIdControllerAuthorisation,
                                                                              hearingIdControllerAuthorisation,
                                                                              mediaIdControllerAuthorisation,
                                                                              mediaRequestIdControllerAuthorisation,
-                                                                             transcriptionIdControllerAuthorisation);
+                                                                             transcriptionIdControllerAuthorisation
+        );
     }
 
     @Test
