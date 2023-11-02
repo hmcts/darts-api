@@ -1,0 +1,207 @@
+package uk.gov.hmcts.darts.authorisation.component.impl;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
+import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.ControllerAuthorisation;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
+import static uk.gov.hmcts.darts.authorisation.component.impl.CaseIdControllerAuthorisationImpl.CASE_ID_PARAM;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_CASE_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+
+@ExtendWith(MockitoExtension.class)
+class AnyEntityIdControllerAuthorisationImplTest {
+
+    private static final String METHOD = "POST";
+    private static final String CASES_URI = "/cases";
+    private static final String CASE_ID_PARAM_VALUE = "1";
+
+    @Mock
+    private Authorisation authorisation;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+    private Set<SecurityRoleEnum> roles;
+
+    private ControllerAuthorisation controllerAuthorisation;
+
+    private CaseIdControllerAuthorisationImpl caseIdControllerAuthorisation;
+    private HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation;
+    private MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation;
+    private MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation;
+    private TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation;
+
+    @BeforeEach
+    void setUp() {
+        roles = Set.of(
+            JUDGE,
+            REQUESTER,
+            APPROVER,
+            TRANSCRIBER,
+            LANGUAGE_SHOP_USER,
+            RCJ_APPEALS
+        );
+        caseIdControllerAuthorisation = new CaseIdControllerAuthorisationImpl(authorisation);
+        hearingIdControllerAuthorisation = new HearingIdControllerAuthorisationImpl(authorisation);
+        mediaIdControllerAuthorisation = new MediaIdControllerAuthorisationImpl(authorisation);
+        mediaRequestIdControllerAuthorisation = new MediaRequestIdControllerAuthorisationImpl(authorisation);
+        transcriptionIdControllerAuthorisation = new TranscriptionIdControllerAuthorisationImpl(authorisation);
+        controllerAuthorisation = new AnyEntityIdControllerAuthorisationImpl(authorisation,
+                                                                             caseIdControllerAuthorisation,
+                                                                             hearingIdControllerAuthorisation,
+                                                                             mediaIdControllerAuthorisation,
+                                                                             mediaRequestIdControllerAuthorisation,
+                                                                             transcriptionIdControllerAuthorisation);
+    }
+
+    @Test
+    void getContextId() {
+        assertEquals(ANY_ENTITY_ID, controllerAuthorisation.getContextId());
+    }
+
+    @Test
+    void checkAuthorisationRequestBody() throws JsonProcessingException {
+        String body = """
+            {
+              "case_id": 1,
+              "hearing_id": 2,
+              "media_id": 3,
+              "media_request_id": 4,
+              "transcription_id": 5
+            }
+            """;
+
+        JsonNode jsonNode = mapper.readTree(body);
+
+        assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(jsonNode, roles));
+
+        verify(authorisation).authoriseByCaseId(1, roles);
+    }
+
+    @Test
+    void checkAuthorisationRequestBodyWhenCaseIdMissing() throws JsonProcessingException {
+        String body = """
+            {
+              "hearing_id": 2,
+              "media_id": 3,
+              "media_request_id": 4,
+              "transcription_id": 5
+            }
+            """;
+
+        JsonNode jsonNode = mapper.readTree(body);
+
+        assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(jsonNode, roles));
+
+        verify(authorisation).authoriseByHearingId(2, roles);
+        verify(authorisation).authoriseByMediaId(3, roles);
+        verify(authorisation).authoriseByMediaRequestId(4, roles);
+        verify(authorisation).authoriseByTranscriptionId(5, roles);
+
+    }
+
+    @Test
+    void checkAuthorisationPathParameter() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, "/cases/1");
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE, Map.of(CASE_ID_PARAM, CASE_ID_PARAM_VALUE)
+        );
+
+        assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
+
+        verify(authorisation).authoriseByCaseId(1, roles);
+    }
+
+    @Test
+    void checkAuthorisationQueryParameter() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+        request.setParameter(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
+
+        assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
+
+        verify(authorisation).authoriseByCaseId(1, roles);
+    }
+
+    @Test
+    void checkAuthorisationHeaderParameter() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+        request.addHeader(CASE_ID_PARAM, CASE_ID_PARAM_VALUE);
+
+        assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
+
+        verify(authorisation).authoriseByCaseId(1, roles);
+    }
+
+    @Test
+    void checkAuthorisationShouldThrowBadRequestWhenCaseIdParameterMissing() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+        );
+
+        assertEquals(BAD_REQUEST.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST, exception.getError());
+
+        verifyNoInteractions(authorisation);
+    }
+
+    @Test
+    void checkAuthorisationShouldThrowBadRequestWhenCaseIdInvalid() {
+        MockHttpServletRequest request = new MockHttpServletRequest(METHOD, CASES_URI);
+        request.setAttribute(
+            URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+            Collections.emptyMap()
+        );
+        request.setParameter(CASE_ID_PARAM, "");
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(request, roles)
+        );
+
+        assertEquals(BAD_REQUEST_CASE_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_CASE_ID, exception.getError());
+
+        verifyNoInteractions(authorisation);
+    }
+
+}
