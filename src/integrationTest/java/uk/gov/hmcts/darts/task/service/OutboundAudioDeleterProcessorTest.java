@@ -262,6 +262,57 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     @Test
+    void ifMediaRequestLastAccessedIsOnAWeekendThenTreatItAsItWasAccessedOnAFriday() {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+        //last accessed sunday
+        MediaRequestEntity currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            OffsetDateTime.of(LocalDate.of(2023, Month.OCTOBER, 22), LOCAL_TIME, ZoneOffset.UTC),
+            AudioRequestType.DOWNLOAD,
+            COMPLETED
+        );
+        dartsDatabase.save(
+            currentMediaRequest);
+
+        createTransientDirectoryAndObjectStatus(currentMediaRequest);
+
+        //setting clock to Tuesday, 24 October 2023 10:10:50
+        clock = Clock.fixed(Instant.ofEpochSecond(1_698_142_250L), ZoneId.of("Europe/London"));
+        OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl =
+            createOutboundDeleterService(clock, 2);
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+
+
+        //last accessed saturday
+        currentMediaRequest = AudioTestData.createCurrentMediaRequest(
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            OffsetDateTime.of(LocalDate.of(2023, Month.OCTOBER, 21), LOCAL_TIME, ZoneOffset.UTC),
+            AudioRequestType.DOWNLOAD,
+            COMPLETED
+        );
+        dartsDatabase.save(
+            currentMediaRequest);
+
+        createTransientDirectoryAndObjectStatus(currentMediaRequest);
+
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+
+    }
+
+
+    @Test
     void whereLastAccessedIsNullUseCreatedAndInProgressStatus() {
         MediaRequestEntity matchingMediaRequest = createMediaRequestsWithHearingWithLastAccessedTimeIsNull();
 
