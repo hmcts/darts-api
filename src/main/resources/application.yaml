@@ -111,6 +111,8 @@ darts:
     trim-workspace: ${user.home}/audiotransform/trim
     re-encode-workspace: ${user.home}/audiotransform/encode
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
+    outbounddeleter:
+      last-accessed-deletion-day: 2
 
   azure:
     active-directory-b2c-base-uri: https://hmctsdartsb2csbox.b2clogin.com

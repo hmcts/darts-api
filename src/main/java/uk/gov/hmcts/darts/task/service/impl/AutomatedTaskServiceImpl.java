@@ -13,6 +13,7 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
@@ -36,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
 
@@ -63,6 +66,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final DailyListProcessor dailyListProcessor;
 
+    private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
+
     private final TranscriptionsApi transcriptionsApi;
 
 
@@ -70,6 +75,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
         addProcessDailyListToTaskRegistrar(taskRegistrar);
         addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
+        addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -134,6 +140,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             rescheduleProcessDailyListAutomatedTask();
         } else if (CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
             rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
+        } else if (OUTBOUND_AUDIO_DELETER_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
+            rescheduleOutboundAudioDeleterAutomatedTask();
         } else {
             throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
@@ -182,7 +190,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 return automatedTask.getAutomatedTaskStatus();
             }
         }
-        throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
+        throw  new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
     }
 
     /**
@@ -203,6 +211,25 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(processDailyListAutomatedTask, trigger);
     }
 
+    /**
+     * Sets up the ProcessDailyListAutomatedTask and adds it to the task registrar which then makes it available to the
+     * TaskScheduler.
+     *
+     * @param taskRegistrar Registers scheduled tasks
+     */
+    private void addOutboundAudioDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask = new OutboundAudioDeleterAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            outboundAudioDeleterProcessor
+        );
+        outboundAudioDeleterAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(
+            outboundAudioDeleterAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(outboundAudioDeleterAutomatedTask);
+        taskRegistrar.addTriggerTask(outboundAudioDeleterAutomatedTask, trigger);
+    }
+
 
     private void addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
@@ -218,17 +245,15 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private void rescheduleProcessDailyListAutomatedTask() {
-        ProcessDailyListAutomatedTask processDailyListAutomatedTask;
-        Trigger trigger;
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
+            ProcessDailyListAutomatedTask processDailyListAutomatedTask = new ProcessDailyListAutomatedTask(
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 dailyListProcessor
             );
-            trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
+            Trigger trigger = createAutomatedTaskTrigger(processDailyListAutomatedTask);
             taskScheduler.schedule(processDailyListAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
@@ -236,19 +261,34 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private void rescheduleCloseNonCompletedTranscriptionsAutomatedTask() {
-        CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask;
-        Trigger trigger;
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(
             CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
-            closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
+            CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 transcriptionsApi
             );
-            trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
+            Trigger trigger = createAutomatedTaskTrigger(closeUnfinishedTranscriptionsAutomatedTask);
             taskScheduler.schedule(closeUnfinishedTranscriptionsAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleOutboundAudioDeleterAutomatedTask() {
+
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(OUTBOUND_AUDIO_DELETER_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            OutboundAudioDeleterAutomatedTask outboundAudioDeleterAutomatedTask = new OutboundAudioDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                outboundAudioDeleterProcessor
+            );
+            Trigger trigger = createAutomatedTaskTrigger(outboundAudioDeleterAutomatedTask);
+            taskScheduler.schedule(outboundAudioDeleterAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

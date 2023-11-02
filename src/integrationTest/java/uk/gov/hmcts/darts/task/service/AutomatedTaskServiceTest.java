@@ -14,6 +14,7 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
+import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
@@ -38,23 +40,50 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 @TestMethodOrder(OrderAnnotation.class)
 class AutomatedTaskServiceTest extends IntegrationPerClassBase {
+
     @Autowired
     private AutomatedTaskService automatedTaskService;
-
     @Autowired
     private ScheduledTaskHolder scheduledTaskHolder;
-
     @Autowired
     private AutomatedTaskRepository automatedTaskRepository;
-
     @Autowired
     private LockProvider lockProvider;
-
     @Autowired
     private AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties;
-
     @Autowired
     private TranscriptionsApi transcriptionsApi;
+
+    @Autowired
+    private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
+
+    private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
+        log.info("Number of scheduled tasks " + scheduledTasks.size());
+        scheduledTasks.forEach(
+            scheduledTask -> {
+                Task task = scheduledTask.getTask();
+                if (task instanceof CronTask cronTask) {
+                    log.info("CronTask expression: {} Runnable: {}",
+                             cronTask.getExpression(), cronTask.getRunnable()
+                    );
+                } else if (task instanceof TriggerTask triggerTask) {
+                    log.info("TriggerTask trigger: {} Runnable: {}",
+                             triggerTask.getTrigger(), triggerTask.getRunnable()
+                    );
+                } else if (task instanceof FixedRateTask fixedRateTask) {
+                    log.info("FixedRateTask initial delay duration: {} Interval duration: {} ",
+                             fixedRateTask.getInitialDelayDuration(), fixedRateTask.getIntervalDuration()
+                    );
+                } else if (task instanceof FixedDelayTask fixedDelayTask) {
+                    log.info("FixedDelayTask initial delay duration: {} Interval duration: {}",
+                             fixedDelayTask.getInitialDelayDuration(), fixedDelayTask.getIntervalDuration()
+                    );
+                } else {
+                    log.info("Unknown task type: " + task);
+                }
+            }
+        );
+    }
 
     @Test
     @Order(1)
@@ -270,28 +299,55 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     }
 
-    private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
-        log.info("Number of scheduled tasks " + scheduledTasks.size());
-        scheduledTasks.forEach(
-            scheduledTask -> {
-                Task task = scheduledTask.getTask();
-                if (task instanceof CronTask cronTask) {
-                    log.info("CronTask expression: {} Runnable: {}",
-                             cronTask.getExpression(), cronTask.getRunnable());
-                } else if (task instanceof TriggerTask triggerTask) {
-                    log.info("TriggerTask trigger: {} Runnable: {}",
-                             triggerTask.getTrigger(), triggerTask.getRunnable());
-                } else if (task instanceof FixedRateTask fixedRateTask) {
-                    log.info("FixedRateTask initial delay duration: {} Interval duration: {} ",
-                             fixedRateTask.getInitialDelayDuration(), fixedRateTask.getIntervalDuration());
-                } else if (task instanceof FixedDelayTask fixedDelayTask) {
-                    log.info("FixedDelayTask initial delay duration: {} Interval duration: {}",
-                             fixedDelayTask.getInitialDelayDuration(), fixedDelayTask.getIntervalDuration());
-                } else {
-                    log.info("Unknown task type: " + task);
-                }
-            }
-        );
+    @Test
+    @Order(10)
+    void givenConfiguredTasksUpdateCronAndResetCronForOutboundAudioDeleterAutomatedTask() {
+        AutomatedTask automatedTask =
+            new OutboundAudioDeleterAutomatedTask(automatedTaskRepository,
+                                                           lockProvider,
+                                                           automatedTaskConfigurationProperties,
+                                                           outboundAudioDeleterProcessor);
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
+                 originalAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression());
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
     }
+
+    @Test
+    @Order(11)
+    void givenConfiguredTaskCancelOutboundAudioDeleterAutomatedTask() {
+        AutomatedTask automatedTask =
+            new OutboundAudioDeleterAutomatedTask(automatedTaskRepository,
+                                                           lockProvider,
+                                                           automatedTaskConfigurationProperties, outboundAudioDeleterProcessor
+                                                           );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(automatedTask.getTaskName(), mayInterruptIfRunning);
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
+    }
+
 
 }
