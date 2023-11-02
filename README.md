@@ -126,7 +126,7 @@ The report will be available under ./build/jacocoHtml/index.html. The report inc
 and integration test coverage
 
 
-### Running the application in docker
+### Running the application in docker (without darts-gateway & darts-stub-services)
 
 Create the image of the application by executing the following command:
 
@@ -144,7 +144,7 @@ Run the distribution (created in `build/install/darts-api` directory)
 by executing the following command:
 
 ```bash
-  docker-compose -f docker-compose-local.yml up
+  docker-compose -f docker-compose-local.yml up darts-api darts-db darts-redis
 ```
 
 This will start the API container exposing the application's port
@@ -162,6 +162,21 @@ You should get a response similar to this:
 
 ```
   {"status":"UP","diskSpace":{"status":"UP","total":249644974080,"free":137188298752,"threshold":10485760}}
+```
+
+### Running the application in docker with darts-gateway & darts-stub-services
+
+Currently, to run the full suite of services we need to check out and build the darts-gateway
+and darts-stub-services.  A convenience script has been added `./bin/dcup` to automate this.
+
+To run all services use:
+```bash
+./bin/dcup
+```
+
+If you want to run the darts-api outside of docker and run only the dependant services in docker use:
+```bash
+./bin/dcup noapi
 ```
 
 ### Alternative script to run application
