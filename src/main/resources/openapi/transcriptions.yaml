@@ -94,7 +94,7 @@ paths:
                       - type
                     properties:
                       type:
-                        $ref: '#/components/schemas/UpdateTranscription404ErrorCode'
+                        $ref: '#/components/schemas/GetTranscription404ErrorCode'
               example:
                 type: "TRANSCRIPTION_101"
                 title: "The requested transcription cannot be found"
@@ -476,6 +476,11 @@ components:
         transcription_workflow_id:
           type: integer
     UpdateTranscription404ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_101"
+      x-enum-varnames: [ TRANSCRIPTION_NOT_FOUND ]
+    GetTranscription404ErrorCode:
       type: string
       enum:
         - "TRANSCRIPTION_101"
