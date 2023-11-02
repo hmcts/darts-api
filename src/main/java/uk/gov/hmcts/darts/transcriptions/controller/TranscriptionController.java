@@ -59,7 +59,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(bodyAuthorisation = true, contextId = {HEARING_ID, CASE_ID},
+    @Authorisation(bodyAuthorisation = true, contextId = {CASE_ID, HEARING_ID},
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(
         TranscriptionRequestDetails transcriptionRequestDetails) {
@@ -76,7 +76,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, TRANSCRIBER})
+    @Authorisation(contextId = {TRANSCRIPTION_ID}, securityRoles = {APPROVER, TRANSCRIBER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscription updateTranscription) {
 

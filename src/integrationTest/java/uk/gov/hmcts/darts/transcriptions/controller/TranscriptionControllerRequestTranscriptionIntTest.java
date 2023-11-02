@@ -257,11 +257,11 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTranscriptionFailed100Error(actualJson);
+        assertTranscriptionFailed404Error(actualJson);
 
         assertAudit(0);
     }
@@ -415,6 +415,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
+        assertTranscriptionFailed404Error(actualJson);
+
+        assertAudit(0);
+    }
+
+    private static void assertTranscriptionFailed404Error(String actualJson) {
         String expectedJson = """
             {
               "type": "HEARING_100",
@@ -423,8 +429,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
-        assertAudit(0);
     }
 
     @Test

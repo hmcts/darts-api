@@ -14,7 +14,7 @@ public @interface Authorisation {
 
     boolean bodyAuthorisation() default false;
 
-    ContextIdEnum contextId();
+    ContextIdEnum[] contextId();
 
     SecurityRoleEnum[] securityRoles();
 

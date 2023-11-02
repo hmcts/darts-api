@@ -51,7 +51,7 @@ public class AudioController implements AudioApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = MEDIA_REQUEST_ID,
+    @Authorisation(contextId = {MEDIA_REQUEST_ID},
         securityRoles = {TRANSCRIBER})
     public ResponseEntity<Resource> download(Integer mediaRequestId) {
         return audioRequestsController.download(mediaRequestId);
@@ -59,7 +59,7 @@ public class AudioController implements AudioApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = HEARING_ID,
+    @Authorisation(contextId = {HEARING_ID},
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingId);
@@ -70,7 +70,7 @@ public class AudioController implements AudioApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = MEDIA_ID,
+    @Authorisation(contextId = {MEDIA_ID},
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<Resource> preview(Integer mediaId) {
         InputStream audioMediaFile = audioService.preview(mediaId);

@@ -22,6 +22,8 @@ import uk.gov.hmcts.darts.authorisation.service.ControllerAuthorisationFactory;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Aspect
@@ -59,10 +61,7 @@ public class AuthorisationAspect {
 
         JsonNode jsonNode = objectMapper.valueToTree(body);
 
-        Set<ContextIdEnum> contexts = Set.of(authorisationAnnotation.contextId());
-        for ()
-        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId())
-            .checkAuthorisation(jsonNode, roles);
+        authoriseContext(Set.of(authorisationAnnotation.contextId()), roles, jsonNode);
 
         return joinPoint.proceed();
     }
@@ -82,8 +81,39 @@ public class AuthorisationAspect {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
 
-        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId())
-            .checkAuthorisation(request, roles);
+        authoriseContext(Set.of(authorisationAnnotation.contextId()), request, roles);
+    }
+
+    private void authoriseContext(Set<ContextIdEnum> contextIds, Set<SecurityRoleEnum> roles, JsonNode jsonNode) {
+        List<ContextIdEnum> contexts = new ArrayList<>(contextIds);
+        int lastItem = contexts.size() - 1;
+        for (int index = 0; index < contexts.size(); index++) {
+            try {
+                ContextIdEnum contextId = contexts.get(index);
+                controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(jsonNode, roles);
+                break;
+            } catch (Exception e) {
+                if (index == lastItem) {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    private void authoriseContext(Set<ContextIdEnum> contextIds, HttpServletRequest request, Set<SecurityRoleEnum> roles) {
+        List<ContextIdEnum> contexts = new ArrayList<>(contextIds);
+        int lastItem = contexts.size() - 1;
+        for (int index = 0; index < contexts.size(); index++) {
+            try {
+                ContextIdEnum contextId = contexts.get(index);
+                controllerAuthorisationFactory.getHandler(contextId).checkAuthorisation(request, roles);
+                break;
+            } catch (Exception e) {
+                if (index == lastItem) {
+                    throw e;
+                }
+            }
+        }
     }
 
     private boolean handleRequestBodyAuthorisation(@NotNull String method) {

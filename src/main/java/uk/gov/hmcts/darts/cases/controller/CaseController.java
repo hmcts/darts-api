@@ -94,7 +94,7 @@ public class CaseController implements CasesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = CASE_ID,
+    @Authorisation(contextId = {CASE_ID},
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<List<Hearing>> casesCaseIdHearingsGet(Integer caseId) {
 
@@ -103,7 +103,7 @@ public class CaseController implements CasesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = CASE_ID,
+    @Authorisation(contextId = {CASE_ID},
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<SingleCase> casesCaseIdGet(Integer caseId) {
 
@@ -114,7 +114,7 @@ public class CaseController implements CasesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = CASE_ID,
+    @Authorisation(contextId = {CASE_ID},
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<SingleCase> casesCaseIdPatch(Integer caseId, PatchRequestObject patchRequestObject) {
         PatchCaseRequestValidator.validate(patchRequestObject);
@@ -123,7 +123,7 @@ public class CaseController implements CasesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = CASE_ID,
+    @Authorisation(contextId = {CASE_ID},
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER})
     public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
         return new ResponseEntity<>(caseService.getTranscriptsById(caseId), HttpStatus.OK);
