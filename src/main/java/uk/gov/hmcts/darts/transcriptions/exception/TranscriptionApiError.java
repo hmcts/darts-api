@@ -52,6 +52,11 @@ public enum TranscriptionApiError implements DartsApiError {
         "108",
         HttpStatus.BAD_REQUEST,
         "Failed to attach transcript"
+    ),
+    FAILED_TO_DOWNLOAD_TRANSCRIPT(
+        "109",
+        HttpStatus.BAD_REQUEST,
+        "Failed to download transcript"
     );
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";

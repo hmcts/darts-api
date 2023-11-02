@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +19,7 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
+import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
@@ -30,9 +33,14 @@ import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
@@ -77,6 +85,30 @@ public class TranscriptionController implements TranscriptionApi {
     public ResponseEntity<AttachTranscriptResponse> attachTranscript(Integer transcriptionId,
                                                                      MultipartFile transcript) {
         return ResponseEntity.ok(transcriptionService.attachTranscript(transcriptionId, transcript));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+    public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
+        final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
+            transcriptionId);
+        return ResponseEntity.ok()
+            .header(
+                CONTENT_DISPOSITION,
+                String.format("attachment; filename=\"%s\"", downloadTranscriptResponse.getFileName())
+            )
+            .header(
+                "external_location",
+                downloadTranscriptResponse.getExternalLocation().toString()
+            )
+            .header(
+                "transcription_document_id",
+                String.valueOf(downloadTranscriptResponse.getTranscriptionDocumentId())
+            )
+            .contentType(MediaType.parseMediaType(downloadTranscriptResponse.getContentType()))
+            .body(downloadTranscriptResponse.getResource());
     }
 
     @Override
