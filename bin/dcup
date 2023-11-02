@@ -24,8 +24,9 @@ do
 done
 
 if [[ "$1" == "noapi" ]]; then
-    docker compose -f docker-compose-local.yml up --scale darts-api=0
+    docker compose -f docker-compose-local.yml up --scale darts-api=0 -d
 else
-    docker compose -f docker-compose-local.yml up
+    docker compose -f docker-compose-local.yml build
+    docker compose -f docker-compose-local.yml up -d
 fi
 
