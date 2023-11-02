@@ -68,6 +68,7 @@ import java.util.Optional;
 import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
@@ -314,7 +315,7 @@ public class DartsDatabaseStub {
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
                 OffsetDateTime.parse("2023-06-30T13:00:00Z"),
-                audioRequestType
+                audioRequestType, OPEN
             ));
     }
 
@@ -330,8 +331,7 @@ public class DartsDatabaseStub {
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                null,
-                audioRequestType
+                null, audioRequestType
             ));
     }
 
@@ -387,7 +387,7 @@ public class DartsDatabaseStub {
     }
 
     public MediaRequestEntity save(MediaRequestEntity mediaRequestEntity) {
-        return mediaRequestRepository.save(mediaRequestEntity);
+        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
 
     public MediaEntity save(MediaEntity media) {

@@ -101,7 +101,7 @@ class TestSupportControllerTest extends IntegrationBase {
     @Test
     void getsBankHolidays() throws Exception {
         Event event = new Event();
-        event.title = "christmas";
+        event.setTitle("christmas");
         List<Event> events = new ArrayList<>();
         events.add(event);
 
