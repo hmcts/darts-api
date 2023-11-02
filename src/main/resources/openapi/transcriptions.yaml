@@ -595,11 +595,11 @@ components:
           example: Specified Times
         transcription_start_ts:
           type: string
-          format: time
+          format: date-time
           example: 2023-06-26T13:00:00Z
         transcription_end_ts:
           type: string
-          format: time
+          format: date-time
           example: 2023-06-26T13:00:00Z
     defendant:
       type: string

@@ -64,8 +64,8 @@ public class TranscriptionResponseMapper {
                 transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
             }
             transcriptionResponse.setRequestType(transcriptionEntity.getTranscriptionType().getDescription());
-            transcriptionResponse.setTranscriptionStartTs(String.valueOf(transcriptionEntity.getStartTime()));
-            transcriptionResponse.setTranscriptionEndTs(String.valueOf(transcriptionEntity.getEndTime()));
+            transcriptionResponse.setTranscriptionStartTs(transcriptionEntity.getStartTime());
+            transcriptionResponse.setTranscriptionEndTs(transcriptionEntity.getEndTime());
         } catch (Exception exception) {
             throw new DartsApiException(TranscriptionApiError.INTERNAL_SERVER_ERROR);
         }
