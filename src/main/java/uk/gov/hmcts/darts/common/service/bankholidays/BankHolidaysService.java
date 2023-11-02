@@ -15,7 +15,7 @@ public class BankHolidaysService {
 
     public List<Event> getBankHolidaysFor(int year) {
         return bankHolidaysApi.retrieveAll().englandAndWales.events.stream()
-            .filter(eve -> eve.date.getYear() == year)
+            .filter(eve -> eve.getDate().getYear() == year)
             .collect(toList());
     }
 }
