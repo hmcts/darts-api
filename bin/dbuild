@@ -8,7 +8,7 @@ if [ -f "$logfile" ]; then
   rm "$logfile"
 fi
 
-git clone git@github.com:hmcts/"$1".git &>> "$logfile"
+git clone git@github.com:hmcts/"$1".git >> "$logfile"
 
 cd "$1" || exit
 ./gradlew assemble &>> "$logfile"
