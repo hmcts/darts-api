@@ -60,16 +60,16 @@ class AnyEntityIdControllerAuthorisationImplTest {
             LANGUAGE_SHOP_USER,
             RCJ_APPEALS
         );
-        CaseIdControllerAuthorisationImpl caseIdControllerAuthorisation = new CaseIdControllerAuthorisationImpl(
-            authorisation);
-        HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation = new HearingIdControllerAuthorisationImpl(
-            authorisation);
-        MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation = new MediaIdControllerAuthorisationImpl(
-            authorisation);
-        MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation = new MediaRequestIdControllerAuthorisationImpl(
-            authorisation);
-        TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation = new TranscriptionIdControllerAuthorisationImpl(
-            authorisation);
+        CaseIdControllerAuthorisationImpl caseIdControllerAuthorisation =
+            new CaseIdControllerAuthorisationImpl(authorisation);
+        HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation =
+            new HearingIdControllerAuthorisationImpl(authorisation);
+        MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation =
+            new MediaIdControllerAuthorisationImpl(authorisation);
+        MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation =
+            new MediaRequestIdControllerAuthorisationImpl(authorisation);
+        TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation =
+            new TranscriptionIdControllerAuthorisationImpl(authorisation);
         controllerAuthorisation = new AnyEntityIdControllerAuthorisationImpl(authorisation,
                                                                              caseIdControllerAuthorisation,
                                                                              hearingIdControllerAuthorisation,
