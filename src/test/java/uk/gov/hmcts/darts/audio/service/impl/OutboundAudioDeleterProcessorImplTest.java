@@ -11,17 +11,13 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
-import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,8 +28,7 @@ class OutboundAudioDeleterProcessorImplTest {
     private MediaRequestRepository mediaRequestRepository;
     @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-    @Mock
-    private BankHolidaysService bankHolidaysService;
+
     @Mock
     private UserAccountRepository userAccountRepository;
     @Mock
@@ -61,10 +56,6 @@ class OutboundAudioDeleterProcessorImplTest {
             any()
         )).thenReturn(value);
         when(transientObjectDirectoryRepository.findByMediaRequest_idIn(any())).thenReturn(List.of(new TransientObjectDirectoryEntity()));
-
-        Event bankHoliday = new Event();
-        bankHoliday.setDate(LocalDate.now());
-        when(bankHolidaysService.getBankHolidaysFor(anyInt())).thenReturn(List.of(bankHoliday));
 
         when(userAccountRepository.findById(0)).thenReturn(Optional.empty());
         assertThrows(DartsApiException.class, () ->
