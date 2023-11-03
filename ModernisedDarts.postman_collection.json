@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "fd94be39-6ef6-4885-86da-ecdf7aff2f09",
+		"_postman_id": "eac5d37b-cf06-423a-bcb7-9fb2cad5d928",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "27348549"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -811,7 +810,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-05-31T09:00:00Z\",\n  \"end_date_time\": \"2023-05-31T12:00:00Z\"\n}",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-03T10:00:00Z\",\n  \"end_date_time\": \"2023-11-03T12:00:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -856,7 +855,7 @@
 							"variable": [
 								{
 									"key": "transcription_id",
-									"value": "1"
+									"value": "61"
 								}
 							]
 						}
@@ -922,7 +921,7 @@
 							"variable": [
 								{
 									"key": "transcription_id",
-									"value": "1"
+									"value": "61"
 								}
 							]
 						}
@@ -933,7 +932,22 @@
 					"name": "/transcriptions/types",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/types",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"types"
+							]
+						}
 					},
 					"response": []
 				},
@@ -941,7 +955,93 @@
 					"name": "/transcriptions/urgencies",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/urgencies",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"urgencies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id}/document",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "transcript",
+									"contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+									"type": "file",
+									"src": "/Users/richardbull/rbull/DARTS/Test Document.docx"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id/document",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id",
+								"document"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "61"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /transcriptions/{transcription_id}/document",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/*"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id/document",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id",
+								"document"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
 					},
 					"response": []
 				}
