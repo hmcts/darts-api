@@ -167,7 +167,7 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     private boolean transcriptionDatesAreSet(OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
-        return !isNull(startDateTime) && !isNull(endDateTime);
+        return nonNull(startDateTime) && nonNull(endDateTime);
     }
 
 }
