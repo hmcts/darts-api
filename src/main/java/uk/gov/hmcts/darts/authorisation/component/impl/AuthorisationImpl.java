@@ -114,4 +114,5 @@ public class AuthorisationImpl implements Authorisation {
             throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
         }
     }
+
 }

@@ -58,8 +58,7 @@ public class AuthorisationAspect {
 
         JsonNode jsonNode = objectMapper.valueToTree(body);
 
-        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId())
-            .checkAuthorisation(jsonNode, roles);
+        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(jsonNode, roles);
 
         return joinPoint.proceed();
     }
@@ -79,8 +78,7 @@ public class AuthorisationAspect {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
 
-        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId())
-            .checkAuthorisation(request, roles);
+        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(request, roles);
     }
 
     private boolean handleRequestBodyAuthorisation(@NotNull String method) {

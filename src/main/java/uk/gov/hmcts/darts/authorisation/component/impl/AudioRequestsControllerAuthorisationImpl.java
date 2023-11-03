@@ -1,43 +1,63 @@
 package uk.gov.hmcts.darts.authorisation.component.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.ControllerAuthorisation;
 import uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
-import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID_MEDIA_REQUEST;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEARING_ID_TRANSCRIBER;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
-class AudioRequestsControllerAuthorisationImpl extends HearingIdControllerAuthorisationImpl {
+class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisation
+    implements ControllerAuthorisation {
 
     static final String HEARING_ID_PARAM = "hearing_id";
+    public static final String REQUEST_TYPE = "request_type";
+    public static final String DOWNLOAD_REQUEST_TYPE = "DOWNLOAD";
 
     private final Authorisation authorisation;
 
-    public AudioRequestsControllerAuthorisationImpl(Authorisation authorisation, Authorisation authorisation1) {
-        super(authorisation);
-        this.authorisation = authorisation1;
-    }
+    private final HearingIdControllerAuthorisationImpl hearingIdControllerAuthorisation;
 
     @Override
     public ContextIdEnum getContextId() {
-        return HEARING_ID_MEDIA_REQUEST;
+        return DOWNLOAD_HEARING_ID_TRANSCRIBER;
+    }
+
+    @Override
+    public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
+        Optional<String> requestTypeParamOptional = getEntityParamOptional(request, REQUEST_TYPE);
+        if (requestTypeParamOptional.isPresent()) {
+            roles = setDownloadRequestSecurityRoles(roles, requestTypeParamOptional.get());
+        }
+
+        hearingIdControllerAuthorisation.checkAuthorisation(request, roles);
     }
 
     @Override
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
-        String requestType = jsonNode.path("request_type").textValue();
-        if ("DOWNLOAD".equals(requestType)) {
+        String requestType = jsonNode.path(REQUEST_TYPE).textValue();
+        roles = setDownloadRequestSecurityRoles(roles, requestType);
+        authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
+    }
+
+    private static Set<SecurityRoleEnum> setDownloadRequestSecurityRoles(Set<SecurityRoleEnum> roles, String requestType) {
+        if (DOWNLOAD_REQUEST_TYPE.equals(requestType)) {
             roles = new HashSet<>();
             roles.add(SecurityRoleEnum.TRANSCRIBER);
         }
-        authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
+        return roles;
     }
-    
+
 }
