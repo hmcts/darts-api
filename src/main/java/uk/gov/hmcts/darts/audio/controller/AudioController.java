@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -87,6 +88,19 @@ public class AudioController implements AudioApi {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public byte[] readByteRange(InputStream inputStream, long start, long end) throws IOException {
+        ByteArrayOutputStream bufferedOutputStream = new ByteArrayOutputStream();
+        byte[] data = new byte[BYTE_RANGE];
+        int read;
+        while ((read = inputStream.read(data, 0, data.length)) != -1) {
+            bufferedOutputStream.write(data, 0, read);
+        }
+        bufferedOutputStream.flush();
+        byte[] result = new byte[(int) (end - start) + 1];
+        System.arraycopy(bufferedOutputStream.toByteArray(), (int) start, result, 0, result.length);
+        return result;
     }
 
     @Override
