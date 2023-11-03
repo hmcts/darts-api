@@ -39,9 +39,7 @@ class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> hearingIdParamOptional = getEntityParamOptional(request, HEARING_ID_PARAM);
-        if (hearingIdParamOptional.isPresent()) {
-            checkAuthorisationByHearingId(hearingIdParamOptional, roles);
-        }
+        checkAuthorisationByHearingId(hearingIdParamOptional, roles);
 
         if (hearingIdParamOptional.isEmpty()) {
             log.error(String.format(

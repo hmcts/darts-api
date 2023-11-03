@@ -39,9 +39,7 @@ class MediaRequestIdControllerAuthorisationImpl extends BaseControllerAuthorisat
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> mediaRequestIdParamOptional = getEntityParamOptional(request, MEDIA_REQUEST_ID_PARAM);
-        if (mediaRequestIdParamOptional.isPresent()) {
-            checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
-        }
+        checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
 
         if (mediaRequestIdParamOptional.isEmpty()) {
             log.error(String.format(

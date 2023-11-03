@@ -39,29 +39,20 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> hearingIdParamOptional = getEntityParamOptional(request, hearingIdControllerAuthorisation.getEntityIdParam());
-        if (hearingIdParamOptional.isPresent()) {
-            hearingIdControllerAuthorisation.checkAuthorisationByHearingId(hearingIdParamOptional, roles);
-        }
+        hearingIdControllerAuthorisation.checkAuthorisationByHearingId(hearingIdParamOptional, roles);
 
         Optional<String> caseIdParamOptional = getEntityParamOptional(request, caseIdControllerAuthorisation.getEntityIdParam());
-        if (caseIdParamOptional.isPresent()) {
-            caseIdControllerAuthorisation.checkAuthorisationByCaseId(caseIdParamOptional, roles);
-        }
+        caseIdControllerAuthorisation.checkAuthorisationByCaseId(caseIdParamOptional, roles);
 
         Optional<String> mediaIdParamOptional = getEntityParamOptional(request, mediaIdControllerAuthorisation.getEntityIdParam());
-        if (mediaIdParamOptional.isPresent()) {
-            mediaIdControllerAuthorisation.checkAuthorisationByMediaId(mediaIdParamOptional, roles);
-        }
+        mediaIdControllerAuthorisation.checkAuthorisationByMediaId(mediaIdParamOptional, roles);
 
         Optional<String> mediaRequestIdParamOptional = getEntityParamOptional(request, mediaRequestIdControllerAuthorisation.getEntityIdParam());
-        if (mediaRequestIdParamOptional.isPresent()) {
-            mediaRequestIdControllerAuthorisation.checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
-        }
+        mediaRequestIdControllerAuthorisation.checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
+
 
         Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, transcriptionIdControllerAuthorisation.getEntityIdParam());
-        if (transcriptionIdParamOptional.isPresent()) {
-            transcriptionIdControllerAuthorisation.checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
-        }
+        transcriptionIdControllerAuthorisation.checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
 
         if (hearingIdParamOptional.isEmpty()
             && caseIdParamOptional.isEmpty()

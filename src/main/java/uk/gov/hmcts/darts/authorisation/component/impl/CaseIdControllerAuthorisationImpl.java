@@ -39,9 +39,7 @@ class CaseIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> caseIdParamOptional = getEntityParamOptional(request, CASE_ID_PARAM);
-        if (caseIdParamOptional.isPresent()) {
-            checkAuthorisationByCaseId(caseIdParamOptional, roles);
-        }
+        checkAuthorisationByCaseId(caseIdParamOptional, roles);
 
         if (caseIdParamOptional.isEmpty()) {
             log.error(String.format(

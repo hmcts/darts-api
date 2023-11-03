@@ -39,9 +39,7 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, TRANSCRIPTION_ID_PARAM);
-        if (transcriptionIdParamOptional.isPresent()) {
-            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
-        }
+        checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
 
         if (transcriptionIdParamOptional.isEmpty()) {
             log.error(String.format(
