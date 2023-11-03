@@ -20,7 +20,6 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -40,8 +39,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @RequiredArgsConstructor
 @Slf4j
 public class AudioController implements AudioApi {
-
-    public static final int BYTE_RANGE = 128; // increase the byte range from here
 
     private final AudioService audioService;
     private final AudioTransformationService audioTransformationService;
@@ -79,27 +76,47 @@ public class AudioController implements AudioApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<byte[]> preview(Integer mediaId, @RequestHeader(value = "Range", required = false) String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
-        try {
-            byte[] bytes = IOUtils.toByteArray(audioMediaFile);
-            return ResponseEntity.status(HttpStatus.OK)
-                .header("Content-Type", "audio/mpeg")
-                .header("Content-Length", String.valueOf(bytes.length))
-                .body(bytes);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        if (httpRangeList == null) {
+            try {
+                byte[] bytes = IOUtils.toByteArray(audioMediaFile);
+                return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type", "audio/mpeg")
+                    .header("Content-Length", String.valueOf(bytes.length))
+                    .body(bytes);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                byte[] bytes = IOUtils.toByteArray(audioMediaFile);
+                long fileSize = bytes.length;
+                String[] ranges = httpRangeList.split("-");
+                long rangeStart = Long.parseLong(ranges[0].substring(6));
+                long rangeEnd;
+                if (ranges.length > 1) {
+                    rangeEnd = Long.parseLong(ranges[1]);
+                } else {
+                    rangeEnd = fileSize - 1;
+                }
+                if (fileSize < rangeEnd) {
+                    rangeEnd = fileSize - 1;
+                }
+                String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
+                return ResponseEntity.status(HttpStatus.OK)
+                    .header("Content-Type", "audio/mpeg")
+                    .header("Content-Length", contentLength)
+                    .header("Content-Range", "bytes" + " " + rangeStart + "-" + rangeEnd + "/" + fileSize)
+                    .body(readByteRange(bytes, rangeStart, rangeEnd));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public byte[] readByteRange(InputStream inputStream, long start, long end) throws IOException {
-        ByteArrayOutputStream bufferedOutputStream = new ByteArrayOutputStream();
-        byte[] data = new byte[BYTE_RANGE];
-        int read;
-        while ((read = inputStream.read(data, 0, data.length)) != -1) {
-            bufferedOutputStream.write(data, 0, read);
-        }
-        bufferedOutputStream.flush();
+    public byte[] readByteRange(byte[] wholeFile, long start, long end) throws IOException {
         byte[] result = new byte[(int) (end - start) + 1];
-        System.arraycopy(bufferedOutputStream.toByteArray(), (int) start, result, 0, result.length);
+        System.arraycopy(wholeFile, (int) start, result, 0, result.length);
         return result;
     }
 
