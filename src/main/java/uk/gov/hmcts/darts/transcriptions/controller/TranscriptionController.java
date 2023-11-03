@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
@@ -22,6 +25,7 @@ import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
@@ -170,4 +174,17 @@ public class TranscriptionController implements TranscriptionApi {
         return nonNull(startDateTime) && nonNull(endDateTime);
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, REQUESTER, JUDGE, TRANSCRIBER, RCJ_APPEALS})
+    public ResponseEntity<TranscriptionResponse> getTranscription(
+        @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
+            in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
+    ) {
+        return new ResponseEntity<>(
+            transcriptionService.getTranscription(transcriptionId),
+            HttpStatus.OK
+        );
+
+    }
 }

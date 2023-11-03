@@ -5,6 +5,7 @@ import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
@@ -23,6 +24,8 @@ public interface TranscriptionService {
     List<TranscriptionTypeResponse> getTranscriptionTypes();
 
     List<TranscriptionUrgencyResponse> getTranscriptionUrgencies();
+
+    TranscriptionResponse getTranscription(Integer transcriptionId);
 
     AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript);
 

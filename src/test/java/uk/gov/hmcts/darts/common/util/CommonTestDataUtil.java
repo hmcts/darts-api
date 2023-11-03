@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -210,12 +211,23 @@ public class CommonTestDataUtil {
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
         transcription.setId(1);
         transcription.setCreatedBy(createUserAccount());
+        transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
+        transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
+        transcription.setTranscriptionStatus(createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
 
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
         transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
         transcription.setTranscriptionStatus(transcriptionStatus);
         return List.of(transcription);
+    }
+
+    private static List<TranscriptionDocumentEntity> createTranscriptionDocuments() {
+        List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setFileName("test.doc");
+        transcriptionDocumentEntities.add(transcriptionDocumentEntity);
+        return transcriptionDocumentEntities;
     }
 
     public UserAccountEntity createUserAccount() {
@@ -331,5 +343,12 @@ public class CommonTestDataUtil {
         transcriptionUrgencyEntity.setId(transcriptionUrgencyEnum.getId());
         transcriptionUrgencyEntity.setDescription(transcriptionUrgencyEnum.name());
         return transcriptionUrgencyEntity;
+    }
+
+    public TranscriptionStatusEntity createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
+        TranscriptionStatusEntity transcriptionStatusEntity = new TranscriptionStatusEntity();
+        transcriptionStatusEntity.setId(transcriptionStatusEnum.getId());
+        transcriptionStatusEntity.setStatusType(transcriptionStatusEnum.name());
+        return transcriptionStatusEntity;
     }
 }
