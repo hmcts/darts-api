@@ -65,7 +65,9 @@ public class TranscriptionResponseMapper {
             latestTranscriptionDocumentEntity.ifPresent(
                 transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
-            transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
+            if (transcriptionEntity.getHearing() != null) {
+                transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
+            }
             if (transcriptionEntity.getTranscriptionUrgency() != null) {
                 transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
             }
@@ -73,7 +75,7 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setTranscriptionStartTs(transcriptionEntity.getStartTime());
             transcriptionResponse.setTranscriptionEndTs(transcriptionEntity.getEndTime());
         } catch (Exception exception) {
-            throw new DartsApiException(TranscriptionApiError.INTERNAL_SERVER_ERROR);
+            throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND);
         }
         return transcriptionResponse;
 

@@ -99,12 +99,6 @@ paths:
                 type: "TRANSCRIPTION_101"
                 title: "The requested transcription cannot be found"
                 status: 404
-        '500':
-          description: Internal Server Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
 
     patch:
       tags:

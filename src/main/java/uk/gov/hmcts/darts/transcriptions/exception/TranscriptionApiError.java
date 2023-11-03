@@ -57,13 +57,8 @@ public enum TranscriptionApiError implements DartsApiError {
         "109",
         HttpStatus.BAD_REQUEST,
         "Failed to download transcript"
-    ),
-    INTERNAL_SERVER_ERROR(
-        "110",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "The requested data cannot be located"
     );
-  
+
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";
 
     private final String errorTypeNumeric;

@@ -118,7 +118,7 @@ class TranscriptionResponseMapperTest {
             () -> TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity)
         );
 
-        assertEquals(TranscriptionApiError.INTERNAL_SERVER_ERROR, exception.getError());
+        assertEquals(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND, exception.getError());
     }
 
 }
