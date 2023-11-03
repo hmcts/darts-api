@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
-import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_ANY_ID;
 
 @Component
 @AllArgsConstructor
@@ -113,7 +113,7 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
 
     private static void entitiesNotFound(String authLocation) {
         log.error("Unable to find entity/entities in {} for authorisation", authLocation);
-        throw new DartsApiException(BAD_REQUEST);
+        throw new DartsApiException(BAD_REQUEST_ANY_ID);
     }
 
 }

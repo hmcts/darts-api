@@ -26,7 +26,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.web.servlet.HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE;
 import static uk.gov.hmcts.darts.authorisation.component.impl.CaseIdControllerAuthorisationImpl.CASE_ID_PARAM;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
-import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_ANY_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_CASE_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
@@ -178,8 +178,8 @@ class AnyEntityIdControllerAuthorisationImplTest {
             () -> controllerAuthorisation.checkAuthorisation(request, roles)
         );
 
-        assertEquals(BAD_REQUEST.getTitle(), exception.getMessage());
-        assertEquals(BAD_REQUEST, exception.getError());
+        assertEquals(BAD_REQUEST_ANY_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_ANY_ID, exception.getError());
 
         verifyNoInteractions(authorisation);
     }

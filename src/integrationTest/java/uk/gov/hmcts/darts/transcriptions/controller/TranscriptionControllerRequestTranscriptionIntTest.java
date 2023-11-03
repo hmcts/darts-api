@@ -253,21 +253,21 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isUnauthorized())
+            .andExpect(status().isForbidden())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertFailedAuthentication100Error(actualJson);
+        assertFailedAuthentication107Error(actualJson);
 
         assertAudit(0);
     }
 
-    private void assertFailedAuthentication100Error(String actualJson) {
+    private void assertFailedAuthentication107Error(String actualJson) {
         String expectedJson = """
             {
               "type": "AUTHORISATION_107",
               "title": "Failed to check authorisation",
-              "status": 401
+              "status": 403
             }
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
