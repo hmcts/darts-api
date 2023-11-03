@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,6 +34,8 @@ public class UserAccountStub {
             var newUser = new UserAccountEntity();
             newUser.setUsername("System User");
             newUser.setEmailAddress("system.user@example.com");
+            newUser.setAccountGuid(UUID.randomUUID().toString());
+            newUser.setIsSystemUser(false);
             return userAccountRepository.saveAndFlush(newUser);
         }
     }
@@ -51,6 +54,8 @@ public class UserAccountStub {
             newUser.setCreatedBy(systemUser);
             newUser.setLastModifiedBy(systemUser);
             newUser.setState(1);
+            newUser.setAccountGuid(UUID.randomUUID().toString());
+            newUser.setIsSystemUser(false);
             return userAccountRepository.saveAndFlush(newUser);
         }
     }

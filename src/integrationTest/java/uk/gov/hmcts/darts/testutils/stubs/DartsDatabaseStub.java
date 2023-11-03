@@ -64,6 +64,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
@@ -436,6 +437,8 @@ public class DartsDatabaseStub {
         UserAccountEntity testUser = new UserAccountEntity();
         testUser.setEmailAddress("test.user@example.com");
         testUser.setUsername("testuser");
+        testUser.setAccountGuid(UUID.randomUUID().toString());
+        testUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(testUser);
     }
 

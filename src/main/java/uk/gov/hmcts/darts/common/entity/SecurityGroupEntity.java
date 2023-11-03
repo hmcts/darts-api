@@ -62,6 +62,12 @@ public class SecurityGroupEntity {
     @Column(name = "group_display_name")
     private String groupDisplayName;
 
+    @Column(name = "global_access")
+    private Boolean globalAccess;
+
+    @Column(name = "display_state")
+    private Boolean displayState;
+
     @ManyToMany
     @JoinTable(name = "security_group_courthouse_ae",
         joinColumns = {@JoinColumn(name = "grp_id")},

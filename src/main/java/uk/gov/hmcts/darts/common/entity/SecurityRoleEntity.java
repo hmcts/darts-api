@@ -33,6 +33,12 @@ public class SecurityRoleEntity {
     @EqualsAndHashCode.Include
     private String roleName;
 
+    @Column(name = "display_name")
+    private String displayName;
+
+    @Column(name = "display_state")
+    private Boolean displayState;
+
     @ManyToMany
     @JoinTable(name = "security_role_permission_ae",
         joinColumns = {@JoinColumn(name = "rol_id")},
