@@ -49,6 +49,7 @@ import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
@@ -508,4 +509,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return transcriptionStatuses;
     }
 
+    @Override
+    public TranscriptionResponse getTranscription(Integer transcriptionId) {
+        TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
+            .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
+        return TranscriptionResponseMapper.mapToTranscriptionResponse(transcription);
+    }
 }
