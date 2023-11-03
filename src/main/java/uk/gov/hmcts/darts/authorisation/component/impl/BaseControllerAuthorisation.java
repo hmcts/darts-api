@@ -22,4 +22,15 @@ abstract class BaseControllerAuthorisation {
         return Optional.ofNullable(pathVariables.get(pathParam));
     }
 
+    Optional<String> getEntityParamOptional(HttpServletRequest request, String entityIdParam) {
+        Optional<String> entityIdParamOptional = getPathParamValue(request, entityIdParam);
+
+        if (entityIdParamOptional.isEmpty()) {
+            entityIdParamOptional = Optional.ofNullable(request.getParameter(entityIdParam));
+        }
+        if (entityIdParamOptional.isEmpty()) {
+            entityIdParamOptional = Optional.ofNullable(request.getHeader(entityIdParam));
+        }
+        return entityIdParamOptional;
+    }
 }

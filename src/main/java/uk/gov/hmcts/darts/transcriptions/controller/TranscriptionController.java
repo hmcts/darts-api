@@ -39,6 +39,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
@@ -61,6 +62,8 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(
         TranscriptionRequestDetails transcriptionRequestDetails) {
         validateTranscriptionRequestValues(transcriptionRequestDetails);
@@ -168,7 +171,7 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     private boolean transcriptionDatesAreSet(OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
-        return !isNull(startDateTime) || !isNull(endDateTime);
+        return nonNull(startDateTime) && nonNull(endDateTime);
     }
 
     @Override

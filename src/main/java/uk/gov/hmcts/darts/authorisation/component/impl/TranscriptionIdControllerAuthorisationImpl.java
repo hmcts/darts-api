@@ -32,20 +32,14 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
         return TRANSCRIPTION_ID;
     }
 
+    public String getEntityIdParam() {
+        return TRANSCRIPTION_ID_PARAM;
+    }
+
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> transcriptionIdParamOptional = getPathParamValue(request, TRANSCRIPTION_ID_PARAM);
+        Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, TRANSCRIPTION_ID_PARAM);
         checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
-
-        if (transcriptionIdParamOptional.isEmpty()) {
-            transcriptionIdParamOptional = Optional.ofNullable(request.getParameter(TRANSCRIPTION_ID_PARAM));
-            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
-        }
-
-        if (transcriptionIdParamOptional.isEmpty()) {
-            transcriptionIdParamOptional = Optional.ofNullable(request.getHeader(TRANSCRIPTION_ID_PARAM));
-            checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
-        }
 
         if (transcriptionIdParamOptional.isEmpty()) {
             log.error(String.format(
@@ -62,8 +56,8 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
         authorisation.authoriseByTranscriptionId(jsonNode.path(TRANSCRIPTION_ID_PARAM).intValue(), roles);
     }
 
-    private void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional,
-                                                     Set<SecurityRoleEnum> roles) {
+    void checkAuthorisationByTranscriptionId(Optional<String> transcriptionIdParamOptional,
+                                             Set<SecurityRoleEnum> roles) {
         if (transcriptionIdParamOptional.isPresent()) {
             try {
                 Integer transcriptionId = Integer.valueOf(transcriptionIdParamOptional.get());

@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -17,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -57,6 +57,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 @AutoConfigureMockMvc
 @Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports"})
+@Transactional
 class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions");
@@ -113,7 +114,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(1)
-    @Transactional
     void transcriptionRequestWithValidValuesShouldReturnSuccess() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
@@ -145,7 +145,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(1),
                                     AWAITING_AUTHORISATION, testUser
         );
-
 
         assertThat(dartsDatabaseStub.getTranscriptionCommentRepository().findAll())
             .hasSize(1)
@@ -183,7 +182,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(12)
-    @Transactional
     void transcriptionRequestWithDuplicateValues() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
@@ -213,7 +211,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(2)
-    @Transactional
     void transcriptionRequestWithNullDatesAndSentencingRemarksTypeShouldReturnSuccess()
         throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
@@ -241,7 +238,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(3)
-    @Transactional
     void transcriptionRequestWithNullHearingAndNullCaseShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
@@ -257,26 +253,36 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
-            .andExpect(status().isBadRequest())
+            .andExpect(status().isForbidden())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        assertTranscriptionFailed100Error(actualJson);
+        assertFailedAuthentication107Error(actualJson);
 
         assertAudit(0);
+    }
+
+    private void assertFailedAuthentication107Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "AUTHORISATION_107",
+              "title": "Failed to check authorisation",
+              "status": 403
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @ParameterizedTest
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
     @Order(4)
-    @Transactional
     void transcriptionRequestWithNullStartDateAndRequiredDatesTranscriptionTypeShouldThrowException(
         TranscriptionTypeEnum transcriptionTypeEnum)
         throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getId(),
+            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, null, END_TIME
         );
 
@@ -298,14 +304,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @ParameterizedTest
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
     @Order(5)
-    @Transactional
     void transcriptionRequestWithNullEndDateAndRequiredDatesTranscriptionTypeShouldThrowException(
         TranscriptionTypeEnum transcriptionTypeEnum)
         throws Exception {
+
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, null, transcriptionUrgencyEnum.getId(),
+            hearing.getId(), null, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, null
         );
 
@@ -326,7 +332,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(6)
-    @Transactional
     void transcriptionRequestWithInvalidUrgencyIdShouldThrowException() throws Exception {
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
@@ -349,7 +354,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(7)
-    @Transactional
     void transcriptionRequestWithNullUrgencyIdShouldThrowException() throws Exception {
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
@@ -372,7 +376,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(8)
-    @Transactional
     void transcriptionRequestWithInvalidTranscriptionTypeIdShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
 
@@ -395,13 +398,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Test
     @Order(9)
-    @Transactional
     void transcriptionRequestWithInvalidHearingIdShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            789, null, transcriptionUrgencyEnum.getId(),
+            999_999, null, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
@@ -415,6 +417,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
+        assertHearingNotFound404Error(actualJson);
+
+        assertAudit(0);
+    }
+
+    private void assertHearingNotFound404Error(String actualJson) {
         String expectedJson = """
             {
               "type": "HEARING_100",
@@ -424,18 +432,27 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
-        assertAudit(0);
+    }
+
+    private void assertCaseNotFound404Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "CASE_104",
+              "title": "The requested case cannot be found",
+              "status": 404
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
     @Order(10)
-    @Transactional
     void transcriptionRequestWithInvalidCaseIdShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
-            null, 789, transcriptionUrgencyEnum.getId(),
+            null, 999_999, transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
@@ -449,21 +466,13 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        String expectedJson = """
-            {
-              "type": "CASE_104",
-              "title": "The requested case cannot be found",
-              "status": 404
-            }""";
 
-        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
+        assertCaseNotFound404Error(actualJson);
         assertAudit(0);
     }
 
     @Test
     @Order(11)
-    @Transactional
     void transcriptionRequestWithValidHearingAndNullCaseIdShouldReturnSuccess() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
