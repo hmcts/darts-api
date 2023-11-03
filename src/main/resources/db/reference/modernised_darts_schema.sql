@@ -160,6 +160,9 @@
 --    add media_type table, primary key and fk from media
 --    add is_system_user and account_guid to user_account
 --    add display_name to courthouse
+--v54 add checksum to annotation_document and transcription_document
+--    add display_state to transcription_type and transcription_urgency
+--    add display_name to transcription_status
 
 
 -- List of Table Aliases
@@ -277,6 +280,7 @@ CREATE TABLE annotation_document
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
+,checksum                    CHARACTER VARYING             NOT NULL
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE darts_tables;
@@ -661,9 +665,9 @@ CREATE TABLE external_object_directory
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 -- additional optional FKs to other relevant internal objects would require columns here
 ,external_location           UUID                          NOT NULL
-,external_file_id            CHARACTER VARYING  
+,external_file_id            CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,external_record_id          CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
-,checksum                    CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
+,checksum                    CHARACTER VARYING                       
 ,transfer_attempts           INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -1132,6 +1136,7 @@ CREATE TABLE transcription_document
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
+,checksum                    CHARACTER VARYING             NOT NULL
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE darts_tables;
@@ -1145,6 +1150,7 @@ IS 'foreign key from transcription';
 CREATE TABLE transcription_status
 (trs_id                      INTEGER                       NOT NULL
 ,status_type                 CHARACTER VARYING             NOT NULL
+,display_name                CHARACTER VARYING             NOT NULL
 )TABLESPACE darts_tables; 
 
 COMMENT ON TABLE transcription_status
@@ -1156,7 +1162,8 @@ IS 'primary key of transcription_status';
 
 CREATE TABLE transcription_type
 (trt_id                      INTEGER                       NOT NULL
-,description                 CHARACTER VARYING        
+,description                 CHARACTER VARYING             NOT NULL
+,display_state               BOOLEAN                       NOT NULL       
 )TABLESPACE darts_tables;
 
 COMMENT ON TABLE transcription_type
@@ -1168,7 +1175,8 @@ IS 'primary key, but not sequence generated';
 
 CREATE TABLE transcription_urgency
 (tru_id                      INTEGER                       NOT NULL
-,description                 CHARACTER VARYING
+,description                 CHARACTER VARYING             NOT NULL
+,display_state               BOOLEAN                       NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON TABLE transcription_urgency 
