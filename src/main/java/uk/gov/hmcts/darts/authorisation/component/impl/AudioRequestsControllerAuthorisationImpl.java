@@ -24,6 +24,7 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
 
     static final String HEARING_ID_PARAM = "hearing_id";
     public static final String REQUEST_TYPE = "request_type";
+    public static final String DOWNLOAD_REQUEST_TYPE = "DOWNLOAD";
 
     private final Authorisation authorisation;
 
@@ -38,8 +39,7 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
         Optional<String> requestTypeParamOptional = getEntityParamOptional(request, REQUEST_TYPE);
         if (requestTypeParamOptional.isPresent()) {
-            roles = new HashSet<>();
-            roles.add(SecurityRoleEnum.TRANSCRIBER);
+            roles = setDownloadRequestSecurityRoles(roles, requestTypeParamOptional.get());
         }
 
         hearingIdControllerAuthorisation.checkAuthorisation(request, roles);
@@ -48,11 +48,16 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
     @Override
     public void checkAuthorisation(JsonNode jsonNode, Set<SecurityRoleEnum> roles) {
         String requestType = jsonNode.path(REQUEST_TYPE).textValue();
-        if ("DOWNLOAD".equals(requestType)) {
+        roles = setDownloadRequestSecurityRoles(roles, requestType);
+        authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
+    }
+
+    private static Set<SecurityRoleEnum> setDownloadRequestSecurityRoles(Set<SecurityRoleEnum> roles, String requestType) {
+        if (DOWNLOAD_REQUEST_TYPE.equals(requestType)) {
             roles = new HashSet<>();
             roles.add(SecurityRoleEnum.TRANSCRIBER);
         }
-        authorisation.authoriseByHearingId(jsonNode.path(HEARING_ID_PARAM).intValue(), roles);
+        return roles;
     }
 
 }

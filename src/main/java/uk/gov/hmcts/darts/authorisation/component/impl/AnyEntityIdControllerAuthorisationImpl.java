@@ -50,7 +50,6 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         Optional<String> mediaRequestIdParamOptional = getEntityParamOptional(request, mediaRequestIdControllerAuthorisation.getEntityIdParam());
         mediaRequestIdControllerAuthorisation.checkAuthorisationByMediaRequestId(mediaRequestIdParamOptional, roles);
 
-
         Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, transcriptionIdControllerAuthorisation.getEntityIdParam());
         transcriptionIdControllerAuthorisation.checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
 
