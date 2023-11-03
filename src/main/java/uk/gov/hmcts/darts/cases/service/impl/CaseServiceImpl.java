@@ -127,12 +127,7 @@ public class CaseServiceImpl implements CaseService {
             throw new DartsApiException(CaseApiError.TOO_MANY_RESULTS);
         }
         if (caseIds.isEmpty()) {
-            List<Integer> caseIdNoSecurityRoles = advancedSearchRequestHelper.getMatchingCourtCases(request, false);
-            if (caseIdNoSecurityRoles.isEmpty()) {
-                return new ArrayList<>();
-            } else {
-                throw new DartsApiException(CaseApiError.INVALID_USER_ROLES);
-            }
+            return new ArrayList<>();
         }
         List<HearingEntity> hearings = hearingRepository.findByCaseIds(caseIds);
         return AdvancedSearchResponseMapper.mapResponse(hearings);

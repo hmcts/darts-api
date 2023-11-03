@@ -38,11 +38,6 @@ public enum CaseApiError implements DartsApiError {
         "106",
         HttpStatus.BAD_REQUEST,
         "The request does not contain any values that are supported by the PATCH operation."
-    ),
-    INVALID_USER_ROLES(
-        "107",
-        HttpStatus.FORBIDDEN,
-        "Invalid user roles for search criteria."
     );
 
     private static final String ERROR_TYPE_PREFIX = "CASE";

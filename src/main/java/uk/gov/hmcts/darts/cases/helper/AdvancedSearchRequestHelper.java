@@ -50,14 +50,10 @@ public class AdvancedSearchRequestHelper {
     private final UserIdentity userIdentity;
 
     public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request) {
-        return getMatchingCourtCases(request, true);
-    }
-
-    public List<Integer> getMatchingCourtCases(GetCasesSearchRequest request, boolean useRoles) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Integer> criteriaQuery = criteriaBuilder.createQuery(Integer.class);
         Root<CourtCaseEntity> caseRoot = criteriaQuery.from(CourtCaseEntity.class);
-        List<Predicate> predicates = createPredicates(request, criteriaBuilder, caseRoot, useRoles);
+        List<Predicate> predicates = createPredicates(request, criteriaBuilder, caseRoot);
 
         Predicate finalAndPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         criteriaQuery.where(finalAndPredicate);
@@ -68,7 +64,7 @@ public class AdvancedSearchRequestHelper {
         return query.getResultList();
     }
 
-    private List<Predicate> createPredicates(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot, boolean useRoles) {
+    private List<Predicate> createPredicates(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicates = new ArrayList<>();
         CollectionUtils.addAll(predicates, createCaseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, caseRoot));
@@ -77,9 +73,7 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
-        if (useRoles) {
-            CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
-        }
+        CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
         return predicates;
 
     }
