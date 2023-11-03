@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.controller;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,11 +80,11 @@ public class AudioController implements AudioApi {
     public ResponseEntity<byte[]> preview(Integer mediaId, @RequestHeader(value = "Range", required = false) String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         try {
-            int fileSize = audioMediaFile.available();
+            byte[] bytes = IOUtils.toByteArray(audioMediaFile);
             return ResponseEntity.status(HttpStatus.OK)
                 .header("Content-Type", "audio/mpeg")
-                .header("Content-Length", String.valueOf(fileSize))
-                .body(readByteRange(audioMediaFile, 0, fileSize - 1));
+                .header("Content-Length", String.valueOf(bytes.length))
+                .body(bytes);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
