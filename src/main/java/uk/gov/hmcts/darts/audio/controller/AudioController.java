@@ -90,19 +90,6 @@ public class AudioController implements AudioApi {
         }
     }
 
-    public byte[] readByteRange(InputStream inputStream, long start, long end) throws IOException {
-        ByteArrayOutputStream bufferedOutputStream = new ByteArrayOutputStream();
-        byte[] data = new byte[BYTE_RANGE];
-        int read;
-        while ((read = inputStream.read(data, 0, data.length)) != -1) {
-            bufferedOutputStream.write(data, 0, read);
-        }
-        bufferedOutputStream.flush();
-        byte[] result = new byte[(int) (end - start) + 1];
-        System.arraycopy(bufferedOutputStream.toByteArray(), (int) start, result, 0, result.length);
-        return result;
-    }
-
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<Void> addAudioMetaData(AddAudioMetadataRequest addAudioMetadataRequest) {
