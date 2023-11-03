@@ -2,7 +2,7 @@ package uk.gov.hmcts.darts.authorisation.component.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
@@ -18,7 +18,7 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST;
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Slf4j
 public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     implements ControllerAuthorisation {
