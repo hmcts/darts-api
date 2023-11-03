@@ -47,6 +47,7 @@ DROP TABLE transcription ;
 DROP TABLE transcription_urgency;
 DROP TABLE hearing     ;              
 DROP TABLE media       ;
+DROP TABLE media_type;
 DROP TABLE notification;              
 DROP TABLE report      ;      
 DROP TABLE automated_task;
@@ -76,6 +77,7 @@ DROP SEQUENCE ctr_seq;
 DROP SEQUENCE dal_seq;
 DROP SEQUENCE dfc_seq;
 DROP SEQUENCE dfd_seq;
+
 DROP SEQUENCE eve_seq;
 DROP SEQUENCE evh_seq;
 DROP SEQUENCE eod_seq;

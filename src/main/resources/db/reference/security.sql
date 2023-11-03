@@ -9,6 +9,9 @@
 --     moved INSERT statements to new file security_test_data.sql
 --v15 comment preceding lines 
 --v16 removing created* & last_modified* from SECURITY_ROLE, SECURITY_PERMISSION
+--v17 add display_name and display_state to security_role 
+--    add global_access and display_state to security_group
+--    
 
 -- assuming this already exists:
 -- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
@@ -32,6 +35,8 @@ SET SEARCH_PATH TO darts;
 CREATE TABLE security_group
 (grp_id                  INTEGER                         NOT NULL
 ,rol_id                  INTEGER                         NOT NULL
+,global_access           BOOLEAN                         NOT NULL
+,display_state           BOOLEAN                         NOT NULL
 ,r_dm_group_s_object_id  CHARACTER VARYING(16)
 ,group_name              CHARACTER VARYING               NOT NULL
 ,is_private              BOOLEAN
@@ -70,6 +75,8 @@ IS 'foreign key from security_group';
 CREATE TABLE security_role
 (rol_id                  INTEGER                         NOT NULL
 ,role_name               CHARACTER VARYING               NOT NULL
+,display_name            CHARACTER VARYING               NOT NULL
+,display_state           BOOLEAN                         NOT NULL
 ) TABLESPACE darts_tables;
 
 CREATE TABLE security_permission
