@@ -7,8 +7,15 @@ SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
 
 
-INSERT INTO user_account (usr_id, user_name, description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (0, 'SYSTEM', 'System User', CURRENT_TIMESTAMP, 1, CURRENT_TIMESTAMP, 1);
-
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (0, NULL, 'System User', 'dartssystemuser@hmcts.net', 'System User', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-1, NULL, 'Event Processor', 'Event.Processor@example.com', 'Event Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-2, NULL, 'DailyList Processor', 'DailyList.Processor@example.com', 'DailyList Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-3, NULL, 'AddAudio Processor', 'AddAudio.Processor@example.com', 'AddAudio Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-4, NULL, 'AddCase Processor', 'AddCase.Processor@example.com', 'AddCase Processor', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-40, NULL, 'Xhibit', 'xhibit@hmcts.net', 'Xhibit', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-41, NULL, 'Cpp', 'cpp@hmcts.net', 'Cpp', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-42, NULL, 'Dar Pc', 'dar.pc@hmcts.net', 'Dar Pc', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
+INSERT INTO user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, last_login_ts, is_system_user, account_guid, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (-43, NULL, 'Mid Tier', 'dar.midtier@hmcts.net', 'Mid Tier', 0, NULL, true, 'Not available', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (1, 'Move Courtroom', 'Move Courtroom', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (2, 'Export Audio', 'Export Audio', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
@@ -22,7 +29,6 @@ INSERT INTO audit_activity (aua_id, activity_name, activity_description, created
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (10, 'Reject Transcription', 'Reject Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (11, 'Accept Transcription', 'Accept Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
 INSERT INTO audit_activity (aua_id, activity_name, activity_description, created_ts, created_by, last_modified_ts, last_modified_by) VALUES (12, 'Complete Transcription', 'Complete Transcription', CURRENT_TIMESTAMP, 0, CURRENT_TIMESTAMP, 0);
-
 
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (1, '1000', '1002', 'Proceedings in chambers', 'StandardEventHandler', true,false,0,current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (2, '1000', '1001', 'Offences put to defendant', 'StandardEventHandler', true,false,0,current_timestamp);
@@ -101,7 +107,7 @@ INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handl
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (75, '2933', '3982', 'Victim Personal Statement(s) read', 'StandardEventHandler', true,false,0,current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (76, '2934', '3983', 'Unspecified event', 'StandardEventHandler', true,false,0,current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (77, '3000', NULL, 'Archive Case', 'StopAndCloseHandler', true,false,0,current_timestamp);
-INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (78, '3010', NULL, 'Sentence Transcription Required', 'TranscriptionRequestHandler', true, false, 1, current_timestamp);
+INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (78, '3010', NULL, 'Sentence Transcription Required', 'TranscriptionRequestHandler', true,false,0,current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (79, '4101', NULL, 'Witness cross-examined by Defence', 'StandardEventHandler', true,false,0,current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (80, '4102', NULL, 'Witness cross-examined by Prosecution', 'StandardEventHandler', true,false,0,current_timestamp);
 INSERT INTO event_handler (evh_id, event_type, event_sub_type, event_name, handler, active,is_reporting_restriction, created_by, created_ts) VALUES (81, '10100', NULL, 'Case called on', 'DarStartHandler', true,false,0,current_timestamp);
@@ -443,13 +449,23 @@ INSERT INTO security_permission (per_id, permission_name) VALUES (14, 'VIEW_MY_A
 INSERT INTO security_permission (per_id, permission_name) VALUES (15, 'VIEW_MY_TRANSCRIPTIONS');
 INSERT INTO security_permission (per_id, permission_name) VALUES (16, 'EXPORT_PROCESSED_PLAYBACK_AUDIO');
 INSERT INTO security_permission (per_id, permission_name) VALUES (17, 'EXPORT_PROCESSED_DOWNLOAD_AUDIO');
+INSERT INTO security_permission (per_id, permission_name) VALUES (18, 'ADD_DOCUMENT');
+INSERT INTO security_permission (per_id, permission_name) VALUES (19, 'GET_CASES');
+INSERT INTO security_permission (per_id, permission_name) VALUES (20, 'REGISTER_NODE');
+INSERT INTO security_permission (per_id, permission_name) VALUES (21, 'ADD_CASE');
+INSERT INTO security_permission (per_id, permission_name) VALUES (22, 'ADD_LOG_ENTRY');
+INSERT INTO security_permission (per_id, permission_name) VALUES (23, 'ADD_AUDIO');
 
-INSERT INTO security_role (rol_id, role_name) VALUES (1, 'APPROVER');
-INSERT INTO security_role (rol_id, role_name) VALUES (2, 'REQUESTER');
-INSERT INTO security_role (rol_id, role_name) VALUES (3, 'JUDGE');
-INSERT INTO security_role (rol_id, role_name) VALUES (4, 'TRANSCRIBER');
-INSERT INTO security_role (rol_id, role_name) VALUES (5, 'LANGUAGE_SHOP_USER');
-INSERT INTO security_role (rol_id, role_name) VALUES (6, 'RCJ_APPEALS');
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (1, 'APPROVER', 'Approver', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (2, 'REQUESTER', 'Requester', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (3, 'JUDGE', 'Judge', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (4, 'TRANSCRIBER', 'Transcriber', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (5, 'LANGUAGE_SHOP_USER', 'Language Shop', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (6, 'RCJ_APPEALS', 'RCJ Appeals', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (7, 'XHIBIT', 'XHIBIT', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (8, 'CPP', 'CPP', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (9, 'DAR_PC', 'DAR PC', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (10, 'MID_TIER', 'Mid Tier', true);
 
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 2);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 4);
@@ -510,27 +526,37 @@ INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (6, 10);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (6, 13);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (6, 14);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (6, 16);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (7, 16);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (8, 16);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (9, 17);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (9, 18);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 18);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 19);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 20);
+INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 21);
 
-INSERT INTO transcription_status (trs_id, status_type) VALUES (1, 'Requested');
-INSERT INTO transcription_status (trs_id, status_type) VALUES (2, 'Awaiting Authorisation');
-INSERT INTO transcription_status (trs_id, status_type) VALUES (3, 'Approved');
-INSERT INTO transcription_status (trs_id, status_type) VALUES (4, 'Rejected');
-INSERT INTO transcription_status (trs_id, status_type) VALUES (5, 'With Transcriber');
-INSERT INTO transcription_status (trs_id, status_type) VALUES (6, 'Complete');
-INSERT INTO transcription_status (trs_id, status_type) VALUES (7, 'Closed');
+INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (1, 'Requested', 'Requested');
+INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (2, 'Awaiting Authorisation', 'Awaiting Authorisation');
+INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (3, 'Approved', 'Approved');
+INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (4, 'Rejected', 'Rejected');
+INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (5, 'With Transcriber', 'With Transcriber');
+INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (6, 'Complete', 'Complete');
+INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (7, 'Closed', 'Closed');
 
-INSERT INTO transcription_type (trt_id, description) VALUES (1, 'Sentencing remarks');
-INSERT INTO transcription_type (trt_id, description) VALUES (2, 'Summing up (including verdict)');
-INSERT INTO transcription_type (trt_id, description) VALUES (3, 'Antecedents');
-INSERT INTO transcription_type (trt_id, description) VALUES (4, 'Argument and submission of ruling');
-INSERT INTO transcription_type (trt_id, description) VALUES (5, 'Court Log');
-INSERT INTO transcription_type (trt_id, description) VALUES (6, 'Mitigation');
-INSERT INTO transcription_type (trt_id, description) VALUES (7, 'Proceedings after verdict');
-INSERT INTO transcription_type (trt_id, description) VALUES (8, 'Prosecution opening of facts');
-INSERT INTO transcription_type (trt_id, description) VALUES (9, 'Specified Times');
-INSERT INTO transcription_type (trt_id, description) VALUES (999, 'Other');
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (1, 'Sentencing remarks', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (2, 'Summing up (including verdict)', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (3, 'Antecedents', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (4, 'Argument and submission of ruling', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (5, 'Court Log', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (6, 'Mitigation', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (7, 'Proceedings after verdict', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (8, 'Prosecution opening of facts', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (9, 'Specified Times', true);
+INSERT INTO transcription_type (trt_id, description, display_state) VALUES (999, 'Other', true);
 
-INSERT INTO transcription_urgency (tru_id, description) VALUES (1, 'Standard');
-INSERT INTO transcription_urgency (tru_id, description) VALUES (2, 'Overnight');
-INSERT INTO transcription_urgency (tru_id, description) VALUES (3, 'Other');
-
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (1, 'Standard', false);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (2, 'Overnight', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (3, 'Other', false);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (4, '3 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (5, '7 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (6, '12 working days', true);
