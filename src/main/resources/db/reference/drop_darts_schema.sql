@@ -4,6 +4,14 @@ SET SEARCH_PATH TO DARTS;
 DROP TRIGGER trw_ar_trg ON transcription_workflow;
 DROP FUNCTION tra_trw_sync_fnc;
 
+DROP TABLE case_retention;
+DROP TABLE case_management_retention;
+DROP TABLE retention_policy_type;
+
+DROP SEQUENCE cmr_seq;
+DROP SEQUENCE car_seq;
+DROP SEQUENCE rpt_seq;
+
 DROP TABLE security_group_courthouse_ae;
 DROP TABLE security_role_permission_ae;
 DROP TABLE security_group_user_account_ae;
@@ -17,9 +25,6 @@ DROP SEQUENCE per_seq;
 
 DROP TABLE case_judge_ae;
 DROP TABLE hearing_judge_ae;
-DROP TABLE case_retention_event;
-DROP TABLE case_retention;
-DROP TABLE retention_policy;
 DROP TABLE defence;
 DROP TABLE defendant;
 DROP TABLE prosecutor;
@@ -69,15 +74,12 @@ DROP SEQUENCE ado_seq;
 DROP SEQUENCE aud_seq;
 DROP SEQUENCE aua_seq;
 DROP SEQUENCE aut_seq;
-DROP SEQUENCE car_seq;
 DROP SEQUENCE cas_seq;
-DROP SEQUENCE cre_seq;
 DROP SEQUENCE cth_seq;
 DROP SEQUENCE ctr_seq;
 DROP SEQUENCE dal_seq;
 DROP SEQUENCE dfc_seq;
 DROP SEQUENCE dfd_seq;
-
 DROP SEQUENCE eve_seq;
 DROP SEQUENCE evh_seq;
 DROP SEQUENCE eod_seq;
@@ -93,7 +95,6 @@ DROP SEQUENCE ods_seq;
 DROP SEQUENCE prn_seq;
 DROP SEQUENCE reg_seq;
 DROP SEQUENCE rep_seq;
-DROP SEQUENCE rtp_seq;
 DROP SEQUENCE tod_seq;
 DROP SEQUENCE tra_seq;
 DROP SEQUENCE trc_seq;

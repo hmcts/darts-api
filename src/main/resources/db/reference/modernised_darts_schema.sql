@@ -154,7 +154,7 @@
 --    added: GRANT SELECT,UPDATE ON  nod_seq TO darts_user;
 --    updated annotation_document - all columns NOT NULL
 --    updated transcription_document - all columns NOT NULL
---v53 amend transaction.hearing_date from TIEMSTAMP to DATE, to be consistent with hearing.hearing_date
+--v53 amend transcription.hearing_date from TIMESTAMP to DATE, to be consistent with hearing.hearing_date
 --    add transcription.is_manual BOOLEAN 
 --    add media_file, media_format, media_type (as FK to new table), file_size, checksum to media
 --    add media_type table, primary key and fk from media
@@ -163,6 +163,15 @@
 --v54 add checksum to annotation_document and transcription_document
 --    add display_state to transcription_type and transcription_urgency
 --    add display_name to transcription_status
+--v55 remove retain_until_ts from court_case
+--    add retention_applies_from to court_case
+--    add end_of_sentence_ts to court_case
+--    remove all retention related artefacts, to be included in separate file
+--    including case_retention, case_retention_event, retention_policy
+--    remove NN constraint in user_account
+--    add current_owner to annotation, with FK to user_account
+--    amend media.file_size to bigint
+--    remove media_type table, and replace by media.media_type column
 
 
 -- List of Table Aliases
@@ -172,8 +181,6 @@
 -- audit_activity              AUA
 -- automated_task              AUT
 -- case_judge_ae               CAJ
--- case_retention              CAR
--- case_retention_event        CRE
 -- court_case                  CAS
 -- courthouse                  CTH
 -- courthouse_region_ae        CRA
@@ -192,14 +199,12 @@
 -- judge                       JUD
 -- media                       MED
 -- media_request               MER
--- media_type                  MET
 -- node_register               NOD
 -- notification                NOT
 -- object_directory_status     ODS
 -- prosecutor                  PRN
 -- region                      REG
 -- report                      REP
--- retention_policy            RTP
 -- transcription               TRA
 -- transcription_comment       TRC
 -- transcription_document      TRD
@@ -247,6 +252,7 @@ CREATE TABLE annotation
 ,annotation_ts               TIMESTAMP WITH TIME ZONE
 ,annotation_object_id        CHARACTER VARYING(16)
 ,version_label               CHARACTER VARYING(32)
+,current_owner               INTEGER                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -362,49 +368,6 @@ COMMENT ON COLUMN case_judge_ae.jud_id
 IS 'foreign key from judge, part of composite natural key and PK';
 
 
-CREATE TABLE case_retention
-(car_id                      INTEGER                       NOT NULL
-,cas_id                      INTEGER                       NOT NULL
-,rtp_id                      INTEGER                       NOT NULL
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
-,manual_override             BOOLEAN                       NOT NULL
-,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
-,created_by                  INTEGER                       NOT NULL
-,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL          
-) TABLESPACE darts_tables;
-
-COMMENT ON COLUMN case_retention.car_id
-IS 'primary key of case_retention';
-
-COMMENT ON COLUMN case_retention.cas_id
-IS 'foreign key from court_case';
-
-COMMENT ON COLUMN case_retention.rtp_id
-IS 'foreign key from retention_policy';
-
-
-CREATE TABLE case_retention_event
-(cre_id                      INTEGER                       NOT NULL
-,car_id                      INTEGER                       NOT NULL
-,sentencing_type             INTEGER                       NOT NULL
-,total_sentencing            CHARACTER VARYING
-,last_processed_event_ts     TIMESTAMP WITH TIME ZONE      NOT NULL
-,submitted_by                INTEGER
-,user_comment                CHARACTER VARYING
-,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
-,created_by                  INTEGER                       NOT NULL
-,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL      
-) TABLESPACE darts_tables;
-
-COMMENT ON COLUMN case_retention_event.cre_id
-IS 'primary key of case_retention_event';
-
-COMMENT ON COLUMN case_retention_event.car_id
-IS 'foreign key from case_retention';
-
-
 CREATE TABLE court_case
 (cas_id                      INTEGER                       NOT NULL
 ,cth_id                      INTEGER                       NOT NULL
@@ -414,7 +377,8 @@ CREATE TABLE court_case
 ,case_closed                 BOOLEAN                       NOT NULL
 ,interpreter_used            BOOLEAN                       NOT NULL
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
+,retention_applies_from_ts   TIMESTAMP WITH TIME ZONE
+,end_of_sentence_ts          TIMESTAMP WITH TIME ZONE 
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -808,7 +772,6 @@ IS 'primary key of judge';
 CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER
-,met_id                      INTEGER                       NOT NULL
 ,media_object_id             CHARACTER VARYING(16)
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
@@ -817,7 +780,8 @@ CREATE TABLE media
 ,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
 ,media_file                  CHARACTER VARYING             NOT NULL
 ,media_format                CHARACTER VARYING             NOT NULL
-,file_size                   INTEGER                       NOT NULL
+,media_type                  CHAR(1)                       NOT NULL DEFAULT 'A'
+,file_size                   BIGINT                        NOT NULL
 ,checksum                    CHARACTER VARYING
 ,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
@@ -900,11 +864,6 @@ IS 'filename of the requested media object, possibly migrated from moj_transform
 
 COMMENT ON COLUMN media_request.output_format
 IS 'format of the requested media object, possibly migrated from moj_transformation_s';
-
-CREATE TABLE media_type
-(met_id                      INTEGER                       NOT NULL
-,media_type                  CHARACTER VARYING             NOT NULL
-) TABLESPACE darts_tables;
 
 CREATE TABLE node_register
 (node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not nod_id
@@ -1030,19 +989,6 @@ IS 'directly sourced from moj_report_s';
 
 COMMENT ON COLUMN report.version_label
 IS 'inherited from dm_sysobject_r, for r_object_type of moj_report';
-
-CREATE TABLE retention_policy
-(rtp_id                      INTEGER                       NOT NULL
-,policy_name                 CHARACTER VARYING             NOT NULL
-,retention_period            INTEGER                       NOT NULL
-,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
-,created_by                  INTEGER                       NOT NULL
-,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_modified_by            INTEGER                       NOT NULL
-) TABLESPACE darts_tables;
-
-COMMENT ON COLUMN retention_policy.rtp_id
-IS 'primary key of retention_policy';
 
 CREATE TABLE transcription
 (tra_id                      INTEGER                       NOT NULL
@@ -1222,7 +1168,7 @@ CREATE TABLE user_account
 ,user_state                  INTEGER
 ,last_login_ts               TIMESTAMP WITH TIME ZONE
 ,is_system_user              BOOLEAN                       NOT NULL
-,account_guid                CHARACTER VARYING             NOT NULL
+,account_guid                CHARACTER VARYING             
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1256,12 +1202,6 @@ ALTER TABLE automated_task          ADD PRIMARY KEY USING INDEX automated_task_p
 
 CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id) TABLESPACE darts_indexes;
 ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
-
-CREATE UNIQUE INDEX case_retention_pk ON case_retention(car_id) TABLESPACE darts_indexes; 
-ALTER TABLE case_retention          ADD PRIMARY KEY USING INDEX case_retention_pk;
-
-CREATE UNIQUE INDEX case_retention_event_pk ON case_retention_event(cre_id) TABLESPACE darts_indexes; 
-ALTER TABLE case_retention_event    ADD PRIMARY KEY USING INDEX case_retention_event_pk;
 
 CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE darts_indexes; 
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
@@ -1320,9 +1260,6 @@ ALTER TABLE media                   ADD PRIMARY KEY USING INDEX media_pk;
 CREATE UNIQUE INDEX media_request_pk ON media_request(mer_id) TABLESPACE darts_indexes;
 ALTER TABLE media_request           ADD PRIMARY KEY USING INDEX media_request_pk;
 
-CREATE UNIQUE INDEX media_type_pk ON media_type(met_id) TABLESPACE darts_indexes;
-ALTER TABLE media_type           ADD PRIMARY KEY USING INDEX media_type_pk;
-
 CREATE UNIQUE INDEX node_register_pk ON node_register(node_id) TABLESPACE darts_indexes;
 ALTER TABLE node_register         ADD PRIMARY KEY USING INDEX node_register_pk;
 
@@ -1340,9 +1277,6 @@ ALTER TABLE region                  ADD PRIMARY KEY USING INDEX region_pk;
 
 CREATE UNIQUE INDEX report_pk ON report(rep_id) TABLESPACE darts_indexes;
 ALTER TABLE report                  ADD PRIMARY KEY USING INDEX report_pk;
-
-CREATE UNIQUE INDEX retention_policy_pk ON retention_policy(rtp_id) TABLESPACE darts_indexes;
-ALTER TABLE retention_policy           ADD PRIMARY KEY USING INDEX retention_policy_pk;
 
 CREATE UNIQUE INDEX transcription_pk ON transcription(tra_id) TABLESPACE darts_indexes;
 ALTER TABLE transcription           ADD PRIMARY KEY USING INDEX transcription_pk;
@@ -1379,8 +1313,6 @@ CREATE SEQUENCE ado_seq CACHE 20;
 CREATE SEQUENCE aud_seq CACHE 20;
 CREATE SEQUENCE aua_seq CACHE 20 RESTART WITH 8;
 CREATE SEQUENCE aut_seq CACHE 20;
-CREATE SEQUENCE car_seq CACHE 20;
-CREATE SEQUENCE cre_seq CACHE 20;
 CREATE SEQUENCE cas_seq CACHE 20;
 CREATE SEQUENCE cth_seq CACHE 20;
 CREATE SEQUENCE ctr_seq CACHE 20;
@@ -1402,7 +1334,6 @@ CREATE SEQUENCE ods_seq CACHE 20;
 CREATE SEQUENCE prn_seq CACHE 20;
 CREATE SEQUENCE reg_seq CACHE 20;
 CREATE SEQUENCE rep_seq CACHE 20;
-CREATE SEQUENCE rtp_seq CACHE 20;
 CREATE SEQUENCE tod_seq CACHE 20;
 CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
@@ -1424,6 +1355,10 @@ FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 ALTER TABLE annotation                
 ADD CONSTRAINT annotation_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
+
+ALTER TABLE annotation   
+ADD CONSTRAINT annotation_current_owner_fk
+FOREIGN KEY (current_owner) REFERENCES user_account(usr_id);
 
 ALTER TABLE annotation   
 ADD CONSTRAINT annotation_created_by_fk
@@ -1481,34 +1416,6 @@ ALTER TABLE case_judge_ae
 ADD CONSTRAINT case_judge_ae_judge_fk
 FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
 
-ALTER TABLE case_retention                
-ADD CONSTRAINT case_retention_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
-
-ALTER TABLE case_retention                
-ADD CONSTRAINT case_retention_retention_policy_fk
-FOREIGN KEY (rtp_id) REFERENCES retention_policy(rtp_id);
-
-ALTER TABLE case_retention 
-ADD CONSTRAINT case_retention_created_by_fk
-FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE case_retention   
-ADD CONSTRAINT case_retention_modified_by_fk
-FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE case_retention_event               
-ADD CONSTRAINT case_retention_event_case_retention_fk
-FOREIGN KEY (car_id) REFERENCES case_retention(car_id);
-
-ALTER TABLE case_retention_event 
-ADD CONSTRAINT case_retention_event_created_by_fk
-FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE case_retention_event   
-ADD CONSTRAINT case_retention_event_modified_by_fk
-FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
 ALTER TABLE court_case                        
 ADD CONSTRAINT court_case_event_handler_fk
 FOREIGN KEY (evh_id) REFERENCES event_handler(evh_id);
@@ -1548,10 +1455,6 @@ FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 ALTER TABLE courtroom
 ADD CONSTRAINT courtroom_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE courtroom   
---ADD CONSTRAINT courtroom_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE daily_list                  
 ADD CONSTRAINT daily_list_courthouse_fk
@@ -1608,10 +1511,6 @@ FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 ALTER TABLE event_handler
 ADD CONSTRAINT event_handler_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE event_handler   
---ADD CONSTRAINT event_handler_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_media_fk
@@ -1709,10 +1608,6 @@ ALTER TABLE media
 ADD CONSTRAINT media_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE media   
-ADD CONSTRAINT media_media_type_fk
-FOREIGN KEY (met_id) REFERENCES media_type(met_id);
-
 ALTER TABLE media_request               
 ADD CONSTRAINT media_request_hearing_fk
 FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
@@ -1753,14 +1648,6 @@ ALTER TABLE notification
 ADD CONSTRAINT notification_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
---ALTER TABLE object_directory_status
---ADD CONSTRAINT object_directory_status_created_by_fk
---FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE object_directory_status
---ADD CONSTRAINT object_directory_status_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
 ALTER TABLE prosecutor               
 ADD CONSTRAINT prosecutor_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
@@ -1773,28 +1660,12 @@ ALTER TABLE prosecutor
 ADD CONSTRAINT prosecutor_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
---ALTER TABLE region
---ADD CONSTRAINT region_created_by_fk
---FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE region
---ADD CONSTRAINT region_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
 ALTER TABLE report
 ADD CONSTRAINT report_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE report
 ADD CONSTRAINT report_modified_by_fk
-FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE retention_policy
-ADD CONSTRAINT retention_policy_created_by_fk
-FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE retention_policy
-ADD CONSTRAINT retention_policy_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE transcription               
@@ -1853,33 +1724,9 @@ ALTER TABLE transcription_document
 ADD CONSTRAINT transcription_document_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
 
---ALTER TABLE transcription_type
---ADD CONSTRAINT transcription_type_created_by_fk
---FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE transcription_type
---ADD CONSTRAINT transcription_type_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE transcription_urgency
---ADD CONSTRAINT transcription_urgency_created_by_fk
---FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE transcription_urgency
---ADD CONSTRAINT transcription_urgency_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
-
 ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_transcription_fk
 FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
-
---ALTER TABLE transcription_workflow
---ADD CONSTRAINT transcription_workflow_created_by_fk
---FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
---ALTER TABLE transcription_workflow
---ADD CONSTRAINT transcription_workflow_last_modified_by_fk
---FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE transcription_workflow               
 ADD CONSTRAINT transcription_workflow_transcription_status_fk
@@ -1940,8 +1787,6 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON audit TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON audit_activity TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON automated_task TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_judge_ae TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention_event TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;
@@ -1960,14 +1805,12 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_media_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON judge TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media_request TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON media_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON node_register TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON notification TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON object_directory_status TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON prosecutor TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON region TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON report TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON retention_policy TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_comment TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_status TO darts_user;
@@ -1981,9 +1824,7 @@ GRANT SELECT,UPDATE ON  ann_seq TO darts_user;
 GRANT SELECT,UPDATE ON  aua_seq TO darts_user;
 GRANT SELECT,UPDATE ON  aud_seq TO darts_user;
 GRANT SELECT,UPDATE ON  aut_seq TO darts_user;
-GRANT SELECT,UPDATE ON  car_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cas_seq TO darts_user;
-GRANT SELECT,UPDATE ON  cre_seq TO darts_user;
 GRANT SELECT,UPDATE ON  cth_seq TO darts_user;
 GRANT SELECT,UPDATE ON  ctr_seq TO darts_user;
 GRANT SELECT,UPDATE ON  dal_seq TO darts_user;
@@ -2004,7 +1845,6 @@ GRANT SELECT,UPDATE ON  ods_seq TO darts_user;
 GRANT SELECT,UPDATE ON  prn_seq TO darts_user;
 GRANT SELECT,UPDATE ON  reg_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rep_seq TO darts_user;
-GRANT SELECT,UPDATE ON  rtp_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trc_seq TO darts_user;

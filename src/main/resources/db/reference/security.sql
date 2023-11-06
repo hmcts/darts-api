@@ -11,7 +11,8 @@
 --v16 removing created* & last_modified* from SECURITY_ROLE, SECURITY_PERMISSION
 --v17 add display_name and display_state to security_role 
 --    add global_access and display_state to security_group
---    
+--v18 add use_interpreter boolean on security_group 
+--    add defaults to global_access and use_interpreter to false   
 
 -- assuming this already exists:
 -- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
@@ -35,7 +36,7 @@ SET SEARCH_PATH TO darts;
 CREATE TABLE security_group
 (grp_id                  INTEGER                         NOT NULL
 ,rol_id                  INTEGER                         NOT NULL
-,global_access           BOOLEAN                         NOT NULL
+,global_access           BOOLEAN                         NOT NULL  DEFAULT FALSE
 ,display_state           BOOLEAN                         NOT NULL
 ,r_dm_group_s_object_id  CHARACTER VARYING(16)
 ,group_name              CHARACTER VARYING               NOT NULL
@@ -45,6 +46,7 @@ CREATE TABLE security_group
 ,group_class             CHARACTER VARYING
 ,group_global_unique_id  CHARACTER VARYING
 ,group_display_name      CHARACTER VARYING
+,use_interpreter         BOOLEAN                         NOT NULL  DEFAULT FALSE
 ,created_ts              TIMESTAMP WITH TIME ZONE        NOT NULL
 ,created_by              INTEGER                         NOT NULL
 ,last_modified_ts        TIMESTAMP WITH TIME ZONE        NOT NULL
