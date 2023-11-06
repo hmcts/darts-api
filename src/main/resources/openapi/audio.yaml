@@ -201,6 +201,74 @@ paths:
                 type: "AUDIO_101"
                 title: "The requested data cannot be located"
                 status: 500
+  /audio/preview2/{media_id}:
+    get:
+      tags:
+        - Audio
+      summary: Preview audio (return bytes)
+      operationId: preview2
+      description: Preview audio
+      parameters:
+        - in: path
+          name: media_id
+          schema:
+            type: integer
+          required: true
+          description: "Internal identifier for media"
+          example: 1
+        - in: header
+          name: range
+          schema:
+            type: string
+          description: "Range header"
+      responses:
+        200:
+          description: OK
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: byte
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_104"
+                title: "Failed to check authorisation for the media"
+                status: 400
+        '401':
+          description: Unauthorised Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 401
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_102"
+                title: "The requested media cannot be found"
+                status: 404
+        500:
+          description: The requested data cannot be located
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_101"
+                title: "The requested data cannot be located"
+                status: 500
   /audios:
     post:
       tags:
