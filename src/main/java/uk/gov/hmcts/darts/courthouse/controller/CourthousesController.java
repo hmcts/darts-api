@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
-import uk.gov.hmcts.darts.courthouse.api.CourthousesApi;
+import uk.gov.hmcts.darts.courthouse.http.api.CourthousesApi;
 import uk.gov.hmcts.darts.courthouse.mapper.CourthouseToCourthouseEntityMapper;
 import uk.gov.hmcts.darts.courthouse.model.Courthouse;
 import uk.gov.hmcts.darts.courthouse.model.ExtendedCourthouse;

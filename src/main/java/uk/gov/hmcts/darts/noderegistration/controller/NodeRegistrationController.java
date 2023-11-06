@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.noderegistration.api.DevicesApi;
+import uk.gov.hmcts.darts.noderegistration.http.api.DevicesApi;
 import uk.gov.hmcts.darts.noderegistration.model.PostNodeRegistrationResponse;
 import uk.gov.hmcts.darts.noderegistration.service.NodeRegistrationService;
 
@@ -35,7 +35,8 @@ public class NodeRegistrationController implements DevicesApi {
         @Valid @RequestParam(value = "mac_address") String macAddress
     ) {
         Integer nodeId = nodeRegistrationService.registerDevices(nodeType, courtHouse, courtRoom,
-              hostName, ipAddress, macAddress);
+                                                                 hostName, ipAddress, macAddress
+        );
 
         PostNodeRegistrationResponse postRegisterDeviceResponse = new PostNodeRegistrationResponse();
         postRegisterDeviceResponse.setNodeId(nodeId);
