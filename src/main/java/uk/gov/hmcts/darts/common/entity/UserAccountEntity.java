@@ -60,10 +60,4 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
 
-    @Column(name = "is_system_user")
-    private Boolean isSystemUser;
-
-    @Column(name = "account_guid")
-    private String accountGuid;
-
 }
