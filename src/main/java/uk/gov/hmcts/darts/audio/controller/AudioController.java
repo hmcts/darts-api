@@ -120,10 +120,11 @@ public class AudioController implements AudioApi {
 
     public byte[] readByteRange(byte[] wholeFile, long start, long end) {
         int srcPos;
-        if (start > Integer.MIN_VALUE && start < Integer.MAX_VALUE)
-            srcPos = (int)start;
-        else
+        if (start > Integer.MIN_VALUE && start < Integer.MAX_VALUE) {
+            srcPos = (int) start;
+        } else {
             throw new IllegalArgumentException("Invalid input: start bytes truncated");
+        }
 
         byte[] result = new byte[(int) (end - start) + 1];
         System.arraycopy(wholeFile, srcPos, result, 0, result.length);
