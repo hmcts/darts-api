@@ -507,6 +507,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         transcriptionRequestDetails.setComment(comment);
         transcriptionRequestDetails.setStartDateTime(startDateTime);
         transcriptionRequestDetails.setEndDateTime(endDateTime);
+        transcriptionRequestDetails.setIsManual(false);
         return transcriptionRequestDetails;
     }
 

@@ -119,11 +119,14 @@ components:
       type: object
       required:
         - courthouse_name
+        - display_name
       properties:
         courthouse_name:
           type: string
         code:
           type: integer
+        display_name:
+          type: string
     ExtendedCourthouse:
       allOf:
         - $ref: '#/components/schemas/Courthouse'

@@ -297,6 +297,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setEndTime(transcriptionRequestDetails.getEndDateTime());
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
+        transcription.setIsManual(transcriptionRequestDetails.getIsManual());
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {
             transcription.setCourtCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));

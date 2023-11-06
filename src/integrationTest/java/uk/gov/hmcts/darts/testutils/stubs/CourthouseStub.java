@@ -22,6 +22,7 @@ public class CourthouseStub {
     private CourthouseEntity createCourthouse(String name) {
         CourthouseEntity newCourthouse = new CourthouseEntity();
         newCourthouse.setCourthouseName(name);
+        newCourthouse.setDisplayName(name);
         courthouseRepository.saveAndFlush(newCourthouse);
         return newCourthouse;
     }

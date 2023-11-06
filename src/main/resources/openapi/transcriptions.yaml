@@ -437,6 +437,9 @@ components:
           type: string
           format: date-time
           example: '2023-07-31T14:32:24.000Z'
+        is_manual:
+          type: boolean
+          example: false
     RequestTranscription400ErrorCode:
       type: string
       enum:

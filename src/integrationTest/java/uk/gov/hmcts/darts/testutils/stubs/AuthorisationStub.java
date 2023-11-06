@@ -101,6 +101,10 @@ public class AuthorisationStub {
         mediaEntity.setCourtroom(courtroomEntity);
         mediaEntity.setStart(OffsetDateTime.now());
         mediaEntity.setEnd(OffsetDateTime.now());
+        mediaEntity.setMediaFile("media file");
+        mediaEntity.setFileSize(1000);
+        mediaEntity.setMediaFormat("mp3");
+        mediaEntity.setChecksum("checksum");
         dartsDatabaseStub.save(mediaEntity);
 
         hearingEntity.addMedia(mediaEntity);
@@ -118,6 +122,7 @@ public class AuthorisationStub {
         transcriptionEntity.setTranscriptionStatus(awaitingAuthorisationTranscriptionStatus);
         transcriptionEntity.setCreatedBy(testUser);
         transcriptionEntity.setLastModifiedBy(testUser);
+        transcriptionEntity.setIsManual(false);
 
         TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,

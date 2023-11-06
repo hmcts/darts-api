@@ -429,6 +429,18 @@ components:
           type: string
           description: 'Courtroom the audio was recorded in'
           maxLength: 64
+        media_file:
+          type: string
+          description: 'The file for the audio'
+          maxLength: 255
+        file_size:
+          type: integer
+          format: int32
+          description: 'The size of the file in bytes'
+        checksum:
+          type: string
+          description: 'Checksum to ensure integrity of file'
+          maxLength: 255
         cases:
           type: array
           items:

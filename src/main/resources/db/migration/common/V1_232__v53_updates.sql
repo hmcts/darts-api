@@ -11,10 +11,12 @@ CREATE TABLE IF NOT EXISTS darts.media_type (
 ALTER TABLE media ADD COLUMN media_file   CHARACTER VARYING   NOT NULL;
 ALTER TABLE media ADD COLUMN media_format CHARACTER VARYING   NOT NULL;
 ALTER TABLE media ADD COLUMN file_size    INTEGER   NOT NULL;
-ALTER TABLE media ADD COLUMN checksum     CHARACTER VARYING   NOT NULL;
+ALTER TABLE media ADD COLUMN checksum     CHARACTER VARYING   NULL;
+ALTER TABLE media ADD COLUMN met_id   CHARACTER VARYING   NULL;
 ALTER TABLE media
 ADD CONSTRAINT media_media_type_fk
-FOREIGN KEY (med_id) REFERENCES media_type(met_id);
+FOREIGN KEY (met_id) REFERENCES media_type(met_id);
 ALTER TABLE user_account ADD COLUMN is_system_user boolean NOT NULL DEFAULT FALSE;
 ALTER TABLE user_account ADD COLUMN account_guid CHARACTER VARYING   NOT null default 'Not available';
 ALTER TABLE courthouse ADD COLUMN display_name CHARACTER VARYING   NOT null default 'Default name';
+

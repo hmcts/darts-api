@@ -26,6 +26,10 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
         );
         media.setCourtroom(foundCourtroom);
         media.setCaseIdList(addAudioMetadataRequest.getCases());
+        media.setMediaFormat(addAudioMetadataRequest.getFormat());
+        media.setFileSize(addAudioMetadataRequest.getFileSize());
+        media.setChecksum(addAudioMetadataRequest.getChecksum());
+        media.setMediaFile(addAudioMetadataRequest.getFilename());
         return media;
     }
 }

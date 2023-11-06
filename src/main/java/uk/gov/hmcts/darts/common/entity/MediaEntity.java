@@ -64,4 +64,20 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
+    @Column(name = "media_file")
+    private String mediaFile;
+
+    @Column(name = "media_format")
+    private String mediaFormat;
+
+    @Column(name = "file_size")
+    private Integer fileSize;
+
+    @Column(name = "checksum")
+    private String checksum;
+
+    //@ManyToOne
+    //@JoinColumn(name = "met_id", nullable = false)
+    //private MediaTypeEntity transcriptionType;
+
 }

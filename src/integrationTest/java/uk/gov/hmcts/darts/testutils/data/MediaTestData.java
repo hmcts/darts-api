@@ -21,6 +21,10 @@ public class MediaTestData {
         media.setStart(OffsetDateTime.now());
         media.setEnd(OffsetDateTime.now());
         media.setCourtroom(courtroomEntity);
+        media.setMediaFile("a-media-file");
+        media.setChecksum("a-checksum");
+        media.setFileSize(1000);
+        media.setMediaFormat("mp3");
         return media;
     }
 
@@ -30,6 +34,10 @@ public class MediaTestData {
         mediaEntity.setEnd(endTime);
         mediaEntity.setChannel(channel);
         mediaEntity.setTotalChannels(2);
+        mediaEntity.setMediaFile("a-media-file");
+        mediaEntity.setChecksum("a-checksum");
+        mediaEntity.setFileSize(1000);
+        mediaEntity.setMediaFormat("mp3");
         return mediaEntity;
     }
 
@@ -40,6 +48,10 @@ public class MediaTestData {
         mediaEntity.setEnd(endTime);
         mediaEntity.setChannel(channel);
         mediaEntity.setTotalChannels(2);
+        mediaEntity.setMediaFormat("mp3");
+        mediaEntity.setMediaFile("a-media-file");
+        mediaEntity.setFileSize(1000);
+        mediaEntity.setChecksum("a-checksum");
         return mediaEntity;
     }
 }
