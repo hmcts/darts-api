@@ -22,7 +22,6 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
