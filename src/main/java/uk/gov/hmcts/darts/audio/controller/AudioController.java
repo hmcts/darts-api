@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.InputStreamResource;
@@ -80,6 +81,7 @@ public class AudioController implements AudioApi {
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
     }
 
+    @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
@@ -88,40 +90,32 @@ public class AudioController implements AudioApi {
         InputStream audioMediaFile = audioService.preview(mediaId);
 
         if (httpRangeList == null) {
-            try {
-                byte[] bytes = IOUtils.toByteArray(audioMediaFile);
-                return ResponseEntity.status(HttpStatus.OK)
-                    .header("Content-Type", "audio/mpeg")
-                    .header("Content-Length", String.valueOf(bytes.length))
-                    .body(bytes);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            byte[] bytes = IOUtils.toByteArray(audioMediaFile);
+            return ResponseEntity.status(HttpStatus.OK)
+                .header("Content-Type", "audio/mpeg")
+                .header("Content-Length", String.valueOf(bytes.length))
+                .body(bytes);
         } else {
-            try {
-                byte[] bytes = IOUtils.toByteArray(audioMediaFile);
-                long fileSize = bytes.length;
-                String[] ranges = httpRangeList.split("-");
-                long rangeStart = Long.parseLong(ranges[0].substring(6));
-                long rangeEnd;
-                if (ranges.length > 1) {
-                    rangeEnd = Long.parseLong(ranges[1]);
-                } else {
-                    rangeEnd = fileSize - 1;
-                }
-                if (fileSize < rangeEnd) {
-                    rangeEnd = fileSize - 1;
-                }
-                String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
-                String contentRange = "bytes" + " " + rangeStart + "-" + rangeEnd + "/" + fileSize;
-                return ResponseEntity.status(HttpStatus.OK)
-                    .header("Content-Type", "audio/mpeg")
-                    .header("Content-Length", contentLength)
-                    .header("Content-Range", contentRange)
-                    .body(readByteRange(bytes, rangeStart, rangeEnd));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            byte[] bytes = IOUtils.toByteArray(audioMediaFile);
+            long fileSize = bytes.length;
+            String[] ranges = httpRangeList.split("-");
+            long rangeStart = Long.parseLong(ranges[0].substring(6));
+            long rangeEnd;
+            if (ranges.length > 1) {
+                rangeEnd = Long.parseLong(ranges[1]);
+            } else {
+                rangeEnd = fileSize - 1;
             }
+            if (fileSize < rangeEnd) {
+                rangeEnd = fileSize - 1;
+            }
+            String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
+            String contentRange = "bytes" + " " + rangeStart + "-" + rangeEnd + "/" + fileSize;
+            return ResponseEntity.status(HttpStatus.OK)
+                .header("Content-Type", "audio/mpeg")
+                .header("Content-Length", contentLength)
+                .header("Content-Range", contentRange)
+                .body(readByteRange(bytes, rangeStart, rangeEnd));
         }
     }
 
