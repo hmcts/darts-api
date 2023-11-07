@@ -76,8 +76,8 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "checksum")
     private String checksum;
 
-    //@ManyToOne
-    //@JoinColumn(name = "met_id", nullable = false)
-    //private MediaTypeEntity transcriptionType;
+    @ManyToOne
+    @JoinColumn(name = "met_id", nullable = false)
+    private MediaTypeEntity mediaType;
 
 }

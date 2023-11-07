@@ -22,11 +22,11 @@ class CourthousesFunctionalTest extends FunctionalTest {
 
     public static final String COURTHOUSES_URI = "/courthouses";
     public static final String COURTHOUSE_BODY = """
-        {"courthouse_name": "BIRMINGHAM","code": 5705}""";
+        {"courthouse_name": "BIRMINGHAM","display_name": "Birmingham","code": 5705}""";
     public static final String COURTHOUSE_UPDATEBODY = """
-        {"courthouse_name": "MANCHESTER","code": 2112}""";
+        {"courthouse_name": "MANCHESTER","display_name": "Manchester","code": 2112}""";
     public static final String COURTHOUSE_INVALIDBODY = """
-        {"courthouse_name": "READING", code: "1234"}""";
+        {"courthouse_name": "READING","display_name": "Reading", code: "1234"}""";
     public static final String COURTHOUSE_BAD_ID = "/99999";
     public static final int OK = 200;
     public static final int CREATED = 201;
