@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
-import uk.gov.hmcts.darts.hearings.api.HearingsApi;
+import uk.gov.hmcts.darts.hearings.http.api.HearingsApi;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 import uk.gov.hmcts.darts.hearings.model.Transcript;
