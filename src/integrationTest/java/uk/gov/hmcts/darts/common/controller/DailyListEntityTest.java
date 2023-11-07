@@ -25,7 +25,7 @@ class DailyListEntityTest extends IntegrationBase {
 
     @Test
     void dailyListAddDailyListEndpoint() throws Exception {
-        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         String jsonDocument = getContentsFromFile("tests/DailyListTest/dailyListAddDailyListEndpoint/requestBody.json");
         MockHttpServletRequestBuilder requestBuilder = post("/dailylists")

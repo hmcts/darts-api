@@ -248,15 +248,16 @@ public class DartsDatabaseStub {
         return courthouseStub.createCourthouseUnlessExists(courthouseName);
     }
 
-    public CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code) {
+    public CourthouseEntity createCourthouseWithNameAndCode(String name, Integer code, String displayName) {
         var courthouse = CourthouseTestData.createCourthouse(name);
         courthouse.setCode(code);
+        courthouse.setDisplayName(displayName);
         return courthouseRepository.save(courthouse);
     }
 
     @Transactional
     public CourthouseEntity createCourthouseWithTwoCourtrooms() {
-        CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457);
+        CourthouseEntity swanseaCourtEntity = createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "1"));
         courtroomRepository.saveAndFlush(createCourtRoomWithNameAtCourthouse(swanseaCourtEntity, "2"));
         return swanseaCourtEntity;
