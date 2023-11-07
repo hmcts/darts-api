@@ -18,4 +18,6 @@ public @interface Authorisation {
 
     SecurityRoleEnum[] securityRoles();
 
+    SecurityRoleEnum[] globalAccessSecurityRoles();
+
 }

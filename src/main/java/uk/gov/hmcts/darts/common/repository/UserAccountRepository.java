@@ -14,6 +14,9 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
 
     Optional<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
+    Optional<UserAccountEntity> findByGuidOrEmailAddressIgnoreCase(String guid, String emailAddress);
+
+
     //todo find out what user states are Active
     @Query("""
         SELECT DISTINCT userAccount

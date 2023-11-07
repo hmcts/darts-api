@@ -175,7 +175,7 @@ class AuthorisationServiceTest {
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
         dartsDatabaseStub.getUserAccountRepository().saveAndFlush(bristolUser);
 
-        assertDoesNotThrow(() -> authorisationService.checkAuthorisation(
+        assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
             List.of(a1Court, c3Court),
             Set.of(APPROVER, REQUESTER)
         ));
@@ -190,7 +190,7 @@ class AuthorisationServiceTest {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> authorisationService.checkAuthorisation(
+            () -> authorisationService.checkCourthouseAuthorisation(
                 List.of(a1Court, b2Court),
                 Collections.emptySet()
             )

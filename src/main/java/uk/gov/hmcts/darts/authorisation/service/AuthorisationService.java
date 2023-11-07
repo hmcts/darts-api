@@ -13,7 +13,7 @@ public interface AuthorisationService {
 
     Optional<UserState> getAuthorisation(String emailAddress);
 
-    void checkAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles);
+    void checkCourthouseAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles);
 
     List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse);
 }

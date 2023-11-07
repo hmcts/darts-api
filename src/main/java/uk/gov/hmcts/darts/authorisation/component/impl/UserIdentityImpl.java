@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.List;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
 
 @Component
@@ -59,8 +60,25 @@ public class UserIdentityImpl implements UserIdentity {
         throw new IllegalStateException("Could not obtain email address from principal");
     }
 
+    public String getGuid() {
+
+        Object principalObject = SecurityContextHolder.getContext()
+            .getAuthentication()
+            .getPrincipal();
+
+        Object oid = null;
+        if (principalObject instanceof Jwt jwt) {
+            oid = jwt.getClaims().get(OID);
+        }
+        if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
+            return guid;
+        }
+        return null;
+    }
+
+
     public UserAccountEntity getUserAccount() {
-        return userAccountRepository.findByEmailAddressIgnoreCase(getEmailAddress())
+        return userAccountRepository.findByGuidOrEmailAddressIgnoreCase(getGuid(), getEmailAddress())
             .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
     }
 }
