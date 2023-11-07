@@ -13,9 +13,14 @@ info:
 paths:
   /users:
     get:
-      summary: Get all users
       tags:
         - User
+      parameters:
+        - in: query
+          name: courthouse
+          required: true
+          schema:
+            $ref: "#/components/schemas/CourthouseId"
       responses:
         '200':
           $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
@@ -30,25 +35,13 @@ paths:
           $ref: '#/components/responses/UserSuccessResponseWithId'
         '400':
           $ref: '#/components/responses/BadUserRequest'
-
   /users/{id}:
-    get:
-      summary: Get user by id
-      tags:
-        - User
-      parameters:
-        - $ref: '#/components/parameters/Id'
-      responses:
-        '200':
-          $ref: '#/components/responses/UserSuccessResponseWithIdAndLastLogin'
-        '404':
-          $ref: '#/components/responses/UserNotFound'
     patch:
       summary: Modify user by id
       tags:
         - User
       parameters:
-        - $ref: '#/components/parameters/Id'
+        - $ref: '#/components/parameters/UserId'
       requestBody:
         $ref: '#/components/requestBodies/UserPatchRequest'
       responses:
@@ -58,8 +51,6 @@ paths:
           $ref: '#/components/responses/BadUserPatchRequest'
         '404':
           $ref: '#/components/responses/UserNotFound'
-        '409':
-          $ref: '#/components/responses/UserHasOwnedObjects'
 
   /users/search:
     post:
@@ -72,20 +63,14 @@ paths:
         '200':
           $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
 
-  /users/transfer:
-    put:
-      summary: Transfer all ownership of one user's objects to the target user
-      tags:
-        - User
-      requestBody:
-        $ref: '#/components/requestBodies/UserTransferRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/UserTransferSuccess'
-
   /security-groups:
     get:
-      summary: Get all security groups
+      summary: Get security groups
+      parameters:
+        - in: query
+          name: courthouse
+          schema:
+            $ref: "#/components/schemas/CourthouseId"
       tags:
         - SecurityGroup
       responses:
@@ -117,13 +102,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserSearch'
-    UserTransferRequest:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserTransfer'
-
 
   responses:
     UserSuccessResponseWithId:
@@ -197,86 +175,77 @@ components:
             type: "USER_100"
             title: "User not found"
             status: 404
-    UserHasOwnedObjects:
-      description: An attempt has been made to disable a user who has ownership of objects.
-      content:
-        application/json+problem:
-          schema:
-            $ref: './problem.yaml'
-          example:
-            type: "USER_110"
-            title: "A user with owned objects cannot be disabled"
-            status: 409
-
 
   parameters:
-    Id:
+    UserId:
       in: path
-      required: true
       name: id
+      required: true
       schema:
         type: integer
-    FullName:
+    CourthouseId:
       in: query
-      name: full_name
+      name: courthouse
+      required: true
       schema:
-        $ref: "#/components/schemas/Name"
-    EmailAddress:
-      in: query
-      name: email_address
-      schema:
-        $ref: "#/components/schemas/EmailAddress"
-
+        $ref: "#/components/schemas/CourthouseId"
 
   schemas:
-    Name:
+    UserId:
+      type: integer
+    UserName:
       minLength: 1
       maxLength: 256
       type: string
-    EmailAddress:
+    UserEmailAddress:
       minLength: 1
       maxLength: 256
       type: string
-    Description:
+    UserDescription:
       minLength: 1
       maxLength: 256
       type: string
-    State:
+    UserState:
       type: string
       enum:
         - ENABLED
         - DISABLED
       default: ENABLED
+
+    SecurityGroupId:
+      type: integer
     SecurityGroupName:
-      minLength: 1
-      maxLength: 256
       type: string
     SecurityGroupDescription:
-      minLength: 1
-      maxLength: 256
       type: string
     SecurityGroupDisplayName:
-      minLength: 1
+      type: string
+    SecurityGroupRole:
+      type: string
+
+    CourthouseId:
+      type: integer
+    
+    GenericSearchField:
+      minLength: 3
       maxLength: 256
       type: string
-    UserId:
-      type: integer
 
     User:
       type: object
       properties:
         full_name:
-          $ref: '#/components/schemas/Name'
+          $ref: '#/components/schemas/UserName'
         email_address:
-          $ref: '#/components/schemas/EmailAddress'
+          $ref: '#/components/schemas/UserEmailAddress'
         description:
-          $ref: '#/components/schemas/Description'
+          $ref: '#/components/schemas/UserDescription'
         state:
-          $ref: '#/components/schemas/State'
+          $ref: '#/components/schemas/UserState'
         security_groups:
           type: array
           items:
-            $ref: '#/components/schemas/SecurityGroupName'
+            $ref: '#/components/schemas/SecurityGroupId'
       required:
         - full_name
         - email_address
@@ -285,22 +254,22 @@ components:
       type: object
       properties:
         full_name:
-          $ref: '#/components/schemas/Name'
+          $ref: '#/components/schemas/UserName'
         description:
-          $ref: '#/components/schemas/Description'
+          $ref: '#/components/schemas/UserDescription'
         state:
-          $ref: '#/components/schemas/State'
+          $ref: '#/components/schemas/UserState'
         security_groups:
           type: array
           items:
-            $ref: '#/components/schemas/SecurityGroupName'
+            $ref: '#/components/schemas/SecurityGroupId'
     UserSearch:
       type: object
       properties:
         full_name:
-          $ref: '#/components/schemas/Name'
+          $ref: '#/components/schemas/GenericSearchField'
         email_address:
-          $ref: '#/components/schemas/EmailAddress'
+          $ref: '#/components/schemas/GenericSearchField'
     UserWithId:
       type: object
       properties:
@@ -316,22 +285,17 @@ components:
           format: date-time
       allOf:
         - $ref: '#/components/schemas/UserWithId'
-    UserTransfer:
-      type: object
-      properties:
-        from_id:
-          $ref: '#/components/schemas/UserId'
-        to_id:
-            $ref: '#/components/schemas/UserId'
-      required:
-        - from_id
-        - to_id
+
     SecurityGroup:
       type: object
       properties:
+        id:
+          $ref: '#/components/schemas/SecurityGroupId'
         name:
           $ref: '#/components/schemas/SecurityGroupName'
         display_name:
           $ref: '#/components/schemas/SecurityGroupDisplayName'
+        role:
+          $ref: '#/components/schemas/SecurityGroupRole'
         description:
           $ref: '#/components/schemas/SecurityGroupDescription'
