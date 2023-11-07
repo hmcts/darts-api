@@ -143,7 +143,7 @@ class TranscriptionServiceImplTest {
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
-        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
@@ -224,7 +224,7 @@ class TranscriptionServiceImplTest {
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
-        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
@@ -303,7 +303,7 @@ class TranscriptionServiceImplTest {
         Integer hearingId = 1;
         when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
 
-        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
@@ -388,7 +388,7 @@ class TranscriptionServiceImplTest {
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
 
-        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId()))
             .thenReturn(mockTranscriptionUrgency);
 
@@ -476,7 +476,7 @@ class TranscriptionServiceImplTest {
     @Test
     void saveTranscriptionRequestWithNullCaseAndNullHearingAndCourtLogTypeThrowsException() {
 
-        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
         when(mockTranscriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId())).thenReturn(
             mockTranscriptionUrgency);
 

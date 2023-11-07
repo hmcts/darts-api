@@ -333,7 +333,9 @@ public class CommonTestDataUtil {
     public List<TranscriptionUrgencyEntity> createTranscriptionUrgencyEntities() {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = new ArrayList<>();
         for (TranscriptionUrgencyEnum transcriptionUrgencyEnum : TranscriptionUrgencyEnum.values()) {
-            transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
+            if (transcriptionUrgencyEnum.getId() != 1 && transcriptionUrgencyEnum.getId() != 3) {
+                transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
+            }
         }
         return transcriptionUrgencyEntities;
     }
@@ -342,6 +344,7 @@ public class CommonTestDataUtil {
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
         transcriptionUrgencyEntity.setId(transcriptionUrgencyEnum.getId());
         transcriptionUrgencyEntity.setDescription(transcriptionUrgencyEnum.name());
+
         return transcriptionUrgencyEntity;
     }
 
