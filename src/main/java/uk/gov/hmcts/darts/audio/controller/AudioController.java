@@ -110,7 +110,7 @@ public class AudioController implements AudioApi {
             }
             String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
             String contentRange = "bytes" + " " + rangeStart + "-" + rangeEnd + "/" + fileSize;
-            return ResponseEntity.status(HttpStatus.OK)
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                 .header("Content-Type", "audio/mpeg")
                 .header("Content-Length", contentLength)
                 .header("Content-Range", contentRange)
