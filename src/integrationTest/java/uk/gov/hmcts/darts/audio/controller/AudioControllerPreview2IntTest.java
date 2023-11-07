@@ -77,7 +77,7 @@ class AudioControllerPreview2IntTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
             String.format("/audio/preview2/%d", mediaEntity.getId()))).header("Range", "bytes=0-1023");
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+        mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
         verify(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
@@ -91,7 +91,7 @@ class AudioControllerPreview2IntTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
             String.format("/audio/preview2/%d", mediaEntity.getId()))).header("Range", "bytes=1024-2047");
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk());
+        mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
 
         verify(authorisation).authoriseByMediaId(
             mediaEntity.getId(),
