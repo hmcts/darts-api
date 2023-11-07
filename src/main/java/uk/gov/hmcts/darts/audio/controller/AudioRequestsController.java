@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.audio.component.AudioRequestResponseMapper;
 import uk.gov.hmcts.darts.audio.component.AudioRequestSummaryMapper;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
-import uk.gov.hmcts.darts.audiorequests.api.AudioRequestsApi;
+import uk.gov.hmcts.darts.audiorequests.http.api.AudioRequestsApi;
 import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;

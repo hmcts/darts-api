@@ -306,7 +306,7 @@ swaggerList.each {
     generatorName = "spring"
     inputSpec = "$rootDir/src/main/resources/openapi/".toString() + "${apiName}.yaml"
     outputDir = "$buildDir/generated/openapi".toString()
-    apiPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".api"
+    apiPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".http.api"
     modelPackage = "uk.gov.hmcts.darts.".toString() + "${apiName}" + ".model"
     //    https://openapi-generator.tech/docs/generators/java/#config-options
     skipOperationExample = true

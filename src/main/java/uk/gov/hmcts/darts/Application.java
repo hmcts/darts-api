@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import uk.gov.hmcts.darts.audio.api.AudioInternalApi;
+import uk.gov.hmcts.darts.audio.api.AudioApi;
 
 import java.util.TimeZone;
 
@@ -21,7 +21,7 @@ import static java.time.ZoneOffset.UTC;
 @RequiredArgsConstructor
 public class Application implements CommandLineRunner {
 
-    private final AudioInternalApi audioInternalApi;
+    private final AudioApi audioApi;
 
     @PostConstruct
     public void started() {
@@ -44,7 +44,7 @@ public class Application implements CommandLineRunner {
     public void run(String... args) {
         if (System.getenv("ATS_MODE") != null) {
             log.info("ATS_MODE activated");
-            audioInternalApi.handleKedaInvocationForMediaRequests();
+            audioApi.handleKedaInvocationForMediaRequests();
         }
     }
 

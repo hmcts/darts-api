@@ -1,6 +1,6 @@
 package uk.gov.hmcts.darts.audio.api;
 
-public interface AudioInternalApi {
+public interface AudioApi {
 
     void handleKedaInvocationForMediaRequests();
 

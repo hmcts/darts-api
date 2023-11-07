@@ -11,8 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
+import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioService;
@@ -88,14 +88,14 @@ public class AudioController implements AudioApi {
     public ResponseEntity<byte[]> preview2(Integer mediaId, @RequestHeader(value = "Range", required = false) String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
 
+        byte[] bytes = IOUtils.toByteArray(audioMediaFile);
         if (httpRangeList == null) {
-            byte[] bytes = IOUtils.toByteArray(audioMediaFile);
             return ResponseEntity.status(HttpStatus.OK)
-                .header("Content-Type", "audio/mpeg")
+                .header("Content-Type", "application/octet-stream")
+                .header("Content-Disposition", "attachment; filename=\"" + mediaId.toString() + ".mp3\"")
                 .header("Content-Length", String.valueOf(bytes.length))
                 .body(bytes);
         } else {
-            byte[] bytes = IOUtils.toByteArray(audioMediaFile);
             long fileSize = bytes.length;
             String[] ranges = httpRangeList.split("-");
             long rangeStart = Long.parseLong(ranges[0].substring(6));

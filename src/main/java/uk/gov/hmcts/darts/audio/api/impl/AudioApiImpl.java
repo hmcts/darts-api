@@ -2,12 +2,12 @@ package uk.gov.hmcts.darts.audio.api.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.api.AudioInternalApi;
+import uk.gov.hmcts.darts.audio.api.AudioApi;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 
 @Service
 @RequiredArgsConstructor
-public class AudioInternalApiImpl implements AudioInternalApi {
+public class AudioApiImpl implements AudioApi {
 
     private final AudioTransformationService audioTransformationService;
 
