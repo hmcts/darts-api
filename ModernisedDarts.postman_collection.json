@@ -951,6 +951,36 @@
 					},
 					"response": []
 				},
+      				{
+					"name": "/transcriptions/{transcription_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+							{
+								"key": "transcription_id",
+								"value": "1"
+							}
+						]
+						}
+					},
+					"response": []
+				},
+
 				{
 					"name": "/transcriptions/urgencies",
 					"request": {
