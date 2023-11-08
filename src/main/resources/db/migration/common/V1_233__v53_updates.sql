@@ -3,6 +3,11 @@ UPDATE transcription SET hearing_date_tmp = CAST(hearing_date AS DATE);
 ALTER TABLE transcription DROP COLUMN hearing_date;
 ALTER TABLE transcription RENAME COLUMN hearing_date_tmp TO hearing_date;
 ALTER TABLE transcription ADD COLUMN is_manual boolean NOT NULL DEFAULT FALSE;
+
+UPDATE transcription
+set is_manual=true
+WHERE trt_id = 999;
+
 CREATE TABLE IF NOT EXISTS media_type (
   met_id                INTEGER                    NOT null
 , media_type            CHARACTER VARYING          NOT null
