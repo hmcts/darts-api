@@ -178,7 +178,7 @@ class TranscriptionServiceImplTest {
             TEST_COMMENT,
             startDateTime,
             endDateTime
-        ), false);
+        ), true);
 
         verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
 
@@ -192,7 +192,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
-        assertThat(transcriptionEntity.getIsManual()).isFalse();
+        assertThat(transcriptionEntity.getIsManual()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -261,7 +261,7 @@ class TranscriptionServiceImplTest {
             TEST_COMMENT,
             startDateTime,
             endDateTime
-        ), false);
+        ), true);
 
         verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
 
@@ -272,7 +272,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isNotNull();
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
-        assertThat(transcriptionEntity.getIsManual()).isFalse();
+        assertThat(transcriptionEntity.getIsManual()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
