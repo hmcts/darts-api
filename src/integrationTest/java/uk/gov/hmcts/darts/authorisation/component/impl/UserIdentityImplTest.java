@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -14,11 +15,14 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
 @SpringBootTest()
 class UserIdentityImplTest extends IntegrationBase {
@@ -133,6 +137,36 @@ class UserIdentityImplTest extends IntegrationBase {
 
         assertEquals(USER_DETAILS_INVALID.getTitle(), exception.getMessage());
         assertEquals(USER_DETAILS_INVALID, exception.getError());
+
+    }
+
+    @Test
+    void getGuid() {
+        String guid = UUID.randomUUID().toString();
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("oid", guid)
+            .build();
+
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        assertEquals(guid, userIdentity.getGuid());
+    }
+
+    @Test
+    @Transactional
+    void userHasGlobalAccess() {
+        String guid = UUID.randomUUID().toString();
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("oid", guid)
+            .build();
+
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        dartsDatabaseStub.getUserAccountStub().createXhibitExternalUser(guid, null);
+
+        assertEquals(true, userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
 
     }
 }

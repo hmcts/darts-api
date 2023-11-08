@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,6 +25,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import javax.validation.Valid;
 
+import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -36,6 +39,10 @@ public class EventsController implements EventApi {
     private final DartsEventMapper dartsEventMapper;
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+//    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
+//        securityRoles = {XHIBIT, CPP},
+//        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<EventsResponse> eventsPost(
         @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
@@ -58,6 +65,10 @@ public class EventsController implements EventApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+//    @Authorisation(contextId = ANY_ENTITY_ID,
+//        securityRoles = {XHIBIT, CPP},
+//        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<List<CourtLog>> courtlogsGet(
         @Parameter(name = "courthouse", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse,
         @Parameter(name = "case_number", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "case_number", required = true) String caseNumber,

@@ -9,9 +9,12 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Component
@@ -114,4 +117,27 @@ public class UserAccountStub {
         return testUser;
     }
 
+
+    public UserAccountEntity createXhibitExternalUser(String guid, CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-14);
+        securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        return createExternalUser(guid, securityGroupEntity, courthouseEntity);
+    }
+
+    public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity, CourthouseEntity courthouseEntity) {
+        if (nonNull(courthouseEntity)) {
+            securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+        }
+
+        var testUser = getIntegrationTestUserAccountEntity();
+        Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
+        securityGroupEntities.add(securityGroupEntity);
+        testUser.setSecurityGroupEntities(securityGroupEntities);
+        testUser.setIsSystemUser(true);
+        testUser.setAccountGuid(guid);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
 }
