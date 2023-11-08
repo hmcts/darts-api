@@ -207,7 +207,7 @@ class CaseServiceImplTest {
         assertNotNull(savedCaseEntity.getProsecutorList());
         assertNotNull(savedCaseEntity.getDefenceList());
 
-        String actualResponse = objectMapper.writeValueAsString(result);
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), objectMapper.writeValueAsString(result));
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);

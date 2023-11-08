@@ -494,6 +494,9 @@ components:
         case_number:
           type: string
           example: CASE1001
+        case_id:
+          type: integer
+          example: 1001
         defendants:
           type: array
           items:
