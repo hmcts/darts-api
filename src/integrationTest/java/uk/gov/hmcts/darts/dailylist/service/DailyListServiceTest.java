@@ -62,7 +62,7 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Test
     void insert1OkJson() throws IOException {
-        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_ok/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
@@ -80,7 +80,7 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Test
     void insert1OkJsonAndXml() throws IOException {
-        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
@@ -98,7 +98,7 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Test
     void updateOkJsonWithXml() throws IOException {
-        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
         String dailyListJsonStr = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1OkJsonAndXml/DailyListRequest.json");
         DailyListJsonObject dailyList = MAPPER.readValue(dailyListJsonStr, DailyListJsonObject.class);
@@ -118,7 +118,7 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Test
     void insert1DuplicateOk() throws IOException {
-        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         String requestBody = getContentsFromFile(
             "tests/dailylist/DailyListServiceTest/insert1_duplicate_ok/DailyListRequest.json");
@@ -183,7 +183,7 @@ class DailyListServiceTest extends IntegrationBase {
 
     @Test
     void ok_saveDl_xml_then_json() throws IOException {
-        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457);
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
 
         DailyListPostRequest requestWithXml = new DailyListPostRequest(
             CPP,

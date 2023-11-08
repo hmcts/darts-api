@@ -14,10 +14,10 @@ import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 public class TranscriptionsApiImpl implements TranscriptionsApi {
 
     private final TranscriptionService transcriptionService;
-    
+
     @Override
-    public RequestTranscriptionResponse saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails) {
-        return transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails);
+    public RequestTranscriptionResponse saveTranscriptionRequest(TranscriptionRequestDetails transcriptionRequestDetails, boolean isManual) {
+        return transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, isManual);
     }
 
     @Override

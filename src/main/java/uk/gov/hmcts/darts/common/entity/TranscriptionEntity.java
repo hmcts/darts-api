@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +65,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private String requestor;
 
     @Column(name = "hearing_date")
-    private OffsetDateTime hearingDate;
+    private LocalDate hearingDate;
 
     @Column(name = "start_ts")
     private OffsetDateTime startTime;
@@ -74,6 +75,9 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
+
+    @Column(name = "is_manual", nullable = false)
+    private Boolean isManual;
 
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
     private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();

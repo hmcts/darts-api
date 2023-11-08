@@ -59,6 +59,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
+        swanseaCourthouse.setDisplayName("SWANSEA");
 
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
         CourtroomEntity courtroom2 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom2");

@@ -35,6 +35,8 @@ class CourthouseApiTest extends IntegrationBase {
     public static final String REQUEST_BODY_HAVERFORDWEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyHaverfordwest.json";
     public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_NAME_JSON =
         "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseName.json";
+    public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON =
+        "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseDisplayName.json";
     private static final String REQUEST_BODY_TEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyTest.json";
 
     @Autowired
@@ -147,6 +149,19 @@ class CourthouseApiTest extends IntegrationBase {
 
         assertEquals(
             "{\"violations\":[{\"field\":\"courthouseName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
+            response.getResponse().getContentAsString()
+        );
+    }
+
+    @Test
+    void courthousesPostWithMissingCourthouseDisplayName() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = post("/courthouses")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(getContentsFromFile(REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON));
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isBadRequest()).andReturn();
+
+        assertEquals(
+            "{\"violations\":[{\"field\":\"displayName\",\"message\":\"must not be null\"}],\"type\":\"https://zalando.github.io/problem/constraint-violation\",\"status\":400,\"title\":\"Constraint Violation\"}",
             response.getResponse().getContentAsString()
         );
     }

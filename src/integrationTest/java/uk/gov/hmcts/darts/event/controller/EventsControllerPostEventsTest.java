@@ -59,6 +59,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("swansea");
+        courthouse.setDisplayName("swansea");
 
         dartsDatabase.getCourthouseRepository().save(courthouse);
 
@@ -100,6 +101,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     void useExistingCase() throws Exception {
         CourthouseEntity courthouse = new CourthouseEntity();
         courthouse.setCourthouseName("swansea1");
+        courthouse.setDisplayName("swansea1");
 
         CourtCaseEntity courtCase = new CourtCaseEntity();
         courtCase.setCaseNumber("CaseNumber");

@@ -197,6 +197,7 @@ public class TestSupportController {
     private CourthouseEntity newCourthouse(String courthouseName) {
         var courthouse = new CourthouseEntity();
         courthouse.setCourthouseName(courthouseName);
+        courthouse.setDisplayName(courthouseName);
         return courthouseRepository.save(courthouse);
     }
 

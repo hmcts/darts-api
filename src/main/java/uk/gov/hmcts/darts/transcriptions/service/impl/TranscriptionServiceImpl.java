@@ -128,7 +128,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     public RequestTranscriptionResponse saveTranscriptionRequest(
-        TranscriptionRequestDetails transcriptionRequestDetails) {
+        TranscriptionRequestDetails transcriptionRequestDetails, boolean isManual) {
 
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
@@ -140,7 +140,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 transcriptionRequestDetails,
                 transcriptionStatus,
                 getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
-                getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId())
+                getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId()),
+                isManual
             );
         } catch (DataIntegrityViolationException e) {
             throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
@@ -283,7 +284,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                                                   TranscriptionRequestDetails transcriptionRequestDetails,
                                                   TranscriptionStatusEntity transcriptionStatus,
                                                   TranscriptionTypeEntity transcriptionType,
-                                                  TranscriptionUrgencyEntity transcriptionUrgency) {
+                                                  TranscriptionUrgencyEntity transcriptionUrgency, boolean isManual) {
 
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
@@ -297,6 +298,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setEndTime(transcriptionRequestDetails.getEndDateTime());
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
+        transcription.setIsManual(isManual);
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {
             transcription.setCourtCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));

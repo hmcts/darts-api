@@ -194,6 +194,10 @@ class AudioTransformationServiceTest extends IntegrationBase {
         newMedia.setTotalChannels(4);
         newMedia.setStart(OffsetDateTime.parse("2023-07-04T10:00:00Z"));
         newMedia.setEnd(OffsetDateTime.parse("2023-07-04T11:00:00Z"));
+        newMedia.setMediaFile("a-media-file");
+        newMedia.setChecksum("a-checksum");
+        newMedia.setFileSize(1000);
+        newMedia.setMediaFormat("mp3");
         newMedia = dartsDatabase.save(newMedia);
 
         assertEquals(Optional.empty(), audioTransformationService.getMediaLocation(newMedia));
@@ -208,6 +212,9 @@ class AudioTransformationServiceTest extends IntegrationBase {
         newMedia.setTotalChannels(4);
         newMedia.setStart(OffsetDateTime.parse("2023-07-04T16:00:00Z"));
         newMedia.setEnd(OffsetDateTime.parse("2023-07-04T17:00:00Z"));
+        newMedia.setMediaFile("filename");
+        newMedia.setMediaFormat("mp3");
+        newMedia.setFileSize(1000);
         newMedia = dartsDatabase.save(newMedia);
 
         ExternalLocationTypeEntity externalLocationTypeEntity =

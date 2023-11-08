@@ -25,7 +25,7 @@ public class TranscriptionMapper {
         HearingEntity hearing = transcriptionEntity.getHearing();
         if (hearing == null) {
             if (transcriptionEntity.getHearingDate() != null) {
-                transcript.setHearingDate(transcriptionEntity.getHearingDate().toLocalDate());
+                transcript.setHearingDate(transcriptionEntity.getHearingDate());
             }
         } else {
             transcript.setHeaId(hearing.getId());

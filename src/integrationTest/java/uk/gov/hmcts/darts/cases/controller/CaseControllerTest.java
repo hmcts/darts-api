@@ -104,6 +104,7 @@ class CaseControllerTest extends IntegrationBase {
     void setupData() {
         var swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
+        swanseaCourthouse.setDisplayName("SWANSEA");
 
         var swanseaCourtroom1 = someMinimalCourtRoom();
         swanseaCourtroom1.setName("1");

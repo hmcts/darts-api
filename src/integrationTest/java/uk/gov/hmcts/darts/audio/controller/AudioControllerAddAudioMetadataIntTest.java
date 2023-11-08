@@ -99,6 +99,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         addAudioMetadataRequest.courthouse(courthouse);
         addAudioMetadataRequest.courtroom("1");
         addAudioMetadataRequest.cases(List.of("case1", "case2", "case3"));
+        addAudioMetadataRequest.setFileSize(1000);
+        addAudioMetadataRequest.setChecksum("calculatedchecksum");
         return addAudioMetadataRequest;
     }
 }

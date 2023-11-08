@@ -46,7 +46,7 @@ class TranscriptionMapperTest {
         transcription.setTranscriptionType(transcriptionType);
         transcription.setCreatedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
         transcription.setId(1);
-        transcription.setHearingDate(OffsetDateTime.of(2023, 6, 20, 12, 0, 0, 0, ZoneOffset.UTC));
+        transcription.setHearingDate(LocalDate.of(2023, 6, 20));
         transcription.setRequestor("someLegacyRequestor");
 
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();

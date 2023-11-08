@@ -48,4 +48,8 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
         joinColumns = {@JoinColumn(name = "cth_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroups = new LinkedHashSet<>();
+
+    @Column(name = "display_name")
+    private String displayName;
+
 }
