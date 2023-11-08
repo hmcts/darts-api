@@ -95,7 +95,6 @@ public class TestSupportController {
 
         session.getTransaction().commit();
         session.close();
-        
     }
 
     private void removeUserCourthousePermissions(Session session,List cthIds) {
