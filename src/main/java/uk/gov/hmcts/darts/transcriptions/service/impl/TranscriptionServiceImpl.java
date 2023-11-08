@@ -128,7 +128,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     @Transactional
     public RequestTranscriptionResponse saveTranscriptionRequest(
-        TranscriptionRequestDetails transcriptionRequestDetails) {
+        TranscriptionRequestDetails transcriptionRequestDetails, boolean isManual) {
 
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());

@@ -69,7 +69,7 @@ public class TranscriptionController implements TranscriptionApi {
         validateTranscriptionRequestValues(transcriptionRequestDetails);
         try {
             return new ResponseEntity<>(
-                transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails),
+                transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, false),
                 HttpStatus.OK
             );
         } catch (EntityNotFoundException exception) {

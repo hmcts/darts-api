@@ -37,7 +37,7 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
         transcriptionRequestDetails.setEndDateTime(dartsEvent.getEndTime());
         transcriptionRequestDetails.setHearingId(createdHearing.getHearingEntity().getId());
         RequestTranscriptionResponse transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(
-            transcriptionRequestDetails);
+            transcriptionRequestDetails, false);
 
         //automatically approve the transcription request
         UpdateTranscription updateTranscription = new UpdateTranscription();
