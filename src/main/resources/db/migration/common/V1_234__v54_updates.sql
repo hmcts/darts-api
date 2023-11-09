@@ -99,13 +99,10 @@ SET display_state=true
 WHERE trt_id=999;
 ALTER TABLE transcription_type ALTER COLUMN display_state SET NOT NULL;
 
-ALTER TABLE transcription_urgency ADD COLUMN display_state     BOOLEAN;
+ALTER TABLE transcription_urgency ADD COLUMN display_state     BOOLEAN DEFAULT TRUE ;
 UPDATE transcription_urgency
 SET display_state=false
 WHERE tru_id=1;
-UPDATE transcription_urgency
-SET display_state=true
-WHERE tru_id=2;
 UPDATE transcription_urgency
 SET display_state=false
 WHERE tru_id=3;
