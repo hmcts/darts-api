@@ -396,7 +396,6 @@ components:
         - courthouse
         - courtroom
         - cases
-        - media_file
         - file_size
       properties:
         started_at:
