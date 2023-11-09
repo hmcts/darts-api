@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_DETAILS_INVALID;
@@ -168,6 +169,23 @@ class UserIdentityImplTest extends IntegrationBase {
         dartsDatabaseStub.getUserAccountStub().createXhibitExternalUser(guid, null);
 
         assertTrue(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
+
+    }
+
+    @Test
+    @Transactional
+    void userHasGlobalAccessReturnsFalseWhenUserNoGlobalAccess() {
+        String guid = UUID.randomUUID().toString();
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("oid", guid)
+            .build();
+
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        dartsDatabaseStub.getUserAccountStub().createAuthorisedIntegrationTestUser(null);
+
+        assertFalse(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
 
     }
 }
