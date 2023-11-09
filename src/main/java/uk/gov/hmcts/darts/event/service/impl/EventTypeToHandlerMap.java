@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -25,8 +26,20 @@ public class EventTypeToHandlerMap {
             return true;
         }
 
-        eventHandlerRepository.findByTypeAndSubTypeAndActiveTrue(event.getType(), event.getSubType())
-            .ifPresent(eventHandler -> addHandlerMapping(key, eventHandler));
+        Optional<EventHandlerEntity> foundMapping = eventHandlerRepository.findByTypeAndSubTypeAndActiveTrue(
+            event.getType(),
+            event.getSubType()
+        );
+        if (foundMapping.isPresent()) {
+            addHandlerMapping(key, foundMapping.get());
+        } else {
+            foundMapping = eventHandlerRepository.findByTypeAndSubTypeIsNullAndActiveTrue(
+                event.getType()
+            );
+            if (foundMapping.isPresent()) {
+                addHandlerMapping(key, foundMapping.get());
+            }
+        }
 
         return Objects.equals(eventTypeToHandler.get(key), simpleName);
     }
