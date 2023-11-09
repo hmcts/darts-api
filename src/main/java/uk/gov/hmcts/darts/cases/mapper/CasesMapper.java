@@ -36,6 +36,7 @@ public class CasesMapper {
         PostCaseResponse postCaseResponse = new PostCaseResponse();
         postCaseResponse.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
         postCaseResponse.setCaseNumber(caseEntity.getCaseNumber());
+        postCaseResponse.setCaseId(caseEntity.getId());
         postCaseResponse.setDefendants(caseEntity.getDefendantStringList());
         postCaseResponse.setProsecutors(caseEntity.getProsecutorsStringList());
         postCaseResponse.setDefenders(caseEntity.getDefenceStringList());

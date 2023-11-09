@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -72,5 +73,13 @@ public final class TestUtils {
     public static <T> T unmarshalXmlFile(Class<T> type, String xmlFile) throws JAXBException, IOException {
         JAXBContext context = JAXBContext.newInstance(type);
         return type.cast(context.createUnmarshaller().unmarshal(Files.newBufferedReader(Path.of(xmlFile))));
+    }
+
+    public static String removeTags(List<String> tagsToRemove, String input) {
+        String output = input;
+        for (String tagToRemove : tagsToRemove) {
+            output = output.replaceAll("\"" + tagToRemove + "\".{1,6},", "");
+        }
+        return output;
     }
 }

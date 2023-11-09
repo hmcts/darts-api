@@ -13,9 +13,11 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.TestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -141,7 +143,7 @@ class CaseControllerTest extends IntegrationBase {
             .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-        String actualResponse = response.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponse.json"));
@@ -156,7 +158,7 @@ class CaseControllerTest extends IntegrationBase {
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithoutCourtroom.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-        String actualResponse = response.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseWithoutCourtroomAndJudge.json");
@@ -201,7 +203,7 @@ class CaseControllerTest extends IntegrationBase {
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyWithNonExistingCourtroom.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-        String actualResponse = response.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseForNonExistingCourtroom.json"));
@@ -216,7 +218,7 @@ class CaseControllerTest extends IntegrationBase {
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyOnlyCourthouseProvided.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-        String actualResponse = response.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseOnlyCourthouseProvided.json");
@@ -232,7 +234,7 @@ class CaseControllerTest extends IntegrationBase {
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyForCaseWithoutHearing.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-        String actualResponse = response.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseNoHearing.json"));
@@ -247,7 +249,7 @@ class CaseControllerTest extends IntegrationBase {
                 "tests/cases/CaseControllerTest/casesPostEndpoint/requestBodyCaseUpdate.json"));
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isCreated()).andReturn();
 
-        String actualResponse = response.getResponse().getContentAsString();
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), response.getResponse().getContentAsString());
 
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json"));
