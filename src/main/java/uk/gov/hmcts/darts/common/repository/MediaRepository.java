@@ -15,6 +15,7 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
            FROM HearingEntity he
            JOIN he.mediaList me
            WHERE he.id = :hearingId
+           ORDER BY me.start
         """)
     List<MediaEntity> findAllByHearingId(Integer hearingId);
 
