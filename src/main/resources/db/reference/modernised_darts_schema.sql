@@ -172,6 +172,7 @@
 --    add current_owner to annotation, with FK to user_account
 --    amend media.file_size to bigint
 --    remove media_type table, and replace by media.media_type column
+--v56 add hide_request_from_requestor field on transcription
 
 
 -- List of Table Aliases
@@ -1004,6 +1005,7 @@ CREATE TABLE transcription
 ,start_ts                    TIMESTAMP WITH TIME ZONE               -- both c_start and c_end have time components
 ,end_ts                      TIMESTAMP WITH TIME ZONE               -- we have 49k rows in legacy moj_transcription_s, 7k have c_end != c_start
 ,is_manual_transcription     BOOLEAN                       NOT NULL
+,hide_request_from_requestor BOOLEAN                       NOT NULL 
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
