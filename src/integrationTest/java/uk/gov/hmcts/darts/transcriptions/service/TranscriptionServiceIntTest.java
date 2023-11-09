@@ -55,7 +55,6 @@ class TranscriptionServiceIntTest extends IntegrationBase {
     void setupData() {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn(systemUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(systemUser);
 
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(

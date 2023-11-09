@@ -15,6 +15,8 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
 
     Optional<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
+    Optional<UserAccountEntity> findByAccountGuid(String guid);
+
     Optional<UserAccountEntity> findByAccountGuidAndIsSystemUserTrue(String guid);
 
     //todo find out what user states are Active
@@ -37,7 +39,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.securityRoleEntity securityRole
         WHERE accountGuid = :accountGuid
-        AND securityRole.id = IN (:roleIds)
+        AND securityRole.id IN (:roleIds)
         AND securityGroup.globalAccess = true
         """)
     Optional<UserAccountEntity> findByAccountGuidForRolesAndGlobalAccessIsTrue(String accountGuid, Set<Integer> roleIds);

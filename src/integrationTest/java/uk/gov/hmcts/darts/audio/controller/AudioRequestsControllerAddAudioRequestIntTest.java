@@ -90,13 +90,13 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
         testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
     void addAudioRequestPostShouldReturnForbiddenError() throws Exception {
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
 
@@ -222,7 +222,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
     void addAudioRequestDownloadPostShouldThrow403() throws Exception {
         CourthouseEntity courthouse = dartsDatabase.findCourthouseWithName(SOME_COURTHOUSE);
         testUser = dartsDatabase.getUserAccountStub().createJudgeUser(courthouse);
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         var audioRequestDetails = createAudioRequestDetails(hearingEntity, AUDIO_REQUEST_TYPE_DOWNLOAD);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)

@@ -74,8 +74,6 @@ public class AuthorisationAspect {
         return joinPoint.proceed();
     }
 
-
-
     @Before("authorisationPointcut() && withinControllerPointcut()")
     public void handleRequestParametersAuthorisationAdvice(JoinPoint joinPoint) {
         uk.gov.hmcts.darts.authorisation.annotation.Authorisation authorisationAnnotation = ((MethodSignature) joinPoint.getSignature()).getMethod()

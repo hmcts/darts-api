@@ -95,7 +95,6 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
         testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 

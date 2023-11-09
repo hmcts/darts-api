@@ -161,12 +161,12 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         mediaRequestEntity.setRequestType(PLAYBACK);
         dartsDatabase.save(mediaRequestEntity);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
-
         doNothing().when(authorisation)
             .authoriseByMediaRequestId(mediaRequestEntity.getId(),
                                        Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))

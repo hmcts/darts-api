@@ -101,7 +101,6 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
         transcriptionId = transcriptionEntity.getId();
 
         testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 

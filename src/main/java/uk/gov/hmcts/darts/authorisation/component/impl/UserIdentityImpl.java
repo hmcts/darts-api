@@ -30,7 +30,6 @@ public class UserIdentityImpl implements UserIdentity {
 
     private final UserAccountRepository userAccountRepository;
 
-    @Override
     public String getEmailAddress() {
         Object principalObject = SecurityContextHolder.getContext()
             .getAuthentication()
@@ -62,28 +61,29 @@ public class UserIdentityImpl implements UserIdentity {
         throw new IllegalStateException("Could not obtain email address from principal");
     }
 
-    public String getGuid() {
+    public String getGuidFromToken() {
+        if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
+            Object principalObject = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-        Object principalObject = SecurityContextHolder.getContext()
-            .getAuthentication()
-            .getPrincipal();
-
-        Object oid = null;
-        if (principalObject instanceof Jwt jwt) {
-            oid = jwt.getClaims().get(OID);
-        }
-        if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
-            return guid;
+            Object oid = null;
+            if (principalObject instanceof Jwt jwt) {
+                oid = jwt.getClaims().get(OID);
+            }
+            if (nonNull(oid) && oid instanceof String guid && StringUtils.isNotBlank(guid)) {
+                return guid;
+            }
         }
         return null;
     }
 
     public UserAccountEntity getUserAccount() {
         UserAccountEntity userAccount = null;
-        String guid = getGuid();
+        String guid = getGuidFromToken();
         if (nonNull(guid)) {
             // Only use GUID for system users
-            userAccount = userAccountRepository.findByAccountGuidAndIsSystemUserTrue(guid).orElse(null);
+            userAccount = userAccountRepository.findByAccountGuid(guid).orElse(null);
         }
         if (isNull(userAccount)) {
             userAccount = userAccountRepository.findByEmailAddressIgnoreCase(getEmailAddress())
@@ -94,14 +94,14 @@ public class UserIdentityImpl implements UserIdentity {
 
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
-        String guid = getGuid();
+        String guid = getGuidFromToken();
 
         if (nonNull(guid)) {
             Optional<UserAccountEntity> userAccountEntityOptional =
                 userAccountRepository.findByAccountGuidForRolesAndGlobalAccessIsTrue(
                     guid, globalAccessRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet())
                 );
-            if (userAccountEntityOptional.isPresent()) {
+            if (userAccountEntityOptional.isPresent() && userAccountEntityOptional.get().getIsSystemUser()) {
                 userHasGlobalAccess = true;
             }
         }

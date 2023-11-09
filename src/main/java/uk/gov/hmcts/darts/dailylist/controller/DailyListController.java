@@ -55,9 +55,6 @@ public class DailyListController implements DailyListsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-//    @Authorisation(bodyAuthorisation = false, contextId = ANY_ENTITY_ID,
-//        securityRoles = {XHIBIT, CPP},
-//        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPatch(
         @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
         @NotNull @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = true) DailyListJsonObject jsonDocument
@@ -93,9 +90,6 @@ public class DailyListController implements DailyListsApi {
         produces = {"application/json", "application/json+problem"}
     )
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-//    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-//        securityRoles = {XHIBIT, CPP},
-//        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPost(
         @NotNull @Parameter(name = "source_system", description = "The source system that has sent the message", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "source_system", required = true) String sourceSystem,
         @Parameter(name = "courthouse", description = "The courthouse that the dailyList represents. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = false) String courthouse,

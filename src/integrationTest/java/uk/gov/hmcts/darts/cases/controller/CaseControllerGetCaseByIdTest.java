@@ -55,13 +55,13 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
     void casesSearchGetEndpointShouldReturnForbiddenError() throws Exception {
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(endpointUrl, getCaseId(SOME_CASE_NUMBER, SOME_COURTHOUSE));
 

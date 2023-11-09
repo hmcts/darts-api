@@ -58,7 +58,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test

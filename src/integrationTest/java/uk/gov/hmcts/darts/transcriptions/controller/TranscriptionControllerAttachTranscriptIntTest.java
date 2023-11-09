@@ -121,7 +121,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         transcriptionCompany.setCourthouseEntities(Set.of(authorisationStub.getCourthouseEntity()));
 
         UserAccountEntity testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
@@ -135,7 +134,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     @Test
     void attachTranscriptShouldReturnForbiddenError() throws Exception {
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -155,7 +154,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

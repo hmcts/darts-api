@@ -39,6 +39,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -137,19 +139,24 @@ public class AuthorisationServiceImpl implements AuthorisationService {
 
     @Override
     public void checkCourthouseAuthorisation(List<CourthouseEntity> courthouses, Set<SecurityRoleEnum> securityRoles) {
-        String emailAddress = userIdentity.getEmailAddress();
-        List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(
-            emailAddress, securityRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet()));
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
+        if (nonNull(userAccount)) {
+            String emailAddress = userAccount.getEmailAddress();
+            List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(
+                emailAddress,
+                securityRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet())
+            );
 
-        if (new HashSet<>(authorisedCourthouses).containsAll(courthouses)) {
-            return;
+            if (new HashSet<>(authorisedCourthouses).containsAll(courthouses)) {
+                return;
+            }
+            log.debug("User {} is not authorised for courthouses {}, securityRoles {}", emailAddress,
+                      courthouses.stream().map(CourthouseEntity::getCourthouseName).toList(),
+                      securityRoles
+            );
+            throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
-
-        log.debug("User {} is not authorised for courthouses {}, securityRoles {}", emailAddress,
-                  courthouses.stream().map(CourthouseEntity::getCourthouseName).toList(),
-                  securityRoles
-        );
-        throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
+        throw new DartsApiException(AuthorisationError.USER_DETAILS_INVALID);
     }
 
     @Override

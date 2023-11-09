@@ -9,7 +9,7 @@ public interface UserIdentity {
 
     String getEmailAddress();
 
-    String getGuid();
+    String getGuidFromToken();
 
     UserAccountEntity getUserAccount();
 
