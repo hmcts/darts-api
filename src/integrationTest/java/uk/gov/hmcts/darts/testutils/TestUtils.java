@@ -36,6 +36,7 @@ public final class TestUtils {
         String output = input;
         for (String tagToRemove : tagsToRemove) {
             output = output.replaceAll("\"" + tagToRemove + "\".{1,6},", "");
+            output = output.replaceAll("\"" + tagToRemove + "\".{1,6}}", "}");
         }
         return output;
     }
