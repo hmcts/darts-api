@@ -1,6 +1,12 @@
-ALTER TABLE annotation_document ADD COLUMN checksum     CHARACTER VARYING   NOT NULL;
-ALTER TABLE transcription_document ADD COLUMN checksum     CHARACTER VARYING   NOT NULL;
+ALTER TABLE annotation_document ADD COLUMN checksum     CHARACTER VARYING;
+UPDATE annotation_document
+set checksum='a-checksum'
+ALTER TABLE annotation_document ALTER COLUMN checksum SET NOT NULL;
 
+ALTER TABLE transcription_document ADD COLUMN checksum     CHARACTER VARYING;
+UPDATE transcription_document
+set checksum='a-checksum'
+ALTER TABLE transcription_document ALTER COLUMN checksum SET NOT NULL;
 
 UPDATE security_role
 set display_name='Approver', display_state=true
