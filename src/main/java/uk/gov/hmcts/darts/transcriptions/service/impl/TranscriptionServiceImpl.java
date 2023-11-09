@@ -40,6 +40,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
+import uk.gov.hmcts.darts.transcriptions.component.YourTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
@@ -124,6 +126,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private final WorkflowValidator workflowValidator;
     private final TranscriptFileValidator transcriptFileValidator;
+
+    private final YourTranscriptsQuery yourTranscriptsQuery;
 
     @Override
     @Transactional
@@ -484,6 +488,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             .fileName(latestTranscriptionDocumentEntity.getFileName())
             .externalLocation(externalLocation)
             .transcriptionDocumentId(latestTranscriptionDocumentEntity.getId()).build();
+    }
+
+    @Override
+    public GetYourTranscriptsResponse getYourTranscripts(Integer userId) {
+        final var getYourTranscriptsResponse = new GetYourTranscriptsResponse();
+        getYourTranscriptsResponse.setRequesterTranscriptions(yourTranscriptsQuery.getRequesterTranscriptions(userId));
+        getYourTranscriptsResponse.setApproverTranscriptions(yourTranscriptsQuery.getApproverTranscriptions(userId));
+        return getYourTranscriptsResponse;
     }
 
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
