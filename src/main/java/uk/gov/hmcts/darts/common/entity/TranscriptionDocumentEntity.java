@@ -56,4 +56,6 @@ public class TranscriptionDocumentEntity {
     @OneToMany(mappedBy = ExternalObjectDirectoryEntity_.TRANSCRIPTION_DOCUMENT_ENTITY)
     private List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntities = new ArrayList<>();
 
+    @Column(name = "checksum", nullable = false)
+    private String checksum;
 }

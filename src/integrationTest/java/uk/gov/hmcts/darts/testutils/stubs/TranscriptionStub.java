@@ -127,6 +127,7 @@ public class TranscriptionStub {
         transcriptionDocumentEntity.setFileSize(fileSize);
         transcriptionDocumentEntity.setUploadedBy(testUser);
         transcriptionDocumentEntity.setUploadedDateTime(now(UTC));
+        transcriptionDocumentEntity.setChecksum(checksum);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setStatus(objectDirectoryStatusEntity);
