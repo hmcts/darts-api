@@ -10,5 +10,17 @@
   {
     "tru_id": 3,
     "description": "Other"
+  },
+  {
+    "tru_id": 4,
+    "description": "3 working days"
+  },
+  {
+    "tru_id": 5,
+    "description": "7 working days"
+  },
+  {
+    "tru_id": 6,
+    "description": "12 working days"
   }
 ]

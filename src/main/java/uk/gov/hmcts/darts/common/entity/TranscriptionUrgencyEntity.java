@@ -20,4 +20,7 @@ public class TranscriptionUrgencyEntity {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "display_state")
+    private Boolean displayState;
+
 }

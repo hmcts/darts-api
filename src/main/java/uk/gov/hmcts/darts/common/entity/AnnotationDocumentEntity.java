@@ -48,4 +48,7 @@ public class AnnotationDocumentEntity {
     @CreationTimestamp
     @Column(name = "uploaded_ts")
     private OffsetDateTime uploadedDateTime;
+
+    @Column(name = "checksum", nullable = false)
+    private String checksum;
 }

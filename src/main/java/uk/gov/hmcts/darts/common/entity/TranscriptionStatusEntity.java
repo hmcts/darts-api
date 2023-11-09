@@ -20,4 +20,6 @@ public class TranscriptionStatusEntity {
     @Column(name = "status_type", nullable = false)
     private String statusType;
 
+    @Column(name = "display_name", nullable = false)
+    private String displayName;
 }
