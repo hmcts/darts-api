@@ -50,8 +50,6 @@ class EventsControllerPostEventsTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
 
-    private UserAccountEntity testUser;
-
     @BeforeEach
     void setUp() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -91,7 +89,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
 
-        setupExternalUserForHearing(courthouse);
+        setupExternalUserForCourthouse(courthouse);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
@@ -140,7 +138,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
 
-        setupExternalUserForHearing(courthouse);
+        setupExternalUserForCourthouse(courthouse);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
@@ -264,9 +262,9 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         return createEventHandlerWith("StandardEventHandler", "ActiveTestType", "ActiveTestSubType");
     }
 
-    private void setupExternalUserForHearing(CourthouseEntity courthouse) {
+    private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {
         String guid = UUID.randomUUID().toString();
-        testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
     }

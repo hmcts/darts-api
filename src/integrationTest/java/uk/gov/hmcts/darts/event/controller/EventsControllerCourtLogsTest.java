@@ -5,11 +5,14 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +43,7 @@ import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
 @Transactional
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
     public static final String NEW_CASE = "Case0000001";
@@ -67,8 +71,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
-
-    private UserAccountEntity testUser;
 
     @BeforeEach
     void setUp() {
@@ -145,7 +147,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtLogsGet() throws Exception {
-        setupExternalUserForHearing(null);
+        setupExternalUserForCourthouse(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, "Swansea")
@@ -180,7 +182,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
-        setupExternalUserForHearing(hearingEntity.getCourtCase().getCourthouse());
+        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, courthouseName)
@@ -215,7 +217,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
-        setupExternalUserForHearing(hearingEntity.getCourtCase().getCourthouse());
+        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, courthouseName)
@@ -254,7 +256,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
 
-        setupExternalUserForHearing(hearingEntity.getCourtCase().getCourthouse());
+        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, SOME_COURTHOUSE)
@@ -271,9 +273,33 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
     }
 
-    private void setupExternalUserForHearing(CourthouseEntity courthouse) {
+    @Test
+    void courtLogsEndpointShouldReturnForbiddenError() throws Exception {
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam(COURTHOUSE, SOME_COURTHOUSE)
+            .queryParam(CASE_NUMBER, NEW_CASE)
+            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult response = mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isForbidden())
+            .andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = """
+            {"type":"AUTHORISATION_107","title":"Failed to check authorisation","status":403}
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {
         String guid = UUID.randomUUID().toString();
-        testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
     }
