@@ -15,12 +15,31 @@ CREATE TABLE IF NOT EXISTS media_type (
 );
 
 INSERT INTO media_type VALUES(1, 'AUDIO');
-ALTER TABLE media ADD COLUMN media_file   CHARACTER VARYING   NOT NULL;
-ALTER TABLE media ADD COLUMN media_format CHARACTER VARYING   NOT NULL;
-ALTER TABLE media ADD COLUMN file_size    INTEGER   NOT NULL;
-ALTER TABLE media ADD COLUMN checksum     CHARACTER VARYING   NULL;
+
+ALTER TABLE media ADD COLUMN media_file   CHARACTER VARYING;
+UPDATE media
+SET media_file='a media file';
+ALTER TABLE media ALTER COLUMN media_file SET NOT NULL;
+
+ALTER TABLE media ADD COLUMN media_format CHARACTER VARYING;
+UPDATE media
+SET media_format='media format';
+ALTER TABLE media ALTER COLUMN media_format SET NOT NULL;
+
+ALTER TABLE media ADD COLUMN file_size    INTEGER;
+UPDATE media
+SET file_size=1000;
+ALTER TABLE media ALTER COLUMN file_size SET NOT NULL;
+
+ALTER TABLE media ADD COLUMN checksum     CHARACTER VARYING;
+UPDATE media
+SET checksum='achecksum';
+
 ALTER TABLE media ADD COLUMN met_id   INTEGER   DEFAULT 1;
 ALTER TABLE media
 ADD CONSTRAINT media_media_type_fk
 FOREIGN KEY (met_id) REFERENCES media_type(met_id);
-ALTER TABLE courthouse ADD COLUMN display_name CHARACTER VARYING   NOT null default 'Default name';
+ALTER TABLE courthouse ADD COLUMN display_name CHARACTER VARYING;
+UPDATE courthouse
+SET display_name=courthouse_name;
+ALTER TABLE courthouse ALTER COLUMN display_name SET NOT NULL;
