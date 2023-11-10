@@ -415,6 +415,11 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
+    public List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState() {
+        return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAllByDisplayStateTrue());
+    }
+
+    @Override
     @Transactional
     @SuppressWarnings({"java:S4790"})
     public AttachTranscriptResponse attachTranscript(Integer transcriptionId,

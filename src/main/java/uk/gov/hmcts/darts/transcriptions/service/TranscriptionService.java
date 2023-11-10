@@ -27,6 +27,8 @@ public interface TranscriptionService {
 
     List<TranscriptionUrgencyResponse> getTranscriptionUrgencies();
 
+    List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState();
+
     TranscriptionResponse getTranscription(Integer transcriptionId);
 
     AttachTranscriptResponse attachTranscript(Integer transcriptionId, MultipartFile transcript);

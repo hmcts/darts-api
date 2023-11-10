@@ -40,9 +40,9 @@ class TranscriptionServiceGetTranscriptionUrgencyTest {
     void getTranscriptionUrgency() throws Exception {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = CommonTestDataUtil.createTranscriptionUrgencyEntities();
 
-        when(mockTranscriptionUrgencyRepository.findAll()).thenReturn(transcriptionUrgencyEntities);
+        when(mockTranscriptionUrgencyRepository.findAllByDisplayStateTrue()).thenReturn(transcriptionUrgencyEntities);
 
-        List<TranscriptionUrgencyResponse> transcriptionUrgencyResponses = transcriptionService.getTranscriptionUrgencies();
+        List<TranscriptionUrgencyResponse> transcriptionUrgencyResponses = transcriptionService.getTranscriptionUrgenciesByDisplayState();
         String actualResponse = objectMapper.writeValueAsString(transcriptionUrgencyResponses);
 
         String expectedResponse = getContentsFromFile(

@@ -11,7 +11,10 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 public enum TranscriptionUrgencyEnum {
     STANDARD(1),
     OVERNIGHT(2),
-    OTHER(3);
+    OTHER(3),
+    WORKING_DAYS_3(4),
+    WORKING_DAYS_7(5),
+    WORKING_DAYS_12(6);
 
     private final Integer id;
 
