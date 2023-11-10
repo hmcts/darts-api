@@ -131,10 +131,11 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<TranscriptionUrgencyResponse>> getTranscriptionUrgencies() {
         return new ResponseEntity<>(
-            transcriptionService.getTranscriptionUrgencies(),
+            transcriptionService.getTranscriptionUrgenciesByDisplayState(),
             HttpStatus.OK
         );
     }
+
 
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
 
