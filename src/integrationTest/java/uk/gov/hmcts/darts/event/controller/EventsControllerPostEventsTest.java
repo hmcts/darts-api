@@ -187,6 +187,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
             .header("Content-Type", "application/json")
             .content(requestBody);
 
+        setupExternalUserForCourthouse(courthouse);
+
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
 
@@ -230,6 +232,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
             .content(requestBody);
+        
+        setupExternalUserForCourthouse(courthouse);
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
