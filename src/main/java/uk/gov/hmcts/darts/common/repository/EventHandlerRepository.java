@@ -14,5 +14,7 @@ public interface EventHandlerRepository extends JpaRepository<EventHandlerEntity
 
     Optional<EventHandlerEntity> findByTypeAndSubTypeAndActiveTrue(String type, String subType);
 
+    Optional<EventHandlerEntity> findByTypeAndSubTypeIsNullAndActiveTrue(String type);
+
 
 }
