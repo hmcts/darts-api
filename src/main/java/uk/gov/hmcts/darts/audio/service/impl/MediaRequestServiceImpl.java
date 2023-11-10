@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
@@ -269,5 +270,15 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         if (expectedType != mediaRequestEntity.getRequestType()) {
             throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT);
         }
+    }
+
+    @Override
+    public MediaRequestEntity updateAudioRequestCompleted(Integer id, String fileName, AudioRequestOutputFormat audioRequestOutputFormat) {
+        MediaRequestEntity mediaRequestEntity = getMediaRequestById(id);
+
+        mediaRequestEntity.setStatus(AudioRequestStatus.COMPLETED);
+        mediaRequestEntity.setOutputFilename(fileName);
+        mediaRequestEntity.setOutputFormat(audioRequestOutputFormat);
+        return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -45,7 +46,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
@@ -205,7 +205,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
 
-        mediaRequestService.updateAudioRequestStatus(mediaRequestEntity.getId(), COMPLETED);
+        AudioRequestOutputFormat audioRequestOutputFormat;
+        switch (mediaRequestEntity.getRequestType()) {
+            case DOWNLOAD -> audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
+            default -> audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
+        }
+        String fileName = mediaRequestEntity.getHearing().getCourtCase().getCaseNumber() + "_" + mediaRequestEntity.getHearing().getHearingDate();
+
+        mediaRequestService.updateAudioRequestCompleted(requestId, fileName, audioRequestOutputFormat);
         log.debug(
             "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
             requestId,
