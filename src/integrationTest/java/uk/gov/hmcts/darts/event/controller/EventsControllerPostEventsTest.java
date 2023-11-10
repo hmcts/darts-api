@@ -232,7 +232,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
             .content(requestBody);
-        
+
         setupExternalUserForCourthouse(courthouse);
 
         mockMvc.perform(requestBuilder)
