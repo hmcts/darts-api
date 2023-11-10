@@ -143,7 +143,7 @@ class CaseControllerSearchGetTest extends IntegrationBase {
         CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getEmailAddressFromToken()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL)

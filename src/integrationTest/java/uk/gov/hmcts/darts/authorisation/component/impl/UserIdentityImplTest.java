@@ -47,7 +47,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("test.user@example.com", userIdentity.getEmailAddress());
+        assertEquals("test.user@example.com", userIdentity.getEmailAddressFromToken());
     }
 
     @Test
@@ -59,7 +59,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddress());
+        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddressFromToken());
         assertEquals("Unexpected number of email addresses: 2", exception.getMessage());
     }
 
@@ -71,7 +71,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddress());
+        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddressFromToken());
         assertEquals("Could not obtain email address from principal", exception.getMessage());
     }
 
@@ -84,7 +84,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("test.user@example.com", userIdentity.getEmailAddress());
+        assertEquals("test.user@example.com", userIdentity.getEmailAddressFromToken());
     }
 
     @Test
@@ -96,7 +96,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddress());
+        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddressFromToken());
         assertEquals("Could not obtain email address from principal", exception.getMessage());
     }
 
@@ -110,7 +110,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals(email, userIdentity.getEmailAddress());
+        assertEquals(email, userIdentity.getEmailAddressFromToken());
 
         UserAccountEntity testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
@@ -128,7 +128,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals(email, userIdentity.getEmailAddress());
+        assertEquals(email, userIdentity.getEmailAddressFromToken());
 
         dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 

@@ -50,17 +50,21 @@ public class UserAccountStub {
         if (userAccountEntityOptional.isPresent()) {
             return userAccountEntityOptional.get();
         } else {
-            UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("IntegrationTest User");
-            newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
-            newUser.setCreatedBy(systemUser);
-            newUser.setLastModifiedBy(systemUser);
-            newUser.setState(1);
-            newUser.setAccountGuid(UUID.randomUUID().toString());
-            newUser.setIsSystemUser(false);
-            return userAccountRepository.saveAndFlush(newUser);
+            return createIntegrationUser(UUID.randomUUID().toString());
         }
+    }
+
+    private UserAccountEntity createIntegrationUser(String guid) {
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
+        var newUser = new UserAccountEntity();
+        newUser.setUsername("IntegrationTest User");
+        newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
+        newUser.setCreatedBy(systemUser);
+        newUser.setLastModifiedBy(systemUser);
+        newUser.setState(1);
+        newUser.setAccountGuid(guid);
+        newUser.setIsSystemUser(false);
+        return userAccountRepository.saveAndFlush(newUser);
     }
 
     @Transactional
@@ -140,4 +144,5 @@ public class UserAccountStub {
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
     }
+
 }

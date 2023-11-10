@@ -7,7 +7,7 @@ import java.util.Set;
 
 public interface UserIdentity {
 
-    String getEmailAddress();
+    String getEmailAddressFromToken();
 
     String getGuidFromToken();
 

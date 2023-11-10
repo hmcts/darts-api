@@ -62,6 +62,10 @@ public class EventsController implements EventApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        securityRoles = {XHIBIT, CPP},
+        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<EventsResponse> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
         DartsEvent dartsEvent = dartsEventMapper.toDartsEvent(courtLogsPostRequestBody);
 

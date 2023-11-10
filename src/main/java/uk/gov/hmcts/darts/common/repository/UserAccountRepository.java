@@ -38,10 +38,10 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         FROM UserAccountEntity userAccount
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.securityRoleEntity securityRole
-        WHERE accountGuid = :accountGuid
+        WHERE (userAccount.emailAddress = :emailAddress OR userAccount.accountGuid = :accountGuid)
         AND securityRole.id IN (:roleIds)
         AND securityGroup.globalAccess = true
         """)
-    Optional<UserAccountEntity> findByAccountGuidForRolesAndGlobalAccessIsTrue(String accountGuid, Set<Integer> roleIds);
+    List<UserAccountEntity> findByEmailAddressOrAccountGuidForRolesAndGlobalAccessIsTrue(String emailAddress, String accountGuid, Set<Integer> roleIds);
 
 }

@@ -91,6 +91,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         Assertions.assertEquals(0, getAllLogEventsMatchingText().size(), "Precondition failed");
 
+        setupExternalUserForCourthouse(null);
+
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
 
