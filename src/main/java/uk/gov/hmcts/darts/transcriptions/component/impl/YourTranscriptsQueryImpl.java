@@ -35,33 +35,33 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
-                    transcription_workflow trw
+                    darts.transcription_workflow trw
                 INNER JOIN
-                    transcription tra
+                    darts.transcription tra
                 ON
                     trw.tra_id = tra.tra_id
                 INNER JOIN
-                    court_case cas
+                    darts.court_case cas
                 ON
                     tra.cas_id = cas.cas_id
                 INNER JOIN
-                    courthouse cth
+                    darts.courthouse cth
                 ON
                     cas.cth_id = cth.cth_id
                 INNER JOIN
-                    hearing hea
+                    darts.hearing hea
                 ON
                     tra.hea_id = hea.hea_id
                 INNER JOIN
-                    transcription_type trt
+                    darts.transcription_type trt
                 ON
                     tra.trt_id = trt.trt_id
                 INNER JOIN
-                    transcription_status trs
+                    darts.transcription_status trs
                 ON
                     tra.trs_id = trs.trs_id
-                INNER JOIN
-                    transcription_urgency tru
+                LEFT JOIN
+                    darts.transcription_urgency tru
                 ON
                     tra.tru_id = tru.tru_id
                 WHERE
@@ -83,29 +83,29 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
-                    transcription_workflow trw
+                    darts.transcription_workflow trw
                 INNER JOIN
-                    transcription tra
+                    darts.transcription tra
                 ON
                     trw.tra_id = tra.tra_id
                 INNER JOIN
-                    court_case cas
+                    darts.court_case cas
                 ON
                     tra.cas_id = cas.cas_id
                 INNER JOIN
-                    courthouse cth
+                    darts.courthouse cth
                 ON
                     cas.cth_id = cth.cth_id
                 INNER JOIN
-                    transcription_type trt
+                    darts.transcription_type trt
                 ON
                     tra.trt_id = trt.trt_id
                 INNER JOIN
-                    transcription_status trs
+                    darts.transcription_status trs
                 ON
                     tra.trs_id = trs.trs_id
-                INNER JOIN
-                    transcription_urgency tru
+                LEFT JOIN
+                    darts.transcription_urgency tru
                 ON
                     tra.tru_id = tru.tru_id
                 WHERE
@@ -113,6 +113,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
                 AND tra.hea_id IS NULL
+                ORDER BY transcription_id desc
                 """,
             new MapSqlParameterSource("usr_id", userId),
             yourTranscriptsSummaryRowMapper
@@ -135,53 +136,53 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
-                    transcription tra
+                    darts.transcription tra
                 INNER JOIN
-                    court_case cas
+                    darts.court_case cas
                 ON
                     tra.cas_id = cas.cas_id
                 INNER JOIN
-                    courthouse cth
+                    darts.courthouse cth
                 ON
                     cas.cth_id = cth.cth_id
                 AND cth.cth_id IN
                     (   SELECT
                             DISTINCT(grc.cth_id)
                         FROM
-                            user_account usr
+                            darts.user_account usr
                         INNER JOIN
-                            security_group_user_account_ae gua
+                            darts.security_group_user_account_ae gua
                         ON
                             usr.usr_id = gua.usr_id
                         INNER JOIN
-                            security_group grp
+                            darts.security_group grp
                         ON
                             gua.grp_id = grp.grp_id
                         INNER JOIN
-                            security_group_courthouse_ae grc
+                            darts.security_group_courthouse_ae grc
                         ON
                             grp.grp_id = grc.grp_id
                         WHERE
                             usr.usr_id = :usr_id
                         AND grp.rol_id = :rol_id)
                 INNER JOIN
-                    hearing hea
+                    darts.hearing hea
                 ON
                     tra.hea_id = hea.hea_id
                 INNER JOIN
-                    transcription_type trt
+                    darts.transcription_type trt
                 ON
                     tra.trt_id = trt.trt_id
                 INNER JOIN
-                    transcription_status trs
+                    darts.transcription_status trs
                 ON
                     tra.trs_id = trs.trs_id
-                INNER JOIN
-                    transcription_urgency tru
+                LEFT JOIN
+                    darts.transcription_urgency tru
                 ON
                     tra.tru_id = tru.tru_id
                 INNER JOIN
-                    transcription_workflow trw
+                    darts.transcription_workflow trw
                 ON
                     tra.tra_id = trw.tra_id
                 AND trw.trs_id = 1
@@ -203,49 +204,49 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
-                    transcription tra
+                    darts.transcription tra
                 INNER JOIN
-                    court_case cas
+                    darts.court_case cas
                 ON
                     tra.cas_id = cas.cas_id
                 INNER JOIN
-                    courthouse cth
+                    darts.courthouse cth
                 ON
                     cas.cth_id = cth.cth_id
                 AND cth.cth_id IN
                     (   SELECT
                             DISTINCT(grc.cth_id)
                         FROM
-                            user_account usr
+                            darts.user_account usr
                         INNER JOIN
-                            security_group_user_account_ae gua
+                            darts.security_group_user_account_ae gua
                         ON
                             usr.usr_id = gua.usr_id
                         INNER JOIN
-                            security_group grp
+                            darts.security_group grp
                         ON
                             gua.grp_id = grp.grp_id
                         INNER JOIN
-                            security_group_courthouse_ae grc
+                            darts.security_group_courthouse_ae grc
                         ON
                             grp.grp_id = grc.grp_id
                         WHERE
                             usr.usr_id = :usr_id
                         AND grp.rol_id = :rol_id)
                 INNER JOIN
-                    transcription_type trt
+                    darts.transcription_type trt
                 ON
                     tra.trt_id = trt.trt_id
                 INNER JOIN
-                    transcription_status trs
+                    darts.transcription_status trs
                 ON
                     tra.trs_id = trs.trs_id
-                INNER JOIN
-                    transcription_urgency tru
+                LEFT JOIN
+                    darts.transcription_urgency tru
                 ON
                     tra.tru_id = tru.tru_id
                 INNER JOIN
-                    transcription_workflow trw
+                    darts.transcription_workflow trw
                 ON
                     tra.tra_id = trw.tra_id
                 AND trw.trs_id = 1
@@ -253,6 +254,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     tra.trs_id = :trs_id
                 AND trw.workflow_actor <> :usr_id
                 AND tra.hea_id IS NULL
+                ORDER BY transcription_id desc
                 """,
             new MapSqlParameterSource("usr_id", userId)
                 .addValue("rol_id", APPROVER.getId())

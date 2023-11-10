@@ -29,6 +29,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetYourTranscriptsResponse'
+        '400':
+          description: Bad Request Error
         '401':
           description: Unauthorised Error
     post:

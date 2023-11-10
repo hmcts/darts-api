@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -24,10 +25,17 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
 
 @Component
 @RequiredArgsConstructor
@@ -44,9 +52,9 @@ public class TranscriptionStub {
     public TranscriptionEntity createTranscription(
         HearingEntity hearing
     ) {
-        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(TranscriptionTypeEnum.SENTENCING_REMARKS);
-        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(TranscriptionStatusEnum.APPROVED);
-        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(TranscriptionUrgencyEnum.STANDARD);
+        TranscriptionTypeEntity transcriptionType = mapToTranscriptionTypeEntity(SENTENCING_REMARKS);
+        TranscriptionStatusEntity transcriptionStatus = mapToTranscriptionStatusEntity(APPROVED);
+        TranscriptionUrgencyEntity transcriptionUrgencyEntity = mapToTranscriptionUrgencyEntity(STANDARD);
         UserAccountEntity authorisedIntegrationTestUser = userAccountStub.createAuthorisedIntegrationTestUser(hearing.getCourtCase()
                                                                                                                   .getCourthouse());
         return createAndSaveTranscriptionEntity(
@@ -97,6 +105,46 @@ public class TranscriptionStub {
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
+    @Transactional
+    public TranscriptionEntity createAndSaveAwaitingAuthorisationTranscription(UserAccountEntity userAccountEntity,
+                                                                               CourtCaseEntity courtCaseEntity,
+                                                                               HearingEntity hearingEntity,
+                                                                               OffsetDateTime workflowTimestamp) {
+        final var awaitingAuthorisationTranscriptionStatus = getTranscriptionStatusByEnum(AWAITING_AUTHORISATION);
+
+        final var transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setCourtCase(courtCaseEntity);
+        transcriptionEntity.setHearing(hearingEntity);
+        transcriptionEntity.setTranscriptionType(getTranscriptionTypeByEnum(SPECIFIED_TIMES));
+        transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
+        transcriptionEntity.setTranscriptionStatus(awaitingAuthorisationTranscriptionStatus);
+        OffsetDateTime now = now(UTC);
+        OffsetDateTime yesterday = now(UTC).minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        transcriptionEntity.setStartTime(yesterday);
+        transcriptionEntity.setEndTime(yesterday.plusHours(now.getHour()).plusMinutes(now.getMinute())
+                                           .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
+        transcriptionEntity.setCreatedBy(userAccountEntity);
+        transcriptionEntity.setLastModifiedBy(userAccountEntity);
+        transcriptionEntity.setIsManual(true);
+
+        final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+            transcriptionEntity,
+            userAccountEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(REQUESTED)
+        );
+
+        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+            transcriptionEntity,
+            userAccountEntity,
+            workflowTimestamp,
+            awaitingAuthorisationTranscriptionStatus
+        );
+
+        transcriptionEntity.getTranscriptionWorkflowEntities()
+            .addAll(List.of(requestedTranscriptionWorkflowEntity, awaitingAuthorisationTranscriptionWorkflowEntity));
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
 
     public TranscriptionWorkflowEntity createTranscriptionWorkflowEntity(TranscriptionEntity transcriptionEntity,
                                                                          UserAccountEntity user,
