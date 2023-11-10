@@ -32,13 +32,11 @@ public class EventTypeToHandlerMap {
         );
         if (foundMapping.isPresent()) {
             addHandlerMapping(key, foundMapping.get());
-        } else {
+        } else if (event.getSubType() != null) {
             foundMapping = eventHandlerRepository.findByTypeAndSubTypeIsNullAndActiveTrue(
                 event.getType()
             );
-            if (foundMapping.isPresent()) {
-                addHandlerMapping(key, foundMapping.get());
-            }
+            foundMapping.ifPresent(eventHandlerEntity -> addHandlerMapping(key, eventHandlerEntity));
         }
 
         return Objects.equals(eventTypeToHandler.get(key), simpleName);
