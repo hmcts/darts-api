@@ -15,6 +15,7 @@ import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
 public class StopAndCloseHandler extends EventHandlerBase {
 
     private final ApplicationEventPublisher eventPublisher;
+    private final DarNotifyServiceImpl darNotifyService;
 
     @Override
     @Transactional
@@ -23,7 +24,7 @@ public class StopAndCloseHandler extends EventHandlerBase {
         var courtCase = hearing.getHearingEntity().getCourtCase();
 
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, STOP_RECORDING);
-        eventPublisher.publishEvent(notifyEvent);
+        darNotifyService.notifyDarPc(notifyEvent);
 
         courtCase.setClosed(TRUE);
         courtCase.setCaseClosedTimestamp(dartsEvent.getDateTime());
