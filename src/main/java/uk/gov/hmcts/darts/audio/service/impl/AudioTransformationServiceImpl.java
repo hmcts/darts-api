@@ -48,6 +48,7 @@ import java.util.concurrent.ExecutionException;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
@@ -205,10 +206,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
 
-        AudioRequestOutputFormat audioRequestOutputFormat;
-        switch (mediaRequestEntity.getRequestType()) {
-            case DOWNLOAD -> audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
-            default -> audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
+        AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
+        if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
+            audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
         }
         String fileName = mediaRequestEntity.getHearing().getCourtCase().getCaseNumber() + "_" + mediaRequestEntity.getHearing().getHearingDate();
 
@@ -258,7 +258,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         var requestType = mediaRequestEntity.getRequestType();
 
-        if (AudioRequestType.DOWNLOAD.equals(requestType)) {
+        if (DOWNLOAD.equals(requestType)) {
             return handleDownload(downloadedMedias, mediaRequestEntity);
         } else if (AudioRequestType.PLAYBACK.equals(requestType)) {
             return handlePlayback(downloadedMedias, mediaRequestEntity);
