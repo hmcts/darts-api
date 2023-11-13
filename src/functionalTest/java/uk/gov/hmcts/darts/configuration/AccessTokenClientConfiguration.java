@@ -15,6 +15,7 @@ public class AccessTokenClientConfiguration {
 
     private final AzureAdAuthenticationProperties adAuthenticationProperties;
     private final AzureAdB2CAuthenticationProperties b2cAuthenticationProperties;
+    private final AzureAdB2CGlobalAuthenticationProperties b2cGlobalAuthenticationProperties;
 
     @Bean
     public AccessTokenClient internalAccessTokenClient() {
@@ -38,12 +39,12 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient externalGlobalAccessTokenClient() {
-        return new AccessTokenClient(b2cAuthenticationProperties.getTokenUri(),
-                                     b2cAuthenticationProperties.getScope(),
-                                     b2cAuthenticationProperties.getGlobalUsername(),
-                                     b2cAuthenticationProperties.getGlobalPassword(),
-                                     b2cAuthenticationProperties.getClientId(),
-                                     b2cAuthenticationProperties.getClientSecret());
+        return new AccessTokenClient(b2cGlobalAuthenticationProperties.getTokenUri(),
+                                     b2cGlobalAuthenticationProperties.getScope(),
+                                     b2cGlobalAuthenticationProperties.getUsername(),
+                                     b2cGlobalAuthenticationProperties.getPassword(),
+                                     b2cGlobalAuthenticationProperties.getClientId(),
+                                     b2cGlobalAuthenticationProperties.getClientSecret());
     }
 
 }

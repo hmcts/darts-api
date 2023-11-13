@@ -25,7 +25,8 @@ import java.text.MessageFormat;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @SpringBootTest(
-    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class, AzureAdB2CAuthenticationProperties.class },
+    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
+        AzureAdB2CAuthenticationProperties.class, AzureAdB2CGlobalAuthenticationProperties.class },
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
