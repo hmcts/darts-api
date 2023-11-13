@@ -364,10 +364,9 @@ dependencies {
   implementation 'com.azure:azure-storage-blob'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
-  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.22.3'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.0.1'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.0.1'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.6.1'
-
-  implementation "org.flywaydb:flyway-database-postgresql"
 
   //database
   implementation 'org.postgresql:postgresql:42.6.0'
