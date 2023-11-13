@@ -133,13 +133,13 @@ class GovNotifyServiceTest {
     @Test
     void audioRequestBeingProcessed() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString());
-        assertEquals("DARTS: Audio Request Being Processed", emailResponse.getSubject());
+        assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    The audio you requested for case TheCaseId is currently being processed.
-                    You will be further notified once the audio is available in your My Audio section in DARTS.
-                    Regards,
-                    DARTS""", emailResponse);
+                    We have received your audio recording order for case ID TheCaseId, and it's currently being processed.
+
+                    We'll notify you when it's ready and available for use.
+
+                    Alternatively, you can visit the Your audio section in the DARTS Portal to check its progress.""", emailResponse);
     }
 
     @Test
