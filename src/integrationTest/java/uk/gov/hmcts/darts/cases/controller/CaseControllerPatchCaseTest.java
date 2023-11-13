@@ -76,7 +76,17 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"case_id":<<case_id>>,"courthouse":"testCourthouse","case_number":"testCaseNumber","retain_until":"2023-09-06T16:16:57.331Z"}""";
+            {
+              "case_id": <<case_id>>,
+              "courthouse": "testCourthouse",
+              "case_number": "testCaseNumber",
+              "defendants": [],
+              "judges": [],
+              "prosecutors": [],
+              "defenders": [],
+              "retain_until": "2023-09-06T16:16:57.331Z"
+            }
+            """;
         expectedResponse = expectedResponse.replace("<<case_id>>", createdCase.getId().toString());
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -111,8 +121,10 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = "{\"title\":\"Bad Request\",\"status\":400,\"detail\":\"JSON parse error: Unrecognized field \\\"courthouse\\\" " +
-                                  "(class uk.gov.hmcts.darts.cases.model.PatchRequestObject), not marked as ignorable\"}";
+        String expectedResponse =
+            "{\"title\":\"Bad Request\",\"status\":400,\"detail\":\"JSON parse error: Unrecognized field \\\"courthouse\\\" "
+            +
+            "(class uk.gov.hmcts.darts.cases.model.PatchRequestObject), not marked as ignorable\"}";
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

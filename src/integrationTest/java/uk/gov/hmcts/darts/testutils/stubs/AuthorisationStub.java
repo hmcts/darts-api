@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -11,32 +12,27 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
+import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
 
 @Component
 @RequiredArgsConstructor
 @Getter
 public class AuthorisationStub {
 
-    private static final OffsetDateTime YESTERDAY = OffsetDateTime.now(UTC).minusDays(1).withHour(9).withMinute(0)
-        .withSecond(0);
+    private static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
+        .withSecond(0).withNano(0);
 
     private final DartsDatabaseStub dartsDatabaseStub;
 
@@ -53,6 +49,7 @@ public class AuthorisationStub {
     private MediaEntity mediaEntity;
     private TranscriptionEntity transcriptionEntity;
 
+    @Transactional
     public void givenTestSchema() {
         courtroomEntity = dartsDatabaseStub.givenTheDatabaseContainsCourthouseWithRoom(
             "Bristol",
@@ -99,8 +96,8 @@ public class AuthorisationStub {
         mediaEntity.setChannel(1);
         mediaEntity.setTotalChannels(2);
         mediaEntity.setCourtroom(courtroomEntity);
-        mediaEntity.setStart(OffsetDateTime.now());
-        mediaEntity.setEnd(OffsetDateTime.now());
+        mediaEntity.setStart(now());
+        mediaEntity.setEnd(now());
         mediaEntity.setMediaFile("media file");
         mediaEntity.setFileSize(1000);
         mediaEntity.setMediaFormat("mp3");
@@ -110,44 +107,15 @@ public class AuthorisationStub {
         hearingEntity.addMedia(mediaEntity);
         dartsDatabaseStub.save(hearingEntity);
 
-        TranscriptionStub transcriptionStub = dartsDatabaseStub.getTranscriptionStub();
-        final TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus = transcriptionStub.getTranscriptionStatusByEnum(
-            AWAITING_AUTHORISATION);
-
-        transcriptionEntity = new TranscriptionEntity();
-        transcriptionEntity.setCourtCase(courtCaseEntity);
-        transcriptionEntity.setCourtroom(courtroomEntity);
-        transcriptionEntity.setHearing(hearingEntity);
-        transcriptionEntity.setTranscriptionType(transcriptionStub.getTranscriptionTypeByEnum(SPECIFIED_TIMES));
-        transcriptionEntity.setTranscriptionStatus(awaitingAuthorisationTranscriptionStatus);
-        transcriptionEntity.setCreatedBy(testUser);
-        transcriptionEntity.setLastModifiedBy(testUser);
-        transcriptionEntity.setIsManual(false);
-
-        TranscriptionWorkflowEntity requestedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            testUser,
-            YESTERDAY,
-            transcriptionStub.getTranscriptionStatusByEnum(REQUESTED)
-        );
-
-        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
-            transcriptionEntity,
-            testUser,
-            YESTERDAY,
-            awaitingAuthorisationTranscriptionStatus
-        );
-
-        transcriptionEntity.getTranscriptionWorkflowEntities()
-            .addAll(List.of(requestedTranscriptionWorkflowEntity, awaitingAuthorisationTranscriptionWorkflowEntity));
-        transcriptionEntity = dartsDatabaseStub.save(transcriptionEntity);
+        transcriptionEntity = dartsDatabaseStub.getTranscriptionStub()
+            .createAndSaveAwaitingAuthorisationTranscription(testUser, courtCaseEntity, hearingEntity, YESTERDAY);
     }
 
     private void createHearing() {
         hearingEntity = new HearingEntity();
         hearingEntity.setCourtCase(courtCaseEntity);
         hearingEntity.setCourtroom(courtroomEntity);
-        hearingEntity.setHearingDate(LocalDate.now());
+        hearingEntity.setHearingDate(YESTERDAY.toLocalDate());
         hearingEntity.setHearingIsActual(true);
         hearingEntity.setScheduledStartTime(LocalTime.now());
         dartsDatabaseStub.save(hearingEntity);
