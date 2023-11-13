@@ -209,7 +209,34 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
             .andExpect(jsonPath("$.detail", matchesRegex("\\{ \\\"transcription_id\\\": [0-9]+ \\}")))
             .andReturn();
+    }
 
+    @Test
+    @Order(13)
+    void transcriptionRequestWithDuplicateValuesWithNoTimes() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilderDup)
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test

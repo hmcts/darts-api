@@ -136,15 +136,17 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
 
-        List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEnd(
-            transcriptionRequestDetails.getHearingId(),
-            getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
-            transcriptionRequestDetails.getStartDateTime(),
-            transcriptionRequestDetails.getEndDateTime()
-        );
-        if (!matchingTranscriptions.isEmpty()) {
-            String errorDetail = "{ \"transcription_id\": " + matchingTranscriptions.get(0).getId().toString() + " }";
-            throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION, errorDetail);
+        if (transcriptionRequestDetails.getStartDateTime() != null && transcriptionRequestDetails.getEndDateTime() != null) {
+            List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEnd(
+                transcriptionRequestDetails.getHearingId(),
+                getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
+                transcriptionRequestDetails.getStartDateTime(),
+                transcriptionRequestDetails.getEndDateTime()
+            );
+            if (!matchingTranscriptions.isEmpty()) {
+                String errorDetail = "{ \"transcription_id\": " + matchingTranscriptions.get(0).getId().toString() + " }";
+                throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION, errorDetail);
+            }
         }
 
         TranscriptionEntity transcription = saveTranscription(
