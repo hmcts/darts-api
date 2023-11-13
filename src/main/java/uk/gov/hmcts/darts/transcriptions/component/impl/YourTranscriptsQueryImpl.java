@@ -31,7 +31,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     cth.courthouse_name,
                     hea.hearing_date,
                     trt.description as transcription_type,
-                    trs.status_type as status,
+                    trs.display_name as status,
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
@@ -79,7 +79,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     cth.courthouse_name,
                     tra.hearing_date,
                     trt.description as transcription_type,
-                    trs.status_type as status,
+                    trs.display_name as status,
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
@@ -132,7 +132,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     cth.courthouse_name,
                     hea.hearing_date,
                     trt.description as transcription_type,
-                    trs.status_type as status,
+                    trs.display_name as status,
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
@@ -200,7 +200,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     cth.courthouse_name,
                     hearing_date,
                     trt.description as transcription_type,
-                    trs.status_type as status,
+                    trs.display_name as status,
                     tru.description as urgency,
                     trw.workflow_ts as requested_ts
                 FROM
