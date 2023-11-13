@@ -557,6 +557,6 @@ INSERT INTO transcription_type (trt_id, description, display_state) VALUES (999,
 INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (1, 'Standard', false);
 INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (2, 'Overnight', true);
 INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (3, 'Other', false);
-INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (4, '3 working days', true);
-INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (5, '7 working days', true);
-INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (6, '12 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (4, 'Up to 3 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (5, 'Up to 7 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (6, 'Up to 12 working days', true);
