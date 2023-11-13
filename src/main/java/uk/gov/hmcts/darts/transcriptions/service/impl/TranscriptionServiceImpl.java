@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,6 +62,7 @@ import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -137,19 +137,28 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
 
-        TranscriptionEntity transcription;
-        try {
-            transcription = saveTranscription(
-                userAccount,
-                transcriptionRequestDetails,
-                transcriptionStatus,
+        if (transcriptionRequestDetails.getStartDateTime() != null && transcriptionRequestDetails.getEndDateTime() != null) {
+            List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEnd(
+                transcriptionRequestDetails.getHearingId(),
                 getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
-                getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId()),
-                isManual
+                transcriptionRequestDetails.getStartDateTime(),
+                transcriptionRequestDetails.getEndDateTime()
             );
-        } catch (DataIntegrityViolationException e) {
-            throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION);
+            if (!matchingTranscriptions.isEmpty()) {
+                Integer duplicateTranscriptionId = matchingTranscriptions.get(0).getId();
+                throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
+                                            Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionId));
+            }
         }
+
+        TranscriptionEntity transcription = saveTranscription(
+            userAccount,
+            transcriptionRequestDetails,
+            transcriptionStatus,
+            getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
+            getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId()),
+            isManual
+        );
 
         transcription.getTranscriptionWorkflowEntities().add(
             saveTranscriptionWorkflow(
