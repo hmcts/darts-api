@@ -181,7 +181,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     void shouldSetPlaybackFileNameAndFormat() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(1, TEST_FILENAME, AudioRequestOutputFormat.ZIP);
 

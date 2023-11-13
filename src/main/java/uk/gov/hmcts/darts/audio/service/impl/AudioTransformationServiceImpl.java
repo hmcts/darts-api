@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,6 +168,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
             hearingEntity = mediaRequestEntity.getHearing();
 
+            AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
+            if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
+                audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
+            final String fileName = hearingEntity.getCourtCase().getCaseNumber() + "_" + hearingEntity.getHearingDate().format(formatter);
+
             List<MediaEntity> mediaEntitiesForRequest = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForRequest.isEmpty()) {
@@ -190,6 +198,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
             }
 
+            mediaRequestService.updateAudioRequestCompleted(requestId, fileName, audioRequestOutputFormat);
+
         } catch (Exception e) {
             log.error(
                 "Exception occurred for request id {}. Exception message: {}",
@@ -206,13 +216,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
 
-        AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
-        if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
-            audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
-        }
-        String fileName = mediaRequestEntity.getHearing().getCourtCase().getCaseNumber() + "_" + mediaRequestEntity.getHearing().getHearingDate();
-
-        mediaRequestService.updateAudioRequestCompleted(requestId, fileName, audioRequestOutputFormat);
         log.debug(
             "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
             requestId,

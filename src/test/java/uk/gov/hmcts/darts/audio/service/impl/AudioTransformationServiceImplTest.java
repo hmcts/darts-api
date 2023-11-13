@@ -7,6 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -15,13 +17,16 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceImplTest {
@@ -45,6 +50,16 @@ class AudioTransformationServiceImplTest {
 
     @InjectMocks
     private AudioTransformationServiceImpl audioTransformationService;
+
+    @Mock
+    private MediaRequestServiceImpl mockMediaRequestService;
+
+    @Mock
+    private MediaRequestEntity mockMediaRequestEntity;
+
+    @Mock
+    private HearingEntity mockHearing;
+
 
     @Test
     void testGetAudioBlobData() {
@@ -103,4 +118,28 @@ class AudioTransformationServiceImplTest {
         verify(mockTransientObjectDirectoryService).saveTransientDataLocation(mediaRequestEntity, BLOB_LOCATION);
     }
 
+    @Test
+    void testHandleKedaInvocationForMediaRequestsRequestTypeNull() {
+
+        when(mockMediaRequestEntity.getId()).thenReturn(1);
+        when(mockMediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN))
+            .thenReturn(Optional.of(mockMediaRequestEntity));
+        when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
+        when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
+
+        assertThrows(NullPointerException.class, () -> audioTransformationService.handleKedaInvocationForMediaRequests());
+    }
+
+    @Test
+    void testHandleKedaInvocationForMediaRequestsCaseNull() {
+        when(mockMediaRequestEntity.getId()).thenReturn(1);
+        when(mockMediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN))
+            .thenReturn(Optional.of(mockMediaRequestEntity));
+        when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
+        when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
+        when(mockMediaRequestEntity.getRequestType()).thenReturn(DOWNLOAD);
+
+        assertThrows(NullPointerException.class, () -> audioTransformationService.handleKedaInvocationForMediaRequests());
+
+    }
 }
