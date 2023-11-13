@@ -120,6 +120,11 @@ darts:
     active-directory-b2c-external-user-signin-policy: "B2C_1_darts_externaluser_signin"
     active-directory-b2c-external-user-passwordreset-policy: "B2C_1_darts_externaluser_password_reset"
     active-directory-justice-auth-uri: https://login.microsoftonline.com
+  data-management:
+    retention-period:
+      inbound:
+        arm-minimum: 24
+        user-id: -5
   daily-list:
     housekeeping:
       enabled: true
