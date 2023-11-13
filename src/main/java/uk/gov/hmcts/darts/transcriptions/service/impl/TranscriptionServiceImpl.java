@@ -62,6 +62,7 @@ import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -144,8 +145,9 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 transcriptionRequestDetails.getEndDateTime()
             );
             if (!matchingTranscriptions.isEmpty()) {
-                String errorDetail = "{ \"transcription_id\": " + matchingTranscriptions.get(0).getId().toString() + " }";
-                throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION, errorDetail);
+                String duplicateTranscriptionId = matchingTranscriptions.get(0).getId().toString();
+                throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
+                                            Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionId));
             }
         }
 

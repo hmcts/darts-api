@@ -207,7 +207,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilderDup)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
-            .andExpect(jsonPath("$.detail", matchesRegex("\\{ \\\"transcription_id\\\": [0-9]+ \\}")))
+            .andExpect(jsonPath("$.duplicate_transcription_id", matchesRegex("[0-9]+")))
             .andReturn();
     }
 
