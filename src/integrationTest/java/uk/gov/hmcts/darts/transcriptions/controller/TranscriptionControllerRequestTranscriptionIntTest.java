@@ -42,6 +42,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -204,7 +205,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilderDup)
-            .andExpect(status().is4xxClientError())
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
+            .andExpect(jsonPath("$.detail", matchesRegex("\\{ \\\"transcription_id\\\": [0-9]+ \\}")))
             .andReturn();
 
     }
