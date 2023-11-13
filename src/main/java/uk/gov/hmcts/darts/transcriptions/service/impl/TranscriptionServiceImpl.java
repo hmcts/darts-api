@@ -137,7 +137,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
 
-        if (transcriptionRequestDetails.getStartDateTime() != null && transcriptionRequestDetails.getEndDateTime() != null) {
+        if (transcriptionRequestDetails.getStartDateTime() != null
+            && transcriptionRequestDetails.getEndDateTime() != null) {
             List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEnd(
                 transcriptionRequestDetails.getHearingId(),
                 getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
@@ -146,8 +147,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             );
             if (!matchingTranscriptions.isEmpty()) {
                 Integer duplicateTranscriptionId = matchingTranscriptions.get(0).getId();
-                throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
-                                            Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionId));
+                throw new DartsApiException(
+                    TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
+                    Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionId)
+                );
             }
         }
 
@@ -430,7 +433,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     @Transactional
-    @SuppressWarnings({"java:S4790"})
     public AttachTranscriptResponse attachTranscript(Integer transcriptionId,
                                                      MultipartFile transcript) {
 

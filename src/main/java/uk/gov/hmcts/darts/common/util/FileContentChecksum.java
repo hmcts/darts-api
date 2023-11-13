@@ -6,6 +6,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 
 @Component
+@SuppressWarnings({"java:S4790"})
 public class FileContentChecksum {
 
     /**
