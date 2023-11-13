@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
@@ -70,8 +71,6 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
-import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.ACCEPT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.AUTHORISE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.COMPLETE_TRANSCRIPTION;
@@ -126,6 +125,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private final WorkflowValidator workflowValidator;
     private final TranscriptFileValidator transcriptFileValidator;
+    private final FileContentChecksum fileContentChecksum;
 
     private final YourTranscriptsQuery yourTranscriptsQuery;
 
@@ -439,10 +439,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         final var updateTranscription = updateTranscription(transcriptionId, new UpdateTranscription(COMPLETE.getId()));
 
         final UUID externalLocation;
-        final String checksum; // equivalent to the CONTENT-MD5 tag value as a base64 encoded representation of the binary MD5 hash value
+        final String checksum;
         try {
             BinaryData binaryData = BinaryData.fromStream(transcript.getInputStream());
-            checksum = new String(encodeBase64(md5(binaryData.toBytes())));
+            checksum = fileContentChecksum.calculate(binaryData.toBytes());
             externalLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_ATTACH_TRANSCRIPT, e);
@@ -456,6 +456,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setFileName(transcript.getOriginalFilename());
         transcriptionDocumentEntity.setFileType(transcript.getContentType());
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
+        transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
 
         final var externalObjectDirectoryEntity = saveExternalObjectDirectory(
@@ -488,7 +489,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             .stream()
             .filter(externalObjectDirectoryEntity1 ->
                         UNSTRUCTURED.getId().equals(externalObjectDirectoryEntity1.getExternalLocationType().getId())
-                            && nonNull(externalObjectDirectoryEntity1.getExternalLocation()))
+                        && nonNull(externalObjectDirectoryEntity1.getExternalLocation()))
             .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
             .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
