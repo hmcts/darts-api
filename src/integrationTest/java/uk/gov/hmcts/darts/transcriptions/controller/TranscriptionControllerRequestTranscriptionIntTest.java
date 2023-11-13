@@ -41,6 +41,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -204,9 +205,38 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilderDup)
-            .andExpect(status().is4xxClientError())
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
+            .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
+            .andReturn();
+    }
+
+    @Test
+    @Order(13)
+    void transcriptionRequestWithDuplicateValuesWithNoTimes() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
             .andReturn();
 
+        MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilderDup)
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
     @Test
