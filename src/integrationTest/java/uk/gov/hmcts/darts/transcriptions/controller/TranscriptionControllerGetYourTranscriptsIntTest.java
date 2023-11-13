@@ -88,7 +88,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest {
             .andExpect(jsonPath("$.requester_transcriptions[0].urgency", is("Standard")))
             .andExpect(jsonPath("$.requester_transcriptions[0].requested_ts").isString())
 
-            .andExpect(jsonPath("$.approver_transcriptions").doesNotExist());
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
     @Test
@@ -101,8 +101,8 @@ class TranscriptionControllerGetYourTranscriptsIntTest {
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.requester_transcriptions").doesNotExist())
-            .andExpect(jsonPath("$.approver_transcriptions").doesNotExist());
+            .andExpect(jsonPath("$.requester_transcriptions").isEmpty())
+            .andExpect(jsonPath("$.approver_transcriptions").isEmpty());
     }
 
     @Test

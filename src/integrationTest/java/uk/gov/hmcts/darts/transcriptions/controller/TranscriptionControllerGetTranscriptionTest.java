@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,16 +32,18 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @AutoConfigureMockMvc
 @Transactional
 class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
+
     private static final String ENDPOINT_URL_TRANSCRIPTION = "/transcriptions/{transcription_id}";
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    private UserIdentity mockUserIdentity;
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
-    private static final List<String> TAGS_TO_IGNORE = List.of("case_id", "hea_id");
+    private static final List<String> TAGS_TO_IGNORE = List.of("case_id");
+
+    @Autowired
+    private MockMvc mockMvc;
+    @MockBean
+    private UserIdentity mockUserIdentity;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +54,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
             SOME_DATE_TIME.toLocalDate()
         );
         CourthouseEntity courthouseEntity = hearingEntity.getCourtroom().getCourthouse();
-        JSONAssert.assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName(), JSONCompareMode.NON_EXTENSIBLE);
+        assertEquals(SOME_COURTHOUSE, courthouseEntity.getCourthouseName());
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(courthouseEntity);
@@ -65,10 +68,13 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
         transcription.setStartTime(SOME_DATE_TIME);
         transcription.setEndTime(SOME_DATE_TIME);
-        dartsDatabase.save(transcription);
+        transcription = dartsDatabase.save(transcription);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
-        String expected = TestUtils.removeTags(TAGS_TO_IGNORE, getContentsFromFile("tests/transcriptions/transcription/expectedResponse.json"));
+        String expected = TestUtils.removeTags(TAGS_TO_IGNORE,
+                                               getContentsFromFile(
+                                                   "tests/transcriptions/transcription/expectedResponse.json")
+        );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);

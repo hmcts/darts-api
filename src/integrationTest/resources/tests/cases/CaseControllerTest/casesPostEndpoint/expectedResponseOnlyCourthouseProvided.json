@@ -1,4 +1,8 @@
 {
   "courthouse": "SWANSEA",
-  "case_number": "CASE1001"
+  "case_number": "CASE1001",
+  "defendants": [],
+  "judges": [],
+  "prosecutors": [],
+  "defenders": []
 }

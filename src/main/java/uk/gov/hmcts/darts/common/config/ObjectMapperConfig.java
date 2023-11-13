@@ -11,6 +11,7 @@ import org.zalando.problem.jackson.ProblemModule;
 
 @Configuration
 public class ObjectMapperConfig {
+
     @Bean
     @Primary
     public ObjectMapper objectMapper() {
@@ -18,7 +19,7 @@ public class ObjectMapperConfig {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.registerModule(new ProblemModule());
 
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 

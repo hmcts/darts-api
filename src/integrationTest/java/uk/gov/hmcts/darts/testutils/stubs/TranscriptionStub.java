@@ -101,7 +101,7 @@ public class TranscriptionStub {
         transcription.setTranscriptionUrgency(transcriptionUrgency);
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
-        transcription.setIsManual(false);
+        transcription.setIsManual(true);
         return transcriptionRepository.saveAndFlush(transcription);
     }
 
