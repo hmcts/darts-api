@@ -24,7 +24,7 @@ public interface DartsApiTrait extends AdviceTrait {
             .withTitle(error.getTitle())
             .withDetail(exception.getDetail());
 
-        for (Entry<String, String> stringStringEntry : exception.getCustomProperties().entrySet()) {
+        for (Entry<String, Object> stringStringEntry : exception.getCustomProperties().entrySet()) {
             problemBuilder.with(stringStringEntry.getKey(), stringStringEntry.getValue());
         }
 

@@ -13,7 +13,7 @@ public class DartsApiException extends RuntimeException {
 
     private final DartsApiError error;
     private final String detail;
-    private final HashMap<String, String> customProperties = new HashMap<>();
+    private final HashMap<String, Object> customProperties = new HashMap<>();
 
     public DartsApiException(DartsApiError error) {
         super(error.getTitle());
@@ -36,7 +36,7 @@ public class DartsApiException extends RuntimeException {
         this.detail = detail;
     }
 
-    public DartsApiException(DartsApiError error, Map<String, String> customProperties) {
+    public DartsApiException(DartsApiError error, Map<String, Object> customProperties) {
         super(error.getTitle());
 
         this.error = error;
@@ -44,7 +44,7 @@ public class DartsApiException extends RuntimeException {
         this.customProperties.putAll(customProperties);
     }
 
-    public DartsApiException(DartsApiError error, String detail, Map<String, String> customProperties) {
+    public DartsApiException(DartsApiError error, String detail, Map<String, Object> customProperties) {
         super(String.format("%s. %s", error.getTitle(), detail));
 
         this.error = error;

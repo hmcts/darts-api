@@ -145,7 +145,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 transcriptionRequestDetails.getEndDateTime()
             );
             if (!matchingTranscriptions.isEmpty()) {
-                String duplicateTranscriptionId = matchingTranscriptions.get(0).getId().toString();
+                Integer duplicateTranscriptionId = matchingTranscriptions.get(0).getId();
                 throw new DartsApiException(TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
                                             Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionId));
             }
