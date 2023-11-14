@@ -6,5 +6,5 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 public interface AuditApi {
 
-    public void recordAudit(AuditActivityEnum activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase);
+    void recordAudit(AuditActivityEnum activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase);
 }

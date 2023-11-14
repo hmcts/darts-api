@@ -13,18 +13,12 @@ import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity_;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.AuditApiError;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AuditActivityRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
-import uk.gov.hmcts.darts.common.repository.HearingRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -32,23 +26,6 @@ import java.util.Optional;
 public class AuditServiceImpl implements AuditService {
     private AuditActivityRepository auditActivityRepository;
     private AuditRepository auditRepository;
-    private UserAccountRepository userAccountRepository;
-    private HearingRepository hearingRepository;
-
-
-    @Transactional
-    @Override
-    public void recordAuditRequestAudio(AuditActivityEnum activity, Integer userId, Integer hearingId) {
-        Optional<HearingEntity> hearing = hearingRepository.findById(
-            hearingId);
-
-        Optional<UserAccountEntity> user = userAccountRepository.findById(userId);
-        if (hearing.isPresent() && user.isPresent()) {
-            recordAudit(activity, user.get(), hearing.get().getCourtCase());
-        } else {
-            throw new DartsApiException(AuditApiError.NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT);
-        }
-    }
 
     @Transactional
     @Override

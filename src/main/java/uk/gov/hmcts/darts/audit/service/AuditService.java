@@ -11,8 +11,6 @@ import java.util.List;
 
 public interface AuditService {
 
-    void recordAuditRequestAudio(AuditActivityEnum activity, Integer userAccountEntity, Integer courtCase);
-
     @Transactional
     void recordAudit(AuditActivityEnum activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase);
 
