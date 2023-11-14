@@ -9,7 +9,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -83,7 +83,7 @@ class TranscriptionServiceImplTest {
     @Mock
     private HearingsService mockHearingsService;
     @Mock
-    private AuditService mockAuditService;
+    private AuditApi mockAuditApi;
 
     @Mock
     private UserIdentity mockUserIdentity;
@@ -164,7 +164,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
@@ -214,7 +214,7 @@ class TranscriptionServiceImplTest {
 
         assertTranscriptionComments();
 
-        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -244,7 +244,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer hearingId = null;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
@@ -291,7 +291,7 @@ class TranscriptionServiceImplTest {
 
         assertTranscriptionComments();
 
-        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -321,7 +321,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         Integer caseId = null;
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
@@ -372,7 +372,7 @@ class TranscriptionServiceImplTest {
 
         assertTranscriptionComments();
 
-        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     @Test
@@ -405,7 +405,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
-        doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        doNothing().when(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
 
         OffsetDateTime startDateTime = null;
         OffsetDateTime endDateTime = null;
@@ -456,7 +456,7 @@ class TranscriptionServiceImplTest {
         assertTranscriptionComments();
 
 
-        verify(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
+        verify(mockAuditApi).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
     }
 
     private void assertTranscriptionComments() {

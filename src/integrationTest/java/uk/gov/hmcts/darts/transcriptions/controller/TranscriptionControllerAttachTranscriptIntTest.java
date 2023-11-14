@@ -16,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -75,7 +75,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
     @MockBean
     private MultipartProperties mockMultipartProperties;
     @MockBean
-    private AuditService mockAuditService;
+    private AuditApi mockAuditApi;
 
     private Integer transcriptionId;
     private Integer testUserId;
@@ -128,7 +128,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofMegabytes(10));
         when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofMegabytes(10));
 
-        doNothing().when(mockAuditService)
+        doNothing().when(mockAuditApi)
             .recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
@@ -159,7 +159,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -191,7 +191,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -226,7 +226,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -294,8 +294,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
         assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
 
-        verify(mockAuditService).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockAuditService).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -360,8 +360,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
         assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
 
-        verify(mockAuditService).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockAuditService).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
 }

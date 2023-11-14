@@ -44,12 +44,7 @@ class AuditServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        auditServiceImpl = new AuditServiceImpl(
-            auditActivityRepository,
-            auditRepository,
-            userAccountRepository,
-            hearingRepository
-        );
+        auditServiceImpl = new AuditServiceImpl(auditActivityRepository, auditRepository);
     }
 
     @Test

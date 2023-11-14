@@ -66,7 +66,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final DataManagementApiImpl dataManagementApi;
     private final NotificationApi notificationApi;
-
     private final AuditApi auditApi;
 
     @Override

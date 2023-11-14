@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -73,7 +73,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     @MockBean
     private UserIdentity mockUserIdentity;
     @MockBean
-    private AuditService mockAuditService;
+    private AuditApi mockAuditApi;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -99,7 +99,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
-        doNothing().when(mockAuditService)
+        doNothing().when(mockAuditApi)
             .recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
@@ -150,7 +150,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         assertTrue(templateList.contains("request_to_transcriber"));
         assertTrue(templateList.contains("transcription_request_approved"));
 
-        verify(mockAuditService).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -195,7 +195,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         );
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
-        verify(mockAuditService).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -221,7 +221,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         verify(authorisation).authoriseByTranscriptionId(
             -1, Set.of(APPROVER, TRANSCRIBER)
         );
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -247,7 +247,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         verify(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,7 +16,10 @@ import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -30,10 +34,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,6 +55,9 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     @MockBean
     private Authorisation authorisation;
 
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
@@ -69,6 +73,12 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     @Autowired
     private AuditService auditService;
 
+    @BeforeEach
+    void setUp() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+    }
 
     @Test
     void audioRequestDownloadShouldDownloadFromOutboundStorageAndReturnSuccess() throws Exception {
