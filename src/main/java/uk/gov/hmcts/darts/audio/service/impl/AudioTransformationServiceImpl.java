@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -38,6 +39,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +47,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
@@ -166,6 +168,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity = mediaRequestService.getMediaRequestById(requestId);
             hearingEntity = mediaRequestEntity.getHearing();
 
+            AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
+            if (mediaRequestEntity.getRequestType().equals(DOWNLOAD)) {
+                audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
+            final String fileName = hearingEntity.getCourtCase().getCaseNumber() + "_" + hearingEntity.getHearingDate().format(formatter);
+
             List<MediaEntity> mediaEntitiesForRequest = getMediaMetadata(hearingEntity.getId());
 
             if (mediaEntitiesForRequest.isEmpty()) {
@@ -189,6 +198,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
             }
 
+            mediaRequestService.updateAudioRequestCompleted(requestId, fileName, audioRequestOutputFormat);
+
         } catch (Exception e) {
             log.error(
                 "Exception occurred for request id {}. Exception message: {}",
@@ -205,7 +216,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
 
-        mediaRequestService.updateAudioRequestStatus(mediaRequestEntity.getId(), COMPLETED);
         log.debug(
             "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
             requestId,
@@ -251,7 +261,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         var requestType = mediaRequestEntity.getRequestType();
 
-        if (AudioRequestType.DOWNLOAD.equals(requestType)) {
+        if (DOWNLOAD.equals(requestType)) {
             return handleDownload(downloadedMedias, mediaRequestEntity);
         } else if (AudioRequestType.PLAYBACK.equals(requestType)) {
             return handlePlayback(downloadedMedias, mediaRequestEntity);
