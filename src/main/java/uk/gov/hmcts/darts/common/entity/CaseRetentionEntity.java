@@ -12,7 +12,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
-public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
+public class CaseRetentionEntity extends CreatedBaseEntity {
 
 
     public static final String ID = "car_id";
@@ -38,13 +38,32 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     private CourtCaseEntity courtCase;
 
     @ManyToOne
-    @JoinColumn(name = "rtp_id")
-    private RetentionPolicyEntity retentionPolicy;
+    @JoinColumn(name = "rpt_id")
+    private RetentionPolicyTypeEntity retentionPolicyType;
+
+    @ManyToOne
+    @JoinColumn(name = "cmr_id")
+    private CaseManagementRetentionEntity caseManagementRetention;
+
+    @Column(name = "total_sentence")
+    private String totalSentence;
 
     @Column(name = "retain_until_ts")
     private OffsetDateTime retainUntil;
 
-    @Column(name = "manual_override")
-    private boolean manualOverride;
+    @Column(name = "retain_until_applied_on_ts")
+    private OffsetDateTime retainUntilAppliedOn;
+
+    @Column(name = "current_state")
+    private String currentState;
+
+    @Column(name = "comments")
+    private String comments;
+
+    @Column(name = "retention_object_id")
+    private String retentionObjectId;
+
+    @Column(name = "submitted_ts")
+    private OffsetDateTime submitted;
 
 }

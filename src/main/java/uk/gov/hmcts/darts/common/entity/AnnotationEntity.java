@@ -53,4 +53,8 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "version_label")
     private String legacyVersionLabel;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_owner", nullable = false)
+    private UserAccountEntity currentOwner;
 }

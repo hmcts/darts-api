@@ -28,11 +28,12 @@ import java.util.List;
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
-public class CourtCaseEntity extends CreatedModifiedBaseEntity {
+public class  CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public static final String COURT_CASE = "courtCase";
     public static final String VERSION_LABEL = "version_label";
-    public static final String RETAIN_UNTIL_TS = "retain_until_ts";
+    public static final String RETENTION_APPLIES_FROM_TS = "retention_applies_from_ts";
+    public static final String END_OF_SENTENCE_TS = "end_of_sentence_ts";
     public static final String CASE_CLOSED_TS = "case_closed_ts";
     public static final String INTERPRETER_USED = "interpreter_used";
     public static final String CASE_CLOSED = "case_closed";
@@ -84,9 +85,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = COURT_CASE, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<DefenceEntity> defenceList = new ArrayList<>();
 
-    @Column(name = RETAIN_UNTIL_TS)
-    private OffsetDateTime retainUntilTimestamp;
-
     @Column(name = VERSION_LABEL, length = 32)
     private String legacyVersionLabel;
 
@@ -104,6 +102,12 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         joinColumns = {@JoinColumn(name = "cas_id")},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
+
+    @Column(name = RETENTION_APPLIES_FROM_TS)
+    private OffsetDateTime retentionAppliesFromTimestamp;
+
+    @Column(name = END_OF_SENTENCE_TS)
+    private OffsetDateTime endOfSentenceTimestamp;
 
     public void addHearing(HearingEntity hearing) {
         if (hearings.stream().noneMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()))) {
