@@ -15,7 +15,8 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -76,7 +77,9 @@ class MediaRequestServiceImplTest {
     @Mock
     private NotificationApi notificationApi;
     @Mock
-    private AuditService auditService;
+    private AuditApi auditApi;
+    @Mock
+    private UserIdentity userIdentity;
 
     private HearingEntity mockHearingEntity;
     private MediaRequestEntity mockMediaRequestEntity;
@@ -101,6 +104,10 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setCreatedBy(mockUserAccountEntity);
         mockMediaRequestEntity.setLastModifiedDateTime(now);
         mockMediaRequestEntity.setLastModifiedBy(mockUserAccountEntity);
+
+        var testUser = new UserAccountEntity();
+        testUser.setEmailAddress("test.user@example.com");
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
@@ -242,7 +249,7 @@ class MediaRequestServiceImplTest {
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
-        doNothing().when(auditService).recordAudit(any(), any(), any());
+        doNothing().when(auditApi).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
@@ -356,7 +363,7 @@ class MediaRequestServiceImplTest {
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
-        doNothing().when(auditService).recordAudit(any(), any(), any());
+        doNothing().when(auditApi).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));

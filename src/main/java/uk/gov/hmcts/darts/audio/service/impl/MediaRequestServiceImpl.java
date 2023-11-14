@@ -23,8 +23,9 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -59,13 +60,14 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     private final HearingRepository hearingRepository;
     private final UserAccountRepository userAccountRepository;
+    private final UserIdentity userIdentity;
     private final MediaRequestRepository mediaRequestRepository;
     private final EntityManager entityManager;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final DataManagementApiImpl dataManagementApi;
     private final NotificationApi notificationApi;
 
-    private final AuditService auditService;
+    private final AuditApi auditApi;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -258,9 +260,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
         }
 
-        auditService.recordAudit(
+        auditApi.recordAudit(
             auditActivityEnum,
-            mediaRequestEntity.getRequestor(),
+            this.getUserAccount(),
             mediaRequestEntity.getHearing().getCourtCase()
         );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
@@ -280,5 +282,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestEntity.setOutputFilename(fileName);
         mediaRequestEntity.setOutputFormat(audioRequestOutputFormat);
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+    }
+
+    private UserAccountEntity getUserAccount() {
+        return userIdentity.getUserAccount();
     }
 }
