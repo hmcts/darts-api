@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
@@ -32,12 +33,10 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final SystemUserHelper systemUserHelper;
 
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
-
-    @Value("${darts.automated.task.system-user.housekeeping.guid}")
-    String userGuid;
 
     @Transactional
     public void markForDeletion() {
@@ -68,7 +67,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
         ObjectDirectoryStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
             MARKED_FOR_DELETION.getId());
 
-        UserAccountEntity user = userAccountRepository.findSystemUser(userGuid);
+        UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));
         externalObjectDirectoryRepository.updateStatus(
             deletionStatus,
             user,
