@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audit.cofig;
+package uk.gov.hmcts.darts.audit.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

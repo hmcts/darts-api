@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audit.service;
+package uk.gov.hmcts.darts.audit.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
+import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity_;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity_;
