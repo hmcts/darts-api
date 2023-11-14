@@ -32,7 +32,7 @@ public class TranscriptionMapper {
             transcript.setHearingDate(hearing.getHearingDate());
         }
         transcript.setType(transcriptionEntity.getTranscriptionType().getDescription());
-        transcript.setRequestedOn(transcriptionEntity.getCreatedDateTime().toLocalDate());
+        transcript.setRequestedOn(transcriptionEntity.getCreatedDateTime());
         transcript.setRequestedByName(getRequestedBy(transcriptionEntity));
         transcript.setStatus(transcriptionEntity.getTranscriptionStatus().getStatusType());
         return transcript;
