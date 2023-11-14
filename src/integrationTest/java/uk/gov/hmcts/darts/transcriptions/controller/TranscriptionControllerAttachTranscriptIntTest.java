@@ -292,6 +292,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
         assertEquals(INBOUND.getId(), externalObjectDirectoryEntity.getExternalLocationType().getId());
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
+        assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
 
         verify(mockAuditService).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockAuditService).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
@@ -357,6 +358,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertEquals(STORED.getId(), externalObjectDirectoryEntity.getStatus().getId());
         assertEquals(INBOUND.getId(), externalObjectDirectoryEntity.getExternalLocationType().getId());
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
+        assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
 
         verify(mockAuditService).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
         verify(mockAuditService).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
