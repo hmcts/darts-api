@@ -17,8 +17,6 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
-import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
@@ -28,7 +26,6 @@ import java.util.List;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
-import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
@@ -44,21 +41,6 @@ public class AudioController implements AudioApi {
     private final AudioService audioService;
     private final AudioTransformationService audioTransformationService;
     private final AudioResponseMapper audioResponseMapper;
-
-    // TODO Used where audio was moved to audio-requests and should be removed when frontend is updated
-    private final AudioRequestsController audioRequestsController;
-
-    public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
-        return audioRequestsController.addAudioRequest(audioRequestDetails);
-    }
-
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {TRANSCRIBER})
-    public ResponseEntity<Resource> download(Integer mediaRequestId) {
-        return audioRequestsController.download(mediaRequestId);
-    }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -85,7 +67,8 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
-    public ResponseEntity<byte[]> preview2(Integer mediaId, @RequestHeader(value = "Range", required = false) String httpRangeList) {
+    public ResponseEntity<byte[]> preview2(Integer mediaId,
+                                           @RequestHeader(value = "Range", required = false) String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
 
         byte[] bytes = IOUtils.toByteArray(audioMediaFile);
