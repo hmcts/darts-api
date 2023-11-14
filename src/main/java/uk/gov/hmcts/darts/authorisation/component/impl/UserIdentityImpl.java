@@ -97,12 +97,13 @@ public class UserIdentityImpl implements UserIdentity {
     public boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles) {
         boolean userHasGlobalAccess = false;
         String emailAddress = null;
+        String guid = getGuidFromToken();
+
         try {
             emailAddress = getEmailAddressFromToken();
         } catch (IllegalStateException e) {
             log.debug("Unable to get email address from token: {}", e.getMessage());
         }
-        String guid = guid = getGuidFromToken();
 
         if (nonNull(guid) || nonNull(emailAddress)) {
             List<UserAccountEntity> userAccountEntities =

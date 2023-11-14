@@ -142,9 +142,10 @@ public class AuthorisationServiceImpl implements AuthorisationService {
         UserAccountEntity userAccount = userIdentity.getUserAccount();
         if (nonNull(userAccount)) {
             String emailAddress = userAccount.getEmailAddress();
-            List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddress(
+            List<CourthouseEntity> authorisedCourthouses = courthouseRepository.findAuthorisedCourthousesForEmailAddressOrGuid(
                 emailAddress,
-                securityRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet())
+                securityRoles.stream().map(SecurityRoleEnum::getId).collect(Collectors.toUnmodifiableSet()),
+                userAccount.getAccountGuid()
             );
 
             if (new HashSet<>(authorisedCourthouses).containsAll(courthouses)) {
