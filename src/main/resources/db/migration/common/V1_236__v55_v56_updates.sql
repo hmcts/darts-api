@@ -2,22 +2,18 @@ ALTER TABLE court_case DROP COLUMN retain_until_ts;
 ALTER TABLE court_case ADD COLUMN retention_applies_from_ts    	TIMESTAMP WITH TIME ZONE;
 ALTER TABLE court_case ADD COLUMN end_of_sentence_ts    		    TIMESTAMP WITH TIME ZONE;
 
-
--- need to check there is still no data before merge, do we need cascade for no data
 DROP TABLE case_retention cascade;
 DROP TABLE retention_policy;
 DROP TABLE case_retention_event;
 
 DROP SEQUENCE car_seq;
 
--- nothing in annotation staging, check before merge
 ALTER TABLE annotation ADD COLUMN current_owner    				INTEGER		NOT NULL;
 ALTER TABLE annotation
 ADD CONSTRAINT annotation_current_owner_fk
 FOREIGN KEY (current_owner) REFERENCES user_account(usr_id);
 
--- existing data in file size, they should convert but will it do it automatically? Create entries in media
-ALTER TABLE media ALTER COLUMN file_size type BIGINT;--do this again with some data
+ALTER TABLE media ALTER COLUMN file_size type BIGINT;
 
 ALTER TABLE  media DROP COLUMN met_id;
 DROP TABLE media_type;
