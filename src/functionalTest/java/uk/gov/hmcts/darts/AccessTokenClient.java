@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -18,6 +20,8 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@Slf4j
+@ToString
 public class AccessTokenClient {
 
     private final String tokenUri;
@@ -26,6 +30,7 @@ public class AccessTokenClient {
     private final String password;
     private final String clientId;
     private final String clientSecret;
+
 
     @SneakyThrows
     public String getAccessToken() {
@@ -36,7 +41,7 @@ public class AccessTokenClient {
                                             "username", username,
                                             "password", password
         );
-
+        log.info("username {}", username);
         HttpRequest request = HttpRequest.newBuilder(URI.create(tokenUri))
             .POST(encode(params))
             .header("Content-Type", "application/x-www-form-urlencoded")
