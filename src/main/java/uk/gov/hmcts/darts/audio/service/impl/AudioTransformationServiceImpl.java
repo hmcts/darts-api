@@ -143,8 +143,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public void handleKedaInvocationForMediaRequests() {
-        mediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN)
-            .ifPresent(openMediaRequests -> processAudioRequest(openMediaRequests.getId()));
+        var openRequests = mediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN);
+
+        if (openRequests.isEmpty()) {
+            log.info("No open requests found for ATS to process.");
+        } else {
+            openRequests.ifPresent(openMediaRequests -> processAudioRequest(openMediaRequests.getId()));
+        }
     }
 
     /**
