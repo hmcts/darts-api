@@ -107,4 +107,7 @@ ALTER TABLE security_group ADD COLUMN use_interpreter  BOOLEAN		NOT null default
 ALTER TABLE security_group ALTER COLUMN global_access  SET default FALSE;
 
 -- v56
-ALTER TABLE transcription ADD COLUMN  hide_request_from_requestor BOOLEAN NOT NULL;
+ALTER TABLE transcription ADD COLUMN  hide_request_from_requestor BOOLEAN;
+UPDATE transcription
+set hide_request_from_requestor=false;
+ALTER TABLE transcription ALTER COLUMN hide_request_from_requestor SET NOT NULL;
