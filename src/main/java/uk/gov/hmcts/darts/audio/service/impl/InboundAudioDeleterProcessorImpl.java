@@ -36,8 +36,8 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
     @Value("${darts.data-management.retention-period.inbound.arm-minimum}")
     int hoursInArm;
 
-    @Value("${darts.data-management.retention-period.inbound.user-id}")
-    int userId;
+    @Value("${darts.automated.task.system-user.housekeeping.guid}")
+    String userGuid;
 
     @Transactional
     public void markForDeletion() {
@@ -68,7 +68,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
         ObjectDirectoryStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
             MARKED_FOR_DELETION.getId());
 
-        UserAccountEntity user = userAccountRepository.getReferenceById(userId);
+        UserAccountEntity user = userAccountRepository.findSystemUser(userGuid);
         externalObjectDirectoryRepository.updateStatus(
             deletionStatus,
             user,

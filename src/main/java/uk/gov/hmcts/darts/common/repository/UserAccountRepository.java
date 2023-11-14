@@ -32,6 +32,15 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         """)
     List<UserAccountEntity> findByRoleAndCourthouse(int securityRole, CourthouseEntity courthouse);
 
+    @Query("""
+        SELECT userAccount
+        FROM UserAccountEntity userAccount
+        WHERE userAccount.state = 1
+        AND userAccount.isSystemUser = true
+        AND userAccount.accountGuid = :uuid
+        """)
+    UserAccountEntity findSystemUser(String uuid);
+
 
     @Query("""
         SELECT DISTINCT userAccount
