@@ -104,10 +104,6 @@ class MediaRequestServiceImplTest {
         mockMediaRequestEntity.setCreatedBy(mockUserAccountEntity);
         mockMediaRequestEntity.setLastModifiedDateTime(now);
         mockMediaRequestEntity.setLastModifiedBy(mockUserAccountEntity);
-
-        var testUser = new UserAccountEntity();
-        testUser.setEmailAddress("test.user@example.com");
-        when(userIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
