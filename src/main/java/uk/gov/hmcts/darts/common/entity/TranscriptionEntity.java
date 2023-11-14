@@ -79,6 +79,9 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "is_manual", nullable = false)
     private Boolean isManual;
 
+    @Column(name = "hide_request_from_requestor", nullable = false)
+    private Boolean hideRequestFromRequestor;
+
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
     private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
 
