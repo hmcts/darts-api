@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.time.OffsetDateTime;
 
-import static uk.gov.hmcts.darts.common.entity.MediaEntity.mediaTypeDefault;
+import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -27,7 +27,7 @@ public class MediaTestData {
         media.setChecksum("a-checksum");
         media.setFileSize(1000L);
         media.setMediaFormat("mp3");
-        media.setMediaType(mediaTypeDefault);
+        media.setMediaType(MEDIA_TYPE_DEFAULT);
         return media;
     }
 
@@ -41,7 +41,7 @@ public class MediaTestData {
         mediaEntity.setChecksum("a-checksum");
         mediaEntity.setFileSize(1000L);
         mediaEntity.setMediaFormat("mp3");
-        mediaEntity.setMediaType(mediaTypeDefault);
+        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
         return mediaEntity;
     }
 
@@ -56,7 +56,7 @@ public class MediaTestData {
         mediaEntity.setMediaFile("a-media-file");
         mediaEntity.setFileSize(1000L);
         mediaEntity.setChecksum("a-checksum");
-        mediaEntity.setMediaType(mediaTypeDefault);
+        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
         return mediaEntity;
     }
 }

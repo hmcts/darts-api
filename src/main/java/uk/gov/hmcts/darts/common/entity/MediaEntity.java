@@ -28,7 +28,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class MediaEntity extends CreatedModifiedBaseEntity {
-    public static final Character mediaTypeDefault = 'A';
+    public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id
     @Column(name = "med_id")

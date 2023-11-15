@@ -100,7 +100,6 @@ FOREIGN KEY (cmr_id) REFERENCES case_management_retention(cmr_id);
 
 -- Security
 ALTER TABLE security_group ADD COLUMN use_interpreter  BOOLEAN		NOT null default FALSE;
-ALTER TABLE security_group ALTER COLUMN global_access  SET default FALSE;
 
 -- v56
 ALTER TABLE transcription ADD COLUMN  hide_request_from_requestor BOOLEAN;

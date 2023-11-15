@@ -15,7 +15,6 @@ import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = RetentionPolicyTypeEntity.TABLE_NAME)
-@SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
 public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {

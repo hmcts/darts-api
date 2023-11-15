@@ -37,7 +37,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.entity.MediaEntity.mediaTypeDefault;
+import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
@@ -199,7 +199,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         newMedia.setChecksum("a-checksum");
         newMedia.setFileSize(1000L);
         newMedia.setMediaFormat("mp3");
-        newMedia.setMediaType(mediaTypeDefault);
+        newMedia.setMediaType(MEDIA_TYPE_DEFAULT);
         newMedia = dartsDatabase.save(newMedia);
 
         assertEquals(Optional.empty(), audioTransformationService.getMediaLocation(newMedia));
@@ -217,7 +217,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         newMedia.setMediaFile("filename");
         newMedia.setMediaFormat("mp3");
         newMedia.setFileSize(1000L);
-        newMedia.setMediaType(mediaTypeDefault);
+        newMedia.setMediaType(MEDIA_TYPE_DEFAULT);
         newMedia = dartsDatabase.save(newMedia);
 
         ExternalLocationTypeEntity externalLocationTypeEntity =

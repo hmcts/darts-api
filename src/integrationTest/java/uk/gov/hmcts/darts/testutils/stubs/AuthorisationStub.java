@@ -25,7 +25,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.common.entity.MediaEntity.mediaTypeDefault;
+import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
 @Component
 @RequiredArgsConstructor
@@ -103,7 +103,7 @@ public class AuthorisationStub {
         mediaEntity.setFileSize(1000L);
         mediaEntity.setMediaFormat("mp3");
         mediaEntity.setChecksum("checksum");
-        mediaEntity.setMediaType(mediaTypeDefault);
+        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
         dartsDatabaseStub.save(mediaEntity);
 
         hearingEntity.addMedia(mediaEntity);
