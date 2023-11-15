@@ -40,6 +40,7 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
@@ -66,8 +67,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private static final String TEST_COMMENT = "Test comment";
 
-    private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
-    private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-07-31T14:32Z");
+    //private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
+    private static final OffsetDateTime START_TIME = now().plusMinutes(5);
+    private static final OffsetDateTime END_TIME = now().plusMinutes(20);
 
     @Autowired
     private MockMvc mockMvc;
@@ -171,8 +173,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertAudit(int expected) {
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(courtCase.getId());
-        searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
-        searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
+        searchQuery.setFromDate(now().minusDays(1));
+        searchQuery.setToDate(now().plusDays(1));
         searchQuery.setAuditActivityId(REQUEST_TRANSCRIPTION.getId());
 
         List<AuditEntity> auditEntities = auditService.search(searchQuery);
@@ -238,6 +240,112 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilderDup)
             .andExpect(status().isOk())
             .andReturn();
+    }
+
+
+    @Test
+    @Order(14)
+    void transcriptionRequestHearingWithNoAudio() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+        );
+
+        hearing.setMediaList(null);
+        dartsDatabaseStub.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        assertFailedTranscription110Error(actualJson);
+
+        assertAudit(0);
+    }
+
+
+    private void assertFailedTranscription110Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "TRANSCRIPTION_110",
+              "title": "Transcription could not be requested, no audio",
+              "status": 404
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    @Order(15)
+    void transcriptionRequestStartTimeOutsideHearing() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, now().minusHours(1), now().plusMinutes(10)
+        );
+
+        dartsDatabaseStub.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        assertFailedTranscription111Error(actualJson);
+
+        assertAudit(0);
+    }
+
+    @Test
+    @Order(15)
+    void transcriptionRequestEndTimeOutsideHearing() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, now().plusMinutes(1), now().plusHours(10)
+        );
+
+        dartsDatabaseStub.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        assertFailedTranscription111Error(actualJson);
+
+        assertAudit(0);
+    }
+
+    private void assertFailedTranscription111Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "TRANSCRIPTION_111",
+              "title": "Transcription could not be requested, times outside of hearing times",
+              "status": 404
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -521,6 +629,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         assertAudit(1);
     }
+
+
 
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
                                                                           Integer caseId,
