@@ -36,4 +36,14 @@ public class AccessTokenClientConfiguration {
                                      b2cAuthenticationProperties.getClientSecret());
     }
 
+    @Bean
+    public AccessTokenClient externalGlobalAccessTokenClient() {
+        return new AccessTokenClient(b2cAuthenticationProperties.getTokenUri(),
+                                     b2cAuthenticationProperties.getScope(),
+                                     b2cAuthenticationProperties.getGlobalUsername(),
+                                     b2cAuthenticationProperties.getGlobalPassword(),
+                                     b2cAuthenticationProperties.getClientId(),
+                                     b2cAuthenticationProperties.getClientSecret());
+    }
+
 }

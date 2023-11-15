@@ -36,7 +36,9 @@ def secrets = [
     secret('DarMidTierPassword', 'DAR_MIDTIER_PASSWORD'),
     secret('AzureADFunctionalTestUsername', 'AZURE_AD_FUNCTIONAL_TEST_USERNAME'),
     secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD'),
-    secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL')
+    secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
+    secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
+    secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD')
 
   ],
 ]

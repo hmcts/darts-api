@@ -81,7 +81,7 @@ class CasesFunctionalTest  extends FunctionalTest {
         eventBody = eventBody.replace("<<courtroom>>", COURTROOM);
         eventBody = eventBody.replace("<<caseNumber>>", CASE_NUMBER);
 
-        Response eventResponse = buildRequestWithExternalAuth()
+        Response eventResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(EVENTS_PATH))

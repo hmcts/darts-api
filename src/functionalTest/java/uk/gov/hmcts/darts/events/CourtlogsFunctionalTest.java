@@ -51,7 +51,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
         bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
 
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body(bodyText)
             .when()
@@ -67,7 +67,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Test
     @Order(2)
     void postFail() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body("""
                       {
@@ -92,7 +92,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Test
     @Order(3)
     void getSuccess() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .param("courthouse", courthouseName)
             .param("case_number", "func-CASE1001")
@@ -121,7 +121,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Test
     @Order(4)
     void getFail() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .param("courthouse", "func-liverpool")
             .param("case_number", "func-CASE1001")

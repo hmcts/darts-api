@@ -38,6 +38,9 @@ public class FunctionalTest {
     private AccessTokenClient externalAccessTokenClient;
 
     @Autowired
+    private AccessTokenClient externalGlobalAccessTokenClient;
+
+    @Autowired
     private AccessTokenClient internalAccessTokenClient;
 
     @Value("${deployed-application-uri}")
@@ -55,6 +58,10 @@ public class FunctionalTest {
 
     public RequestSpecification buildRequestWithExternalAuth() {
         return buildRequestWithAuth(externalAccessTokenClient);
+    }
+
+    public RequestSpecification buildRequestWithExternalGlobalAccessAuth() {
+        return buildRequestWithAuth(externalGlobalAccessTokenClient);
     }
 
     public RequestSpecification buildRequestWithInternalAuth() {
