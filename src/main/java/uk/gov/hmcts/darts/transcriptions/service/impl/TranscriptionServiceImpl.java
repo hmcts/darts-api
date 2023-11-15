@@ -171,8 +171,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 transcriptionRequestDetails.getComment()
             ));
 
-        if (!workflowValidator.isAutomatedTranscription(TranscriptionTypeEnum.fromId(
-            transcription.getTranscriptionType().getId()))) {
+        if (transcription.getIsManualTranscription()) {
             transcriptionStatus = getTranscriptionStatusById(AWAITING_AUTHORISATION.getId());
 
             transcription.getTranscriptionWorkflowEntities().add(
@@ -250,7 +249,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
-        if (!workflowValidator.validateChangeToWorkflowStatus(
+        if (!workflowValidator.validateChangeToWorkflowStatus(transcription.getIsManualTranscription(),
             TranscriptionTypeEnum.fromId(transcription.getTranscriptionType().getId()),
             TranscriptionStatusEnum.fromId(transcription.getTranscriptionStatus().getId()),
             desiredTargetTranscriptionStatus
@@ -314,7 +313,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setEndTime(transcriptionRequestDetails.getEndDateTime());
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
-        transcription.setIsManual(isManual);
+        transcription.setIsManualTranscription(isManual);
+        transcription.setIsManualTranscription(isManual);
         transcription.setHideRequestFromRequestor(false);
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {

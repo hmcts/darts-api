@@ -45,6 +45,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -113,11 +114,11 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES","OTHER"})
     @Order(1)
-    void transcriptionRequestWithValidValuesShouldReturnSuccess() throws Exception {
+    void transcriptionRequestWithValidValuesShouldReturnSuccess(TranscriptionTypeEnum transcriptionTypeEnum) throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
@@ -138,6 +139,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         TranscriptionRepository transcriptionRepository = dartsDatabaseStub.getTranscriptionRepository();
         TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        assertTrue(transcriptionEntity.getIsManualTranscription());
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),

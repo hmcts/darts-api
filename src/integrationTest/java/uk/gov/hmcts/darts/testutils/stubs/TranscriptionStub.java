@@ -101,7 +101,8 @@ public class TranscriptionStub {
         transcription.setTranscriptionUrgency(transcriptionUrgency);
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
-        transcription.setIsManual(true);
+        transcription.setIsManualTranscription(true);
+        transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
         return transcriptionRepository.saveAndFlush(transcription);
     }
@@ -126,7 +127,8 @@ public class TranscriptionStub {
                                            .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
         transcriptionEntity.setCreatedBy(userAccountEntity);
         transcriptionEntity.setLastModifiedBy(userAccountEntity);
-        transcriptionEntity.setIsManual(true);
+        transcriptionEntity.setIsManualTranscription(true);
+        transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setHideRequestFromRequestor(false);
 
         final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
