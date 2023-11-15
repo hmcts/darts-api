@@ -60,7 +60,7 @@ public class DailyListController implements DailyListsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        securityRoles = {XHIBIT, CPP},
+        securityRoles = {},
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPatch(
         @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
@@ -98,7 +98,7 @@ public class DailyListController implements DailyListsApi {
     )
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        securityRoles = {XHIBIT, CPP},
+        securityRoles = {},
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPost(
         @NotNull @Parameter(name = "source_system", description = "The source system that has sent the message", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "source_system", required = true) String sourceSystem,

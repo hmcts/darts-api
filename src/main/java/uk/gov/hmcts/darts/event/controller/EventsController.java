@@ -45,7 +45,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        securityRoles = {XHIBIT, CPP},
+        securityRoles = {},
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<EventsResponse> eventsPost(
         @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
@@ -64,7 +64,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        securityRoles = {XHIBIT, CPP},
+        securityRoles = {},
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<EventsResponse> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
         DartsEvent dartsEvent = dartsEventMapper.toDartsEvent(courtLogsPostRequestBody);
@@ -75,7 +75,7 @@ public class EventsController implements EventApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
-        securityRoles = {XHIBIT, CPP},
+        securityRoles = {},
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<List<CourtLog>> courtlogsGet(
         @Parameter(name = "courthouse", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse,
