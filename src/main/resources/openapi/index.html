@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta
+    name="description"
+    content="SwaggerUI"
+  />
+  <title>Modernised DARTS SwaggerUI</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui.css"/>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-bundle.js" crossorigin></script>
+<script src="https://unpkg.com/swagger-ui-dist@4.5.0/swagger-ui-standalone-preset.js" crossorigin></script>
+<script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        urls: [
+        {url: "audio.yaml", name: "Audio"},
+        {url: "audiorequests.yaml", name: "Audio Requests"},
+        {url: "audit.yaml", name: "Audit"},
+        {url: "cases.yaml", name: "Cases"},
+        {url: "courthouse.yaml", name: "Courthouses"},
+        {url: "dailylist.yaml", name: "Daily Lists"},
+        {url: "event.yaml", name: "Events"},
+        {url: "hearings.yaml", name: "Hearings"},
+        {url: "transcriptions.yaml", name: "Transcriptions"},
+        {url: "usermanagement.yaml", name: "User Management"},
+        ],
+        dom_id: '#swagger-ui',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "StandaloneLayout",
+      });
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
