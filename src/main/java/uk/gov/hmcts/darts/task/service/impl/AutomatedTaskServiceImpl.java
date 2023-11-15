@@ -13,6 +13,7 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audio.service.ExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
@@ -41,6 +43,7 @@ import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_T
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
@@ -71,6 +74,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
     private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
+    private final ExternalDataStoreDeleter externalDataStoreDeleter;
 
     private final TranscriptionsApi transcriptionsApi;
 
@@ -147,6 +151,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
         } else if (OUTBOUND_AUDIO_DELETER_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
             rescheduleOutboundAudioDeleterAutomatedTask();
+        } else if (EXTERNAL_DATASTORE_DELETER == AutomatedTaskName.valueOfTaskName(taskName)) {
+            rescheduleExternalDataStoreDeleterAutomatedTask();
         } else if (INBOUND_AUDIO_DELETER_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
             rescheduleInboundAudioDeleterAutomatedTask();
         } else {
@@ -250,6 +256,25 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(inboundAudioDeleterAutomatedTask, trigger);
     }
 
+    /**
+     * Sets up the ExternalDataStoreDeleter and adds it to the task registrar which then makes it available to the
+     * TaskScheduler.
+     *
+     * @param taskRegistrar Registers scheduled tasks
+     */
+    private void addExternalDataStoreDeleterToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask = new ExternalDataStoreDeleterAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            externalDataStoreDeleter
+        );
+        externalDataStoreDeleterAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(
+            externalDataStoreDeleterAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(externalDataStoreDeleterAutomatedTask);
+        taskRegistrar.addTriggerTask(externalDataStoreDeleterAutomatedTask, trigger);
+    }
+
 
     private void addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
@@ -326,6 +351,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(inboundAudioDeleterAutomatedTask);
             taskScheduler.schedule(inboundAudioDeleterAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleExternalDataStoreDeleterAutomatedTask() {
+
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(EXTERNAL_DATASTORE_DELETER.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask = new ExternalDataStoreDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                externalDataStoreDeleter
+            );
+            Trigger trigger = createAutomatedTaskTrigger(externalDataStoreDeleterAutomatedTask);
+            taskScheduler.schedule(externalDataStoreDeleterAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

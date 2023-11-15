@@ -4,7 +4,7 @@ import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 
 import java.util.List;
 
-public interface OutboundAudioDeleterProcessor {
+public interface OutboundDataStoreSoftDeleter {
 
     List<MediaRequestEntity> delete();
 }
