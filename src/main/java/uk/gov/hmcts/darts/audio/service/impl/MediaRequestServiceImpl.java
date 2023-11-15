@@ -156,6 +156,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(requestor);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
         mediaRequestEntity.setRequestType(requestType);
