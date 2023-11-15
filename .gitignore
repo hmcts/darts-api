@@ -18,7 +18,8 @@ bin/generated-sources/
 .springBeans
 
 ### IntelliJ IDEA ###
-.idea
+.idea/*
+!.idea/codeStyles/
 /out
 *.iws
 *.iml
