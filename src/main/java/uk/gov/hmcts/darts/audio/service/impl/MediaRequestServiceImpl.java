@@ -23,8 +23,8 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
-import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
@@ -101,13 +101,15 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional
     @Override
     public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
-        return saveAudioRequestToDb(
+        MediaRequestEntity mediaRequest = saveAudioRequestToDb(
             hearingRepository.getReferenceById(request.getHearingId()),
             userAccountRepository.getReferenceById(request.getRequestor()),
             request.getStartTime(),
             request.getEndTime(),
             request.getRequestType()
         );
+        auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
+        return mediaRequest;
     }
 
     @Override
