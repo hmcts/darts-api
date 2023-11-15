@@ -17,4 +17,5 @@ public interface AuthorisationApi {
 
     List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse);
 
+    UserAccountEntity getCurrentUser();
 }

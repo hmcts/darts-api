@@ -96,6 +96,8 @@ public class TestSupportController {
 
         removeCourtHouses(session);
 
+        removeUsers(session);
+
         session.getTransaction().commit();
         session.close();
     }
@@ -318,6 +320,13 @@ public class TestSupportController {
                                              select cas_id from darts.court_case where case_number like 'func-%'
                                              """, Integer.class)
             .getResultList();
+    }
+
+    private void removeUsers(Session session) {
+        session.createNativeQuery("""
+                delete from darts.user_account where description = 'Functional test user'
+                """, Integer.class)
+            .executeUpdate();
     }
 
     @GetMapping(value = "/bank-holidays/{year}")
