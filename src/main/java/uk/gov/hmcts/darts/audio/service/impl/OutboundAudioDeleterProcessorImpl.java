@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 
@@ -29,18 +29,20 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     private final UserAccountRepository userAccountRepository;
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final LastAccessedDeletionDayCalculator deletionDayCalculator;
+    private final SystemUserHelper systemUserHelper;
 
     public OutboundAudioDeleterProcessorImpl(MediaRequestRepository mediaRequestRepository,
                                              TransientObjectDirectoryRepository transientObjectDirectoryRepository,
                                              UserAccountRepository userAccountRepository,
                                              ObjectDirectoryStatusRepository objectDirectoryStatusRepository,
-                                             LastAccessedDeletionDayCalculator deletionDayCalculator) {
+                                             LastAccessedDeletionDayCalculator deletionDayCalculator,
+                                             SystemUserHelper systemUserHelper) {
         this.mediaRequestRepository = mediaRequestRepository;
         this.transientObjectDirectoryRepository = transientObjectDirectoryRepository;
         this.userAccountRepository = userAccountRepository;
         this.objectDirectoryStatusRepository = objectDirectoryStatusRepository;
         this.deletionDayCalculator = deletionDayCalculator;
-
+        this.systemUserHelper = systemUserHelper;
     }
 
 
@@ -62,9 +64,10 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByMediaRequest_idIn(
             mediaRequests);
 
-        Optional<UserAccountEntity> systemUser = userAccountRepository.findById(0);
+        UserAccountEntity systemUser = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid(
+            "housekeeping"));
 
-        if (systemUser.isEmpty()) {
+        if (systemUser == null) {
             throw new DartsApiException(OutboundDeleterException.MISSING_SYSTEM_USER);
         }
         ObjectDirectoryStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
@@ -73,9 +76,9 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
             entity.getMediaRequest().setStatus(AudioRequestStatus.EXPIRED);
-            entity.getMediaRequest().setLastModifiedBy(systemUser.get());
+            entity.getMediaRequest().setLastModifiedBy(systemUser);
 
-            entity.setLastModifiedBy(systemUser.get());
+            entity.setLastModifiedBy(systemUser);
             entity.setStatus(deletionStatus);
 
             deletedValues.add(entity.getMediaRequest());
