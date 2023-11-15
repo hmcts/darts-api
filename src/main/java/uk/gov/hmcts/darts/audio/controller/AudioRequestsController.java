@@ -80,8 +80,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {})
+        securityRoles = {TRANSCRIBER})
     public ResponseEntity<Resource> download(Integer mediaRequestId) {
         InputStream audioFileStream = mediaRequestService.download(mediaRequestId);
 

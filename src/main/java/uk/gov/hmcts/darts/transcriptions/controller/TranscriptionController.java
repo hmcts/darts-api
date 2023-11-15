@@ -81,8 +81,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, TRANSCRIBER},
-        globalAccessSecurityRoles = {})
+    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, TRANSCRIBER})
     public ResponseEntity<UpdateTranscriptionResponse> updateTranscription(Integer transcriptionId,
                                                                            UpdateTranscription updateTranscription) {
 
@@ -91,8 +90,7 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {TRANSCRIBER},
-        globalAccessSecurityRoles = {})
+    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {TRANSCRIBER})
     public ResponseEntity<AttachTranscriptResponse> attachTranscript(Integer transcriptionId,
                                                                      MultipartFile transcript) {
         return ResponseEntity.ok(transcriptionService.attachTranscript(transcriptionId, transcript));
