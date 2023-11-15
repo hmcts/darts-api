@@ -28,6 +28,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class MediaEntity extends CreatedModifiedBaseEntity {
+    public static final Character MEDIA_TYPE_DEFAULT = 'A';
 
     @Id
     @Column(name = "med_id")
@@ -71,13 +72,13 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     private String mediaFormat;
 
     @Column(name = "file_size")
-    private Integer fileSize;
+    private Long fileSize;
 
     @Column(name = "checksum")
     private String checksum;
 
-    @ManyToOne
-    @JoinColumn(name = "met_id", nullable = false)
-    private MediaTypeEntity mediaType;
+    @Column(name = "media_type")
+    private Character mediaType;
+
 
 }

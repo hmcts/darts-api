@@ -296,7 +296,7 @@ components:
           maxLength: 255
         file_size:
           type: integer
-          format: int32
+          format: int64
           description: 'The size of the file in bytes'
         checksum:
           type: string

@@ -3,9 +3,10 @@ package uk.gov.hmcts.darts.testutils.data;
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.MediaTypeEntity;
 
 import java.time.OffsetDateTime;
+
+import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
@@ -24,12 +25,9 @@ public class MediaTestData {
         media.setCourtroom(courtroomEntity);
         media.setMediaFile("a-media-file");
         media.setChecksum("a-checksum");
-        media.setFileSize(1000);
+        media.setFileSize(1000L);
         media.setMediaFormat("mp3");
-        MediaTypeEntity mediaTypeEntity = new MediaTypeEntity();
-        mediaTypeEntity.setId(1);
-        mediaTypeEntity.setMediaType("AUDIO");
-        media.setMediaType(mediaTypeEntity);
+        media.setMediaType(MEDIA_TYPE_DEFAULT);
         return media;
     }
 
@@ -41,12 +39,9 @@ public class MediaTestData {
         mediaEntity.setTotalChannels(2);
         mediaEntity.setMediaFile("a-media-file");
         mediaEntity.setChecksum("a-checksum");
-        mediaEntity.setFileSize(1000);
+        mediaEntity.setFileSize(1000L);
         mediaEntity.setMediaFormat("mp3");
-        MediaTypeEntity mediaTypeEntity = new MediaTypeEntity();
-        mediaTypeEntity.setId(1);
-        mediaTypeEntity.setMediaType("AUDIO");
-        mediaEntity.setMediaType(mediaTypeEntity);
+        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
         return mediaEntity;
     }
 
@@ -59,12 +54,9 @@ public class MediaTestData {
         mediaEntity.setTotalChannels(2);
         mediaEntity.setMediaFormat("mp3");
         mediaEntity.setMediaFile("a-media-file");
-        mediaEntity.setFileSize(1000);
+        mediaEntity.setFileSize(1000L);
         mediaEntity.setChecksum("a-checksum");
-        MediaTypeEntity mediaTypeEntity = new MediaTypeEntity();
-        mediaTypeEntity.setId(1);
-        mediaTypeEntity.setMediaType("AUDIO");
-        mediaEntity.setMediaType(mediaTypeEntity);
+        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
         return mediaEntity;
     }
 }

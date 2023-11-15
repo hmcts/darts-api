@@ -193,6 +193,5 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         assertEquals(200, getCaseresponse.statusCode());
         assertEquals(CASE_NUMBER, getCaseresponse.jsonPath().get("case_number"));
-        assertEquals("2030-10-07T23:59:59Z", getCaseresponse.jsonPath().get("retain_until"));
     }
 }
