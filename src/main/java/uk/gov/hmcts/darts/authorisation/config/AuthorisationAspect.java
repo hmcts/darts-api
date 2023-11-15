@@ -65,7 +65,7 @@ public class AuthorisationAspect {
         if (!globalAccessRoles.isEmpty()) {
             hasGlobalAccess = userIdentity.userHasGlobalAccess(globalAccessRoles);
         }
-        //TODO
+
         if (!hasGlobalAccess) {
             JsonNode jsonNode = objectMapper.valueToTree(body);
             controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(
