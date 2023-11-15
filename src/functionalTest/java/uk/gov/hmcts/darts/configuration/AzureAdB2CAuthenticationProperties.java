@@ -17,7 +17,5 @@ public class AzureAdB2CAuthenticationProperties {
     private String password;
     private String clientId;
     private String clientSecret;
-    private String globalUsername;
-    private String globalPassword;
 
 }

@@ -6,4 +6,4 @@ insert into darts.security_group(grp_id, rol_id,group_name, global_access) value
 
 UPDATE darts.user_account
 SET account_guid = '43cb3e21-b03a-4629-9908-b0ddaf7448b9'
-WHERE usr_id = '-999';
+WHERE usr_id = -999;
