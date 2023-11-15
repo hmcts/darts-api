@@ -161,8 +161,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
-        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
-        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
+        when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
@@ -192,7 +191,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
-        assertThat(transcriptionEntity.getIsManual()).isTrue();
+        assertThat(transcriptionEntity.getIsManualTranscription()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -242,9 +241,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
-        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
-        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
-
+        when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
@@ -272,7 +269,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isNotNull();
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
-        assertThat(transcriptionEntity.getIsManual()).isTrue();
+        assertThat(transcriptionEntity.getIsManualTranscription()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -321,8 +318,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
-        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
-        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
+        when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
@@ -339,7 +335,7 @@ class TranscriptionServiceImplTest {
             TEST_COMMENT,
             startDateTime,
             endDateTime
-        ), false);
+        ), true);
 
         verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
 
@@ -353,7 +349,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
-        assertThat(transcriptionEntity.getIsManual()).isFalse();
+        assertThat(transcriptionEntity.getIsManualTranscription()).isTrue();
 
         verify(
             mockTranscriptionWorkflowRepository,
@@ -406,8 +402,7 @@ class TranscriptionServiceImplTest {
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
-        when(mockTranscription.getTranscriptionType()).thenReturn(mockTranscriptionType);
-        when(mockWorkflowValidator.isAutomatedTranscription(transcriptionTypeEnum)).thenReturn(false);
+        when(mockTranscription.getIsManualTranscription()).thenReturn(true);
 
         when(mockTranscription.getCourtCase()).thenReturn(mockCourtCase);
         doNothing().when(mockAuditService).recordAudit(REQUEST_TRANSCRIPTION, testUser, mockCourtCase);
@@ -437,7 +432,7 @@ class TranscriptionServiceImplTest {
         assertThat(transcriptionEntity.getTranscriptionUrgency()).isEqualTo(mockTranscriptionUrgency);
         assertThat(transcriptionEntity.getStartTime()).isEqualTo(startDateTime);
         assertThat(transcriptionEntity.getEndTime()).isEqualTo(endDateTime);
-        assertThat(transcriptionEntity.getIsManual()).isFalse();
+        assertThat(transcriptionEntity.getIsManualTranscription()).isFalse();
 
         verify(
             mockTranscriptionWorkflowRepository,
