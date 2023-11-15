@@ -102,7 +102,7 @@ public class TranscriptionStub {
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
-        transcription.setIsManual(true);
+        transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
         return transcriptionRepository.saveAndFlush(transcription);
     }
@@ -128,7 +128,7 @@ public class TranscriptionStub {
         transcriptionEntity.setCreatedBy(userAccountEntity);
         transcriptionEntity.setLastModifiedBy(userAccountEntity);
         transcriptionEntity.setIsManualTranscription(true);
-        transcriptionEntity.setIsManual(true);
+        transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setHideRequestFromRequestor(false);
 
         final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(

@@ -314,7 +314,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setCreatedBy(userAccount);
         transcription.setLastModifiedBy(userAccount);
         transcription.setIsManualTranscription(isManual);
-        transcription.setIsManual(isManual);
+        transcription.setIsManualTranscription(isManual);
         transcription.setHideRequestFromRequestor(false);
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {
