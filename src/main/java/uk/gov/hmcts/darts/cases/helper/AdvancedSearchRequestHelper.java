@@ -149,7 +149,7 @@ public class AdvancedSearchRequestHelper {
     }
 
     private List<Predicate> addUserSecurityRolesCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
-
+        //TODO this needs to be reworked so that it looks at email address or guid
         List<Predicate> predicateList = new ArrayList<>();
         Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
         predicateList.add(criteriaBuilder.equal(
