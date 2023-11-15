@@ -31,7 +31,7 @@ public class UserIdentityImpl implements UserIdentity {
 
     private final UserAccountRepository userAccountRepository;
 
-    public String getEmailAddressFromToken() {
+    private String getEmailAddressFromToken() {
         if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
             Object principalObject = SecurityContextHolder.getContext()
                 .getAuthentication()
@@ -42,7 +42,6 @@ public class UserIdentityImpl implements UserIdentity {
                 if (emailsAddressesObject == null) {
                     emailsAddressesObject = jwt.getClaims().get(PREFERRED_USERNAME);
                 }
-
                 if (emailsAddressesObject instanceof List<?> emails) {
                     if (emails.size() != 1) {
                         throw new IllegalStateException(String.format(
@@ -63,7 +62,7 @@ public class UserIdentityImpl implements UserIdentity {
         throw new IllegalStateException("Could not obtain email address from principal");
     }
 
-    public String getGuidFromToken() {
+    private String getGuidFromToken() {
         if (nonNull(SecurityContextHolder.getContext().getAuthentication())) {
             Object principalObject = SecurityContextHolder.getContext()
                 .getAuthentication()
@@ -84,7 +83,7 @@ public class UserIdentityImpl implements UserIdentity {
         UserAccountEntity userAccount = null;
         String guid = getGuidFromToken();
         if (nonNull(guid)) {
-            // System users will use guid not email address
+            // System users will use GUID not email address
             userAccount = userAccountRepository.findByAccountGuid(guid).orElse(null);
         }
         if (isNull(userAccount)) {

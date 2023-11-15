@@ -7,10 +7,6 @@ import java.util.Set;
 
 public interface UserIdentity {
 
-    String getEmailAddressFromToken();
-
-    String getGuidFromToken();
-
     UserAccountEntity getUserAccount();
 
     boolean userHasGlobalAccess(Set<SecurityRoleEnum> globalAccessRoles);

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.authorisation.component.impl;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
@@ -38,20 +40,30 @@ class UserIdentityImplTest extends IntegrationBase {
     @Autowired
     private DartsDatabaseStub dartsDatabaseStub;
 
+    @Autowired
+    private AuthorisationStub authorisationStub;
+
+
+    @BeforeEach
+    void beforeEach() {
+        authorisationStub.givenTestSchema();
+    }
+
+
     @Test
-    void getEmailAddress() {
+    void getUserAccountGetEmailAddress() {
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())
-            .claim("emails", List.of("test.user@example.com"))
+            .claim("emails", List.of("integrationtest.user@example.com"))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("test.user@example.com", userIdentity.getEmailAddressFromToken());
+        assertEquals("integrationtest.user@example.com", userIdentity.getUserAccount().getEmailAddress());
     }
 
     @Test
-    void getEmailAddressShouldThrowExceptionWhenUnexpectedNumberOfEmails() {
+    void getUserAccountShouldThrowExceptionWhenUnexpectedNumberOfEmails() {
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())
@@ -59,36 +71,36 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddressFromToken());
+        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
         assertEquals("Unexpected number of email addresses: 2", exception.getMessage());
     }
 
     @Test
-    void getEmailAddressShouldThrowExceptionWhenMissingEmailsClaim() {
+    void getUserAccountShouldThrowExceptionWhenMissingEmailsClaim() {
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddressFromToken());
+        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
         assertEquals("Could not obtain email address from principal", exception.getMessage());
     }
 
     @Test
-    void getEmailAddressForInternalUser() {
+    void getUserAccountGetEmailAddressForInternalUser() {
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())
-            .claim("preferred_username", "test.user@example.com")
+            .claim("preferred_username", "integrationtest.user@example.com")
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals("test.user@example.com", userIdentity.getEmailAddressFromToken());
+        assertEquals("integrationtest.user@example.com", userIdentity.getUserAccount().getEmailAddress());
     }
 
     @Test
-    void getEmailAddressEmptyClaims() {
+    void getUserAccountShouldThrowExceptionWithEmptyClaims() {
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
             .claim("sub", UUID.randomUUID().toString())
@@ -96,7 +108,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getEmailAddressFromToken());
+        var exception = assertThrows(IllegalStateException.class, () -> userIdentity.getUserAccount());
         assertEquals("Could not obtain email address from principal", exception.getMessage());
     }
 
@@ -110,7 +122,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals(email, userIdentity.getEmailAddressFromToken());
+        assertEquals(email, userIdentity.getUserAccount().getEmailAddress());
 
         UserAccountEntity testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
@@ -119,7 +131,7 @@ class UserIdentityImplTest extends IntegrationBase {
     }
 
     @Test
-    void getUserAccountForNonExistingEmailAddressThrowsIllegalStateException() {
+    void getUserAccountForNonExistingEmailAddressThrowsException() {
         String email = "non-existing-user@example.com";
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")
@@ -127,10 +139,6 @@ class UserIdentityImplTest extends IntegrationBase {
             .claim("emails", List.of(email))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
-        assertEquals(email, userIdentity.getEmailAddressFromToken());
-
-        dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         var exception = assertThrows(
             DartsApiException.class,
@@ -143,6 +151,7 @@ class UserIdentityImplTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void getGuid() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
@@ -150,9 +159,10 @@ class UserIdentityImplTest extends IntegrationBase {
             .claim("oid", guid)
             .build();
 
+        dartsDatabaseStub.getUserAccountStub().createXhibitExternalUser(guid, null);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        assertEquals(guid, userIdentity.getGuidFromToken());
+        assertEquals(guid, userIdentity.getUserAccount().getAccountGuid());
     }
 
     @Test
@@ -174,7 +184,7 @@ class UserIdentityImplTest extends IntegrationBase {
 
     @Test
     @Transactional
-    void userHasGlobalAccessReturnsFalseWhenUserNoGlobalAccess() {
+    void userHasGlobalAccessReturnsFalseWhenUserHasNoGlobalAccess() {
         String guid = UUID.randomUUID().toString();
         Jwt jwt = Jwt.withTokenValue("test")
             .header("alg", "RS256")

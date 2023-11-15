@@ -65,10 +65,13 @@ public class AuthorisationAspect {
         if (!globalAccessRoles.isEmpty()) {
             hasGlobalAccess = userIdentity.userHasGlobalAccess(globalAccessRoles);
         }
-
-        if (!hasGlobalAccess && !roles.isEmpty()) {
+        //TODO
+        if (!hasGlobalAccess) {
             JsonNode jsonNode = objectMapper.valueToTree(body);
-            controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(jsonNode, roles);
+            controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(
+                jsonNode,
+                roles
+            );
         }
 
         return joinPoint.proceed();
@@ -97,7 +100,7 @@ public class AuthorisationAspect {
             hasGlobalAccess = userIdentity.userHasGlobalAccess(globalAccessRoles);
         }
 
-        if (!hasGlobalAccess && !roles.isEmpty()) {
+        if (!hasGlobalAccess) {
             controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(request, roles);
         }
     }

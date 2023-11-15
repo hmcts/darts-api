@@ -310,7 +310,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     private void setupUserAccountAndSecurityGroup() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(swanseaCourthouse);
-        when(mockUserIdentity.getEmailAddressFromToken()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
 }
