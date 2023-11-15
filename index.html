@@ -18,16 +18,16 @@
     window.onload = () => {
       window.ui = SwaggerUIBundle({
         urls: [
-        {url: "audio.yaml", name: "Audio"},
-        {url: "audiorequests.yaml", name: "Audio Requests"},
-        {url: "audit.yaml", name: "Audit"},
-        {url: "cases.yaml", name: "Cases"},
-        {url: "courthouse.yaml", name: "Courthouses"},
-        {url: "dailylist.yaml", name: "Daily Lists"},
-        {url: "event.yaml", name: "Events"},
-        {url: "hearings.yaml", name: "Hearings"},
-        {url: "transcriptions.yaml", name: "Transcriptions"},
-        {url: "usermanagement.yaml", name: "User Management"},
+        {url: "src/main/resources/openapi/audio.yaml", name: "Audio"},
+        {url: "src/main/resources/openapi/audiorequests.yaml", name: "Audio Requests"},
+        {url: "src/main/resources/openapi/audit.yaml", name: "Audit"},
+        {url: "src/main/resources/openapi/cases.yaml", name: "Cases"},
+        {url: "src/main/resources/openapi/courthouse.yaml", name: "Courthouses"},
+        {url: "src/main/resources/openapi/dailylist.yaml", name: "Daily Lists"},
+        {url: "src/main/resources/openapi/event.yaml", name: "Events"},
+        {url: "src/main/resources/openapi/hearings.yaml", name: "Hearings"},
+        {url: "src/main/resources/openapi/transcriptions.yaml", name: "Transcriptions"},
+        {url: "src/main/resources/openapi/usermanagement.yaml", name: "User Management"},
         ],
         dom_id: '#swagger-ui',
         presets: [
@@ -37,6 +37,7 @@
         layout: "StandaloneLayout",
       });
     };
+
 
 
 </script>
