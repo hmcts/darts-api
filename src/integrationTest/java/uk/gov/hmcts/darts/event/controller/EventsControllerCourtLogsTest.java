@@ -7,13 +7,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -22,14 +27,19 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateTime;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
+@Transactional
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
     public static final String NEW_CASE = "Case0000001";
@@ -55,6 +65,11 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    private UserAccountEntity testUser;
+
     @BeforeEach
     void setUp() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -63,6 +78,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             SOME_COURTROOM,
             SOME_DATE_TIME.toLocalDate()
         );
+
     }
 
     @Test
@@ -129,6 +145,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtLogsGet() throws Exception {
+        setupExternalUserForHearing(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, "Swansea")
@@ -163,6 +180,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
+        setupExternalUserForHearing(hearingEntity.getCourtCase().getCourthouse());
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, courthouseName)
             .queryParam(CASE_NUMBER, caseNumber)
@@ -195,6 +214,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
+
+        setupExternalUserForHearing(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, courthouseName)
@@ -233,6 +254,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
 
+        setupExternalUserForHearing(hearingEntity.getCourtCase().getCourthouse());
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, SOME_COURTHOUSE)
             .queryParam(CASE_NUMBER, NEW_CASE)
@@ -248,5 +271,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
     }
 
-
+    private void setupExternalUserForHearing(CourthouseEntity courthouse) {
+        String guid = UUID.randomUUID().toString();
+        testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
+    }
 }

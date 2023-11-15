@@ -22,10 +22,13 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.createEventHandlerWith;
 
 @AutoConfigureMockMvc
@@ -46,6 +49,8 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    private UserAccountEntity testUser;
 
     @BeforeEach
     void setUp() {
@@ -71,7 +76,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
         courthouse.setCourthouseName("swansea");
         courthouse.setDisplayName("swansea");
 
-        dartsDatabase.getCourthouseRepository().save(courthouse);
+        courthouse = dartsDatabase.getCourthouseRepository().save(courthouse);
 
         String requestBody = """
             {
@@ -86,9 +91,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
 
-        String guid = UUID.randomUUID().toString();
-        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        setupExternalUserForHearing(courthouse);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
@@ -137,6 +140,7 @@ class EventsControllerPostEventsTest extends IntegrationBase {
               "date_time": "2023-06-14T08:37:30.945Z"
             }""";
 
+        setupExternalUserForHearing(courthouse);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
             .header("Content-Type", "application/json")
@@ -258,5 +262,12 @@ class EventsControllerPostEventsTest extends IntegrationBase {
 
     private static EventHandlerEntity getHandlerWithDefaults() {
         return createEventHandlerWith("StandardEventHandler", "ActiveTestType", "ActiveTestSubType");
+    }
+
+    private void setupExternalUserForHearing(CourthouseEntity courthouse) {
+        String guid = UUID.randomUUID().toString();
+        testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
     }
 }
