@@ -59,8 +59,7 @@ Alternatively, you can log into the [Azure home page](https://portal.azure.com/#
 active for the secrets to be visible.
 
 Once you have obtained the values, set the environment variables on your system. E.g. On Mac, you may run this command
-in
-the terminal, replacing `<<env var name>>` and `<<secret value>>` as necessary:
+in the terminal, replacing `<<env var name>>` and `<<secret value>>` as necessary:
 
 ```
 launchctl setenv <<env var name>> <<secret value>>
@@ -168,8 +167,7 @@ Create docker image:
   docker-compose -f docker-compose-local.yml build
 ```
 
-Run the distribution (created in `build/install/darts-api` directory)
-by executing the following command:
+Run the distribution (created in `build/install/darts-api` directory) by executing the following command:
 
 ```bash
   docker-compose -f docker-compose-local.yml up darts-api darts-db darts-redis
