@@ -5,7 +5,6 @@ import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,6 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 )
 @ActiveProfiles({"dev", "functionalTest"})
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
-@Slf4j
 public class FunctionalTest {
 
     protected static final String COURTHOUSE_SWANSEA = "func-swansea";
@@ -65,7 +63,6 @@ public class FunctionalTest {
     }
 
     public RequestSpecification buildRequestWithExternalGlobalAccessAuth() {
-        log.info("buildRequestWithExternalGlobalAccessAuth {}", externalGlobalAccessTokenClient);
         return buildRequestWithAuth(externalGlobalAccessTokenClient);
     }
 
