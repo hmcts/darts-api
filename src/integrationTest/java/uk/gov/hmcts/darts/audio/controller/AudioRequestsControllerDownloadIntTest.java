@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
@@ -54,7 +54,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/download");
 
-    private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivityEnum.EXPORT_AUDIO.getId();
+    private static final Integer DOWNLOAD_AUDIT_ACTIVITY_ID = AuditActivity.EXPORT_AUDIO.getId();
     @MockBean
     private Authorisation authorisation;
 

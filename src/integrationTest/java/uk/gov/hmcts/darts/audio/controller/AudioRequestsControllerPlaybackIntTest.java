@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
@@ -58,7 +58,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/playback");
 
-    private static final Integer PLAYBACK_AUDIT_ACTIVITY_ID = AuditActivityEnum.AUDIO_PLAYBACK.getId();
+    private static final Integer PLAYBACK_AUDIT_ACTIVITY_ID = AuditActivity.AUDIO_PLAYBACK.getId();
     @MockBean
     private Authorisation authorisation;
 

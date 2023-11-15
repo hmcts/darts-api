@@ -1,11 +1,11 @@
-package uk.gov.hmcts.darts.audit.enums;
+package uk.gov.hmcts.darts.audit.api;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum AuditActivityEnum {
+public enum AuditActivity {
 
     MOVE_COURTROOM(1),
     EXPORT_AUDIO(2),

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity_;
@@ -29,7 +29,7 @@ public class AuditServiceImpl implements AuditService {
 
     @Transactional
     @Override
-    public void recordAudit(AuditActivityEnum activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
+    public void recordAudit(AuditActivity activity, UserAccountEntity userAccountEntity, CourtCaseEntity courtCase) {
         AuditEntity auditEntity = new AuditEntity();
         auditEntity.setCourtCase(courtCase);
         auditEntity.setAuditActivity(auditActivityRepository.getReferenceById(activity.getId()));

@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 
 import java.io.InputStream;
@@ -102,7 +102,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         try {
             audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
             addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);
-            auditApi.recordAudit(AuditActivityEnum.REQUEST_AUDIO, audioRequest.getRequestor(), audioRequest.getHearing().getCourtCase());
+            auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, audioRequest.getRequestor(), audioRequest.getHearing().getCourtCase());
         } catch (Exception e) {
             log.error("Failed to request audio {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

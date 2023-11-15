@@ -44,8 +44,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.util.unit.DataSize.ofBytes;
 import static org.springframework.util.unit.DataSize.ofMegabytes;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.COMPLETE_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.IMPORT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;

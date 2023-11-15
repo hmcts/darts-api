@@ -7,7 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.service.impl.AuditServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -50,10 +50,10 @@ class AuditServiceImplTest {
     @Test
     void testRecordAudit() {
         AuditActivityEntity auditActivityEntity = new AuditActivityEntity();
-        auditActivityEntity.setName(String.valueOf(AuditActivityEnum.MOVE_COURTROOM));
+        auditActivityEntity.setName(String.valueOf(AuditActivity.MOVE_COURTROOM));
         when(auditActivityRepository.getReferenceById(any())).thenReturn(auditActivityEntity);
 
-        auditServiceImpl.recordAudit(AuditActivityEnum.MOVE_COURTROOM, new UserAccountEntity(), new CourtCaseEntity());
+        auditServiceImpl.recordAudit(AuditActivity.MOVE_COURTROOM, new UserAccountEntity(), new CourtCaseEntity());
 
         verify(auditRepository).saveAndFlush(auditEntityArgumentCaptor.capture());
 
@@ -64,7 +64,7 @@ class AuditServiceImplTest {
         assertNotNull(savedValue.getCreatedBy());
         assertNotNull(savedValue.getLastModifiedBy());
         assertNull(savedValue.getAdditionalData());
-        assertEquals(String.valueOf(AuditActivityEnum.MOVE_COURTROOM), savedValue.getAuditActivity().getName());
+        assertEquals(String.valueOf(AuditActivity.MOVE_COURTROOM), savedValue.getAuditActivity().getName());
     }
 
 }

@@ -24,7 +24,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
@@ -239,15 +239,15 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public InputStream download(Integer mediaRequestId) {
-        return downloadOrPlayback(mediaRequestId, AuditActivityEnum.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
+        return downloadOrPlayback(mediaRequestId, AuditActivity.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
     }
 
     @Override
     public InputStream playback(Integer mediaRequestId) {
-        return downloadOrPlayback(mediaRequestId, AuditActivityEnum.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
+        return downloadOrPlayback(mediaRequestId, AuditActivity.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
     }
 
-    private InputStream downloadOrPlayback(Integer mediaRequestId, AuditActivityEnum auditActivityEnum, AudioRequestType expectedType) {
+    private InputStream downloadOrPlayback(Integer mediaRequestId, AuditActivity auditActivity, AudioRequestType expectedType) {
         MediaRequestEntity mediaRequestEntity = getMediaRequestById(mediaRequestId);
         validateMediaRequestType(mediaRequestEntity, expectedType);
         var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
@@ -260,7 +260,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
 
         auditApi.recordAudit(
-            auditActivityEnum,
+            auditActivity,
             this.getUserAccount(),
             mediaRequestEntity.getHearing().getCourtCase()
         );
