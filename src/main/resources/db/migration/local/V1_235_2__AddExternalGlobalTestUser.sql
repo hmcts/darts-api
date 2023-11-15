@@ -8,6 +8,5 @@ SET global_access = true
 WHERE group_name in ('Xhibit Group', 'Cpp Group');
 
 UPDATE darts.user_account
-SET account_guid = '43cb3e21-b03a-4629-9908-b0ddaf7448b9',
-user_email_address = null
+SET account_guid = '43cb3e21-b03a-4629-9908-b0ddaf7448b9'
 WHERE usr_id = '-999';

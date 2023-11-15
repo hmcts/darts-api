@@ -5,6 +5,5 @@ insert into darts.security_group(grp_id, rol_id,group_name, global_access) value
 insert into darts.security_group(grp_id, rol_id,group_name, global_access) values (-15, 8, 'Cpp Group', true);
 
 UPDATE darts.user_account
-SET account_guid = '43cb3e21-b03a-4629-9908-b0ddaf7448b9',
-user_email_address = null
+SET account_guid = '43cb3e21-b03a-4629-9908-b0ddaf7448b9'
 WHERE usr_id = '-999';

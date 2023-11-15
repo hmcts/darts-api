@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class CasesFunctionalTest extends FunctionalTest {
+class CasesFunctionalTest  extends FunctionalTest {
     private static final String CASES_PATH = "/cases";
     private static final String EVENTS_PATH = "/events";
     private static final String CASE_NUMBER = "func-case-" + randomAlphanumeric(7);

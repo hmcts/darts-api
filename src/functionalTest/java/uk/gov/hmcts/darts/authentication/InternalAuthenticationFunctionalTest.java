@@ -49,7 +49,7 @@ class InternalAuthenticationFunctionalTest extends FunctionalTest {
             .then()
             .extract().response();
 
-        assertEquals(404, response.statusCode());
+        assertEquals(401, response.statusCode());
     }
 
 
