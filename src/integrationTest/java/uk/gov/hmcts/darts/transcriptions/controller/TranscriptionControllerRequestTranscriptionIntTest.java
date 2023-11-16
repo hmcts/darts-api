@@ -311,7 +311,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     void transcriptionRequestEndTimeOutsideHearing() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
