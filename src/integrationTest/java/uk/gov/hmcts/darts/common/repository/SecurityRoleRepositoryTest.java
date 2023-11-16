@@ -26,7 +26,7 @@ class SecurityRoleRepositoryTest {
     @Test
     void shouldFindAllSecurityRoles() {
         List<SecurityRoleEntity> securityRoleEntityList = securityRoleRepository.findAll();
-        assertEquals(10, securityRoleEntityList.size());
+        assertEquals(11, securityRoleEntityList.size());
     }
 
     @Test
