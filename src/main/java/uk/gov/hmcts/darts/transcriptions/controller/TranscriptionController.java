@@ -188,14 +188,17 @@ public class TranscriptionController implements TranscriptionApi {
         }
         log.info("Completed initial checks for transcriptionRequestDetails.getHearingId() " + transcriptionRequestDetails.getHearingId());
         Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
+        log.info("transcriptionTypeId" + transcriptionTypeId);
         TranscriptionTypeEnum.fromId(transcriptionTypeId);
         TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getUrgencyId());
+        log.info("got enums");
 
         if (transcriptionTypesThatRequireDates(transcriptionTypeId)
             && !transcriptionDatesAreSet(
             transcriptionRequestDetails.getStartDateTime(),
             transcriptionRequestDetails.getEndDateTime()
         )) {
+            log.info("error");
             log.error(
                 "This transcription type {} requires both the start date ({}) and end dates ({})",
                 transcriptionRequestDetails.getTranscriptionTypeId(),
@@ -204,14 +207,17 @@ public class TranscriptionController implements TranscriptionApi {
             );
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
+        log.info("got to end");
     }
 
     private boolean transcriptionTypesThatRequireDates(Integer transcriptionTypeId) {
+        log.info("checking types that need dates");
         return SPECIFIED_TIMES.getId().equals(transcriptionTypeId)
             || COURT_LOG.getId().equals(transcriptionTypeId);
     }
 
     private boolean transcriptionDatesAreSet(OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
+        log.info("checking dates not null");
         return nonNull(startDateTime) && nonNull(endDateTime);
     }
 
