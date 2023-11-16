@@ -186,7 +186,7 @@ public class TranscriptionController implements TranscriptionApi {
         } else {
             caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
         }
-
+        log.info("Completed initial checks for transcriptionRequestDetails.getHearingId() " + transcriptionRequestDetails.getHearingId());
         Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
         TranscriptionTypeEnum.fromId(transcriptionTypeId);
         TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getUrgencyId());

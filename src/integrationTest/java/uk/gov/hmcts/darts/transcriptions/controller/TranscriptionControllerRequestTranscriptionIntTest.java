@@ -67,7 +67,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private static final String TEST_COMMENT = "Test comment";
 
-    //private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
     private static final OffsetDateTime START_TIME = now().plusMinutes(5);
     private static final OffsetDateTime END_TIME = now().plusMinutes(20);
 
@@ -187,6 +186,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @Test
     @Order(12)
     void transcriptionRequestWithDuplicateValues() throws Exception {
+        log.info("transcriptionRequestWithDuplicateValues");
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
@@ -195,6 +195,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
         );
 
+        log.info("objectMapper.writeValueAsString(transcriptionRequestDetails) "
+                     + objectMapper.writeValueAsString(transcriptionRequestDetails));
+
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
@@ -202,16 +205,18 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn();
-
+        log.info("sent first request");
         MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+        log.info("built second request");
 
         mockMvc.perform(requestBuilderDup)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
             .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
             .andReturn();
+        log.info("done");
     }
 
     @Test
