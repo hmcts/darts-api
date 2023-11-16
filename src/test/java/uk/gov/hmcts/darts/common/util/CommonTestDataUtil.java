@@ -20,6 +20,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
@@ -37,6 +38,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports"})
 @UtilityClass
 public class CommonTestDataUtil {
 
@@ -219,6 +221,7 @@ public class CommonTestDataUtil {
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
         transcription.setTranscriptionCommentEntities(createTranscriptionComments());
+        transcription.setTranscriptionWorkflowEntities(createTranscriptionWorkflow());
 
         if (generateStatus) {
             TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
@@ -237,12 +240,29 @@ public class CommonTestDataUtil {
         return transcriptionDocumentEntities;
     }
 
+    private static List<TranscriptionWorkflowEntity> createTranscriptionWorkflow() {
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity.getTranscriptionCommentEntities().addAll(createTranscriptionComments("workflowcommenta"));
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity.getTranscriptionCommentEntities().addAll(createTranscriptionComments("workflowcommentb"));
+
+        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity);
+        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity2);
+        return transcriptionWorkflowEntities;
+    }
+
     private static List<TranscriptionCommentEntity> createTranscriptionComments() {
+        return createTranscriptionComments("comment");
+    }
+
+    private static List<TranscriptionCommentEntity> createTranscriptionComments(String prefixMessage) {
         List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         TranscriptionCommentEntity transcriptionCommentEntity2 = new TranscriptionCommentEntity();
-        transcriptionCommentEntity.setComment("comment1");
-        transcriptionCommentEntity2.setComment("comment2");
+        transcriptionCommentEntity.setComment(prefixMessage + "1");
+        transcriptionCommentEntity2.setComment(prefixMessage + "2");
         transcriptionCommentEntities.add(transcriptionCommentEntity);
         transcriptionCommentEntities.add(transcriptionCommentEntity2);
         return transcriptionCommentEntities;

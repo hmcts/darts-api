@@ -157,7 +157,6 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
-        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1,2);
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
@@ -237,7 +236,6 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
-        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1, 2);
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
@@ -314,7 +312,7 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
-        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1,2);
+        //when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1,2);
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());
@@ -398,7 +396,6 @@ class TranscriptionServiceImplTest {
             .thenReturn(awaitingAuthorisationTranscriptionStatus);
 
         when(mockTranscriptionRepository.saveAndFlush(any(TranscriptionEntity.class))).thenReturn(mockTranscription);
-        when(mockTranscriptionWorkflowEntity.getId()).thenReturn(1,2);
         when(mockTranscriptionWorkflowRepository.saveAndFlush(any())).thenReturn(mockTranscriptionWorkflowEntity);
 
         mockTranscriptionType.setId(transcriptionTypeEnum.getId());

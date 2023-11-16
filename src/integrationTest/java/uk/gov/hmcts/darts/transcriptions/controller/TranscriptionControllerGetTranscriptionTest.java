@@ -16,12 +16,14 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,6 +80,15 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         commentEntity2.setComment("comment2");
         transcription.setTranscriptionCommentEntities(Arrays.asList(commentEntity, commentEntity2));
 
+        TranscriptionWorkflowEntity workflowaEntity = new TranscriptionWorkflowEntity();
+        addCommentsToWorkflow(workflowaEntity, "workflowacomment", 2);
+
+        TranscriptionWorkflowEntity workflowbEntity = new TranscriptionWorkflowEntity();
+        addCommentsToWorkflow(workflowbEntity, "workflowbcomment", 2);
+
+        transcription.setTranscriptionWorkflowEntities(Arrays.asList(workflowaEntity, workflowbEntity));
+        transcription.setTranscriptionCommentEntities(Arrays.asList(commentEntity, commentEntity2));
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
         String expected = TestUtils.removeTags(TAGS_TO_IGNORE,
                                                getContentsFromFile(
@@ -97,4 +108,15 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+    private void addCommentsToWorkflow(TranscriptionWorkflowEntity workflow, String prefix, int generateCount) {
+        List<TranscriptionCommentEntity> generatedCommentsLst = new ArrayList<>();
+
+        for (int i = 0; i < generateCount; i++) {
+            TranscriptionCommentEntity comment = new TranscriptionCommentEntity();
+            comment.setComment(prefix + (i + 1));
+            generatedCommentsLst.add(comment);
+        }
+        workflow.setTranscriptionCommentEntities(generatedCommentsLst);
+    }
 }

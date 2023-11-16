@@ -6,6 +6,10 @@
   "from": "IntegrationTest User",
   "received": "2023-06-20T10:00:00Z",
   "comments": [
+    "workflowacomment1",
+    "workflowacomment2",
+    "workflowbcomment1",
+    "workflowbcomment2",
     "comment1",
     "comment2"
   ],

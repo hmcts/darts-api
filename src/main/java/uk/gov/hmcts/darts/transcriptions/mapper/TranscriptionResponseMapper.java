@@ -66,8 +66,17 @@ public class TranscriptionResponseMapper {
             }
 
             transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
-            transcriptionResponse.setComments(transcriptionEntity.getTranscriptionCommentEntities().stream().map(
-                TranscriptionCommentEntity::getComment).collect(Collectors.toList()));
+
+            // add comments mapped to the workflow that is also mapped to the transaction
+            List<String> comments = transcriptionEntity.getTranscriptionWorkflowEntities().stream()
+                .map(twe -> twe.getTranscriptionCommentEntities().stream()
+                    .map(TranscriptionCommentEntity::getComment))
+                .flatMap(list -> list.toList().stream()).collect(Collectors.toList());
+
+            // add comments mapped to transaction
+            comments.addAll(transcriptionEntity.getTranscriptionCommentEntities().stream().map(
+                TranscriptionCommentEntity::getComment).toList());
+            transcriptionResponse.setComments(comments);
 
             final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
                 .stream()
