@@ -8,7 +8,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.service.CaseService;
@@ -71,13 +71,13 @@ import static java.time.ZoneOffset.UTC;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.ACCEPT_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.AUTHORISE_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.COMPLETE_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.DOWNLOAD_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.IMPORT_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REJECT_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.ACCEPT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUTHORISE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.REQUEST_TO_TRANSCRIBER;
@@ -119,7 +119,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private final CaseService caseService;
     private final HearingsService hearingsService;
-    private final AuditService auditService;
+    private final AuditApi auditApi;
 
     private final UserIdentity userIdentity;
 
@@ -183,7 +183,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 ));
         }
 
-        auditService.recordAudit(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
+        auditApi.recordAudit(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
 
         RequestTranscriptionResponse requestTranscriptionResponse = new RequestTranscriptionResponse();
         requestTranscriptionResponse.setTranscriptionId(transcription.getId());
@@ -229,7 +229,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             case APPROVED -> {
                 notifyTranscriptionCompanyForCourthouse(courtCaseEntity);
                 notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED);
-                auditService.recordAudit(
+                auditApi.recordAudit(
                     AUTHORISE_TRANSCRIPTION,
                     userAccountEntity,
                     courtCaseEntity
@@ -237,10 +237,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             }
             case REJECTED -> {
                 notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED);
-                auditService.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+                auditApi.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
-            case WITH_TRANSCRIBER -> auditService.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
-            case COMPLETE -> auditService.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            case WITH_TRANSCRIBER -> auditApi.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            case COMPLETE -> auditApi.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
         }
     }
 
@@ -468,7 +468,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.getExternalObjectDirectoryEntities().add(externalObjectDirectoryEntity);
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
 
-        auditService.recordAudit(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
+        auditApi.recordAudit(IMPORT_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         var attachTranscriptResponse = new AttachTranscriptResponse();
         attachTranscriptResponse.setTranscriptionDocumentId(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()
@@ -497,7 +497,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
 
         final UUID externalLocation = externalObjectDirectoryEntity.getExternalLocation();
-        auditService.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
+        auditApi.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
 
         return DownloadTranscriptResponse.builder()
             .resource(new InputStreamResource(dataManagementApi.getBlobDataFromUnstructuredContainer(externalLocation)

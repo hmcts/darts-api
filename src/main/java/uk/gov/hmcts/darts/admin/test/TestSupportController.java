@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
@@ -179,7 +179,7 @@ public class TestSupportController {
         AuditEntity audit = new AuditEntity();
         audit.setCourtCase(savedCase);
         audit.setUser(userAccountRepository.getReferenceById(0));
-        Optional<AuditActivityEntity> foundAuditActivity = auditActivityRepository.findById(AuditActivityEnum.valueOf(
+        Optional<AuditActivityEntity> foundAuditActivity = auditActivityRepository.findById(AuditActivity.valueOf(
             auditActivity).getId());
 
         if (foundAuditActivity.isPresent()) {

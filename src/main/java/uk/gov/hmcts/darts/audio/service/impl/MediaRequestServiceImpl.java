@@ -23,8 +23,9 @@ import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity_;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -59,13 +60,13 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     private final HearingRepository hearingRepository;
     private final UserAccountRepository userAccountRepository;
+    private final UserIdentity userIdentity;
     private final MediaRequestRepository mediaRequestRepository;
     private final EntityManager entityManager;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final DataManagementApiImpl dataManagementApi;
     private final NotificationApi notificationApi;
-
-    private final AuditService auditService;
+    private final AuditApi auditApi;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -100,13 +101,15 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional
     @Override
     public MediaRequestEntity saveAudioRequest(AudioRequestDetails request) {
-        return saveAudioRequestToDb(
+        MediaRequestEntity mediaRequest = saveAudioRequestToDb(
             hearingRepository.getReferenceById(request.getHearingId()),
             userAccountRepository.getReferenceById(request.getRequestor()),
             request.getStartTime(),
             request.getEndTime(),
             request.getRequestType()
         );
+        auditApi.recordAudit(AuditActivity.REQUEST_AUDIO, mediaRequest.getRequestor(), mediaRequest.getHearing().getCourtCase());
+        return mediaRequest;
     }
 
     @Override
@@ -238,15 +241,15 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public InputStream download(Integer mediaRequestId) {
-        return downloadOrPlayback(mediaRequestId, AuditActivityEnum.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
+        return downloadOrPlayback(mediaRequestId, AuditActivity.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
     }
 
     @Override
     public InputStream playback(Integer mediaRequestId) {
-        return downloadOrPlayback(mediaRequestId, AuditActivityEnum.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
+        return downloadOrPlayback(mediaRequestId, AuditActivity.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
     }
 
-    private InputStream downloadOrPlayback(Integer mediaRequestId, AuditActivityEnum auditActivityEnum, AudioRequestType expectedType) {
+    private InputStream downloadOrPlayback(Integer mediaRequestId, AuditActivity auditActivity, AudioRequestType expectedType) {
         MediaRequestEntity mediaRequestEntity = getMediaRequestById(mediaRequestId);
         validateMediaRequestType(mediaRequestEntity, expectedType);
         var transientObjectEntity = transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(
@@ -258,9 +261,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
         }
 
-        auditService.recordAudit(
-            auditActivityEnum,
-            mediaRequestEntity.getRequestor(),
+        auditApi.recordAudit(
+            auditActivity,
+            this.getUserAccount(),
             mediaRequestEntity.getHearing().getCourtCase()
         );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
@@ -280,5 +283,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestEntity.setOutputFilename(fileName);
         mediaRequestEntity.setOutputFormat(audioRequestOutputFormat);
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+    }
+
+    private UserAccountEntity getUserAccount() {
+        return userIdentity.getUserAccount();
     }
 }

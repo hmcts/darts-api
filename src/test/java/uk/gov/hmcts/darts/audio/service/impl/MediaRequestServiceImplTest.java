@@ -15,7 +15,9 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -76,7 +78,9 @@ class MediaRequestServiceImplTest {
     @Mock
     private NotificationApi notificationApi;
     @Mock
-    private AuditService auditService;
+    private AuditApi auditApi;
+    @Mock
+    private UserIdentity userIdentity;
 
     private HearingEntity mockHearingEntity;
     private MediaRequestEntity mockMediaRequestEntity;
@@ -134,12 +138,14 @@ class MediaRequestServiceImplTest {
         when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
         when(mockMediaRequestRepository.saveAndFlush(any(MediaRequestEntity.class))).thenReturn(mockMediaRequestEntity);
         when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
+        doNothing().when(auditApi).recordAudit(any(), any(), any());
         var request = mediaRequestService.saveAudioRequest(requestDetails);
 
         assertEquals(request.getId(), mockMediaRequestEntity.getId());
         verify(mockHearingRepository).getReferenceById(hearingId);
         verify(mockMediaRequestRepository).saveAndFlush(any(MediaRequestEntity.class));
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
+        verify(auditApi).recordAudit(AuditActivity.REQUEST_AUDIO, mockUserAccountEntity, mockHearingEntity.getCourtCase());
     }
 
     @SneakyThrows
@@ -242,7 +248,7 @@ class MediaRequestServiceImplTest {
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
-        doNothing().when(auditService).recordAudit(any(), any(), any());
+        doNothing().when(auditApi).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
@@ -356,7 +362,7 @@ class MediaRequestServiceImplTest {
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
-        doNothing().when(auditService).recordAudit(any(), any(), any());
+        doNothing().when(auditApi).recordAudit(any(), any(), any());
 
         when(dataManagementApi.getBlobDataFromOutboundContainer(blobUuid))
             .thenReturn(BinaryData.fromBytes(DUMMY_FILE_CONTENT.getBytes()));
