@@ -7,6 +7,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -62,7 +64,7 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setFrom(transcriptionEntity.getCreatedBy().getUsername());
 
             if (transcriptionEntity.getTranscriptionStatus() != null) {
-                transcriptionResponse.setStatus(transcriptionEntity.getTranscriptionStatus().getStatusType());
+                transcriptionResponse.setStatus(transcriptionEntity.getTranscriptionStatus().getDisplayName());
             }
 
             transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
@@ -72,6 +74,15 @@ public class TranscriptionResponseMapper {
                 .map(twe -> twe.getTranscriptionCommentEntities().stream()
                     .map(TranscriptionCommentEntity::getComment))
                 .flatMap(list -> list.toList().stream()).collect(Collectors.toList());
+
+            // if we have at least one workflow then take the first one and set the workflow from and
+            // the date the transcription was received
+            Optional<TranscriptionWorkflowEntity> transcriptionWorkflow
+                = transcriptionEntity.getTranscriptionWorkflowEntities().stream().findFirst();
+            if (transcriptionWorkflow.isPresent()) {
+                transcriptionResponse.setFrom(transcriptionWorkflow.get().getWorkflowActor().getUsername());
+                transcriptionResponse.setReceived(transcriptionWorkflow.get().getWorkflowTimestamp());
+            }
 
             // add comments mapped to transaction
             comments.addAll(transcriptionEntity.getTranscriptionCommentEntities().stream().map(

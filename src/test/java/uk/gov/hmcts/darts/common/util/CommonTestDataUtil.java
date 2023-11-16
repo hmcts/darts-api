@@ -206,10 +206,14 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
-        return createTranscriptionList(hearing, true);
+        return createTranscriptionList(hearing, true, true);
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
+        return createTranscriptionList(hearing,  generateStatus, true);
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtCase(hearing.getCourtCase());
         transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
@@ -221,12 +225,16 @@ public class CommonTestDataUtil {
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
         transcription.setTranscriptionCommentEntities(createTranscriptionComments());
-        transcription.setTranscriptionWorkflowEntities(createTranscriptionWorkflow());
+
+        if (!excludeWorkflow) {
+            transcription.setTranscriptionWorkflowEntities(createTranscriptionWorkflow());
+        }
 
         if (generateStatus) {
             TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
             transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
             transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
+            transcriptionStatus.setDisplayName(TranscriptionStatusEnum.APPROVED.name());
             transcription.setTranscriptionStatus(transcriptionStatus);
         }
         return List.of(transcription);
@@ -241,13 +249,16 @@ public class CommonTestDataUtil {
     }
 
     private static List<TranscriptionWorkflowEntity> createTranscriptionWorkflow() {
-        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
         TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
         transcriptionWorkflowEntity.getTranscriptionCommentEntities().addAll(createTranscriptionComments("workflowcommenta"));
+        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcriptionWorkflowEntity.setWorkflowActor(createUserAccount("workflow user"));
 
         TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = new TranscriptionWorkflowEntity();
-        transcriptionWorkflowEntity.getTranscriptionCommentEntities().addAll(createTranscriptionComments("workflowcommentb"));
+        transcriptionWorkflowEntity2.getTranscriptionCommentEntities().addAll(createTranscriptionComments("workflowcommentb"));
+        transcriptionWorkflowEntity2.setWorkflowActor(createUserAccount("workflow user 2"));
 
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
         transcriptionWorkflowEntities.add(transcriptionWorkflowEntity);
         transcriptionWorkflowEntities.add(transcriptionWorkflowEntity2);
         return transcriptionWorkflowEntities;
@@ -269,8 +280,12 @@ public class CommonTestDataUtil {
     }
 
     public UserAccountEntity createUserAccount() {
+        return createUserAccount("testUsername");
+    }
+
+    public UserAccountEntity createUserAccount(String username) {
         UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setUsername("testUsername");
+        userAccount.setUsername(username);
         userAccount.setEmailAddress("test@test.com");
         return userAccount;
     }

@@ -82,9 +82,13 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
         TranscriptionWorkflowEntity workflowaEntity = new TranscriptionWorkflowEntity();
         addCommentsToWorkflow(workflowaEntity, "workflowacomment", 2);
+        workflowaEntity.setWorkflowActor(transcription.getCreatedBy());
+        workflowaEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
 
         TranscriptionWorkflowEntity workflowbEntity = new TranscriptionWorkflowEntity();
         addCommentsToWorkflow(workflowbEntity, "workflowbcomment", 2);
+        workflowbEntity.setWorkflowActor(transcription.getCreatedBy());
+        workflowbEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
 
         transcription.setTranscriptionWorkflowEntities(Arrays.asList(workflowaEntity, workflowbEntity));
         transcription.setTranscriptionCommentEntities(Arrays.asList(commentEntity, commentEntity2));
