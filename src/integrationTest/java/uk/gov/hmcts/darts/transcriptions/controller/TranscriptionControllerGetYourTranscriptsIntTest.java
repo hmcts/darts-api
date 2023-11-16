@@ -59,7 +59,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest {
         systemUser = authorisationStub.getSystemUser();
         testUser = authorisationStub.getTestUser();
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 

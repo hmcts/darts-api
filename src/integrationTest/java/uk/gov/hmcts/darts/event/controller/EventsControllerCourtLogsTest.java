@@ -5,15 +5,23 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.event.model.CourtLogsPostRequestBody;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -22,14 +30,20 @@ import java.net.URI;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateTime;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 
 @AutoConfigureMockMvc
+@Transactional
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class EventsControllerCourtLogsTest extends IntegrationBase {
 
     public static final String NEW_CASE = "Case0000001";
@@ -55,6 +69,9 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
     @BeforeEach
     void setUp() {
         dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
@@ -63,6 +80,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             SOME_COURTROOM,
             SOME_DATE_TIME.toLocalDate()
         );
+
     }
 
     @Test
@@ -72,6 +90,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             .content(objectMapper.writeValueAsBytes(createRequestBody()));
 
         Assertions.assertEquals(0, getAllLogEventsMatchingText().size(), "Precondition failed");
+
+        setupExternalUserForCourthouse(null);
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
@@ -129,6 +149,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Test
     void courtLogsGet() throws Exception {
+        setupExternalUserForCourthouse(null);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, "Swansea")
@@ -163,6 +184,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
 
+        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, courthouseName)
             .queryParam(CASE_NUMBER, caseNumber)
@@ -195,6 +218,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
         String caseNumber = hearingEntity.getCourtCase().getCaseNumber();
+
+        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, courthouseName)
@@ -233,6 +258,8 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         String courthouseName = hearingEntity.getCourtCase().getCourthouse().getCourthouseName();
 
+        setupExternalUserForCourthouse(hearingEntity.getCourtCase().getCourthouse());
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam(COURTHOUSE, SOME_COURTHOUSE)
             .queryParam(CASE_NUMBER, NEW_CASE)
@@ -248,5 +275,34 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
             .andExpect(MockMvcResultMatchers.jsonPath("$", Matchers.hasSize(2)));
     }
 
+    @Test
+    void courtLogsEndpointShouldReturnForbiddenError() throws Exception {
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam(COURTHOUSE, SOME_COURTHOUSE)
+            .queryParam(CASE_NUMBER, NEW_CASE)
+            .queryParam(START_DATE_TIME, "2022-07-01T09:00:00+01")
+            .queryParam(END_DATE_TIME, "2024-07-01T12:00:00+01")
+            .contentType(MediaType.APPLICATION_JSON_VALUE);
+
+        MvcResult response = mockMvc.perform(requestBuilder)
+            .andExpect(MockMvcResultMatchers.status().isForbidden())
+            .andReturn();
+
+        String actualResponse = response.getResponse().getContentAsString();
+
+        String expectedResponse = """
+            {"type":"AUTHORISATION_107","title":"Failed to check authorisation","status":403}
+            """;
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
+    private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {
+        String guid = UUID.randomUUID().toString();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
+    }
 }

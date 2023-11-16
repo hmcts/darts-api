@@ -12,7 +12,9 @@ public enum SecurityRoleEnum {
     JUDGE(3),
     TRANSCRIBER(4),
     LANGUAGE_SHOP_USER(5),
-    RCJ_APPEALS(6);
+    RCJ_APPEALS(6),
+    XHIBIT(7),
+    CPP(8);
 
     private final Integer id;
 

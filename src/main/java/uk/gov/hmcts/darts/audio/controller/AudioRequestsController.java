@@ -60,7 +60,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> deleteAudioRequest(Integer mediaRequestId) {
         mediaRequestService.deleteAudioRequest(mediaRequestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -69,7 +70,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
         mediaRequestService.updateAudioRequestLastAccessedTimestamp(mediaRequestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -91,7 +93,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
         AddAudioResponse addAudioResponse;
         MediaRequestEntity audioRequest;
@@ -110,7 +113,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Resource> playback(Integer mediaRequestId) {
         InputStream audioFileStream = mediaRequestService.playback(mediaRequestId);
 
@@ -119,6 +123,5 @@ public class AudioRequestsController implements AudioRequestsApi {
             HttpStatus.OK
         );
     }
-
 
 }

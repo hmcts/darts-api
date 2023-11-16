@@ -68,6 +68,10 @@ java:
           alias: SYSTEM_USER_EMAIL
         - name: redis-connection-string
           alias: REDIS_CONNECTION_STRING
+        - name: AzureAdB2CFuncTestROPCGlobalUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
+        - name: AzureAdB2CFuncTestROPCGlobalPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -148,6 +152,10 @@ function:
           alias: SYSTEM_USER_EMAIL
         - name: redis-connection-string
           alias: REDIS_CONNECTION_STRING
+        - name: AzureAdB2CFuncTestROPCGlobalUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
+        - name: AzureAdB2CFuncTestROPCGlobalPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require

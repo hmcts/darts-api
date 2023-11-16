@@ -40,12 +40,12 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(createdCase.getCourthouse());
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
     void testForbidden() throws Exception {
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -58,7 +58,7 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
             """;
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }

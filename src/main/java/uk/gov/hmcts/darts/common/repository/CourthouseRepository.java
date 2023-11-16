@@ -22,9 +22,10 @@ public interface CourthouseRepository extends JpaRepository<CourthouseEntity, In
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.courthouseEntities courthouse
         JOIN securityGroup.securityRoleEntity securityRole
-        WHERE lower(userAccount.emailAddress) = lower(:emailAddress)
+        WHERE (lower(userAccount.emailAddress) = lower(:emailAddress) or
+        userAccount.accountGuid = :guid)
         AND securityRole.id IN (:roleIds)
         """)
-    List<CourthouseEntity> findAuthorisedCourthousesForEmailAddress(String emailAddress, Set<Integer> roleIds);
+    List<CourthouseEntity> findAuthorisedCourthousesForEmailAddressOrGuid(String emailAddress, Set<Integer> roleIds, String guid);
 
 }

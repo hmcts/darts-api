@@ -120,7 +120,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         transcriptionId = transcriptionEntity.getId();
 
         testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         doNothing().when(mockAuditApi)
@@ -129,7 +128,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
     @Test
     void downloadTranscriptShouldReturnForbiddenError() throws Exception {
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -144,7 +143,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

@@ -110,7 +110,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         hearing = authorisationStub.getHearingEntity();
         testUser = authorisationStub.getTestUser();
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 

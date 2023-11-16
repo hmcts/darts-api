@@ -45,7 +45,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingId);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
@@ -56,7 +57,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Resource> preview(Integer mediaId) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
@@ -66,7 +68,8 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<byte[]> preview2(Integer mediaId,
                                            @RequestHeader(value = "Range", required = false) String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);

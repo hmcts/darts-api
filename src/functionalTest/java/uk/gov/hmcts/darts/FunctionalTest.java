@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.configuration.AccessTokenClientConfiguration;
 import uk.gov.hmcts.darts.configuration.AzureAdAuthenticationProperties;
 import uk.gov.hmcts.darts.configuration.AzureAdB2CAuthenticationProperties;
+import uk.gov.hmcts.darts.configuration.AzureAdB2CGlobalAuthenticationProperties;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,7 +26,8 @@ import java.text.MessageFormat;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @SpringBootTest(
-    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class, AzureAdB2CAuthenticationProperties.class },
+    classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
+        AzureAdB2CAuthenticationProperties.class, AzureAdB2CGlobalAuthenticationProperties.class },
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
@@ -36,6 +38,9 @@ public class FunctionalTest {
 
     @Autowired
     private AccessTokenClient externalAccessTokenClient;
+
+    @Autowired
+    private AccessTokenClient externalGlobalAccessTokenClient;
 
     @Autowired
     private AccessTokenClient internalAccessTokenClient;
@@ -55,6 +60,10 @@ public class FunctionalTest {
 
     public RequestSpecification buildRequestWithExternalAuth() {
         return buildRequestWithAuth(externalAccessTokenClient);
+    }
+
+    public RequestSpecification buildRequestWithExternalGlobalAccessAuth() {
+        return buildRequestWithAuth(externalGlobalAccessTokenClient);
     }
 
     public RequestSpecification buildRequestWithInternalAuth() {
