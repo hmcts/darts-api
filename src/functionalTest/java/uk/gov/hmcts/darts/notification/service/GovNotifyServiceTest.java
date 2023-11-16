@@ -106,9 +106,10 @@ class GovNotifyServiceTest {
     @Test
     void transcriptionRequestApproved() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED.toString());
-        assertEquals("Transcript Request Approved", emailResponse.getSubject());
+        assertEquals("Your transcript request was approved", emailResponse.getSubject());
         compare("""
                     Your transcript request for case ID TheCaseId has been approved.
+
                     We’ll notify you when it’s available to download.""", emailResponse);
     }
 
