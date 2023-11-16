@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.audit.service.impl;
 
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
@@ -20,12 +21,15 @@ import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class AuditServiceImpl implements AuditService {
-    private AuditActivityRepository auditActivityRepository;
-    private AuditRepository auditRepository;
+    private final AuditActivityRepository auditActivityRepository;
+    private final AuditRepository auditRepository;
+
+    @Value("${darts.audit.application-server}")
+    private String applicationServer;
 
     @Transactional
     @Override
@@ -34,7 +38,7 @@ public class AuditServiceImpl implements AuditService {
         auditEntity.setCourtCase(courtCase);
         auditEntity.setAuditActivity(auditActivityRepository.getReferenceById(activity.getId()));
         auditEntity.setUser(userAccountEntity);
-        auditEntity.setApplicationServer("not available");
+        auditEntity.setApplicationServer(applicationServer);
         auditEntity.setAdditionalData(null);
         auditEntity.setCreatedBy(userAccountEntity);
         auditEntity.setLastModifiedBy(userAccountEntity);
