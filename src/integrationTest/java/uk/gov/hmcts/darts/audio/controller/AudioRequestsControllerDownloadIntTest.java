@@ -80,7 +80,6 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
     void setUp() {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
     }
 
     @Test
