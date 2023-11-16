@@ -150,10 +150,11 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
-
+        log.info("Starting validateTranscriptionRequestValues");
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
+            log.info("Found hearing");
             HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
             if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
                 log.error("Transcription could not be requested. No audio found for hearing id {}",
@@ -161,12 +162,18 @@ public class TranscriptionController implements TranscriptionApi {
                 throw new DartsApiException(AUDIO_NOT_FOUND);
             } else {
                 //check times
+                log.info("Checking times");
                 OffsetDateTime requestStartDateTime = transcriptionRequestDetails.getStartDateTime();
                 OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime();
+                log.info("requestStartDateTime" + requestStartDateTime);
+                log.info("requestEndDateTime" + requestEndDateTime);
+                log.info("hearing.getMediaList().get(0).getStart()" + hearing.getMediaList().get(0).getStart());
+                log.info("hearing.getMediaList().get(0).getEnd()" + hearing.getMediaList().get(0).getEnd());
                 if (requestStartDateTime != null && requestEndDateTime != null) {
                     boolean validTimes = hearing.getMediaList().stream().anyMatch(m -> m.getStart().isBefore(
                         requestStartDateTime) && m.getStart().isBefore(requestEndDateTime)
                         && m.getEnd().isAfter(requestStartDateTime) && m.getEnd().isAfter(requestEndDateTime));
+                    log.info("checked times validTimes " + validTimes);
                     if (!validTimes) {
                         log.error(
                             "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
