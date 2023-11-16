@@ -47,7 +47,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
 
     @Transactional
-    public List<MediaRequestEntity> delete() {
+    public List<MediaRequestEntity> markForDeletion() {
         List<MediaRequestEntity> deletedValues = new ArrayList<>();
         OffsetDateTime deletionStartDateTime = this.deletionDayCalculator.getStartDateForDeletion();
 

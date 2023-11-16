@@ -28,7 +28,7 @@ public class OutboundDataStoreSoftDeleterAutomatedTask extends AbstractLockableA
 
     @Override
     protected void runTask() {
-        outboundDataStoreSoftDeleter.delete();
+        outboundDataStoreSoftDeleter.markForDeletion();
     }
 
     @Override

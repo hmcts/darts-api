@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +38,9 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public void deleteBlobData(String containerName, UUID blobId) {
+    public Response<Void> deleteBlobData(String containerName, UUID blobId) {
         log.info("Delete blob data method executed");
+        return null;
     }
 
     private void logStubUsageWarning() {

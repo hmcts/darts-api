@@ -14,7 +14,7 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationServiceGivenBuilder;
 import uk.gov.hmcts.darts.audio.service.ExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.service.InboundUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.service.impl.ExternalDataStoreDeleterImpl;
-import uk.gov.hmcts.darts.audio.service.impl.OutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.service.impl.OutboundDataStoreDeleterImpl;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -63,7 +63,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     @Autowired
     private InboundUnstructuredDataStoreDeleter inboundUnstructuredDataStoreDeleter;
     @Autowired
-    private OutboundDataStoreDeleter outboundDataStoreDeleter;
+    private OutboundDataStoreDeleterImpl outboundDataStoreDeleter;
     private UserAccountEntity requestor;
     private HearingEntity hearing;
 

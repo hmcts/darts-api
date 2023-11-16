@@ -12,13 +12,13 @@ public class ExternalDataStoreDeleterImpl implements ExternalDataStoreDeleter {
 
 
     private final InboundUnstructuredDataStoreDeleter inboundUnstructuredDataStoreDeleter;
-    private final OutboundDataStoreDeleter outboundDataStoreDeleter;
+    private final OutboundDataStoreDeleterImpl outboundDataStoreDeleter;
 
 
     @Override
     @Transactional
     public void delete() {
-        this.inboundUnstructuredDataStoreDeleter.delete();
-        this.outboundDataStoreDeleter.delete();
+        inboundUnstructuredDataStoreDeleter.delete();
+        outboundDataStoreDeleter.delete();
     }
 }

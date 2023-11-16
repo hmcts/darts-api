@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +18,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,26 +31,24 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class InboundOutboundDeleterTest {
+class InboundUnstructuredDataStoreStoreDeleterImplTest {
 
     @Mock
-    private DataManagementDao dataManagementDao;
+    private DataManagementApi dataManagementApi;
     private InboundUnstructuredDataStoreDeleter deleter;
-    @Mock
-    private BlobContainerClient blobContainerClient;
+
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    @Mock
-    private BlobClient blobClient;
+
     @Mock
     private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
-    @Mock
-    private DataManagementConfiguration dataManagementConfiguration;
+
     private ObjectDirectoryStatusEntity markedForDeletionStatus;
     private ExternalLocationTypeEntity inboundLocation;
     private ExternalLocationTypeEntity unstructuredLocation;
@@ -64,11 +59,10 @@ class InboundOutboundDeleterTest {
     @BeforeEach
     public void setUp() {
         deleter = new InboundUnstructuredDataStoreStoreDeleterImpl(
-            dataManagementDao,
+            dataManagementApi,
             externalObjectDirectoryRepository,
             objectDirectoryStatusRepository,
             externalLocationTypeRepository,
-            dataManagementConfiguration,
             userAccountRepository
         );
 
@@ -129,8 +123,7 @@ class InboundOutboundDeleterTest {
             .thenReturn(unstructuredData);
 
 
-        when(dataManagementDao.getBlobContainerClient(any())).thenReturn(blobContainerClient);
-        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        doNothing().when(dataManagementApi).deleteBlobDataFromInboundContainer(any());
 
 
         List<ExternalObjectDirectoryEntity> deletedItems = deleter.delete();

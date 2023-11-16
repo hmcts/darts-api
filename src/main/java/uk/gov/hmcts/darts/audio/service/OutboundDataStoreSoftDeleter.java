@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface OutboundDataStoreSoftDeleter {
 
-    List<MediaRequestEntity> delete();
+    List<MediaRequestEntity> markForDeletion();
 }

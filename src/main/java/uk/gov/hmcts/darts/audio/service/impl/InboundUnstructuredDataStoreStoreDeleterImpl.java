@@ -1,106 +1,106 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.azure.storage.blob.BlobContainerClient;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.exception.ExternalDataDeleterException;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.service.InboundUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.exception.AzureException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class InboundUnstructuredDataStoreStoreDeleterImpl implements InboundUnstructuredDataStoreDeleter {
 
 
-    private final DataManagementDao dataManagementDao;
+    private final DataManagementApi dataManagementApi;
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
-    private final DataManagementConfiguration dataManagementConfiguration;
 
     private final UserAccountRepository userAccountRepository;
 
 
-    public InboundUnstructuredDataStoreStoreDeleterImpl(DataManagementDao dataManagementDao,
-                                                        ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                                        ObjectDirectoryStatusRepository objectDirectoryStatusRepository,
-                                                        ExternalLocationTypeRepository externalLocationTypeRepository,
-                                                        DataManagementConfiguration dataManagementConfiguration, UserAccountRepository userAccountRepository) {
-        this.dataManagementDao = dataManagementDao;
-        this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
-        this.objectDirectoryStatusRepository = objectDirectoryStatusRepository;
-        this.externalLocationTypeRepository = externalLocationTypeRepository;
-        this.dataManagementConfiguration = dataManagementConfiguration;
-        this.userAccountRepository = userAccountRepository;
-    }
-
     @Transactional
     public List<ExternalObjectDirectoryEntity> delete() {
 
-        Optional<UserAccountEntity> systemUser = getSystemUser();
-
-        if (systemUser.isEmpty()) {
-            throw new DartsApiException(ExternalDataDeleterException.MISSING_SYSTEM_USER);
-        }
-
-        ObjectDirectoryStatusEntity markedForDeletionStatus = getMarkedForDeletionStatus();
-        List<ExternalObjectDirectoryEntity> inboundData = deleteExternalData(
-            externalLocationTypeRepository.getReferenceById(INBOUND.getId()), markedForDeletionStatus,
-            dataManagementConfiguration.getInboundContainerName(),
-            systemUser.get()
+        List<ExternalObjectDirectoryEntity> deleteExternalData = deleteExternalData(
+            externalLocationTypeRepository.getReferenceById(INBOUND.getId()), INBOUND
         );
 
         List<ExternalObjectDirectoryEntity> unstructuredData = deleteExternalData(
             externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId()),
-            markedForDeletionStatus,
-            dataManagementConfiguration.getUnstructuredContainerName(),
-            systemUser.get()
+            UNSTRUCTURED
         );
 
-        inboundData.addAll(unstructuredData);
+        deleteExternalData.addAll(unstructuredData);
 
-        return inboundData;
+        return deleteExternalData;
 
     }
 
     private List<ExternalObjectDirectoryEntity> deleteExternalData(ExternalLocationTypeEntity externalLocationType,
-                                                                   ObjectDirectoryStatusEntity markedForDeletionStatus,
-                                                                   String containerName, UserAccountEntity systemUser) {
-        List<ExternalObjectDirectoryEntity> externalData = externalObjectDirectoryRepository.findByExternalLocationTypeAndMarkedForDeletion(
+                                                                   ExternalLocationTypeEnum locationType) {
+        List<ExternalObjectDirectoryEntity> entitiesForDeletion = externalObjectDirectoryRepository.findByExternalLocationTypeAndMarkedForDeletion(
             externalLocationType,
-            markedForDeletionStatus
+            getMarkedForDeletionStatus()
         );
 
-        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
 
+        UserAccountEntity systemUser = getSystemUser();
         ObjectDirectoryStatusEntity deletedStatus = getDeletedStatus();
-        for (ExternalObjectDirectoryEntity data : externalData) {
-            dataManagementDao.getBlobClient(containerClient, data.getExternalLocation()).delete();
-            data.setStatus(deletedStatus);
-            data.setLastModifiedBy(systemUser);
+
+        for (ExternalObjectDirectoryEntity entityToBeDeleted : entitiesForDeletion) {
+            UUID externalLocation = entityToBeDeleted.getExternalLocation();
+            log.debug(
+                "Deleting data from container: {} with location: {} for entity with id: {} and status: {}",
+                locationType, externalLocation, entityToBeDeleted.getId(), entityToBeDeleted.getStatus()
+            );
+            try {
+                if (INBOUND == locationType) {
+                    dataManagementApi.deleteBlobDataFromInboundContainer(externalLocation);
+                } else if (UNSTRUCTURED == locationType) {
+                    dataManagementApi.deleteBlobDataFromUnstructuredContainer(externalLocation);
+                }
+
+                entityToBeDeleted.setStatus(deletedStatus);
+                entityToBeDeleted.setLastModifiedBy(systemUser);
+            } catch (AzureException e) {
+                log.error("could not delete from inbound/unstructured container", e);
+            }
+
         }
-        return externalData;
+        return entitiesForDeletion;
     }
 
-    private Optional<UserAccountEntity> getSystemUser() {
-        return userAccountRepository.findById(0);
+    private UserAccountEntity getSystemUser() {
+
+        Optional<UserAccountEntity> systemUser = userAccountRepository.findById(0);
+        if (systemUser.isEmpty()) {
+            throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
+        }
+        return systemUser.get();
     }
 
 

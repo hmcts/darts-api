@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
 
@@ -24,14 +25,18 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class DataManagementServiceImplTest {
 
-    @InjectMocks
-    private DataManagementServiceImpl dataManagementService;
-    @Mock
-    private DataManagementDao dataManagementDao;
     public static final String BLOB_CONTAINER_NAME = "dummy_container";
     public static final UUID BLOB_ID = UUID.randomUUID();
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
+    @InjectMocks
+    private DataManagementServiceImpl dataManagementService;
+    @Mock
+    private DataManagementDao dataManagementDao;
+
+    @Mock
+    private DataManagementConfiguration dataManagementConfiguration;
+
     private BlobContainerClient blobContainerClient;
     private BlobClient blobClient;
 
@@ -63,10 +68,10 @@ class DataManagementServiceImplTest {
     void testDeleteBlobData() {
         Mockito.when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         Mockito.when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
-        Mockito.doNothing().when(blobClient).delete();
+        Mockito.when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(null);
 
         dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
 
-        verify(blobClient,times(1)).delete();
+        verify(blobClient, times(1)).deleteWithResponse(any(), any(), any(), any());
     }
 }

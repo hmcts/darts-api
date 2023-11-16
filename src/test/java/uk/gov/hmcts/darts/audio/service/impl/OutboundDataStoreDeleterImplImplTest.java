@@ -1,7 +1,5 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +13,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
-import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,37 +26,30 @@ import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OutboundDataStoreDeleterImplTest {
+class OutboundDataStoreDeleterImplImplTest {
     @Mock
-    DataManagementDao dataManagementDao;
+    DataManagementApi dataManagementApi;
     @Mock
     ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
-    @Mock
-    DataManagementConfiguration dataManagementConfiguration;
     @Mock
     UserAccountRepository userAccountRepository;
     @Mock
     TransientObjectDirectoryRepository transientObjectDirectoryRepository;
 
-    OutboundDataStoreDeleter deleter;
-
-    @Mock
-    private BlobContainerClient blobContainerClient;
+    OutboundDataStoreDeleterImpl deleter;
 
     private ObjectDirectoryStatusEntity markedForDeletionStatus;
 
-    @Mock
-    private BlobClient blobClient;
 
     @BeforeEach
     void setUp() {
-        this.deleter = new OutboundDataStoreDeleter(
-            dataManagementDao,
+        this.deleter = new OutboundDataStoreDeleterImpl(
+            dataManagementApi,
             objectDirectoryStatusRepository,
-            dataManagementConfiguration,
             userAccountRepository,
             transientObjectDirectoryRepository
         );
@@ -106,9 +96,7 @@ class OutboundDataStoreDeleterImplTest {
             outboundData);
 
 
-        when(dataManagementDao.getBlobContainerClient(any())).thenReturn(blobContainerClient);
-        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
-
+        doNothing().when(dataManagementApi).deleteBlobDataFromOutboundContainer(any());
 
         List<TransientObjectDirectoryEntity> deletedItems = deleter.delete();
 
