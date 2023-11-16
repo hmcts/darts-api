@@ -120,6 +120,10 @@ darts:
     active-directory-b2c-external-user-signin-policy: "B2C_1_darts_externaluser_signin"
     active-directory-b2c-external-user-passwordreset-policy: "B2C_1_darts_externaluser_password_reset"
     active-directory-justice-auth-uri: https://login.microsoftonline.com
+  data-management:
+    retention-period:
+      inbound:
+        arm-minimum: 24
   daily-list:
     housekeeping:
       enabled: true
@@ -164,6 +168,8 @@ darts:
     task:
       thread-pool-size: 5
       system-user-email: ${SYSTEM_USER_EMAIL:}
+      system-user-guid-map:
+        housekeeping: ecfd1f14-c9b6-4f15-94c7-cc60e53f2c7a
   testing-support-endpoints:
     enabled: ${TESTING_SUPPORT_ENDPOINTS_ENABLED:false}
   bank-holidays:
