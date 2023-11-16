@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
@@ -58,6 +59,15 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
             transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
             transcriptionResponse.setJudges(courtCase.getJudgeStringList());
+            transcriptionResponse.setFrom(transcriptionEntity.getCreatedBy().getUsername());
+
+            if (transcriptionEntity.getTranscriptionStatus() != null) {
+                transcriptionResponse.setStatus(transcriptionEntity.getTranscriptionStatus().getStatusType());
+            }
+
+            transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
+            transcriptionResponse.setComments(transcriptionEntity.getTranscriptionCommentEntities().stream().map(
+                TranscriptionCommentEntity::getComment).collect(Collectors.toList()));
 
             final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
                 .stream()

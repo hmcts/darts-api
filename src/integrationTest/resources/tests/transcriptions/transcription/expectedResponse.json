@@ -2,6 +2,13 @@
   "case_id": 1,
   "case_number": "1",
   "courthouse": "some-courthouse",
+  "status": "APPROVED",
+  "from": "IntegrationTest User",
+  "received": "2023-06-20T10:00:00Z",
+  "comments": [
+    "comment1",
+    "comment2"
+  ],
   "defendants": [],
   "judges": [
     "1judge1"

@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -203,6 +204,10 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
+        return createTranscriptionList(hearing, true);
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtCase(hearing.getCourtCase());
         transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
@@ -213,12 +218,14 @@ public class CommonTestDataUtil {
         transcription.setCreatedBy(createUserAccount());
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
-        transcription.setTranscriptionStatus(createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
+        transcription.setTranscriptionCommentEntities(createTranscriptionComments());
 
-        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
-        transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
-        transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
-        transcription.setTranscriptionStatus(transcriptionStatus);
+        if (generateStatus) {
+            TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+            transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
+            transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
+            transcription.setTranscriptionStatus(transcriptionStatus);
+        }
         return List.of(transcription);
     }
 
@@ -228,6 +235,17 @@ public class CommonTestDataUtil {
         transcriptionDocumentEntity.setFileName("test.doc");
         transcriptionDocumentEntities.add(transcriptionDocumentEntity);
         return transcriptionDocumentEntities;
+    }
+
+    private static List<TranscriptionCommentEntity> createTranscriptionComments() {
+        List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
+        TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
+        TranscriptionCommentEntity transcriptionCommentEntity2 = new TranscriptionCommentEntity();
+        transcriptionCommentEntity.setComment("comment1");
+        transcriptionCommentEntity2.setComment("comment2");
+        transcriptionCommentEntities.add(transcriptionCommentEntity);
+        transcriptionCommentEntities.add(transcriptionCommentEntity2);
+        return transcriptionCommentEntities;
     }
 
     public UserAccountEntity createUserAccount() {
