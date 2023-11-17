@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.CASE_NUMBER;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.PORTAL_URL;
 
 // These tests are functional in that they connect to the real external gov.uk notify service.
 // However, unlike other functional tests these will run against the locally spun up application.
@@ -37,10 +38,11 @@ class GovNotifyServiceTest {
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
 
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
-        assertEquals("New transcript request submitted and awaiting review", emailResponse.getSubject());
+        assertEquals("A new transcript is ready for you to review", emailResponse.getSubject());
         compare("""
                     There is a new transcript available for you to review.
-                    Sign into the DARTS Portal to access it.""", emailResponse);
+
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
     private static void compare(String expected, SendEmailResponse emailResponse) {
@@ -55,6 +57,7 @@ class GovNotifyServiceTest {
         govNotifyRequest.setTemplateId(templateId);
         govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
         parameterMap.put(CASE_NUMBER, "TheCaseId");
+        parameterMap.put(PORTAL_URL, "ThePortalURL");
         govNotifyRequest.setParameterMap(parameterMap);
 
         return govNotifyService.sendNotification(govNotifyRequest);
@@ -70,24 +73,27 @@ class GovNotifyServiceTest {
     @Test
     void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
-        assertEquals("New transcript request", emailResponse.getSubject());
+        assertEquals("New DARTS transcription request", emailResponse.getSubject());
         compare("""
-                    You have received a new transcription request from the DARTS Portal.\s
+                    You have received a new transcription request from the DARTS Portal.
 
-                    To access the request, please [sign in to the DARTS Portal]""", emailResponse);
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
 
     @Test
     void requestedAudioIsAvailable() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
-        assertEquals("DARTS: Requested Audio is Available", emailResponse.getSubject());
-        compare("""
-                    Hello,
-                    The audio you requested for case TheCaseId is now available.
-                    Please visit the My Audio section within DARTS to access your requested Audio.
-                    Regards
-                    DARTS""", emailResponse);
+        assertEquals("Your requested audio is available", emailResponse.getSubject());
+        compare(
+            """
+                The audio recording for case number TheCaseId is ready.
+
+                [Sign into the DARTS Portal](ThePortalURL) to access it.
+
+                The recording will expire in 2 working days (this does not include Saturdays and Sundays) but you can extend it by opening the file.""",
+            emailResponse
+        );
     }
 
     @Test
