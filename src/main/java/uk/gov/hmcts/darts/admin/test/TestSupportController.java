@@ -72,7 +72,6 @@ public class TestSupportController {
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
-        auditRepository.deleteAll();
         var caseIds = getCaseIdsToBeDeleted(session);
         var hearingIds = hearingIdsToBeDeleted(session, caseIds);
         var eventIds = eventIdsToBeDeleted(session, hearingIds);
@@ -81,13 +80,14 @@ public class TestSupportController {
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
 
+        removeCaseAudit(session, caseIds);
         removeCaseJudgeJoins(session, caseIds);
         removeCaseDefence(session, caseIds);
         removeCaseDefendant(session, caseIds);
         removeCaseProsecutor(session, caseIds);
         removeCases(session, caseIds);
 
-        List nodeRegisterIds = nodeRegisterIdsToBeDeleted(session, courtroomTrash);
+        List<Integer> nodeRegisterIds = nodeRegisterIdsToBeDeleted(session, courtroomTrash);
         removeNodeRegisters(nodeRegisterIds);
 
         removeDailyLists(session);
@@ -100,7 +100,7 @@ public class TestSupportController {
         session.close();
     }
 
-    private void removeUserCourthousePermissions(Session session,List cthIds) {
+    private void removeUserCourthousePermissions(Session session,List<Integer> cthIds) {
         session.createNativeQuery("""
                                              delete from darts.security_group_courthouse_ae where cth_id in (?)
                                              """, Integer.class)
@@ -213,7 +213,7 @@ public class TestSupportController {
         courtroomTrash.add(courtroom.getId());
     }
 
-    private void removeCases(Session session, List casIds) {
+    private void removeCases(Session session, List<Integer> casIds) {
         session.createNativeQuery("""
                                       delete from darts.court_case where cas_id in (?)
                                       """, Integer.class)
@@ -221,15 +221,15 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-    private void removeHearings(Session session, List heaIds) {
+    private void removeHearings(Session session, List<Integer> heaIds) {
         session.createNativeQuery("""
                                       delete from darts.hearing where hea_id in (?)
-                                      """)
+                                      """, Integer.class)
             .setParameter(1, heaIds)
             .executeUpdate();
     }
 
-    private void removeEvents(Session session, List eveIds) {
+    private void removeEvents(Session session, List<Integer> eveIds) {
         session.createNativeQuery("""
                                       delete from darts.event where event.eve_id in (?)
                                       """, Integer.class)
@@ -237,7 +237,7 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-    private void removeHearingEventJoins(Session session, List heaIds) {
+    private void removeHearingEventJoins(Session session, List<Integer> heaIds) {
         session.createNativeQuery("""
                                       delete from darts.hearing_event_ae where hea_id in (?)
                                       """, Integer.class)
@@ -245,7 +245,15 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-    private void removeCaseJudgeJoins(Session session, List caseIds) {
+    private void removeCaseAudit(Session session, List<Integer> caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.audit where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeCaseJudgeJoins(Session session, List<Integer> caseIds) {
         session.createNativeQuery("""
                                       delete from darts.case_judge_ae where cas_id in (?)
                                       """, Integer.class)
@@ -253,7 +261,7 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-    private void removeCaseDefence(Session session, List caseIds) {
+    private void removeCaseDefence(Session session, List<Integer> caseIds) {
         session.createNativeQuery("""
                                       delete from darts.defence where cas_id in (?)
                                       """, Integer.class)
@@ -261,7 +269,7 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-    private void removeCaseDefendant(Session session, List caseIds) {
+    private void removeCaseDefendant(Session session, List<Integer> caseIds) {
         session.createNativeQuery("""
                                       delete from darts.defendant where cas_id in (?)
                                       """, Integer.class)
@@ -269,7 +277,7 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-    private void removeCaseProsecutor(Session session, List caseIds) {
+    private void removeCaseProsecutor(Session session, List<Integer> caseIds) {
         session.createNativeQuery("""
                                       delete from darts.prosecutor where cas_id in (?)
                                       """, Integer.class)
@@ -281,7 +289,7 @@ public class TestSupportController {
         nodeRegistrationRepository.deleteAllById(nodeIds);
     }
 
-    private static List eventIdsToBeDeleted(Session session, List heaIds) {
+    private static List<Integer> eventIdsToBeDeleted(Session session, List<Integer> heaIds) {
         return session.createNativeQuery("""
                                              select eve_id from darts.hearing_event_ae where hea_id in (?)
                                              """, Integer.class)
@@ -289,7 +297,7 @@ public class TestSupportController {
             .getResultList();
     }
 
-    private static List hearingIdsToBeDeleted(Session session, List casIds) {
+    private static List<Integer> hearingIdsToBeDeleted(Session session, List<Integer> casIds) {
         return session.createNativeQuery("""
                                              select hea_id from darts.hearing where cas_id in (?)
                                              """, Integer.class)
@@ -297,7 +305,7 @@ public class TestSupportController {
             .getResultList();
     }
 
-    private static List nodeRegisterIdsToBeDeleted(Session session, List crtIds) {
+    private static List<Integer> nodeRegisterIdsToBeDeleted(Session session, List<Integer> crtIds) {
         return session.createNativeQuery("""
                                              select node_id from darts.node_register where ctr_id in (?)
                                              """, Integer.class)
@@ -305,7 +313,7 @@ public class TestSupportController {
             .getResultList();
     }
 
-    private static List getCaseIdsToBeDeleted(Session session) {
+    private static List<Integer> getCaseIdsToBeDeleted(Session session) {
         return session.createNativeQuery("""
                                              select cas_id from darts.court_case where case_number like 'func-%'
                                              """, Integer.class)

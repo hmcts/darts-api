@@ -19,8 +19,8 @@ import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
+import uk.gov.hmcts.darts.notification.helper.GovNotifyRequestHelper;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
-import uk.gov.hmcts.darts.notification.mapper.GovNotifyRequestMapper;
 import uk.gov.hmcts.darts.notification.service.GovNotifyService;
 import uk.gov.hmcts.darts.notification.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
@@ -40,6 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final CaseRepository caseRepository;
     private final GovNotifyService govNotifyService;
     private final TemplateIdHelper templateIdHelper;
+    private final GovNotifyRequestHelper govNotifyRequestHelper;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
     private static final List<NotificationStatus> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
         NotificationStatus.OPEN,
@@ -129,7 +130,7 @@ public class NotificationServiceImpl implements NotificationService {
 
             GovNotifyRequest govNotifyRequest = null;
             try {
-                govNotifyRequest = GovNotifyRequestMapper.map(notification, templateId);
+                govNotifyRequest = govNotifyRequestHelper.map(notification, templateId);
                 govNotifyService.sendNotification(govNotifyRequest);
                 updateNotificationStatus(notification, NotificationStatus.SENT);
             } catch (JsonProcessingException e) {

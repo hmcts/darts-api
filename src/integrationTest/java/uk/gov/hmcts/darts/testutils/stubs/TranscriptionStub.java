@@ -84,6 +84,7 @@ public class TranscriptionStub {
         TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
         transcriptionStatus.setId(statusEnum.getId());
         transcriptionStatus.setStatusType(statusEnum.name());
+        transcriptionStatus.setDisplayName(statusEnum.name());
         return transcriptionStatus;
     }
 

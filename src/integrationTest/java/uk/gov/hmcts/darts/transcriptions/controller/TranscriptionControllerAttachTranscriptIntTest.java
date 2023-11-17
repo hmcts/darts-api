@@ -117,7 +117,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         transcriptionId = transcriptionEntity.getId();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
-        transcriptionCompany = securityGroupRepository.findById(1).orElseThrow();
+        transcriptionCompany = securityGroupRepository.findById(-4).orElseThrow();
         transcriptionCompany.setCourthouseEntities(Set.of(authorisationStub.getCourthouseEntity()));
 
         UserAccountEntity testUser = authorisationStub.getTestUser();

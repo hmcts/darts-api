@@ -64,9 +64,9 @@ public class AuthorisationStub {
         testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
-        bristolStaff = securityGroupRepository.findById(20).orElseThrow();
+        bristolStaff = securityGroupRepository.findById(-2).orElseThrow();
         bristolStaff.setCourthouseEntities(Set.of(courthouseEntity));
-        bristolAppr = securityGroupRepository.findById(35).orElseThrow();
+        bristolAppr = securityGroupRepository.findById(-1).orElseThrow();
         bristolAppr.setCourthouseEntities(Set.of(courthouseEntity));
         testUser.getSecurityGroupEntities().addAll(List.of(bristolStaff, bristolAppr));
         dartsDatabaseStub.getUserAccountRepository().save(testUser);

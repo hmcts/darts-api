@@ -357,7 +357,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                                       TranscriptionEntity transcription) {
         TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
         transcriptionCommentEntity.setComment(workflowComment);
-        transcriptionCommentEntity.setTranscriptionWorkflowId(savedTranscriptionWorkFlow.getId());
+        transcriptionCommentEntity.setTranscriptionWorkflowId(savedTranscriptionWorkFlow);
         transcriptionCommentEntity.setTranscription(transcription);
         transcriptionCommentEntity.setLastModifiedBy(userAccount);
         transcriptionCommentEntity.setCreatedBy(userAccount);

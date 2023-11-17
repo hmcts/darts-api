@@ -1,11 +1,12 @@
-package uk.gov.hmcts.darts.notification.mapper;
+package uk.gov.hmcts.darts.notification.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.notification.NotificationConstants;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
@@ -13,9 +14,12 @@ import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@UtilityClass
+@Component
 @Slf4j
-public class GovNotifyRequestMapper {
+public class GovNotifyRequestHelper {
+
+    @Value("${darts.portal.url}")
+    private String portalUrl;
 
     public GovNotifyRequest map(NotificationEntity notification, String templateId) throws JsonProcessingException {
         GovNotifyRequest request = new GovNotifyRequest();
@@ -28,10 +32,7 @@ public class GovNotifyRequestMapper {
 
     private Map<String, String> createParameterMap(NotificationEntity notification) throws JsonProcessingException {
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
-        parameterMap.put(
-            NotificationConstants.ParameterMapValues.CASE_NUMBER,
-            String.valueOf(notification.getCourtCase().getCaseNumber())
-        );
+        addCommonParameters(notification, parameterMap);
         String templateValuesStr = notification.getTemplateValues();
         if (StringUtils.isNotBlank(templateValuesStr)) {
             Map<String, String> keyValues;
@@ -45,5 +46,16 @@ public class GovNotifyRequestMapper {
             parameterMap.putAll(keyValues);
         }
         return parameterMap;
+    }
+
+    private void addCommonParameters(NotificationEntity notification, Map<String, String> parameterMap) {
+        parameterMap.put(
+            NotificationConstants.ParameterMapValues.CASE_NUMBER,
+            String.valueOf(notification.getCourtCase().getCaseNumber())
+        );
+        parameterMap.put(
+            NotificationConstants.ParameterMapValues.PORTAL_URL,
+            portalUrl
+        );
     }
 }

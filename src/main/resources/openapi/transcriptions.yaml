@@ -694,6 +694,16 @@ components:
         courthouse:
           type: string
           example: Swansea
+        status:
+          type: string
+        from:
+          type: string
+        received:
+          type: string
+          format: date-time
+        comments:
+          items:
+            type: string
         defendants:
           type: array
           items:
