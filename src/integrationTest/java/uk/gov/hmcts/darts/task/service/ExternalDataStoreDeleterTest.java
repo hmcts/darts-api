@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
@@ -58,8 +57,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private BlobContainerClient blobContainerClient;
     @MockBean
     private DataManagementDao dataManagementDao;
-    @Autowired
-    private DataManagementConfiguration dataManagementConfiguration;
+
     @Autowired
     private InboundUnstructuredDataStoreDeleter inboundUnstructuredDataStoreDeleter;
     @Autowired
