@@ -633,8 +633,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertAudit(1);
     }
 
-
-
     private TranscriptionRequestDetails createTranscriptionRequestDetails(Integer hearingId,
                                                                           Integer caseId,
                                                                           Integer urgencyId,

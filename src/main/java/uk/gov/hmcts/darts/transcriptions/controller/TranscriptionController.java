@@ -178,6 +178,7 @@ public class TranscriptionController implements TranscriptionApi {
         } else {
             caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
         }
+
         Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
         TranscriptionTypeEnum.fromId(transcriptionTypeId);
         TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getUrgencyId());
