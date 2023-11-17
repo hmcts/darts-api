@@ -38,6 +38,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static java.time.OffsetDateTime.now;
@@ -186,17 +187,16 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @Test
     @Order(12)
     void transcriptionRequestWithDuplicateValues() throws Exception {
-        log.info("transcriptionRequestWithDuplicateValues");
+        OffsetDateTime startTime = now().plusMinutes(5).truncatedTo(ChronoUnit.SECONDS);
+        OffsetDateTime endTime = now().plusMinutes(10).truncatedTo(ChronoUnit.SECONDS);
+
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
         );
-
-        log.info("objectMapper.writeValueAsString(transcriptionRequestDetails) "
-                     + objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
@@ -205,18 +205,16 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn();
-        log.info("sent first request");
+
         MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
-        log.info("built second request");
 
         mockMvc.perform(requestBuilderDup)
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
             .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
             .andReturn();
-        log.info("done");
     }
 
     @Test
