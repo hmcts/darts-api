@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -169,7 +170,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() {
+    void whenAudioRequestHasBeenProcessedDeleteBlobDataAndAudioRequest() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
         UUID blobId = UUID.randomUUID();
 
@@ -187,7 +188,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    void whenTransientObjectHasNoExternalLocationValueAvoidDeletingFromBlobStorage() {
+    void whenTransientObjectHasNoExternalLocationValueAvoidDeletingFromBlobStorage() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(null);
@@ -203,7 +204,7 @@ class MediaRequestServiceImplTest {
     }
 
     @Test
-    void whenNoAudioIsPresentOnlyDeleteAudioRequest() {
+    void whenNoAudioIsPresentOnlyDeleteAudioRequest() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
         when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
             .thenReturn(Optional.empty());

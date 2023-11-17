@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
-import uk.gov.hmcts.darts.common.exception.AzureException;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -86,7 +86,7 @@ public class InboundUnstructuredDataStoreStoreDeleterImpl implements InboundUnst
 
                 entityToBeDeleted.setStatus(deletedStatus);
                 entityToBeDeleted.setLastModifiedBy(systemUser);
-            } catch (AzureException e) {
+            } catch (AzureDeleteBlobException e) {
                 log.error("could not delete from inbound/unstructured container", e);
             }
 

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
+import lombok.SneakyThrows;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -95,6 +96,7 @@ class InboundUnstructuredDataStoreStoreDeleterImplTest {
             markedForDeletionStatus);
     }
 
+    @SneakyThrows
     @Test
     void deleteFromInboundAndUnstructuredDatastore() {
         mockStatus();

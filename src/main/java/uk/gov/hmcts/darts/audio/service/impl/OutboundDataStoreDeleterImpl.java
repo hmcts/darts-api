@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
-import uk.gov.hmcts.darts.common.exception.AzureException;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -55,7 +55,7 @@ public class OutboundDataStoreDeleterImpl implements OutboundDataStoreDeleter {
                 dataManagementApi.deleteBlobDataFromOutboundContainer(externalLocation);
                 entityToBeDeleted.setStatus(deletedStatus);
                 entityToBeDeleted.setLastModifiedBy(systemUser);
-            } catch (AzureException e) {
+            } catch (AzureDeleteBlobException e) {
                 log.error("could not delete from outbound container", e);
             }
 

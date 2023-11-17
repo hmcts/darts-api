@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -84,7 +85,7 @@ class OutboundDataStoreDeleterImplImplTest {
     }
 
     @Test
-    void deleteFromInboundAndUnstructuredDatastore() {
+    void deleteFromInboundAndUnstructuredDatastore() throws AzureDeleteBlobException {
         mockStatus();
 
         mockSystemUser();

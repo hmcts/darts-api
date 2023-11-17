@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.datamanagement.service;
 
+import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
 import uk.gov.hmcts.darts.datamanagement.service.impl.DataManagementServiceImpl;
@@ -30,6 +32,8 @@ class DataManagementServiceImplTest {
     public static final UUID BLOB_ID = UUID.randomUUID();
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
+    @Mock
+    public Response<Void> responseMock;
     @Mock
     private DataManagementDao dataManagementDao;
     @Mock
@@ -64,11 +68,12 @@ class DataManagementServiceImplTest {
     }
 
     @Test
-    void testDeleteBlobData() {
+    void testDeleteBlobData() throws AzureDeleteBlobException {
         when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(20);
         when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
-        when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(null);
+        when(responseMock.getStatusCode()).thenReturn(202);
+        when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
 
         dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
 
