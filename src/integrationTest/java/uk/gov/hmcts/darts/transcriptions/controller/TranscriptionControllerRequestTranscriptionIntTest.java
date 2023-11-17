@@ -67,8 +67,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private static final String TEST_COMMENT = "Test comment";
 
-    private static final OffsetDateTime START_TIME = now().plusMinutes(5);
-    private static final OffsetDateTime END_TIME = now().plusMinutes(20);
+    private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
+    private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-07-31T14:32Z");
 
     @Autowired
     private MockMvc mockMvc;
