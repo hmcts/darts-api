@@ -38,6 +38,7 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static java.time.OffsetDateTime.now;
@@ -192,8 +193,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         log.info("startTime 1  " + startTime);
         log.info("endTime 1    " + endTime);
 
-        startTime = now().plusMinutes(5);
-        endTime = now().plusMinutes(10);
+        startTime = now().plusMinutes(5).truncatedTo(ChronoUnit.SECONDS);
+        endTime = now().plusMinutes(10).truncatedTo(ChronoUnit.SECONDS);
         log.info("startTime 1  " + startTime);
         log.info("endTime 1    " + endTime);
 
