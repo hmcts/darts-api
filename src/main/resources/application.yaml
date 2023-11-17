@@ -115,8 +115,8 @@ darts:
       last-accessed-deletion-day: 2
 
   azure:
-    active-directory-b2c-base-uri: https://hmctsdartsb2csbox.b2clogin.com
-    active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsdartsb2csbox.onmicrosoft.com
+    active-directory-b2c-base-uri: https://hmctsstgextid.b2clogin.com
+    active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsstgextid.onmicrosoft.com
     active-directory-b2c-external-user-signin-policy: "B2C_1_darts_externaluser_signin"
     active-directory-b2c-external-user-passwordreset-policy: "B2C_1_darts_externaluser_password_reset"
     active-directory-justice-auth-uri: https://login.microsoftonline.com
