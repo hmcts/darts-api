@@ -32,7 +32,7 @@ import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 @Getter
 public class AuthorisationStub {
 
-    public static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
+    private static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
         .withSecond(0).withNano(0);
 
     private final DartsDatabaseStub dartsDatabaseStub;
@@ -98,7 +98,7 @@ public class AuthorisationStub {
         mediaEntity.setTotalChannels(2);
         mediaEntity.setCourtroom(courtroomEntity);
         mediaEntity.setStart(now());
-        mediaEntity.setEnd(now().plusMinutes(30));
+        mediaEntity.setEnd(now());
         mediaEntity.setMediaFile("media file");
         mediaEntity.setFileSize(1000L);
         mediaEntity.setMediaFormat("mp3");
