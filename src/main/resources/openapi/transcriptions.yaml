@@ -514,12 +514,6 @@ components:
         - "TRANSCRIPTION_106"
         - "TRANSCRIPTION_107"
       x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY ]
-    RequestTranscription404ErrorCode:
-      type: string
-      enum:
-        - "TRANSCRIPTION_101"
-        - "TRANSCRIPTION_110"
-        - "TRANSCRIPTION_111"
     RequestTranscription409ErrorCode:
       type: string
       enum:
