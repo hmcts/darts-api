@@ -18,12 +18,14 @@ import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
+import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.model.TriggerAndAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.AutomatedTaskName;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.service.AutomatedTaskService;
@@ -38,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
@@ -68,6 +71,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
 
+    private final InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+
     private final TranscriptionsApi transcriptionsApi;
 
 
@@ -76,6 +81,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addProcessDailyListToTaskRegistrar(taskRegistrar);
         addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
         addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
+        addInboundToUnstructuredTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -142,6 +148,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
         } else if (OUTBOUND_AUDIO_DELETER_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
             rescheduleOutboundAudioDeleterAutomatedTask();
+        } else if (INBOUND_TO_UNSTRUCTURED_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
+            rescheduleInboundToUnstructuredAutomatedTask();
         } else {
             throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
@@ -230,6 +238,18 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(outboundAudioDeleterAutomatedTask, trigger);
     }
 
+    private void addInboundToUnstructuredTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        InboundToUnstructuredAutomatedTask inboundToUnstructuredAutomatedTask = new InboundToUnstructuredAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            inboundToUnstructuredProcessor
+        );
+        inboundToUnstructuredAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(
+            inboundToUnstructuredAutomatedTask));
+        Trigger trigger = createAutomatedTaskTrigger(inboundToUnstructuredAutomatedTask);
+        taskRegistrar.addTriggerTask(inboundToUnstructuredAutomatedTask, trigger);
+    }
 
     private void addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
         CloseUnfinishedTranscriptionsAutomatedTask closeUnfinishedTranscriptionsAutomatedTask = new CloseUnfinishedTranscriptionsAutomatedTask(
@@ -289,6 +309,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             );
             Trigger trigger = createAutomatedTaskTrigger(outboundAudioDeleterAutomatedTask);
             taskScheduler.schedule(outboundAudioDeleterAutomatedTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
+    private void rescheduleInboundToUnstructuredAutomatedTask() {
+
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(INBOUND_TO_UNSTRUCTURED_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            InboundToUnstructuredAutomatedTask inboundToUnstructuredAutomatedTask = new InboundToUnstructuredAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                inboundToUnstructuredProcessor
+            );
+            Trigger trigger = createAutomatedTaskTrigger(inboundToUnstructuredAutomatedTask);
+            taskScheduler.schedule(inboundToUnstructuredAutomatedTask, trigger);
         } else {
             taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
         }

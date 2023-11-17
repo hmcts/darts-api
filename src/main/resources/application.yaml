@@ -113,7 +113,10 @@ darts:
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
     outbounddeleter:
       last-accessed-deletion-day: 2
-
+    allowed-extensions:
+      - "mp2"
+      - "mp3"
+    max-file-size: 1048576
   azure:
     active-directory-b2c-base-uri: https://hmctsdartsb2csbox.b2clogin.com
     active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsdartsb2csbox.onmicrosoft.com
@@ -154,6 +157,7 @@ darts:
     allowed-extensions:
       - "docx"
       - "doc"
+    max-file-size: 1048576
     allowed-content-types:
       - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       - "application/msword"
