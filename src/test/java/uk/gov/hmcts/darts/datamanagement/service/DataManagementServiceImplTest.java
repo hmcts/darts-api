@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -78,5 +79,26 @@ class DataManagementServiceImplTest {
         dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID);
 
         verify(blobClient, times(1)).deleteWithResponse(any(), any(), any(), any());
+    }
+
+    @Test
+    void testDeleteBlobDataWithFailure() {
+        when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(20);
+        when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(responseMock.getStatusCode()).thenReturn(400);
+        when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenReturn(responseMock);
+
+        assertThrows(AzureDeleteBlobException.class, () -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));
+    }
+
+    @Test
+    void testDeleteBlobDataWithTimeout() {
+        when(dataManagementConfiguration.getDeleteTimeout()).thenReturn(0);
+        when(dataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(dataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(blobClient.deleteWithResponse(any(), any(), any(), any())).thenThrow(new RuntimeException("timeout"));
+
+        assertThrows(AzureDeleteBlobException.class, () -> dataManagementService.deleteBlobData(BLOB_CONTAINER_NAME, BLOB_ID));
     }
 }
