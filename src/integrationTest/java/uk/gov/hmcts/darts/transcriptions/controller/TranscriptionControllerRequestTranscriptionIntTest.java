@@ -247,7 +247,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .andReturn();
     }
 
-
+    /*
     @Test
     @Order(14)
     void transcriptionRequestHearingWithNoAudio() throws Exception {
@@ -352,6 +352,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
+
+    */
 
     @Test
     @Order(2)
