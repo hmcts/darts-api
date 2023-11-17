@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "8b681048-a12d-40a3-adac-16223f55196d",
+		"_postman_id": "c4056a2b-30c7-435f-878d-2031c3cd5f2c",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -765,8 +765,8 @@
 							"INSERT INTO user_account (usr_id, user_name, user_email_address)",
 							"VALUES (-10, 'Richard B', 'Richard.B@EXAMPLE.COM');",
 							"",
-							"INSERT INTO courthouse (cth_id, courthouse_name, created_ts, last_modified_ts)",
-							"VALUES (-1, 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
+							"INSERT INTO courthouse (cth_id, courthouse_name, display_name, created_ts, last_modified_ts)",
+							"VALUES (-1, 'Bristol', 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
 							"",
 							"INSERT INTO security_group_courthouse_ae (grp_id, cth_id)",
 							"VALUES (-4, -1);",
@@ -1078,9 +1078,180 @@
 					"name": "/transcriptions",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": ""
+						}
 					},
 					"response": []
+				}
+			]
+		},
+		{
+			"name": "Token",
+			"item": [
+				{
+					"name": "Generate Bearer Token - AAD_B2C_ROPC",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{AAD_B2C_ROPC_CLIENT_ID}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{AAD_B2C_ROPC_SCOPE}}",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{AAD_B2C_ROPC_USERNAME}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{AAD_B2C_ROPC_PASSWORD}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}",
+							"host": [
+								"{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "active-directory-b2c-auth - token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "default"
+								},
+								{
+									"key": "client_id",
+									"value": "{{AAD_B2C_CLIENT_ID}}",
+									"type": "default"
+								},
+								{
+									"key": "scope",
+									"value": "{{AAD_B2C_CLIENT_ID}} offline_access",
+									"type": "default"
+								},
+								{
+									"key": "code",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "http://localhost:4550/external-user/handle-oauth-code",
+									"type": "default"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{AAD_B2C_CLIENT_SECRET}}",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{active-directory-b2c-auth-uri}}/{{active-directory-b2c-external-user-signin-policy}}/oauth2/v2.0/token",
+							"host": [
+								"{{active-directory-b2c-auth-uri}}"
+							],
+							"path": [
+								"{{active-directory-b2c-external-user-signin-policy}}",
+								"oauth2",
+								"v2.0",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "/users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4550/users?courthouse=-1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4550",
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "courthouse",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// V1_239__update_security_schema.sql"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		}

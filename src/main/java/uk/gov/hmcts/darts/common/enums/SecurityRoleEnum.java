@@ -14,7 +14,10 @@ public enum SecurityRoleEnum {
     LANGUAGE_SHOP_USER(5),
     RCJ_APPEALS(6),
     XHIBIT(7),
-    CPP(8);
+    CPP(8),
+    DAR_PC(9),
+    MID_TIER(10),
+    ADMIN(11);
 
     private final Integer id;
 

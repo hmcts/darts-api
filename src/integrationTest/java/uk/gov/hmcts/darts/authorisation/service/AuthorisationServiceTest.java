@@ -61,7 +61,7 @@ class AuthorisationServiceTest {
         var testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
-        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(36);
+        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(-3);
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setUsername("Test Judge");
         judgeUserAccount.setEmailAddress(TEST_JUDGE_EMAIL);
@@ -73,8 +73,8 @@ class AuthorisationServiceTest {
         UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
-        SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(20);
-        SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(35);
+        SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(-2);
+        SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(-1);
         UserAccountEntity bristolUserAccount = new UserAccountEntity();
         bristolUserAccount.setUsername("Test Bristol");
         bristolUserAccount.setEmailAddress(TEST_BRISTOL_EMAIL);

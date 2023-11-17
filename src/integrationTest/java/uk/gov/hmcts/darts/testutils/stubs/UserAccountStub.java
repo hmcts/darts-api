@@ -69,7 +69,7 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
@@ -78,7 +78,8 @@ public class UserAccountStub {
         return testUser;
     }
 
-    private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity, CourthouseEntity courthouseEntity) {
+    private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity,
+                                              CourthouseEntity courthouseEntity) {
         if (!securityGroupEntity.getCourthouseEntities().contains(courthouseEntity)) {
             securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
             securityGroupRepository.saveAndFlush(securityGroupEntity);
@@ -86,7 +87,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         securityGroupEntity.getCourthouseEntities().clear();
         securityGroupRepository.saveAndFlush(securityGroupEntity);
 
@@ -97,7 +98,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createTranscriptionCompanyUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(4);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
@@ -109,7 +110,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(36);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-3);
         assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
@@ -121,7 +122,6 @@ public class UserAccountStub {
         return testUser;
     }
 
-
     public UserAccountEntity createXhibitExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-14);
         securityGroupEntity.setGlobalAccess(true);
@@ -130,7 +130,8 @@ public class UserAccountStub {
         return createExternalUser(guid, securityGroupEntity, courthouseEntity);
     }
 
-    public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity, CourthouseEntity courthouseEntity) {
+    public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
+                                                CourthouseEntity courthouseEntity) {
         if (nonNull(courthouseEntity)) {
             securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         }
