@@ -79,17 +79,6 @@ paths:
                 status: 403
         '404':
           description: Not Found Error
-          content:
-            application/json+problem:
-              schema:
-                allOf:
-                  - $ref: './problem.yaml'
-                  - type: object
-                    required:
-                      - type
-                    properties:
-                      type:
-                        $ref: '#/components/schemas/RequestTranscription404ErrorCode'
         '409':
           description: Duplicate transcription request
           content:
