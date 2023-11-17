@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.service.impl.AuditServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
@@ -42,9 +43,12 @@ class AuditServiceImplTest {
     @Captor
     ArgumentCaptor<AuditEntity> auditEntityArgumentCaptor;
 
+    private static final String APP_SERVER = "APP_SERVER";
+
     @BeforeEach
     void setUp() {
         auditServiceImpl = new AuditServiceImpl(auditActivityRepository, auditRepository);
+        ReflectionTestUtils.setField(auditServiceImpl, "applicationServer", APP_SERVER);
     }
 
     @Test
@@ -60,7 +64,7 @@ class AuditServiceImplTest {
         AuditEntity savedValue = auditEntityArgumentCaptor.getValue();
         assertNotNull(savedValue.getCourtCase());
         assertNotNull(savedValue.getUser());
-        assertNotNull(savedValue.getApplicationServer());
+        assertEquals(savedValue.getApplicationServer(), APP_SERVER);
         assertNotNull(savedValue.getCreatedBy());
         assertNotNull(savedValue.getLastModifiedBy());
         assertNull(savedValue.getAdditionalData());

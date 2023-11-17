@@ -181,6 +181,8 @@ darts:
   redis:
     connection-string: ${REDIS_CONNECTION_STRING:redis://localhost:6379}
     ssl-enabled: ${REDIS_SSL_ENABLED:true}
+  audit:
+    application-server: ${CLUSTER_NAME:not available}
 
 dbMigration:
   # When true, the app will run DB migration on startup.

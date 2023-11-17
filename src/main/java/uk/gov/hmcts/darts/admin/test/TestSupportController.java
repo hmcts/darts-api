@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -62,6 +63,8 @@ public class TestSupportController {
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
 
+    @Value("${darts.audit.application-server}")
+    private String applicationServer;
 
     @SuppressWarnings("unchecked")
     @DeleteMapping(value = "/clean")
@@ -188,7 +191,7 @@ public class TestSupportController {
             return new ResponseEntity<>(BAD_REQUEST);
         }
 
-        audit.setApplicationServer("not available");
+        audit.setApplicationServer(applicationServer);
         auditRepository.saveAndFlush(audit);
 
         return new ResponseEntity<>(CREATED);
