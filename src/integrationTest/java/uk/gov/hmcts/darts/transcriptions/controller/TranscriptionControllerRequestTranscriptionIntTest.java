@@ -188,7 +188,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     void transcriptionRequestWithDuplicateValues() throws Exception {
         log.info("transcriptionRequestWithDuplicateValues");
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
