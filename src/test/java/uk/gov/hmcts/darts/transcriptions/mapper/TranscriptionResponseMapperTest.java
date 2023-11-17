@@ -92,6 +92,36 @@ class TranscriptionResponseMapperTest {
     }
 
     @Test
+    void mapToTranscriptionResponseWithNoStatus() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, false);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+
+        TranscriptionResponse transcriptionResponse =
+            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseNoStatusSingleEntity.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void mapToTranscriptionResponseWithWorkflow() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+
+        TranscriptionResponse transcriptionResponse =
+            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityWithWorkflow.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
     void mapToTranscriptionResponse() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
