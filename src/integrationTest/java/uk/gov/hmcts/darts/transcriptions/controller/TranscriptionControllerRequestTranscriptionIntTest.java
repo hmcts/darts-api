@@ -67,8 +67,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private static final String TEST_COMMENT = "Test comment";
 
-    private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
-    private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-07-31T14:32Z");
+    private static final OffsetDateTime START_TIME = now().plusMinutes(5);
+    private static final OffsetDateTime END_TIME = now().plusMinutes(20);
 
     @Autowired
     private MockMvc mockMvc;
@@ -186,13 +186,17 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @Test
     @Order(12)
     void transcriptionRequestWithDuplicateValues() throws Exception {
+        OffsetDateTime startTime = OffsetDateTime.parse("2023-07-31T12:00Z");
+        OffsetDateTime endTime = OffsetDateTime.parse("2023-07-31T14:32Z");
+        startTime = OffsetDateTime.now().plusMinutes(5);
+        endTime = OffsetDateTime.now().plusMinutes(10);
         log.info("transcriptionRequestWithDuplicateValues");
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
         );
 
         log.info("objectMapper.writeValueAsString(transcriptionRequestDetails) "
