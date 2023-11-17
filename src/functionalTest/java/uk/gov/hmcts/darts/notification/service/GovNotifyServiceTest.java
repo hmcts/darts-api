@@ -38,10 +38,11 @@ class GovNotifyServiceTest {
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
 
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
-        assertEquals("New transcript request submitted and awaiting review", emailResponse.getSubject());
+        assertEquals("A new transcript is ready for you to review", emailResponse.getSubject());
         compare("""
                     There is a new transcript available for you to review.
-                    Sign into the DARTS Portal to access it.""", emailResponse);
+
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
     private static void compare(String expected, SendEmailResponse emailResponse) {
@@ -72,11 +73,11 @@ class GovNotifyServiceTest {
     @Test
     void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
-        assertEquals("New transcript request", emailResponse.getSubject());
+        assertEquals("New DARTS transcription request", emailResponse.getSubject());
         compare("""
-                    You have received a new transcription request from the DARTS Portal.\s
+                    You have received a new transcription request from the DARTS Portal.
 
-                    To access the request, please [sign in to the DARTS Portal]""", emailResponse);
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
 
