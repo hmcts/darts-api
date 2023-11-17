@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.service.CaseService;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -51,8 +50,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.AUDIO_NOT_FOUND;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TIMES_OUTSIDE_OF_HEARING_TIMES;
 
 
 @RestController
@@ -154,6 +151,8 @@ public class TranscriptionController implements TranscriptionApi {
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
+            hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            /*
             log.info("Found hearing");
             HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
             if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
@@ -183,6 +182,7 @@ public class TranscriptionController implements TranscriptionApi {
                     }
                 }
             }
+            */
         } else {
             caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
         }
