@@ -2,23 +2,23 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
-import uk.gov.hmcts.darts.audio.service.OutboundDataStoreSoftDeleter;
+import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 
 @Slf4j
-public class OutboundDataStoreSoftDeleterAutomatedTask extends AbstractLockableAutomatedTask {
+public class OutboundAudioDeleterAutomatedTask extends AbstractLockableAutomatedTask {
 
     protected String taskName = OUTBOUND_AUDIO_DELETER_TASK_NAME.getTaskName();
-    private final OutboundDataStoreSoftDeleter outboundDataStoreSoftDeleter;
+    private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
 
-    public OutboundDataStoreSoftDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                                     AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                     OutboundDataStoreSoftDeleter processor) {
+    public OutboundAudioDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
+                                             AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                             OutboundAudioDeleterProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
-        this.outboundDataStoreSoftDeleter = processor;
+        this.outboundAudioDeleterProcessor = processor;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class OutboundDataStoreSoftDeleterAutomatedTask extends AbstractLockableA
 
     @Override
     protected void runTask() {
-        outboundDataStoreSoftDeleter.markForDeletion();
+        outboundAudioDeleterProcessor.markForDeletion();
     }
 
     @Override

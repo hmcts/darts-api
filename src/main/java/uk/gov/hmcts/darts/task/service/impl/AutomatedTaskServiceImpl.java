@@ -42,8 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
-import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTORE_DELETER;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
@@ -85,6 +85,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addCloseNonCompletedTranscriptionsAutomatedTaskToTaskRegistrar(taskRegistrar);
         addOutboundAudioDeleterToTaskRegistrar(taskRegistrar);
         addInboundAudioDeleterToTaskRegistrar(taskRegistrar);
+        addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
     }
 
     @Override

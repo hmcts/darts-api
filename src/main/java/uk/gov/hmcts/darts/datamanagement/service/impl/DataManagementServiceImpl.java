@@ -26,7 +26,7 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     private final DataManagementDao dataManagementDao;
 
-    private DataManagementConfiguration dataManagementConfiguration;
+    private final DataManagementConfiguration dataManagementConfiguration;
 
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
@@ -54,10 +54,10 @@ public class DataManagementServiceImpl implements DataManagementService {
             BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
             BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
             return blobClient.deleteWithResponse(DeleteSnapshotsOptionType.INCLUDE, null,
-                                                 Duration.of(
-                                                     dataManagementConfiguration.getDeleteTimeout(),
-                                                     ChronoUnit.SECONDS
-                                                 ), null
+                    Duration.of(
+                            dataManagementConfiguration.getDeleteTimeout(),
+                            ChronoUnit.SECONDS
+                    ), null
             );
         } catch (RuntimeException e) {
             throw new AzureException("Could not delete from container: " + containerName, e);

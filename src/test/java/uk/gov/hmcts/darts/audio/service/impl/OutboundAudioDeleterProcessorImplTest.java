@@ -22,7 +22,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OutboundDataStoreSoftDeleterImplTest {
+class OutboundAudioDeleterProcessorImplTest {
     @Mock
     LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
     @Mock
@@ -34,14 +34,14 @@ class OutboundDataStoreSoftDeleterImplTest {
     private UserAccountRepository userAccountRepository;
     @Mock
     private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
-    private OutboundDataStoreSoftDeleterImpl outboundAudioDeleterProcessorImpl;
+    private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
 
     @Mock
     private SystemUserHelper systemUserHelper;
 
     @BeforeEach
     void setUp() {
-        this.outboundAudioDeleterProcessorImpl = new OutboundDataStoreSoftDeleterImpl(
+        this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
             mediaRequestRepository,
             transientObjectDirectoryRepository,
             userAccountRepository,

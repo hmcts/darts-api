@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
-import uk.gov.hmcts.darts.audio.exception.OutboundDeleterException;
+import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
@@ -68,7 +68,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
             "housekeeping"));
 
         if (systemUser == null) {
-            throw new DartsApiException(OutboundDeleterException.MISSING_SYSTEM_USER);
+            throw new DartsApiException(AudioApiError.MISSING_SYSTEM_USER);
         }
         ObjectDirectoryStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
             MARKED_FOR_DELETION.getId());
