@@ -188,8 +188,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     void transcriptionRequestWithDuplicateValues() throws Exception {
         OffsetDateTime startTime = OffsetDateTime.parse("2023-07-31T12:00Z");
         OffsetDateTime endTime = OffsetDateTime.parse("2023-07-31T14:32Z");
-        //startTime = OffsetDateTime.now().plusMinutes(5);
-        //endTime = OffsetDateTime.now().plusMinutes(10);
+        log.info("startTime 1" + startTime);
+        log.info("endTime 1" + endTime);
+        startTime = OffsetDateTime.now().plusMinutes(5);
+        endTime = OffsetDateTime.now().plusMinutes(10);
+        log.info("startTime 2" + startTime);
+        log.info("endTime 2" + endTime);
         log.info("transcriptionRequestWithDuplicateValues");
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
