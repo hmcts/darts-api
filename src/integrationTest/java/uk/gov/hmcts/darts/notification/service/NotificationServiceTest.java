@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.REQUEST_TO_TRANSCRIBER;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 class NotificationServiceTest extends IntegrationBase {
@@ -90,10 +90,10 @@ class NotificationServiceTest extends IntegrationBase {
     @Test
     void sendNotificationToGovNotifyNow() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
-        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER)).thenReturn(
+        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(
             "976bf288-705d-4cbb-b24f-c5529abf14cf");
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER)
+            .eventId(REQUEST_TO_TRANSCRIBER.toString())
             .caseId(caseId)
             .emailAddresses(TEST_EMAIL_ADDRESS)
             .templateValues(
@@ -119,12 +119,12 @@ class NotificationServiceTest extends IntegrationBase {
     @Test
     void sendNotificationToGovNotifyInvalidTemplateId() throws TemplateNotFoundException, NotificationClientException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
-        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER))
+        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString()))
             .thenReturn("INVALID-TEMPLATE-ID");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
             .thenThrow(new NotificationClientException(""));
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER)
+            .eventId(REQUEST_TO_TRANSCRIBER.toString())
             .caseId(caseId)
             .emailAddresses(TEST_EMAIL_ADDRESS)
             .templateValues("")
@@ -142,13 +142,13 @@ class NotificationServiceTest extends IntegrationBase {
     @Test
     void sendNotificationToGovNotifyFailureRetryExceeded() throws TemplateNotFoundException, NotificationClientException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
-        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER))
+        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString()))
             .thenReturn("976bf288-1234-1234-1234-c5529abf14cf");
         when(govNotifyService.sendNotification(any(GovNotifyRequest.class)))
             .thenThrow(new NotificationClientException(""));
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER)
+            .eventId(REQUEST_TO_TRANSCRIBER.toString())
             .caseId(caseId)
             .emailAddresses(TEST_EMAIL_ADDRESS)
             .templateValues("")
@@ -168,11 +168,11 @@ class NotificationServiceTest extends IntegrationBase {
     @Test
     void sendNotificationToGovNotifyInvalidJson() throws TemplateNotFoundException {
         var caseId = dartsDatabase.save(someMinimalCase()).getId();
-        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER)).thenReturn(
+        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(
             "976bf288-1234-1234-1234-c5529abf14cf");//invalid template number
 
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER)
+            .eventId(REQUEST_TO_TRANSCRIBER.toString())
             .caseId(caseId)
             .emailAddresses(TEST_EMAIL_ADDRESS)
             .templateValues("{,1,}")
