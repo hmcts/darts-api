@@ -80,9 +80,10 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.REQUEST_TO_TRANSCRIBER;
-import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_APPROVED;
-import static uk.gov.hmcts.darts.notification.NotificationConstants.TemplateNames.TRANSCRIPTION_REQUEST_REJECTED;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
@@ -181,6 +182,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                     transcriptionStatus,
                     null
                 ));
+
+            notifyApprovers(transcription);
         }
 
         auditApi.recordAudit(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
@@ -228,7 +231,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         switch (newStatusEnum) {
             case APPROVED -> {
                 notifyTranscriptionCompanyForCourthouse(courtCaseEntity);
-                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED);
+                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_APPROVED.toString());
                 auditApi.recordAudit(
                     AUTHORISE_TRANSCRIPTION,
                     userAccountEntity,
@@ -236,7 +239,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 );
             }
             case REJECTED -> {
-                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED);
+                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED.toString());
                 auditApi.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
             case WITH_TRANSCRIBER -> auditApi.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
@@ -261,6 +264,19 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
+    }
+
+    private void notifyApprovers(TranscriptionEntity transcription) {
+        List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
+            SecurityRoleEnum.APPROVER,
+            transcription.getCourtCase().getCourthouse()
+        );
+        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
+            .eventId(COURT_MANAGER_APPROVE_TRANSCRIPT.toString())
+            .userAccountsToEmail(usersToNotify)
+            .caseId(transcription.getCourtCase().getId())
+            .build();
+        notificationApi.scheduleNotification(request);
     }
 
     private void notifyRequestor(TranscriptionEntity transcription, String templateName) {
@@ -288,7 +304,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         //schedule notification
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
-            .eventId(REQUEST_TO_TRANSCRIBER)
+            .eventId(REQUEST_TO_TRANSCRIBER.toString())
             .userAccountsToEmail(usersToNotify)
             .caseId(courtCase.getId())
             .build();
