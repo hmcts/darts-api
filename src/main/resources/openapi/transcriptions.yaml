@@ -671,7 +671,7 @@ components:
         transcription_id:
           type: integer
           example: 12345
-          description: The request_id of the transcription request.
+          description: The transcription_id of the transcription request.
         case_id:
           type: integer
           example: 1
@@ -688,7 +688,7 @@ components:
         received:
           type: string
           format: date-time
-        instructions:
+        requestor_comments:
           type: string
         rejection_reason:
           type: string

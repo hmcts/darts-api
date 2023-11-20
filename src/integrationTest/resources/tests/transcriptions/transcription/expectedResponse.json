@@ -1,11 +1,10 @@
 {
-  "transcription_id": 1,
   "case_number": "1",
   "courthouse": "some-courthouse",
   "status": "Approved",
   "from": "IntegrationTest User",
   "received": "2023-06-20T10:00:00Z",
-  "instructions": "comment1",
+  "requestor_comments": "comment1",
   "defendants": [],
   "judges": [
     "1judge1"

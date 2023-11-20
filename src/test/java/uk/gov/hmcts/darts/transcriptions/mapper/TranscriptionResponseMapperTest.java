@@ -124,7 +124,7 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionResponse() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
-        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
 
         GetTranscriptionByIdResponse transcriptionResponse =

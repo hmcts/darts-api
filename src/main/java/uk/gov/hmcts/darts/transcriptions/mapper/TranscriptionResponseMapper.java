@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
@@ -70,7 +71,7 @@ public class TranscriptionResponseMapper {
 
             transcriptionResponse.setFrom(getRequestorName(transcriptionEntity));
             transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
-            transcriptionResponse.setInstructions(getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REQUESTED));
+            transcriptionResponse.setRequestorComments(getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REQUESTED));
             transcriptionResponse.setRejectionReason(getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REJECTED));
 
             final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
@@ -104,11 +105,11 @@ public class TranscriptionResponseMapper {
         if (foundWorkflowEntityOpt.isEmpty()) {
             return null;
         }
-        List<TranscriptionCommentEntity> transcriptionCommentEntities = foundWorkflowEntityOpt.get().getTranscriptionCommentEntities();
+        List<TranscriptionCommentEntity> transcriptionCommentEntities = foundWorkflowEntityOpt.get().getTranscriptionComments();
         if (transcriptionCommentEntities.isEmpty()) {
             return null;
         }
-        return transcriptionCommentEntities.get(0).getComment();
+        return StringUtils.trimToNull(transcriptionCommentEntities.get(0).getComment());
 
     }
 
