@@ -96,7 +96,7 @@ public class TranscriptionResponseMapper {
     }
 
     /*
-    Returns the transcription comment that was added when the transcription was set this status in the workflow.
+    Returns the transcription comment that was added when the transcription was set to this status in the workflow.
      */
     private String getTranscriptionCommentAtStatus(TranscriptionEntity transcriptionEntity, TranscriptionStatusEnum status) {
         Optional<TranscriptionWorkflowEntity> foundWorkflowEntityOpt = transcriptionEntity.getTranscriptionWorkflowEntities().stream()
