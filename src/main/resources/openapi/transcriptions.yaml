@@ -120,7 +120,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TranscriptionResponse'
+                $ref: '#/components/schemas/GetTranscriptionByIdResponse'
         '401':
           description: Unauthorised Error
         '403':
@@ -665,9 +665,13 @@ components:
           type: string
           example: Standard
 
-    TranscriptionResponse:
+    GetTranscriptionByIdResponse:
       type: object
       properties:
+        transcription_id:
+          type: integer
+          example: 12345
+          description: The request_id of the transcription request.
         case_id:
           type: integer
           example: 1
@@ -684,9 +688,11 @@ components:
         received:
           type: string
           format: date-time
-        comments:
-          items:
-            type: string
+        instructions:
+          type: string
+        rejection_reason:
+          type: string
+          description: Optional parameter that is only shown when a transcription has been rejected.
         defendants:
           type: array
           items:

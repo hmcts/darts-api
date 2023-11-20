@@ -15,7 +15,7 @@ import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
@@ -97,7 +97,7 @@ class TranscriptionResponseMapperTest {
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, false);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
 
-        TranscriptionResponse transcriptionResponse =
+        GetTranscriptionByIdResponse transcriptionResponse =
             TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
@@ -112,7 +112,7 @@ class TranscriptionResponseMapperTest {
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
 
-        TranscriptionResponse transcriptionResponse =
+        GetTranscriptionByIdResponse transcriptionResponse =
             TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
@@ -127,7 +127,7 @@ class TranscriptionResponseMapperTest {
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
 
-        TranscriptionResponse transcriptionResponse =
+        GetTranscriptionByIdResponse transcriptionResponse =
             TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
