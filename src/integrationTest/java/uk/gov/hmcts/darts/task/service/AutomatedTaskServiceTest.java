@@ -14,7 +14,9 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
-import uk.gov.hmcts.darts.audio.service.ExternalDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -63,7 +65,11 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
 
     @Autowired
-    private ExternalDataStoreDeleter externalDataStoreDeleter;
+    private ExternalInboundDataStoreDeleter externalInboundDataStoreDeleter;
+    @Autowired
+    private ExternalUnstructuredDataStoreDeleter externalUnstructuredDataStoreDeleter;
+    @Autowired
+    private ExternalOutboundDataStoreDeleter externalOutboundDataStoreDeleter;
 
     @Autowired
     private InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
@@ -416,7 +422,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                externalDataStoreDeleter
+                externalInboundDataStoreDeleter, externalUnstructuredDataStoreDeleter, externalOutboundDataStoreDeleter
             );
         Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
             automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
@@ -445,9 +451,13 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Order(14)
     void givenConfiguredTaskCancelExternalDataDeleterAutomatedTask() {
         AutomatedTask automatedTask =
-            new ExternalDataStoreDeleterAutomatedTask(automatedTaskRepository,
-                                                      lockProvider,
-                                                      automatedTaskConfigurationProperties, externalDataStoreDeleter
+            new ExternalDataStoreDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                externalInboundDataStoreDeleter,
+                externalUnstructuredDataStoreDeleter,
+                externalOutboundDataStoreDeleter
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();

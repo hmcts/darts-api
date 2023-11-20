@@ -2,7 +2,9 @@ package uk.gov.hmcts.darts.task.runner.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
-import uk.gov.hmcts.darts.audio.service.ExternalDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 
@@ -10,15 +12,25 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTOR
 
 @Slf4j
 public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutomatedTask {
-    private final ExternalDataStoreDeleter externalDataStoreDeleter;
+
+    private final ExternalInboundDataStoreDeleter inboundDeleter;
+    private final ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
+    private final ExternalOutboundDataStoreDeleter outboundDeleter;
+
+
     protected String taskName = EXTERNAL_DATASTORE_DELETER.getTaskName();
 
     public ExternalDataStoreDeleterAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
                                                  AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                                 ExternalDataStoreDeleter deleter) {
+                                                 ExternalInboundDataStoreDeleter inboundDeleter,
+                                                 ExternalUnstructuredDataStoreDeleter unstructuredDeleter,
+                                                 ExternalOutboundDataStoreDeleter outboundDeleter) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
-        this.externalDataStoreDeleter = deleter;
+        this.inboundDeleter = inboundDeleter;
+        this.unstructuredDeleter = unstructuredDeleter;
+        this.outboundDeleter = outboundDeleter;
     }
+
 
     @Override
     public String getTaskName() {
@@ -27,7 +39,9 @@ public class ExternalDataStoreDeleterAutomatedTask extends AbstractLockableAutom
 
     @Override
     protected void runTask() {
-        externalDataStoreDeleter.delete();
+        inboundDeleter.delete();
+        unstructuredDeleter.delete();
+        outboundDeleter.delete();
     }
 
     @Override

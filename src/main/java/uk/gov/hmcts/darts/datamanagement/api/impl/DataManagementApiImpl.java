@@ -44,8 +44,9 @@ public class DataManagementApiImpl implements DataManagementApi {
 
     @Override
     public void deleteBlobDataFromUnstructuredContainer(UUID blobId) throws AzureDeleteBlobException {
-        dataManagementService.deleteBlobData(getOutboundContainerName(), blobId);
+        dataManagementService.deleteBlobData(getUnstructuredContainerName(), blobId);
     }
+
 
     @Override
     public UUID saveBlobDataToInboundContainer(BinaryData binaryData) {
@@ -58,6 +59,10 @@ public class DataManagementApiImpl implements DataManagementApi {
 
     private String getInboundContainerName() {
         return dataManagementConfiguration.getInboundContainerName();
+    }
+
+    private String getUnstructuredContainerName() {
+        return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
 }

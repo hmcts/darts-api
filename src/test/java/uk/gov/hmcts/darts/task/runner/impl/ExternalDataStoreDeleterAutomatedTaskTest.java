@@ -6,24 +6,35 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.audio.service.ExternalDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalDataStoreDeleterAutomatedTaskTest {
 
-    @Mock
-    ExternalDataStoreDeleter deleter;
 
     @Mock
     LockProvider provider;
 
+    @Mock
+    private ExternalInboundDataStoreDeleter inboundDeleter;
+
+    @Mock
+    private ExternalUnstructuredDataStoreDeleter unstructuredDeleter;
+
+    @Mock
+    private ExternalOutboundDataStoreDeleter outboundDeleter;
+
     @Test
     void runTask() {
         ExternalDataStoreDeleterAutomatedTask externalDataStoreDeleterAutomatedTask =
-            new ExternalDataStoreDeleterAutomatedTask(null, provider, null, deleter);
+            new ExternalDataStoreDeleterAutomatedTask(null, provider, null, inboundDeleter, unstructuredDeleter, outboundDeleter);
 
         externalDataStoreDeleterAutomatedTask.runTask();
 
-        Mockito.verify(deleter, Mockito.times(1)).delete();
+        Mockito.verify(inboundDeleter, Mockito.times(1)).delete();
+        Mockito.verify(outboundDeleter, Mockito.times(1)).delete();
+        Mockito.verify(unstructuredDeleter, Mockito.times(1)).delete();
     }
 }

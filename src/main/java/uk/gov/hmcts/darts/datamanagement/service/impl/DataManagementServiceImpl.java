@@ -64,8 +64,7 @@ public class DataManagementServiceImpl implements DataManagementService {
             }
             return response;
         } catch (RuntimeException e) {
-            throw new AzureDeleteBlobException("Could not delete from container: " + containerName, e);
+            throw new AzureDeleteBlobException("Could not delete from container: " + containerName + " uuid: " + blobId, e);
         }
     }
-
 }

@@ -13,7 +13,9 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.service.ExternalDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -74,9 +76,11 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
     private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
-    private final ExternalDataStoreDeleter externalDataStoreDeleter;
 
     private final TranscriptionsApi transcriptionsApi;
+    private final ExternalInboundDataStoreDeleter inboundDataStoreDeleter;
+    private final ExternalUnstructuredDataStoreDeleter unstructuredDataStoreDeleter;
+    private final ExternalOutboundDataStoreDeleter outboundDataStoreDeleter;
 
 
     @Override
@@ -268,7 +272,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
             automatedTaskRepository,
             lockProvider,
             automatedTaskConfigurationProperties,
-            externalDataStoreDeleter
+            inboundDataStoreDeleter, unstructuredDataStoreDeleter, outboundDataStoreDeleter
         );
         externalDataStoreDeleterAutomatedTask.setLastCronExpression(getAutomatedTaskCronExpression(
             externalDataStoreDeleterAutomatedTask));
@@ -365,7 +369,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
                 automatedTaskRepository,
                 lockProvider,
                 automatedTaskConfigurationProperties,
-                externalDataStoreDeleter
+                inboundDataStoreDeleter, unstructuredDataStoreDeleter, outboundDataStoreDeleter
             );
             Trigger trigger = createAutomatedTaskTrigger(externalDataStoreDeleterAutomatedTask);
             taskScheduler.schedule(externalDataStoreDeleterAutomatedTask, trigger);
