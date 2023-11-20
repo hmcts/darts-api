@@ -196,7 +196,7 @@ components:
     UserName:
       minLength: 1
       maxLength: 256
-      pattern: '^\S.+$' # Disallow starting or ending with whitespace
+      pattern: ^[^\s][a-zA-Z\s'-]+[^\s]$
       type: string
     UserEmailAddress:
       minLength: 1

@@ -34,6 +34,7 @@ public class UserController implements UserApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<UserWithId> usersPost(User user) {
         UserWithId createdUser = userManagementService.createUser(user);
 
@@ -42,6 +43,7 @@ public class UserController implements UserApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<UserWithIdAndLastLogin> usersIdPatch(Integer userId, UserPatch userPatch) {
         UserWithIdAndLastLogin updatedUser = userManagementService.modifyUser(userId, userPatch);
 
