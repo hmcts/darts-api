@@ -8,6 +8,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -16,16 +17,21 @@ import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +65,8 @@ class AudioServiceImplTest {
 
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
+    @Captor
+    ArgumentCaptor<BinaryData> inboundBlobStorageArgumentCaptor;
     @Mock
     private AudioTransformationService audioTransformationService;
 
@@ -77,6 +85,16 @@ class AudioServiceImplTest {
     private RetrieveCoreObjectService retrieveCoreObjectService;
     @Mock
     private HearingRepository hearingRepository;
+    @Mock
+    private UserIdentity userIdentity;
+    @Mock
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    @Mock
+    private ExternalLocationTypeRepository externalLocationTypeRepository;
+    @Mock
+    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    @Mock
+    private DataManagementApi dataManagementApi;
     private AudioService audioService;
 
     @Mock
@@ -86,14 +104,17 @@ class AudioServiceImplTest {
     void setUp() {
         audioService = new AudioServiceImpl(
             audioTransformationService,
-            transientObjectDirectoryRepository,
+            externalObjectDirectoryRepository,
+            objectDirectoryStatusRepository,
+            externalLocationTypeRepository,
             mediaRepository,
             audioOperationService,
             fileOperationService,
             retrieveCoreObjectService,
             hearingRepository,
             mapper,
-            auditService
+            dataManagementApi,
+            userIdentity
         );
     }
 
@@ -146,7 +167,7 @@ class AudioServiceImplTest {
 
 
     @Test
-    void addAudio() {
+    void addAudio() throws IOException {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
 
@@ -160,8 +181,20 @@ class AudioServiceImplTest {
         )).thenReturn(hearingEntity);
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
 
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "addAudio",
+            "audio_sample.mp2",
+            "audio/mpeg",
+            DUMMY_FILE_CONTENT.getBytes()
+        );
+
         when(mapper.mapToMedia(any())).thenReturn(mediaEntity);
-        audioService.addAudio(addAudioMetadataRequest);
+        audioService.addAudio(audioFile, addAudioMetadataRequest);
+
+        verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
+        var binaryData = inboundBlobStorageArgumentCaptor.getValue();
+        assertEquals(BinaryData.fromStream(audioFile.getInputStream()).toString(),binaryData.toString());
+
 
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());
         verify(hearingRepository, times(3)).saveAndFlush(any());
