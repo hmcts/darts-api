@@ -58,7 +58,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         authorisationStub.givenTestSchema();
 
         UserAccountEntity testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
