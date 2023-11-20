@@ -95,6 +95,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setRequestor(userAccountEntity);
+        mediaRequestEntity.setCurrentOwner(userAccountEntity);
         mediaRequestEntity.setStartTime(TIME_12_00);
         mediaRequestEntity.setEndTime(TIME_13_00);
         mediaRequestEntity.setCreatedBy(userAccountEntity);
