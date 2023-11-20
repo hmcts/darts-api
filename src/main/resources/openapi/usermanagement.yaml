@@ -196,6 +196,7 @@ components:
     UserName:
       minLength: 1
       maxLength: 256
+      pattern: ^[^\s][a-zA-Z\s'-]+[^\s]$
       type: string
     UserEmailAddress:
       minLength: 1
@@ -225,7 +226,7 @@ components:
 
     CourthouseId:
       type: integer
-    
+
     GenericSearchField:
       minLength: 3
       maxLength: 256
@@ -280,11 +281,13 @@ components:
     UserWithIdAndLastLogin:
       type: object
       properties:
+        id:
+          $ref: '#/components/schemas/UserId'
         last_login:
           type: string
           format: date-time
       allOf:
-        - $ref: '#/components/schemas/UserWithId'
+        - $ref: '#/components/schemas/User'
 
     SecurityGroup:
       type: object
