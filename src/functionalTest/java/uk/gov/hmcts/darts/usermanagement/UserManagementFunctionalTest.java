@@ -39,7 +39,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
             response.asString(),
             new CustomComparator(
                 JSONCompareMode.NON_EXTENSIBLE,
-                new Customization("id", new RegularExpressionValueMatcher<>("\\d*"))
+                new Customization("id", new RegularExpressionValueMatcher<>("\\d+"))
             )
         );
     }
