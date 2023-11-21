@@ -129,12 +129,10 @@ class GovNotifyServiceTest {
             parameterMap
         );
         assertEquals("Your transcript request was rejected", emailResponse.getSubject());
-        compare(
-            """
-                Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
+        compare("""
+                 Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
 
-                You can resubmit your request, but take into account the reason for the original request's rejection.
-            """,
+                 You can resubmit your request, but take into account the reason for the original request's rejection.""",
             emailResponse
         );
     }
