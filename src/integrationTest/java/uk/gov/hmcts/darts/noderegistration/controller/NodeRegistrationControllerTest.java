@@ -5,29 +5,46 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.noderegistration.model.PostNodeRegistrationResponse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.util.Set;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 
 @Slf4j
 @AutoConfigureMockMvc
-class NodeRegistrationControllerTest  extends IntegrationBase {
+@Transactional
+class NodeRegistrationControllerTest extends IntegrationBase {
 
     @Autowired
     private transient MockMvc mockMvc;
 
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+
     @Test
     void testPostRegisterDevices() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
+        setupExternalUserForCourthouse(null);
 
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
@@ -40,6 +57,7 @@ class NodeRegistrationControllerTest  extends IntegrationBase {
 
     @Test
     void testInvalidCourtroom() throws Exception {
+        setupExternalUserForCourthouse(null);
         MockHttpServletRequestBuilder requestBuilder = buildRequest("SWANSEA", "999", "DAR");
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
         assertTrue(mvcResult.getResponse().getContentAsString().contains("Could not find the courtroom"));
@@ -59,6 +77,8 @@ class NodeRegistrationControllerTest  extends IntegrationBase {
     void testAcceptNonDarDevices() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
 
+        setupExternalUserForCourthouse(null);
+
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
@@ -72,6 +92,7 @@ class NodeRegistrationControllerTest  extends IntegrationBase {
     void testAcceptsDuplicates() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
 
+        setupExternalUserForCourthouse(null);
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
         MockHttpServletRequestBuilder requestBuilder = buildRequest(courtroomEntity.getCourthouse().getCourthouseName(),
@@ -91,6 +112,7 @@ class NodeRegistrationControllerTest  extends IntegrationBase {
     @Test
     void testEmptyStrings() throws Exception {
         dartsDatabase.createCourthouseWithTwoCourtrooms();
+        setupExternalUserForCourthouse(null);
 
         CourtroomEntity courtroomEntity = dartsDatabase.findCourtroomBy("SWANSEA", "1");
 
@@ -115,4 +137,10 @@ class NodeRegistrationControllerTest  extends IntegrationBase {
             .param("mac_address", "6A-5F-90-A4-2C-12");
     }
 
+    private void setupExternalUserForCourthouse(CourthouseEntity courthouse) {
+        String guid = UUID.randomUUID().toString();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createDarPcExternalUser(guid, courthouse);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(MID_TIER, DAR_PC))).thenReturn(true);
+    }
 }

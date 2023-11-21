@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 import static uk.gov.hmcts.darts.testutils.data.CommonTestData.createOffsetDateTime;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
@@ -91,7 +92,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
         Assertions.assertEquals(0, getAllLogEventsMatchingText().size(), "Precondition failed");
 
-        setupExternalUserForCourthouse(null);
+        setupExternalMidTierUserForCourthouse(null);
 
         mockMvc.perform(requestBuilder)
             .andExpect(MockMvcResultMatchers.status().isCreated());
@@ -304,5 +305,12 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP))).thenReturn(true);
+    }
+
+    private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {
+        String guid = UUID.randomUUID().toString();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createMidTierExternalUser(guid, courthouse);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(MID_TIER))).thenReturn(true);
     }
 }

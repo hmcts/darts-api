@@ -5,20 +5,27 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
+import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.TestUtils.substituteHearingDateWithToday;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
@@ -38,6 +46,7 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createListOfJudges
 import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createListOfProsecutor;
 
 @AutoConfigureMockMvc
+@Transactional
 class CaseControllerTest extends IntegrationBase {
 
     public static final String EXPECTED_RESPONSE_FILE = "tests/cases/CaseControllerTest/casesGetEndpoint/expectedResponse.json";
@@ -45,6 +54,9 @@ class CaseControllerTest extends IntegrationBase {
     public static final String BASE_PATH = "/cases";
     @Autowired
     private transient MockMvc mockMvc;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
 
     private HearingEntity setupHearingForCase1(CourthouseEntity swanseaCourthouse, CourtroomEntity swanseaCourtroom1) {
         var case1 = createCaseAt(swanseaCourthouse);
@@ -123,7 +135,7 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesGetEndpoint() throws Exception {
-
+        setupExternalMidTierUserForCourthouse(null);
         MockHttpServletRequestBuilder requestBuilder = get(BASE_PATH)
             .queryParam(COURTHOUSE, "SWANSEA")
             .queryParam(COURTROOM, "1")
@@ -138,6 +150,8 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostWithoutExistingCase() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile("tests/cases/CaseControllerTest/casesPostEndpoint/requestBody.json"));
@@ -152,6 +166,8 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostWithoutExistingCaseAndCourtroomMissing() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
@@ -197,6 +213,8 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostWithNonExistingCourtroom() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
@@ -212,6 +230,8 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostOnlyCaseNumberAndCourthouseProvided() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
@@ -227,6 +247,8 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostWithExistingCaseButNoHearing() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
         dartsDatabase.createCase("EDINBURGH", "case1");
         MockHttpServletRequestBuilder requestBuilder = post(BASE_PATH)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -243,6 +265,8 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesPostUpdateExistingCase() throws Exception {
+        setupExternalMidTierUserForCourthouse(null);
+
         MockHttpServletRequestBuilder requestBuilder = post("/cases")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(getContentsFromFile(
@@ -254,5 +278,12 @@ class CaseControllerTest extends IntegrationBase {
         String expectedResponse = substituteHearingDateWithToday(getContentsFromFile(
             "tests/cases/CaseControllerTest/casesPostEndpoint/expectedResponseCaseUpdate.json"));
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    private void setupExternalMidTierUserForCourthouse(CourthouseEntity courthouse) {
+        String guid = UUID.randomUUID().toString();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createMidTierExternalUser(guid, courthouse);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(MID_TIER))).thenReturn(true);
     }
 }
