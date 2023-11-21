@@ -681,6 +681,10 @@ components:
         courthouse:
           type: string
           example: Swansea
+        reporting_restriction:
+          type: string
+          example: "Section 4(2) of the Contempt of Court Act 1981"
+          description: 'Any reporting restrictions associated with the case.'
         status:
           type: string
         from:
