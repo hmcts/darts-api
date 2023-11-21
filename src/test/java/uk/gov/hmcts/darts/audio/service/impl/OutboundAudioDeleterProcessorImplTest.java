@@ -66,7 +66,7 @@ class OutboundAudioDeleterProcessorImplTest {
 
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn(null);
         assertThrows(DartsApiException.class, () ->
-            outboundAudioDeleterProcessorImpl.delete());
+            outboundAudioDeleterProcessorImpl.markForDeletion());
     }
 }
 
