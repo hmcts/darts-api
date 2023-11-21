@@ -24,6 +24,11 @@ public enum AudioApiError implements DartsApiError {
         HttpStatus.NOT_FOUND,
         "The requested media cannot be found"
     ),
+    FAILED_TO_UPLOAD_AUDIO_FILE(
+        "103",
+        HttpStatus.BAD_REQUEST,
+        "Failed to store uploaded audio file"
+    ),
     MISSING_SYSTEM_USER(
         "103",
         null,
