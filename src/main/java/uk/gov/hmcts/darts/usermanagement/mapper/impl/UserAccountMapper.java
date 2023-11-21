@@ -43,7 +43,7 @@ public interface UserAccountMapper {
     UserWithIdAndLastLogin mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
 
     default UserState mapToUserState(Integer stateValue) {
-        return stateValue == 0 ? UserState.ENABLED : UserState.DISABLED;
+        return stateValue == null || stateValue == 0 ? UserState.ENABLED : UserState.DISABLED;
     }
 
     default Integer mapToUserStateValue(UserState userState) {

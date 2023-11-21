@@ -15,6 +15,7 @@ paths:
     get:
       tags:
         - User
+      operationId: getUsers
       parameters:
         - in: query
           name: courthouse
@@ -28,6 +29,7 @@ paths:
       summary: Create new user
       tags:
         - User
+      operationId: createUser
       requestBody:
         $ref: '#/components/requestBodies/UserRequest'
       responses:
@@ -40,6 +42,7 @@ paths:
       summary: Modify user by id
       tags:
         - User
+      operationId: modifyUser
       parameters:
         - $ref: '#/components/parameters/UserId'
       requestBody:
@@ -57,6 +60,7 @@ paths:
       summary: Get users by search criteria
       tags:
         - User
+      operationId: search
       requestBody:
         $ref: '#/components/requestBodies/UserSearchRequest'
       responses:
@@ -196,7 +200,7 @@ components:
     UserName:
       minLength: 1
       maxLength: 256
-      pattern: ^[^\s][a-zA-Z\s'-]+[^\s]$
+      pattern: ^\S$|^\S[a-zA-Z '-]*\S$
       type: string
     UserEmailAddress:
       minLength: 1
@@ -226,11 +230,6 @@ components:
 
     CourthouseId:
       type: integer
-
-    GenericSearchField:
-      minLength: 3
-      maxLength: 256
-      type: string
 
     User:
       type: object
@@ -268,9 +267,9 @@ components:
       type: object
       properties:
         full_name:
-          $ref: '#/components/schemas/GenericSearchField'
+          $ref: '#/components/schemas/UserName'
         email_address:
-          $ref: '#/components/schemas/GenericSearchField'
+          $ref: '#/components/schemas/UserEmailAddress'
     UserWithId:
       type: object
       properties:

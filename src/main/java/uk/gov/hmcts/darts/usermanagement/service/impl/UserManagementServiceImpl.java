@@ -8,16 +8,19 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
+import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 import uk.gov.hmcts.darts.usermanagement.model.UserState;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +35,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
     private final AuthorisationApi authorisationApi;
+    private final UserSearchQuery userSearchQuery;
 
     @Override
     public UserWithId createUser(User user) {
@@ -59,8 +63,10 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public UserWithIdAndLastLogin modifyUser(Integer userId, UserPatch userPatch) {
         var userEntity = userAccountRepository.findById(userId)
-            .orElseThrow(() -> new DartsApiException(UserManagementError.USER_NOT_FOUND,
-                                                     String.format("User id %d not found", userId)));
+            .orElseThrow(() -> new DartsApiException(
+                UserManagementError.USER_NOT_FOUND,
+                String.format("User id %d not found", userId)
+            ));
         updateEntity(userPatch, userEntity);
 
         UserAccountEntity updatedUserEntity = userAccountRepository.save(userEntity);
@@ -70,6 +76,20 @@ public class UserManagementServiceImpl implements UserManagementService {
         user.setSecurityGroups(securityGroupIds);
 
         return user;
+    }
+
+    @Override
+    public List<UserWithIdAndLastLogin> search(UserSearch userSearch) {
+        List<UserWithIdAndLastLogin> userWithIdAndLastLoginList = new ArrayList<>();
+
+        userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress())
+            .forEach(userAccountEntity -> {
+                UserWithIdAndLastLogin userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
+                userWithIdAndLastLogin.setSecurityGroups(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
+            });
+
+        return userWithIdAndLastLoginList;
     }
 
     private void updateEntity(UserPatch user, UserAccountEntity userAccountEntity) {
@@ -113,5 +133,5 @@ public class UserManagementServiceImpl implements UserManagementService {
             .map(SecurityGroupEntity::getId)
             .toList();
     }
-    
+
 }

@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "6a9d1f2c-5dde-454a-9cd7-7660f682f1bb",
+		"_postman_id": "5f17c956-c279-4474-a254-fe91f08073a5",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30362290"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -1079,9 +1078,50 @@
 					"name": "/transcriptions",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "user_id",
+								"value": "{{user_id}}",
+								"type": "default"
+							}
+						],
 						"url": {
-							"raw": ""
+							"raw": "{{serverUrl}}/transcriptions",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
 						}
 					},
 					"response": []
@@ -1174,7 +1214,7 @@
 								},
 								{
 									"key": "redirect_uri",
-									"value": "http://localhost:4550/external-user/handle-oauth-code",
+									"value": "{{serverUrl}}/external-user/handle-oauth-code",
 									"type": "default"
 								},
 								{
@@ -1229,6 +1269,36 @@
 									"key": "courthouse",
 									"value": "-1"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/users/search",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"full_name\": \"mi\",\n  \"email_address\": \"@hmcts\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/users/search",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"users",
+								"search"
 							]
 						}
 					},

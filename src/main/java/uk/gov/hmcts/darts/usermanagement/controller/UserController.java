@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.usermanagement.http.api.UserApi;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
+import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
@@ -29,13 +30,13 @@ public class UserController implements UserApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<List<UserWithIdAndLastLogin>> usersGet(Integer courthouse) {
-        return UserApi.super.usersGet(courthouse);
+    public ResponseEntity<List<UserWithIdAndLastLogin>> getUsers(Integer courthouse) {
+        return UserApi.super.getUsers(courthouse);
     }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<UserWithId> usersPost(User user) {
+    public ResponseEntity<UserWithId> createUser(User user) {
         UserWithId createdUser = userManagementService.createUser(user);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -44,10 +45,17 @@ public class UserController implements UserApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<UserWithIdAndLastLogin> usersIdPatch(Integer userId, UserPatch userPatch) {
+    public ResponseEntity<UserWithIdAndLastLogin> modifyUser(Integer userId, UserPatch userPatch) {
         UserWithIdAndLastLogin updatedUser = userManagementService.modifyUser(userId, userPatch);
 
         return ResponseEntity.ok(updatedUser);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    public ResponseEntity<List<UserWithIdAndLastLogin>> search(UserSearch userSearch) {
+        return ResponseEntity.ok(userManagementService.search(userSearch));
     }
 
 }
