@@ -6,6 +6,13 @@
     <cve>CVE-2023-4586</cve>
   </suppress>
 
+  <suppress until="2024-01-14">
+    <notes>Suppression for netty. Pulled in by azure-bom latest version</notes>
+    <cve>CVE-2023-36052</cve>
+  </suppress>
+
+  CVE-2023-36052
+
   <!--Please add all the false positives under the below section-->
   <suppress>
     <notes>False Positive
