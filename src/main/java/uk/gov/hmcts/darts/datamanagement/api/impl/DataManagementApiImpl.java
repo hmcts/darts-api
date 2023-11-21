@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.datamanagement.api.impl;
 import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -32,9 +33,20 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
-    public void deleteBlobDataFromOutboundContainer(UUID blobId) {
+    public void deleteBlobDataFromOutboundContainer(UUID blobId) throws AzureDeleteBlobException {
         dataManagementService.deleteBlobData(getOutboundContainerName(), blobId);
     }
+
+    @Override
+    public void deleteBlobDataFromInboundContainer(UUID blobId) throws AzureDeleteBlobException {
+        dataManagementService.deleteBlobData(getOutboundContainerName(), blobId);
+    }
+
+    @Override
+    public void deleteBlobDataFromUnstructuredContainer(UUID blobId) throws AzureDeleteBlobException {
+        dataManagementService.deleteBlobData(getUnstructuredContainerName(), blobId);
+    }
+
 
     @Override
     public UUID saveBlobDataToInboundContainer(BinaryData binaryData) {
@@ -47,6 +59,10 @@ public class DataManagementApiImpl implements DataManagementApi {
 
     private String getInboundContainerName() {
         return dataManagementConfiguration.getInboundContainerName();
+    }
+
+    private String getUnstructuredContainerName() {
+        return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
 }

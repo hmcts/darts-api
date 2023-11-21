@@ -154,6 +154,8 @@ darts:
         unstructured: darts-unstructured
         inbound: darts-inbound-container
         outbound: darts-outbound
+    delete:
+      timeout: 60
   transcription:
     allowed-extensions:
       - "docx"

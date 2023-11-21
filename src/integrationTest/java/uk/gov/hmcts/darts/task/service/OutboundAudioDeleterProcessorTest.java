@@ -134,7 +134,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
 
 
     }
@@ -165,7 +165,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        outboundAudioDeleterProcessorImpl.delete();
+        outboundAudioDeleterProcessorImpl.markForDeletion();
 
 
         assertEntityStateNotChanged(currentMediaRequest);
@@ -198,7 +198,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1_698_019_200L), ZoneId.of("Europe/London"));
         outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 2);
 
-        outboundAudioDeleterProcessorImpl.delete();
+        outboundAudioDeleterProcessorImpl.markForDeletion();
 
         assertEntityStateNotChanged(currentMediaRequest);
     }
@@ -245,7 +245,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 10);
-        outboundAudioDeleterProcessorImpl.delete();
+        outboundAudioDeleterProcessorImpl.markForDeletion();
 
         assertEntityStateNotChanged(currentMediaRequest);
     }
@@ -275,7 +275,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
         OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 4);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
     }
 
     @Test
@@ -306,7 +306,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         clock = Clock.fixed(Instant.ofEpochSecond(1_698_142_250L), ZoneId.of("Europe/London"));
         OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl =
             createOutboundDeleterService(clock, 2);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
 
 
         //last accessed saturday
@@ -324,7 +324,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
 
     }
 
@@ -333,7 +333,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     void whereLastAccessedIsNullUseCreatedAndInProgressStatus() {
         MediaRequestEntity matchingMediaRequest = createMediaRequestsWithHearingWithLastAccessedTimeIsNull();
 
-        List<MediaRequestEntity> markedForDeletion = outboundAudioDeleterProcessorImpl.delete();
+        List<MediaRequestEntity> markedForDeletion = outboundAudioDeleterProcessorImpl.markForDeletion();
 
         MediaRequestEntity expiredMediaRequest = dartsDatabase.getMediaRequestRepository().findById(markedForDeletion.get(
             0).getId()).get();

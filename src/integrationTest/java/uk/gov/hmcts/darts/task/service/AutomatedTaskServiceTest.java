@@ -14,6 +14,9 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
+import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
+import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
@@ -24,6 +27,7 @@ import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
@@ -41,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @TestMethodOrder(OrderAnnotation.class)
+@SuppressWarnings({"PMD.ExcessiveImports"})
 class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
@@ -58,6 +63,13 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
+
+    @Autowired
+    private ExternalInboundDataStoreDeleter externalInboundDataStoreDeleter;
+    @Autowired
+    private ExternalUnstructuredDataStoreDeleter externalUnstructuredDataStoreDeleter;
+    @Autowired
+    private ExternalOutboundDataStoreDeleter externalOutboundDataStoreDeleter;
 
     @Autowired
     private InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
@@ -402,5 +414,61 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     }
 
+    @Test
+    @Order(13)
+    void givenConfiguredTasksUpdateCronAndResetCronForExternalDataDeleterAutomatedTask() {
+        AutomatedTask automatedTask =
+            new ExternalDataStoreDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                externalInboundDataStoreDeleter, externalUnstructuredDataStoreDeleter, externalOutboundDataStoreDeleter
+            );
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
+                 originalAutomatedTaskEntity.get().getCronExpression()
+        );
 
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    @Order(14)
+    void givenConfiguredTaskCancelExternalDataDeleterAutomatedTask() {
+        AutomatedTask automatedTask =
+            new ExternalDataStoreDeleterAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                externalInboundDataStoreDeleter,
+                externalUnstructuredDataStoreDeleter,
+                externalOutboundDataStoreDeleter
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(automatedTask.getTaskName(), mayInterruptIfRunning);
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
+    }
 }

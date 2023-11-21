@@ -25,7 +25,7 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @Table(name = "external_object_directory")
 @Getter
 @Setter
-public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
+public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity implements ObjectDirectory {
 
     @Id
     @Column(name = "eod_id")
@@ -62,4 +62,13 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
 
+    @Override
+    public int getStatusId() {
+        return getStatus().getId();
+    }
+
+    @Override
+    public UUID getLocation() {
+        return externalLocation;
+    }
 }

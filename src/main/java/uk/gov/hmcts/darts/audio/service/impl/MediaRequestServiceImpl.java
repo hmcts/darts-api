@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -140,7 +141,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             UUID blobId = mediaTransientObject.getExternalLocation();
 
             if (blobId != null) {
-                dataManagementApi.deleteBlobDataFromOutboundContainer(blobId);
+                try {
+                    dataManagementApi.deleteBlobDataFromOutboundContainer(blobId);
+                } catch (AzureDeleteBlobException e) {
+                    log.error("Error while deleting audio request", e);
+                }
+
             }
 
             transientObjectDirectoryRepository.deleteById(mediaTransientObject.getId());
