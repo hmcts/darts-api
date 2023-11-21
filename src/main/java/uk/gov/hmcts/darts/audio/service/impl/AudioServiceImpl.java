@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
@@ -35,8 +36,6 @@ import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
-import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 
@@ -57,6 +56,7 @@ public class AudioServiceImpl implements AudioService {
     private final AddAudioRequestMapper mapper;
     private final DataManagementApi dataManagementApi;
     private final UserIdentity userIdentity;
+    private final FileContentChecksum fileContentChecksum;
 
     private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return new AudioFileInfo(
@@ -102,7 +102,7 @@ public class AudioServiceImpl implements AudioService {
 
         try {
             BinaryData binaryData = BinaryData.fromStream(audioFileStream.getInputStream());
-            checksum = new String(encodeBase64(md5(binaryData.toBytes())));
+            checksum = fileContentChecksum.calculate(binaryData.toBytes());
             externalLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
         } catch (IOException e) {
             throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);

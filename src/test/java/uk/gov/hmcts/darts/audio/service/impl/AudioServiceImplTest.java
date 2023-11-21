@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
@@ -95,6 +96,8 @@ class AudioServiceImplTest {
     private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     @Mock
     private DataManagementApi dataManagementApi;
+    @Mock
+    private FileContentChecksum fileContentChecksum;
     private AudioService audioService;
 
     @Mock
@@ -114,7 +117,8 @@ class AudioServiceImplTest {
             hearingRepository,
             mapper,
             dataManagementApi,
-            userIdentity
+            userIdentity,
+            fileContentChecksum
         );
     }
 
