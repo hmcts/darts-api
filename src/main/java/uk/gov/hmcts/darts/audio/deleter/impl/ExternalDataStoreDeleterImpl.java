@@ -43,9 +43,9 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
         for (T entityToBeDeleted : toBeDeleted) {
             UUID externalLocation = entityToBeDeleted.getLocation();
             log.debug(
-                "Deleting data from container with location: {} for entity with id: {} and status: {}",
+                "Deleting data with location: {} for entity with id: {} and status: {}",
                 externalLocation,
-                entityToBeDeleted,
+                entityToBeDeleted.getId(),
                 entityToBeDeleted.getStatusId()
             );
 

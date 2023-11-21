@@ -9,6 +9,7 @@ public interface ObjectDirectory {
 
     void setStatus(ObjectDirectoryStatusEntity deletedStatus);
 
-
     void setLastModifiedBy(UserAccountEntity systemUser);
+
+    Integer getId();
 }
