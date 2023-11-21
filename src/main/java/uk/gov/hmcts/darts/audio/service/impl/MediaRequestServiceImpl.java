@@ -199,7 +199,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);
         criteriaQuery.where(criteriaBuilder.and(
-            criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.requestor), paramRequestor),
+            criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
             expiredPredicate(expired, criteriaBuilder, mediaRequest)
         ));
 
