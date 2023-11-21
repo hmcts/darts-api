@@ -27,7 +27,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             .redirects().follow(false)
             .delete();
     }
-    
+
     @Test
     @Order(1)
     void postSuccess() {
@@ -49,7 +49,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
         bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
 
-        Response response = buildRequestWithExternalDarMidTierGlobalAccessTokenClient()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body(bodyText)
             .when()
@@ -65,7 +65,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     @Test
     @Order(2)
     void postFail() {
-        Response response = buildRequestWithExternalDarMidTierGlobalAccessTokenClient()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body("""
                       {
