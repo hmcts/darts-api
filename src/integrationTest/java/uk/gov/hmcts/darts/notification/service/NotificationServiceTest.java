@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.notification.service;
 
+import org.apache.commons.collections4.map.LinkedMap;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -231,5 +232,27 @@ class NotificationServiceTest extends IntegrationBase {
         assertTrue(emailList.contains("testEmail2@test.com"));
         assertTrue(emailList.contains("testEmail3@test.com"));
         assertTrue(emailList.contains("testEmail4@test.com"));
+    }
+
+    @Test
+    void sendWrongTypeOfMap() throws TemplateNotFoundException {
+        var caseId = dartsDatabase.save(someMinimalCase()).getId();
+        when(templateIdHelper.findTemplateId(REQUEST_TO_TRANSCRIBER.toString())).thenReturn(
+            "976bf288-705d-4cbb-b24f-c5529abf14cf");
+        Map<String, String> templateParams = new LinkedMap<>();
+        templateParams.put("key1", "value1");
+        templateParams.put("key2", "value2");
+        templateParams.put("key3", "value3");
+        templateParams.put("key4", "value4");
+        templateParams.put("key5", "value5");
+
+        SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
+            .eventId(REQUEST_TO_TRANSCRIBER.toString())
+            .caseId(caseId)
+            .emailAddresses(TEST_EMAIL_ADDRESS)
+            .templateValues(templateParams)
+            .build();
+
+        service.scheduleNotification(request);
     }
 }

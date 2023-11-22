@@ -78,10 +78,9 @@ public class NotificationServiceImpl implements NotificationService {
             return null;
         }
 
-        ObjectWriter objectReader = new ObjectMapper().writerFor(HashMap.class);
+        ObjectWriter objectWriter = new ObjectMapper().writerFor(HashMap.class);
         try {
-            String valueAsString = objectReader.writeValueAsString(templateValues);
-            return valueAsString;
+            return objectWriter.writeValueAsString(templateValues);
         } catch (JsonProcessingException e) {
             log.error(
                 "Serialisation of request params for event {} with params {} has failed with error :- {}",
