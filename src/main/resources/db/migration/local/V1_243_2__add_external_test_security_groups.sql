@@ -23,21 +23,21 @@ VALUES(-46, -15);
 
 INSERT INTO darts.user_account
 (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, created_ts, last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-VALUES(-49, NULL, 'darpc_midtier_user', 'darpc_midtier_user@hmcts.net', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'b884e22d-a38c-4a34-94d0-af7f0e177bc6', true);
+VALUES(-60, NULL, 'darpc_midtier_user', 'darpc_midtier_user@hmcts.net', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'b884e22d-a38c-4a34-94d0-af7f0e177bc6', true);
 
 INSERT INTO darts.security_group_user_account_ae
 (usr_id, grp_id)
-VALUES(-49, -17);
+VALUES(-60, -17);
 
 INSERT INTO darts.security_group_user_account_ae
 (usr_id, grp_id)
-VALUES(-49, -16);
+VALUES(-60, -16);
 
 UPDATE darts.user_account
 SET account_guid = '9797a4fc-8e62-4095-bda6-04e7747b05e5'
 WHERE usr_id = -46;
 
--- due to a clash of user accounts whereby there are now 2 darts_global_test_users, rename the one on test -44 and the one on staging -48
+-- due to a clash of user accounts whereby there are now 2 darts_global_test_users, rename the one on test -44 and the one on staging -48 N.B. can't remove users due to foreign keys
 UPDATE darts.user_account
 SET user_name = 'darts_user'
 WHERE usr_id = -44

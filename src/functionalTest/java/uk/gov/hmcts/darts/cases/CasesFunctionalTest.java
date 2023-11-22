@@ -51,7 +51,7 @@ class CasesFunctionalTest  extends FunctionalTest {
         caseBody = caseBody.replace("<<courthouse>>", COURTHOUSE);
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
-        Response caseResponse = buildRequestWithExternalDarMidTierGlobalAccessTokenClient()
+        Response caseResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_PATH))
