@@ -165,7 +165,7 @@ darts:
       - "application/msword"
     max-created-by-duration: 30d
   portal:
-    url: https://darts-portal.staging.platform.hmcts.net
+    url: https://darts-portal.staging.apps.hmcts.net
   automated:
     task:
       thread-pool-size: 5
