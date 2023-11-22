@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 public interface UserAccountMapper {
 
     @Mappings({
-        @Mapping(source = "fullName", target = "username"),
+        @Mapping(source = "fullName", target = "userName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "description", target = "userDescription"),
         @Mapping(source = "state", target = "state"),
@@ -25,7 +25,7 @@ public interface UserAccountMapper {
 
     @Mappings({
         @Mapping(source = "id", target = "id"),
-        @Mapping(source = "username", target = "fullName"),
+        @Mapping(source = "userName", target = "fullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
         @Mapping(source = "state", target = "state")
@@ -34,7 +34,7 @@ public interface UserAccountMapper {
 
     @Mappings({
         @Mapping(source = "id", target = "id"),
-        @Mapping(source = "username", target = "fullName"),
+        @Mapping(source = "userName", target = "fullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
         @Mapping(source = "state", target = "state"),

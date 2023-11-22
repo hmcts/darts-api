@@ -115,7 +115,7 @@ public class TranscriptionResponseMapper {
 
     private String getRequestorName(TranscriptionEntity transcriptionEntity) {
         if (transcriptionEntity.getCreatedBy() != null) {
-            return transcriptionEntity.getCreatedBy().getUsername();
+            return transcriptionEntity.getCreatedBy().getUserName();
         } else {
             return transcriptionEntity.getRequestor();
         }

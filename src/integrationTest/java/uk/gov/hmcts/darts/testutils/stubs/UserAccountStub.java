@@ -35,7 +35,7 @@ public class UserAccountStub {
             return userAccountEntityOptional.get();
         } else {
             var newUser = new UserAccountEntity();
-            newUser.setUsername("System User");
+            newUser.setUserName("System User");
             newUser.setEmailAddress("system.user@example.com");
             newUser.setAccountGuid(UUID.randomUUID().toString());
             newUser.setIsSystemUser(false);
@@ -57,7 +57,7 @@ public class UserAccountStub {
     private UserAccountEntity createIntegrationUser(String guid) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
-        newUser.setUsername("IntegrationTest User");
+        newUser.setUserName("IntegrationTest User");
         newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);

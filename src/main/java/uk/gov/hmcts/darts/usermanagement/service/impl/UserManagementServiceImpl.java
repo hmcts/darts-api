@@ -95,7 +95,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private void updateEntity(UserPatch user, UserAccountEntity userAccountEntity) {
         String name = user.getFullName();
         if (name != null) {
-            userAccountEntity.setUsername(name);
+            userAccountEntity.setUserName(name);
         }
 
         String description = user.getDescription();
