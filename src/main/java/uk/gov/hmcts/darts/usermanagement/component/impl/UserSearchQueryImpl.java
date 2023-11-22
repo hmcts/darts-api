@@ -34,6 +34,7 @@ public class UserSearchQueryImpl implements UserSearchQuery {
         criteriaQuery.select(root);
 
         List<Predicate> wherePredicates = new ArrayList<>();
+        wherePredicates.add(criteriaBuilder.isFalse(root.get(UserAccountEntity_.isSystemUser)));
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
         ParameterExpression<String> paramFullName = criteriaBuilder.parameter(String.class);
 

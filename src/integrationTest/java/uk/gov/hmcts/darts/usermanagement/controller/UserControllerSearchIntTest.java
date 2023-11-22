@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 import static uk.gov.hmcts.darts.common.enums.UserStateEnum.DISABLED;
+import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
 
 @AutoConfigureMockMvc
 class UserControllerSearchIntTest extends IntegrationBase {
@@ -134,69 +135,61 @@ class UserControllerSearchIntTest extends IntegrationBase {
     }
 
     @Test
+    @Transactional
     void searchByEmailAddressShouldReturnOk() throws Exception {
+        UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
+        SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
+        testUser.getSecurityGroupEntities().add(testTranscriberSG);
+        testUser.setState(ENABLED.getId());
+        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("user@hmcts");
+        userSearch.setEmailAddress("@example");
 
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(userSearch)))
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
-            .andReturn();
-
-        String expectedResponse = """
-            [
-              {
-                "id": -46,
-                "full_name": "darts_global_test_user",
-                "email_address": "darts.global.user@hmcts.net",
-                "state": "ENABLED",
-                "security_groups": []
-              }
-            ]
-            """;
-        JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
-        );
+            .andExpect(jsonPath("$[0].id").isNumber())
+            .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
+            .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
+            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].security_groups").isArray())
+            .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
+            .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
     }
 
     @Test
+    @Transactional
     void searchByEmailAddressAndFullNameShouldReturnOk() throws Exception {
+        UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
+        SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
+        testUser.getSecurityGroupEntities().add(testTranscriberSG);
+        testUser.setState(ENABLED.getId());
+        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("global");
-        userSearch.setFullName("test");
+        userSearch.setEmailAddress("@example");
+        userSearch.setFullName("IntegrationTest");
 
-        MvcResult mvcResult = mockMvc.perform(post(ENDPOINT_URL)
-                                                  .header("Content-Type", "application/json")
-                                                  .content(objectMapper.writeValueAsString(userSearch)))
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
             .andExpect(status().isOk())
-            .andReturn();
-
-        String expectedResponse = """
-            [
-              {
-                "id": -46,
-                "full_name": "darts_global_test_user",
-                "email_address": "darts.global.user@hmcts.net",
-                "state": "ENABLED",
-                "security_groups": []
-              }
-            ]
-            """;
-        JSONAssert.assertEquals(
-            expectedResponse,
-            mvcResult.getResponse().getContentAsString(),
-            JSONCompareMode.NON_EXTENSIBLE
-        );
+            .andExpect(jsonPath("$[0].id").isNumber())
+            .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
+            .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
+            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].security_groups").isArray())
+            .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
+            .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
