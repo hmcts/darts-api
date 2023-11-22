@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.COURTROOM;
 import static uk.gov.hmcts.darts.cases.CasesConstants.GetCasesParams.DATE;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.TestUtils.substituteHearingDateWithToday;
@@ -135,7 +136,7 @@ class CaseControllerTest extends IntegrationBase {
 
     @Test
     void casesGetEndpoint() throws Exception {
-        setupExternalMidTierUserForCourthouse(null);
+        setupExternalDarPcUserForCourthouse(null);
         MockHttpServletRequestBuilder requestBuilder = get(BASE_PATH)
             .queryParam(COURTHOUSE, "SWANSEA")
             .queryParam(COURTROOM, "1")
@@ -285,5 +286,12 @@ class CaseControllerTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createMidTierExternalUser(guid, courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         when(mockUserIdentity.userHasGlobalAccess(Set.of(MID_TIER))).thenReturn(true);
+    }
+
+    private void setupExternalDarPcUserForCourthouse(CourthouseEntity courthouse) {
+        String guid = UUID.randomUUID().toString();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createDarPcExternalUser(guid, courthouse);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(DAR_PC))).thenReturn(true);
     }
 }
