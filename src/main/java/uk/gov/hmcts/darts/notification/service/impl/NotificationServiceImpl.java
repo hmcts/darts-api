@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.notification.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -28,6 +30,7 @@ import uk.gov.service.notify.NotificationClientException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,18 +71,25 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     private String getTemplateParamsString(SaveNotificationToDbRequest request) {
+
         Map<String, String> templateValues = request.getTemplateValues();
+
         if (MapUtils.isEmpty(templateValues)) {
             return null;
         }
-        List<String> kvJsonList = templateValues.entrySet().stream().map(this::makeKvIntoJsonString).toList();
-        String kvJson = StringUtils.join(kvJsonList, ",");
-        kvJson = "{" + kvJson + "}";
-        return kvJson;
-    }
 
-    private String makeKvIntoJsonString(Map.Entry<String, String> entry) {
-        return StringUtils.wrap(entry.getKey(), "\"") + ": " + StringUtils.wrap(entry.getValue(), "\"");
+        ObjectWriter objectReader = new ObjectMapper().writerFor(HashMap.class);
+        try {
+            String valueAsString = objectReader.writeValueAsString(templateValues);
+            return valueAsString;
+        } catch (JsonProcessingException e) {
+            log.error(
+                "Serialisation of request params for event {} with params {} has failed with error :- {}",
+                request.getEventId(), request.getTemplateValues(),
+                e.getMessage()
+            );
+        }
+        return null;
     }
 
     private List<String> getEmailAddresses(SaveNotificationToDbRequest request) {
