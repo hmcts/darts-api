@@ -22,7 +22,6 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient internalAccessTokenClient() {
-        log.info("adAuthenticationProperties username {}", adAuthenticationProperties.getUsername());
         return new AccessTokenClient(adAuthenticationProperties.getTokenUri(),
                               adAuthenticationProperties.getScope(),
                               adAuthenticationProperties.getUsername(),
@@ -33,7 +32,6 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient externalAccessTokenClient() {
-        log.info("b2cAuthenticationProperties username {}", b2cAuthenticationProperties.getUsername());
         return new AccessTokenClient(b2cAuthenticationProperties.getTokenUri(),
                                      b2cAuthenticationProperties.getScope(),
                                      b2cAuthenticationProperties.getUsername(),
@@ -44,7 +42,6 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient externalGlobalAccessTokenClient() {
-        log.info("externalGlobalAccessTokenClient username {}", b2cGlobalAuthenticationProperties.getUsername());
         return new AccessTokenClient(b2cGlobalAuthenticationProperties.getTokenUri(),
                                      b2cGlobalAuthenticationProperties.getScope(),
                                      b2cGlobalAuthenticationProperties.getUsername(),
@@ -55,7 +52,6 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient externalDarPcMidTierGlobalAccessTokenClient() {
-        log.info("b2CDarPcMidtierGlobalAuthenticationProperties username {}", b2CDarPcMidtierGlobalAuthenticationProperties.getUsername());
         return new AccessTokenClient(b2CDarPcMidtierGlobalAuthenticationProperties.getTokenUri(),
                                      b2CDarPcMidtierGlobalAuthenticationProperties.getScope(),
                                      b2CDarPcMidtierGlobalAuthenticationProperties.getUsername(),
