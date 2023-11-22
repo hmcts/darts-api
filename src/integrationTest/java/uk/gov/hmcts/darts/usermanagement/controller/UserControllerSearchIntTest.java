@@ -146,7 +146,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("@example");
+        userSearch.setEmailAddress("integrationtest.user@");
 
         mockMvc.perform(post(ENDPOINT_URL)
                             .header("Content-Type", "application/json")
@@ -176,7 +176,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("@example");
+        userSearch.setEmailAddress("integrationtest.user@");
         userSearch.setFullName("IntegrationTest");
 
         mockMvc.perform(post(ENDPOINT_URL)
@@ -207,7 +207,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
 
         UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("@example");
+        userSearch.setEmailAddress("integrationtest.user@");
         userSearch.setFullName("IntegrationTest");
 
         mockMvc.perform(post(ENDPOINT_URL)
