@@ -64,7 +64,9 @@ import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static java.time.ZoneOffset.UTC;
@@ -80,6 +82,7 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REJECTION_REASON;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED;
@@ -217,14 +220,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UpdateTranscriptionResponse updateTranscriptionResponse = new UpdateTranscriptionResponse();
         updateTranscriptionResponse.setTranscriptionWorkflowId(transcriptionWorkflowEntity.getId());
 
-        handleNotificationsAndAudit(userAccountEntity, transcriptionEntity, transcriptionStatusEntity);
+        handleNotificationsAndAudit(userAccountEntity, transcriptionEntity, transcriptionStatusEntity, updateTranscription);
         return updateTranscriptionResponse;
     }
 
     @SuppressWarnings({"java:S131", "checkstyle:MissingSwitchDefault"})
     private void handleNotificationsAndAudit(UserAccountEntity userAccountEntity,
                                              TranscriptionEntity transcriptionEntity,
-                                             TranscriptionStatusEntity transcriptionStatusEntity) {
+                                             TranscriptionStatusEntity transcriptionStatusEntity, UpdateTranscription updateTranscription) {
         TranscriptionStatusEnum newStatusEnum = TranscriptionStatusEnum.fromId(transcriptionStatusEntity.getId());
 
         final var courtCaseEntity = transcriptionEntity.getCourtCase();
@@ -239,7 +242,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 );
             }
             case REJECTED -> {
-                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED.toString());
+                Map<String, String> templateParams = new HashMap<>();
+                templateParams.put(REJECTION_REASON, updateTranscription.getWorkflowComment());
+
+                notifyRequestor(transcriptionEntity, TRANSCRIPTION_REQUEST_REJECTED.toString(), templateParams);
                 auditApi.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
             case WITH_TRANSCRIBER -> auditApi.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
@@ -280,13 +286,18 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         notificationApi.scheduleNotification(request);
     }
 
-    private void notifyRequestor(TranscriptionEntity transcription, String templateName) {
+    private void notifyRequestor(TranscriptionEntity transcription, String templateName, Map<String, String> templateParams) {
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(templateName)
             .userAccountsToEmail(List.of(transcription.getCreatedBy()))
             .caseId(transcription.getCourtCase().getId())
+            .templateValues(templateParams)
             .build();
         notificationApi.scheduleNotification(request);
+    }
+
+    private void notifyRequestor(TranscriptionEntity transcription, String templateName) {
+        notifyRequestor(transcription, templateName, new HashMap<>());
     }
 
     private void notifyTranscriptionCompanyForCourthouse(CourtCaseEntity courtCase) {
