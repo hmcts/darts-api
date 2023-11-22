@@ -10,6 +10,8 @@ import uk.gov.hmcts.darts.usermanagement.model.UserState;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 
+import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
+
 @Mapper(componentModel = "spring",
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -43,7 +45,7 @@ public interface UserAccountMapper {
     UserWithIdAndLastLogin mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
 
     default UserState mapToUserState(Integer stateValue) {
-        return stateValue == null || stateValue == 0 ? UserState.ENABLED : UserState.DISABLED;
+        return stateValue == null || ENABLED.getId().equals(stateValue) ? UserState.ENABLED : UserState.DISABLED;
     }
 
     default Integer mapToUserStateValue(UserState userState) {
