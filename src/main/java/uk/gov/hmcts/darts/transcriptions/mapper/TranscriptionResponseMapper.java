@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -60,6 +61,10 @@ public class TranscriptionResponseMapper {
             CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
             transcriptionResponse.setTranscriptionId(transcriptionEntity.getId());
             transcriptionResponse.setCaseId(courtCase.getId());
+            EventHandlerEntity reportingRestrictions = courtCase.getReportingRestrictions();
+            if (reportingRestrictions != null) {
+                transcriptionResponse.setReportingRestriction(reportingRestrictions.getEventName());
+            }
             transcriptionResponse.setCaseNumber(courtCase.getCaseNumber());
             transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
             transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
