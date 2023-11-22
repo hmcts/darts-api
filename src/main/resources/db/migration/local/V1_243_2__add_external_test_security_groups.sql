@@ -6,6 +6,9 @@ UPDATE darts.user_account
 SET account_guid = 'd040e413-f1ac-4902-b347-369f6e582559', is_system_user = true, user_name = 'xhibit_user'
 WHERE usr_id = -40;
 
+UPDATE darts.security_group
+SET global_access = true
+WHERE group_name in ('Dar Pc Group', 'Mid Tier Group');
 
 INSERT INTO darts.security_group_user_account_ae
 (usr_id, grp_id)
@@ -16,6 +19,7 @@ VALUES(-46, -16);
 INSERT INTO darts.security_group_user_account_ae
 (usr_id, grp_id)
 VALUES(-46, -15);
+
 
 INSERT INTO darts.user_account
 (usr_id, dm_user_s_object_id, user_name, user_email_address, description, user_state, created_ts, last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
@@ -28,3 +32,8 @@ VALUES(-49, -17);
 INSERT INTO darts.security_group_user_account_ae
 (usr_id, grp_id)
 VALUES(-49, -16);
+
+UPDATE darts.user_account
+SET account_guid = '9797a4fc-8e62-4095-bda6-04e7747b05e5'
+WHERE usr_id = -46;
+
