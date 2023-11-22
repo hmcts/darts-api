@@ -5,6 +5,7 @@ import lombok.Data;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -13,5 +14,5 @@ public class SaveNotificationToDbRequest {
     Integer caseId;
     String emailAddresses;
     List<UserAccountEntity> userAccountsToEmail;
-    String templateValues;
+    Map<String, String> templateValues;
 }

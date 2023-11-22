@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +29,7 @@ import uk.gov.service.notify.NotificationClientException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 
 @RequiredArgsConstructor
@@ -54,21 +56,37 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void scheduleNotification(SaveNotificationToDbRequest request) {
         List<String> emailAddresses = getEmailAddresses(request);
+        String templateParamsString = getTemplateParamsString(request);
         for (String emailAddress : emailAddresses) {
             saveNotificationToDb(
                 request.getEventId(),
                 request.getCaseId(),
                 StringUtils.trim(emailAddress),
-                request.getTemplateValues()
+                templateParamsString
             );
         }
+    }
+
+    private String getTemplateParamsString(SaveNotificationToDbRequest request) {
+        Map<String, String> templateValues = request.getTemplateValues();
+        if (MapUtils.isEmpty(templateValues)) {
+            return null;
+        }
+        List<String> kvJsonList = templateValues.entrySet().stream().map(this::makeKvIntoJsonString).toList();
+        String kvJson = StringUtils.join(kvJsonList, ",");
+        kvJson = "{" + kvJson + "}";
+        return kvJson;
+    }
+
+    private String makeKvIntoJsonString(Map.Entry<String, String> entry) {
+        return StringUtils.wrap(entry.getKey(), "\"") + ": " + StringUtils.wrap(entry.getValue(), "\"");
     }
 
     private List<String> getEmailAddresses(SaveNotificationToDbRequest request) {
         String emailAddressesStr = request.getEmailAddresses();
         List<String> emailAddressList = new ArrayList<>();
         if (StringUtils.isNotBlank(emailAddressesStr)) {
-            CollectionUtils.addAll(emailAddressList, StringUtils.split(emailAddressesStr, ","));
+            CollectionUtils.addAll(emailAddressList, StringUtils.split(emailAddressesStr, ", "));
         }
         if (request.getUserAccountsToEmail() != null) {
             CollectionUtils.addAll(
