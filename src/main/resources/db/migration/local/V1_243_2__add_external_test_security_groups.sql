@@ -37,3 +37,13 @@ UPDATE darts.user_account
 SET account_guid = '9797a4fc-8e62-4095-bda6-04e7747b05e5'
 WHERE usr_id = -46;
 
+-- due to a clash of user accounts whereby there are now 2 darts_global_test_users, rename the one on test -44 and the one on staging -48
+UPDATE darts.user_account
+SET user_name = 'darts_user'
+WHERE usr_id = -44
+AND user_name = 'darts_global_test_user';
+
+UPDATE darts.user_account
+SET user_name = 'darts_user'
+WHERE usr_id = -48
+AND user_name = 'darts_global_test_user';
