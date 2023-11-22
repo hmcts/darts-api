@@ -1,24 +1,21 @@
 package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
-import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
+import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -76,8 +73,11 @@ public class TranscriptionResponseMapper {
 
             transcriptionResponse.setFrom(getRequestorName(transcriptionEntity));
             transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
-            transcriptionResponse.setRequestorComments(getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REQUESTED));
-            transcriptionResponse.setRejectionReason(getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REJECTED));
+            transcriptionResponse.setRequestorComments(TranscriptionUtil.getTranscriptionCommentAtStatus(
+                transcriptionEntity,
+                TranscriptionStatusEnum.REQUESTED
+            ));
+            transcriptionResponse.setRejectionReason(TranscriptionUtil.getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REJECTED));
 
             final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
                 .stream()
@@ -98,23 +98,6 @@ public class TranscriptionResponseMapper {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND);
         }
         return transcriptionResponse;
-
-    }
-
-    /*
-    Returns the transcription comment that was added when the transcription was set to this status in the workflow.
-     */
-    private String getTranscriptionCommentAtStatus(TranscriptionEntity transcriptionEntity, TranscriptionStatusEnum status) {
-        Optional<TranscriptionWorkflowEntity> foundWorkflowEntityOpt = transcriptionEntity.getTranscriptionWorkflowEntities().stream()
-            .filter(workflow -> workflow.getTranscriptionStatus().getId().equals(status.getId())).findAny();
-        if (foundWorkflowEntityOpt.isEmpty()) {
-            return null;
-        }
-        List<TranscriptionCommentEntity> transcriptionCommentEntities = foundWorkflowEntityOpt.get().getTranscriptionComments();
-        if (transcriptionCommentEntities.isEmpty()) {
-            return null;
-        }
-        return StringUtils.trimToNull(transcriptionCommentEntities.get(0).getComment());
 
     }
 

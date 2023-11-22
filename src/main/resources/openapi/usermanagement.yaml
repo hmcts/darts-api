@@ -112,6 +112,17 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SecurityGroupArraySuccessResponse'
+    post:
+      summary: Create security group (transcriber groups only)
+      tags:
+        - SecurityGroup
+      requestBody:
+        $ref: '#/components/requestBodies/SecurityGroupsRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/SecurityGroupSuccessResponse'
+        '400':
+          $ref: '#/components/responses/SecurityGroupBadRequest'
 
 
 ########################################################################################################################
@@ -138,6 +149,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserSearch'
+    SecurityGroupsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecurityGroup'
 
   responses:
     UserSuccessResponseWithId:
@@ -167,9 +184,15 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/SecurityGroup'
+              $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
     UserTransferSuccess:
       description: 'Success'
+    SecurityGroupSuccessResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
 
     BadUserRequest:
       description: Bad Request
@@ -211,6 +234,21 @@ components:
             type: "USER_100"
             title: "User not found"
             status: 404
+    SecurityGroupBadRequest:
+      description: Bad Request
+      content:
+        application/json+problem:
+          schema:
+            $ref: './problem.yaml'
+          example:
+            violations:
+              - field: "name"
+                message: "must not be null"
+              - field: "display_name"
+                message: "must not be null"
+            type: "https://zalando.github.io/problem/constraint-violation"
+            title: "Constraint Violation"
+            status: 400
 
   parameters:
     UserId:
@@ -253,12 +291,22 @@ components:
       type: integer
     SecurityGroupName:
       type: string
+      minLength: 1
+      maxLength: 256
     SecurityGroupDescription:
       type: string
+      minLength: 1
+      maxLength: 256
     SecurityGroupDisplayName:
       type: string
+      minLength: 1
+      maxLength: 256
     SecurityGroupRole:
       type: string
+    SecurityGroupGlobalAccess:
+      type: boolean
+    SecurityGroupDisplayState:
+      type: boolean
 
     CourthouseId:
       type: integer
@@ -325,16 +373,28 @@ components:
         - "AUTHORISATION_107"
       x-enum-varnames: [ BAD_REQUEST_ANY_ID ]
 
-    SecurityGroup:
+    SecurityGroupWithIdAndRole:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/SecurityGroupId'
+        role:
+          $ref: '#/components/schemas/SecurityGroupRole'
+        global_access:
+          $ref: '#/components/schemas/SecurityGroupGlobalAccess'
+        display_state:
+          $ref: '#/components/schemas/SecurityGroupDisplayState'
+      allOf:
+        - $ref: '#/components/schemas/SecurityGroup'
+    SecurityGroup:
+      type: object
+      properties:
         name:
           $ref: '#/components/schemas/SecurityGroupName'
         display_name:
           $ref: '#/components/schemas/SecurityGroupDisplayName'
-        role:
-          $ref: '#/components/schemas/SecurityGroupRole'
         description:
           $ref: '#/components/schemas/SecurityGroupDescription'
+      required:
+        - name
+        - display_name
