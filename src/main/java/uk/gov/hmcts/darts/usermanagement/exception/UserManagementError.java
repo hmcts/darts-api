@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.exception;
+package uk.gov.hmcts.darts.usermanagement.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,15 +7,15 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
 @RequiredArgsConstructor
-public enum OutboundDeleterException implements DartsApiError {
+public enum UserManagementError implements DartsApiError {
 
-    MISSING_SYSTEM_USER(
+    USER_NOT_FOUND(
         "100",
-        null,
-        "Failed to mark audio(s) for deletion as system user was not found"
+            HttpStatus.NOT_FOUND,
+            "The provided user does not exist"
     );
 
-    private static final String ERROR_TYPE_PREFIX = "AUDIO";
+    private static final String ERROR_TYPE_PREFIX = "USER_MANAGEMENT";
 
     private final String errorTypeNumeric;
     private final HttpStatus httpStatus;
@@ -25,4 +25,5 @@ public enum OutboundDeleterException implements DartsApiError {
     public String getErrorTypePrefix() {
         return ERROR_TYPE_PREFIX;
     }
+
 }

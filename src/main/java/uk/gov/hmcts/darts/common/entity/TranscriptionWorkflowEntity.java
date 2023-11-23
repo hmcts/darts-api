@@ -45,6 +45,6 @@ public class TranscriptionWorkflowEntity {
     @Column(name = "workflow_ts", nullable = false)
     private OffsetDateTime workflowTimestamp;
 
-    @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION_WORKFLOW_ID)
-    private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
+    @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION_WORKFLOW)
+    private List<TranscriptionCommentEntity> transcriptionComments = new ArrayList<>();
 }

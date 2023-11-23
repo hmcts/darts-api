@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -20,11 +19,10 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
 @AutoConfigureMockMvc
-@Transactional
 class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL_TRANSCRIPTION = "/transcriptions/{transcription_id}";
@@ -42,7 +39,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
-    private static final List<String> TAGS_TO_IGNORE = List.of("case_id");
+    private static final List<String> TAGS_TO_IGNORE = List.of("case_id", "transcription_id");
 
     @Autowired
     private MockMvc mockMvc;
@@ -74,33 +71,49 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         transcription.setEndTime(SOME_DATE_TIME);
         transcription = dartsDatabase.save(transcription);
 
-        TranscriptionCommentEntity commentEntity = new TranscriptionCommentEntity();
-        commentEntity.setComment("comment1");
-        TranscriptionCommentEntity commentEntity2 = new TranscriptionCommentEntity();
-        commentEntity2.setComment("comment2");
-        transcription.setTranscriptionCommentEntities(Arrays.asList(commentEntity, commentEntity2));
+        UserAccountEntity userAccount = transcription.getCreatedBy();
 
-        TranscriptionWorkflowEntity workflowaEntity = new TranscriptionWorkflowEntity();
-        addCommentsToWorkflow(workflowaEntity, "workflowacomment", 2);
-        workflowaEntity.setWorkflowActor(transcription.getCreatedBy());
-        workflowaEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        {
+            TranscriptionWorkflowEntity workflowAEntity = new TranscriptionWorkflowEntity();
+            workflowAEntity.setTranscription(transcription);
+            workflowAEntity.setWorkflowActor(transcription.getCreatedBy());
+            workflowAEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+            workflowAEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.REQUESTED));
+            dartsDatabase.save(workflowAEntity);
 
-        TranscriptionWorkflowEntity workflowbEntity = new TranscriptionWorkflowEntity();
-        addCommentsToWorkflow(workflowbEntity, "workflowbcomment", 2);
-        workflowbEntity.setWorkflowActor(transcription.getCreatedBy());
-        workflowbEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+            addCommentToWorkflow(workflowAEntity, "comment1", userAccount);
+        }
 
-        transcription.setTranscriptionWorkflowEntities(Arrays.asList(workflowaEntity, workflowbEntity));
-        transcription.setTranscriptionCommentEntities(Arrays.asList(commentEntity, commentEntity2));
+        {
+            TranscriptionWorkflowEntity workflowBEntity = new TranscriptionWorkflowEntity();
+            workflowBEntity.setTranscription(transcription);
+            workflowBEntity.setWorkflowActor(transcription.getCreatedBy());
+            workflowBEntity.setWorkflowTimestamp(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+            workflowBEntity.setTranscriptionStatus(dartsDatabase.getTranscriptionStub().getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED));
+            dartsDatabase.save(workflowBEntity);
+
+            addCommentToWorkflow(workflowBEntity, "comment2", userAccount);
+        }
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, transcription.getId());
-        String expected = TestUtils.removeTags(TAGS_TO_IGNORE,
-                                               getContentsFromFile(
-                                                   "tests/transcriptions/transcription/expectedResponse.json")
+        String expected = TestUtils.removeTags(
+            TAGS_TO_IGNORE,
+            getContentsFromFile(
+                "tests/transcriptions/transcription/expectedResponse.json")
         );
         MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
         String actualResponse = TestUtils.removeTags(TAGS_TO_IGNORE, mvcResult.getResponse().getContentAsString());
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    private void addCommentToWorkflow(TranscriptionWorkflowEntity workflowEntity, String comment, UserAccountEntity userAccount) {
+        TranscriptionCommentEntity commentEntity = new TranscriptionCommentEntity();
+        commentEntity.setTranscription(workflowEntity.getTranscription());
+        commentEntity.setTranscriptionWorkflow(workflowEntity);
+        commentEntity.setComment(comment);
+        commentEntity.setLastModifiedBy(userAccount);
+        commentEntity.setCreatedBy(userAccount);
+        dartsDatabase.save(commentEntity);
     }
 
     @Test
@@ -110,17 +123,5 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
         String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-    private void addCommentsToWorkflow(TranscriptionWorkflowEntity workflow, String prefix, int generateCount) {
-        List<TranscriptionCommentEntity> generatedCommentsLst = new ArrayList<>();
-
-        for (int i = 0; i < generateCount; i++) {
-            TranscriptionCommentEntity comment = new TranscriptionCommentEntity();
-            comment.setComment(prefix + (i + 1));
-            generatedCommentsLst.add(comment);
-        }
-        workflow.setTranscriptionCommentEntities(generatedCommentsLst);
     }
 }

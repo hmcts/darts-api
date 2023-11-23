@@ -24,10 +24,10 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.http.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
@@ -212,7 +212,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Authorisation(contextId = TRANSCRIPTION_ID,
         securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<TranscriptionResponse> getTranscription(
+    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(
         @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
             in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
     ) {

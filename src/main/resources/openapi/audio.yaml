@@ -207,17 +207,22 @@ paths:
     post:
       tags:
         - Audio
-      summary: Upload audio metadata
-      operationId: addAudioMetaData
+      summary: Upload audio file and metadata
+      operationId: addAudio
       requestBody:
-        required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AddAudioMetadataRequest'
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                metadata:
+                  $ref: '#/components/schemas/AddAudioMetadataRequest'
       responses:
         200:
-          description: Audio metadata accepted
+          description: Audio file and metadata accepted
         400:
           description: Bad request
           content:
@@ -309,3 +314,4 @@ components:
           description: 'List of associated case numbers'
           minItems: 1
           maxLength: 255
+

@@ -78,6 +78,7 @@ public class AuthorisationStub {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(testUser);
+        mediaRequestEntity.setCurrentOwner(testUser);
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setStartTime(YESTERDAY);
@@ -87,6 +88,7 @@ public class AuthorisationStub {
         mediaRequestEntitySystemUser = new MediaRequestEntity();
         mediaRequestEntitySystemUser.setHearing(hearingEntity);
         mediaRequestEntitySystemUser.setRequestor(systemUser);
+        mediaRequestEntitySystemUser.setCurrentOwner(systemUser);
         mediaRequestEntitySystemUser.setStatus(OPEN);
         mediaRequestEntitySystemUser.setRequestType(DOWNLOAD);
         mediaRequestEntitySystemUser.setStartTime(YESTERDAY);

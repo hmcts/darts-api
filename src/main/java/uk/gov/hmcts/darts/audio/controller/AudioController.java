@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -119,8 +120,8 @@ public class AudioController implements AudioApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<Void> addAudioMetaData(AddAudioMetadataRequest addAudioMetadataRequest) {
-        audioService.addAudio(addAudioMetadataRequest);
+    public ResponseEntity<Void> addAudio(MultipartFile file, AddAudioMetadataRequest metadata) {
+        audioService.addAudio(file, metadata);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

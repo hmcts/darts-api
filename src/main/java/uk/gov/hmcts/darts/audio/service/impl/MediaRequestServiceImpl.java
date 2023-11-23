@@ -34,6 +34,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity_;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -140,7 +141,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             UUID blobId = mediaTransientObject.getExternalLocation();
 
             if (blobId != null) {
-                dataManagementApi.deleteBlobDataFromOutboundContainer(blobId);
+                try {
+                    dataManagementApi.deleteBlobDataFromOutboundContainer(blobId);
+                } catch (AzureDeleteBlobException e) {
+                    log.error("Error while deleting audio request", e);
+                }
+
             }
 
             transientObjectDirectoryRepository.deleteById(mediaTransientObject.getId());
@@ -156,6 +162,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(requestor);
         mediaRequestEntity.setStartTime(startTime);
         mediaRequestEntity.setEndTime(endTime);
         mediaRequestEntity.setRequestType(requestType);
@@ -198,7 +205,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);
         criteriaQuery.where(criteriaBuilder.and(
-            criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.requestor), paramRequestor),
+            criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
             expiredPredicate(expired, criteriaBuilder, mediaRequest)
         ));
 

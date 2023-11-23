@@ -30,7 +30,7 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "trw_id")
-    private TranscriptionWorkflowEntity transcriptionWorkflowId;
+    private TranscriptionWorkflowEntity transcriptionWorkflow;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tra_id")

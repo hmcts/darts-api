@@ -70,6 +70,13 @@ public class FunctionalTest {
         return buildRequestWithAuth(internalAccessTokenClient);
     }
 
+    public void clean() {
+        buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/clean"))
+            .redirects().follow(false)
+            .delete();
+    }
+
     private RequestSpecification buildRequestWithAuth(AccessTokenClient accessTokenClient) {
         return RestAssured.given()
             .header("Authorization", String.format("Bearer %s", accessTokenClient.getAccessToken()));

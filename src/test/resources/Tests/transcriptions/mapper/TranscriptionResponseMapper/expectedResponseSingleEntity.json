@@ -1,1 +1,22 @@
-{"case_id":101,"case_number":"case1","courthouse":"case_courthouse","status":"APPROVED","from":"testUsername","received":"2020-06-20T10:10:00Z","comments":["comment1","comment2"], "defendants":["defendant_case1_1","defendant_case1_2"],"judges":["Judge_1","Judge_2"],"transcript_file_name":"test.doc","hearing_date":"2023-06-20","urgency":"STANDARD","request_type":"SENTENCING_REMARKS"}
+{
+  "transcription_id": 1,
+  "case_id": 101,
+  "case_number": "case1",
+  "courthouse": "case_courthouse",
+  "status": "APPROVED",
+  "from": "testUsername",
+  "received": "2020-06-20T10:10:00Z",
+  "requestor_comments": "workflowcommenta1",
+  "defendants": [
+    "defendant_case1_1",
+    "defendant_case1_2"
+  ],
+  "judges": [
+    "Judge_1",
+    "Judge_2"
+  ],
+  "transcript_file_name": "test.doc",
+  "hearing_date": "2023-06-20",
+  "urgency": "STANDARD",
+  "request_type": "SENTENCING_REMARKS"
+}

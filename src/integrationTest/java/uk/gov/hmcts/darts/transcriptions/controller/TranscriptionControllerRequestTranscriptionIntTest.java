@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -54,6 +55,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
@@ -155,6 +157,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .extracting(TranscriptionCommentEntity::getComment)
             .containsExactly(TEST_COMMENT);
 
+        List<NotificationEntity> notificationEntities = dartsDatabaseStub.getNotificationRepository().findAll();
+        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        assertTrue(templateList.contains(COURT_MANAGER_APPROVE_TRANSCRIPT.toString()));
 
         assertAudit(1);
     }
