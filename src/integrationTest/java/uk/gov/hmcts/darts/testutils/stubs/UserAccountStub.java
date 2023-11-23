@@ -133,6 +133,31 @@ public class UserAccountStub {
         return createExternalUser(guid, securityGroupEntity, courthouseEntity);
     }
 
+    public UserAccountEntity createCppExternalUser(String guid, CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-15);
+        securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        return createExternalUser(guid, securityGroupEntity, courthouseEntity);
+    }
+
+
+    public UserAccountEntity createDarPcExternalUser(String guid, CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-16);
+        securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        return createExternalUser(guid, securityGroupEntity, courthouseEntity);
+    }
+
+    public UserAccountEntity createMidTierExternalUser(String guid, CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-17);
+        securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        return createExternalUser(guid, securityGroupEntity, courthouseEntity);
+    }
+
     public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
                                                 CourthouseEntity courthouseEntity) {
         if (nonNull(courthouseEntity)) {

@@ -22,7 +22,7 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
 
         @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
         String ipAddress = "192.0.0.1";
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .queryParam("node_type", "DAR")
             .queryParam("courthouse", courthouseName)
