@@ -18,7 +18,13 @@ public enum EventError implements DartsApiError {
     EVENT_HANDLER_NOT_FOUND(
         "101",
         HttpStatus.UNPROCESSABLE_ENTITY,
-        "No event handler found event"
+        "No event handler found for event"
+    ),
+
+    EVENT_HANDLER_NOT_FOUND_IN_DB(
+        "102",
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        "No event handler found in database"
     );
 
     private static final String ERROR_TYPE_PREFIX = "EVENT";

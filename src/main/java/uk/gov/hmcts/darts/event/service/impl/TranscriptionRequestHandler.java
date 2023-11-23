@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -23,10 +24,10 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
 
     @Override
     @Transactional
-    public void handle(final DartsEvent dartsEvent) {
+    public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         //save the event in the database
         dartsEvent.setDateTime(dartsEvent.getStartTime());
-        var createdHearing = createHearingAndSaveEvent(dartsEvent);
+        var createdHearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
         //create automatic transcription request
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();

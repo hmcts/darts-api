@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.event.model.CreatedHearing;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -19,8 +20,8 @@ public class StandardEventHandler extends EventHandlerBase {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public void handle(final DartsEvent dartsEvent) {
-        CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent);
+    public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
 
         if (isTheHearingNewOrTheCourtroomIsDifferent(
             createdHearing.isHearingNew(),

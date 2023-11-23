@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
@@ -17,8 +18,8 @@ public class DarStartHandler extends EventHandlerBase {
 
     @Override
     @Transactional
-    public void handle(DartsEvent dartsEvent) {
-        createHearingAndSaveEvent(dartsEvent); // saveEvent
+    public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        createHearingAndSaveEvent(dartsEvent, eventHandler); // saveEvent
         var notifyEvent = new DarNotifyApplicationEvent(this, dartsEvent, START_RECORDING);
         eventPublisher.publishEvent(notifyEvent);
     }

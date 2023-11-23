@@ -16,11 +16,10 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
 
     @Transactional
     @Override
-    public void handle(DartsEvent dartsEvent) {
-        CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent);
+    public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
         CourtCaseEntity courtCaseEntity = createdHearing.getHearingEntity().getCourtCase();
-        EventHandlerEntity eventHandlerEntity = handlerMap.eventTypeReference(dartsEvent);
-        courtCaseEntity.setReportingRestrictions(eventHandlerEntity);
+        courtCaseEntity.setReportingRestrictions(eventHandler);
         caseRepository.saveAndFlush(courtCaseEntity);
     }
 }

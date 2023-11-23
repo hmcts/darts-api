@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 
@@ -20,8 +21,8 @@ public class InterpreterUsedHandler extends EventHandlerBase {
 
     @Override
     @Transactional
-    public void handle(final DartsEvent dartsEvent) {
-        var hearing = createHearingAndSaveEvent(dartsEvent);
+    public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        var hearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
         var courtCase = hearing.getHearingEntity().getCourtCase();
 
         if (hearing.isHearingNew() || hearing.isCourtroomDifferentFromHearing()) {
