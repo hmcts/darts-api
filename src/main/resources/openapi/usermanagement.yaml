@@ -15,6 +15,7 @@ paths:
     get:
       tags:
         - User
+      operationId: getUsers
       parameters:
         - in: query
           name: courthouse
@@ -28,6 +29,7 @@ paths:
       summary: Create new user
       tags:
         - User
+      operationId: createUser
       requestBody:
         $ref: '#/components/requestBodies/UserRequest'
       responses:
@@ -40,6 +42,7 @@ paths:
       summary: Modify user by id
       tags:
         - User
+      operationId: modifyUser
       parameters:
         - $ref: '#/components/parameters/UserId'
       requestBody:
@@ -57,11 +60,44 @@ paths:
       summary: Get users by search criteria
       tags:
         - User
+      operationId: search
       requestBody:
         $ref: '#/components/requestBodies/UserSearchRequest'
       responses:
         '200':
           $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                violations:
+                  - field: emailAddress
+                    message: size must be between 1 and 256
+                type: https://zalando.github.io/problem/constraint-violation
+                status: 400
+                title: Constraint Violation
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UserAuthorisation403ErrorCode'
+              example:
+                type: AUTHORISATION_107
+                title: Failed to check authorisation
+                status: 403
 
   /security-groups:
     get:
@@ -234,7 +270,7 @@ components:
     UserName:
       minLength: 1
       maxLength: 256
-      pattern: ^[^\s][a-zA-Z\s'-]+[^\s]$
+      pattern: ^\S$|^\S[a-zA-Z '-]*\S$
       type: string
     UserEmailAddress:
       minLength: 1
@@ -275,11 +311,6 @@ components:
     CourthouseId:
       type: integer
 
-    GenericSearchField:
-      minLength: 3
-      maxLength: 256
-      type: string
-
     User:
       type: object
       properties:
@@ -316,9 +347,9 @@ components:
       type: object
       properties:
         full_name:
-          $ref: '#/components/schemas/GenericSearchField'
+          $ref: '#/components/schemas/UserName'
         email_address:
-          $ref: '#/components/schemas/GenericSearchField'
+          $ref: '#/components/schemas/UserEmailAddress'
     UserWithId:
       type: object
       properties:
@@ -336,6 +367,11 @@ components:
           format: date-time
       allOf:
         - $ref: '#/components/schemas/User'
+    UserAuthorisation403ErrorCode:
+      type: string
+      enum:
+        - "AUTHORISATION_107"
+      x-enum-varnames: [ BAD_REQUEST_ANY_ID ]
 
     SecurityGroupWithIdAndRole:
       type: object

@@ -10,13 +10,16 @@ import uk.gov.hmcts.darts.usermanagement.model.UserState;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 
+import static uk.gov.hmcts.darts.common.enums.UserStateEnum.DISABLED;
+import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
+
 @Mapper(componentModel = "spring",
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
     unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserAccountMapper {
 
     @Mappings({
-        @Mapping(source = "fullName", target = "username"),
+        @Mapping(source = "fullName", target = "userName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "description", target = "userDescription"),
         @Mapping(source = "state", target = "state"),
@@ -25,7 +28,7 @@ public interface UserAccountMapper {
 
     @Mappings({
         @Mapping(source = "id", target = "id"),
-        @Mapping(source = "username", target = "fullName"),
+        @Mapping(source = "userName", target = "fullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
         @Mapping(source = "state", target = "state")
@@ -34,7 +37,7 @@ public interface UserAccountMapper {
 
     @Mappings({
         @Mapping(source = "id", target = "id"),
-        @Mapping(source = "username", target = "fullName"),
+        @Mapping(source = "userName", target = "fullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
         @Mapping(source = "state", target = "state"),
@@ -43,11 +46,11 @@ public interface UserAccountMapper {
     UserWithIdAndLastLogin mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
 
     default UserState mapToUserState(Integer stateValue) {
-        return stateValue == 0 ? UserState.ENABLED : UserState.DISABLED;
+        return stateValue == null || ENABLED.getId().equals(stateValue) ? UserState.ENABLED : UserState.DISABLED;
     }
 
     default Integer mapToUserStateValue(UserState userState) {
-        return UserState.ENABLED.equals(userState) ? 0 : 1;
+        return UserState.ENABLED.equals(userState) ? ENABLED.getId() : DISABLED.getId();
     }
 
 }
