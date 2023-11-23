@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -50,6 +51,9 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.AUDIO_NOT_FOUND;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TIMES_OUTSIDE_OF_HEARING_TIMES;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -146,11 +150,31 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
-
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
-            hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
+                log.error("Transcription could not be requested. No audio found for hearing id {}",
+                          transcriptionRequestDetails.getHearingId());
+                throw new DartsApiException(AUDIO_NOT_FOUND);
+            } else {
+                //check times
+                OffsetDateTime requestStartDateTime = transcriptionRequestDetails.getStartDateTime();
+                OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime();
+                if (requestStartDateTime != null && requestEndDateTime != null) {
+                    boolean validTimes = hearing.getMediaList().stream().anyMatch(m -> m.getStart().isBefore(
+                        requestStartDateTime) && m.getStart().isBefore(requestEndDateTime)
+                        && m.getEnd().isAfter(requestStartDateTime) && m.getEnd().isAfter(requestEndDateTime));
+                    if (!validTimes) {
+                        log.error(
+                            "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
+                            transcriptionRequestDetails.getHearingId()
+                        );
+                        throw new DartsApiException(TIMES_OUTSIDE_OF_HEARING_TIMES);
+                    }
+                }
+            }
         } else {
             caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
         }

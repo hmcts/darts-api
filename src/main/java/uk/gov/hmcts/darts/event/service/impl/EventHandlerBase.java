@@ -49,7 +49,7 @@ public abstract class EventHandlerBase implements EventHandler {
         return event;
     }
 
-    protected CreatedHearing createHearing(DartsEvent dartsEvent) {
+    protected CreatedHearing createHearingAndSaveEvent(DartsEvent dartsEvent) {
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {

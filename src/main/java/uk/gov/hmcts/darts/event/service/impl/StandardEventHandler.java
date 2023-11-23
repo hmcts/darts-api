@@ -20,7 +20,7 @@ public class StandardEventHandler extends EventHandlerBase {
 
     @Override
     public void handle(final DartsEvent dartsEvent) {
-        CreatedHearing createdHearing = createHearing(dartsEvent);
+        CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent);
 
         if (isTheHearingNewOrTheCourtroomIsDifferent(
             createdHearing.isHearingNew(),

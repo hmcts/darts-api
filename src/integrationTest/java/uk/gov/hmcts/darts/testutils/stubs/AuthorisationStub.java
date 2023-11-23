@@ -100,7 +100,7 @@ public class AuthorisationStub {
         mediaEntity.setTotalChannels(2);
         mediaEntity.setCourtroom(courtroomEntity);
         mediaEntity.setStart(now());
-        mediaEntity.setEnd(now());
+        mediaEntity.setEnd(now().plusMinutes(30));
         mediaEntity.setMediaFile("media file");
         mediaEntity.setFileSize(1000L);
         mediaEntity.setMediaFormat("mp3");

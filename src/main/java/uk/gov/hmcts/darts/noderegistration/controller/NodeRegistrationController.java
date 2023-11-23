@@ -3,16 +3,23 @@ package uk.gov.hmcts.darts.noderegistration.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.noderegistration.http.api.DevicesApi;
 import uk.gov.hmcts.darts.noderegistration.model.PostNodeRegistrationResponse;
 import uk.gov.hmcts.darts.noderegistration.service.NodeRegistrationService;
 
 import javax.validation.Valid;
+
+import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.DAR_PC;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.MID_TIER;
 
 @RestController
 public class NodeRegistrationController implements DevicesApi {
@@ -20,6 +27,10 @@ public class NodeRegistrationController implements DevicesApi {
     @Autowired
     NodeRegistrationService nodeRegistrationService;
 
+
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {MID_TIER, DAR_PC})
     public ResponseEntity<PostNodeRegistrationResponse> registerDevicesPost(
         @Parameter(name = "node_type", description = "The type of device being registered, might just be DAR", in = ParameterIn.QUERY)
         @Valid @RequestParam(value = "node_type") String nodeType,
