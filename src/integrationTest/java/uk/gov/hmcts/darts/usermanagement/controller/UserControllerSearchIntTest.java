@@ -166,6 +166,36 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     @Transactional
+    void searchByFullNameShouldReturnOk() throws Exception {
+        UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
+        SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
+        testUser.getSecurityGroupEntities().add(testTranscriberSG);
+        testUser.setState(ENABLED.getId());
+        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+
+        UserSearch userSearch = new UserSearch();
+        userSearch.setFullName("IntegrationTest");
+
+        mockMvc.perform(post(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .content(objectMapper.writeValueAsString(userSearch)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").isNumber())
+            .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
+            .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
+            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].security_groups").isArray())
+            .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
+            .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    @Transactional
     void searchByEmailAddressAndFullNameShouldReturnOk() throws Exception {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);

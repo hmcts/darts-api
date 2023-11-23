@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.usermanagement.model.UserState;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 
+import static uk.gov.hmcts.darts.common.enums.UserStateEnum.DISABLED;
 import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
 
 @Mapper(componentModel = "spring",
@@ -49,7 +50,7 @@ public interface UserAccountMapper {
     }
 
     default Integer mapToUserStateValue(UserState userState) {
-        return UserState.ENABLED.equals(userState) ? 0 : 1;
+        return UserState.ENABLED.equals(userState) ? ENABLED.getId() : DISABLED.getId();
     }
 
 }
