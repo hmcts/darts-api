@@ -8,11 +8,16 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Integer> {
 
     Optional<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
+
+    Optional<UserAccountEntity> findByAccountGuid(String guid);
+
+    Optional<UserAccountEntity> findByAccountGuidAndIsSystemUserTrue(String guid);
 
     //todo find out what user states are Active
     @Query("""
@@ -27,5 +32,25 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         """)
     List<UserAccountEntity> findByRoleAndCourthouse(int securityRole, CourthouseEntity courthouse);
 
+    @Query("""
+        SELECT userAccount
+        FROM UserAccountEntity userAccount
+        WHERE userAccount.state = 1
+        AND userAccount.isSystemUser = true
+        AND userAccount.accountGuid = :uuid
+        """)
+    UserAccountEntity findSystemUser(String uuid);
+
+
+    @Query("""
+        SELECT DISTINCT userAccount
+        FROM UserAccountEntity userAccount
+        JOIN userAccount.securityGroupEntities securityGroup
+        JOIN securityGroup.securityRoleEntity securityRole
+        WHERE (userAccount.emailAddress = :emailAddress OR userAccount.accountGuid = :accountGuid)
+        AND securityRole.id IN (:roleIds)
+        AND securityGroup.globalAccess = true
+        """)
+    List<UserAccountEntity> findByEmailAddressOrAccountGuidForRolesAndGlobalAccessIsTrue(String emailAddress, String accountGuid, Set<Integer> roleIds);
 
 }

@@ -76,8 +76,11 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
-    @Column(name = "is_manual", nullable = false)
-    private Boolean isManual;
+    @Column(name = "is_manual_transcription", nullable = false)
+    private Boolean isManualTranscription;
+
+    @Column(name = "hide_request_from_requestor", nullable = false)
+    private Boolean hideRequestFromRequestor;
 
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
     private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();

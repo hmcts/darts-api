@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
@@ -38,7 +38,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.DOWNLOAD_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -69,7 +69,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
     @MockBean
-    private AuditService mockAuditService;
+    private AuditApi mockAuditApi;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -120,16 +120,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         transcriptionId = transcriptionEntity.getId();
 
         testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
-        doNothing().when(mockAuditService)
+        doNothing().when(mockAuditApi)
             .recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
     void downloadTranscriptShouldReturnForbiddenError() throws Exception {
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -144,11 +143,11 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -170,7 +169,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -222,7 +221,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
-        verify(mockAuditService).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -274,6 +273,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
-        verify(mockAuditService).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 }

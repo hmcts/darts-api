@@ -14,11 +14,13 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
@@ -36,6 +38,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports"})
 @UtilityClass
 public class CommonTestDataUtil {
 
@@ -203,6 +206,14 @@ public class CommonTestDataUtil {
     }
 
     public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing) {
+        return createTranscriptionList(hearing, true, true);
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus) {
+        return createTranscriptionList(hearing, generateStatus, true);
+    }
+
+    public List<TranscriptionEntity> createTranscriptionList(HearingEntity hearing, boolean generateStatus, boolean excludeWorkflow) {
         TranscriptionEntity transcription = new TranscriptionEntity();
         transcription.setCourtCase(hearing.getCourtCase());
         transcription.setTranscriptionType(createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS));
@@ -213,12 +224,19 @@ public class CommonTestDataUtil {
         transcription.setCreatedBy(createUserAccount());
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
         transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
-        transcription.setTranscriptionStatus(createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum.APPROVED));
+        transcription.setTranscriptionCommentEntities(createTranscriptionComments());
 
-        TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
-        transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
-        transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
-        transcription.setTranscriptionStatus(transcriptionStatus);
+        if (!excludeWorkflow) {
+            transcription.setTranscriptionWorkflowEntities(createTranscriptionWorkflow());
+        }
+
+        if (generateStatus) {
+            TranscriptionStatusEntity transcriptionStatus = new TranscriptionStatusEntity();
+            transcriptionStatus.setId(TranscriptionStatusEnum.APPROVED.getId());
+            transcriptionStatus.setStatusType(TranscriptionStatusEnum.APPROVED.name());
+            transcriptionStatus.setDisplayName(TranscriptionStatusEnum.APPROVED.name());
+            transcription.setTranscriptionStatus(transcriptionStatus);
+        }
         return List.of(transcription);
     }
 
@@ -230,9 +248,55 @@ public class CommonTestDataUtil {
         return transcriptionDocumentEntities;
     }
 
+    private static List<TranscriptionWorkflowEntity> createTranscriptionWorkflow() {
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity.setTranscriptionComments(createTranscriptionComments("workflowcommenta"));
+        transcriptionWorkflowEntity.setWorkflowTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC));
+        transcriptionWorkflowEntity.setWorkflowActor(createUserAccount("workflow user"));
+        transcriptionWorkflowEntity.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.REQUESTED));
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity2 = new TranscriptionWorkflowEntity();
+        transcriptionWorkflowEntity2.setTranscriptionComments(createTranscriptionComments("workflowcommentb"));
+        transcriptionWorkflowEntity2.setWorkflowActor(createUserAccount("workflow user 2"));
+        transcriptionWorkflowEntity2.setTranscriptionStatus(createTranscriptionStatus(TranscriptionStatusEnum.APPROVED));
+
+        List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = new ArrayList<>();
+        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity);
+        transcriptionWorkflowEntities.add(transcriptionWorkflowEntity2);
+        return transcriptionWorkflowEntities;
+    }
+
+    private static TranscriptionStatusEntity createTranscriptionStatus(TranscriptionStatusEnum statusEnum) {
+        TranscriptionStatusEntity entity = new TranscriptionStatusEntity();
+        entity.setStatusType(statusEnum.name());
+        entity.setId(statusEnum.getId());
+        entity.setStatusType(statusEnum.name());
+        return entity;
+
+    }
+
+    private static List<TranscriptionCommentEntity> createTranscriptionComments() {
+        return createTranscriptionComments("comment");
+    }
+
+    private static List<TranscriptionCommentEntity> createTranscriptionComments(String prefixMessage) {
+        List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
+        TranscriptionCommentEntity transcriptionCommentEntity = new TranscriptionCommentEntity();
+        TranscriptionCommentEntity transcriptionCommentEntity2 = new TranscriptionCommentEntity();
+        transcriptionCommentEntity.setComment(prefixMessage + "1");
+        transcriptionCommentEntity2.setComment(prefixMessage + "2");
+        transcriptionCommentEntities.add(transcriptionCommentEntity);
+        transcriptionCommentEntities.add(transcriptionCommentEntity2);
+        return transcriptionCommentEntities;
+    }
+
     public UserAccountEntity createUserAccount() {
+        return createUserAccount("testUsername");
+    }
+
+    public UserAccountEntity createUserAccount(String username) {
         UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setUsername("testUsername");
+        userAccount.setUsername(username);
         userAccount.setEmailAddress("test@test.com");
         return userAccount;
     }
@@ -317,7 +381,7 @@ public class CommonTestDataUtil {
 
     public List<TranscriptionTypeEntity> createTranscriptionTypeEntities() {
         List<TranscriptionTypeEntity> transcriptionTypeEntities = new ArrayList<>();
-        for (TranscriptionTypeEnum transcriptionTypeEnum: TranscriptionTypeEnum.values()) {
+        for (TranscriptionTypeEnum transcriptionTypeEnum : TranscriptionTypeEnum.values()) {
             transcriptionTypeEntities.add(createTranscriptionTypeEntityFromEnum(transcriptionTypeEnum));
         }
         return transcriptionTypeEntities;

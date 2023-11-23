@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.notification.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.notification.dto.GovNotifyRequest;
 import uk.gov.hmcts.darts.notification.service.GovNotifyService;
@@ -15,8 +14,7 @@ import uk.gov.service.notify.SendEmailResponse;
 @Slf4j
 public class GovNotifyServiceImpl implements GovNotifyService {
 
-    @Autowired
-    private NotificationClient client;
+    private final NotificationClient client;
 
     @Override
     public SendEmailResponse sendNotification(GovNotifyRequest request) throws NotificationClientException {

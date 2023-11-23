@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -17,12 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 class MediaRequestServiceTest extends IntegrationPerClassBase {
 
+    public static final String TEST_FILENAME = "test-filename";
     private static final String T_09_00_00_Z = "2023-05-31T09:00:00Z";
     private static final String T_12_00_00_Z = "2023-05-31T12:00:00Z";
 
@@ -165,6 +168,26 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
 
         mediaRequestService.deleteAudioRequest(request.getId());
         assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestById(request.getId()));
+    }
+
+    @Test
+    @Order(9)
+    void shouldSetDownloadFileNameAndFormat() {
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(1, TEST_FILENAME, AudioRequestOutputFormat.MP3);
+
+        assertEquals(COMPLETED, mediaRequestEntity.getStatus());
+        assertEquals(TEST_FILENAME, mediaRequestEntity.getOutputFilename());
+        assertEquals(AudioRequestOutputFormat.MP3, mediaRequestEntity.getOutputFormat());
+    }
+
+    @Test
+    @Order(10)
+    void shouldSetPlaybackFileNameAndFormat() {
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(1, TEST_FILENAME, AudioRequestOutputFormat.ZIP);
+
+        assertEquals(COMPLETED, mediaRequestEntity.getStatus());
+        assertEquals(TEST_FILENAME, mediaRequestEntity.getOutputFilename());
+        assertEquals(AudioRequestOutputFormat.ZIP, mediaRequestEntity.getOutputFormat());
     }
 
 }

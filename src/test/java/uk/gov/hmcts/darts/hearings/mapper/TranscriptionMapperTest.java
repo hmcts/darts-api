@@ -31,7 +31,7 @@ class TranscriptionMapperTest {
         assertEquals(102, transcript.getHeaId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
         assertEquals("SENTENCING_REMARKS", transcript.getType());
-        assertEquals(LocalDate.of(2020, 6, 20), transcript.getRequestedOn());
+        assertEquals(OffsetDateTime.of(2020, 6, 20,10, 10, 0, 0,ZoneOffset.UTC), transcript.getRequestedOn());
         assertEquals("testUsername", transcript.getRequestedByName());
         assertEquals("APPROVED", transcript.getStatus());
     }
@@ -59,7 +59,8 @@ class TranscriptionMapperTest {
         assertEquals(1, transcript.getTraId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
         assertEquals("SENTENCING_REMARKS", transcript.getType());
-        assertEquals(LocalDate.of(2020, 6, 20), transcript.getRequestedOn());
+        assertEquals(OffsetDateTime.of(2020, 6, 20,10, 10, 0, 0,ZoneOffset.UTC), transcript.getRequestedOn());
+
         assertEquals("someLegacyRequestor", transcript.getRequestedByName());
         assertEquals("APPROVED", transcript.getStatus());
     }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.event.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.event.component.DartsEventMapper;
 import uk.gov.hmcts.darts.event.http.api.EventApi;
 import uk.gov.hmcts.darts.event.model.CourtLog;
@@ -24,6 +26,11 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import javax.validation.Valid;
 
+import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -36,6 +43,9 @@ public class EventsController implements EventApi {
     private final DartsEventMapper dartsEventMapper;
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<EventsResponse> eventsPost(
         @Parameter(name = "DartsEvent") @Valid @RequestBody DartsEvent dartsEvent
     ) {
@@ -51,6 +61,9 @@ public class EventsController implements EventApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<EventsResponse> courtlogsPost(CourtLogsPostRequestBody courtLogsPostRequestBody) {
         DartsEvent dartsEvent = dartsEventMapper.toDartsEvent(courtLogsPostRequestBody);
 
@@ -58,6 +71,9 @@ public class EventsController implements EventApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID,
+        globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<List<CourtLog>> courtlogsGet(
         @Parameter(name = "courthouse", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = true) String courthouse,
         @Parameter(name = "case_number", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "case_number", required = true) String caseNumber,

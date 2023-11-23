@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REJECT_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
@@ -70,7 +70,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
     @MockBean
     private UserIdentity mockUserIdentity;
     @MockBean
-    private AuditService mockAuditService;
+    private AuditApi mockAuditApi;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -92,11 +92,10 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
             transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
         testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
-        doNothing().when(mockAuditService)
+        doNothing().when(mockAuditApi)
             .recordAudit(REJECT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
@@ -123,7 +122,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         verify(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -168,7 +167,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         );
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
-        verify(mockAuditService).recordAudit(REJECT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(REJECT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -194,7 +193,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         verify(authorisation).authoriseByTranscriptionId(
             -1, Set.of(APPROVER, TRANSCRIBER)
         );
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -220,7 +219,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         verify(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
 }

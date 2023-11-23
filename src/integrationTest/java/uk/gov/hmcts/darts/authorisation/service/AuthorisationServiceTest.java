@@ -61,7 +61,7 @@ class AuthorisationServiceTest {
         var testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
-        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(36);
+        SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(-3);
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setUsername("Test Judge");
         judgeUserAccount.setEmailAddress(TEST_JUDGE_EMAIL);
@@ -73,8 +73,8 @@ class AuthorisationServiceTest {
         UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
-        SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(20);
-        SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(35);
+        SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(-2);
+        SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(-1);
         UserAccountEntity bristolUserAccount = new UserAccountEntity();
         bristolUserAccount.setUsername("Test Bristol");
         bristolUserAccount.setEmailAddress(TEST_BRISTOL_EMAIL);
@@ -162,7 +162,6 @@ class AuthorisationServiceTest {
     @Transactional
     void shouldCheckAuthorisationOK() {
         String emailAddress = TEST_BRISTOL_EMAIL;
-        when(mockUserIdentity.getEmailAddress()).thenReturn(emailAddress);
 
         var a1Court = dartsDatabaseStub.createCourthouseUnlessExists("A1 COURT");
         var b2Court = dartsDatabaseStub.createCourthouseUnlessExists("B2 COURT");
@@ -175,7 +174,8 @@ class AuthorisationServiceTest {
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
         dartsDatabaseStub.getUserAccountRepository().saveAndFlush(bristolUser);
 
-        assertDoesNotThrow(() -> authorisationService.checkAuthorisation(
+        when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
+        assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
             List.of(a1Court, c3Court),
             Set.of(APPROVER, REQUESTER)
         ));
@@ -183,19 +183,19 @@ class AuthorisationServiceTest {
 
     @Test
     void shouldCheckAuthorisationThrowsDartsApiException() {
-        when(mockUserIdentity.getEmailAddress()).thenReturn(TEST_NEW_EMAIL);
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         var a1Court = dartsDatabaseStub.createCourthouseUnlessExists("A1 COURT");
         var b2Court = dartsDatabaseStub.createCourthouseUnlessExists("B2 COURT");
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> authorisationService.checkAuthorisation(
+            () -> authorisationService.checkCourthouseAuthorisation(
                 List.of(a1Court, b2Court),
                 Collections.emptySet()
             )
         );
-        assertEquals("User is not authorised for the associated courthouse", exception.getMessage());
+        assertEquals("Could not obtain user details", exception.getMessage());
     }
 
 }

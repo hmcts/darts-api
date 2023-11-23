@@ -229,8 +229,8 @@ components:
           example: "Sentencing remarks"
         requested_on:
           type: string
-          format: date
-          example: 2022-05-22
+          format: date-time
+          example: 2023-06-20T10:00:00Z
         requested_by_name:
           type: string
           example: "Joe Bloggs"

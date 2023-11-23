@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
@@ -45,12 +46,14 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
@@ -109,15 +112,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         hearing = authorisationStub.getHearingEntity();
         testUser = authorisationStub.getTestUser();
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES","OTHER"})
     @Order(1)
-    void transcriptionRequestWithValidValuesShouldReturnSuccess() throws Exception {
+    void transcriptionRequestWithValidValuesShouldReturnSuccess(TranscriptionTypeEnum transcriptionTypeEnum) throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
@@ -138,6 +140,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         TranscriptionRepository transcriptionRepository = dartsDatabaseStub.getTranscriptionRepository();
         TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        assertTrue(transcriptionEntity.getIsManualTranscription());
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
@@ -152,6 +155,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .extracting(TranscriptionCommentEntity::getComment)
             .containsExactly(TEST_COMMENT);
 
+        List<NotificationEntity> notificationEntities = dartsDatabaseStub.getNotificationRepository().findAll();
+        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        assertTrue(templateList.contains(COURT_MANAGER_APPROVE_TRANSCRIPT.toString()));
 
         assertAudit(1);
     }

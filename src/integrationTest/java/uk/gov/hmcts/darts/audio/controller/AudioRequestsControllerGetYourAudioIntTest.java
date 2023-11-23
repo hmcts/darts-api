@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -38,14 +39,23 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     @Test
     void getYourAudioCurrent() throws Exception {
 
-        var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        var requestor = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+        var currentOwner = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
-        dartsDatabase.createAndLoadCompletedMediaRequestEntity(currentMediaRequest.getHearing(), requestor, AudioRequestType.DOWNLOAD);
+        currentMediaRequest.setCurrentOwner(currentOwner);
+        dartsDatabase.save(currentMediaRequest);
+        MediaRequestEntity currentMediaRequest2 = dartsDatabase.createAndLoadCompletedMediaRequestEntity(
+            currentMediaRequest.getHearing(),
+            requestor,
+            AudioRequestType.DOWNLOAD
+        );
+        currentMediaRequest2.setCurrentOwner(currentOwner);
+        dartsDatabase.save(currentMediaRequest2);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
             .header(
                 "user_id",
-                requestor.getId()
+                currentOwner.getId()
             );
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)

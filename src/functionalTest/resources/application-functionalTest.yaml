@@ -1,10 +1,13 @@
 azure-ad-b2c-auth:
-  token-uri: https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/B2C_1_ropc_darts_signin/oauth2/v2.0/token
-  scope: https://hmctsdartsb2csbox.onmicrosoft.com/${AAD_B2C_ROPC_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}/Functional.Test
+  token-uri: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com/B2C_1_ropc_darts_signin/oauth2/v2.0/token
+  scope: https://hmctsstgextid.onmicrosoft.com/${AAD_B2C_ROPC_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}/Functional.Test
   username: ${FUNC_TEST_ROPC_USERNAME:#{null}}
   password: ${FUNC_TEST_ROPC_PASSWORD:#{null}}
   client-id: ${AAD_B2C_ROPC_CLIENT_ID_KEY:#{null}}
   client-secret: ${AAD_B2C_ROPC_CLIENT_SECRET_KEY:#{null}}
+  global-access-username: ${AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME:#{null}}
+  global-access-password: ${AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD:#{null}}
+
 
 azure-ad-auth:
   token-uri: https://login.microsoftonline.com/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
@@ -13,5 +16,13 @@ azure-ad-auth:
   password: ${AZURE_AD_FUNCTIONAL_TEST_PASSWORD:#{null}}
   client-id: ${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000:#{null}}
   client-secret: ${AAD_CLIENT_SECRET:#{null}}
+
+azure-ad-b2c-global-auth:
+  token-uri: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com/B2C_1_ropc_darts_signin/oauth2/v2.0/token
+  scope: https://hmctsstgextid.onmicrosoft.com/${AAD_B2C_ROPC_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}/Functional.Test
+  username: ${AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME:#{null}}
+  password: ${AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD:#{null}}
+  client-id: ${AAD_B2C_ROPC_CLIENT_ID_KEY:#{null}}
+  client-secret: ${AAD_B2C_ROPC_CLIENT_SECRET_KEY:#{null}}
 
 deployed-application-uri: ${TEST_URL:http://localhost:4550}

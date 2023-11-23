@@ -25,6 +25,7 @@ import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
 @Component
 @RequiredArgsConstructor
@@ -63,9 +64,9 @@ public class AuthorisationStub {
         testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
-        bristolStaff = securityGroupRepository.findById(20).orElseThrow();
+        bristolStaff = securityGroupRepository.findById(-2).orElseThrow();
         bristolStaff.setCourthouseEntities(Set.of(courthouseEntity));
-        bristolAppr = securityGroupRepository.findById(35).orElseThrow();
+        bristolAppr = securityGroupRepository.findById(-1).orElseThrow();
         bristolAppr.setCourthouseEntities(Set.of(courthouseEntity));
         testUser.getSecurityGroupEntities().addAll(List.of(bristolStaff, bristolAppr));
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
@@ -77,6 +78,7 @@ public class AuthorisationStub {
         mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(testUser);
+        mediaRequestEntity.setCurrentOwner(testUser);
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setStartTime(YESTERDAY);
@@ -86,6 +88,7 @@ public class AuthorisationStub {
         mediaRequestEntitySystemUser = new MediaRequestEntity();
         mediaRequestEntitySystemUser.setHearing(hearingEntity);
         mediaRequestEntitySystemUser.setRequestor(systemUser);
+        mediaRequestEntitySystemUser.setCurrentOwner(systemUser);
         mediaRequestEntitySystemUser.setStatus(OPEN);
         mediaRequestEntitySystemUser.setRequestType(DOWNLOAD);
         mediaRequestEntitySystemUser.setStartTime(YESTERDAY);
@@ -99,9 +102,10 @@ public class AuthorisationStub {
         mediaEntity.setStart(now());
         mediaEntity.setEnd(now());
         mediaEntity.setMediaFile("media file");
-        mediaEntity.setFileSize(1000);
+        mediaEntity.setFileSize(1000L);
         mediaEntity.setMediaFormat("mp3");
         mediaEntity.setChecksum("checksum");
+        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
         dartsDatabaseStub.save(mediaEntity);
 
         hearingEntity.addMedia(mediaEntity);

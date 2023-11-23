@@ -17,8 +17,6 @@ import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
-import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 
 import java.io.InputStream;
@@ -44,8 +42,6 @@ public class AudioRequestsController implements AudioRequestsApi {
     private final AudioRequestSummaryMapper audioRequestSummaryMapper;
     private final AudioRequestResponseMapper audioRequestResponseMapper;
 
-    private final AuditService auditService;
-
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<AudioNonAccessedResponse> getNonAccessedCount(Integer userId) {
@@ -64,7 +60,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> deleteAudioRequest(Integer mediaRequestId) {
         mediaRequestService.deleteAudioRequest(mediaRequestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -73,7 +70,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
         mediaRequestService.updateAudioRequestLastAccessedTimestamp(mediaRequestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -95,16 +93,14 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = DOWNLOAD_HEARING_ID_TRANSCRIBER,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
         AddAudioResponse addAudioResponse;
         MediaRequestEntity audioRequest;
         try {
             audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
             addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);
-            auditService.recordAuditRequestAudio(AuditActivityEnum.REQUEST_AUDIO,
-                                                 audioRequestDetails.getRequestor(), audioRequestDetails.getHearingId()
-            );
         } catch (Exception e) {
             log.error("Failed to request audio {}", e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -117,7 +113,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Resource> playback(Integer mediaRequestId) {
         InputStream audioFileStream = mediaRequestService.playback(mediaRequestId);
 
@@ -126,6 +123,5 @@ public class AudioRequestsController implements AudioRequestsApi {
             HttpStatus.OK
         );
     }
-
 
 }

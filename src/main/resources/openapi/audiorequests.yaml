@@ -416,7 +416,8 @@ components:
       type: object
       properties:
         count:
-          type: long
+          type: integer
+          format: int64
           example: 1
 
     AddAudioResponse:

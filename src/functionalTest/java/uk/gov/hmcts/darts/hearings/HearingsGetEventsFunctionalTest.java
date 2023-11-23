@@ -50,7 +50,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             }""",
             COURTHOUSE, courtroomName, randomCaseNumber, randomEventText1);
 
-        buildRequestWithExternalAuth()
+        buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)
             .when()
@@ -77,7 +77,7 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
             }""",
             COURTHOUSE, courtroomName, randomCaseNumber, randomEventText2);
 
-        buildRequestWithExternalAuth()
+        buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body(requestBody)
             .when()

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface OutboundAudioDeleterProcessor {
 
-    List<MediaRequestEntity> delete();
+    List<MediaRequestEntity> markForDeletion();
 }

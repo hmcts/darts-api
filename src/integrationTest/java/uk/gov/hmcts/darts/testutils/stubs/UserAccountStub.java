@@ -9,9 +9,12 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Component
@@ -47,22 +50,26 @@ public class UserAccountStub {
         if (userAccountEntityOptional.isPresent()) {
             return userAccountEntityOptional.get();
         } else {
-            UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
-            var newUser = new UserAccountEntity();
-            newUser.setUsername("IntegrationTest User");
-            newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
-            newUser.setCreatedBy(systemUser);
-            newUser.setLastModifiedBy(systemUser);
-            newUser.setState(1);
-            newUser.setAccountGuid(UUID.randomUUID().toString());
-            newUser.setIsSystemUser(false);
-            return userAccountRepository.saveAndFlush(newUser);
+            return createIntegrationUser(UUID.randomUUID().toString());
         }
+    }
+
+    private UserAccountEntity createIntegrationUser(String guid) {
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
+        var newUser = new UserAccountEntity();
+        newUser.setUsername("IntegrationTest User");
+        newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
+        newUser.setCreatedBy(systemUser);
+        newUser.setLastModifiedBy(systemUser);
+        newUser.setState(1);
+        newUser.setAccountGuid(guid);
+        newUser.setIsSystemUser(false);
+        return userAccountRepository.saveAndFlush(newUser);
     }
 
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
 
         var testUser = getIntegrationTestUserAccountEntity();
@@ -71,7 +78,8 @@ public class UserAccountStub {
         return testUser;
     }
 
-    private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity, CourthouseEntity courthouseEntity) {
+    private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity,
+                                              CourthouseEntity courthouseEntity) {
         if (!securityGroupEntity.getCourthouseEntities().contains(courthouseEntity)) {
             securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
             securityGroupRepository.saveAndFlush(securityGroupEntity);
@@ -79,7 +87,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(1);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         securityGroupEntity.getCourthouseEntities().clear();
         securityGroupRepository.saveAndFlush(securityGroupEntity);
 
@@ -90,7 +98,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createTranscriptionCompanyUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(4);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
@@ -102,7 +110,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(36);
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-3);
         assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
@@ -110,6 +118,30 @@ public class UserAccountStub {
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
+    public UserAccountEntity createXhibitExternalUser(String guid, CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-14);
+        securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        return createExternalUser(guid, securityGroupEntity, courthouseEntity);
+    }
+
+    public UserAccountEntity createExternalUser(String guid, SecurityGroupEntity securityGroupEntity,
+                                                CourthouseEntity courthouseEntity) {
+        if (nonNull(courthouseEntity)) {
+            securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
+        }
+
+        var testUser = getIntegrationTestUserAccountEntity();
+        Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
+        securityGroupEntities.add(securityGroupEntity);
+        testUser.setSecurityGroupEntities(securityGroupEntities);
+        testUser.setIsSystemUser(true);
+        testUser.setAccountGuid(guid);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
     }
