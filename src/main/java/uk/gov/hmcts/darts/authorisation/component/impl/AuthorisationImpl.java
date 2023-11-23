@@ -107,6 +107,9 @@ public class AuthorisationImpl implements Authorisation {
             UserAccountEntity userAccount = userIdentity.getUserAccount();
 
             if (!mediaRequest.getRequestor().getId().equals(userAccount.getId())) {
+                log.info("mediaRequest.getRequestor().getId()"
+                             + mediaRequest.getRequestor().getId()
+                             + "userAccount.getId()" + userAccount.getId());
                 throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
             }
         } catch (EntityNotFoundException | IllegalStateException e) {
