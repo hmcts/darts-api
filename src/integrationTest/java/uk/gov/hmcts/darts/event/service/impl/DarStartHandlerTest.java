@@ -129,10 +129,6 @@ class DarStartHandlerTest extends IntegrationBase {
             DAR_START_HANDLER);
         assertThat(eventHandlerEntityList.size()).isEqualTo(6);
 
-        EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
-            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
-            .findFirst()
-            .orElseThrow();
 
         CourtCaseEntity createdCase = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CLOSED_CASE_NUMBER);
         createdCase.setClosed(true);
@@ -140,6 +136,11 @@ class DarStartHandlerTest extends IntegrationBase {
 
         //create another case at a different courthouse, but same case number thats still open.
         dartsDatabase.createCase("another courthouse", SOME_CLOSED_CASE_NUMBER);
+
+        EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
+            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+            .findFirst()
+            .orElseThrow();
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingStartedEventHandler.getType())
