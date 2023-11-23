@@ -17,8 +17,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
 
     Optional<UserAccountEntity> findByAccountGuid(String guid);
 
-    Optional<UserAccountEntity> findByAccountGuidAndIsSystemUserTrue(String guid);
-
     //todo find out what user states are Active
     @Query("""
         SELECT DISTINCT userAccount

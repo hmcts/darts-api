@@ -34,7 +34,7 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     private String dmObjectId;
 
     @Column(name = "user_name", nullable = false)
-    private String username;
+    private String userName;
 
     @Column(name = "user_email_address")
     private String emailAddress;
@@ -51,7 +51,7 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "account_guid")
     private String accountGuid;
 
-    @Column(name = "is_system_user")
+    @Column(name = "is_system_user", nullable = false)
     private Boolean isSystemUser;
 
     @ManyToMany

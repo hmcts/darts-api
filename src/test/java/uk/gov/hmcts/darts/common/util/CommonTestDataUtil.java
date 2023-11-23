@@ -294,9 +294,9 @@ public class CommonTestDataUtil {
         return createUserAccount("testUsername");
     }
 
-    public UserAccountEntity createUserAccount(String username) {
+    public UserAccountEntity createUserAccount(String userName) {
         UserAccountEntity userAccount = new UserAccountEntity();
-        userAccount.setUsername(username);
+        userAccount.setUserName(userName);
         userAccount.setEmailAddress("test@test.com");
         return userAccount;
     }

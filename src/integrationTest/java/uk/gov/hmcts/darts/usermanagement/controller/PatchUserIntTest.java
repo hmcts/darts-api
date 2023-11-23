@@ -92,7 +92,7 @@ class PatchUserIntTest extends IntegrationBase {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals("Jimmy Smith", latestUserAccountEntity.getUsername());
+            assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
             assertEquals(0, latestUserAccountEntity.getState());
@@ -139,7 +139,7 @@ class PatchUserIntTest extends IntegrationBase {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals("Jimmy Smith", latestUserAccountEntity.getUsername());
+            assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals("An updated description", latestUserAccountEntity.getUserDescription());
             assertEquals(1, latestUserAccountEntity.getState());
@@ -281,10 +281,14 @@ class PatchUserIntTest extends IntegrationBase {
                 .findById(userId)
                 .orElseThrow();
 
-            assertThat(getSecurityGroupIds(latestUserAccountEntity),
-                not(hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2)));
-            assertThat(getSecurityGroupIds(latestUserAccountEntity),
-                hasItems(-3, -4));
+            assertThat(
+                getSecurityGroupIds(latestUserAccountEntity),
+                not(hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2))
+            );
+            assertThat(
+                getSecurityGroupIds(latestUserAccountEntity),
+                hasItems(-3, -4)
+            );
 
             return null;
         });
@@ -309,7 +313,7 @@ class PatchUserIntTest extends IntegrationBase {
             .findById(userId)
             .orElseThrow();
         assertEquals(ORIGINAL_SYSTEM_USER_FLAG, latestUserAccountEntity.getIsSystemUser());
-        assertEquals(ORIGINAL_USERNAME, latestUserAccountEntity.getUsername());
+        assertEquals(ORIGINAL_USERNAME, latestUserAccountEntity.getUserName());
         assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
         assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
         assertEquals(0, latestUserAccountEntity.getState());
@@ -318,7 +322,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     private UserAccountEntity createEnabledUserAccountEntity() {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUsername(ORIGINAL_USERNAME);
+        userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
         userAccountEntity.setState(0);
@@ -340,7 +344,7 @@ class PatchUserIntTest extends IntegrationBase {
 
     private UserAccountEntity createDisabledUserAccountEntity() {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUsername(ORIGINAL_USERNAME);
+        userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
         userAccountEntity.setState(1);

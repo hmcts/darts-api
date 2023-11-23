@@ -90,7 +90,7 @@ class PostUserIntTest extends IntegrationBase {
             UserAccountEntity createdUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals(USERNAME, createdUserAccountEntity.getUsername());
+            assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
             assertEquals(0, createdUserAccountEntity.getState());
@@ -141,7 +141,7 @@ class PostUserIntTest extends IntegrationBase {
             UserAccountEntity createdUserAccountEntity = dartsDatabase.getUserAccountRepository()
                 .findById(userId)
                 .orElseThrow();
-            assertEquals(USERNAME, createdUserAccountEntity.getUsername());
+            assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertEquals(DESCRIPTION, createdUserAccountEntity.getUserDescription());
             assertEquals(0, createdUserAccountEntity.getState());
@@ -181,7 +181,7 @@ class PostUserIntTest extends IntegrationBase {
     @Test
     void createUserShouldSucceedWhenProvidedWithAUserEmailAddressThatMatchesAnExistingDisabledAccount() throws Exception {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUsername("James Smith");
+        userAccountEntity.setUserName("James Smith");
         userAccountEntity.setEmailAddress("james.smith@hmcts.net");
         userAccountEntity.setIsSystemUser(false);
         userAccountEntity.setState(1);
