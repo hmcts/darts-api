@@ -154,6 +154,8 @@ darts:
         transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
   storage:
+    arm:
+      connection-string: ${ARM_STORAGE_CONNECTION_STRING:}
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:
