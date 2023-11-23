@@ -30,7 +30,7 @@ public class DarNotifyServiceImpl {
         var darNotifyType = event.getDarNotifyType();
         var dartsEvent = event.getDartsEvent();
 
-        List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCaseNumbers());
+        List<String> openCaseNumbers = caseRepository.findOpenCaseNumbers(dartsEvent.getCourthouse(), dartsEvent.getCaseNumbers());
         if (!openCaseNumbers.isEmpty()) {
             DarNotifyEvent darNotifyEvent = DarNotifyEvent.builder()
                 .notificationType(darNotifyType.getNotificationType())

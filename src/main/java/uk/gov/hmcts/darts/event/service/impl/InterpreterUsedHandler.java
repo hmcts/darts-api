@@ -21,7 +21,7 @@ public class InterpreterUsedHandler extends EventHandlerBase {
     @Override
     @Transactional
     public void handle(final DartsEvent dartsEvent) {
-        var hearing = createHearing(dartsEvent);
+        var hearing = createHearingAndSaveEvent(dartsEvent);
         var courtCase = hearing.getHearingEntity().getCourtCase();
 
         if (hearing.isHearingNew() || hearing.isCourtroomDifferentFromHearing()) {

@@ -26,7 +26,7 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
     public void handle(final DartsEvent dartsEvent) {
         //save the event in the database
         dartsEvent.setDateTime(dartsEvent.getStartTime());
-        var createdHearing = createHearing(dartsEvent);
+        var createdHearing = createHearingAndSaveEvent(dartsEvent);
 
         //create automatic transcription request
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
