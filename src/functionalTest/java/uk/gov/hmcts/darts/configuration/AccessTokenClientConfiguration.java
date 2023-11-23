@@ -18,7 +18,7 @@ public class AccessTokenClientConfiguration {
     private final AzureAdAuthenticationProperties adAuthenticationProperties;
     private final AzureAdB2CAuthenticationProperties b2cAuthenticationProperties;
     private final AzureAdB2CGlobalAuthenticationProperties b2cGlobalAuthenticationProperties;
-    private final AzureAdB2CDarPcMidtierGlobalAuthenticationProperties b2CDarPcMidtierGlobalAuthenticationProperties;
+    private final AzureAdB2CDarPcMidtierGlobalAuthenticationProperties b2cDarPcMidtierGlobalAuthenticationProperties;
 
     @Bean
     public AccessTokenClient internalAccessTokenClient() {
@@ -52,12 +52,13 @@ public class AccessTokenClientConfiguration {
 
     @Bean
     public AccessTokenClient externalDarPcMidTierGlobalAccessTokenClient() {
-        return new AccessTokenClient(b2CDarPcMidtierGlobalAuthenticationProperties.getTokenUri(),
-                                     b2CDarPcMidtierGlobalAuthenticationProperties.getScope(),
-                                     b2CDarPcMidtierGlobalAuthenticationProperties.getUsername(),
-                                     b2CDarPcMidtierGlobalAuthenticationProperties.getPassword(),
-                                     b2CDarPcMidtierGlobalAuthenticationProperties.getClientId(),
-                                     b2CDarPcMidtierGlobalAuthenticationProperties.getClientSecret());
+        return new AccessTokenClient(
+            b2cDarPcMidtierGlobalAuthenticationProperties.getTokenUri(),
+            b2cDarPcMidtierGlobalAuthenticationProperties.getScope(),
+            b2cDarPcMidtierGlobalAuthenticationProperties.getUsername(),
+            b2cDarPcMidtierGlobalAuthenticationProperties.getPassword(),
+            b2cDarPcMidtierGlobalAuthenticationProperties.getClientId(),
+            b2cDarPcMidtierGlobalAuthenticationProperties.getClientSecret());
     }
 
 }
