@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.datamanagement.service.impl;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -13,14 +14,16 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
+import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 
 import java.time.OffsetDateTime;
@@ -56,157 +59,238 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final UserAccountRepository userAccountRepository;
     private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
     private final AudioConfigurationProperties audioConfigurationProperties;
+    private final List<Integer> failureStatesList =
+        new ArrayList<>(Arrays.asList(FAILURE.getId(),
+                                     FAILURE_FILE_NOT_FOUND.getId(),
+                                     FAILURE_FILE_SIZE_CHECK_FAILED.getId(),
+                                     FAILURE_FILE_TYPE_CHECK_FAILED.getId(),
+                                     FAILURE_CHECKSUM_FAILED.getId(),
+                                     FAILURE_ARM_INGESTION_FAILED.getId()));
+    private List<ExternalObjectDirectoryEntity> unstructuredStoredList;
+    private List<ExternalObjectDirectoryEntity> unstructuredFailedList;
 
-    private ObjectDirectoryStatusEntity statusAwaiting;
-    private ObjectDirectoryStatusEntity statusFailed;
-    private ObjectDirectoryStatusEntity statusStored ;
-    private ExternalLocationTypeEntity externalLocationTypeUnstructured;
-    private ObjectDirectoryStatusEntity statusFailedFileSize;
-    private ObjectDirectoryStatusEntity statusFailedFileType;
-    private ObjectDirectoryStatusEntity statusFailedChecksum;
-    private List<Integer> failureStatesList = new ArrayList<>(Arrays.asList(FAILURE.getId(), FAILURE_FILE_NOT_FOUND.getId(), FAILURE_FILE_SIZE_CHECK_FAILED.getId(),FAILURE_FILE_TYPE_CHECK_FAILED.getId(),FAILURE_CHECKSUM_FAILED.getId(),FAILURE_ARM_INGESTION_FAILED.getId()));
 
     @Override
     @Transactional
     public void processInboundToUnstructured() {
-        statusAwaiting = objectDirectoryStatusRepository.getReferenceById(AWAITING_VERIFICATION.getId());
-        statusFailed = objectDirectoryStatusRepository.getReferenceById(FAILURE.getId());
-        statusStored = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
-        statusFailedFileSize = objectDirectoryStatusRepository.getReferenceById(FAILURE_FILE_SIZE_CHECK_FAILED.getId());
-        statusFailedFileType = objectDirectoryStatusRepository.getReferenceById(FAILURE_FILE_TYPE_CHECK_FAILED.getId());
-        statusFailedChecksum = objectDirectoryStatusRepository.getReferenceById(FAILURE_CHECKSUM_FAILED.getId());
-
-        ExternalLocationTypeEntity externalLocationTypeInbound = externalLocationTypeRepository.getReferenceById(INBOUND.getId());
-        externalLocationTypeUnstructured = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
-
-        List<ExternalObjectDirectoryEntity> externalObjectDirectoryStoredInbound = externalObjectDirectoryRepository.findByStatusAndType(
-            statusStored, externalLocationTypeInbound);
-
-        processAllStoredInboundExternalObjects(externalObjectDirectoryStoredInbound);
+        log.debug("Processing Inbound data store");
+        processAllStoredInboundExternalObjects();
     }
 
     @Transactional
-    private void processAllStoredInboundExternalObjects(List<ExternalObjectDirectoryEntity> externalObjectDirectoryStoredInbound) {
-        for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : externalObjectDirectoryStoredInbound) {
+    private void processAllStoredInboundExternalObjects() {
+        List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(
+            STORED), getType(INBOUND));
+        unstructuredStoredList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(STORED), getType(UNSTRUCTURED));
+        unstructuredFailedList = externalObjectDirectoryRepository.findByNotStatusAndType(getStatus(STORED), getType(UNSTRUCTURED));
+
+        for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
 
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
+            ObjectDirectoryStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
+            if (unstructuredExternalObjectDirectoryEntity == null || unstructuredStatus == null || unstructuredStatus.getId().equals(STORED.getId())) {
+                break;
+            }
 
-            if (failureStatesList.contains(unstructuredExternalObjectDirectoryEntity.getStatus().getId())) {
-                int numAttempts = 0;
-                if( unstructuredExternalObjectDirectoryEntity.getTransferAttempts()!=null) {
-                    numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
-                    if (numAttempts >= 3) {
-                        break;
-                    }
-                }
-                unstructuredExternalObjectDirectoryEntity.setTransferAttempts(numAttempts + 1);
+            if (attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
+                break;
             }
 
             // save it as AWAITING_VERIFICATION
-            unstructuredExternalObjectDirectoryEntity.setStatus(statusAwaiting);
+            unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
 
-            BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
+            try {
+                BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
+                final String calculatedChecksum = new String(encodeBase64(md5(inboundFile.toBytes())));
+                validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity);
 
-            final String calculatedChecksum = new String(encodeBase64(md5(inboundFile.toBytes())));
-            validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity);
-
-            if(unstructuredExternalObjectDirectoryEntity.getStatus().equals(statusAwaiting)) {
-                // upload file
-                UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile);
-                unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
-                unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
-                unstructuredExternalObjectDirectoryEntity.setStatus(statusStored);
+                if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
+                    // upload file
+                    UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile);
+                    unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
+                    unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
+                    unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
+                }
+            } catch (BlobStorageException e) {
+                log.error("Failed to get BLOB from datastore {} for file {}", getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
+                unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
+                setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             }
-
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
 
         }
     }
 
+    private boolean attemptsExceeded(ObjectDirectoryStatusEntity unstructuredStatus, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
+        if (failureStatesList.contains(unstructuredStatus.getId())) {
+            int numAttempts = 0;
+            if (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null) {
+                numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
+                if (numAttempts >= 3) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private ExternalObjectDirectoryEntity getNewOrExistingExternalObjectDirectory(ExternalObjectDirectoryEntity inboundExternalObjectDirectory) {
-        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = externalObjectDirectoryRepository.findByMediaTranscriptionAndAnnotation(externalLocationTypeUnstructured, inboundExternalObjectDirectory.getMedia(), inboundExternalObjectDirectory.getTranscriptionDocumentEntity(), inboundExternalObjectDirectory.getAnnotationDocumentEntity());
-        if ( unstructuredExternalObjectDirectoryEntity == null) {
-            unstructuredExternalObjectDirectoryEntity = createUnstructuredExternalObjectDirectoryEntity(inboundExternalObjectDirectory);
+
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getUnstructuredStored(inboundExternalObjectDirectory);
+        if (unstructuredExternalObjectDirectoryEntity == null) {
+            unstructuredExternalObjectDirectoryEntity = getUnstructuredFailed(inboundExternalObjectDirectory);
+            if (unstructuredExternalObjectDirectoryEntity == null) {
+                unstructuredExternalObjectDirectoryEntity = createUnstructuredExternalObjectDirectoryEntity(
+                    inboundExternalObjectDirectory);
+            }
         }
         return unstructuredExternalObjectDirectoryEntity;
     }
 
-    private void validate(String calculatedChecksum, ExternalObjectDirectoryEntity externalObjectDirectory, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
+    private ExternalObjectDirectoryEntity getUnstructuredFailed(ExternalObjectDirectoryEntity inboundExternalObjectDirectory) {
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
+        for (ExternalObjectDirectoryEntity eod : unstructuredFailedList) {
+            if (failureStatesList.contains(eod.getStatus().getId())) {
+                externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(inboundExternalObjectDirectory,eod);
+                if (externalObjectDirectoryEntity != null) {
+                    break;
+                }
+            }
+        }
 
-        MediaEntity mediaEntity = externalObjectDirectory.getMedia();
-        if(mediaEntity != null) {
+        return externalObjectDirectoryEntity;
+    }
+
+    private ExternalObjectDirectoryEntity getUnstructuredStored(ExternalObjectDirectoryEntity inbound) {
+        // check in unstructuredStoredList
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
+        for (ExternalObjectDirectoryEntity unstructured : unstructuredStoredList) {
+            externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(
+                inbound,
+                unstructured
+            );
+            if (externalObjectDirectoryEntity != null) {
+                break;
+            }
+
+        }
+
+        return externalObjectDirectoryEntity;
+    }
+
+    private static ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
+        ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
+        if (inbound.getMedia() != null && unstructured.getMedia() != null) {
+            if (inbound.getMedia().getId().equals(unstructured.getMedia().getId())) {
+                externalObjectDirectoryEntity = unstructured;
+            }
+        }
+        if (inbound.getTranscriptionDocumentEntity() != null && unstructured.getTranscriptionDocumentEntity() != null) {
+            if (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId())) {
+                externalObjectDirectoryEntity = unstructured;
+            }
+        }
+        if (inbound.getAnnotationDocumentEntity() != null && unstructured.getAnnotationDocumentEntity() != null) {
+            if (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId())) {
+                externalObjectDirectoryEntity = unstructured;
+            }
+        }
+        return externalObjectDirectoryEntity;
+    }
+
+    private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
+
+        MediaEntity mediaEntity = inbound.getMedia();
+        if (mediaEntity != null) {
             performValidation(
-                unstructuredExternalObjectDirectoryEntity,
+                unstructured,
                 mediaEntity.getChecksum(),
-                calculatedChecksum,
+                checksum,
                 audioConfigurationProperties.getAllowedExtensions(),
                 FilenameUtils.getExtension(mediaEntity.getMediaFile()).toLowerCase(),
                 audioConfigurationProperties.getMaxFileSize(),
-                mediaEntity.getFileSize() );
+                mediaEntity.getFileSize());
         }
 
-        TranscriptionDocumentEntity transcriptionDocumentEntity = externalObjectDirectory.getTranscriptionDocumentEntity();
-        if(transcriptionDocumentEntity!=null) {
+        TranscriptionDocumentEntity transcriptionDocumentEntity = inbound.getTranscriptionDocumentEntity();
+        if (transcriptionDocumentEntity != null) {
             performValidation(
-                unstructuredExternalObjectDirectoryEntity,
+                unstructured,
                 transcriptionDocumentEntity.getChecksum(),
-                calculatedChecksum,
+                checksum,
                 transcriptionConfigurationProperties.getAllowedExtensions(),
                 FilenameUtils.getExtension(transcriptionDocumentEntity.getFileName()).toLowerCase(),
                 transcriptionConfigurationProperties.getMaxFileSize(),
-                transcriptionDocumentEntity.getFileSize() );
+                transcriptionDocumentEntity.getFileSize());
         }
 
-        AnnotationDocumentEntity annotationDocumentEntity = externalObjectDirectory.getAnnotationDocumentEntity();
-        if(annotationDocumentEntity!=null) {
+        AnnotationDocumentEntity annotationDocumentEntity = inbound.getAnnotationDocumentEntity();
+        if (annotationDocumentEntity != null) {
             performValidation(
-                unstructuredExternalObjectDirectoryEntity,
+                unstructured,
                 annotationDocumentEntity.getChecksum(),
-                calculatedChecksum,
+                checksum,
                 transcriptionConfigurationProperties.getAllowedExtensions(),
                 FilenameUtils.getExtension(annotationDocumentEntity.getFileName()).toLowerCase(),
                 transcriptionConfigurationProperties.getMaxFileSize(),
-                annotationDocumentEntity.getFileSize() );
+                annotationDocumentEntity.getFileSize());
         }
 
     }
 
-    private void performValidation(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity, String incomingChecksum, String calculatedChecksum, List<String> allowedExtensions, String extension, Integer maxFileSize, Integer fileSize) {
+    private void performValidation(
+        ExternalObjectDirectoryEntity unstructured,
+        String incomingChecksum, String calculatedChecksum,
+        List<String> allowedExtensions, String extension,
+        Integer maxFileSize, Integer fileSize) {
         if (calculatedChecksum.compareTo(incomingChecksum) != 0) {
-            unstructuredExternalObjectDirectoryEntity.setStatus(statusFailedChecksum);
+            unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
         }
         if (!allowedExtensions.contains(extension)) {
-            unstructuredExternalObjectDirectoryEntity.setStatus(statusFailedFileType);
+            unstructured.setStatus(getStatus(FAILURE_FILE_TYPE_CHECK_FAILED));
         }
         if (fileSize > maxFileSize) {
-            unstructuredExternalObjectDirectoryEntity.setStatus(statusFailedFileSize);
+            unstructured.setStatus(getStatus(FAILURE_FILE_SIZE_CHECK_FAILED));
+        }
+
+        setNumTransferAttempts(unstructured);
+    }
+
+    private void setNumTransferAttempts(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
+        if (failureStatesList.contains(unstructuredExternalObjectDirectoryEntity.getStatus().getId())) {
+            int numAttempts = 1;
+            if (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null) {
+                numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts() + 1;
+            }
+            unstructuredExternalObjectDirectoryEntity.setTransferAttempts(numAttempts);
         }
     }
 
     @Transactional
     private ExternalObjectDirectoryEntity createUnstructuredExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        TranscriptionDocumentEntity transcriptionDocumentEntity = externalObjectDirectory.getTranscriptionDocumentEntity();
-        MediaEntity mediaEntity = externalObjectDirectory.getMedia();
-        AnnotationDocumentEntity annotationDocumentEntity = externalObjectDirectory.getAnnotationDocumentEntity();
-        OffsetDateTime now = OffsetDateTime.now();
-        var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
 
         ExternalObjectDirectoryEntity  unstructuredExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         unstructuredExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId()));
-        unstructuredExternalObjectDirectoryEntity.setStatus(statusAwaiting);
+        unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
         unstructuredExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
-        if(mediaEntity!=null) {
+        MediaEntity mediaEntity = externalObjectDirectory.getMedia();
+        if (mediaEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setMedia(mediaEntity);
         }
-        if(transcriptionDocumentEntity != null) {
+        TranscriptionDocumentEntity transcriptionDocumentEntity = externalObjectDirectory.getTranscriptionDocumentEntity();
+        if (transcriptionDocumentEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
         }
-        if(annotationDocumentEntity!=null) {
+        AnnotationDocumentEntity annotationDocumentEntity = externalObjectDirectory.getAnnotationDocumentEntity();
+        if (annotationDocumentEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setAnnotationDocumentEntity(annotationDocumentEntity);
         }
+        OffsetDateTime now = OffsetDateTime.now();
         unstructuredExternalObjectDirectoryEntity.setCreatedDateTime(now);
         unstructuredExternalObjectDirectoryEntity.setLastModifiedDateTime(now);
+        var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
         unstructuredExternalObjectDirectoryEntity.setCreatedBy(systemUser);
         unstructuredExternalObjectDirectoryEntity.setLastModifiedBy(systemUser);
 
@@ -216,8 +300,19 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private String getInboundContainerName() {
         return dataManagementConfiguration.getInboundContainerName();
     }
+
     private String getUnstructuredContainerName() {
         return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
+    private ObjectDirectoryStatusEntity getStatus(ObjectDirectoryStatusEnum status) {
+        if (objectDirectoryStatusRepository != null) {
+            return objectDirectoryStatusRepository.getReferenceById(status.getId());
+        }
+        return null;
+    }
+
+    private ExternalLocationTypeEntity getType(ExternalLocationTypeEnum type) {
+        return externalLocationTypeRepository.getReferenceById(type.getId());
+    }
 }

@@ -21,8 +21,10 @@ public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomate
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
     }
 
-    public InboundToUnstructuredAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties, InboundToUnstructuredProcessor processor) {
+    public InboundToUnstructuredAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
+                                              LockProvider lockProvider,
+                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                              InboundToUnstructuredProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.inboundToUnstructuredProcessor = processor;
     }

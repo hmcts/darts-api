@@ -115,8 +115,7 @@ darts:
       last-accessed-deletion-day: 2
     allowed-extensions:
       - "mp2"
-      - "mp3"
-    max-file-size: 1048576
+    max-file-size: 10485760
   azure:
     active-directory-b2c-base-uri: https://hmctsdartsb2csbox.b2clogin.com
     active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsdartsb2csbox.onmicrosoft.com

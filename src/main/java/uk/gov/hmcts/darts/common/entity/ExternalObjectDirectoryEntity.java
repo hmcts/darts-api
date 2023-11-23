@@ -33,7 +33,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "eod_gen", sequenceName = "eod_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
     @JoinColumn(name = "med_id", foreignKey = @ForeignKey(name = "eod_media_fk"))
     private MediaEntity media;
 
@@ -44,9 +44,6 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     @ManyToOne(fetch = FetchType.EAGER, cascade = {PERSIST, MERGE})
     @JoinColumn(name = "ado_id", foreignKey = @ForeignKey(name = "eod_annotation_document_fk"))
     private AnnotationDocumentEntity annotationDocumentEntity;
-
-//    @Column(name = "ado_id")
-//    private Integer annotationDocumentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ods_id", foreignKey = @ForeignKey(name = "eod_object_directory_status_fk"), nullable = false)
