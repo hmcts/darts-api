@@ -14,5 +14,9 @@
   {
     "tru_id": 6,
     "description": "WORKING_DAYS_12"
+  },
+  {
+    "tru_id": 7,
+    "description": "WORKING_DAYS_2"
   }
 ]

@@ -14,7 +14,8 @@ public enum TranscriptionUrgencyEnum {
     OTHER(3),
     WORKING_DAYS_3(4),
     WORKING_DAYS_7(5),
-    WORKING_DAYS_12(6);
+    WORKING_DAYS_12(6),
+    WORKING_DAYS_2(7);
 
     private final Integer id;
 
