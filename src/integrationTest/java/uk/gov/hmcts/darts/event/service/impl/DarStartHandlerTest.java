@@ -139,7 +139,7 @@ class DarStartHandlerTest extends IntegrationBase {
         dartsDatabase.getCaseRepository().saveAndFlush(createdCase);
 
         //create another case at a different courthouse, but same case number thats still open.
-        CourtCaseEntity otherCase = dartsDatabase.createCase("another courthouse", SOME_CLOSED_CASE_NUMBER);
+        dartsDatabase.createCase("another courthouse", SOME_CLOSED_CASE_NUMBER);
 
         DartsEvent dartsEvent = someMinimalDartsEvent()
             .type(hearingStartedEventHandler.getType())
