@@ -82,7 +82,14 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(
             STORED), getType(INBOUND));
         unstructuredStoredList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(STORED), getType(UNSTRUCTURED));
-        unstructuredFailedList = externalObjectDirectoryRepository.findByNotStatusAndType(getStatus(STORED), getType(UNSTRUCTURED));
+        unstructuredFailedList = externalObjectDirectoryRepository.findByFailedAndType(
+            getStatus(FAILURE),
+            getStatus(FAILURE_FILE_NOT_FOUND),
+            getStatus(FAILURE_ARM_INGESTION_FAILED),
+            getStatus(FAILURE_FILE_TYPE_CHECK_FAILED),
+            getStatus(FAILURE_FILE_SIZE_CHECK_FAILED),
+            getStatus(FAILURE_CHECKSUM_FAILED),
+            getType(UNSTRUCTURED));
 
         for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
 
@@ -223,7 +230,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 transcriptionConfigurationProperties.getAllowedExtensions(),
                 FilenameUtils.getExtension(transcriptionDocumentEntity.getFileName()).toLowerCase(),
                 transcriptionConfigurationProperties.getMaxFileSize(),
-                transcriptionDocumentEntity.getFileSize());
+                Long.valueOf(transcriptionDocumentEntity.getFileSize())
+            );
         }
 
         AnnotationDocumentEntity annotationDocumentEntity = inbound.getAnnotationDocumentEntity();
@@ -235,7 +243,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 transcriptionConfigurationProperties.getAllowedExtensions(),
                 FilenameUtils.getExtension(annotationDocumentEntity.getFileName()).toLowerCase(),
                 transcriptionConfigurationProperties.getMaxFileSize(),
-                annotationDocumentEntity.getFileSize());
+                Long.valueOf(annotationDocumentEntity.getFileSize())
+            );
         }
 
     }
@@ -244,7 +253,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         ExternalObjectDirectoryEntity unstructured,
         String incomingChecksum, String calculatedChecksum,
         List<String> allowedExtensions, String extension,
-        Integer maxFileSize, Integer fileSize) {
+        Integer maxFileSize, Long fileSize) {
         if (calculatedChecksum.compareTo(incomingChecksum) != 0) {
             unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
         }
