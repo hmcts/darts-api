@@ -18,12 +18,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 public class TranscriptionsUpdateSetHidingValidator implements TranscriptionsUpdateValidator {
 
     public boolean validate(Optional<TranscriptionEntity> entity, UpdateTranscriptions transaction) {
-        boolean valid = false;
-        if (entity.isPresent() && isHidingSet(transaction)) {
-            valid = canChangeHiding(entity.get(), transaction);
-        }
-
-        return valid;
+        return entity.filter(transcriptionEntity -> canChangeHiding(transcriptionEntity, transaction)).isPresent();
     }
 
     private boolean isHidingSet(UpdateTranscriptions transcription) {
@@ -31,12 +26,12 @@ public class TranscriptionsUpdateSetHidingValidator implements TranscriptionsUpd
     }
 
     private boolean canChangeHiding(TranscriptionEntity entity, UpdateTranscriptions transaction) {
-        boolean verify = false;
+        boolean verify;
         if (transaction.getHideRequestFromRequestor() != null && transaction.getHideRequestFromRequestor()) {
             boolean transStateverify = validateStateForHide(entity.getTranscriptionStatus());
             boolean wfStateVerify = validateWfStateForHide(entity.getTranscriptionWorkflowEntities());
             return transStateverify || wfStateVerify;
-        } else if (transaction.getHideRequestFromRequestor() != null) {
+        } else {
             verify = true;
         }
         return verify;
