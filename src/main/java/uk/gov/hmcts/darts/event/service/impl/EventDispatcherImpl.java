@@ -22,7 +22,8 @@ import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NOT_FO
 @RequiredArgsConstructor
 public class EventDispatcherImpl implements EventDispatcher {
 
-    public static final String LOG_MESSAGE_FORMAT = "No event handler could be found for messageId: %s type: %s and subtype: %s";
+    public static final String NO_HANDLER_IN_DB_MESSAGE = "No event handler could be found in the database for messageId: %s type: %s and subtype: %s.";
+    public static final String HANDLER_NOT_FOUND_MESSAGE = "No event handler could be found for messageId: %s type: %s and subtype: %s, just returning OK";
 
     private final List<EventHandler> eventHandlers;
     private final EventHandlerRepository eventHandlerRepository;
@@ -38,7 +39,7 @@ public class EventDispatcherImpl implements EventDispatcher {
             foundHandler.get().handle(event, foundHandlerEntity);
         } else {
             // Event registered in DB, but no handler defined...just log and return OK.
-            log.warn(String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType()));
+            log.warn(String.format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));
         }
     }
 
@@ -56,9 +57,10 @@ public class EventDispatcherImpl implements EventDispatcher {
             event.getSubType()
         );
         if (foundMappings.isEmpty()) {
+            log.warn(String.format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));
             throw new DartsApiException(
                 EVENT_HANDLER_NOT_FOUND_IN_DB,
-                String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())
+                String.format(NO_HANDLER_IN_DB_MESSAGE, event.getMessageId(), event.getType(), event.getSubType())
             );
         }
 

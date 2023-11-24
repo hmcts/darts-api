@@ -41,7 +41,7 @@ class EventDispatcherImplTest {
         var exception = assertThrows(DartsApiException.class, () -> eventDispatcher.receive(event));
 
         assertEquals(
-            "No event handler could be found for messageId: 1 type: TestType and subtype: TestSubType",
+            "No event handler could be found in the database for messageId: 1 type: TestType and subtype: TestSubType.",
             exception.getDetail()
         );
     }
