@@ -12,9 +12,9 @@ import uk.gov.hmcts.darts.event.service.EventHandler;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NOT_FOUND;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NOT_FOUND_IN_DB;
 
 @Service
@@ -30,14 +30,16 @@ public class EventDispatcherImpl implements EventDispatcher {
 
     @Override
     public void receive(DartsEvent event) {
-        EventHandlerEntity foundHandler = findHandler(event);
-        eventHandlers.stream()
-            .filter(handler -> handler.isHandlerFor(foundHandler.getHandler()))
-            .findAny().orElseThrow(() -> new DartsApiException(
-                EVENT_HANDLER_NOT_FOUND,
-                String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType())
-            ))
-            .handle(event, foundHandler);
+        EventHandlerEntity foundHandlerEntity = findHandler(event);
+        Optional<EventHandler> foundHandler = eventHandlers.stream()
+            .filter(handler -> handler.isHandlerFor(foundHandlerEntity.getHandler()))
+            .findAny();
+        if (foundHandler.isPresent()) {
+            foundHandler.get().handle(event, foundHandlerEntity);
+        } else {
+            // Event registered in DB, but no handler defined...just log and return OK.
+            log.warn(String.format(LOG_MESSAGE_FORMAT, event.getMessageId(), event.getType(), event.getSubType()));
+        }
     }
 
     private EventHandlerEntity findHandler(DartsEvent event) {

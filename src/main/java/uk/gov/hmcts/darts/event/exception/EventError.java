@@ -14,16 +14,9 @@ public enum EventError implements DartsApiError {
         HttpStatus.UNPROCESSABLE_ENTITY,
         "Data on the event could not be reconciled with Darts records"
     ),
-
-    EVENT_HANDLER_NOT_FOUND(
-        "101",
-        HttpStatus.UNPROCESSABLE_ENTITY,
-        "No event handler found for event"
-    ),
-
     EVENT_HANDLER_NOT_FOUND_IN_DB(
-        "102",
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        "101",
+        HttpStatus.NOT_FOUND,
         "No event handler found in database"
     );
 

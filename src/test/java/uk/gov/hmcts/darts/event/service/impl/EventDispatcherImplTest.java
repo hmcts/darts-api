@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventHandler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,8 +30,7 @@ class EventDispatcherImplTest {
     @Test
     void receiveWithNoHandlers() {
         List<EventHandler> eventHandlers = new ArrayList<>();
-        EventHandlerEntity eventHandlerEntity = new EventHandlerEntity();
-        when(eventHandlerRepository.findByTypeAndSubType(anyString(), anyString())).thenReturn(List.of(eventHandlerEntity));
+        when(eventHandlerRepository.findByTypeAndSubType(anyString(), anyString())).thenReturn(Collections.emptyList());
         EventDispatcherImpl eventDispatcher = new EventDispatcherImpl(eventHandlers, eventHandlerRepository);
 
 
