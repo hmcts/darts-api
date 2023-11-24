@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions;
 
 import java.util.Optional;
 
-public class TranscriptionsUpdateSetHidingValidatorTest {
+class TranscriptionsUpdateSetHidingValidatorTest {
 
     private TranscriptionsUpdateSetHidingValidator validator;
 
@@ -20,7 +20,7 @@ public class TranscriptionsUpdateSetHidingValidatorTest {
     }
 
     @Test
-    public void testValidateWhenSuccess() {
+    void testValidateWhenSuccess() {
         UpdateTranscriptions transcriptions = new UpdateTranscriptions();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(true);
@@ -35,7 +35,7 @@ public class TranscriptionsUpdateSetHidingValidatorTest {
     }
 
     @Test
-    public void testValidateWhenFailureOnState() {
+    void testValidateWhenFailureOnState() {
         UpdateTranscriptions transcriptions = new UpdateTranscriptions();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(true);
@@ -50,7 +50,7 @@ public class TranscriptionsUpdateSetHidingValidatorTest {
     }
 
     @Test
-    public void testValidateWhenEntityNotFound() {
+    void testValidateWhenEntityNotFound() {
         UpdateTranscriptions transcriptions = new UpdateTranscriptions();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(true);
@@ -59,7 +59,7 @@ public class TranscriptionsUpdateSetHidingValidatorTest {
     }
 
     @Test
-    public void testValidateWhenSuccessWithHideFalseRegardlessOfState() {
+    void testValidateWhenSuccessWithHideFalseRegardlessOfState() {
         UpdateTranscriptions transcriptions = new UpdateTranscriptions();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(false);
