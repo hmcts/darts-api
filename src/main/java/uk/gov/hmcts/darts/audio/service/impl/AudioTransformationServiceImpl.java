@@ -311,14 +311,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
                  courtCase.getId());
 
-        log.info("Temporary logging: mediaRequestEntity.getRequestor() = {}", mediaRequestEntity.getRequestor());
-        log.info("Temporary logging: mediaRequestEntity.getRequestor().getId() = {}", mediaRequestEntity.getRequestor().getId());
-
         Optional<UserAccountEntity> userAccount = userAccountRepository.findById(mediaRequestEntity.getRequestor().getId());
 
         if (userAccount.isPresent()) {
-            log.info("Temporary logging: userAccount = {}", userAccount);
-            log.info("Temporary logging: userAccount email = {}", userAccount.get().getEmailAddress());
 
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
                 .eventId(notificationTemplateName)
