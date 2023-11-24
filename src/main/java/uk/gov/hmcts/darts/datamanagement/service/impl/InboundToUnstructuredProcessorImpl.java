@@ -77,7 +77,6 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         processAllStoredInboundExternalObjects();
     }
 
-    @Transactional
     private void processAllStoredInboundExternalObjects() {
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(
             STORED), getType(INBOUND));
@@ -95,11 +94,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
             ObjectDirectoryStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
-            if (unstructuredExternalObjectDirectoryEntity == null || unstructuredStatus == null || unstructuredStatus.getId().equals(STORED.getId())) {
-                break;
-            }
-
-            if (attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
+            if (unstructuredStatus == null || unstructuredStatus.getId().equals(STORED.getId()) || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
                 break;
             }
 
@@ -130,14 +125,10 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     }
 
     private boolean attemptsExceeded(ObjectDirectoryStatusEntity unstructuredStatus, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
-        if (failureStatesList.contains(unstructuredStatus.getId())) {
-            int numAttempts = 0;
-            if (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null) {
-                numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
-                if (numAttempts >= 3) {
-                    return true;
-                }
-            }
+        if (failureStatesList.contains(unstructuredStatus.getId()) && (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null)) {
+                int numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
+                return numAttempts >= 3;
+
         }
         return false;
     }
@@ -189,20 +180,17 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private static ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
         ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        if (inbound.getMedia() != null && unstructured.getMedia() != null) {
-            if (inbound.getMedia().getId().equals(unstructured.getMedia().getId())) {
+        if (inbound.getMedia() != null && unstructured.getMedia() != null && (inbound.getMedia().getId().equals(unstructured.getMedia().getId()))) {
                 externalObjectDirectoryEntity = unstructured;
-            }
+
         }
-        if (inbound.getTranscriptionDocumentEntity() != null && unstructured.getTranscriptionDocumentEntity() != null) {
-            if (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId())) {
+        if (inbound.getTranscriptionDocumentEntity() != null && unstructured.getTranscriptionDocumentEntity() != null && (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId()))) {
                 externalObjectDirectoryEntity = unstructured;
-            }
+
         }
-        if (inbound.getAnnotationDocumentEntity() != null && unstructured.getAnnotationDocumentEntity() != null) {
-            if (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId())) {
+        if (inbound.getAnnotationDocumentEntity() != null && unstructured.getAnnotationDocumentEntity() != null && (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId()))) {
                 externalObjectDirectoryEntity = unstructured;
-            }
+
         }
         return externalObjectDirectoryEntity;
     }
@@ -277,7 +265,6 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
-    @Transactional
     private ExternalObjectDirectoryEntity createUnstructuredExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
 
         ExternalObjectDirectoryEntity  unstructuredExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
