@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Random;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
