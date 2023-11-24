@@ -420,4 +420,98 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
         Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
         Assertions.assertFalse(existingTranscription1.getHideRequestFromRequestor());
     }
+
+    @Test
+    public void testFailureAllWhereNoPartialResponseIsGiven() throws Exception {
+        // set an incorrect state for a hide to take place
+        TranscriptionEntity existingTranscription1 = dartsDatabaseStub.getTranscriptionRepository().findById(
+            transcriptionId1).orElseThrow();
+        TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED);
+        existingTranscription1.setTranscriptionStatus(entity1);
+
+        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        transcriptions1.setTranscriptionId(transcriptionId1);
+        transcriptions1.setHideRequestFromRequestor(true);
+
+
+        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
+        updateTranscriptions.setTranscriptions(new ArrayList<>());
+        updateTranscriptions.getTranscriptions().add(transcriptions1);
+
+        MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
+            String.format("/transcriptions")))
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(updateTranscriptions));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+
+        Assertions.assertEquals(400, mvcResult.getResponse().getStatus());
+        Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
+            mvcResult.getResponse().getContentAsString(),
+            Problem.class);
+
+        // assert the failure response
+        Assertions.assertNotNull(failureResponse);
+        Assertions.assertFalse(JsonPath.parse(mvcResult.getResponse().getContentAsString())
+                                  .jsonString().contains("partial_failure"));
+        Assertions.assertFalse(existingTranscription1.getHideRequestFromRequestor());
+    }
+
+    @Test
+    public void testTransactionsUpdateHideSuccessButUnchangedInDBWhenHideIsNull() throws Exception {
+        TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
+            transcriptionId).orElseThrow();
+        TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
+        existingTranscription.setTranscriptionStatus(entity);
+
+        TranscriptionEntity existingTranscription1 = dartsDatabaseStub.getTranscriptionRepository().findById(
+            transcriptionId1).orElseThrow();
+        TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REJECTED);
+        existingTranscription1.setTranscriptionStatus(entity1);
+
+        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
+        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
+        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        transcriptions.setTranscriptionId(transcriptionId);
+        transcriptions.setHideRequestFromRequestor(null);
+
+        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        transcriptions1.setTranscriptionId(transcriptionId1);
+        transcriptions1.setHideRequestFromRequestor(null);
+
+        // we should be able to set hide false on a transcription without
+        // a known state
+        UpdateTranscriptions transcriptions2 = new UpdateTranscriptions();
+        transcriptions2.setTranscriptionId(transcriptionId2);
+        transcriptions2.setHideRequestFromRequestor(null);
+
+        updateTranscriptions.getTranscriptions().add(transcriptions);
+        updateTranscriptions.getTranscriptions().add(transcriptions1);
+        updateTranscriptions.getTranscriptions().add(transcriptions2);
+
+        MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
+            String.format("/transcriptions")))
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(updateTranscriptions));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // we expect a success
+        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+
+        UpdateTranscriptionsResponse successResponse = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsString(),
+            UpdateTranscriptionsResponse.class);
+        Assertions.assertNotNull(successResponse);
+        Assertions.assertEquals(3, successResponse.getTranscriptions().size());
+
+        TranscriptionEntity existingTranscription2 = dartsDatabaseStub.getTranscriptionRepository().findById(
+            transcriptionId2).orElseThrow();
+
+        Assertions.assertFalse(existingTranscription2.getHideRequestFromRequestor());
+        Assertions.assertFalse(existingTranscription1.getHideRequestFromRequestor());
+        Assertions.assertFalse(existingTranscription.getHideRequestFromRequestor());
+    }
 }
