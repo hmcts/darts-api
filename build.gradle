@@ -374,7 +374,7 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.3.1.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.0.Final')
 
   testImplementation 'com.h2database:h2:2.2.224'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.0'
