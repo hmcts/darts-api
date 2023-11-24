@@ -35,7 +35,6 @@ import static uk.gov.hmcts.darts.testutils.data.EventHandlerTestData.createEvent
 @Transactional
 class EventsControllerPostEventsTest extends IntegrationBase {
 
-
     private static final URI ENDPOINT = URI.create("/events");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";

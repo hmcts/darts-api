@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.service.impl;
+package uk.gov.hmcts.darts.event.service.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.event.model.CreatedHearing;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 
 @Slf4j
 @Service
@@ -16,11 +17,10 @@ public class SetReportingRestrictionEventHandler extends EventHandlerBase {
 
     @Transactional
     @Override
-    public void handle(DartsEvent dartsEvent) {
-        CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent);
+    public void handle(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
+        CreatedHearing createdHearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
         CourtCaseEntity courtCaseEntity = createdHearing.getHearingEntity().getCourtCase();
-        EventHandlerEntity eventHandlerEntity = handlerMap.eventTypeReference(dartsEvent);
-        courtCaseEntity.setReportingRestrictions(eventHandlerEntity);
+        courtCaseEntity.setReportingRestrictions(eventHandler);
         caseRepository.saveAndFlush(courtCaseEntity);
     }
 }
