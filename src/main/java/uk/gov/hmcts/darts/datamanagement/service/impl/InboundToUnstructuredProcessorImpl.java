@@ -94,7 +94,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
             ObjectDirectoryStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
-            if (unstructuredStatus == null || unstructuredStatus.getId().equals(STORED.getId()) || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
+            if (unstructuredStatus == null
+                || unstructuredStatus.getId().equals(STORED.getId())
+                || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
                 break;
             }
 
@@ -126,9 +128,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     private boolean attemptsExceeded(ObjectDirectoryStatusEntity unstructuredStatus, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
         if (failureStatesList.contains(unstructuredStatus.getId()) && (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null)) {
-                int numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
-                return numAttempts >= 3;
-
+            int numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
+            return numAttempts >= 3;
         }
         return false;
     }
@@ -180,16 +181,22 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private static ExternalObjectDirectoryEntity getMatchingExternalObjectDirectoryEntity(
         ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        if (inbound.getMedia() != null && unstructured.getMedia() != null && (inbound.getMedia().getId().equals(unstructured.getMedia().getId()))) {
-                externalObjectDirectoryEntity = unstructured;
+        if (inbound.getMedia() != null
+            && unstructured.getMedia() != null
+            && (inbound.getMedia().getId().equals(unstructured.getMedia().getId()))) {
+            externalObjectDirectoryEntity = unstructured;
 
         }
-        if (inbound.getTranscriptionDocumentEntity() != null && unstructured.getTranscriptionDocumentEntity() != null && (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId()))) {
-                externalObjectDirectoryEntity = unstructured;
+        if (inbound.getTranscriptionDocumentEntity() != null
+            && unstructured.getTranscriptionDocumentEntity() != null
+            && (inbound.getTranscriptionDocumentEntity().getId().equals(unstructured.getTranscriptionDocumentEntity().getId()))) {
+            externalObjectDirectoryEntity = unstructured;
 
         }
-        if (inbound.getAnnotationDocumentEntity() != null && unstructured.getAnnotationDocumentEntity() != null && (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId()))) {
-                externalObjectDirectoryEntity = unstructured;
+        if (inbound.getAnnotationDocumentEntity() != null
+            && unstructured.getAnnotationDocumentEntity() != null
+            && (inbound.getAnnotationDocumentEntity().getId().equals(unstructured.getAnnotationDocumentEntity().getId()))) {
+            externalObjectDirectoryEntity = unstructured;
 
         }
         return externalObjectDirectoryEntity;
