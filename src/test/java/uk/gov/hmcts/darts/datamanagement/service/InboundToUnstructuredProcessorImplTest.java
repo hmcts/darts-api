@@ -104,7 +104,8 @@ class InboundToUnstructuredProcessorImplTest {
     @Mock
     ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureFileNotFound;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureARM;
+    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureArm;
+
     @BeforeEach
     void setUp() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -156,18 +157,12 @@ class InboundToUnstructuredProcessorImplTest {
     }
 
     private void setExpectationsForFailedStates() {
-        //        when(objectDirectoryStatusEntityFailure.getId()).thenReturn(3);
         when(objectDirectoryStatusRepository.getReferenceById(3)).thenReturn(objectDirectoryStatusEntityFailure);
-//        when(objectDirectoryStatusEntityFailureFileNotFound.getId()).thenReturn(4);
         when(objectDirectoryStatusRepository.getReferenceById(4)).thenReturn(objectDirectoryStatusEntityFailureFileNotFound);
-//        when(objectDirectoryStatusEntityFailureFileSize.getId()).thenReturn(5);
         when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectDirectoryStatusEntityFailureFileSize);
-//        when(objectDirectoryStatusEntityFailureFileType.getId()).thenReturn(6);
         when(objectDirectoryStatusRepository.getReferenceById(6)).thenReturn(objectDirectoryStatusEntityFailureFileType);
-//        when(objectDirectoryStatusEntityFailureChecksum.getId()).thenReturn(7);
         when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectDirectoryStatusEntityFailureChecksum);
-//        when(objectDirectoryStatusEntityFailureARM.getId()).thenReturn(8);
-        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailureARM);
+        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailureArm);
     }
 
     @Test
@@ -228,7 +223,7 @@ class InboundToUnstructuredProcessorImplTest {
 
 
         List<ExternalObjectDirectoryEntity> failedList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityFailed));
-        when(externalObjectDirectoryRepository.findByFailedAndType(any(), any(),any(),any(),any(),any() ,any())).thenReturn(failedList);
+        when(externalObjectDirectoryRepository.findByFailedAndType(any(), any(),any(),any(),any(),any(),any())).thenReturn(failedList);
 
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
