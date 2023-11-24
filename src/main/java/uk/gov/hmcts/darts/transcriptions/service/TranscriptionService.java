@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsRequest;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsResponse;
 
 import java.util.List;
 
@@ -37,4 +39,5 @@ public interface TranscriptionService {
 
     GetYourTranscriptsResponse getYourTranscripts(Integer userId);
 
+    UpdateTranscriptionsResponse updateTranscriptions(UpdateTranscriptionsRequest request);
 }

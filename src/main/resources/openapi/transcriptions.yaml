@@ -101,6 +101,62 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TranscriptionRequestDetails'
+
+    patch:
+      tags:
+        - Transcription
+      summary: Patch a transcription
+      operationId: updateTranscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateTranscriptionsResponse'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscriptions400ErrorCode'
+              example:
+                type: "TRANSCRIPTION_103"
+                title: "A generic 400 error related to update transcriptions"
+                status: 400
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTranscriptionsRequest'
+
   /transcriptions/{transcription_id}:
     get:
       tags:
@@ -518,6 +574,33 @@ components:
           example: 3
         workflow_comment:
           type: string
+
+    UpdateTranscriptionsRequest:
+      properties:
+        transcriptions:
+            type: array
+            items:
+              $ref: '#/components/schemas/UpdateTranscriptions'
+
+    UpdateTranscriptions:
+      type: object
+      required:
+        - transcriptionId
+      properties:
+        transcriptionId:
+          type: integer
+          example: "1001"
+        hideRequestFromRequestor:
+          type: boolean
+          example: true
+
+    UpdateTranscriptionsResponse:
+      properties:
+        transcriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateTranscriptions'
+
     RequestTranscriptionResponse:
       type: object
       required:
@@ -664,7 +747,11 @@ components:
         description:
           type: string
           example: Standard
-
+    UpdateTranscriptions400ErrorCode:
+      type: string
+      enum:
+        - "UT-PP-400"
+      x-enum-varnames: [ UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM ]
     GetTranscriptionByIdResponse:
       type: object
       properties:
