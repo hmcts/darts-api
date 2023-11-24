@@ -23,11 +23,13 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -73,6 +75,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     private final DataManagementApi dataManagementApi;
     private final NotificationApi notificationApi;
+    private final UserAccountRepository userAccountRepository;
 
     @Override
     public BinaryData getUnstructuredAudioBlob(UUID location) {
@@ -203,7 +206,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
             }
 
-            mediaRequestService.updateAudioRequestCompleted(requestId, fileName, audioRequestOutputFormat);
+            mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity, fileName, audioRequestOutputFormat);
+
+            log.debug("Completed processing for requestId {}. Zip successfully uploaded with blobId: {}", requestId, blobId);
 
         } catch (Exception e) {
             log.error(
@@ -220,12 +225,6 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
-
-        log.debug(
-            "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
-            requestId,
-            blobId
-        );
 
         notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
@@ -309,17 +308,30 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private void notifyUser(MediaRequestEntity mediaRequestEntity,
                             CourtCaseEntity courtCase,
                             String notificationTemplateName) {
-        log.debug("Scheduling notification for template name: {}...", notificationTemplateName);
+        log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
+                 courtCase.getId());
 
-        var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId(notificationTemplateName)
-            .caseId(courtCase.getId())
-            .emailAddresses(mediaRequestEntity.getRequestor().getEmailAddress())
-            .build();
+        log.info("Temporary logging: mediaRequestEntity.getRequestor() = {}", mediaRequestEntity.getRequestor());
+        log.info("Temporary logging: mediaRequestEntity.getRequestor().getId() = {}", mediaRequestEntity.getRequestor().getId());
 
-        notificationApi.scheduleNotification(saveNotificationToDbRequest);
+        Optional<UserAccountEntity> userAccount = userAccountRepository.findById(mediaRequestEntity.getRequestor().getId());
 
-        log.debug("Notification scheduled successfully");
+        if (userAccount.isPresent()) {
+            log.info("Temporary logging: userAccount = {}", userAccount);
+            log.info("Temporary logging: userAccount email = {}", userAccount.get().getEmailAddress());
+
+            var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
+                .eventId(notificationTemplateName)
+                .caseId(courtCase.getId())
+                .emailAddresses(userAccount.get().getEmailAddress())
+                .build();
+
+            notificationApi.scheduleNotification(saveNotificationToDbRequest);
+
+            log.debug("Notification scheduled successfully for request id {} and court case {}", mediaRequestEntity.getId(), courtCase.getId());
+        } else {
+            log.error("No notification scheduled for request id {} and court case {} ", mediaRequestEntity.getId(), courtCase.getId());
+        }
     }
 
 }

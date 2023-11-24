@@ -173,7 +173,8 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
     @Order(9)
     void shouldSetDownloadFileNameAndFormat() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(1, TEST_FILENAME, AudioRequestOutputFormat.MP3);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
+                                                                                                AudioRequestOutputFormat.MP3);
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
         assertEquals(TEST_FILENAME, mediaRequestEntity.getOutputFilename());
@@ -183,7 +184,8 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Test
     @Order(10)
     void shouldSetPlaybackFileNameAndFormat() {
-        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(1, TEST_FILENAME, AudioRequestOutputFormat.ZIP);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
+                                                                                                AudioRequestOutputFormat.ZIP);
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
         assertEquals(TEST_FILENAME, mediaRequestEntity.getOutputFilename());
