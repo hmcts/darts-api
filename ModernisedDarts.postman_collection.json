@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "5f17c956-c279-4474-a254-fe91f08073a5",
+		"_postman_id": "1d8ae6aa-4024-415a-a164-ce73657d03f3",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27348549"
 	},
 	"item": [
 		{
@@ -14,6 +15,16 @@
 						{
 							"name": "swansea event",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -308,7 +319,7 @@
 					"name": "courtLogs",
 					"item": [
 						{
-							"name": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
+							"name": "GET /courtlogs",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -341,6 +352,51 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "POST /courtlogs",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{serverUrl}}/courtlogs?courthouse=\"swansea\"&case_number=1&start_date_time=2023-11-09T08:00:00Z&end_date_time=2023-11-09T12:00:00Z",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"courtlogs"
+									],
+									"query": [
+										{
+											"key": "courthouse",
+											"value": "\"swansea\""
+										},
+										{
+											"key": "case_number",
+											"value": "1"
+										},
+										{
+											"key": "start_date_time",
+											"value": "2023-11-09T08:00:00Z"
+										},
+										{
+											"key": "end_date_time",
+											"value": "2023-11-09T12:00:00Z"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -349,45 +405,45 @@
 		{
 			"name": "Audio",
 			"item": [
-        {
-          "name": "/audios",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "accept",
-                "value": "*/*"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "contentType": "audio/mpeg",
-                  "type": "file",
-                  "src": "sample.mp2"
-                },
-                {
-                  "key": "metadata",
-                  "value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
-                  "contentType": "application/json",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{serverUrl}}/audios",
-              "host": [
-                "{{serverUrl}}"
-              ],
-              "path": [
-                "audios"
-              ]
-            }
-          },
-          "response": []
-        },
+				{
+					"name": "/audios",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"contentType": "audio/mpeg",
+									"type": "file",
+									"src": "sample.mp2"
+								},
+								{
+									"key": "metadata",
+									"value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
+									"contentType": "application/json",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audios",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audios"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "/audio/hearings/{hearing_id}/audios",
 					"request": {
@@ -461,6 +517,16 @@
 						{
 							"name": "POST DailyLists",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -1938,6 +2004,64 @@
 							}
 						}
 					]
+				}
+			]
+		},
+		{
+			"name": "NodeRegistration",
+			"item": [
+				{
+					"name": "POST register-devices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/register-devices?node_type=DAR&courthouse=swansea&court_room=1&host_name=XXXXX.MMM.net&mac_address=6A-5F-90-A4-2C-12&ip_address=192.0.0.1",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"register-devices"
+							],
+							"query": [
+								{
+									"key": "node_type",
+									"value": "DAR"
+								},
+								{
+									"key": "courthouse",
+									"value": "swansea"
+								},
+								{
+									"key": "court_room",
+									"value": "1"
+								},
+								{
+									"key": "host_name",
+									"value": "XXXXX.MMM.net"
+								},
+								{
+									"key": "mac_address",
+									"value": "6A-5F-90-A4-2C-12"
+								},
+								{
+									"key": "ip_address",
+									"value": "192.0.0.1"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		}
