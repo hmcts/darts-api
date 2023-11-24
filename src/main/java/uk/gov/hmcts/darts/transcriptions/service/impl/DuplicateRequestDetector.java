@@ -31,7 +31,7 @@ public class DuplicateRequestDetector {
                 isManual
             );
             if (!matchingTranscriptions.isEmpty()) {
-                var duplicateTranscriptionIds = matchingTranscriptions.stream().map(TranscriptionEntity::getId).toList();
+                var duplicateTranscriptionIds = matchingTranscriptions.get(0).getId();
                 throw new DartsApiException(
                     TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
                     Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionIds)

@@ -33,7 +33,6 @@ class DuplicateRequestDetectorTest {
     private final TranscriptionRepository transcriptionRepository = mock(TranscriptionRepository.class);
     private final TranscriptionTypeRepository transcriptionTypeRepository = mock(TranscriptionTypeRepository.class);
     private TranscriptionTypeEntity transcriptionType;
-    private final Random random = new Random();
 
     private final DuplicateRequestDetector duplicateRequestDetector = new DuplicateRequestDetector(transcriptionRepository, transcriptionTypeRepository);
 
@@ -67,7 +66,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, true))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(List.of(1));
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
     }
 
     @Test
@@ -80,7 +79,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(List.of(1));
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
     }
 
     @Test
@@ -93,7 +92,7 @@ class DuplicateRequestDetectorTest {
         assertThatThrownBy(() -> duplicateRequestDetector.checkForDuplicate(requestDetails, false))
             .isInstanceOf(DartsApiException.class)
             .hasFieldOrPropertyWithValue("error", TranscriptionApiError.DUPLICATE_TRANSCRIPTION)
-            .extracting("customProperties.duplicate_transcription_id").isEqualTo(List.of(1, 2, 3));
+            .extracting("customProperties.duplicate_transcription_id").isEqualTo(1);
     }
 
     private List<TranscriptionEntity> someTranscriptionRequestedManuallyThatMatches(TranscriptionRequestDetails requestDetails, int count) {
