@@ -459,7 +459,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
     }
 
     @Test
-    public void testTransactionsUpdateHideSuccessButUnchangedInDBWhenHideIsNull() throws Exception {
+    public void testTransactionsUpdateHideSuccessButUnchangedInDbWhenHideIsNull() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
