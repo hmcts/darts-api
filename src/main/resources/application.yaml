@@ -115,7 +115,7 @@ darts:
       last-accessed-deletion-day: 2
     allowed-extensions:
       - "mp2"
-    max-file-size: 10485760
+    max-file-size: 524288000
   azure:
     active-directory-b2c-base-uri: https://hmctsstgextid.b2clogin.com
     active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsstgextid.onmicrosoft.com
@@ -162,7 +162,7 @@ darts:
     allowed-extensions:
       - "docx"
       - "doc"
-    max-file-size: 1048576
+    max-file-size: 10485760
     allowed-content-types:
       - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       - "application/msword"
