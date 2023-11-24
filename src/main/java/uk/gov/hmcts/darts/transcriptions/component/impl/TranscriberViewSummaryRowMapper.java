@@ -23,7 +23,7 @@ public class TranscriberViewSummaryRowMapper implements RowMapper<TranscriberVie
             rs.getString("transcription_type"),
             rs.getString("status"),
             rs.getObject("requested_ts", OffsetDateTime.class),
-            rs.getObject("requested_ts", OffsetDateTime.class),
+            rs.getObject("state_change_ts", OffsetDateTime.class),
             rs.getBoolean("is_manual")
         );
         summary.setUrgency(rs.getString("urgency"));
