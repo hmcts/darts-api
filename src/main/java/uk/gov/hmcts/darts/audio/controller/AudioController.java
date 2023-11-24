@@ -4,9 +4,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,6 +15,7 @@ import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
@@ -55,14 +53,15 @@ public class AudioController implements AudioApi {
         return new ResponseEntity<>(audioMetadata, HttpStatus.OK);
     }
 
+    @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<Resource> preview(Integer mediaId) {
+    public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
-        return new ResponseEntity<>(new InputStreamResource(audioMediaFile), HttpStatus.OK);
+        return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList, mediaId.toString());
     }
 
     @SneakyThrows
@@ -74,48 +73,8 @@ public class AudioController implements AudioApi {
     public ResponseEntity<byte[]> preview2(Integer mediaId,
                                            @RequestHeader(value = "Range", required = false) String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
+        return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList, mediaId.toString());
 
-        byte[] bytes = IOUtils.toByteArray(audioMediaFile);
-        if (httpRangeList == null) {
-            return ResponseEntity.status(HttpStatus.OK)
-                .header("Content-Type", "application/octet-stream")
-                .header("Content-Disposition", "attachment; filename=\"" + mediaId.toString() + ".mp3\"")
-                .header("Content-Length", String.valueOf(bytes.length))
-                .body(bytes);
-        } else {
-            long fileSize = bytes.length;
-            String[] ranges = httpRangeList.split("-");
-            long rangeStart = Long.parseLong(ranges[0].substring(6));
-            long rangeEnd;
-            if (ranges.length > 1) {
-                rangeEnd = Long.parseLong(ranges[1]);
-            } else {
-                rangeEnd = fileSize - 1;
-            }
-            if (fileSize < rangeEnd) {
-                rangeEnd = fileSize - 1;
-            }
-            String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
-            String contentRange = "bytes" + " " + rangeStart + "-" + rangeEnd + "/" + fileSize;
-            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .header("Content-Type", "audio/mpeg")
-                .header("Content-Length", contentLength)
-                .header("Content-Range", contentRange)
-                .body(readByteRange(bytes, rangeStart, rangeEnd));
-        }
-    }
-
-    public byte[] readByteRange(byte[] wholeFile, long start, long end) {
-        int srcPos;
-        if (start > Integer.MIN_VALUE && start < Integer.MAX_VALUE) {
-            srcPos = (int) start;
-        } else {
-            throw new IllegalArgumentException("Invalid input: start bytes truncated");
-        }
-
-        byte[] result = new byte[(int) (end - start) + 1];
-        System.arraycopy(wholeFile, srcPos, result, 0, result.length);
-        return result;
     }
 
     @Override

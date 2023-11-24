@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.darts.audio.component.AudioRequestResponseMapper;
 import uk.gov.hmcts.darts.audio.component.AudioRequestSummaryMapper;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
+import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audiorequests.http.api.AudioRequestsApi;
 import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -110,18 +112,16 @@ public class AudioRequestsController implements AudioRequestsApi {
         return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
     }
 
+    @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_REQUEST_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<Resource> playback(Integer mediaRequestId) {
+    public ResponseEntity<byte[]> playback(Integer mediaRequestId, String httpRangeList) {
         InputStream audioFileStream = mediaRequestService.playback(mediaRequestId);
 
-        return new ResponseEntity<>(
-            new InputStreamResource(audioFileStream),
-            HttpStatus.OK
-        );
+        return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, httpRangeList, mediaRequestId.toString());
     }
 
 }
