@@ -11,8 +11,13 @@ public enum UserManagementError implements DartsApiError {
 
     USER_NOT_FOUND(
         "100",
-            HttpStatus.NOT_FOUND,
-            "The provided user does not exist"
+        HttpStatus.NOT_FOUND,
+        "The provided user does not exist"
+    ),
+    DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED(
+        "110",
+        HttpStatus.CONFLICT,
+        "Duplicate security group names are not permitted"
     );
 
     private static final String ERROR_TYPE_PREFIX = "USER_MANAGEMENT";
