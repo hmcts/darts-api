@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -52,7 +51,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AW
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
-public class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
+class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
 
     @MockBean
     private Authorisation authorisation;
@@ -74,16 +73,6 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
 
     @MockBean
     private UserIdentity mockUserIdentity;
-    @MockBean
-    private AuditApi mockAuditApi;
-
-    private TranscriptionEntity transcriptionEntity;
-
-    private TranscriptionEntity transcriptionEntity1;
-
-    private TranscriptionEntity transcriptionEntity2;
-
-    private UserAccountEntity testUser;
 
     private Integer transcriptionId;
 
@@ -91,24 +80,26 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
 
     private Integer transcriptionId2;
 
-    private Integer testUserId;
 
     @BeforeEach
     void beforeEach() {
         authorisationStub.givenTestSchema();
 
+        TranscriptionEntity transcriptionEntity;
         transcriptionEntity = authorisationStub.getTranscriptionEntity();
         assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionEntity.getTranscriptionStatus().getId());
         assertEquals(2, transcriptionEntity.getTranscriptionWorkflowEntities().size());
 
         transcriptionId = transcriptionEntity.getId();
 
+        TranscriptionEntity transcriptionEntity1;
         transcriptionEntity1 = authorisationStub.addNewTranscription();
         assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionEntity1.getTranscriptionStatus().getId());
         assertEquals(2, transcriptionEntity1.getTranscriptionWorkflowEntities().size());
 
         transcriptionId1 = transcriptionEntity1.getId();
 
+        TranscriptionEntity transcriptionEntity2;
         transcriptionEntity2 = authorisationStub.addNewTranscription();
         assertEquals(AWAITING_AUTHORISATION.getId(), transcriptionEntity2.getTranscriptionStatus().getId());
         assertEquals(2, transcriptionEntity2.getTranscriptionWorkflowEntities().size());
@@ -118,13 +109,12 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
         doNothing().when(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
-        testUser = authorisationStub.getTestUser();
+        UserAccountEntity testUser = authorisationStub.getTestUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        testUserId = testUser.getId();
     }
 
     @Test
-    public void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndStateIsGood() throws Exception {
+     void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndStateIsGood() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -164,13 +154,13 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andReturn();
 
         // we expect a success
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         UpdateTranscriptionsResponse successResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
             UpdateTranscriptionsResponse.class);
         Assertions.assertNotNull(successResponse);
-        Assertions.assertEquals(3, successResponse.getTranscriptions().size());
+        assertEquals(3, successResponse.getTranscriptions().size());
         Assertions.assertTrue(successResponse.getTranscriptions().containsAll(updateTranscriptions.getTranscriptions()));
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
         Assertions.assertTrue(existingTranscription1.getHideRequestFromRequestor());
@@ -182,7 +172,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
     }
 
     @Test
-    public void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndWorkflowStateIsGood() throws Exception {
+     void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndWorkflowStateIsGood() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -230,13 +220,13 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andReturn();
 
         // we expect a success
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         UpdateTranscriptionsResponse successResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
             UpdateTranscriptionsResponse.class);
         Assertions.assertNotNull(successResponse);
-        Assertions.assertEquals(3, successResponse.getTranscriptions().size());
+        assertEquals(3, successResponse.getTranscriptions().size());
         Assertions.assertTrue(successResponse.getTranscriptions().containsAll(updateTranscriptions.getTranscriptions()));
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
         Assertions.assertTrue(existingTranscription1.getHideRequestFromRequestor());
@@ -248,7 +238,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
     }
 
     @Test
-    public void testTransactionsUpdateHidePartialFailureWhereSomeTransactionIdsAreUpdatedAndSomeNotFound() throws Exception {
+    void testTransactionsUpdateHidePartialFailureWhereSomeTransactionIdsAreUpdatedAndSomeNotFound() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -288,7 +278,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andReturn();
 
         // assert a partial failure
-        Assertions.assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(400, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class);
@@ -300,8 +290,8 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
         UpdateTranscriptionsResponse partialFailureResponse = objectMapper.readValue(
             partialFailure,
             UpdateTranscriptionsResponse.class);
-        Assertions.assertEquals(1, partialFailureResponse.getTranscriptions().size());
-        Assertions.assertEquals(idThatDoesNotExist, partialFailureResponse.getTranscriptions().get(0).getTranscriptionId());
+        assertEquals(1, partialFailureResponse.getTranscriptions().size());
+        assertEquals(idThatDoesNotExist, partialFailureResponse.getTranscriptions().get(0).getTranscriptionId());
 
         // assert partial success i.e. that the hide flags in the database have been set
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
@@ -309,7 +299,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
     }
 
     @Test
-    public void testTransactionsUpdateHidePartialFailureWhereSomeTransactionIdsAreUpdatedAndSomeAreNotInCorrectStateForHide() throws Exception {
+    void testTransactionsUpdateHidePartialFailureWhereSomeTransactionIdsAreUpdatedAndSomeAreNotInCorrectStateForHide() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -342,7 +332,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andExpect(status().is4xxClientError())
             .andReturn();
 
-        Assertions.assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(400, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class);
@@ -354,8 +344,8 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
         UpdateTranscriptionsResponse partialFailureResponse = objectMapper.readValue(
             partialFailure,
             UpdateTranscriptionsResponse.class);
-        Assertions.assertEquals(1, partialFailureResponse.getTranscriptions().size());
-        Assertions.assertEquals(transcriptionId1, partialFailureResponse.getTranscriptions().get(0).getTranscriptionId());
+        assertEquals(1, partialFailureResponse.getTranscriptions().size());
+        assertEquals(transcriptionId1, partialFailureResponse.getTranscriptions().get(0).getTranscriptionId());
 
         // assert partial success in the database
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
@@ -363,7 +353,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
     }
 
     @Test
-    public void testSuccessChangeFromHiddenToUnhiddenRegardlessOfTranscriptionState() throws Exception {
+    void testSuccessChangeFromHiddenToUnhiddenRegardlessOfTranscriptionState() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -396,7 +386,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
         Assertions.assertTrue(existingTranscription1.getHideRequestFromRequestor());
 
@@ -417,12 +407,12 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andExpect(status().is2xxSuccessful())
             .andReturn();
 
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
         Assertions.assertFalse(existingTranscription1.getHideRequestFromRequestor());
     }
 
     @Test
-    public void testFailureAllWhereNoPartialResponseIsGiven() throws Exception {
+    void testFailureAllWhereNoPartialResponseIsGiven() throws Exception {
         // set an incorrect state for a hide to take place
         TranscriptionEntity existingTranscription1 = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId1).orElseThrow();
@@ -446,7 +436,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andExpect(status().is4xxClientError())
             .andReturn();
 
-        Assertions.assertEquals(400, mvcResult.getResponse().getStatus());
+        assertEquals(400, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
             Problem.class);
@@ -459,7 +449,7 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
     }
 
     @Test
-    public void testTransactionsUpdateHideSuccessButUnchangedInDbWhenHideIsNull() throws Exception {
+    void testTransactionsUpdateHideSuccessButUnchangedInDbWhenHideIsNull() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -499,13 +489,13 @@ public class TranscriptionControllerUpdateTranscriptionsTest extends Integration
             .andReturn();
 
         // we expect a success
-        Assertions.assertEquals(200, mvcResult.getResponse().getStatus());
+        assertEquals(200, mvcResult.getResponse().getStatus());
 
         UpdateTranscriptionsResponse successResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
             UpdateTranscriptionsResponse.class);
         Assertions.assertNotNull(successResponse);
-        Assertions.assertEquals(3, successResponse.getTranscriptions().size());
+        assertEquals(3, successResponse.getTranscriptions().size());
 
         TranscriptionEntity existingTranscription2 = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId2).orElseThrow();
