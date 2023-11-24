@@ -15,12 +15,6 @@ public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomate
     protected String taskName = INBOUND_TO_UNSTRUCTURED_TASK_NAME.getTaskName();
     private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
 
-
-    public InboundToUnstructuredAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
-                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
-        super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
-    }
-
     public InboundToUnstructuredAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                               LockProvider lockProvider,
                                               AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
