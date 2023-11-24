@@ -1,10 +1,11 @@
-package uk.gov.hmcts.darts.event.service.impl;
+package uk.gov.hmcts.darts.event.service.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 
 @Service
 @RequiredArgsConstructor

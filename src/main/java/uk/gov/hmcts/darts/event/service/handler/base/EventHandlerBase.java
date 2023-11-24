@@ -1,6 +1,7 @@
-package uk.gov.hmcts.darts.event.service.impl;
+package uk.gov.hmcts.darts.event.service.handler.base;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
@@ -33,7 +34,7 @@ public abstract class EventHandlerBase implements EventHandler {
 
     @Override
     public boolean isHandlerFor(String handlerName) {
-        return handlerName.equals(this.getClass().getSimpleName());
+        return StringUtils.equals(handlerName, this.getClass().getSimpleName());
     }
 
     protected EventEntity eventEntityFrom(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
@@ -64,7 +65,6 @@ public abstract class EventHandlerBase implements EventHandler {
 
         saveEvent(dartsEvent, hearingEntity, eventHandler);
         setHearingToActive(hearingEntity);
-
 
         return CreatedHearing.builder()
             .hearingEntity(hearingEntity)

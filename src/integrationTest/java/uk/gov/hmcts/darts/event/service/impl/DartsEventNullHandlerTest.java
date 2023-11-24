@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
+import uk.gov.hmcts.darts.event.service.handler.DartsEventNullHandler;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;

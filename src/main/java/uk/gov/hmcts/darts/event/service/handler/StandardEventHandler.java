@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.event.service.impl;
+package uk.gov.hmcts.darts.event.service.handler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.event.model.CreatedHearing;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
+import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.CASE_UPDATE;
 
