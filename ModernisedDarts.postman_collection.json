@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "5f17c956-c279-4474-a254-fe91f08073a5",
+		"_postman_id": "f47c66de-2d5e-43ff-a33b-19046611c40a",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -349,45 +349,45 @@
 		{
 			"name": "Audio",
 			"item": [
-        {
-          "name": "/audios",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "accept",
-                "value": "*/*"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "file",
-                  "contentType": "audio/mpeg",
-                  "type": "file",
-                  "src": "sample.mp2"
-                },
-                {
-                  "key": "metadata",
-                  "value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
-                  "contentType": "application/json",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{serverUrl}}/audios",
-              "host": [
-                "{{serverUrl}}"
-              ],
-              "path": [
-                "audios"
-              ]
-            }
-          },
-          "response": []
-        },
+				{
+					"name": "/audios",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"contentType": "audio/mpeg",
+									"type": "file",
+									"src": "sample.mp2"
+								},
+								{
+									"key": "metadata",
+									"value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
+									"contentType": "application/json",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audios",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audios"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "/audio/hearings/{hearing_id}/audios",
 					"request": {
@@ -849,7 +849,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-09T11:30:00Z\",\n  \"end_date_time\": \"2023-11-09T12:00:00Z\"\n}",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-24T09:00:00Z\",\n  \"end_date_time\": \"2023-11-24T09:30:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -894,7 +894,7 @@
 							"variable": [
 								{
 									"key": "transcription_id",
-									"value": "61"
+									"value": "101"
 								}
 							]
 						}
@@ -942,6 +942,39 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"transcription_status_id\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id} 6 | Complete",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 6\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1164,6 +1197,72 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "/transcriptions/transcriber-view?assigned=false",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=false",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-view"
+							],
+							"query": [
+								{
+									"key": "assigned",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/transcriber-view?assigned=true",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=true",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-view"
+							],
+							"query": [
+								{
+									"key": "assigned",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1172,6 +1271,18 @@
 			"item": [
 				{
 					"name": "Generate Bearer Token - AAD_B2C_ROPC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let responseData = pm.response.json();",
+									"pm.environment.set(\"access_token\", responseData.access_token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
