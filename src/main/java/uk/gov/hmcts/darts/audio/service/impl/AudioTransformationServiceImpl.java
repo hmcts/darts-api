@@ -203,7 +203,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 blobId = saveProcessedData(mediaRequestEntity, BinaryData.fromStream(inputStream));
             }
 
-            mediaRequestService.updateAudioRequestCompleted(requestId, fileName, audioRequestOutputFormat);
+            mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity, fileName, audioRequestOutputFormat);
+
+            log.debug("Completed processing for requestId {}. Zip successfully uploaded with blobId: {}", requestId, blobId);
+
+            notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
         } catch (Exception e) {
             log.error(
@@ -221,13 +225,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
         }
 
-        log.debug(
-            "Completed processing for requestId {}. Zip successfully uploaded with blobId: {}",
-            requestId,
-            blobId
-        );
 
-        notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
+
 
         return blobId;
     }
@@ -309,7 +308,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private void notifyUser(MediaRequestEntity mediaRequestEntity,
                             CourtCaseEntity courtCase,
                             String notificationTemplateName) {
-        log.debug("Scheduling notification for template name: {}...", notificationTemplateName);
+        log.info("Scheduling notification for template name {} and case id {}", notificationTemplateName, courtCase.getId());
 
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
             .eventId(notificationTemplateName)

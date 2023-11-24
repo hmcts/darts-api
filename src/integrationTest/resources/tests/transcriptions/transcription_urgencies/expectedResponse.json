@@ -4,6 +4,10 @@
     "description": "Overnight"
   },
   {
+    "tru_id": 3,
+    "description": "Other"
+  },
+  {
     "tru_id": 4,
     "description": "Up to 3 working days"
   },
@@ -14,5 +18,9 @@
   {
     "tru_id": 6,
     "description": "Up to 12 working days"
+  },
+  {
+    "tru_id": 7,
+    "description": "Up to 2 working days"
   }
 ]

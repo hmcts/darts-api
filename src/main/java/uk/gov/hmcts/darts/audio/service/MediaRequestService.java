@@ -36,5 +36,5 @@ public interface MediaRequestService {
 
     InputStream playback(Integer mediaRequestId);
 
-    MediaRequestEntity updateAudioRequestCompleted(Integer id, String fileName, AudioRequestOutputFormat audioRequestOutputFormat);
+    MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName, AudioRequestOutputFormat audioRequestOutputFormat);
 }
