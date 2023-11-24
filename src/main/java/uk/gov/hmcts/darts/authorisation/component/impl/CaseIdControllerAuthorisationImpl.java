@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.CASE_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_CASE_ID;
@@ -47,6 +48,17 @@ class CaseIdControllerAuthorisationImpl extends BaseControllerAuthorisation
                 CASE_ID_PARAM,
                 request.getRequestURI()
             ));
+            throw new DartsApiException(BAD_REQUEST_CASE_ID);
+        }
+    }
+
+    @Override
+    public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
+        checkAuthorisationByCaseId(idToAuthorise.get(), roles);
+
+        if (idToAuthorise.get().isEmpty()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE));
             throw new DartsApiException(BAD_REQUEST_CASE_ID);
         }
     }

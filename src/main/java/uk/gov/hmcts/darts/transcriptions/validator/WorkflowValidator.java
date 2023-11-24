@@ -44,9 +44,6 @@ public class WorkflowValidator {
         automaticWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
     }
 
-
-
-
     public boolean validateChangeToWorkflowStatus(boolean isManual, TranscriptionTypeEnum transcriptionTypeEnum,
                                                   TranscriptionStatusEnum currentTranscriptionStatus,
                                                   TranscriptionStatusEnum desiredTargetTranscriptionStatus) {

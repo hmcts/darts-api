@@ -13,8 +13,10 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
+import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_MEDIA_ID;
 
 @Component
@@ -46,6 +48,18 @@ class MediaIdControllerAuthorisationImpl extends BaseControllerAuthorisation
                 BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
                 MEDIA_ID_PARAM,
                 request.getRequestURI()
+            ));
+            throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
+        }
+    }
+
+    @Override
+    public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
+        checkAuthorisationByMediaId(idToAuthorise.get(), roles);
+
+        if (idToAuthorise.get().isPresent()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));
             throw new DartsApiException(BAD_REQUEST_MEDIA_ID);
         }

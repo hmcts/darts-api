@@ -58,4 +58,11 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         OffsetDateTime endTime,
         Boolean isManual
     );
+
+    @Query("""
+        SELECT t
+        FROM TranscriptionEntity t
+        WHERE
+        id in :transcriptionIds""")
+    List<TranscriptionEntity> getTranscriptionsForId(List<Integer> transcriptionIds);
 }
