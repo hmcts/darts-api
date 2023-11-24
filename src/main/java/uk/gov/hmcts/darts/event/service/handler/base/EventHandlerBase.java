@@ -1,10 +1,11 @@
-package uk.gov.hmcts.darts.event.service.impl;
+package uk.gov.hmcts.darts.event.service.handler.base;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
@@ -23,8 +24,6 @@ public abstract class EventHandlerBase implements EventHandler {
 
     private static final String MULTIPLE_CASE_NUMBERS = "Event: %s contains multiple caseNumbers: %s";
     @Autowired
-    protected EventTypeToHandlerMap handlerMap;
-    @Autowired
     protected EventRepository eventRepository;
     @Autowired
     protected HearingRepository hearingRepository;
@@ -34,22 +33,22 @@ public abstract class EventHandlerBase implements EventHandler {
     private RetrieveCoreObjectService retrieveCoreObjectService;
 
     @Override
-    public boolean isHandlerFor(DartsEvent event) {
-        return handlerMap.hasMapping(event, this.getClass().getSimpleName());
+    public boolean isHandlerFor(String handlerName) {
+        return StringUtils.equals(handlerName, this.getClass().getSimpleName());
     }
 
-    protected EventEntity eventEntityFrom(DartsEvent dartsEvent) {
+    protected EventEntity eventEntityFrom(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         var event = new EventEntity();
         event.setLegacyEventId(NumberUtils.createInteger(dartsEvent.getEventId()));
         event.setTimestamp(dartsEvent.getDateTime());
-        event.setEventName(handlerMap.eventNameFor(dartsEvent));
+        event.setEventName(eventHandler.getEventName());
         event.setEventText(dartsEvent.getEventText());
-        event.setEventType(handlerMap.eventTypeReference(dartsEvent));
+        event.setEventType(eventHandler);
         event.setMessageId(dartsEvent.getMessageId());
         return event;
     }
 
-    protected CreatedHearing createHearing(DartsEvent dartsEvent) {
+    protected CreatedHearing createHearingAndSaveEvent(DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
 
         final var caseNumbers = dartsEvent.getCaseNumbers();
         if (caseNumbers.size() > 1) {
@@ -64,9 +63,8 @@ public abstract class EventHandlerBase implements EventHandler {
             dartsEvent.getDateTime().toLocalDate()
         );
 
-        saveEvent(dartsEvent, hearingEntity.getCourtroom(), hearingEntity);
+        saveEvent(dartsEvent, hearingEntity, eventHandler);
         setHearingToActive(hearingEntity);
-
 
         return CreatedHearing.builder()
             .hearingEntity(hearingEntity)
@@ -80,9 +78,9 @@ public abstract class EventHandlerBase implements EventHandler {
         hearingRepository.saveAndFlush(hearingEntity);
     }
 
-    protected EventEntity saveEvent(DartsEvent dartsEvent, CourtroomEntity courtroomEntity, HearingEntity hearingEntity) {
-        var eventEntity = eventEntityFrom(dartsEvent);
-        eventEntity.setCourtroom(courtroomEntity);
+    protected EventEntity saveEvent(DartsEvent dartsEvent, HearingEntity hearingEntity, EventHandlerEntity eventHandler) {
+        var eventEntity = eventEntityFrom(dartsEvent, eventHandler);
+        eventEntity.setCourtroom(hearingEntity.getCourtroom());
         eventRepository.saveAndFlush(eventEntity);
         eventEntity.addHearing(hearingEntity);
         eventRepository.saveAndFlush(eventEntity);

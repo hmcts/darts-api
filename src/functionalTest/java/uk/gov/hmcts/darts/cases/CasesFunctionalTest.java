@@ -51,7 +51,7 @@ class CasesFunctionalTest  extends FunctionalTest {
         caseBody = caseBody.replace("<<courthouse>>", COURTHOUSE);
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
-        Response caseResponse = buildRequestWithExternalAuth()
+        Response caseResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_PATH))
@@ -96,7 +96,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Test
     @Order(2)
     void getCases() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_PATH))

@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.configuration.AccessTokenClientConfiguration;
 import uk.gov.hmcts.darts.configuration.AzureAdAuthenticationProperties;
 import uk.gov.hmcts.darts.configuration.AzureAdB2CAuthenticationProperties;
+import uk.gov.hmcts.darts.configuration.AzureAdB2CDarPcMidtierGlobalAuthenticationProperties;
 import uk.gov.hmcts.darts.configuration.AzureAdB2CGlobalAuthenticationProperties;
 
 import java.io.File;
@@ -27,7 +28,8 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @SpringBootTest(
     classes = { AccessTokenClientConfiguration.class, AzureAdAuthenticationProperties.class,
-        AzureAdB2CAuthenticationProperties.class, AzureAdB2CGlobalAuthenticationProperties.class },
+        AzureAdB2CAuthenticationProperties.class, AzureAdB2CGlobalAuthenticationProperties.class,
+        AzureAdB2CDarPcMidtierGlobalAuthenticationProperties.class},
     webEnvironment = WebEnvironment.NONE
 )
 @ActiveProfiles({"dev", "functionalTest"})
@@ -44,6 +46,9 @@ public class FunctionalTest {
 
     @Autowired
     private AccessTokenClient internalAccessTokenClient;
+
+    @Autowired
+    private AccessTokenClient externalDarPcMidTierGlobalAccessTokenClient;
 
     @Value("${deployed-application-uri}")
     private URI baseUri;
@@ -68,6 +73,10 @@ public class FunctionalTest {
 
     public RequestSpecification buildRequestWithInternalAuth() {
         return buildRequestWithAuth(internalAccessTokenClient);
+    }
+
+    public RequestSpecification buildRequestWithExternalDarMidTierGlobalAccessTokenClient() {
+        return buildRequestWithAuth(externalDarPcMidTierGlobalAccessTokenClient);
     }
 
     public void clean() {

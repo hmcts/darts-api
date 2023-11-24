@@ -79,6 +79,17 @@ paths:
                 status: 403
         '404':
           description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/RequestTranscription404ErrorCode'
         '409':
           description: Duplicate transcription request
           content:
@@ -559,6 +570,12 @@ components:
         - "TRANSCRIPTION_106"
         - "TRANSCRIPTION_107"
       x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY ]
+    RequestTranscription404ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_101"
+        - "TRANSCRIPTION_110"
+        - "TRANSCRIPTION_111"
     RequestTranscription409ErrorCode:
       type: string
       enum:

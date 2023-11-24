@@ -16,7 +16,7 @@ import java.util.function.Function;
 
 /**
  * A unit of work that performs a set of operations if and only if the auth passes for a
- * number of stipulated. This class offers a nice way to authorise against a set of bespoke request
+ * number of nondescript data types. This class offers a nice way to authorise against a set of bespoke request
  * body ids as an alternative to the statically defined authorisation annotation
  * {@link uk.gov.hmcts.darts.authorisation.annotation.Authorisation}
  */

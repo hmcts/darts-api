@@ -63,6 +63,16 @@ public enum TranscriptionApiError implements DartsApiError {
         "109",
         HttpStatus.BAD_REQUEST,
         "Failed to download transcript"
+    ),
+    AUDIO_NOT_FOUND(
+        "110",
+        HttpStatus.NOT_FOUND,
+        "Transcription could not be requested, no audio"
+    ),
+    TIMES_OUTSIDE_OF_HEARING_TIMES(
+        "111",
+        HttpStatus.NOT_FOUND,
+        "Transcription could not be requested, times outside of hearing times"
     );
 
 

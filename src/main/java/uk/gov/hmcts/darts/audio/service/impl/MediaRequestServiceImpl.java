@@ -283,8 +283,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public MediaRequestEntity updateAudioRequestCompleted(Integer id, String fileName, AudioRequestOutputFormat audioRequestOutputFormat) {
-        MediaRequestEntity mediaRequestEntity = getMediaRequestById(id);
+    public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName,
+                                                          AudioRequestOutputFormat audioRequestOutputFormat) {
 
         mediaRequestEntity.setStatus(AudioRequestStatus.COMPLETED);
         mediaRequestEntity.setOutputFilename(fileName);
