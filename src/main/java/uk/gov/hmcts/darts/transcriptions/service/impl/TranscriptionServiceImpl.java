@@ -626,7 +626,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private List<Integer> getTranscriptionIdsForRequest(UpdateTranscriptionsRequest transcriptionIds) {
-        return transcriptionIds.getTranscriptions().stream().map(e -> Integer.valueOf(e.getTranscriptionId())).collect(Collectors.toList());
+        return transcriptionIds.getTranscriptions().stream().map(e -> e.getTranscriptionId()).collect(Collectors.toList());
     }
 
     private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {

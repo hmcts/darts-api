@@ -58,7 +58,7 @@ class MediaRequestIdControllerAuthorisationImpl extends BaseControllerAuthorisat
     public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
         checkAuthorisationByMediaRequestId(idToAuthorise.get(), roles);
 
-        if (idToAuthorise.get().isPresent()) {
+        if (!idToAuthorise.get().isPresent()) {
             log.error(String.format(
                 BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));

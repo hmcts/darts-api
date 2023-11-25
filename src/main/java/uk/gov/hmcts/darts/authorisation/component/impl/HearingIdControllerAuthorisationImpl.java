@@ -56,7 +56,7 @@ class HearingIdControllerAuthorisationImpl extends BaseControllerAuthorisation
     public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
         checkAuthorisationByHearingId(idToAuthorise.get(), roles);
 
-        if (idToAuthorise.get().isPresent()) {
+        if (!idToAuthorise.get().isPresent()) {
             log.error(String.format(
                 BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));
