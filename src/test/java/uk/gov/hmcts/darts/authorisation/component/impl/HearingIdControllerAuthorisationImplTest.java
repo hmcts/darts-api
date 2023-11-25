@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -143,6 +144,25 @@ class HearingIdControllerAuthorisationImplTest {
         assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(request, roles));
 
         verify(authorisation).authoriseByHearingId(2, roles);
+    }
+
+    @Test
+    void checkAuthorisationSupplierIdParameter() {
+        assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(() -> Optional.of(HEARING_ID_PARAM_VALUE), roles));
+
+        verify(authorisation).authoriseByHearingId(2, roles);
+    }
+
+    @Test
+    void checkAuthorisationSupplierIdMissingParameter() {
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
+        );
+
+        assertEquals(BAD_REQUEST_HEARING_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_HEARING_ID, exception.getError());
+        verifyNoInteractions(authorisation);
     }
 
     @Test

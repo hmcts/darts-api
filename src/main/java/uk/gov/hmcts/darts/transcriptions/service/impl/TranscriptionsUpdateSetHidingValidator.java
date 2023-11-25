@@ -38,8 +38,8 @@ public class TranscriptionsUpdateSetHidingValidator implements TranscriptionsUpd
     }
 
     private boolean validateStateForHide(TranscriptionStatusEntity entity) {
-        return entity != null && Objects.equals(entity.getId(), COMPLETE.getId())
-            || Objects.equals(entity.getId(), REJECTED.getId());
+        return entity != null && (Objects.equals(entity.getId(), COMPLETE.getId())
+            || Objects.equals(entity.getId(), REJECTED.getId()));
     }
 
     private boolean validateWfStateForHide(List<TranscriptionWorkflowEntity> entity) {

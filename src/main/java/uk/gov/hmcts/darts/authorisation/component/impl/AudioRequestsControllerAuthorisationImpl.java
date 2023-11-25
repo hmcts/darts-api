@@ -48,8 +48,9 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
 
     @Override
     public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
-        if (idToAuthorise.get().isPresent()) {
-            roles = setDownloadRequestSecurityRoles(roles, idToAuthorise.get().get());
+        Optional<String> optionalId = idToAuthorise.get();
+        if (optionalId.isPresent()) {
+            roles = setDownloadRequestSecurityRoles(roles, optionalId.get());
         }
 
         hearingIdControllerAuthorisation.checkAuthorisation(idToAuthorise, roles);
