@@ -378,7 +378,7 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/SecurityGroupId'
-        role:
+        role_id:
           $ref: '#/components/schemas/SecurityGroupRoleId'
         global_access:
           $ref: '#/components/schemas/SecurityGroupGlobalAccess'

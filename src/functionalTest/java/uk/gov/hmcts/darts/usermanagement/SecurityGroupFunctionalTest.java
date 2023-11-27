@@ -46,7 +46,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                   "description": "A test group",
                   "display_state": true,
                   "global_access": false,
-                  "role": 4
+                  "role_id": 4
                 }
                 """,
             response.asString(),

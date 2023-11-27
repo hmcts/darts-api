@@ -18,7 +18,7 @@ public interface SecurityGroupMapper {
         @Mapping(source = "displayName", target = "groupDisplayName"),
         @Mapping(source = "description", target = "description")
     })
-    SecurityGroupEntity mapToUserEntity(SecurityGroup user);
+    SecurityGroupEntity mapToSecurityGroupEntity(SecurityGroup securityGroup);
 
     @Mappings({
         @Mapping(source = "id", target = "id"),

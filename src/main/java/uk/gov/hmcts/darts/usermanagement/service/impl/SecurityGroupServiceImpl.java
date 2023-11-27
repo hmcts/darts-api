@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
@@ -20,25 +21,24 @@ import java.util.Optional;
 public class SecurityGroupServiceImpl implements SecurityGroupService {
 
     private final SecurityGroupRepository securityGroupRepository;
-    private final SecurityRoleRepository roleRepository;
+    private final SecurityRoleRepository securityRoleRepository;
     private final SecurityGroupMapper securityGroupMapper;
 
     @Override
     public SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroup) {
         validateName(securityGroup.getName());
 
-        var securityGroupEntity = securityGroupMapper.mapToUserEntity(securityGroup);
+        var securityGroupEntity = securityGroupMapper.mapToSecurityGroupEntity(securityGroup);
         securityGroupEntity.setGlobalAccess(false);
         securityGroupEntity.setDisplayState(true);
 
-        var transcriberRoleEntity = roleRepository.findByRoleName("TRANSCRIBER")
-            .orElseThrow();
+        var transcriberRoleEntity = securityRoleRepository.getReferenceById(SecurityRoleEnum.TRANSCRIBER.getId());
         securityGroupEntity.setSecurityRoleEntity(transcriberRoleEntity);
 
         var createdSecurityGroupEntity = securityGroupRepository.save(securityGroupEntity);
 
         var securityGroupWithIdAndRole = securityGroupMapper.mapToSecurityGroupWithIdAndRole(createdSecurityGroupEntity);
-        securityGroupWithIdAndRole.setRole(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
+        securityGroupWithIdAndRole.setRoleId(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
 
         return securityGroupWithIdAndRole;
     }
