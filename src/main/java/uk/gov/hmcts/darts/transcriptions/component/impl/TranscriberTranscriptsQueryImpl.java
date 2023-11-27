@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -17,6 +19,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final TranscriberViewSummaryRowMapper transcriberViewSummaryRowMapper;
+    private final Clock clock;
 
     @Override
     public List<TranscriberViewSummary> getTranscriptRequests(Integer userId) {
@@ -91,7 +94,6 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 ON
                     tra.tra_id = approved_trw.tra_id
                 AND approved_trw.trs_id = 3
-                AND approved_trw.workflow_actor = :usr_id
                 WHERE
                     tra.trs_id = 3
                 ORDER BY
@@ -254,12 +256,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 AND complete_trw.workflow_actor = :usr_id
                 WHERE
                     tra.trs_id = 6
-                AND complete_trw.workflow_ts >= CURRENT_DATE
+                AND complete_trw.workflow_ts >= :current_date
                 ORDER BY
                     transcription_id desc
                 """,
             new MapSqlParameterSource("usr_id", userId)
-                .addValue("rol_id", TRANSCRIBER.getId()),
+                .addValue("rol_id", TRANSCRIBER.getId())
+                .addValue("current_date", LocalDate.now(clock).toString()),
             transcriberViewSummaryRowMapper
         );
     }

@@ -9,10 +9,8 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.MultipartProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +25,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.util.List;
@@ -52,8 +49,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -63,9 +58,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     @Autowired
     private AuthorisationStub authorisationStub;
-
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private MockMvc mockMvc;
@@ -89,7 +81,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
         transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
-        TranscriptionStub transcriptionStub = dartsDatabaseStub.getTranscriptionStub();
+        TranscriptionStub transcriptionStub = dartsDatabase.getTranscriptionStub();
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
@@ -105,18 +97,18 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             transcriptionStub.getTranscriptionStatusByEnum(WITH_TRANSCRIBER)
         );
 
-        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
+        assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         transcriptionEntity.getTranscriptionWorkflowEntities()
             .addAll(List.of(approvedTranscriptionWorkflowEntity, withTranscriberTranscriptionWorkflowEntity));
         transcriptionEntity.setTranscriptionStatus(withTranscriberTranscriptionWorkflowEntity.getTranscriptionStatus());
-        dartsDatabaseStub.getTranscriptionRepository().save(transcriptionEntity);
+        dartsDatabase.getTranscriptionRepository().save(transcriptionEntity);
 
         assertEquals(WITH_TRANSCRIBER.getId(), transcriptionEntity.getTranscriptionStatus().getId());
         assertEquals(4, transcriptionEntity.getTranscriptionWorkflowEntities().size());
 
         transcriptionId = transcriptionEntity.getId();
 
-        SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
+        SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
         transcriptionCompany = securityGroupRepository.findById(-4).orElseThrow();
         transcriptionCompany.setCourthouseEntities(Set.of(authorisationStub.getCourthouseEntity()));
 
@@ -166,7 +158,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         UserAccountEntity testUser = authorisationStub.getTestUser();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+        dartsDatabase.getUserAccountRepository().save(testUser);
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -201,7 +193,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         UserAccountEntity testUser = authorisationStub.getTestUser();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+        dartsDatabase.getUserAccountRepository().save(testUser);
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -233,7 +225,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         UserAccountEntity testUser = authorisationStub.getTestUser();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+        dartsDatabase.getUserAccountRepository().save(testUser);
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -258,7 +250,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         Integer transcriptionWorkflowId = documentContext.read("$.transcription_workflow_id");
         assertNotNull(transcriptionWorkflowId);
 
-        final TranscriptionEntity completeTranscriptionEntity = dartsDatabaseStub.getTranscriptionRepository()
+        final TranscriptionEntity completeTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(COMPLETE.getId(), completeTranscriptionEntity.getTranscriptionStatus().getId());
         assertEquals(testUserId, completeTranscriptionEntity.getCreatedBy().getId());
@@ -271,7 +263,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             COMPLETE.getId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
+        assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
         final List<TranscriptionDocumentEntity> transcriptionDocumentEntities = completeTranscriptionEntity.getTranscriptionDocumentEntities();
@@ -302,7 +294,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         UserAccountEntity testUser = authorisationStub.getTestUser();
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+        dartsDatabase.getUserAccountRepository().save(testUser);
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -327,7 +319,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         Integer transcriptionWorkflowId = documentContext.read("$.transcription_workflow_id");
         assertNotNull(transcriptionWorkflowId);
 
-        final TranscriptionEntity completeTranscriptionEntity = dartsDatabaseStub.getTranscriptionRepository()
+        final TranscriptionEntity completeTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(COMPLETE.getId(), completeTranscriptionEntity.getTranscriptionStatus().getId());
         assertEquals(testUserId, completeTranscriptionEntity.getCreatedBy().getId());
@@ -340,7 +332,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
             COMPLETE.getId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
+        assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
         final List<TranscriptionDocumentEntity> transcriptionDocumentEntities = completeTranscriptionEntity.getTranscriptionDocumentEntities();
