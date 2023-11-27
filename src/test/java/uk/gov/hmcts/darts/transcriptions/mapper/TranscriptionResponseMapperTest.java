@@ -137,6 +137,22 @@ class TranscriptionResponseMapperTest {
     }
 
     @Test
+    void mapToTranscriptionResponseIsAutomated() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        transcriptionEntity.setIsManualTranscription(false);
+
+        GetTranscriptionByIdResponse transcriptionResponse =
+            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityAutomated.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
     void mapToTranscriptionResponseInternalServerError() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1);

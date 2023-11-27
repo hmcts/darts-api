@@ -58,6 +58,7 @@ public class TranscriptionResponseMapper {
             CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
             transcriptionResponse.setTranscriptionId(transcriptionEntity.getId());
             transcriptionResponse.setCaseId(courtCase.getId());
+            transcriptionResponse.setHearingId(transcriptionEntity.getHearing().getId());
             EventHandlerEntity reportingRestrictions = courtCase.getReportingRestrictions();
             if (reportingRestrictions != null) {
                 transcriptionResponse.setReportingRestriction(reportingRestrictions.getEventName());
@@ -94,6 +95,7 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setRequestType(transcriptionEntity.getTranscriptionType().getDescription());
             transcriptionResponse.setTranscriptionStartTs(transcriptionEntity.getStartTime());
             transcriptionResponse.setTranscriptionEndTs(transcriptionEntity.getEndTime());
+            transcriptionResponse.setIsManual(transcriptionEntity.getIsManualTranscription());
         } catch (Exception exception) {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND);
         }
