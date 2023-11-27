@@ -167,10 +167,24 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
     Instant adjustTimeDuration(Instant time, String timeDuration) {
         Instant adjustedInstant = Instant.from(time);
-        LocalTime localTime = LocalTime.parse(timeDuration);
-        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.HOUR_OF_DAY), ChronoUnit.HOURS);
-        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.MINUTE_OF_HOUR), ChronoUnit.MINUTES);
-        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.SECOND_OF_MINUTE), ChronoUnit.SECONDS);
+        LocalTime localTime = null;
+        boolean addTime = true;
+        if (timeDuration.startsWith("-")) {
+            localTime = LocalTime.parse(timeDuration.substring(1, timeDuration.length()));
+            addTime = false;
+        } else {
+            localTime = LocalTime.parse(timeDuration);
+        }
+        if (addTime) {
+            adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.HOUR_OF_DAY), ChronoUnit.HOURS);
+            adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.MINUTE_OF_HOUR), ChronoUnit.MINUTES);
+            adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.SECOND_OF_MINUTE), ChronoUnit.SECONDS);
+        } else {
+            adjustedInstant = adjustedInstant.minus(localTime.get(ChronoField.HOUR_OF_DAY), ChronoUnit.HOURS);
+            adjustedInstant = adjustedInstant.minus(localTime.get(ChronoField.MINUTE_OF_HOUR), ChronoUnit.MINUTES);
+            adjustedInstant = adjustedInstant.minus(localTime.get(ChronoField.SECOND_OF_MINUTE), ChronoUnit.SECONDS);
+        }
+
         return adjustedInstant;
     }
 

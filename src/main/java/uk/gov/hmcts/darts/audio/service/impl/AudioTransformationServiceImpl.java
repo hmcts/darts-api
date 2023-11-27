@@ -201,7 +201,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
             }
 
-            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(mediaEntitiesForRequest);
+            List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestDates(mediaEntitiesForRequest, mediaRequestEntity);
+
+            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
             Path generatedFilePath;
             try {
@@ -238,6 +240,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
         return blobId;
+    }
+
+    private List<MediaEntity> filterMediaByMediaRequestDates(List<MediaEntity> mediaEntitiesForRequest, MediaRequestEntity mediaRequestEntity) {
+        return mediaEntitiesForRequest.stream().filter(media -> media.getStart().isAfter(mediaRequestEntity.getStartTime())
+                                                               || media.getStart().equals(mediaRequestEntity.getStartTime())
+                                                               || media.getEnd().isBefore(mediaRequestEntity.getEndTime())
+                                                               || media.getEnd().equals(mediaRequestEntity.getEndTime()))
+            .collect(Collectors.toList());
     }
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -55,17 +56,47 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom");
     }
 
-    @ParameterizedTest
-    @EnumSource(names = {"DOWNLOAD", "PLAYBACK"})
     @Transactional
+    @Test
     @SuppressWarnings("PMD.LawOfDemeter")
-    public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationFor(
-        AudioRequestType audioRequestType) {
+    public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForDownload() {
         given.aMediaEntityGraph();
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
             hearing,
-            audioRequestType,
+            AudioRequestType.DOWNLOAD,
+            userAccountEntity
+        );
+
+        Integer mediaRequestId = given.getMediaRequestEntity().getId();
+
+        audioTransformationService.handleKedaInvocationForMediaRequests();
+
+        var mediaRequestEntity = dartsDatabase.getMediaRequestRepository()
+            .findById(mediaRequestId)
+            .orElseThrow();
+        assertEquals(COMPLETED, mediaRequestEntity.getStatus());
+
+        List<NotificationEntity> scheduledNotifications = dartsDatabase.getNotificationRepository()
+            .findAll();
+        assertEquals(1, scheduledNotifications.size());
+
+        var notificationEntity = scheduledNotifications.get(0);
+        assertEquals(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString(), notificationEntity.getEventId());
+        assertNull(notificationEntity.getTemplateValues());
+        assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
+        assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
+    }
+
+    @Test
+    @Transactional
+    @SuppressWarnings("PMD.LawOfDemeter")
+    public void handleKedaInvocationForMediaRequestsShouldSucceedAndUpdateRequestStatusToCompletedAndScheduleSuccessNotificationForPlayback() {
+        given.aMediaEntityGraph();
+        var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
+        given.aMediaRequestEntityForHearingWithRequestType(
+            hearing,
+            AudioRequestType.PLAYBACK,
             userAccountEntity
         );
 

@@ -198,6 +198,10 @@ class AudioOperationServiceImplTest {
             Instant.parse("2023-10-29T02:15:00Z"),
             audioOperationService.adjustTimeDuration(Instant.parse("2023-10-29T00:30:00Z"), "01:45:00")
         );
+        assertEquals(
+            Instant.parse("2023-04-28T08:59:00Z"),
+            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), "-00:01:00")
+        );
     }
 
     @Test
