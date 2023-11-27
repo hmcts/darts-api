@@ -65,7 +65,6 @@ import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,6 +134,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final FileContentChecksum fileContentChecksum;
 
     private final YourTranscriptsQuery yourTranscriptsQuery;
+    private final DuplicateRequestDetector duplicateRequestDetector;
     private final TranscriberTranscriptsQuery transcriberTranscriptsQuery;
 
     @Override
@@ -145,22 +145,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         UserAccountEntity userAccount = getUserAccount();
         TranscriptionStatusEntity transcriptionStatus = getTranscriptionStatusById(REQUESTED.getId());
 
-        if (transcriptionRequestDetails.getStartDateTime() != null
-            && transcriptionRequestDetails.getEndDateTime() != null) {
-            List<TranscriptionEntity> matchingTranscriptions = transcriptionRepository.findByHearingIdTypeStartAndEnd(
-                transcriptionRequestDetails.getHearingId(),
-                getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
-                transcriptionRequestDetails.getStartDateTime(),
-                transcriptionRequestDetails.getEndDateTime()
-            );
-            if (!matchingTranscriptions.isEmpty()) {
-                Integer duplicateTranscriptionId = matchingTranscriptions.get(0).getId();
-                throw new DartsApiException(
-                    TranscriptionApiError.DUPLICATE_TRANSCRIPTION,
-                    Collections.singletonMap("duplicate_transcription_id", duplicateTranscriptionId)
-                );
-            }
-        }
+        duplicateRequestDetector.checkForDuplicate(transcriptionRequestDetails, isManual);
 
         TranscriptionEntity transcription = saveTranscription(
             userAccount,
