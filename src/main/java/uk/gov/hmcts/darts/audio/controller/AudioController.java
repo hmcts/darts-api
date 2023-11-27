@@ -6,7 +6,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
@@ -62,19 +61,6 @@ public class AudioController implements AudioApi {
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList, mediaId.toString());
-    }
-
-    @SneakyThrows
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<byte[]> preview2(Integer mediaId,
-                                           @RequestHeader(value = "Range", required = false) String httpRangeList) {
-        InputStream audioMediaFile = audioService.preview(mediaId);
-        return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList, mediaId.toString());
-
     }
 
     @Override
