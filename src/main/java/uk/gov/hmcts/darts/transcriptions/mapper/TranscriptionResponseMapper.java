@@ -58,7 +58,6 @@ public class TranscriptionResponseMapper {
             CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
             transcriptionResponse.setTranscriptionId(transcriptionEntity.getId());
             transcriptionResponse.setCaseId(courtCase.getId());
-            transcriptionResponse.setHearingId(transcriptionEntity.getHearing().getId());
             EventHandlerEntity reportingRestrictions = courtCase.getReportingRestrictions();
             if (reportingRestrictions != null) {
                 transcriptionResponse.setReportingRestriction(reportingRestrictions.getEventName());
@@ -87,7 +86,10 @@ public class TranscriptionResponseMapper {
                 transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
             if (transcriptionEntity.getHearing() != null) {
+                transcriptionResponse.setHearingId(transcriptionEntity.getHearing().getId());
                 transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
+            } else {
+                transcriptionResponse.setHearingDate(transcriptionEntity.getHearingDate());
             }
             if (transcriptionEntity.getTranscriptionUrgency() != null) {
                 transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
