@@ -2,16 +2,16 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
 @UtilityClass
 public class TranscriptionEntityMapper {
 
-    public TranscriptionEntity mapTransactionToTransactionEntity(
-        TranscriptionEntity entity, UpdateTranscriptions transaction) {
+    public TranscriptionEntity mapTranscriptionToTranscriptionEntity(
+        TranscriptionEntity entity, UpdateTranscriptionsItem updateTranscriptionsItem) {
 
-        if (transaction.getHideRequestFromRequestor() != null) {
-            entity.setHideRequestFromRequestor(transaction.getHideRequestFromRequestor());
+        if (updateTranscriptionsItem.getHideRequestFromRequestor() != null) {
+            entity.setHideRequestFromRequestor(updateTranscriptionsItem.getHideRequestFromRequestor());
         }
         return entity;
     }

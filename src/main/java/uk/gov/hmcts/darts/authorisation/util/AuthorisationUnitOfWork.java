@@ -26,21 +26,21 @@ public class AuthorisationUnitOfWork {
 
     private final List<ControllerAuthorisation> authorisation;
 
-    public <T> void authoriseWithIdsForTransaction(List<T> idTypes, Function<T, String> getId,
-                                    SecurityRoleEnum[] roles, Runnable runnableOnAuth) {
+    public <T> void authoriseWithIdsForTranscription(List<T> idTypes, Function<T, String> getId,
+                                                     SecurityRoleEnum[] roles, Runnable runnableOnAuth) {
         authoriseWithIds(idTypes, getId, ContextIdEnum.TRANSCRIPTION_ID, roles, runnableOnAuth, true);
     }
 
 
     public <T> void authoriseWithIds(List<T> idTypes, Function<T, String> gatherId,
-                                ContextIdEnum contextIdEnum,
-                                SecurityRoleEnum[] roles, Runnable runnable,
-                                boolean suppressDataValidation) {
+                                     ContextIdEnum contextIdEnum,
+                                     SecurityRoleEnum[] roles, Runnable runnable,
+                                     boolean suppressDataValidation) {
         authorisation.forEach(auth -> {
             if (auth.getContextId() == contextIdEnum) {
-                idTypes.forEach(obj -> {
+                idTypes.forEach(idType -> {
                     try {
-                        auth.checkAuthorisation(() -> Optional.of(gatherId.apply(obj)), new HashSet<>(Arrays.asList(roles)));
+                        auth.checkAuthorisation(() -> Optional.of(gatherId.apply(idType)), new HashSet<>(Arrays.asList(roles)));
                     } catch (DartsApiException ex) {
 
                         // if the client wants to handle the ids being missing themselves then

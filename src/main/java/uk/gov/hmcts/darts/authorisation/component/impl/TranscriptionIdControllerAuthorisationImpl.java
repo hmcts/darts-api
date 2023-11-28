@@ -53,9 +53,9 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
     }
 
     @Override
-    public void checkAuthorisation(Supplier<Optional<String>> idtoAuthorise, Set<SecurityRoleEnum> roles) {
-        checkAuthorisationByTranscriptionId(idtoAuthorise.get(), roles);
-        if (idtoAuthorise.get().isEmpty()) {
+    public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
+        checkAuthorisationByTranscriptionId(idToAuthorise.get(), roles);
+        if (idToAuthorise.get().isEmpty()) {
             log.error(String.format(
                 BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));

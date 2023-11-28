@@ -35,8 +35,8 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsRequest;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsContainer;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
@@ -237,21 +237,22 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<UpdateTranscriptionsResponse> updateTranscriptions(UpdateTranscriptionsRequest request) {
-        final UpdateTranscriptionsResponse response  = new UpdateTranscriptionsResponse();
+    public ResponseEntity<List<UpdateTranscriptionsItem>> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
+        List<UpdateTranscriptionsItem> responseList;
+        final UpdateTranscriptionsContainer responseContainer;
 
         Runnable executeOnAuth = () -> {
-            UpdateTranscriptionsResponse updatedResponse = transcriptionService.updateTranscriptions(request);
-            response.setTranscriptions(updatedResponse.getTranscriptions());
+            responseContainer = transcriptionService.updateTranscriptions(request);
         };
 
         // we authorise the transcription ids
-        authorisation.authoriseWithIdsForTransaction(request.getTranscriptions(),
-               e -> e.getTranscriptionId().toString(),
-               new SecurityRoleEnum[] {APPROVER, TRANSCRIBER}, executeOnAuth);
+        authorisation.authoriseWithIdsForTranscription(request,
+                                                       e -> e.getTranscriptionId().toString(),
+                                                       new SecurityRoleEnum[]{APPROVER, TRANSCRIBER}, executeOnAuth
+        );
 
         return new ResponseEntity<>(
-            response,
+            responseList,
             HttpStatus.OK
         );
     }

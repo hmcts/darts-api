@@ -37,7 +37,7 @@ class AuthorisationUnitOfWorkTest {
         SecurityRoleEnum[] rolesArr = {SecurityRoleEnum.APPROVER};
 
         AuthorisationUnitOfWork unitOfWork = new AuthorisationUnitOfWork(authorisationList);
-        unitOfWork.authoriseWithIdsForTransaction(idobject, (e) -> e.getId(), rolesArr, runnable);
+        unitOfWork.authoriseWithIdsForTranscription(idobject, (e) -> e.getId(), rolesArr, runnable);
 
         Mockito.verify(runnable).run();
         Mockito.verify(authorisation).checkAuthorisation(Mockito.argThat(new IdSupplierMatcher("200")), Mockito.notNull());

@@ -59,10 +59,5 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         Boolean isManual
     );
 
-    @Query("""
-        SELECT t
-        FROM TranscriptionEntity t
-        WHERE
-        id in :transcriptionIds""")
-    List<TranscriptionEntity> getTranscriptionsForId(List<Integer> transcriptionIds);
+    List<TranscriptionEntity> findByIdIn(List<Integer> transcriptionIds);
 }

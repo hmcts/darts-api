@@ -116,7 +116,7 @@ paths:
     patch:
       tags:
         - Transcription
-      summary: Patch a transcription
+      summary: Update multiple transcriptions
       operationId: updateTranscriptions
       responses:
         '200':
@@ -124,7 +124,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UpdateTranscriptionsResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdateTranscriptionsItem'
         '400':
           description: Bad Request Error
           content:
@@ -166,7 +168,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTranscriptionsRequest'
+              type: array
+              items:
+                $ref: '#/components/schemas/UpdateTranscriptionsItem'
 
   /transcriptions/{transcription_id}:
     get:
@@ -624,31 +628,17 @@ components:
         workflow_comment:
           type: string
 
-    UpdateTranscriptionsRequest:
-      properties:
-        transcriptions:
-            type: array
-            items:
-              $ref: '#/components/schemas/UpdateTranscriptions'
-
-    UpdateTranscriptions:
+    UpdateTranscriptionsItem:
       type: object
       required:
         - transcriptionId
       properties:
-        transcriptionId:
+        transcription_id:
           type: integer
           example: "1001"
-        hideRequestFromRequestor:
+        hide_request_from_requestor:
           type: boolean
           example: true
-
-    UpdateTranscriptionsResponse:
-      properties:
-        transcriptions:
-          type: array
-          items:
-            $ref: '#/components/schemas/UpdateTranscriptions'
 
     RequestTranscriptionResponse:
       type: object

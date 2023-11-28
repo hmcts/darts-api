@@ -111,7 +111,6 @@ public class AuthorisationStub {
         hearingEntity.addMedia(mediaEntity);
         dartsDatabaseStub.save(hearingEntity);
 
-        //dartsDatabaseStub.getTranscriptionStub().createStatuses();
         transcriptionEntity = dartsDatabaseStub.getTranscriptionStub()
             .createAndSaveAwaitingAuthorisationTranscription(testUser, courtCaseEntity, hearingEntity, YESTERDAY);
     }

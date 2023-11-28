@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsUpdateValidator;
 
 import java.util.List;
@@ -17,20 +17,20 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 @Component
 public class TranscriptionsUpdateSetHidingValidator implements TranscriptionsUpdateValidator {
 
-    public boolean validate(Optional<TranscriptionEntity> entity, UpdateTranscriptions transaction) {
-        return entity.filter(transcriptionEntity -> canChangeHiding(transcriptionEntity, transaction)).isPresent();
+    public boolean validate(Optional<TranscriptionEntity> entity, UpdateTranscriptionsItem updateTranscriptionsItem) {
+        return entity.filter(transcriptionEntity -> canChangeHiding(transcriptionEntity, updateTranscriptionsItem)).isPresent();
     }
 
-    private boolean isHidingSet(UpdateTranscriptions transcription) {
-        return transcription.getHideRequestFromRequestor() != null;
+    private boolean isHidingSet(UpdateTranscriptionsItem updateTranscriptionsItem) {
+        return updateTranscriptionsItem.getHideRequestFromRequestor() != null;
     }
 
-    private boolean canChangeHiding(TranscriptionEntity entity, UpdateTranscriptions transaction) {
+    private boolean canChangeHiding(TranscriptionEntity entity, UpdateTranscriptionsItem updateTranscriptionsItem) {
         boolean verify;
-        if (transaction.getHideRequestFromRequestor() != null && transaction.getHideRequestFromRequestor()) {
-            boolean transStateverify = validateStateForHide(entity.getTranscriptionStatus());
+        if (updateTranscriptionsItem.getHideRequestFromRequestor() != null && updateTranscriptionsItem.getHideRequestFromRequestor()) {
+            boolean transStateVerify = validateStateForHide(entity.getTranscriptionStatus());
             boolean wfStateVerify = validateWfStateForHide(entity.getTranscriptionWorkflowEntities());
-            return transStateverify || wfStateVerify;
+            return transStateVerify || wfStateVerify;
         } else {
             verify = true;
         }
@@ -44,6 +44,6 @@ public class TranscriptionsUpdateSetHidingValidator implements TranscriptionsUpd
 
     private boolean validateWfStateForHide(List<TranscriptionWorkflowEntity> entity) {
         return entity.stream().anyMatch(workflow -> validateStateForHide(
-                workflow.getTranscriptionStatus()));
+            workflow.getTranscriptionStatus()));
     }
 }

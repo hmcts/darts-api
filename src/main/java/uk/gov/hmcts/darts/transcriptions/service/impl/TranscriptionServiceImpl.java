@@ -61,9 +61,8 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsRequest;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsContainer;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsUpdateValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.TranscriptFileValidator;
@@ -581,33 +580,29 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public UpdateTranscriptionsResponse updateTranscriptions(UpdateTranscriptionsRequest request) {
+    public UpdateTranscriptionsContainer updateTranscriptions(List<UpdateTranscriptionsItem> request) {
 
         final List<TranscriptionEntity> processed = processTransactionUpdates(request);
 
-        List<UpdateTranscriptions> unprocessedUpdates = new ArrayList<>(request.getTranscriptions());
-        List<UpdateTranscriptions> processedUpdates = getTranscriptionForIds(getTranscriptionIdsForEntities(processed), request);
+        List<UpdateTranscriptionsItem> unprocessedUpdates = new ArrayList<>(request);
+        List<UpdateTranscriptionsItem> processedUpdates = getTranscriptionForIds(getTranscriptionIdsForEntities(processed), request);
         unprocessedUpdates.removeAll(processedUpdates);
 
         // return a partial success
         if (!unprocessedUpdates.isEmpty() && !processedUpdates.isEmpty()) {
-            UpdateTranscriptionsResponse response = new UpdateTranscriptionsResponse();
-            response.setTranscriptions(unprocessedUpdates);
-            throw PartialFailureException.getPartialPayloadJson(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS, response);
+            throw PartialFailureException.getPartialPayloadJson(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS, unprocessedUpdates);
         } else if (processedUpdates.isEmpty()) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS);
         }
 
-        UpdateTranscriptionsResponse response = new UpdateTranscriptionsResponse();
-        response.setTranscriptions(processedUpdates);
-        return response;
+        return new UpdateTranscriptionsContainer(processedUpdates);
     }
 
-    private List<TranscriptionEntity> processTransactionUpdates(UpdateTranscriptionsRequest request) {
-        List<TranscriptionEntity> transcriptionEntity = transcriptionRepository.getTranscriptionsForId(getTranscriptionIdsForRequest(request));
+    private List<TranscriptionEntity> processTransactionUpdates(List<UpdateTranscriptionsItem> request) {
+        List<TranscriptionEntity> transcriptionEntity = transcriptionRepository.findByIdIn(getTranscriptionIdsForRequest(request));
         final List<TranscriptionEntity> validated = new ArrayList<>();
-        request.getTranscriptions().forEach(en -> {
-            Optional<TranscriptionEntity> fndEntityTranscription = getTranscriptionForId(en.getTranscriptionId(), transcriptionEntity);
+        request.forEach(en -> {
+            Optional<TranscriptionEntity> fndEntityTranscription = getTranscriptionEntityForId(en.getTranscriptionId(), transcriptionEntity);
             updateTranscriptionsValidator.forEach(validator -> {
                 if (validator.validate(fndEntityTranscription, en)) {
                     validated.add(fndEntityTranscription.get());
@@ -617,7 +612,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         if (!validated.isEmpty()) {
             validated.stream().forEach(entity -> {
-                TranscriptionEntityMapper.mapTransactionToTransactionEntity(entity, getTranscriptionForId(entity.getId(), request).get());
+                TranscriptionEntityMapper.mapTranscriptionToTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request).get());
             });
 
             transcriptionRepository.saveAll(validated);
@@ -625,26 +620,25 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return validated;
     }
 
-    private List<Integer> getTranscriptionIdsForRequest(UpdateTranscriptionsRequest transcriptionIds) {
-        return transcriptionIds.getTranscriptions().stream().map(e -> e.getTranscriptionId()).collect(Collectors.toList());
+    private List<Integer> getTranscriptionIdsForRequest(List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
+        return updateTranscriptionsItems.stream().map(UpdateTranscriptionsItem::getTranscriptionId).collect(Collectors.toList());
     }
 
     private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
         return transcriptionEntities.stream().map(e -> e.getId()).collect(Collectors.toList());
     }
 
-    private List<UpdateTranscriptions> getTranscriptionForIds(List<Integer> transcriptionIds, UpdateTranscriptionsRequest updateTranscriptions) {
-        return updateTranscriptions.getTranscriptions().stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).collect(Collectors.toList());
+    private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Integer> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
+        return updateTranscriptionsItems.stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).collect(Collectors.toList());
     }
 
-    private Optional<UpdateTranscriptions> getTranscriptionForId(Integer transcriptionId, UpdateTranscriptionsRequest updateTranscriptions) {
-        return updateTranscriptions.getTranscriptions().stream().filter(e ->
-            e.getTranscriptionId().equals(transcriptionId)).collect(Collectors.toList()).stream().findFirst();
+    private Optional<UpdateTranscriptionsItem> getTranscriptionsItemForId(Integer transcriptionId, List<UpdateTranscriptionsItem> updateTranscriptions) {
+        return updateTranscriptions.stream().filter(e -> e.getTranscriptionId().equals(transcriptionId)).collect(Collectors.toList()).stream().findAny();
     }
 
-    private Optional<TranscriptionEntity> getTranscriptionForId(Integer transcriptionId,
-        List<TranscriptionEntity> updateTranscriptions) {
+    private Optional<TranscriptionEntity> getTranscriptionEntityForId(Integer transcriptionId,
+                                                                      List<TranscriptionEntity> updateTranscriptions) {
         return updateTranscriptions.stream().filter(e ->
-            e.getId().equals(transcriptionId)).findFirst();
+                                                        e.getId().equals(transcriptionId)).findAny();
     }
 }
