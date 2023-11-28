@@ -82,7 +82,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
 
-    private final InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
+    private final InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
 
     private final UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
 
