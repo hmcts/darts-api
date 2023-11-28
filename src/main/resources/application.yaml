@@ -126,6 +126,9 @@ darts:
     retention-period:
       inbound:
         arm-minimum: 24
+      unstructured:
+        arm-minimum:
+          weeks: 30
   daily-list:
     housekeeping:
       enabled: true
