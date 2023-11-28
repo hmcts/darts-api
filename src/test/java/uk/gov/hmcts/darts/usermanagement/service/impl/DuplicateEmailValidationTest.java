@@ -10,7 +10,8 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,7 +34,7 @@ class DuplicateEmailValidationTest {
     @Test
     void doesNotThrowExceptionIfEmailNotCurrentlyAssociatedWithActiveUser() {
        when(userAccountRepository.findByEmailAddressIgnoreCaseAndState(NEW_EMAIL_ADDRESS, 0))
-           .thenReturn(Optional.empty());
+           .thenReturn(Collections.emptyList());
 
        duplicateEmailValidation.validate(someUserWithEmail(NEW_EMAIL_ADDRESS));
 
@@ -43,7 +44,7 @@ class DuplicateEmailValidationTest {
     @Test
     void throwsExceptionIfEmailAlreadyAssociatedWithActiveUser() {
         when(userAccountRepository.findByEmailAddressIgnoreCaseAndState(EXISTING_EMAIL_ADDRESS, 0))
-            .thenReturn(Optional.of(someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS)));
+            .thenReturn(List.of(someUserAccountWithEmail(EXISTING_EMAIL_ADDRESS)));
 
         assertThatThrownBy(() -> duplicateEmailValidation.validate(someUserWithEmail(EXISTING_EMAIL_ADDRESS)))
             .isInstanceOf(DartsApiException.class);

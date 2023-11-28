@@ -15,6 +15,7 @@ public class DuplicateEmailValidation implements UserCreationValidation {
     @Override
     public void validate(User user) {
         userAccountRepository.findByEmailAddressIgnoreCaseAndState(user.getEmailAddress(), 0)
+            .stream().findFirst()
             .ifPresent(existingUser -> {
                 throw new DartsApiException(
                     UserManagementError.DUPLICATE_EMAIL,

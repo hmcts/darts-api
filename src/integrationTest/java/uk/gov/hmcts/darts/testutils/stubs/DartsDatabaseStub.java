@@ -63,12 +63,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Arrays.*;
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
@@ -117,6 +119,7 @@ public class DartsDatabaseStub {
     private final TranscriptionStub transcriptionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
+    private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
@@ -141,6 +144,8 @@ public class DartsDatabaseStub {
         courthouseRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
+        userAccountRepository.deleteAll(userAccountBin);
+        userAccountBin.clear();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -438,18 +443,20 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
-    public void createTestUserAccount() {
-        Optional<UserAccountEntity> foundAccount = userAccountRepository.findByEmailAddressIgnoreCase(
-            "test.user@example.com");
-        if (foundAccount.isPresent()) {
-            return;
-        }
-        UserAccountEntity testUser = new UserAccountEntity();
-        testUser.setEmailAddress("test.user@example.com");
-        testUser.setUserName("testuser");
-        testUser.setAccountGuid(UUID.randomUUID().toString());
-        testUser.setIsSystemUser(false);
-        userAccountRepository.saveAndFlush(testUser);
+    public void addToUserAccountTrash(String... emailAddresses) {
+        stream(emailAddresses)
+            .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
+            .forEach(userAccountBin::add);
     }
 
+    public void createTestUserAccount() {
+        if (userAccountRepository.findByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
+            UserAccountEntity testUser = new UserAccountEntity();
+            testUser.setEmailAddress("test.user@example.com");
+            testUser.setUserName("testuser");
+            testUser.setAccountGuid(UUID.randomUUID().toString());
+            testUser.setIsSystemUser(false);
+            userAccountRepository.saveAndFlush(testUser);
+        }
+    }
 }
