@@ -146,7 +146,7 @@ darts:
       template-map:
         audio_request_being_processed: d0890ee6-b3d3-45aa-b53a-fcbd651f8aef
         court_manager_approve_transcript: a8390fa6-3f18-44c0-b224-f59971a5e20a
-        error_processing_audio: cb5bc3f6-ae1f-4346-845a-622cf6ad2632
+        error_processing_audio: 707fc9fd-4a64-4503-bf6a-4c6bd7dda1dd
         request_to_transcriber: 12a70a9c-9bcf-4880-8291-1a5c6a4c4b08
         requested_audio_is_available: 5038c158-f7c9-4781-837e-3aaae8e906ed
         transcription_available: a928742c-5eb7-46f0-9f61-d89d5394785c

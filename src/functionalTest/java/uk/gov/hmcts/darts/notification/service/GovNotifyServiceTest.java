@@ -15,8 +15,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.CASE_NUMBER;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.DEFENDANTS;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.PORTAL_URL;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REQUEST_ID;
 
 // These tests are functional in that they connect to the real external gov.uk notify service.
 // However, unlike other functional tests these will run against the locally spun up application.
@@ -151,13 +157,39 @@ class GovNotifyServiceTest {
 
     @Test
     void errorProcessingAudio() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
-        assertEquals("DARTS: Audio Request has Failed", emailResponse.getSubject());
+        Map<String, String> parameterMap = new ConcurrentHashMap<>();
+        parameterMap.put(REQUEST_ID, "TheRequestID");
+        parameterMap.put(COURTHOUSE, "TheCourthouse");
+        parameterMap.put(DEFENDANTS, "Defendant1,Defendant2");
+        parameterMap.put(HEARING_DATE, "TheHearingDate");
+        parameterMap.put(AUDIO_START_TIME,"TheStartTime");
+        parameterMap.put(AUDIO_END_TIME, "TheEndTime");
+        SendEmailResponse emailResponse = createAndSend(
+            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(),
+            parameterMap
+        );
+        assertEquals("Your audio recording order has failed", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    Your audio request for case TheCaseId has failed.Please contact the helpdesk.
-                    Regards,
-                    DARTS""", emailResponse);
+                    Your audio recording order for case ID TheCaseId has failed.
 
+                    Due to unforeseen errors, your audio recording order has failed.
+
+                    To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
+
+                    Case details
+
+                    TheCaseId
+                    TheCourthouse
+                    Defendant1,Defendant2
+
+                    Audio details
+
+                    TheHearingDate
+                    TheStartTime
+                    TheEndTime
+
+                    They will raise a Service Now ticket to process this issue.""",
+                emailResponse
+        );
     }
 }
