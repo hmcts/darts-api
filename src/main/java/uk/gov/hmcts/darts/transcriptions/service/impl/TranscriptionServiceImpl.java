@@ -531,7 +531,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
-        if (assigned != null && TRUE.equals(assigned)) {
+        if (TRUE.equals(assigned)) {
             return transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
         }
         return transcriberTranscriptsQuery.getTranscriptRequests(userId);
