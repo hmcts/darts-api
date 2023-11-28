@@ -52,6 +52,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
@@ -527,6 +528,15 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         getYourTranscriptsResponse.setRequesterTranscriptions(yourTranscriptsQuery.getRequesterTranscriptions(userId));
         getYourTranscriptsResponse.setApproverTranscriptions(yourTranscriptsQuery.getApproverTranscriptions(userId));
         return getYourTranscriptsResponse;
+    }
+
+    @Override
+    public TranscriptionTranscriberCountsResponse getTranscriptionTranscriberCounts(Integer userId) {
+
+        final var getTranscriptionTranscriberCounts = new TranscriptionTranscriberCountsResponse();
+        getTranscriptionTranscriberCounts.setAssigned(3);
+        getTranscriptionTranscriberCounts.setUnassigned(4);
+        return getTranscriptionTranscriberCounts;
     }
 
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,

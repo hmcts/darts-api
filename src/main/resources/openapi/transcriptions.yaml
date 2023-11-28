@@ -475,6 +475,44 @@ paths:
         '401':
           description: Unauthorised Error
 
+  /transcriptions/transcriber-counts:
+    get:
+      tags:
+        - Transcription
+      summary: Get the count of transcript requests and work for a user with a transcriber role
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+      operationId: getTranscriptionTranscriberCounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranscriptionTranscriberCountsResponse'
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+
 components:
   schemas:
     TranscriptionRequestDetails:
@@ -681,6 +719,18 @@ components:
         description:
           type: string
           example: Standard
+
+    TranscriptionTranscriberCountsResponse:
+      type: object
+      properties:
+        unassigned:
+          type: integer
+          example: 4
+          description: The number of unassigned transcript requests for a user with transcriber role.
+        assigned:
+          type: integer
+          description: The number of assigned transcript requests for a user with transcriber role.
+          example: 3
 
     GetTranscriptionByIdResponse:
       type: object
