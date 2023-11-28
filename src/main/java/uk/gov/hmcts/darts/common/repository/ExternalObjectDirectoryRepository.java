@@ -17,13 +17,35 @@ import java.util.List;
 public interface ExternalObjectDirectoryRepository extends JpaRepository<ExternalObjectDirectoryEntity, Integer> {
 
     @Query(
-        """
-            SELECT eod FROM ExternalObjectDirectoryEntity eod, MediaEntity med
-            WHERE eod.media = :media AND eod.status = :status AND eod.externalLocationType = :externalLocationType
-            """
+        "SELECT eod FROM ExternalObjectDirectoryEntity eod, MediaEntity med " +
+            "WHERE eod.media = :media AND eod.status = :status AND eod.externalLocationType = :externalLocationType"
     )
     List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media, ObjectDirectoryStatusEntity status,
                                                                  ExternalLocationTypeEntity externalLocationType);
+
+    @Query(
+        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
+            "WHERE eod.status = :status AND eod.externalLocationType = :type"
+    )
+    List<ExternalObjectDirectoryEntity> findByStatusAndType(ObjectDirectoryStatusEntity status, ExternalLocationTypeEntity type);
+
+    @Query(
+        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
+            "WHERE (eod.status = :status1 " +
+            "OR eod.status = :status2 " +
+            "OR eod.status = :status3 " +
+            "OR eod.status = :status4 " +
+            "OR eod.status = :status5 " +
+            "OR eod.status = :status6) " +
+            "AND eod.externalLocationType = :type"
+    )
+    List<ExternalObjectDirectoryEntity> findByFailedAndType(ObjectDirectoryStatusEntity status1,
+                                                               ObjectDirectoryStatusEntity status2,
+                                                               ObjectDirectoryStatusEntity status3,
+                                                               ObjectDirectoryStatusEntity status4,
+                                                               ObjectDirectoryStatusEntity status5,
+                                                               ObjectDirectoryStatusEntity status6,
+                                                               ExternalLocationTypeEntity type);
 
     @Query("SELECT eod FROM ExternalObjectDirectoryEntity eod WHERE eod.externalLocationType = :externalLocationTypeEntity AND eod.status = :status")
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndMarkedForDeletion(ExternalLocationTypeEntity externalLocationTypeEntity,

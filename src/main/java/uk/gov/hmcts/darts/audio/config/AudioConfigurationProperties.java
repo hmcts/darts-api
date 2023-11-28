@@ -7,6 +7,9 @@ import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @ConfigurationProperties("darts.audio")
 @Getter
 @Setter
@@ -27,4 +30,6 @@ public class AudioConfigurationProperties {
     @NotEmpty
     private String tempBlobWorkspace;
 
+    private Integer maxFileSize;
+    private List<String> allowedExtensions = new ArrayList<>();
 }
