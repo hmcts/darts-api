@@ -198,6 +198,14 @@ class AudioTransformationServiceImplTest {
         assertEquals(TIME_12_40, mediaEntitiesResult.get(0).getEnd());
     }
 
+    @Test
+    void filterMediaByMediaRequestDatesWithRequestStartAndEndDateOutSideMediaRange() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_12_59);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_13_00, TIME_13_01);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        assertEquals(0, mediaEntitiesResult.size());
+    }
+
     private List<MediaEntity> createMediaEntities(OffsetDateTime startTime1, OffsetDateTime endTime1,
                                                   OffsetDateTime startTime2, OffsetDateTime endTime2,
                                                   OffsetDateTime startTime3, OffsetDateTime endTime3) {
