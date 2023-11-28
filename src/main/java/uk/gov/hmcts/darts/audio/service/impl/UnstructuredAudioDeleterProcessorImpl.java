@@ -29,7 +29,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_F
 @RequiredArgsConstructor
 public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioDeleterProcessor {
 
-    @Value("${darts.data-management.retention-period.unstructured.arm-minimum-weeks}")
+    @Value("${darts.data-management.retention-period.unstructured.arm-minimum.weeks}")
     int weeksInArm;
 
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
