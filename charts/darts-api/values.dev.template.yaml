@@ -1,6 +1,10 @@
 java:
   # Don't modify below here
   image: ${IMAGE_NAME}
+  devmemoryRequests: "1Gi"
+  devcpuRequests: "250m"
+  devmemoryLimits: "2Gi"
+  devcpuLimits: "1500m"
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
     darts:
