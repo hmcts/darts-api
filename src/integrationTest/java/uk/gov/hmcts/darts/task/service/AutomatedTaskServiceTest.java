@@ -483,7 +483,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(13)
+    @Order(15)
     void givenConfiguredTaskCancelInboundToUnstructuredAutomatedTask() {
         AutomatedTask automatedTask =
             new InboundToUnstructuredAutomatedTask(automatedTaskRepository,
@@ -507,7 +507,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(15)
+    @Order(16)
     void givenConfiguredTaskCancelUnstructuredAudioDeleterAutomatedTask() {
         AutomatedTask automatedTask =
             new UnstructuredAudioDeleterAutomatedTask(automatedTaskRepository,
