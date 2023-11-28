@@ -38,6 +38,7 @@ public interface TranscriptionService {
     GetYourTranscriptsResponse getYourTranscripts(Integer userId);
 
     List<UpdateTranscriptionsItem> updateTranscriptions(List<UpdateTranscriptionsItem> request);
+
     List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned);
 
 }
