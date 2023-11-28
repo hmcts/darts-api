@@ -103,7 +103,6 @@ public class TranscriptionStub {
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
-        transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
         return transcriptionRepository.saveAndFlush(transcription);
     }
@@ -128,7 +127,6 @@ public class TranscriptionStub {
                                            .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
         transcriptionEntity.setCreatedBy(userAccountEntity);
         transcriptionEntity.setLastModifiedBy(userAccountEntity);
-        transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setIsManualTranscription(true);
         transcriptionEntity.setHideRequestFromRequestor(false);
 

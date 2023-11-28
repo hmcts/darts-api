@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -25,8 +26,6 @@ public interface TranscriptionService {
 
     List<TranscriptionTypeResponse> getTranscriptionTypes();
 
-    List<TranscriptionUrgencyResponse> getTranscriptionUrgencies();
-
     List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState();
 
     GetTranscriptionByIdResponse getTranscription(Integer transcriptionId);
@@ -36,5 +35,7 @@ public interface TranscriptionService {
     DownloadTranscriptResponse downloadTranscript(Integer transcriptionId);
 
     GetYourTranscriptsResponse getYourTranscripts(Integer userId);
+
+    List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned);
 
 }

@@ -27,6 +27,7 @@ import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
@@ -149,14 +150,22 @@ public class TranscriptionController implements TranscriptionApi {
         return ResponseEntity.ok(transcriptionService.getYourTranscripts(userId));
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<TranscriberViewSummary>> getTranscriberTranscripts(Integer userId, Boolean assigned) {
+        return ResponseEntity.ok(transcriptionService.getTranscriberTranscripts(userId, assigned));
+    }
+
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
             HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
             if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
-                log.error("Transcription could not be requested. No audio found for hearing id {}",
-                          transcriptionRequestDetails.getHearingId());
+                log.error(
+                    "Transcription could not be requested. No audio found for hearing id {}",
+                    transcriptionRequestDetails.getHearingId()
+                );
                 throw new DartsApiException(AUDIO_NOT_FOUND);
             } else {
                 //check times
