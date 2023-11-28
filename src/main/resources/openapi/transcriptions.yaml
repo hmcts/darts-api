@@ -823,6 +823,9 @@ components:
         tru_id:
           type: integer
           example: 1
+        transcription_urgency_id:
+          type: integer
+          example: 1
         description:
           type: string
           example: Standard

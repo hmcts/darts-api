@@ -47,6 +47,7 @@ public class TranscriptionResponseMapper {
     TranscriptionUrgencyResponse mapToTranscriptionUrgencyResponse(TranscriptionUrgencyEntity transcriptionUrgencyEntity) {
         TranscriptionUrgencyResponse transcriptionUrgencyResponse = new TranscriptionUrgencyResponse();
         transcriptionUrgencyResponse.setTruId(transcriptionUrgencyEntity.getId());
+        transcriptionUrgencyResponse.setTranscriptionUrgencyId(transcriptionUrgencyEntity.getId());
         transcriptionUrgencyResponse.setDescription(transcriptionUrgencyEntity.getDescription());
         return transcriptionUrgencyResponse;
     }
