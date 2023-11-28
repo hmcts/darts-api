@@ -810,6 +810,9 @@ components:
         trt_id:
           type: integer
           example: 1
+        transcription_type_id:
+          type: integer
+          example: 1
         description:
           type: string
           example: Sentencing remarks

@@ -33,6 +33,7 @@ public class TranscriptionResponseMapper {
     TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
         TranscriptionTypeResponse transcriptionTypeResponse = new TranscriptionTypeResponse();
         transcriptionTypeResponse.setTrtId(transcriptionTypeEntity.getId());
+        transcriptionTypeResponse.setTranscriptionTypeId(transcriptionTypeEntity.getId());
         transcriptionTypeResponse.setDescription(transcriptionTypeEntity.getDescription());
         return transcriptionTypeResponse;
     }
