@@ -247,7 +247,8 @@ public class TranscriptionController implements TranscriptionApi {
         // we authorise the transcription ids
         authorisation.authoriseWithIdsForTranscription(request,
                                                        e -> e.getTranscriptionId().toString(),
-                                                       new SecurityRoleEnum[]{APPROVER, TRANSCRIBER}, executeOnAuth
+                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+                                                       executeOnAuth
         );
 
         return new ResponseEntity<>(

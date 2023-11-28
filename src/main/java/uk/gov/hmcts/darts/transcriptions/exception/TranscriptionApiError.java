@@ -54,11 +54,6 @@ public enum TranscriptionApiError implements DartsApiError {
         HttpStatus.BAD_REQUEST,
         "Failed to attach transcript"
     ),
-    FAILED_TO_UPDATE_TRANSCRIPTIONS(
-        UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
-        HttpStatus.BAD_REQUEST,
-        "Failed to update some of the transcriptions"
-    ),
     FAILED_TO_DOWNLOAD_TRANSCRIPT(
         "109",
         HttpStatus.BAD_REQUEST,
@@ -73,6 +68,11 @@ public enum TranscriptionApiError implements DartsApiError {
         "111",
         HttpStatus.NOT_FOUND,
         "Transcription could not be requested, times outside of hearing times"
+    ),
+    FAILED_TO_UPDATE_TRANSCRIPTIONS(
+        UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
+        HttpStatus.BAD_REQUEST,
+        "Failed to update some of the transcriptions"
     );
 
 

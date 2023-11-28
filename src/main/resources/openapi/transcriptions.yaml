@@ -828,8 +828,9 @@ components:
     UpdateTranscriptions400ErrorCode:
       type: string
       enum:
-        - "UT-PP-400"
-      x-enum-varnames: [ UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM ]
+        - "112"
+      x-enum-varnames:
+        - UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM
     GetTranscriptionByIdResponse:
       type: object
       properties:
