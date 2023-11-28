@@ -40,6 +40,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
+import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.component.YourTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProperties;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
@@ -51,6 +52,7 @@ import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
@@ -69,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.lang.Boolean.TRUE;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
@@ -133,6 +136,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     private final YourTranscriptsQuery yourTranscriptsQuery;
     private final DuplicateRequestDetector duplicateRequestDetector;
+    private final TranscriberTranscriptsQuery transcriberTranscriptsQuery;
 
     @Override
     @Transactional
@@ -437,11 +441,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public List<TranscriptionUrgencyResponse> getTranscriptionUrgencies() {
-        return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAll());
-    }
-
-    @Override
     public List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState() {
         return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAllByDisplayStateTrue());
     }
@@ -539,6 +538,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return getTranscriptionTranscriberCounts;
     }
 
+    public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
+        if (assigned != null && TRUE.equals(assigned)) {
+            return transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
+        }
+        return transcriberTranscriptsQuery.getTranscriptRequests(userId);
+    }
+
     private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
                                                                       String checksum,
                                                                       UserAccountEntity userAccountEntity,
@@ -570,4 +576,5 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
         return TranscriptionResponseMapper.mapToTranscriptionResponse(transcription);
     }
+
 }

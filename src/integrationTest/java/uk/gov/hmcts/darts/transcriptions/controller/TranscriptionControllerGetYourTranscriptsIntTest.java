@@ -4,33 +4,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.net.URI;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Transactional
-class TranscriptionControllerGetYourTranscriptsIntTest {
+class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions");
 
@@ -38,13 +31,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest {
     private AuthorisationStub authorisationStub;
 
     @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
-
-    @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private UserIdentity mockUserIdentity;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -58,8 +45,6 @@ class TranscriptionControllerGetYourTranscriptsIntTest {
 
         systemUser = authorisationStub.getSystemUser();
         testUser = authorisationStub.getTestUser();
-
-        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
@@ -107,7 +92,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest {
     @Test
     void getYourTranscriptsShouldReturnRequesterAndApproverCombinedOk() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
-        var systemUserTranscription = dartsDatabaseStub.getTranscriptionStub()
+        var systemUserTranscription = dartsDatabase.getTranscriptionStub()
             .createAndSaveAwaitingAuthorisationTranscription(
                 systemUser,
                 courtCase,

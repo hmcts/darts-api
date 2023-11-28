@@ -6,9 +6,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -23,7 +21,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.util.List;
@@ -45,8 +42,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -60,8 +55,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     private AuthorisationStub authorisationStub;
     @Autowired
     private TranscriptionStub transcriptionStub;
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private MockMvc mockMvc;
@@ -81,7 +74,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
-        TranscriptionStub transcriptionStub = dartsDatabaseStub.getTranscriptionStub();
+        TranscriptionStub transcriptionStub = dartsDatabase.getTranscriptionStub();
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
@@ -104,7 +97,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             transcriptionStub.getTranscriptionStatusByEnum(COMPLETE)
         );
 
-        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
+        assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         transcriptionEntity.getTranscriptionWorkflowEntities()
             .addAll(List.of(
                 approvedTranscriptionWorkflowEntity,
@@ -112,7 +105,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 completeTranscriptionWorkflowEntity
             ));
         transcriptionEntity.setTranscriptionStatus(completeTranscriptionWorkflowEntity.getTranscriptionStatus());
-        transcriptionEntity = dartsDatabaseStub.getTranscriptionRepository().save(transcriptionEntity);
+        transcriptionEntity = dartsDatabase.getTranscriptionRepository().save(transcriptionEntity);
 
         assertEquals(COMPLETE.getId(), transcriptionEntity.getTranscriptionStatus().getId());
         assertEquals(5, transcriptionEntity.getTranscriptionWorkflowEntities().size());
@@ -177,9 +170,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
-        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabaseStub.getObjectDirectoryStatusEntity(
+        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
             STORED);
-        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
+        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
@@ -229,9 +222,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.doc";
         final String fileType = "application/msword";
         final int fileSize = 22_528;
-        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabaseStub.getObjectDirectoryStatusEntity(
+        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
             STORED);
-        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
+        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "KQ9vVogyRdsnEvxyNQz77g==";

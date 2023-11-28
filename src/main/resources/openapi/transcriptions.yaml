@@ -443,6 +443,38 @@ paths:
                 type: "TRANSCRIPTION_105"
                 title: "Transcription workflow action is not permitted"
                 status: 409
+  /transcriptions/transcriber-view:
+    get:
+      tags:
+        - Transcription
+      summary: Transcriber view for Transcript requests
+      operationId: getTranscriberTranscripts
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+        - in: query
+          name: assigned
+          schema:
+            type: boolean
+          description: '"Your work" view (assigned=true), "Transcript requests" (assigned=false)'
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranscriberViewSummary'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
   /transcriptions/types:
     get:
       tags:
@@ -623,6 +655,45 @@ components:
         requested_ts:
           type: string
           format: date-time
+    TranscriberViewSummary:
+      type: object
+      required:
+        - transcription_id
+        - case_id
+        - case_number
+        - courthouse_name
+        - hearing_date
+        - transcription_type
+        - status
+        - requested_ts
+        - state_change_ts
+        - is_manual
+      properties:
+        transcription_id:
+          type: integer
+        case_id:
+          type: integer
+        case_number:
+          type: string
+        courthouse_name:
+          type: string
+        hearing_date:
+          type: string
+          format: date
+        transcription_type:
+          type: string
+        status:
+          type: string
+        urgency:
+          type: string
+        requested_ts:
+          type: string
+          format: date-time
+        state_change_ts:
+          type: string
+          format: date-time
+        is_manual:
+          type: boolean
     UpdateTranscriptionResponse:
       type: object
       required:
