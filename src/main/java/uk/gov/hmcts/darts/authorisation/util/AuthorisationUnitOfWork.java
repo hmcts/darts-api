@@ -32,15 +32,27 @@ public class AuthorisationUnitOfWork {
     }
 
 
-    public <T> void authoriseWithIds(List<T> idTypes, Function<T, String> gatherId,
+    /**
+     * Generic method to check a list of objects has authorisation.
+     * Pass in the relevant objects and functions.
+     *
+     * @param objectList             - list of objects that contain the ids to be checked
+     * @param gatherIdFunction       - the function that gets the id from the objectList object
+     * @param contextIdEnum          - tell the auth service what type of id it is
+     * @param rolesToValidate        - the roles to verify the user has access to
+     * @param runnable               - What to run if the authorisation is successful.
+     * @param suppressDataValidation - flag
+     * @param <T>                    - response
+     */
+    public <T> void authoriseWithIds(List<T> objectList, Function<T, String> gatherIdFunction,
                                      ContextIdEnum contextIdEnum,
-                                     SecurityRoleEnum[] roles, Runnable runnable,
+                                     SecurityRoleEnum[] rolesToValidate, Runnable runnable,
                                      boolean suppressDataValidation) {
         authorisation.forEach(auth -> {
             if (auth.getContextId() == contextIdEnum) {
-                idTypes.forEach(idType -> {
+                objectList.forEach(idType -> {
                     try {
-                        auth.checkAuthorisation(() -> Optional.of(gatherId.apply(idType)), new HashSet<>(Arrays.asList(roles)));
+                        auth.checkAuthorisation(() -> Optional.of(gatherIdFunction.apply(idType)), new HashSet<>(Arrays.asList(rolesToValidate)));
                     } catch (DartsApiException ex) {
 
                         // if the client wants to handle the ids being missing themselves then

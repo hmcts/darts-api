@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
 import java.util.Optional;
 
@@ -21,7 +21,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
 
     @Test
     void testValidateWhenSuccess() {
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(true);
 
@@ -36,7 +36,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
 
     @Test
     void testValidateWhenFailureOnState() {
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(true);
 
@@ -51,7 +51,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
 
     @Test
     void testValidateWhenEntityNotFound() {
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(true);
 
@@ -60,7 +60,7 @@ class TranscriptionsUpdateSetHidingValidatorTest {
 
     @Test
     void testValidateWhenSuccessWithHideFalseRegardlessOfState() {
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(100);
         transcriptions.setHideRequestFromRequestor(false);
 

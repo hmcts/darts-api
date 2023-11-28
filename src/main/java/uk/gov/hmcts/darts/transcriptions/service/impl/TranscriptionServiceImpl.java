@@ -61,7 +61,6 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsContainer;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsUpdateValidator;
@@ -580,7 +579,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
-    public UpdateTranscriptionsContainer updateTranscriptions(List<UpdateTranscriptionsItem> request) {
+    public List<UpdateTranscriptionsItem> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
 
         final List<TranscriptionEntity> processed = processTransactionUpdates(request);
 
@@ -595,7 +594,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS);
         }
 
-        return new UpdateTranscriptionsContainer(processedUpdates);
+        return processedUpdates;
     }
 
     private List<TranscriptionEntity> processTransactionUpdates(List<UpdateTranscriptionsItem> request) {

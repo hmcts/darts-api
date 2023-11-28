@@ -35,11 +35,11 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsContainer;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.isNull;
@@ -238,11 +238,10 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<UpdateTranscriptionsItem>> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
-        List<UpdateTranscriptionsItem> responseList;
-        final UpdateTranscriptionsContainer responseContainer;
+        List<UpdateTranscriptionsItem> responseList = new ArrayList<>();
 
         Runnable executeOnAuth = () -> {
-            responseContainer = transcriptionService.updateTranscriptions(request);
+            responseList.addAll(transcriptionService.updateTranscriptions(request));
         };
 
         // we authorise the transcription ids

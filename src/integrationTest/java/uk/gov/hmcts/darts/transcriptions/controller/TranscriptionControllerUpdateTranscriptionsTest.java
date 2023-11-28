@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
@@ -27,14 +28,13 @@ import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.model.Problem;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsRequest;
-import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -114,7 +114,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
     }
 
     @Test
-     void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndStateIsGood() throws Exception {
+    void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndStateIsGood() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -125,30 +125,29 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REJECTED);
         existingTranscription1.setTranscriptionStatus(entity1);
 
-        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(transcriptionId);
         transcriptions.setHideRequestFromRequestor(true);
 
-        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions1 = new UpdateTranscriptionsItem();
         transcriptions1.setTranscriptionId(transcriptionId1);
         transcriptions1.setHideRequestFromRequestor(true);
 
         // we should be able to set hide false on a transcription without
         // a known state
-        UpdateTranscriptions transcriptions2 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions2 = new UpdateTranscriptionsItem();
         transcriptions2.setTranscriptionId(transcriptionId2);
         transcriptions2.setHideRequestFromRequestor(false);
 
-        updateTranscriptions.getTranscriptions().add(transcriptions);
-        updateTranscriptions.getTranscriptions().add(transcriptions1);
-        updateTranscriptions.getTranscriptions().add(transcriptions2);
+        List<UpdateTranscriptionsItem> transcriptRequestList = new ArrayList<>();
+        transcriptRequestList.add(transcriptions);
+        transcriptRequestList.add(transcriptions1);
+        transcriptRequestList.add(transcriptions2);
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn();
@@ -156,12 +155,14 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         // we expect a success
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        UpdateTranscriptionsResponse successResponse = objectMapper.readValue(
+        List<UpdateTranscriptionsItem> successResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
-            UpdateTranscriptionsResponse.class);
+            new TypeReference<>() {
+            }
+        );
         Assertions.assertNotNull(successResponse);
-        assertEquals(3, successResponse.getTranscriptions().size());
-        Assertions.assertTrue(successResponse.getTranscriptions().containsAll(updateTranscriptions.getTranscriptions()));
+        assertEquals(3, successResponse.size());
+        Assertions.assertTrue(successResponse.containsAll(transcriptRequestList));
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
         Assertions.assertTrue(existingTranscription1.getHideRequestFromRequestor());
 
@@ -172,7 +173,7 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
     }
 
     @Test
-     void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndWorkflowStateIsGood() throws Exception {
+    void testTransactionsUpdateHideSuccessWhereTransactionIdsAreFoundAndWorkflowStateIsGood() throws Exception {
         TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         TranscriptionStatusEntity entity = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.COMPLETE);
@@ -191,30 +192,29 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         existingTranscription1.getTranscriptionWorkflowEntities().add(workflowBEntity);
         dartsDatabase.save(workflowBEntity);
 
-        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(transcriptionId);
         transcriptions.setHideRequestFromRequestor(true);
 
-        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions1 = new UpdateTranscriptionsItem();
         transcriptions1.setTranscriptionId(transcriptionId1);
         transcriptions1.setHideRequestFromRequestor(true);
 
         // we should be able to set hide false on a transcription without
         // a known state
-        UpdateTranscriptions transcriptions2 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions2 = new UpdateTranscriptionsItem();
         transcriptions2.setTranscriptionId(transcriptionId2);
         transcriptions2.setHideRequestFromRequestor(false);
 
-        updateTranscriptions.getTranscriptions().add(transcriptions);
-        updateTranscriptions.getTranscriptions().add(transcriptions1);
-        updateTranscriptions.getTranscriptions().add(transcriptions2);
+        List<UpdateTranscriptionsItem> transcriptRequestList = new ArrayList<>();
+        transcriptRequestList.add(transcriptions);
+        transcriptRequestList.add(transcriptions1);
+        transcriptRequestList.add(transcriptions2);
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn();
@@ -222,12 +222,14 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         // we expect a success
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        UpdateTranscriptionsResponse successResponse = objectMapper.readValue(
+        List<UpdateTranscriptionsItem> successResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
-            UpdateTranscriptionsResponse.class);
+            new TypeReference<>() {
+            }
+        );
         Assertions.assertNotNull(successResponse);
-        assertEquals(3, successResponse.getTranscriptions().size());
-        Assertions.assertTrue(successResponse.getTranscriptions().containsAll(updateTranscriptions.getTranscriptions()));
+        assertEquals(3, successResponse.size());
+        Assertions.assertTrue(successResponse.containsAll(transcriptRequestList));
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
         Assertions.assertTrue(existingTranscription1.getHideRequestFromRequestor());
 
@@ -249,30 +251,29 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REJECTED);
         existingTranscription1.setTranscriptionStatus(entity1);
 
-        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(transcriptionId);
         transcriptions.setHideRequestFromRequestor(true);
 
-        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions1 = new UpdateTranscriptionsItem();
         transcriptions1.setTranscriptionId(transcriptionId1);
         transcriptions1.setHideRequestFromRequestor(true);
 
         // force a failure on this record as the transcription will not be found
         Integer idThatDoesNotExist = 100;
-        UpdateTranscriptions transcriptions2 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions2 = new UpdateTranscriptionsItem();
         transcriptions2.setTranscriptionId(idThatDoesNotExist);
         transcriptions2.setHideRequestFromRequestor(false);
 
-        updateTranscriptions.getTranscriptions().add(transcriptions);
-        updateTranscriptions.getTranscriptions().add(transcriptions1);
-        updateTranscriptions.getTranscriptions().add(transcriptions2);
+        List<UpdateTranscriptionsItem> transcriptRequestList = new ArrayList<>();
+        transcriptRequestList.add(transcriptions);
+        transcriptRequestList.add(transcriptions1);
+        transcriptRequestList.add(transcriptions2);
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().is4xxClientError())
             .andReturn();
@@ -281,17 +282,20 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         assertEquals(400, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
-            Problem.class);
+            Problem.class
+        );
 
         // assert the failure response
         Assertions.assertNotNull(failureResponse);
         String partialFailure = JsonPath.parse(mvcResult.getResponse().getContentAsString())
             .read("$.partial_failure");
-        UpdateTranscriptionsResponse partialFailureResponse = objectMapper.readValue(
+        List<UpdateTranscriptionsItem> partialFailureResponse = objectMapper.readValue(
             partialFailure,
-            UpdateTranscriptionsResponse.class);
-        assertEquals(1, partialFailureResponse.getTranscriptions().size());
-        assertEquals(idThatDoesNotExist, partialFailureResponse.getTranscriptions().get(0).getTranscriptionId());
+            new TypeReference<>() {
+            }
+        );
+        assertEquals(1, partialFailureResponse.size());
+        assertEquals(idThatDoesNotExist, partialFailureResponse.get(0).getTranscriptionId());
 
         // assert partial success i.e. that the hide flags in the database have been set
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
@@ -311,23 +315,22 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED);
         existingTranscription1.setTranscriptionStatus(entity1);
 
-        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(transcriptionId);
         transcriptions.setHideRequestFromRequestor(true);
 
-        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions1 = new UpdateTranscriptionsItem();
         transcriptions1.setTranscriptionId(transcriptionId1);
         transcriptions1.setHideRequestFromRequestor(true);
 
-        updateTranscriptions.getTranscriptions().add(transcriptions);
-        updateTranscriptions.getTranscriptions().add(transcriptions1);
+        List<UpdateTranscriptionsItem> transcriptRequestList = new ArrayList<>();
+        transcriptRequestList.add(transcriptions);
+        transcriptRequestList.add(transcriptions1);
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().is4xxClientError())
             .andReturn();
@@ -335,17 +338,20 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         assertEquals(400, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
-            Problem.class);
+            Problem.class
+        );
 
         // assert the failure response
         Assertions.assertNotNull(failureResponse);
         String partialFailure = JsonPath.parse(mvcResult.getResponse().getContentAsString())
             .read("$.partial_failure");
-        UpdateTranscriptionsResponse partialFailureResponse = objectMapper.readValue(
+        List<UpdateTranscriptionsItem> partialFailureResponse = objectMapper.readValue(
             partialFailure,
-            UpdateTranscriptionsResponse.class);
-        assertEquals(1, partialFailureResponse.getTranscriptions().size());
-        assertEquals(transcriptionId1, partialFailureResponse.getTranscriptions().get(0).getTranscriptionId());
+            new TypeReference<>() {
+            }
+        );
+        assertEquals(1, partialFailureResponse.size());
+        assertEquals(transcriptionId1, partialFailureResponse.get(0).getTranscriptionId());
 
         // assert partial success in the database
         Assertions.assertTrue(existingTranscription.getHideRequestFromRequestor());
@@ -364,24 +370,23 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REJECTED);
         existingTranscription1.setTranscriptionStatus(entity1);
 
-        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(transcriptionId);
         transcriptions.setHideRequestFromRequestor(true);
 
-        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions1 = new UpdateTranscriptionsItem();
         transcriptions1.setTranscriptionId(transcriptionId1);
         transcriptions1.setHideRequestFromRequestor(true);
 
-        updateTranscriptions.getTranscriptions().add(transcriptions);
-        updateTranscriptions.getTranscriptions().add(transcriptions1);
+        List<UpdateTranscriptionsItem> transcriptRequestList = new ArrayList<>();
+        transcriptRequestList.add(transcriptions);
+        transcriptRequestList.add(transcriptions1);
 
         // set the flag to be on
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -392,17 +397,16 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
 
         existingTranscription1.setTranscriptionStatus(transcriptionStub.getTranscriptionStatusByEnum(AWAITING_AUTHORISATION));
 
-        updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
-        transcriptions = new UpdateTranscriptions();
+        transcriptRequestList = new ArrayList<>();
+        transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(transcriptionId1);
         transcriptions.setHideRequestFromRequestor(false);
-        updateTranscriptions.getTranscriptions().add(transcriptions);
+        transcriptRequestList.add(transcriptions);
 
         requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().is2xxSuccessful())
             .andReturn();
@@ -419,19 +423,18 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.APPROVED);
         existingTranscription1.setTranscriptionStatus(entity1);
 
-        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions1 = new UpdateTranscriptionsItem();
         transcriptions1.setTranscriptionId(transcriptionId1);
         transcriptions1.setHideRequestFromRequestor(true);
 
 
-        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<>());
-        updateTranscriptions.getTranscriptions().add(transcriptions1);
+        List<UpdateTranscriptionsItem> transcriptRequestList = new ArrayList<>();
+        transcriptRequestList.add(transcriptions1);
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().is4xxClientError())
             .andReturn();
@@ -439,12 +442,13 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         assertEquals(400, mvcResult.getResponse().getStatus());
         Problem failureResponse = objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(
             mvcResult.getResponse().getContentAsString(),
-            Problem.class);
+            Problem.class
+        );
 
         // assert the failure response
         Assertions.assertNotNull(failureResponse);
         Assertions.assertFalse(JsonPath.parse(mvcResult.getResponse().getContentAsString())
-                                  .jsonString().contains("partial_failure"));
+                                   .jsonString().contains("partial_failure"));
         Assertions.assertFalse(existingTranscription1.getHideRequestFromRequestor());
     }
 
@@ -460,30 +464,29 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         TranscriptionStatusEntity entity1 = transcriptionStub.getTranscriptionStatusByEnum(TranscriptionStatusEnum.REJECTED);
         existingTranscription1.setTranscriptionStatus(entity1);
 
-        UpdateTranscriptionsRequest updateTranscriptions = new UpdateTranscriptionsRequest();
-        updateTranscriptions.setTranscriptions(new ArrayList<UpdateTranscriptions>());
-        UpdateTranscriptions transcriptions = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions = new UpdateTranscriptionsItem();
         transcriptions.setTranscriptionId(transcriptionId);
         transcriptions.setHideRequestFromRequestor(null);
 
-        UpdateTranscriptions transcriptions1 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions1 = new UpdateTranscriptionsItem();
         transcriptions1.setTranscriptionId(transcriptionId1);
         transcriptions1.setHideRequestFromRequestor(null);
 
         // we should be able to set hide false on a transcription without
         // a known state
-        UpdateTranscriptions transcriptions2 = new UpdateTranscriptions();
+        UpdateTranscriptionsItem transcriptions2 = new UpdateTranscriptionsItem();
         transcriptions2.setTranscriptionId(transcriptionId2);
         transcriptions2.setHideRequestFromRequestor(null);
 
-        updateTranscriptions.getTranscriptions().add(transcriptions);
-        updateTranscriptions.getTranscriptions().add(transcriptions1);
-        updateTranscriptions.getTranscriptions().add(transcriptions2);
+        List<UpdateTranscriptionsItem> transcriptRequestList = new ArrayList<>();
+        transcriptRequestList.add(transcriptions);
+        transcriptRequestList.add(transcriptions1);
+        transcriptRequestList.add(transcriptions2);
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/transcriptions")))
             .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(updateTranscriptions));
+            .content(objectMapper.writeValueAsString(transcriptRequestList));
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
             .andReturn();
@@ -491,11 +494,13 @@ class TranscriptionControllerUpdateTranscriptionsTest extends IntegrationBase {
         // we expect a success
         assertEquals(200, mvcResult.getResponse().getStatus());
 
-        UpdateTranscriptionsResponse successResponse = objectMapper.readValue(
+        List<UpdateTranscriptionsItem> successResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsString(),
-            UpdateTranscriptionsResponse.class);
+            new TypeReference<>() {
+            }
+        );
         Assertions.assertNotNull(successResponse);
-        assertEquals(3, successResponse.getTranscriptions().size());
+        assertEquals(3, successResponse.size());
 
         TranscriptionEntity existingTranscription2 = dartsDatabaseStub.getTranscriptionRepository().findById(
             transcriptionId2).orElseThrow();
