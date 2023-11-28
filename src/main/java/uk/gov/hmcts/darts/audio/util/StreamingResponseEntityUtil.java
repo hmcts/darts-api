@@ -15,27 +15,30 @@ public class StreamingResponseEntityUtil {
 
     public ResponseEntity<byte[]> createResponseEntity(InputStream inputStream, String httpRangeList, String filename) throws IOException {
         byte[] bytes = IOUtils.toByteArray(inputStream);
-        if (StringUtils.isBlank(httpRangeList)) {
-            return ResponseEntity.status(HttpStatus.OK)
-                .header("Content-Type", "application/octet-stream")
-                .header("Content-Disposition", MessageFormat.format("attachment; filename=\"{0}.mp3\"", filename))
-                .header("Content-Length", String.valueOf(bytes.length))
-                .body(bytes);
-        } else {
-            long fileSize = bytes.length;
+        long fileSize = bytes.length;
+        if (StringUtils.isNotBlank(httpRangeList)) {
             httpRangeList = StringUtils.trim(httpRangeList);
             String rangeListValue = StringUtils.substringAfter(httpRangeList, "=");
             String[] ranges = rangeListValue.split("-");
             long rangeStart = Long.parseLong(ranges[0]);
             long rangeEnd = getRangeEnd(fileSize, ranges);
-            String contentLength = String.valueOf((rangeEnd - rangeStart) + 1);
-            String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
-            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .header("Content-Type", "audio/mpeg")
-                .header("Content-Length", contentLength)
-                .header("Content-Range", contentRange)
-                .body(readByteRange(bytes, rangeStart, rangeEnd));
+            long requestedContentLength = (rangeEnd - rangeStart) + 1;
+            String contentLengthStr = String.valueOf(requestedContentLength);
+            if (requestedContentLength < fileSize) {
+                String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
+                return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                    .header("Content-Type", "audio/mpeg")
+                    .header("Content-Length", contentLengthStr)
+                    .header("Content-Range", contentRange)
+                    .body(readByteRange(bytes, rangeStart, rangeEnd));
+            }
         }
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .header("Content-Type", "audio/mpeg")
+            .header("Content-Disposition", MessageFormat.format("attachment; filename=\"{0}.mp3\"", filename))
+            .header("Content-Length", String.valueOf(bytes.length))
+            .body(bytes);
     }
 
     private static long getRangeEnd(long fileSize, String[] ranges) {

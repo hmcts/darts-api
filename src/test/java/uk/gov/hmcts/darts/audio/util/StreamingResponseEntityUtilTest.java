@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class StreamingResponseEntityUtilTest {
 
@@ -53,6 +54,21 @@ class StreamingResponseEntityUtilTest {
 
             assertEquals("1501", contentLength);
             assertEquals("bytes 1000-2500/3248752", response.getHeaders().get("Content-Range").get(0));
+        }
+
+    }
+
+    @Test
+    void startAndEndRangeListSameAsFile() throws IOException {
+        String httpRangeList = "bytes=0-3248751";
+
+        try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
+            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList, "testFileName");
+
+            assertEquals(HttpStatus.OK, response.getStatusCode().value());
+
+            assertEquals("3248752", response.getHeaders().get("Content-Length").get(0));
+            assertNull(response.getHeaders().get("Content-Range"));
         }
 
     }
