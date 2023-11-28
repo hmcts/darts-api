@@ -242,11 +242,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return blobId;
     }
 
-    private List<MediaEntity> filterMediaByMediaRequestDates(List<MediaEntity> mediaEntitiesForRequest, MediaRequestEntity mediaRequestEntity) {
-        return mediaEntitiesForRequest.stream().filter(media -> media.getStart().isAfter(mediaRequestEntity.getStartTime())
-                                                               || media.getStart().equals(mediaRequestEntity.getStartTime())
-                                                               || media.getEnd().isBefore(mediaRequestEntity.getEndTime())
-                                                               || media.getEnd().equals(mediaRequestEntity.getEndTime()))
+    List<MediaEntity> filterMediaByMediaRequestDates(List<MediaEntity> mediaEntitiesForRequest, MediaRequestEntity mediaRequestEntity) {
+        return mediaEntitiesForRequest.stream().filter(media ->
+                                                           (!media.getStart().isBefore( mediaRequestEntity.getStartTime())
+                                                               && media.getStart().isBefore( mediaRequestEntity.getEndTime()))
+                                                               || (!media.getEnd().isAfter( mediaRequestEntity.getEndTime())
+                                                               && media.getEnd().isBefore( mediaRequestEntity.getEndTime())))
             .collect(Collectors.toList());
     }
 
