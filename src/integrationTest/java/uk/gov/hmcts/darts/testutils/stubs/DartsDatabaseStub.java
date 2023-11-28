@@ -63,7 +63,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -456,6 +455,7 @@ public class DartsDatabaseStub {
             testUser.setUserName("testuser");
             testUser.setAccountGuid(UUID.randomUUID().toString());
             testUser.setIsSystemUser(false);
+            testUser.setState(0);
             userAccountRepository.saveAndFlush(testUser);
         }
     }
