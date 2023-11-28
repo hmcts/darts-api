@@ -692,6 +692,9 @@ components:
         case_id:
           type: integer
           example: 1
+        hearing_id:
+          type: integer
+          example: 1234
         case_number:
           type: string
           example: Swansea_case_1
@@ -735,6 +738,9 @@ components:
         request_type:
           type: string
           example: Specified Times
+        is_manual:
+          type: boolean
+          example: false
         transcription_start_ts:
           type: string
           format: date-time

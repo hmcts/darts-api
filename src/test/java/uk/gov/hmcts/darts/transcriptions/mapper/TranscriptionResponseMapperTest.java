@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -107,6 +108,23 @@ class TranscriptionResponseMapperTest {
     }
 
     @Test
+    void mapToTranscriptionResponseWithNoHearingId() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        transcriptionEntity.setHearing(null);
+        transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
+
+        GetTranscriptionByIdResponse transcriptionResponse =
+            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityNoHearing.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
     void mapToTranscriptionResponseWithWorkflow() throws Exception {
         HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
         List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
@@ -133,6 +151,22 @@ class TranscriptionResponseMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntity.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    void mapToTranscriptionResponseIsAutomated() throws Exception {
+        HearingEntity hearing1 = CommonTestDataUtil.createHearing("case1", LocalTime.NOON);
+        List<TranscriptionEntity> transcriptionList = CommonTestDataUtil.createTranscriptionList(hearing1, true, false);
+        TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
+        transcriptionEntity.setIsManualTranscription(false);
+
+        GetTranscriptionByIdResponse transcriptionResponse =
+            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "Tests/transcriptions/mapper/TranscriptionResponseMapper/expectedResponseSingleEntityAutomated.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
