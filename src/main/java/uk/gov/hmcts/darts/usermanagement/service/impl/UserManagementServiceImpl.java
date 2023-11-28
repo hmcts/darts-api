@@ -1,15 +1,14 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
-import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
@@ -36,9 +35,14 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final SecurityGroupRepository securityGroupRepository;
     private final AuthorisationApi authorisationApi;
     private final UserSearchQuery userSearchQuery;
+    private final List<UserCreationValidation> userCreationValidations;
+    private final List<UserModifyValidation> userModifyValidations;
 
     @Override
+    @Transactional
     public UserWithId createUser(User user) {
+        userCreationValidations.forEach(val -> val.validate(user));
+
         var userEntity = userAccountMapper.mapToUserEntity(user);
         userEntity.setIsSystemUser(false);
         mapSecurityGroupsToUserEntity(user.getSecurityGroups(), userEntity);
@@ -61,15 +65,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    @Transactional
     public UserWithIdAndLastLogin modifyUser(Integer userId, UserPatch userPatch) {
-        var userEntity = userAccountRepository.findById(userId)
-            .orElseThrow(() -> new DartsApiException(
-                UserManagementError.USER_NOT_FOUND,
-                String.format("User id %d not found", userId)
-            ));
-        updateEntity(userPatch, userEntity);
+        userModifyValidations.forEach(val -> val.validate(userPatch, userId));
 
-        UserAccountEntity updatedUserEntity = userAccountRepository.save(userEntity);
+        UserAccountEntity updatedUserEntity = userAccountRepository.findById(userId)
+            .map(userEntity -> updatedUserAccount(userPatch, userEntity)).get();
 
         UserWithIdAndLastLogin user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
         List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
@@ -90,6 +91,11 @@ public class UserManagementServiceImpl implements UserManagementService {
             });
 
         return userWithIdAndLastLoginList;
+    }
+
+    private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
+        updateEntity(userPatch, userEntity);
+        return userAccountRepository.save(userEntity);
     }
 
     private void updateEntity(UserPatch user, UserAccountEntity userAccountEntity) {
@@ -133,5 +139,4 @@ public class UserManagementServiceImpl implements UserManagementService {
             .map(SecurityGroupEntity::getId)
             .toList();
     }
-
 }

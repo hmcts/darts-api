@@ -51,4 +51,6 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         """)
     List<UserAccountEntity> findByEmailAddressOrAccountGuidForRolesAndGlobalAccessIsTrue(String emailAddress, String accountGuid, Set<Integer> roleIds);
 
+    Optional<UserAccountEntity> findByEmailAddressIgnoreCaseAndState(String emailAddress, Integer state);
+
 }
