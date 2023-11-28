@@ -28,7 +28,6 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
-@SpringBootTest()
 class UserIdentityImplTest extends IntegrationBase {
 
     @Autowired

@@ -62,7 +62,7 @@ public class UserAccountStub {
         newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
-        newUser.setState(DISABLED.getId());
+        newUser.setState(ENABLED.getId());
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
         return userAccountRepository.saveAndFlush(newUser);
