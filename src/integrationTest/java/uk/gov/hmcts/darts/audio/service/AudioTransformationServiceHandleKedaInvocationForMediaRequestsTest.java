@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -120,7 +121,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
         var notificationEntity = scheduledNotifications.get(0);
         assertEquals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(), notificationEntity.getEventId());
-        assertNull(notificationEntity.getTemplateValues());
+        assertNotNull(notificationEntity.getTemplateValues());
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }
