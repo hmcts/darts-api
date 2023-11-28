@@ -574,6 +574,7 @@ components:
       type: object
       required:
         - urgency_id
+        - transcription_urgency_id
         - transcription_type_id
       properties:
         hearing_id:
@@ -583,6 +584,9 @@ components:
           type: integer
           example: 4567
         urgency_id:
+          type: integer
+          example: 2
+        transcription_urgency_id:
           type: integer
           example: 2
         transcription_type_id:

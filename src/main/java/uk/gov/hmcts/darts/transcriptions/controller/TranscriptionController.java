@@ -195,6 +195,7 @@ public class TranscriptionController implements TranscriptionApi {
         Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
         TranscriptionTypeEnum.fromId(transcriptionTypeId);
         TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getUrgencyId());
+        TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getTranscriptionUrgencyId());
 
         if (transcriptionTypesThatRequireDates(transcriptionTypeId)
             && !transcriptionDatesAreSet(
