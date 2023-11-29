@@ -220,6 +220,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
     @Test
     void addAudioRequestDownloadPostShouldThrow403() throws Exception {
+
         CourthouseEntity courthouse = dartsDatabase.findCourthouseWithName(SOME_COURTHOUSE);
         testUser = dartsDatabase.getUserAccountStub().createJudgeUser(courthouse);
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);

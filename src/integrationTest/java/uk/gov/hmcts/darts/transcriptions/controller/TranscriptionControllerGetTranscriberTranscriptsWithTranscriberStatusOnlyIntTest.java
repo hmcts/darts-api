@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.net.URI;
 
@@ -24,8 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @Transactional
-@TestInstance(PER_CLASS)
-class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyIntTest extends IntegrationBase {
+class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyIntTest extends IntegrationPerClassBase {
 
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/transcriber-view");
     private static final String USER_ID_HEADER = "user_id";

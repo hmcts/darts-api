@@ -48,11 +48,11 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        List<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCaseAndState(
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCaseAndState(
             INTEGRATION_TEST_USER_EMAIL, ENABLED.getId());
 
-        if (!userAccountEntityOptional.isEmpty()) {
-            return userAccountEntityOptional.get(0);
+        if (!userAccounts.isEmpty()) {
+            return userAccounts.get(0);
         } else {
             return createIntegrationUser(UUID.randomUUID().toString());
         }
@@ -65,7 +65,7 @@ public class UserAccountStub {
         newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
-        newUser.setState(DISABLED.getId());
+        newUser.setState(ENABLED.getId());
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
         return userAccountRepository.saveAndFlush(newUser);

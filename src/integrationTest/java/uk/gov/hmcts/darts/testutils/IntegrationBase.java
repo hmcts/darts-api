@@ -20,7 +20,8 @@ public class IntegrationBase {
 
     @BeforeEach
     void clearDbAndStubs() {
-        dartsDatabase.clearDatabaseInThisOrder();
+        dartsDatabase.resetDatabase();
+//        dartsDatabase.clearDatabaseInThisOrder();
         dartsGateway.clearStubs();
     }
 }

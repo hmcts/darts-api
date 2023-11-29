@@ -1,10 +1,15 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import com.jayway.jsonpath.internal.function.Parameter;
+import jakarta.annotation.PostConstruct;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -66,6 +71,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
@@ -73,6 +79,7 @@ import static java.util.Arrays.asList;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
+import static uk.gov.hmcts.darts.usermanagement.model.UserState.ENABLED;
 
 @Service
 @AllArgsConstructor
@@ -118,27 +125,81 @@ public class DartsDatabaseStub {
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
 
+    private final EntityManager entityManager;
+    private List<String> tableNames;
+    private List<String> excludedTables;
+
+    @PostConstruct
+    void afterPropertiesSet() {
+        excludedTables.addAll(List.of(
+            "event_handler",
+            "audit_activity",
+            "automated_task",
+            "external_location_type",
+            "flyway_schema_history",
+            "object_directory_status",
+            "security_permission",
+            "transcription_status",
+            "transcription_type",
+            "transcription_urgency",
+            "security_group",
+            "user_account"
+        ));
+        tableNames = entityManager.getMetamodel().getEntities().stream()
+            .filter(entityType -> entityType.getJavaType().getAnnotation(Table.class) != null)
+            .map(entityType -> entityType.getJavaType().getAnnotation(Table.class))
+            .map(this::convertToTableName)
+            .filter(this::notExcluded)// TODO
+            .toList();
+    }
+
+    private boolean notExcluded(String tableName) {
+        return !excludedTables.contains(tableName);
+    }
+
+    private String convertToTableName(Table table) {
+        String schema = table.schema();
+        String tableName = table.name();
+
+        String convertedSchema = StringUtils.hasText(schema) ? schema.toLowerCase() + "." : "";
+        String convertedTableName = tableName.replaceAll("([a-z])([A-Z])", "$1_$2");
+
+        return convertedSchema + convertedTableName;
+    }
+
+    @Transactional
+    public void resetDatabase() {
+        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+//        entityManager.createNativeQuery("SET SEARCH_PATH TO " + entityManager.getMetamodel().getEntities().stream());
+
+        for (String tableName : tableNames) {
+            entityManager.createNativeQuery("TRUNCATE TABLE darts." + tableName).executeUpdate();
+        }
+
+        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+    }
+
     public void clearDatabaseInThisOrder() {
-        auditRepository.deleteAll();
-        transcriptionCommentRepository.deleteAll();
-        transcriptionWorkflowRepository.deleteAll();
-        transcriptionRepository.deleteAll();
-        externalObjectDirectoryRepository.deleteAll();
-        transientObjectDirectoryRepository.deleteAll();
-        mediaRequestRepository.deleteAll();
-        eventRepository.deleteAll();
-        hearingRepository.deleteAll();
-        mediaRepository.deleteAll();
-        notificationRepository.deleteAll();
-        nodeRegistrationRepository.deleteAll();
-        courtroomRepository.deleteAll();
-        defenceRepository.deleteAll();
-        defendantRepository.deleteAll();
-        prosecutorRepository.deleteAll();
-        caseRepository.deleteAll();
-        judgeRepository.deleteAll();
-        dailyListRepository.deleteAll();
-        courthouseRepository.deleteAll();
+//        auditRepository.deleteAll();
+//        transcriptionCommentRepository.deleteAll();
+//        transcriptionWorkflowRepository.deleteAll();
+//        transcriptionRepository.deleteAll();
+//        externalObjectDirectoryRepository.deleteAll();
+//        transientObjectDirectoryRepository.deleteAll();
+//        mediaRequestRepository.deleteAll();
+//        eventRepository.deleteAll();
+//        hearingRepository.deleteAll();
+//        mediaRepository.deleteAll();
+//        notificationRepository.deleteAll();
+//        nodeRegistrationRepository.deleteAll();
+//        courtroomRepository.deleteAll();
+//        defenceRepository.deleteAll();
+//        defendantRepository.deleteAll();
+//        prosecutorRepository.deleteAll();
+//        caseRepository.deleteAll();
+//        judgeRepository.deleteAll();
+//        dailyListRepository.deleteAll();
+//        courthouseRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
     }
@@ -449,6 +510,7 @@ public class DartsDatabaseStub {
         testUser.setUserName("testuser");
         testUser.setAccountGuid(UUID.randomUUID().toString());
         testUser.setIsSystemUser(false);
+        testUser.setState(0);
         userAccountRepository.saveAndFlush(testUser);
     }
 

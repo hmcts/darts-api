@@ -23,6 +23,7 @@ public class IntegrationPerClassBase {
 
     @BeforeAll
     void clearDbInThisOrder() {
+        dartsDatabase.resetDatabase();
         dartsDatabase.clearDatabaseInThisOrder();
         dartsGateway.clearStubs();
     }
