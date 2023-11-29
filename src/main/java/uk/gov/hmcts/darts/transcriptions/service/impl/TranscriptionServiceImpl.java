@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.azure.core.util.BinaryData;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -143,7 +142,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final YourTranscriptsQuery yourTranscriptsQuery;
     private final DuplicateRequestDetector duplicateRequestDetector;
     private final TranscriberTranscriptsQuery transcriberTranscriptsQuery;
-    private final EntityManager em;
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
 
     @Override
@@ -632,7 +630,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private Optional<UpdateTranscriptionsItem> getTranscriptionsItemForId(Integer transcriptionId, List<UpdateTranscriptionsItem> updateTranscriptions) {
-        return updateTranscriptions.stream().filter(e -> e.getTranscriptionId().equals(transcriptionId)).collect(Collectors.toList()).stream().findAny();
+        return updateTranscriptions.stream().filter(e -> e.getTranscriptionId().equals(transcriptionId)).findAny();
     }
 
     private Optional<TranscriptionEntity> getTranscriptionEntityForId(Integer transcriptionId,

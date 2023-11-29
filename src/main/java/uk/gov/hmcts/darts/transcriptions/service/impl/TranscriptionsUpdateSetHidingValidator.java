@@ -21,10 +21,6 @@ public class TranscriptionsUpdateSetHidingValidator implements TranscriptionsUpd
         return entity.filter(transcriptionEntity -> canChangeHiding(transcriptionEntity, updateTranscriptionsItem)).isPresent();
     }
 
-    private boolean isHidingSet(UpdateTranscriptionsItem updateTranscriptionsItem) {
-        return updateTranscriptionsItem.getHideRequestFromRequestor() != null;
-    }
-
     private boolean canChangeHiding(TranscriptionEntity entity, UpdateTranscriptionsItem updateTranscriptionsItem) {
         boolean verify;
         if (updateTranscriptionsItem.getHideRequestFromRequestor() != null && updateTranscriptionsItem.getHideRequestFromRequestor()) {
