@@ -244,10 +244,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     List<MediaEntity> filterMediaByMediaRequestDates(List<MediaEntity> mediaEntitiesForRequest, MediaRequestEntity mediaRequestEntity) {
         return mediaEntitiesForRequest.stream().filter(
-            media -> (media.getStart().isAfter(mediaRequestEntity.getStartTime()) && media.getStart().isBefore(mediaRequestEntity.getEndTime()))
-                || (media.getEnd().isBefore(mediaRequestEntity.getEndTime()) && media.getEnd().isAfter(mediaRequestEntity.getEndTime()))
-                || (media.getStart().isBefore(mediaRequestEntity.getStartTime()) && media.getEnd().isAfter(mediaRequestEntity.getEndTime()))
-                || media.getStart().isEqual(mediaRequestEntity.getStartTime()) || media.getEnd().isEqual(mediaRequestEntity.getEndTime()))
+            media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd())
+                && (media.getStart().isBefore(mediaRequestEntity.getEndTime())))
             .collect(Collectors.toList());
     }
 

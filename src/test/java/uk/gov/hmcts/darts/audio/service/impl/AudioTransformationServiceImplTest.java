@@ -183,9 +183,19 @@ class AudioTransformationServiceImplTest {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
         List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
-        assertEquals(2, mediaEntitiesResult.size());
+        assertEquals(3, mediaEntitiesResult.size());
+        assertEquals(TIME_11_59, mediaEntitiesResult.get(0).getStart());
+        assertEquals(TIME_13_01, mediaEntitiesResult.get(2).getEnd());
+    }
+
+    @Test
+    void filterMediaByMediaRequestDatesWithStartDateAndEndDateExactMiddleMediaMatch() {
+        List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
+        MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_20, TIME_12_40);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        assertEquals(1, mediaEntitiesResult.size());
         assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getStart());
-        assertEquals(TIME_13_01, mediaEntitiesResult.get(1).getEnd());
+        assertEquals(TIME_12_40, mediaEntitiesResult.get(0).getEnd());
     }
 
     @Test
