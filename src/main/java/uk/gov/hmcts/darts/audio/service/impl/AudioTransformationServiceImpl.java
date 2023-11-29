@@ -223,15 +223,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         } catch (Exception e) {
             log.error(
-                "Exception occurred for request id {}. Exception message: {}",
+                "Exception occurred for request id {}.",
                 requestId,
-                e.getMessage()
+                e
             );
             mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             if (mediaRequestEntity != null && hearingEntity != null) {
                 notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
-                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                );
             }
 
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
@@ -267,7 +268,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
             )));
 
-        log.debug("Downloading audio blob for {}", id);
+        log.debug("Downloading audio blob for {} from unstructured datastore", id);
         BinaryData binaryData = getUnstructuredAudioBlob(id);
         log.debug("Download audio blob complete for {}", id);
 
@@ -327,7 +328,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                             CourtCaseEntity courtCase,
                             String notificationTemplateName) {
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
-                 courtCase.getId());
+                 courtCase.getId()
+        );
 
         Optional<UserAccountEntity> userAccount = userAccountRepository.findById(mediaRequestEntity.getRequestor().getId());
 

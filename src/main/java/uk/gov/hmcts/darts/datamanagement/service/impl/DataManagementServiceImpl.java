@@ -33,6 +33,9 @@ public class DataManagementServiceImpl implements DataManagementService {
 
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
         BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
+        if (!blobClient.exists()) {
+            log.error("Blob {} does not exist in {} container", blobId, containerName);
+        }
         return blobClient.downloadContent();
     }
 
