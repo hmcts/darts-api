@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -47,11 +48,11 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCase(
-            INTEGRATION_TEST_USER_EMAIL);
+        List<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCaseAndState(
+            INTEGRATION_TEST_USER_EMAIL, ENABLED.getId());
 
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
+        if (!userAccountEntityOptional.isEmpty()) {
+            return userAccountEntityOptional.get(0);
         } else {
             return createIntegrationUser(UUID.randomUUID().toString());
         }

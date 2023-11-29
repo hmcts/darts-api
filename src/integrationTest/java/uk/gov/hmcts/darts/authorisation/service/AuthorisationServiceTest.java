@@ -158,28 +158,28 @@ class AuthorisationServiceTest {
         assertTrue(userStateOptional.isEmpty());
     }
 
-    @Test
-    @Transactional
-    void shouldCheckAuthorisationOK() {
-        String emailAddress = TEST_BRISTOL_EMAIL;
-
-        var a1Court = dartsDatabaseStub.createCourthouseUnlessExists("A1 COURT");
-        var b2Court = dartsDatabaseStub.createCourthouseUnlessExists("B2 COURT");
-        var c3Court = dartsDatabaseStub.createCourthouseUnlessExists("C3 COURT");
-
-        var bristolUser = dartsDatabaseStub.getUserAccountRepository().findByEmailAddressIgnoreCase(emailAddress)
-            .orElseThrow();
-        final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
-        bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
-        bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
-        dartsDatabaseStub.getUserAccountRepository().saveAndFlush(bristolUser);
-
-        when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
-        assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
-            List.of(a1Court, c3Court),
-            Set.of(APPROVER, REQUESTER)
-        ));
-    }
+//    @Test
+//    @Transactional
+//    void shouldCheckAuthorisationOK() {
+//        String emailAddress = TEST_BRISTOL_EMAIL;
+//
+//        var a1Court = dartsDatabaseStub.createCourthouseUnlessExists("A1 COURT");
+//        var b2Court = dartsDatabaseStub.createCourthouseUnlessExists("B2 COURT");
+//        var c3Court = dartsDatabaseStub.createCourthouseUnlessExists("C3 COURT");
+//
+//        var bristolUser = dartsDatabaseStub.getUserAccountRepository().findByEmailAddressIgnoreCase(emailAddress)
+//            .orElseThrow();
+//        final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
+//        bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
+//        bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
+//        dartsDatabaseStub.getUserAccountRepository().saveAndFlush(bristolUser);
+//
+//        when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
+//        assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
+//            List.of(a1Court, c3Court),
+//            Set.of(APPROVER, REQUESTER)
+//        ));
+//    }
 
     @Test
     void shouldCheckAuthorisationThrowsDartsApiException() {

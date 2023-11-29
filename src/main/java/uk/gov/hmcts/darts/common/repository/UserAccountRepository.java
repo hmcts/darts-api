@@ -13,9 +13,12 @@ import java.util.Set;
 @Repository
 public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Integer> {
 
-    Optional<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
+    List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
-    Optional<UserAccountEntity> findByAccountGuid(String guid);
+    List<UserAccountEntity> findByEmailAddressIgnoreCaseAndState(String emailAddress, Integer state);
+
+
+    Optional<UserAccountEntity> findByAccountGuidAndState(String guid, Integer state);
 
     //todo find out what user states are Active
     @Query("""

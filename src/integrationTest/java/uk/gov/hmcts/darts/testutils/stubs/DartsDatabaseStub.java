@@ -439,9 +439,9 @@ public class DartsDatabaseStub {
     }
 
     public void createTestUserAccount() {
-        Optional<UserAccountEntity> foundAccount = userAccountRepository.findByEmailAddressIgnoreCase(
+        List<UserAccountEntity> foundAccount = userAccountRepository.findByEmailAddressIgnoreCase(
             "test.user@example.com");
-        if (foundAccount.isPresent()) {
+        if (!foundAccount.isEmpty()) {
             return;
         }
         UserAccountEntity testUser = new UserAccountEntity();
