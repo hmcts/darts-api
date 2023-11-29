@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.authorisation.util.AuthorisationUnitOfWork;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -33,9 +35,11 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.isNull;
@@ -64,7 +68,7 @@ public class TranscriptionController implements TranscriptionApi {
     private final TranscriptionService transcriptionService;
     private final CaseService caseService;
     private final HearingsService hearingsService;
-
+    private final AuthorisationUnitOfWork authorisation;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -229,6 +233,27 @@ public class TranscriptionController implements TranscriptionApi {
             transcriptionService.getTranscription(transcriptionId),
             HttpStatus.OK
         );
+    }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<UpdateTranscriptionsItem>> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
+        List<UpdateTranscriptionsItem> responseList = new ArrayList<>();
+
+        Runnable executeOnAuth = () -> {
+            responseList.addAll(transcriptionService.updateTranscriptions(request));
+        };
+
+        // we authorise the transcription ids
+        authorisation.authoriseWithIdsForTranscription(request,
+                                                       e -> e.getTranscriptionId().toString(),
+                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+                                                       executeOnAuth
+        );
+
+        return new ResponseEntity<>(
+            responseList,
+            HttpStatus.OK
+        );
     }
 }
