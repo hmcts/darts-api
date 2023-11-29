@@ -7,6 +7,9 @@
 --    add legacy object_id fields to case_retention and retention_policy_type
 --    change retention field total_sentence from integer to character varying
 --    change sentence_name to policy_name on retention_policy_type
+-- v5 add is_manual_override to case_retention
+--    add event_ts to case_management_retention
+--    amend eve_id on case_managment_retention to be nullable
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -21,7 +24,8 @@ CREATE TABLE case_management_retention
 (cmr_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,rpt_id                      INTEGER                       NOT NULL
-,eve_id                      INTEGER                       NOT NULL
+,eve_id                      INTEGER                       
+,event_ts                    TIMESTAMP WITH TIME ZONE      
 ,total_sentence              CHARACTER VARYING             NOT NULL  -- < is this integer or the nYnMnD >
 ) TABLESPACE darts_tables;
 
@@ -37,6 +41,7 @@ CREATE TABLE case_retention
 ,comments                    CHARACTER VARYING 
 ,retention_object_id         CHARACTER VARYING                       -- PK of legacy source migration table 
 ,submitted_ts                TIMESTAMP WITH TIME ZONE      NOT NULL
+,is_manual_override          BOOLEAN                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ) TABLESPACE darts_tables;
