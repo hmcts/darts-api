@@ -48,7 +48,7 @@ import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProper
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
-import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionEntityMapper;
+import uk.gov.hmcts.darts.transcriptions.helper.UpdateTranscriptionEntityHelper;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
@@ -581,7 +581,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public List<UpdateTranscriptionsItem> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
 
-        final List<TranscriptionEntity> processed = processTransactionUpdates(request);
+        final List<TranscriptionEntity> processed = processTranscriptionUpdates(request);
 
         List<UpdateTranscriptionsItem> unprocessedUpdates = new ArrayList<>(request);
         List<UpdateTranscriptionsItem> processedUpdates = getTranscriptionForIds(getTranscriptionIdsForEntities(processed), request);
@@ -597,21 +597,21 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return processedUpdates;
     }
 
-    private List<TranscriptionEntity> processTransactionUpdates(List<UpdateTranscriptionsItem> request) {
-        List<TranscriptionEntity> transcriptionEntity = transcriptionRepository.findByIdIn(getTranscriptionIdsForRequest(request));
+    private List<TranscriptionEntity> processTranscriptionUpdates(List<UpdateTranscriptionsItem> request) {
+        List<TranscriptionEntity> foundTranscriptionEntities = transcriptionRepository.findByIdIn(getTranscriptionIdsForRequest(request));
         final List<TranscriptionEntity> validated = new ArrayList<>();
-        request.forEach(en -> {
-            Optional<TranscriptionEntity> fndEntityTranscription = getTranscriptionEntityForId(en.getTranscriptionId(), transcriptionEntity);
+        for (UpdateTranscriptionsItem requestItem : request) {
+            Optional<TranscriptionEntity> matchingEntity = getTranscriptionEntityForId(requestItem.getTranscriptionId(), foundTranscriptionEntities);
             updateTranscriptionsValidator.forEach(validator -> {
-                if (validator.validate(fndEntityTranscription, en)) {
-                    validated.add(fndEntityTranscription.get());
+                if (validator.validate(matchingEntity, requestItem)) {
+                    validated.add(matchingEntity.get());
                 }
             });
-        });
+        }
 
         if (!validated.isEmpty()) {
             validated.stream().forEach(entity -> {
-                TranscriptionEntityMapper.mapTranscriptionToTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request).get());
+                UpdateTranscriptionEntityHelper.updateTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request).get());
             });
 
             transcriptionRepository.saveAll(validated);
