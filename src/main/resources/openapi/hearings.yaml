@@ -217,7 +217,13 @@ components:
         tra_id:
           type: integer
           example: 1
+        transcription_id:
+          type: integer
+          example: 1
         hea_id:
+          type: integer
+          example: 2
+        hearing_id:
           type: integer
           example: 2
         hearing_date:
