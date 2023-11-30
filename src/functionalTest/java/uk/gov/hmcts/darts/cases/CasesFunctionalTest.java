@@ -51,7 +51,7 @@ class CasesFunctionalTest  extends FunctionalTest {
         caseBody = caseBody.replace("<<courthouse>>", COURTHOUSE);
         caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
 
-        Response caseResponse = buildRequestWithExternalAuth()
+        Response caseResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_PATH))
@@ -81,7 +81,7 @@ class CasesFunctionalTest  extends FunctionalTest {
         eventBody = eventBody.replace("<<courtroom>>", COURTROOM);
         eventBody = eventBody.replace("<<caseNumber>>", CASE_NUMBER);
 
-        Response eventResponse = buildRequestWithExternalAuth()
+        Response eventResponse = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(EVENTS_PATH))
@@ -96,7 +96,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     @Test
     @Order(2)
     void getCases() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .when()
             .baseUri(getUri(CASES_PATH))
@@ -193,6 +193,5 @@ class CasesFunctionalTest  extends FunctionalTest {
 
         assertEquals(200, getCaseresponse.statusCode());
         assertEquals(CASE_NUMBER, getCaseresponse.jsonPath().get("case_number"));
-        assertEquals("2030-10-07T23:59:59Z", getCaseresponse.jsonPath().get("retain_until"));
     }
 }

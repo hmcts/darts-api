@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -28,9 +27,9 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -38,24 +37,28 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static java.time.OffsetDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
 
 @AutoConfigureMockMvc
-@Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports"})
 @Transactional
 class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase {
@@ -64,17 +67,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     private static final String TEST_COMMENT = "Test comment";
 
-    private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-07-31T12:00Z");
-    private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-07-31T14:32Z");
+    private static final OffsetDateTime START_TIME = now().plusMinutes(5);
+    private static final OffsetDateTime END_TIME = now().plusMinutes(20);
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private UserIdentity mockUserIdentity;
-
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private AuthorisationStub authorisationStub;
@@ -108,15 +108,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         hearing = authorisationStub.getHearingEntity();
         testUser = authorisationStub.getTestUser();
 
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
-    @Test
+    @ParameterizedTest
+    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES", "OTHER"})
     @Order(1)
-    void transcriptionRequestWithValidValuesShouldReturnSuccess() throws Exception {
+    void transcriptionRequestWithValidValuesShouldReturnSuccess(TranscriptionTypeEnum transcriptionTypeEnum) throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
@@ -135,8 +134,9 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .read("$.transcription_id");
         assertNotNull(transcriptionId);
 
-        TranscriptionRepository transcriptionRepository = dartsDatabaseStub.getTranscriptionRepository();
+        TranscriptionRepository transcriptionRepository = dartsDatabase.getTranscriptionRepository();
         TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
+        assertTrue(transcriptionEntity.getIsManualTranscription());
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
         assertEquals(2, transcriptionWorkflowEntities.size());
         assertTranscriptionWorkflow(transcriptionWorkflowEntities.get(0),
@@ -146,11 +146,14 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
                                     AWAITING_AUTHORISATION, testUser
         );
 
-        assertThat(dartsDatabaseStub.getTranscriptionCommentRepository().findAll())
+        assertThat(dartsDatabase.getTranscriptionCommentRepository().findAll())
             .hasSize(1)
             .extracting(TranscriptionCommentEntity::getComment)
             .containsExactly(TEST_COMMENT);
 
+        List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
+        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        assertTrue(templateList.contains(COURT_MANAGER_APPROVE_TRANSCRIPT.toString()));
 
         assertAudit(1);
     }
@@ -169,8 +172,8 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertAudit(int expected) {
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(courtCase.getId());
-        searchQuery.setFromDate(OffsetDateTime.now().minusDays(1));
-        searchQuery.setToDate(OffsetDateTime.now().plusDays(1));
+        searchQuery.setFromDate(now().minusDays(1));
+        searchQuery.setToDate(now().plusDays(1));
         searchQuery.setAuditActivityId(REQUEST_TRANSCRIPTION.getId());
 
         List<AuditEntity> auditEntities = auditService.search(searchQuery);
@@ -183,12 +186,15 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     @Test
     @Order(12)
     void transcriptionRequestWithDuplicateValues() throws Exception {
+        OffsetDateTime startTime = now().plusMinutes(5).truncatedTo(ChronoUnit.SECONDS);
+        OffsetDateTime endTime = now().plusMinutes(10).truncatedTo(ChronoUnit.SECONDS);
+
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
-        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
 
         TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
-            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
         );
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
@@ -204,9 +210,144 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
 
         mockMvc.perform(requestBuilderDup)
-            .andExpect(status().is4xxClientError())
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
+            .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
+            .andReturn();
+    }
+
+    @Test
+    @Order(13)
+    void transcriptionRequestWithDuplicateValuesWithNoTimes() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, null, null
+        );
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
             .andReturn();
 
+        MockHttpServletRequestBuilder requestBuilderDup = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        mockMvc.perform(requestBuilderDup)
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+
+    @Test
+    @Order(14)
+    void transcriptionRequestHearingWithNoAudio() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, START_TIME, END_TIME
+        );
+
+        hearing.setMediaList(null);
+        dartsDatabase.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        assertFailedTranscription110Error(actualJson);
+
+        assertAudit(0);
+    }
+
+
+    private void assertFailedTranscription110Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "TRANSCRIPTION_110",
+              "title": "Transcription could not be requested, no audio",
+              "status": 404
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    @Order(15)
+    void transcriptionRequestStartTimeOutsideHearing() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, now().minusHours(1), now().plusMinutes(10)
+        );
+
+        dartsDatabase.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        assertFailedTranscription111Error(actualJson);
+
+        assertAudit(0);
+    }
+
+    @Test
+    @Order(16)
+    void transcriptionRequestEndTimeOutsideHearing() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, now().plusMinutes(1), now().plusHours(10)
+        );
+
+        dartsDatabase.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        assertFailedTranscription111Error(actualJson);
+
+        assertAudit(0);
+    }
+
+    private void assertFailedTranscription111Error(String actualJson) {
+        String expectedJson = """
+            {
+              "type": "TRANSCRIPTION_111",
+              "title": "Transcription could not be requested, times outside of hearing times",
+              "status": 404
+            }
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test

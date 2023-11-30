@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,11 +11,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.enums.AuditActivityEnum;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.model.AuditSearchQuery;
 import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -33,6 +36,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -54,9 +58,12 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audio-requests/playback");
 
-    private static final Integer PLAYBACK_AUDIT_ACTIVITY_ID = AuditActivityEnum.AUDIO_PLAYBACK.getId();
+    private static final Integer PLAYBACK_AUDIT_ACTIVITY_ID = AuditActivity.AUDIO_PLAYBACK.getId();
     @MockBean
     private Authorisation authorisation;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
 
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
@@ -72,6 +79,12 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
     @Autowired
     private AuditService auditService;
+
+    @BeforeEach
+    void setUp() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
 
     @Test
     void audioRequestPlaybackShouldPlaybackFromOutboundStorageAndReturnSuccess() throws Exception {
@@ -147,12 +160,12 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         mediaRequestEntity.setRequestType(PLAYBACK);
         dartsDatabase.save(mediaRequestEntity);
 
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
-
         doNothing().when(authorisation)
             .authoriseByMediaRequestId(mediaRequestEntity.getId(),
                                        Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
+            .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))

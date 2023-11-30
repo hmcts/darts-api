@@ -46,7 +46,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
         bodyText = bodyText.replace("<<courtHouseName>>", courthouseName);
         bodyText = bodyText.replace("<<courtroomName>>", courtroomName);
 
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body(bodyText)
             .when()
@@ -61,7 +61,7 @@ class PostEventsFunctionalTest extends FunctionalTest {
 
     @Test
     void fail() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .body("""
                       {

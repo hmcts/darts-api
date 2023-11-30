@@ -21,6 +21,7 @@ public class AudioTestData {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(requestor);
         mediaRequestEntity.setStatus(status);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
@@ -43,6 +44,7 @@ public class AudioTestData {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.EXPIRED);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);
@@ -63,6 +65,7 @@ public class AudioTestData {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);
+        mediaRequestEntity.setCurrentOwner(requestor);
         mediaRequestEntity.setStatus(AudioRequestStatus.COMPLETED);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setAttempts(0);

@@ -9,72 +9,6 @@ info:
   title: Modernised DARTS
 
 paths:
-  /audio/download:
-    get:
-      tags:
-        - Audio
-      summary: Download audio
-      operationId: download
-      description: Download audio
-      parameters:
-        - in: query
-          name: media_request_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            audio/mpeg:
-              schema:
-                type: string
-                format: binary
-            application/zip:
-              schema:
-                type: string
-                format: binary
-        '400':
-          description: Bad Request Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUTHORISATION_103"
-                title: "Failed to check authorisation for the media request"
-                status: 400
-        '401':
-          description: Unauthorised Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUTHORISATION_100"
-                title: "User is not authorised for the associated courthouse"
-                status: 401
-        '404':
-          description: Not Found Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUDIO_REQUESTS_100"
-                title: "The requested audio request cannot be found"
-                status: 404
-        '500':
-          description: The requested data cannot be located
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUDIO_101"
-                title: "The requested data cannot be located"
-                status: 500
-
   /audio/hearings/{hearing_id}/audios:
     get:
       tags:
@@ -153,74 +87,11 @@ paths:
           required: true
           description: "Internal identifier for media"
           example: 1
-      responses:
-        200:
-          description: OK
-          content:
-            audio/mpeg:
-              schema:
-                type: string
-                format: binary
-        '400':
-          description: Bad Request Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUTHORISATION_104"
-                title: "Failed to check authorisation for the media"
-                status: 400
-        '401':
-          description: Unauthorised Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUTHORISATION_100"
-                title: "User is not authorised for the associated courthouse"
-                status: 401
-        '404':
-          description: Not Found Error
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUDIO_102"
-                title: "The requested media cannot be found"
-                status: 404
-        500:
-          description: The requested data cannot be located
-          content:
-            application/json+problem:
-              schema:
-                $ref: './problem.yaml'
-              example:
-                type: "AUDIO_101"
-                title: "The requested data cannot be located"
-                status: 500
-  /audio/preview2/{media_id}:
-    get:
-      tags:
-        - Audio
-      summary: Preview audio (return bytes)
-      operationId: preview2
-      description: Preview audio
-      parameters:
-        - in: path
-          name: media_id
-          schema:
-            type: integer
-          required: true
-          description: "Internal identifier for media"
-          example: 1
         - in: header
           name: range
           schema:
             type: string
-          description: "Range header"
+          description: "Range header, required for streaming audio."
       responses:
         200:
           description: OK
@@ -273,17 +144,22 @@ paths:
     post:
       tags:
         - Audio
-      summary: Upload audio metadata
-      operationId: addAudioMetaData
+      summary: Upload audio file and metadata
+      operationId: addAudio
       requestBody:
-        required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AddAudioMetadataRequest'
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                metadata:
+                  $ref: '#/components/schemas/AddAudioMetadataRequest'
       responses:
         200:
-          description: Audio metadata accepted
+          description: Audio file and metadata accepted
         400:
           description: Bad request
           content:
@@ -299,37 +175,6 @@ paths:
 
 components:
   schemas:
-    AudioRequestType:
-      type: string
-      enum:
-        - DOWNLOAD
-        - PLAYBACK
-    AudioRequestDetails:
-      type: object
-      required:
-        - hearing_id
-        - requestor
-        - start_time
-        - end_time
-        - request_type
-      properties:
-        hearing_id:
-          type: integer
-          example: 12345
-        requestor:
-          type: integer
-          example: 4656
-        start_time:
-          type: string
-          format: date-time
-          example: '2023-05-31T09:00:00Z'
-        end_time:
-          type: string
-          format: date-time
-          example: '2023-05-31T12:00:00Z'
-        request_type:
-          $ref: '#/components/schemas/AudioRequestType'
-
     AudioMetadata:
       type: object
       properties:
@@ -342,48 +187,6 @@ components:
         media_end_timestamp:
           type: string
           format: date-time
-    AddAudioResponse:
-      type: object
-      required:
-        - request_id
-        - case_id
-        - courthouse_name
-        - defendants
-        - hearing_date
-        - start_time
-        - end_time
-      properties:
-        request_id:
-          type: integer
-          example: 1234
-        case_id:
-          type: integer
-          example: 1
-        case_number:
-          type: string
-          example: 'T4565443'
-        courthouse_name:
-          type: string
-          example: "Swansea"
-        defendants:
-          type: array
-          items:
-            $ref: '#/components/schemas/defendant'
-        hearing_date:
-          type: string
-          format: date
-          example: '10-05-2023'
-        start_time:
-          type: string
-          format: date-time
-          example: '2023-05-31T09:00:00Z'
-        end_time:
-          type: string
-          format: date-time
-          example: '2023-05-31T10:00:00Z'
-    defendant:
-      type: string
-      example: Joe Bloggs
     AddAudioMetadataRequest:
       type: object
       required:
@@ -436,7 +239,7 @@ components:
           maxLength: 255
         file_size:
           type: integer
-          format: int32
+          format: int64
           description: 'The size of the file in bytes'
         checksum:
           type: string
@@ -449,3 +252,4 @@ components:
           description: 'List of associated case numbers'
           minItems: 1
           maxLength: 255
+

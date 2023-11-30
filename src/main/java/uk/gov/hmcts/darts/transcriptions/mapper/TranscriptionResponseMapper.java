@@ -2,15 +2,18 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
+import uk.gov.hmcts.darts.transcriptions.util.TranscriptionUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,16 +51,33 @@ public class TranscriptionResponseMapper {
         return transcriptionUrgencyResponse;
     }
 
-    public static TranscriptionResponse mapToTranscriptionResponse(TranscriptionEntity transcriptionEntity) {
+    public static GetTranscriptionByIdResponse mapToTranscriptionResponse(TranscriptionEntity transcriptionEntity) {
 
-        TranscriptionResponse transcriptionResponse = new TranscriptionResponse();
+        GetTranscriptionByIdResponse transcriptionResponse = new GetTranscriptionByIdResponse();
         try {
             CourtCaseEntity courtCase = transcriptionEntity.getCourtCase();
+            transcriptionResponse.setTranscriptionId(transcriptionEntity.getId());
             transcriptionResponse.setCaseId(courtCase.getId());
+            EventHandlerEntity reportingRestrictions = courtCase.getReportingRestrictions();
+            if (reportingRestrictions != null) {
+                transcriptionResponse.setReportingRestriction(reportingRestrictions.getEventName());
+            }
             transcriptionResponse.setCaseNumber(courtCase.getCaseNumber());
             transcriptionResponse.setCourthouse(courtCase.getCourthouse().getCourthouseName());
             transcriptionResponse.setDefendants(courtCase.getDefendantStringList());
             transcriptionResponse.setJudges(courtCase.getJudgeStringList());
+
+            if (transcriptionEntity.getTranscriptionStatus() != null) {
+                transcriptionResponse.setStatus(transcriptionEntity.getTranscriptionStatus().getDisplayName());
+            }
+
+            transcriptionResponse.setFrom(getRequestorName(transcriptionEntity));
+            transcriptionResponse.setReceived(transcriptionEntity.getCreatedDateTime());
+            transcriptionResponse.setRequestorComments(TranscriptionUtil.getTranscriptionCommentAtStatus(
+                transcriptionEntity,
+                TranscriptionStatusEnum.REQUESTED
+            ));
+            transcriptionResponse.setRejectionReason(TranscriptionUtil.getTranscriptionCommentAtStatus(transcriptionEntity, TranscriptionStatusEnum.REJECTED));
 
             final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
                 .stream()
@@ -66,7 +86,10 @@ public class TranscriptionResponseMapper {
                 transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
             if (transcriptionEntity.getHearing() != null) {
+                transcriptionResponse.setHearingId(transcriptionEntity.getHearing().getId());
                 transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
+            } else {
+                transcriptionResponse.setHearingDate(transcriptionEntity.getHearingDate());
             }
             if (transcriptionEntity.getTranscriptionUrgency() != null) {
                 transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
@@ -74,10 +97,19 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setRequestType(transcriptionEntity.getTranscriptionType().getDescription());
             transcriptionResponse.setTranscriptionStartTs(transcriptionEntity.getStartTime());
             transcriptionResponse.setTranscriptionEndTs(transcriptionEntity.getEndTime());
+            transcriptionResponse.setIsManual(transcriptionEntity.getIsManualTranscription());
         } catch (Exception exception) {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND);
         }
         return transcriptionResponse;
 
+    }
+
+    private String getRequestorName(TranscriptionEntity transcriptionEntity) {
+        if (transcriptionEntity.getCreatedBy() != null) {
+            return transcriptionEntity.getCreatedBy().getUserName();
+        } else {
+            return transcriptionEntity.getRequestor();
+        }
     }
 }

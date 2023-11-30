@@ -8,6 +8,8 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
+import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
+
 @RequiredArgsConstructor
 @Component
 public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
@@ -30,6 +32,7 @@ public class AddAudioRequestMapperImpl implements AddAudioRequestMapper {
         media.setFileSize(addAudioMetadataRequest.getFileSize());
         media.setChecksum(addAudioMetadataRequest.getChecksum());
         media.setMediaFile(addAudioMetadataRequest.getFilename());
+        media.setMediaType(MEDIA_TYPE_DEFAULT);
         return media;
     }
 }

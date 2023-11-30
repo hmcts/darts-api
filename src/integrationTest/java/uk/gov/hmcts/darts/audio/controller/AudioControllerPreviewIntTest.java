@@ -82,4 +82,32 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.type").value("AUDIO_101"));
     }
+
+    @Test
+    void previewWithRangeFromStartShouldReturnSuccess() throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = get(URI.create(
+            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-1023");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
+
+        verify(authorisation).authoriseByMediaId(
+            mediaEntity.getId(),
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
+    }
+
+    @Test
+    void previewWithRangeShouldReturnSuccess() throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = get(URI.create(
+            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=1024-2047");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
+
+        verify(authorisation).authoriseByMediaId(
+            mediaEntity.getId(),
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
+    }
 }

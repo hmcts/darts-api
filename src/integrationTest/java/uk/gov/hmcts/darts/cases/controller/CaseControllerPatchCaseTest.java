@@ -40,12 +40,12 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(createdCase.getCourthouse());
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
     }
 
     @Test
     void testForbidden() throws Exception {
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = patch(ENDPOINT_URL, createdCase.getId())
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -58,7 +58,7 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
             """;
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -76,7 +76,16 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"case_id":<<case_id>>,"courthouse":"testCourthouse","case_number":"testCaseNumber","retain_until":"2023-09-06T16:16:57.331Z"}""";
+            {
+              "case_id": <<case_id>>,
+              "courthouse": "testCourthouse",
+              "case_number": "testCaseNumber",
+              "defendants": [],
+              "judges": [],
+              "prosecutors": [],
+              "defenders": []
+            }
+            """;
         expectedResponse = expectedResponse.replace("<<case_id>>", createdCase.getId().toString());
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -111,8 +120,10 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
 
         String actualResponse = response.getResponse().getContentAsString();
 
-        String expectedResponse = "{\"title\":\"Bad Request\",\"status\":400,\"detail\":\"JSON parse error: Unrecognized field \\\"courthouse\\\" " +
-                                  "(class uk.gov.hmcts.darts.cases.model.PatchRequestObject), not marked as ignorable\"}";
+        String expectedResponse =
+            "{\"title\":\"Bad Request\",\"status\":400,\"detail\":\"JSON parse error: Unrecognized field \\\"courthouse\\\" "
+            +
+            "(class uk.gov.hmcts.darts.cases.model.PatchRequestObject), not marked as ignorable\"}";
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

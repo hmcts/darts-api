@@ -28,8 +28,9 @@ public class TranscriptionCommentEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "trc_gen", sequenceName = "trc_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "trw_id")
-    private Integer transcriptionWorkflowId;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "trw_id")
+    private TranscriptionWorkflowEntity transcriptionWorkflow;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "tra_id")

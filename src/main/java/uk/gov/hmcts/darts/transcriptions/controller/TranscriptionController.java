@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.authorisation.util.AuthorisationUnitOfWork;
 import uk.gov.hmcts.darts.cases.service.CaseService;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -23,16 +26,20 @@ import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.http.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
+import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.isNull;
@@ -49,6 +56,9 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.AUDIO_NOT_FOUND;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TIMES_OUTSIDE_OF_HEARING_TIMES;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -58,12 +68,13 @@ public class TranscriptionController implements TranscriptionApi {
     private final TranscriptionService transcriptionService;
     private final CaseService caseService;
     private final HearingsService hearingsService;
-
+    private final AuthorisationUnitOfWork authorisation;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(
         TranscriptionRequestDetails transcriptionRequestDetails) {
         validateTranscriptionRequestValues(transcriptionRequestDetails);
@@ -97,7 +108,8 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS})
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
             transcriptionId);
@@ -136,13 +148,46 @@ public class TranscriptionController implements TranscriptionApi {
         );
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<GetYourTranscriptsResponse> getYourTranscripts(Integer userId) {
+        return ResponseEntity.ok(transcriptionService.getYourTranscripts(userId));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<TranscriberViewSummary>> getTranscriberTranscripts(Integer userId, Boolean assigned) {
+        return ResponseEntity.ok(transcriptionService.getTranscriberTranscripts(userId, assigned));
+    }
 
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
-
         if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
-            hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
+            if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
+                log.error(
+                    "Transcription could not be requested. No audio found for hearing id {}",
+                    transcriptionRequestDetails.getHearingId()
+                );
+                throw new DartsApiException(AUDIO_NOT_FOUND);
+            } else {
+                //check times
+                OffsetDateTime requestStartDateTime = transcriptionRequestDetails.getStartDateTime();
+                OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime();
+                if (requestStartDateTime != null && requestEndDateTime != null) {
+                    boolean validTimes = hearing.getMediaList().stream().anyMatch(m -> m.getStart().isBefore(
+                        requestStartDateTime) && m.getStart().isBefore(requestEndDateTime)
+                        && m.getEnd().isAfter(requestStartDateTime) && m.getEnd().isAfter(requestEndDateTime));
+                    if (!validTimes) {
+                        log.error(
+                            "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
+                            transcriptionRequestDetails.getHearingId()
+                        );
+                        throw new DartsApiException(TIMES_OUTSIDE_OF_HEARING_TIMES);
+                    }
+                }
+            }
         } else {
             caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
         }
@@ -177,8 +222,10 @@ public class TranscriptionController implements TranscriptionApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = TRANSCRIPTION_ID, securityRoles = {APPROVER, REQUESTER, JUDGE, TRANSCRIBER, RCJ_APPEALS})
-    public ResponseEntity<TranscriptionResponse> getTranscription(
+    @Authorisation(contextId = TRANSCRIPTION_ID,
+        securityRoles = {JUDGE, APPROVER, REQUESTER, TRANSCRIBER, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
+    public ResponseEntity<GetTranscriptionByIdResponse> getTranscription(
         @Parameter(name = "transcription_id", description = "transcription_id is the internal id of the transcription.", required = true,
             in = ParameterIn.PATH) @PathVariable("transcription_id") Integer transcriptionId
     ) {
@@ -186,6 +233,27 @@ public class TranscriptionController implements TranscriptionApi {
             transcriptionService.getTranscription(transcriptionId),
             HttpStatus.OK
         );
+    }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<UpdateTranscriptionsItem>> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
+        List<UpdateTranscriptionsItem> responseList = new ArrayList<>();
+
+        Runnable executeOnAuth = () -> {
+            responseList.addAll(transcriptionService.updateTranscriptions(request));
+        };
+
+        // we authorise the transcription ids
+        authorisation.authoriseWithIdsForTranscription(request,
+                                                       e -> e.getTranscriptionId().toString(),
+                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+                                                       executeOnAuth
+        );
+
+        return new ResponseEntity<>(
+            responseList,
+            HttpStatus.OK
+        );
     }
 }

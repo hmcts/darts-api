@@ -25,7 +25,7 @@ import static jakarta.persistence.CascadeType.PERSIST;
 @Table(name = "external_object_directory")
 @Getter
 @Setter
-public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
+public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity implements ObjectDirectory {
 
     @Id
     @Column(name = "eod_id")
@@ -41,8 +41,9 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "trd_id", foreignKey = @ForeignKey(name = "eod_transcription_document_fk"))
     private TranscriptionDocumentEntity transcriptionDocumentEntity;
 
-    @Column(name = "ado_id")
-    private Integer annotationDocumentId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {PERSIST, MERGE})
+    @JoinColumn(name = "ado_id", foreignKey = @ForeignKey(name = "eod_annotation_document_fk"))
+    private AnnotationDocumentEntity annotationDocumentEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ods_id", foreignKey = @ForeignKey(name = "eod_object_directory_status_fk"), nullable = false)
@@ -52,7 +53,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "elt_id", foreignKey = @ForeignKey(name = "eod_external_location_type_fk"), nullable = false)
     private ExternalLocationTypeEntity externalLocationType;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @Column(name = "external_location", unique = true, nullable = false)
     private UUID externalLocation;
 
@@ -62,4 +63,13 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
 
+    @Override
+    public int getStatusId() {
+        return getStatus().getId();
+    }
+
+    @Override
+    public UUID getLocation() {
+        return externalLocation;
+    }
 }

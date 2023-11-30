@@ -18,7 +18,7 @@ public class DartsGatewayStub {
 
     public void darNotificationReturnsSuccess() {
         stubFor(post(urlEqualTo(DAR_NOTIFY_PATH))
-              .willReturn(aResponse().withStatus(200).withBody("")));
+                    .willReturn(aResponse().withStatus(200).withBody("")));
     }
 
     public void verifyDoesntReceiveDarEvent() {
@@ -30,7 +30,7 @@ public class DartsGatewayStub {
         var notificationType = "\"notification_type\":\"" + type + "\"";
         wait(1000);
         verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-              .withRequestBody(containing(notificationType)));
+            .withRequestBody(containing(notificationType)));
 
     }
 

@@ -19,12 +19,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ResetPasswordIntTest {
 
     private static final String EXPECTED_REDIRECT_URL =
-        "https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/" +
+        "https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com/" +
         "B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize?" +
         "client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fexample.com%2Fhandle-oauth-code&" +
         "scope=openid&prompt=login&response_type=id_token";
     private static final String EXPECTED_REDIRECT_URL_WITH_OVERRIDE =
-        "https://hmctsdartsb2csbox.b2clogin.com/hmctsdartsb2csbox.onmicrosoft.com/" +
+        "https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com/" +
         "B2C_1_darts_externaluser_password_reset/oauth2/v2.0/authorize?" +
         "client_id=dummy_client_id&redirect_uri=https%3A%2F%2Fdarts-portal.com%2Fauth%2Fcallback&" +
         "scope=openid&prompt=login&response_type=id_token";

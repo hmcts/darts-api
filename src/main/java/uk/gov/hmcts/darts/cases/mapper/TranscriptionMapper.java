@@ -34,7 +34,7 @@ public class TranscriptionMapper {
             transcript.setHearingDate(hearing.getHearingDate());
         }
         transcript.setType(transcriptionEntity.getTranscriptionType().getDescription());
-        transcript.setRequestedOn(transcriptionEntity.getCreatedDateTime().toLocalDate());
+        transcript.setRequestedOn(transcriptionEntity.getCreatedDateTime());
         transcript.setRequestedByName(getRequestedBy(transcriptionEntity));
         transcript.setStatus(transcriptionEntity.getTranscriptionStatus().getStatusType());
         return transcript;
@@ -42,7 +42,7 @@ public class TranscriptionMapper {
 
     private String getRequestedBy(TranscriptionEntity transcriptionEntity) {
         if (transcriptionEntity.getCreatedBy() != null) {
-            return transcriptionEntity.getCreatedBy().getUsername();
+            return transcriptionEntity.getCreatedBy().getUserName();
         } else {
             return transcriptionEntity.getRequestor();
         }

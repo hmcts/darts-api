@@ -47,11 +47,6 @@
     <exclude name="ExcessiveImports"/>
     <exclude name="LawOfDemeter"/>
   </rule>
-  <rule ref="category/java/design.xml/ExcessiveImports">
-    <properties>
-      <property name="minimum" value="35"/><!-- should be reduced -->
-    </properties>
-  </rule>
   <rule ref="category/java/design.xml/SignatureDeclareThrowsException">
     <properties>
       <property name="IgnoreJUnitCompletely" value="true"/>

@@ -2,27 +2,35 @@ package uk.gov.hmcts.darts.audio.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -38,27 +46,64 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private AuthorisationStub authorisationStub;
+    @Autowired
+    private DartsDatabaseStub dartsDatabaseStub;
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @BeforeEach
+    void beforeEach() {
+        authorisationStub.givenTestSchema();
+
+        UserAccountEntity testUser = authorisationStub.getTestUser();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
 
     @Test
     void addAudioMetadata() throws Exception {
-        dartsDatabase.createCase("SWANSEA", "case1");
-        dartsDatabase.createCase("SWANSEA", "case2");
-        dartsDatabase.createCase("SWANSEA", "case3");
 
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "SWANSEA");
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(addAudioMetadataRequest));
+        UserAccountEntity testUser = authorisationStub.getSystemUser();
+        dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
-        mockMvc.perform(requestBuilder)
+        dartsDatabase.createCase("Bristol", "case1");
+        dartsDatabase.createCase("Bristol", "case2");
+        dartsDatabase.createCase("Bristol", "case3");
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol");
+
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp3",
+            "audio/mpeg",
+            "Test Document (doc)".getBytes()
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes());
+
+
+        mockMvc.perform(
+            multipart(ENDPOINT)
+                .file(audioFile)
+                .file(metadataJson))
             .andExpect(status().isOk())
             .andReturn();
 
         List<HearingEntity> allHearings = dartsDatabase.getHearingRepository().findAll();
 
-        assertEquals(3, allHearings.size());
-
+        List<HearingEntity> addAudioLinkedHearings = new ArrayList<>();
         for (HearingEntity hearing : allHearings) {
+            if (hearing.getCourtCase().getCaseNumber().contains("case")) {
+                addAudioLinkedHearings.add(hearing);
+            }
+        }
+        assertEquals(3, addAudioLinkedHearings.size());
+
+        for (HearingEntity hearing : addAudioLinkedHearings) {
             MediaEntity media = hearing.getMediaList().get(0);
             assertEquals(1, hearing.getMediaList().size());
             assertEquals(STARTED_AT, media.getStart());
@@ -73,11 +118,24 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     @Test
     void addAudioMetadataNonExistingCourthouse() throws Exception {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "TEST");
-        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
-            .header("Content-Type", "application/json")
-            .content(objectMapper.writeValueAsString(addAudioMetadataRequest));
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+        MockMultipartFile audioFile = new MockMultipartFile(
+            "file",
+            "audio.mp3",
+            "audio/mpeg",
+            "Test Document (doc)".getBytes()
+        );
+
+        MockMultipartFile metadataJson = new MockMultipartFile(
+            "metadata",
+            null,
+            "application/json",
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes());
+
+        MvcResult mvcResult = mockMvc.perform(
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
             .andExpect(status().isBadRequest())
             .andReturn();
 
@@ -100,7 +158,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         addAudioMetadataRequest.courtroom("1");
         addAudioMetadataRequest.cases(List.of("case1", "case2", "case3"));
         addAudioMetadataRequest.setMediaFile("media file");
-        addAudioMetadataRequest.setFileSize(1000);
+        addAudioMetadataRequest.setFileSize(1000L);
         addAudioMetadataRequest.setChecksum("calculatedchecksum");
         return addAudioMetadataRequest;
     }

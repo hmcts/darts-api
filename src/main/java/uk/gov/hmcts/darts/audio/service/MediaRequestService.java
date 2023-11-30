@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service;
 
 
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.service.impl.AudioRequestSummaryResult;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -34,4 +35,6 @@ public interface MediaRequestService {
     InputStream download(Integer mediaRequestId);
 
     InputStream playback(Integer mediaRequestId);
+
+    MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName, AudioRequestOutputFormat audioRequestOutputFormat);
 }

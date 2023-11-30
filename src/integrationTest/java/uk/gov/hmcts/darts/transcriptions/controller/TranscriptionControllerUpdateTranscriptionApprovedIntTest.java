@@ -8,14 +8,12 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -25,7 +23,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 
 import java.net.URI;
@@ -41,15 +38,13 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.AUTHORISE_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.AUTHORISE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -62,9 +57,6 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     private AuthorisationStub authorisationStub;
 
     @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -73,7 +65,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     @MockBean
     private UserIdentity mockUserIdentity;
     @MockBean
-    private AuditService mockAuditService;
+    private AuditApi mockAuditApi;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -95,21 +87,20 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
         testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
-        doNothing().when(mockAuditService)
+        doNothing().when(mockAuditApi)
             .recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
     void updateTranscriptionApprovedWithoutComment() throws Exception {
 
-        TranscriptionEntity existingTranscription = dartsDatabaseStub.getTranscriptionRepository().findById(
+        TranscriptionEntity existingTranscription = dartsDatabase.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
         CourthouseEntity courthouse = existingTranscription.getCourtCase().getCourthouse();
-        dartsDatabaseStub.getUserAccountStub().createTranscriptionCompanyUser(courthouse);
+        dartsDatabase.getUserAccountStub().createTranscriptionCompanyUser(courthouse);
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
 
@@ -129,7 +120,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
 
-        final TranscriptionEntity approvedTranscriptionEntity = dartsDatabaseStub.getTranscriptionRepository()
+        final TranscriptionEntity approvedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(APPROVED.getId(), approvedTranscriptionEntity.getTranscriptionStatus().getId());
         assertEquals(testUserId, approvedTranscriptionEntity.getCreatedBy().getId());
@@ -142,15 +133,15 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             updateTranscription.getTranscriptionStatusId(),
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
-        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
+        assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
-        List<NotificationEntity> notificationEntities = dartsDatabaseStub.getNotificationRepository().findAll();
+        List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
         assertTrue(templateList.contains("request_to_transcriber"));
         assertTrue(templateList.contains("transcription_request_approved"));
 
-        verify(mockAuditService).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -176,7 +167,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
 
-        final TranscriptionEntity approvedTranscriptionEntity = dartsDatabaseStub.getTranscriptionRepository()
+        final TranscriptionEntity approvedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(APPROVED.getId(), approvedTranscriptionEntity.getTranscriptionStatus().getId());
         assertEquals(testUserId, approvedTranscriptionEntity.getCreatedBy().getId());
@@ -191,11 +182,11 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         );
         assertEquals(
             APPROVED.toString(),
-            dartsDatabaseStub.getTranscriptionCommentRepository().findAll().get(0).getComment()
+            dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
         );
         assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
 
-        verify(mockAuditService).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -221,7 +212,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         verify(authorisation).authoriseByTranscriptionId(
             -1, Set.of(APPROVER, TRANSCRIBER)
         );
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -247,7 +238,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         verify(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
 }

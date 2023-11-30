@@ -31,8 +31,13 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGivenBuilder {
 
     private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
-    private static final OffsetDateTime TIME_12_10 = OffsetDateTime.parse("2023-01-01T12:10Z");
+    private static final OffsetDateTime TIME_12_01 = OffsetDateTime.parse("2023-01-01T12:01Z");
+    private static final OffsetDateTime TIME_12_20 = OffsetDateTime.parse("2023-01-01T12:20Z");
+    private static final OffsetDateTime TIME_12_40 = OffsetDateTime.parse("2023-01-01T12:40Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
+    private static final OffsetDateTime TIME_13_01 = OffsetDateTime.parse("2023-01-01T13:01Z");
+    private static final OffsetDateTime TIME_13_30 = OffsetDateTime.parse("2023-01-01T13:30Z");
+    private static final OffsetDateTime TIME_14_00 = OffsetDateTime.parse("2023-01-01T14:00Z");
 
 
     private final DartsDatabaseStub dartsDatabaseStub;
@@ -42,28 +47,78 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
     private UserAccountEntity userAccountEntity;
 
     public void aMediaEntityGraph() {
-        var mediaEntity = dartsDatabaseStub.createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
-        );
-
-        hearingEntity.addMedia(mediaEntity);
-        dartsDatabaseStub.getHearingRepository().saveAndFlush(hearingEntity);
 
         var externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
             ExternalLocationTypeEnum.UNSTRUCTURED);
         var objectDirectoryStatusEntity = dartsDatabaseStub.getObjectDirectoryStatusEntity(STORED);
 
-        var externalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
-            .createExternalObjectDirectory(
-                mediaEntity,
-                objectDirectoryStatusEntity,
-                externalLocationTypeEntity,
-                UUID.randomUUID()
+        for (int channelNumber = 1; channelNumber <= 4; channelNumber++) {
+
+            var mediaEntity = dartsDatabaseStub.createMediaEntity(
+                TIME_12_01,
+                TIME_12_20,
+                channelNumber
             );
-        dartsDatabaseStub.getExternalObjectDirectoryRepository()
-            .saveAndFlush(externalObjectDirectoryEntity);
+            var mediaEntity2 = dartsDatabaseStub.createMediaEntity(
+                TIME_12_20,
+                TIME_12_40,
+                channelNumber
+            );
+
+            var mediaEntity3 = dartsDatabaseStub.createMediaEntity(
+                TIME_12_40,
+                TIME_13_01,
+                channelNumber
+            );
+
+            var mediaEntity4 = dartsDatabaseStub.createMediaEntity(
+                TIME_13_30,
+                TIME_14_00,
+                channelNumber
+            );
+
+            hearingEntity.addMedia(mediaEntity);
+            hearingEntity.addMedia(mediaEntity2);
+            hearingEntity.addMedia(mediaEntity3);
+            hearingEntity.addMedia(mediaEntity4);
+            dartsDatabaseStub.getHearingRepository().saveAndFlush(hearingEntity);
+
+
+            var externalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity,
+                    objectDirectoryStatusEntity,
+                    externalLocationTypeEntity,
+                    UUID.randomUUID()
+                );
+            var externalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity2,
+                    objectDirectoryStatusEntity,
+                    externalLocationTypeEntity,
+                    UUID.randomUUID()
+                );
+            var externalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity3,
+                    objectDirectoryStatusEntity,
+                    externalLocationTypeEntity,
+                    UUID.randomUUID()
+                );
+
+            var externalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
+                .createExternalObjectDirectory(
+                    mediaEntity4,
+                    objectDirectoryStatusEntity,
+                    externalLocationTypeEntity,
+                    UUID.randomUUID()
+                );
+
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity2);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity3);
+            dartsDatabaseStub.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectoryEntity4);
+        }
     }
 
     public UserAccountEntity aUserAccount(String emailAddress) {
@@ -95,8 +150,26 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         mediaRequestEntity.setStatus(OPEN);
         mediaRequestEntity.setRequestType(audioRequestType);
         mediaRequestEntity.setRequestor(userAccountEntity);
+        mediaRequestEntity.setCurrentOwner(userAccountEntity);
         mediaRequestEntity.setStartTime(TIME_12_00);
         mediaRequestEntity.setEndTime(TIME_13_00);
+        mediaRequestEntity.setCreatedBy(userAccountEntity);
+        mediaRequestEntity.setLastModifiedBy(userAccountEntity);
+
+        dartsDatabaseStub.getMediaRequestRepository()
+            .saveAndFlush(mediaRequestEntity);
+    }
+
+    public void aMediaRequestEntityForHearingWithRequestType(HearingEntity hearing, AudioRequestType audioRequestType,
+                                                             UserAccountEntity userAccountEntity, OffsetDateTime start, OffsetDateTime end) {
+        mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setHearing(hearing);
+        mediaRequestEntity.setStatus(OPEN);
+        mediaRequestEntity.setRequestType(audioRequestType);
+        mediaRequestEntity.setRequestor(userAccountEntity);
+        mediaRequestEntity.setCurrentOwner(userAccountEntity);
+        mediaRequestEntity.setStartTime(start);
+        mediaRequestEntity.setEndTime(end);
         mediaRequestEntity.setCreatedBy(userAccountEntity);
         mediaRequestEntity.setLastModifiedBy(userAccountEntity);
 

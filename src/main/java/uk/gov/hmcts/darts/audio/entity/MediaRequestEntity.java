@@ -31,6 +31,7 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     public static final String ID_COLUMN_NAME = "mer_id";
     public static final String HEARING_ID_COLUMN_NAME = "hea_id";
+    public static final String CURRENT_OWNER_COLUMN_NAME = "current_owner";
     public static final String REQUESTOR_COLUMN_NAME = "requestor";
     public static final String REQUEST_STATUS_COLUMN_NAME = "request_status";
     public static final String REQUEST_TYPE_COLUMN_NAME = "request_type";
@@ -57,7 +58,11 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = HEARING_ID_COLUMN_NAME, nullable = false)
     private HearingEntity hearing;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = CURRENT_OWNER_COLUMN_NAME, nullable = false)
+    private UserAccountEntity currentOwner;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = REQUESTOR_COLUMN_NAME, nullable = false)
     private UserAccountEntity requestor;
 

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "eac5d37b-cf06-423a-bcb7-9fb2cad5d928",
+		"_postman_id": "8f4d90a7-25b9-4fd7-a448-e873797fb06f",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -14,6 +14,16 @@
 						{
 							"name": "swansea event",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -308,7 +318,7 @@
 					"name": "courtLogs",
 					"item": [
 						{
-							"name": "http://localhost:4550/courtlogs?courthouse=\"String\"&caseNumber=\"String\"&startDateTime=\"String\"&endDateTime=\"String\"",
+							"name": "GET /courtlogs",
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -341,6 +351,51 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "POST /courtlogs",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{serverUrl}}/courtlogs?courthouse=\"swansea\"&case_number=1&start_date_time=2023-11-09T08:00:00Z&end_date_time=2023-11-09T12:00:00Z",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"courtlogs"
+									],
+									"query": [
+										{
+											"key": "courthouse",
+											"value": "\"swansea\""
+										},
+										{
+											"key": "case_number",
+											"value": "1"
+										},
+										{
+											"key": "start_date_time",
+											"value": "2023-11-09T08:00:00Z"
+										},
+										{
+											"key": "end_date_time",
+											"value": "2023-11-09T12:00:00Z"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
@@ -349,6 +404,45 @@
 		{
 			"name": "Audio",
 			"item": [
+				{
+					"name": "/audios",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"contentType": "audio/mpeg",
+									"type": "file",
+									"src": "sample.mp2"
+								},
+								{
+									"key": "metadata",
+									"value": "{\n  \"started_at\": \"2023-11-23T10:36:05.362Z\",\n  \"ended_at\": \"2023-11-23T10:36:05.362Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"sample\",\n  \"courthouse\": \"Bristol\",\n  \"courtroom\": \"1\",\n  \"file_size\": 937.96,\n  \"checksum\": \"aQlozKNmM84agyCpJu26fw==\",\n  \"cases\": [\n    \"case1\"\n  ]\n}",
+									"contentType": "application/json",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{serverUrl}}/audios",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"audios"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "/audio/hearings/{hearing_id}/audios",
 					"request": {
@@ -388,7 +482,7 @@
 						"header": [
 							{
 								"key": "accept",
-								"value": "audio/mp3"
+								"value": "audio/mpeg"
 							}
 						],
 						"url": {
@@ -422,6 +516,16 @@
 						{
 							"name": "POST DailyLists",
 							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{global_access_token}}",
+											"type": "string"
+										}
+									]
+								},
 								"method": "POST",
 								"header": [
 									{
@@ -765,8 +869,8 @@
 							"INSERT INTO user_account (usr_id, user_name, user_email_address)",
 							"VALUES (-10, 'Richard B', 'Richard.B@EXAMPLE.COM');",
 							"",
-							"INSERT INTO courthouse (cth_id, courthouse_name, created_ts, last_modified_ts)",
-							"VALUES (-1, 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
+							"INSERT INTO courthouse (cth_id, courthouse_name, display_name, created_ts, last_modified_ts)",
+							"VALUES (-1, 'Bristol', 'Bristol', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);",
 							"",
 							"INSERT INTO security_group_courthouse_ae (grp_id, cth_id)",
 							"VALUES (-4, -1);",
@@ -810,7 +914,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-03T10:00:00Z\",\n  \"end_date_time\": \"2023-11-03T12:00:00Z\"\n}",
+							"raw": "{\n  \"hearing_id\": -1,\n  \"case_id\": -1,\n  \"urgency_id\": 1,\n  \"transcription_type_id\": 9,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-09T11:30:00Z\",\n  \"end_date_time\": \"2023-11-09T12:00:00Z\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -929,6 +1033,39 @@
 					"response": []
 				},
 				{
+					"name": "/transcriptions/{transcription_id} 6 | Complete",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transcription_status_id\": 6\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "/transcriptions/types",
 					"request": {
 						"method": "GET",
@@ -951,7 +1088,7 @@
 					},
 					"response": []
 				},
-      				{
+				{
 					"name": "/transcriptions/{transcription_id}",
 					"request": {
 						"method": "GET",
@@ -971,16 +1108,15 @@
 								":transcription_id"
 							],
 							"variable": [
-							{
-								"key": "transcription_id",
-								"value": "1"
-							}
-						]
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
 						}
 					},
 					"response": []
 				},
-
 				{
 					"name": "/transcriptions/urgencies",
 					"request": {
@@ -1046,7 +1182,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /transcriptions/{transcription_id}/document",
+					"name": "/transcriptions/{transcription_id}/document",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1069,6 +1205,956 @@
 								{
 									"key": "transcription_id",
 									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "user_id",
+								"value": "{{user_id}}",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/{transcription_id}",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								":transcription_id"
+							],
+							"variable": [
+								{
+									"key": "transcription_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/transcriber-view?assigned=false",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=false",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-view"
+							],
+							"query": [
+								{
+									"key": "assigned",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/transcriptions/transcriber-view?assigned=true",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-view?assigned=true",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-view"
+							],
+							"query": [
+								{
+									"key": "assigned",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Token",
+			"item": [
+				{
+					"name": "Generate Bearer Token - AAD_B2C_ROPC",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "{{AAD_B2C_ROPC_CLIENT_ID}}",
+									"type": "text"
+								},
+								{
+									"key": "scope",
+									"value": "{{AAD_B2C_ROPC_SCOPE}}",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "{{AAD_B2C_ROPC_USERNAME}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{AAD_B2C_ROPC_PASSWORD}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}",
+							"host": [
+								"{{AAD_B2C_ROPC_TOKEN_ENDPOINT}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "active-directory-b2c-auth - token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "authorization_code",
+									"type": "default"
+								},
+								{
+									"key": "client_id",
+									"value": "{{AAD_B2C_CLIENT_ID}}",
+									"type": "default"
+								},
+								{
+									"key": "scope",
+									"value": "{{AAD_B2C_CLIENT_ID}} offline_access",
+									"type": "default"
+								},
+								{
+									"key": "code",
+									"value": "",
+									"type": "default"
+								},
+								{
+									"key": "redirect_uri",
+									"value": "{{serverUrl}}/external-user/handle-oauth-code",
+									"type": "default"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{AAD_B2C_CLIENT_SECRET}}",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{active-directory-b2c-auth-uri}}/{{active-directory-b2c-external-user-signin-policy}}/oauth2/v2.0/token",
+							"host": [
+								"{{active-directory-b2c-auth-uri}}"
+							],
+							"path": [
+								"{{active-directory-b2c-external-user-signin-policy}}",
+								"oauth2",
+								"v2.0",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "/users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:4550/users?courthouse=-1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4550",
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "courthouse",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/users/search",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"full_name\": \"mi\",\n  \"email_address\": \"@hmcts\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{serverUrl}}/users/search",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"users",
+								"search"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"// V1_239__update_security_schema.sql"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Test Scripts",
+			"item": [
+				{
+					"name": "example1",
+					"item": [
+						{
+							"name": "Prerequisite Steps",
+							"item": [
+								{
+									"name": "get server info",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{serverUrl}}/info",
+											"host": [
+												"{{serverUrl}}"
+											],
+											"path": [
+												"info"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create case",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"const moment = require('moment');",
+													"pm.environment.set(\"timestamp\", moment().format(\"MMDDHHmmss\"));"
+												],
+												"type": "text/javascript"
+											}
+										},
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													"",
+													"",
+													"let responseData = pm.response.json();",
+													"pm.collectionVariables.set(\"case_number\", responseData.case_number);",
+													"pm.collectionVariables.set(\"case_id\", responseData.case_id);",
+													"",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"courthouse\": \"swansea\",\n  \"case_number\": \"{{test_reference}} {{timestamp}}\",\n  \"defendants\": [\n    \"{{test_reference}} defendant1\", \"{{test_reference}} defendant2\"\n  ],\n  \"judges\": [\n    \"{{test_reference}} judge1\", \"{{test_reference}} judge2\"\n  ],\n  \"prosecutors\": [\n    \"{{test_reference}} prosecutor1\", \"{{test_reference}} prosecutor2\"\n  ],\n  \"defenders\": [\n    \"{{test_reference}} defender1\", \"{{test_reference}} defender2\"\n  ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{serverUrl}}/cases",
+											"host": [
+												"{{serverUrl}}"
+											],
+											"path": [
+												"cases"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create audio",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"started_at\": \"2023-11-06T09:00:00.000Z\",\n  \"ended_at\": \"2023-11-06T10:00:00.000Z\",\n  \"channel\": 1,\n  \"total_channels\": 4,\n  \"format\": \"mp2\",\n  \"filename\": \"audio_a01\",\n  \"courthouse\": \"swansea\",\n  \"media_file\": \"string\",\n  \"file_size\": 0,\n  \"courtroom\": \"{{case_number}} courtroom1\",\n  \"cases\": [\n    \"{{case_number}}\"\n  ]\n}"
+										},
+										"url": {
+											"raw": "{{serverUrl}}/audios",
+											"host": [
+												"{{serverUrl}}"
+											],
+											"path": [
+												"audios"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "get hearing id",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let responseData = pm.response.json();",
+													"pm.collectionVariables.set(\"hearing_id\", responseData[0].id);",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											}
+										],
+										"url": {
+											"raw": "{{serverUrl}}/cases/:caseId/hearings",
+											"host": [
+												"{{serverUrl}}"
+											],
+											"path": [
+												"cases",
+												":caseId",
+												"hearings"
+											],
+											"query": [
+												{
+													"key": "case_number",
+													"value": "{{case_number}}",
+													"disabled": true
+												},
+												{
+													"key": "courthouse",
+													"value": "swansea",
+													"disabled": true
+												},
+												{
+													"key": "courtroom",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "judge_name",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "defendant_name",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "date_from",
+													"value": "2022-05-20",
+													"disabled": true
+												},
+												{
+													"key": "date_to",
+													"value": "2024-05-20",
+													"disabled": true
+												},
+												{
+													"key": "event_text_contains",
+													"value": "test",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "caseId",
+													"value": "{{case_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create transcription request",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"let responseData = pm.response.json();",
+													"pm.collectionVariables.set(\"transcription_id\", responseData.transcription_id);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "default"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"hearing_id\": {{hearing_id}},\n  \"case_id\": {{case_id}},\n  \"urgency_id\": 2,\n  \"transcription_type_id\": 3,\n  \"comment\": \"Please expedite my transcription request\",\n  \"start_date_time\": \"2023-11-06T09:00:00Z\",\n  \"end_date_time\": \"2023-11-06T10:00:00Z\"\n}"
+										},
+										"url": {
+											"raw": "{{serverUrl}}/transcriptions",
+											"host": [
+												"{{serverUrl}}"
+											],
+											"path": [
+												"transcriptions"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "get Transcription",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"pm.variables.get(\"variable_key\");",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"",
+											"pm.test(\"case_id is correct\", function () {",
+											"    pm.expect(jsonData.case_id).to.eql(pm.collectionVariables.get(\"case_id\"));",
+											"});",
+											"",
+											"pm.test(\"Case Number is correct\", function () {",
+											"    pm.expect(jsonData.case_number).to.eql(pm.collectionVariables.get(\"case_number\"));",
+											"});",
+											"",
+											"pm.test(\"defendants is correct\", function () {",
+											"    pm.expect(jsonData.defendants[0]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" defendant1\");",
+											"    pm.expect(jsonData.defendants[1]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" defendant2\");",
+											"});",
+											"",
+											"pm.test(\"judges is correct\", function () {",
+											"    pm.expect(jsonData.judges[0]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" judge1\");",
+											"    pm.expect(jsonData.judges[1]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" judge2\");",
+											"});",
+											"",
+											"pm.test(\"transcript_file_name is correct\", function () {",
+											"    pm.expect(jsonData.transcript_file_name).to.not.exist;",
+											"});",
+											"",
+											"pm.test(\"hearing_date is correct\", function () {",
+											"    pm.expect(jsonData.hearing_date).to.eql(\"2023-11-06\");",
+											"});",
+											"",
+											"pm.test(\"urgency is correct\", function () {",
+											"    pm.expect(jsonData.urgency).to.eql(\"Overnight\");",
+											"});",
+											"",
+											"pm.test(\"request_type is correct\", function () {",
+											"    pm.expect(jsonData.request_type).to.eql(\"Antecedents\");",
+											"});",
+											"",
+											"pm.test(\"transcription_start_ts is correct\", function () {",
+											"    pm.expect(jsonData.transcription_start_ts).to.eql(\"2023-11-06T09:00:00Z\");",
+											"});",
+											"",
+											"pm.test(\"transcription_end_ts is correct\", function () {",
+											"    pm.expect(jsonData.transcription_end_ts).to.eql(\"2023-11-06T10:00:00Z\");",
+											"});",
+											"",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"transcriptions",
+										":transcription_id"
+									],
+									"variable": [
+										{
+											"key": "transcription_id",
+											"value": "{{transcription_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "approve transcription",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "default"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"transcription_status_id\": 3,\n  \"workflow_comment\": \"approved\"\n}"
+								},
+								"url": {
+									"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"transcriptions",
+										":transcription_id"
+									],
+									"variable": [
+										{
+											"key": "transcription_id",
+											"value": "{{transcription_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "With Transcriber",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"transcription_status_id\": 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"transcriptions",
+										":transcription_id"
+									],
+									"variable": [
+										{
+											"key": "transcription_id",
+											"value": "{{transcription_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "upload transcription file",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "transcript",
+											"contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+											"type": "file",
+											"src": "/Users/chrismagowan/Documents/sample doc2.docx"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{serverUrl}}/transcriptions/:transcription_id/document",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"transcriptions",
+										":transcription_id",
+										"document"
+									],
+									"variable": [
+										{
+											"key": "transcription_id",
+											"value": "{{transcription_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get Transcription 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"pm.variables.get(\"variable_key\");",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"var jsonData = pm.response.json();",
+											"",
+											"pm.test(\"case_id is correct\", function () {",
+											"    pm.expect(jsonData.case_id).to.eql(pm.collectionVariables.get(\"case_id\"));",
+											"});",
+											"",
+											"pm.test(\"Case Number is correct\", function () {",
+											"    pm.expect(jsonData.case_number).to.eql(pm.collectionVariables.get(\"case_number\"));",
+											"});",
+											"",
+											"pm.test(\"defendants is correct\", function () {",
+											"    pm.expect(jsonData.defendants[0]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" defendant1\");",
+											"    pm.expect(jsonData.defendants[1]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" defendant2\");",
+											"});",
+											"",
+											"pm.test(\"judges is correct\", function () {",
+											"    pm.expect(jsonData.judges[0]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" judge1\");",
+											"    pm.expect(jsonData.judges[1]).to.eql(pm.collectionVariables.get(\"test_reference\")+\" judge2\");",
+											"});",
+											"",
+											"pm.test(\"transcript_file_name is correct\", function () {",
+											"    pm.expect(jsonData.transcript_file_name).to.eql(\"sample doc.docx\");",
+											"});",
+											"",
+											"pm.test(\"hearing_date is correct\", function () {",
+											"    pm.expect(jsonData.hearing_date).to.eql(\"2023-11-06\");",
+											"});",
+											"",
+											"pm.test(\"urgency is correct\", function () {",
+											"    pm.expect(jsonData.urgency).to.eql(\"Overnight\");",
+											"});",
+											"",
+											"pm.test(\"request_type is correct\", function () {",
+											"    pm.expect(jsonData.request_type).to.eql(\"Antecedents\");",
+											"});",
+											"",
+											"pm.test(\"transcription_start_ts is correct\", function () {",
+											"    pm.expect(jsonData.transcription_start_ts).to.eql(\"2023-11-06T09:00:00Z\");",
+											"});",
+											"",
+											"pm.test(\"transcription_end_ts is correct\", function () {",
+											"    pm.expect(jsonData.transcription_end_ts).to.eql(\"2023-11-06T10:00:00Z\");",
+											"});",
+											"",
+											"",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{serverUrl}}/transcriptions/:transcription_id",
+									"host": [
+										"{{serverUrl}}"
+									],
+									"path": [
+										"transcriptions",
+										":transcription_id"
+									],
+									"variable": [
+										{
+											"key": "transcription_id",
+											"value": "{{transcription_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.collectionVariables.set(\"test_reference\", \"DMP-1329\");"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "NodeRegistration",
+			"item": [
+				{
+					"name": "POST register-devices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/register-devices?node_type=DAR&courthouse=swansea&court_room=1&host_name=XXXXX.MMM.net&mac_address=6A-5F-90-A4-2C-12&ip_address=192.0.0.1",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"register-devices"
+							],
+							"query": [
+								{
+									"key": "node_type",
+									"value": "DAR"
+								},
+								{
+									"key": "courthouse",
+									"value": "swansea"
+								},
+								{
+									"key": "court_room",
+									"value": "1"
+								},
+								{
+									"key": "host_name",
+									"value": "XXXXX.MMM.net"
+								},
+								{
+									"key": "mac_address",
+									"value": "6A-5F-90-A4-2C-12"
+								},
+								{
+									"key": "ip_address",
+									"value": "192.0.0.1"
 								}
 							]
 						}
@@ -1106,6 +2192,28 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "test_reference",
+			"value": ""
+		},
+		{
+			"key": "case_number",
+			"value": ""
+		},
+		{
+			"key": "case_id",
+			"value": ""
+		},
+		{
+			"key": "hearing_id",
+			"value": ""
+		},
+		{
+			"key": "transcription_id",
+			"value": ""
 		}
 	]
 }

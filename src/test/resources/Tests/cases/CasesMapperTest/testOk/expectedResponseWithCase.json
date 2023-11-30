@@ -1,5 +1,10 @@
 {
   "courthouse": "Test house",
   "courtroom": "1",
-  "hearing_date": "2023-07-07"
+  "hearing_date": "2023-07-07",
+  "scheduled_start": "",
+  "defendants": [],
+  "judges": [],
+  "prosecutors": [],
+  "defenders": []
 }
