@@ -79,7 +79,7 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
 
-                                -- Your work > Completed today: Complete
+                                -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
                                 INSERT INTO darts.transcription (tra_id, cas_id, ctr_id, trt_id, hea_id, transcription_object_id, requestor, start_ts, end_ts, created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date, is_manual_transcription, hide_request_from_requestor)
                                 VALUES (101, -1, NULL, 9, -1, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00', '2023-11-24 12:53:42.870475+00', -10, NULL, -10, 1, 6, NULL, true, false);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -113,7 +113,7 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
     }
 
     @Test
-    void getTranscriberTranscriptsShouldReturnTranscriptRequestsWithTranscriberStatusOk() throws Exception {
+    void shouldReturnTranscriptRequestsWithTranscriberStatusOk() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,

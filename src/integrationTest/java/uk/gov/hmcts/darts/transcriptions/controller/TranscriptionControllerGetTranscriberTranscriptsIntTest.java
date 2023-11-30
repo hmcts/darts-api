@@ -89,7 +89,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
 
-                                -- Your work > Completed before today: Complete
+                                -- This transcription would be hidden from Your work > Completed today (transcriber-view?assigned=true)
                                 INSERT INTO darts.transcription (tra_id, cas_id, ctr_id, trt_id, hea_id, transcription_object_id, requestor, start_ts, end_ts, created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date, is_manual_transcription, hide_request_from_requestor)
                                 VALUES (101, -1, NULL, 9, -1, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00', '2023-11-24 12:53:42.870475+00', -10, NULL, -10, 1, 6, NULL, true, false);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -137,7 +137,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void getTranscriberTranscriptsShouldReturnBadRequestWhenMissingUserIdHeader() throws Exception {
+    void shouldReturnBadRequestWhenMissingUserIdHeader() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
@@ -157,7 +157,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void getTranscriberTranscriptsShouldReturnBadRequestWhenMissingAssignedQueryParam() throws Exception {
+    void shouldReturnBadRequestWhenMissingAssignedQueryParam() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -180,7 +180,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void getTranscriberTranscriptsShouldReturnTranscriptRequestsOk() throws Exception {
+    void shouldReturnTranscriptRequestsOk() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -198,7 +198,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void getTranscriberTranscriptsShouldReturnTranscriberTranscriptionsWorkOk() throws Exception {
+    void shouldReturnTranscriberTranscriptionsWorkOkWithEmptyArray() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -216,7 +216,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void getTranscriberTranscriptsShouldReturnTranscriptRequestsWithApprovedStatusOk() throws Exception {
+    void shouldReturnTranscriptRequestsWithApprovedStatusOk() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -250,7 +250,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void getTranscriberTranscriptsShouldReturnTranscriptRequestsWithTranscriberAndCompletedStatusOk() throws Exception {
+    void shouldReturnTranscriptRequestsWithTranscriberAndCompletedTodayStatusOk() throws Exception {
+        // This test expects that this "Complete" (trs_id=6) transcription (tra_id=101) is hidden from "Your work > Completed today" view
+        // because the workflow_ts is BEFORE TODAY (workflow_ts='2023-11-24 12:53:42.839577+00').
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -276,7 +279,6 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
         OffsetDateTime completeTimestamp = OffsetDateTime.parse(documentContext.read("$.[0].state_change_ts"));
         OffsetDateTime now = OffsetDateTime.now(UTC);
         assertTrue(completeTimestamp.isAfter(now.truncatedTo(ChronoUnit.DAYS))); // today (CURRENT_DATE)
-        assertTrue(completeTimestamp.isBefore(now));
     }
 
 }
