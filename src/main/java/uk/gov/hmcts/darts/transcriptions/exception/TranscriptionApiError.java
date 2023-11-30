@@ -67,8 +67,12 @@ public enum TranscriptionApiError implements DartsApiError {
         "111",
         HttpStatus.NOT_FOUND,
         "Transcription could not be requested, times outside of hearing times"
+    ),
+    USER_NOT_TRANSCRIBER(
+        "112",
+        HttpStatus.FORBIDDEN,
+        "User is not a transcriber user"
     );
-
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";
 
     private final String errorTypeNumeric;

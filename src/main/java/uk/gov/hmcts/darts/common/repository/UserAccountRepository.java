@@ -51,4 +51,14 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         """)
     List<UserAccountEntity> findByEmailAddressOrAccountGuidForRolesAndGlobalAccessIsTrue(String emailAddress, String accountGuid, Set<Integer> roleIds);
 
+    @Query("""
+        SELECT DISTINCT userAccount
+        FROM UserAccountEntity userAccount
+        JOIN userAccount.securityGroupEntities securityGroup
+        JOIN securityGroup.securityRoleEntity securityRole
+        WHERE userAccount.id = :userId
+        AND securityRole.id = :securityRole
+        """)
+    UserAccountEntity findByRoleAndUserId(Integer securityRole, Integer userId);
+
 }

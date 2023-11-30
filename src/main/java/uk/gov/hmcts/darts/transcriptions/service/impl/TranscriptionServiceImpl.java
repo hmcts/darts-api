@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
@@ -85,20 +86,24 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.REJECT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REJECTION_REASON;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_WORKFLOW_ACTION_INVALID;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.USER_NOT_TRANSCRIBER;
 
 @RequiredArgsConstructor
 @Service
@@ -119,6 +124,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
+    private final UserAccountRepository userAccountRepository;
 
     private final AuthorisationApi authorisationApi;
     private final NotificationApi notificationApi;
@@ -293,7 +299,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private void notifyTranscriptionCompanyForCourthouse(CourtCaseEntity courtCase) {
         //find users to notify
         List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
-            SecurityRoleEnum.TRANSCRIBER,
+            TRANSCRIBER,
             courtCase.getCourthouse()
         );
         if (usersToNotify.isEmpty()) {
@@ -532,9 +538,19 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public TranscriptionTranscriberCountsResponse getTranscriptionTranscriberCounts(Integer userId) {
 
+        UserAccountEntity user = userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), userId);
+        if (user == null) {
+            throw new DartsApiException(USER_NOT_TRANSCRIBER);
+        }
+
+        List<Integer> courthouseIds = transcriberTranscriptsQuery.getAuthorisedCourthouses(userId, 4);
+
+        Integer numUnassigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, APPROVED.getId(), 0);
+        Integer numAssigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, WITH_TRANSCRIBER.getId(),userId);
+
         final var getTranscriptionTranscriberCounts = new TranscriptionTranscriberCountsResponse();
-        getTranscriptionTranscriberCounts.setAssigned(3);
-        getTranscriptionTranscriberCounts.setUnassigned(4);
+        getTranscriptionTranscriberCounts.setAssigned(numAssigned);
+        getTranscriptionTranscriberCounts.setUnassigned(numUnassigned);
         return getTranscriptionTranscriberCounts;
     }
 
