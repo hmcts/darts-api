@@ -131,7 +131,7 @@ class NodeRegistrationControllerTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .param("node_type", nodeType)
             .param("courthouse", courthouseName)
-            .param("court_room", courtroomName)
+            .param("courtroom", courtroomName)
             .param("host_name", "XXXXX.MMM.net")
             .param("ip_address", ipAddress)
             .param("mac_address", "6A-5F-90-A4-2C-12");

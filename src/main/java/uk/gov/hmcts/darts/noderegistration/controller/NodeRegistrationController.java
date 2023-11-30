@@ -37,7 +37,7 @@ public class NodeRegistrationController implements DevicesApi {
         @Parameter(name = "courthouse", description = "The name of the location of the courtroom containing the device", in = ParameterIn.QUERY)
         @Valid @RequestParam(value = "courthouse") String courtHouse,
         @Parameter(name = "courtroom", description = "The name of the courtroom containing the device", in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "court_room") String courtRoom,
+        @Valid @RequestParam(value = "courtroom") String courtRoom,
         @Parameter(name = "host_name", description = "The host name of the device on the network", in = ParameterIn.QUERY)
         @Valid @RequestParam(value = "host_name") String hostName,
         @Parameter(name = "ip_address", description = "The IP address of the device on the network", in = ParameterIn.QUERY)
