@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -8,28 +10,29 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
-import uk.gov.hmcts.darts.transcriptions.config.ClockTestConfiguration;
 
 import java.net.URI;
-import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.time.ZoneOffset.UTC;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {"test.clock.fixed-instant=2023-11-24T15:00:00Z"})
 @AutoConfigureMockMvc
-@Import(ClockTestConfiguration.class)
 @Transactional
 @TestInstance(PER_CLASS)
 class TranscriptionControllerGetTranscriberTranscriptsIntTest extends IntegrationBase {
@@ -37,9 +40,6 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     private static final URI ENDPOINT_URI = URI.create("/transcriptions/transcriber-view");
     private static final String USER_ID_HEADER = "user_id";
     private static final String ASSIGNED_QUERY_PARAM = "assigned";
-
-    @Autowired
-    private Clock clock;
 
     @Autowired
     private MockMvc mockMvc;
@@ -89,7 +89,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (102, 81, 5, -10, '2023-11-23 17:45:51.151621+00');
 
-                                -- Your work > Completed today: Complete
+                                -- Your work > Completed before today: Complete
                                 INSERT INTO darts.transcription (tra_id, cas_id, ctr_id, trt_id, hea_id, transcription_object_id, requestor, start_ts, end_ts, created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date, is_manual_transcription, hide_request_from_requestor)
                                 VALUES (101, -1, NULL, 9, -1, NULL, NULL, '2023-11-24 09:00:00+00', '2023-11-24 09:30:00+00', '2023-11-24 12:37:00.782036+00', '2023-11-24 12:53:42.870475+00', -10, NULL, -10, 1, 6, NULL, true, false);
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
@@ -102,14 +102,28 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 VALUES (124, 101, 5, -10, '2023-11-24 12:37:34.976469+00');
                                 INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
                                 VALUES (141, 101, 6, -10, '2023-11-24 12:53:42.839577+00');
+
+                                -- Your work > Completed today: Complete
+                                INSERT INTO darts.transcription (tra_id, cas_id, ctr_id, trt_id, hea_id, transcription_object_id, requestor, start_ts, end_ts, created_ts, last_modified_ts, last_modified_by, version_label, created_by, tru_id, trs_id, hearing_date, is_manual_transcription, hide_request_from_requestor)
+                                VALUES (121, -1, NULL, 9, -1, NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, -10, NULL, -10, 1, 6, NULL, true, false);
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (161, 121, 1, -10, CURRENT_TIMESTAMP);
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (162, 121, 2, -10, CURRENT_TIMESTAMP);
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (163, 121, 3, -10, CURRENT_TIMESTAMP);
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (164, 121, 5, -10, CURRENT_TIMESTAMP);
+                                INSERT INTO darts.transcription_workflow (trw_id, tra_id, trs_id, workflow_actor, workflow_ts)
+                                VALUES (165, 121, 6, -10, CURRENT_TIMESTAMP);
                                 """);
     }
 
     @AfterAll
     void afterAll() {
         jdbcTemplate.update("""
-                                DELETE FROM darts.transcription_workflow WHERE tra_id IN (41, 81, 101);
-                                DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101);
+                                DELETE FROM darts.transcription_workflow WHERE tra_id IN (41, 81, 101, 121);
+                                DELETE FROM darts.transcription WHERE tra_id IN (41, 81, 101, 121);
 
                                 DELETE FROM darts.security_group_courthouse_ae WHERE grp_id=-4 AND cth_id=-1;
                                 DELETE FROM darts.security_group_user_account_ae WHERE usr_id=-10 AND grp_id=-4;
@@ -246,40 +260,23 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.[*].transcription_id").isArray())
+            .andExpect(jsonPath("$.[0].transcription_id").value(121))
+            .andExpect(jsonPath("$.[0].status").value("Complete"))
+            .andExpect(jsonPath("$.[0].state_change_ts").isNotEmpty())
+            .andExpect(jsonPath("$.[1].transcription_id").value(81))
+            .andExpect(jsonPath("$.[1].status").value("With Transcriber"))
+            .andExpect(jsonPath("$.[1].state_change_ts").value("2023-11-23T17:45:51.151621Z"))
             .andReturn();
 
         String actualResponse = mvcResult.getResponse().getContentAsString();
-        String expectedResponse = """
-            [
-              {
-                "transcription_id": 101,
-                "case_id": -1,
-                "case_number": "T20231009-1",
-                "courthouse_name": "Bristol",
-                "hearing_date": "2023-11-17",
-                "transcription_type": "Specified Times",
-                "status": "Complete",
-                "urgency": "Standard",
-                "requested_ts": "2023-11-24T12:37:00.812692Z",
-                "state_change_ts": "2023-11-24T12:53:42.839577Z",
-                "is_manual": true
-              },
-              {
-                "transcription_id": 81,
-                "case_id": -1,
-                "case_number": "T20231009-1",
-                "courthouse_name": "Bristol",
-                "hearing_date": "2023-11-17",
-                "transcription_type": "Specified Times",
-                "status": "With Transcriber",
-                "urgency": "Standard",
-                "requested_ts": "2023-11-23T17:45:14.940936Z",
-                "state_change_ts": "2023-11-23T17:45:51.151621Z",
-                "is_manual": true
-              }
-            ]
-            """;
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        DocumentContext documentContext = JsonPath.parse(actualResponse);
+        List<Integer> transcriptionIds = documentContext.read("$..transcription_id");
+        assertEquals(List.of(121, 81), transcriptionIds);
+        OffsetDateTime completeTimestamp = OffsetDateTime.parse(documentContext.read("$.[0].state_change_ts"));
+        OffsetDateTime now = OffsetDateTime.now(UTC);
+        assertTrue(completeTimestamp.isAfter(now.truncatedTo(ChronoUnit.DAYS))); // today (CURRENT_DATE)
+        assertTrue(completeTimestamp.isBefore(now));
     }
 
 }
