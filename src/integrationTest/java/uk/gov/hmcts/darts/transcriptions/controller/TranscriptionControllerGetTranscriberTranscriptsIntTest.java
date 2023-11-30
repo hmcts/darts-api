@@ -180,7 +180,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnTranscriptRequestsOk() throws Exception {
+    void shouldReturnOkTranscriptRequestsWithEmptyArray() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -198,7 +198,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnTranscriberTranscriptionsWorkOkWithEmptyArray() throws Exception {
+    void shouldReturnOkTranscriberTranscriptionsWorkWithEmptyArray() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -216,7 +216,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnTranscriptRequestsWithApprovedStatusOk() throws Exception {
+    void shouldReturnOkTranscriptRequestsWithApprovedStatus() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -250,7 +250,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnTranscriptRequestsWithTranscriberAndCompletedTodayStatusOk() throws Exception {
+    void shouldReturnOkTranscriberTranscriptionsWorkWithTranscriberAndCompletedTodayStatus() throws Exception {
         // This test expects that this "Complete" (trs_id=6) transcription (tra_id=101) is hidden from "Your work > Completed today" view
         // because the workflow_ts is BEFORE TODAY (workflow_ts='2023-11-24 12:53:42.839577+00').
 
