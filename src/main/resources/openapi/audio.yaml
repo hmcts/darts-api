@@ -199,6 +199,7 @@ components:
         - courthouse
         - courtroom
         - cases
+        - file_size
       properties:
         started_at:
           type: string
