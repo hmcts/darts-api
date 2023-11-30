@@ -115,6 +115,11 @@ public class AuthorisationStub {
             .createAndSaveAwaitingAuthorisationTranscription(testUser, courtCaseEntity, hearingEntity, YESTERDAY);
     }
 
+    public TranscriptionEntity addNewTranscription() {
+        return dartsDatabaseStub.getTranscriptionStub()
+            .createAndSaveAwaitingAuthorisationTranscription(testUser, courtCaseEntity, hearingEntity, YESTERDAY);
+    }
+
     private void createHearing() {
         hearingEntity = new HearingEntity();
         hearingEntity.setCourtCase(courtCaseEntity);

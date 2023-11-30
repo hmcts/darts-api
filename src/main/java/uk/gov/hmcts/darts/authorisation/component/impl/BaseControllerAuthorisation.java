@@ -16,6 +16,9 @@ abstract class BaseControllerAuthorisation {
     public static final String BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE =
         "Unable to extract the %s in request path, query or header params for this Authorisation endpoint: %s";
 
+    public static final String BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE =
+        "id is empty";
+
     Optional<String> getPathParamValue(HttpServletRequest request, String pathParam) {
         @SuppressWarnings("unchecked")
         Map<String, String> pathVariables = (Map<String, String>) request.getAttribute(URI_TEMPLATE_VARIABLES_ATTRIBUTE);

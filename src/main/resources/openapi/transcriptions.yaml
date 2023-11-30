@@ -112,6 +112,67 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TranscriptionRequestDetails'
+
+    patch:
+      tags:
+        - Transcription
+      summary: Update multiple transcriptions
+      operationId: updateTranscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdateTranscriptionsItem'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscriptions400ErrorCode'
+              example:
+                type: "TRANSCRIPTION_112"
+                title: "Failed to update some of the transcriptions"
+                status: 400
+                partial_failure: [{"transcription_id":100,"hide_request_from_requestor":false}]
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpdateTranscriptionsItem'
+
   /transcriptions/{transcription_id}:
     get:
       tags:
@@ -605,6 +666,19 @@ components:
           example: 3
         workflow_comment:
           type: string
+
+    UpdateTranscriptionsItem:
+      type: object
+      required:
+        - transcriptionId
+      properties:
+        transcription_id:
+          type: integer
+          example: "1001"
+        hide_request_from_requestor:
+          type: boolean
+          example: true
+
     RequestTranscriptionResponse:
       type: object
       required:
@@ -790,7 +864,6 @@ components:
         description:
           type: string
           example: Standard
-
     TranscriptionTranscriberCountsResponse:
       type: object
       properties:
@@ -802,7 +875,12 @@ components:
           type: integer
           description: The number of assigned transcript requests for a user with transcriber role.
           example: 3
-
+    UpdateTranscriptions400ErrorCode:
+      type: string
+      enum:
+        - "112"
+      x-enum-varnames:
+        - UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM
     GetTranscriptionByIdResponse:
       type: object
       properties:
@@ -813,6 +891,9 @@ components:
         case_id:
           type: integer
           example: 1
+        hearing_id:
+          type: integer
+          example: 1234
         case_number:
           type: string
           example: Swansea_case_1
@@ -856,6 +937,9 @@ components:
         request_type:
           type: string
           example: Specified Times
+        is_manual:
+          type: boolean
+          example: false
         transcription_start_ts:
           type: string
           format: date-time

@@ -173,7 +173,18 @@
 --    amend media.file_size to bigint
 --    remove media_type table, and replace by media.media_type column
 --v56 add hide_request_from_requestor field on transcription
-
+--v57 add output_filesize to media_request
+--    add priority_order to transcription_urgency
+--    add message_id to daily_list
+--    add retain_until_ts to court_case
+--    replace user_state with is_active on user_accout
+--    add content_object_id to annotation_document, transcription_document & media
+--v58 rename object_directory_status to object_record_status
+--    add table transformed_media, to link media_request to transient_object_directory ( as a media request can give rise to >1 pieces of media
+--    some columns from media_request pushed down to transformed_media, where pertain to the media rather than the Request
+--    add boolean is_hidden to annotation_document, transcription_document & media
+--    add media_status column to media, to include statuses of "fully linked", "marked for deletion", "deleted"
+--
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -202,7 +213,7 @@
 -- media_request               MER
 -- node_register               NOD
 -- notification                NOT
--- object_directory_status     ODS
+-- object_record_status        ORS
 -- prosecutor                  PRN
 -- region                      REG
 -- report                      REP
@@ -213,6 +224,7 @@
 -- transcription_type          TRT
 -- transcription_urgency       TRU
 -- transcription_workflow      TRW
+-- transformed_media           TRM
 -- transient_object_directory  TOD
 -- user_account                USR
 
@@ -284,10 +296,12 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_annotation';
 CREATE TABLE annotation_document
 (ado_id                      INTEGER                       NOT NULL
 ,ann_id                      INTEGER                       NOT NULL
+,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content 
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             NOT NULL
+,is_hidden                   BOOLEAN                       NOT NULL
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE darts_tables;
@@ -380,6 +394,7 @@ CREATE TABLE court_case
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
 ,retention_applies_from_ts   TIMESTAMP WITH TIME ZONE
 ,end_of_sentence_ts          TIMESTAMP WITH TIME ZONE 
+,retain_until_ts             TIMESTAMP WITH TIME ZONE
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -465,6 +480,7 @@ CREATE TABLE daily_list
 ,daily_list_source           CHARACTER VARYING        -- one of CPP,XHB ( live also sees nulls and spaces)   
 ,daily_list_content_json     CHARACTER VARYING
 ,daily_list_content_xml      CHARACTER VARYING
+,message_id                  CHARACTER VARYING
 ,version_label               CHARACTER VARYING(32)  
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -626,7 +642,7 @@ CREATE TABLE external_object_directory
 ,med_id                      INTEGER
 ,trd_id                      INTEGER                                 -- FK to transcription_document
 ,ado_id                      INTEGER                                 -- FK to annotation_document
-,ods_id                      INTEGER                       NOT NULL  -- FK to object_directory_status
+,ors_id                      INTEGER                       NOT NULL  -- FK to object_record_status
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 -- additional optional FKs to other relevant internal objects would require columns here
 ,external_location           UUID                          NOT NULL
@@ -774,6 +790,7 @@ CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER
 ,media_object_id             CHARACTER VARYING(16)
+,content_object_id           CHARACTER VARYING(16)
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
 ,reference_id                CHARACTER VARYING             --all nulls in legacy
@@ -784,6 +801,8 @@ CREATE TABLE media
 ,media_type                  CHAR(1)                       NOT NULL DEFAULT 'A'
 ,file_size                   BIGINT                        NOT NULL
 ,checksum                    CHARACTER VARYING
+,is_hidden                   BOOLEAN                       NOT NULL
+,media_status                CHARACTER VARYING             NOT NULL
 ,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -829,10 +848,6 @@ CREATE TABLE media_request
 ,req_proc_attempts           INTEGER 
 ,start_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,end_ts                      TIMESTAMP WITH TIME ZONE      NOT NULL
-,last_accessed_ts            TIMESTAMP WITH TIME ZONE
-,expiry_ts                   TIMESTAMP WITH TIME ZONE
-,output_filename             CHARACTER VARYING
-,output_format               CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -860,11 +875,7 @@ IS 'start time in the search criteria for request, possibly migrated from moj_ca
 COMMENT ON COLUMN media_request.end_ts
 IS 'end time in the search criteria for request, possibly migrated from moj_cached_media_s or moj_transformation_request_s';
 
-COMMENT ON COLUMN media_request.output_filename
-IS 'filename of the requested media object, possibly migrated from moj_transformation_request_s';
 
-COMMENT ON COLUMN media_request.output_format
-IS 'format of the requested media object, possibly migrated from moj_transformation_s';
 
 CREATE TABLE node_register
 (node_id                     INTEGER                       NOT NULL  --pk column breaks pattern used, is not nod_id
@@ -922,12 +933,12 @@ COMMENT ON COLUMN notification.template_values
 IS 'any extra fields not already covered or inferred from the case, in JSON format';
 
 
-CREATE TABLE object_directory_status
-(ods_id                      INTEGER                       NOT NULL
-,ods_description             CHARACTER VARYING
+CREATE TABLE object_record_status
+(ors_id                      INTEGER                       NOT NULL
+,ors_description             CHARACTER VARYING
 ) TABLESPACE darts_tables;
 
-COMMENT ON TABLE object_directory_status
+COMMENT ON TABLE object_record_status
 IS 'used to record acceptable statuses found in [external/transient]_object_directory';
 
 CREATE TABLE prosecutor
@@ -1081,10 +1092,12 @@ IS 'internal Documentum id from moj_transcription_s acting as foreign key';
 CREATE TABLE transcription_document
 (trd_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
+,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content object
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
 ,checksum                    CHARACTER VARYING             NOT NULL
+,is_hidden                   BOOLEAN                       NOT NULL
 ,uploaded_by                 INTEGER                       NOT NULL
 ,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
 ) TABLESPACE darts_tables;
@@ -1125,6 +1138,7 @@ CREATE TABLE transcription_urgency
 (tru_id                      INTEGER                       NOT NULL
 ,description                 CHARACTER VARYING             NOT NULL
 ,display_state               BOOLEAN                       NOT NULL
+,priority_order              INTEGER                       NOT NULL
 ) TABLESPACE darts_tables;
 
 COMMENT ON TABLE transcription_urgency 
@@ -1145,12 +1159,34 @@ CREATE TABLE transcription_workflow
 --,workflow_comment            CHARACTER VARYING             
 ) TABLESPACE darts_tables;
 
+CREATE TABLE transformed_media
+(trm_id                      INTEGER                       NOT NULL
+,mer_id                      INTEGER                       NOT NULL  -- FK to media_request
+,last_accessed_ts            TIMESTAMP WITH TIME ZONE
+,expiry_ts                   TIMESTAMP WITH TIME ZONE
+,output_filename             CHARACTER VARYING
+,output_filesize             INTEGER
+,output_format               CHARACTER VARYING
+,checksum                    CHARACTER VARYING 
+,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
+,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL  
+) TABLESPACE darts_tables;
 
+COMMENT ON TABLE transformed_media
+IS 'to accommodate the possibility that a single media_request may be fulfilled as more than one resulting piece of media';
+
+COMMENT ON COLUMN transformed_media.output_filename
+IS 'filename of the requested media object, possibly migrated from moj_transformation_request_s';
+
+COMMENT ON COLUMN transformed_media.output_format
+IS 'format of the requested media object, possibly migrated from moj_transformation_s';
 
 CREATE TABLE transient_object_directory
 (tod_id                      INTEGER                       NOT NULL
-,mer_id                      INTEGER                       NOT NULL 
-,ods_id                      INTEGER                       NOT NULL  -- FK to moj_object_directory_status.moj_ods_id
+,trm_id                      INTEGER                       NOT NULL  -- FK to transformed_media 
+,ors_id                      INTEGER                       NOT NULL  -- FK to moj_object_record_status.moj_ors_id
 ,external_location           UUID                          NOT NULL
 ,checksum                    CHARACTER VARYING
 ,transfer_attempts           INTEGER
@@ -1167,7 +1203,7 @@ CREATE TABLE user_account
 ,user_name                   CHARACTER VARYING             NOT NULL
 ,user_email_address          CHARACTER VARYING
 ,description                 CHARACTER VARYING
-,user_state                  INTEGER
+,is_active                   BOOLEAN                       NOT NULL
 ,last_login_ts               TIMESTAMP WITH TIME ZONE
 ,is_system_user              BOOLEAN                       NOT NULL
 ,account_guid                CHARACTER VARYING             
@@ -1268,8 +1304,8 @@ ALTER TABLE node_register         ADD PRIMARY KEY USING INDEX node_register_pk;
 CREATE UNIQUE INDEX notification_pk ON notification(not_id) TABLESPACE darts_indexes;
 ALTER TABLE notification            ADD PRIMARY KEY USING INDEX notification_pk;
 
-CREATE UNIQUE INDEX object_directory_status_pk ON object_directory_status(ods_id) TABLESPACE darts_indexes;
-ALTER TABLE object_directory_status ADD PRIMARY KEY USING INDEX object_directory_status_pk;
+CREATE UNIQUE INDEX object_record_status_pk ON object_record_status(ors_id) TABLESPACE darts_indexes;
+ALTER TABLE object_record_status ADD PRIMARY KEY USING INDEX object_record_status_pk;
 
 CREATE UNIQUE INDEX prosecutor_pk ON prosecutor(prn_id) TABLESPACE darts_indexes;
 ALTER TABLE prosecutor          ADD PRIMARY KEY USING INDEX prosecutor_pk;
@@ -1300,6 +1336,9 @@ ALTER TABLE transcription_urgency                 ADD PRIMARY KEY USING INDEX tr
 
 CREATE UNIQUE INDEX transcription_workflow_pk ON transcription_workflow( trw_id) TABLESPACE darts_indexes;
 ALTER TABLE transcription_workflow               ADD PRIMARY KEY USING INDEX transcription_workflow_pk;
+
+CREATE UNIQUE INDEX transformed_media_pk ON transformed_media( trm_id) TABLESPACE darts_indexes;
+ALTER TABLE transformed_media               ADD PRIMARY KEY USING INDEX transformed_media_pk;
 
 CREATE UNIQUE INDEX transient_object_directory_pk ON transient_object_directory(tod_id) TABLESPACE darts_indexes;
 ALTER TABLE transient_object_directory  ADD PRIMARY KEY USING INDEX transient_object_directory_pk;
@@ -1332,7 +1371,7 @@ CREATE SEQUENCE med_seq CACHE 20;
 CREATE SEQUENCE mer_seq CACHE 20;
 CREATE SEQUENCE nod_seq CACHE 20 START WITH 50000;   -- sequence for node_register.node_id
 CREATE SEQUENCE not_seq CACHE 20;
-CREATE SEQUENCE ods_seq CACHE 20;
+CREATE SEQUENCE ors_seq CACHE 20;
 CREATE SEQUENCE prn_seq CACHE 20;
 CREATE SEQUENCE reg_seq CACHE 20;
 CREATE SEQUENCE rep_seq CACHE 20;
@@ -1341,6 +1380,7 @@ CREATE SEQUENCE tra_seq CACHE 20;
 CREATE SEQUENCE trc_seq CACHE 20;
 CREATE SEQUENCE trd_seq CACHE 20;
 CREATE SEQUENCE trw_seq CACHE 20;
+CREATE SEQUENCE trm_seq CACHE 20;
 CREATE SEQUENCE usr_seq CACHE 20;
 
 
@@ -1535,8 +1575,8 @@ ADD CONSTRAINT eod_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE external_object_directory   
-ADD CONSTRAINT eod_object_directory_status_fk
-FOREIGN KEY (ods_id) REFERENCES object_directory_status(ods_id);
+ADD CONSTRAINT eod_object_record_status_fk
+FOREIGN KEY (ors_id) REFERENCES object_record_status(ors_id);
 
 ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_external_location_type_fk
@@ -1738,6 +1778,10 @@ ALTER TABLE transcription_workflow
 ADD CONSTRAINT transcription_workflow_workflow_actor_fk
 FOREIGN KEY (workflow_actor) REFERENCES user_account(usr_id);
 
+ALTER TABLE transformed_media  
+ADD CONSTRAINT trm_media_request_fk
+FOREIGN KEY (mer_id) REFERENCES media_request(mer_id);
+
 ALTER TABLE transient_object_directory
 ADD CONSTRAINT transient_object_directory_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
@@ -1747,12 +1791,13 @@ ADD CONSTRAINT tod_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE transient_object_directory  
-ADD CONSTRAINT tod_media_request_fk
-FOREIGN KEY (mer_id) REFERENCES media_request(mer_id);
+ADD CONSTRAINT tod_transformed_media_fk
+FOREIGN KEY (trm_id) REFERENCES transformed_media(trm_id);
+
 
 ALTER TABLE transient_object_directory  
-ADD CONSTRAINT tod_object_directory_status_fk
-FOREIGN KEY (ods_id) REFERENCES object_directory_status(ods_id);
+ADD CONSTRAINT tod_object_record_status_fk
+FOREIGN KEY (ors_id) REFERENCES object_record_status(ors_id);
 
 
 
@@ -1809,7 +1854,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON media TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON media_request TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON node_register TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON notification TO darts_user;
-GRANT SELECT,INSERT,UPDATE,DELETE ON object_directory_status TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON object_record_status TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON prosecutor TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON region TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON report TO darts_user;
@@ -1819,6 +1864,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_status TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_urgency TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transcription_workflow TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON transformed_media TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON transient_object_directory TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON user_account TO darts_user;
 
@@ -1843,7 +1889,7 @@ GRANT SELECT,UPDATE ON  med_seq TO darts_user;
 GRANT SELECT,UPDATE ON  mer_seq TO darts_user;
 GRANT SELECT,UPDATE ON  nod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  not_seq TO darts_user;
-GRANT SELECT,UPDATE ON  ods_seq TO darts_user;
+GRANT SELECT,UPDATE ON  ors_seq TO darts_user;
 GRANT SELECT,UPDATE ON  prn_seq TO darts_user;
 GRANT SELECT,UPDATE ON  reg_seq TO darts_user;
 GRANT SELECT,UPDATE ON  rep_seq TO darts_user;
@@ -1851,6 +1897,7 @@ GRANT SELECT,UPDATE ON  tod_seq TO darts_user;
 GRANT SELECT,UPDATE ON  tra_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trc_seq TO darts_user;
 GRANT SELECT,UPDATE ON  trw_seq TO darts_user;
+GRANT SELECT,UPDATE ON  trm_seq TO darts_user;
 GRANT SELECT,UPDATE ON  usr_seq TO darts_user;
 
 GRANT USAGE ON SCHEMA DARTS TO darts_user;

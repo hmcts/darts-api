@@ -482,7 +482,7 @@
 						"header": [
 							{
 								"key": "accept",
-								"value": "audio/mp3"
+								"value": "audio/mpeg"
 							}
 						],
 						"url": {

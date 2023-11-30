@@ -58,4 +58,6 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         OffsetDateTime endTime,
         Boolean isManual
     );
+
+    List<TranscriptionEntity> findByIdIn(List<Integer> transcriptionIds);
 }

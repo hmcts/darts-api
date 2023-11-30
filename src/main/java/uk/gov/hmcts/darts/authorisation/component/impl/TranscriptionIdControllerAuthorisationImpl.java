@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_TRANSCRIPTION_ID;
@@ -38,7 +39,7 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
 
     @Override
     public void checkAuthorisation(HttpServletRequest request, Set<SecurityRoleEnum> roles) {
-        Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, TRANSCRIPTION_ID_PARAM);
+        Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, getEntityIdParam());
         checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
 
         if (transcriptionIdParamOptional.isEmpty()) {
@@ -46,6 +47,17 @@ class TranscriptionIdControllerAuthorisationImpl extends BaseControllerAuthorisa
                 BAD_REQUEST_AUTHORISATION_PARAM_ERROR_MESSAGE,
                 TRANSCRIPTION_ID_PARAM,
                 request.getRequestURI()
+            ));
+            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
+        }
+    }
+
+    @Override
+    public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
+        checkAuthorisationByTranscriptionId(idToAuthorise.get(), roles);
+        if (idToAuthorise.get().isEmpty()) {
+            log.error(String.format(
+                BAD_REQUEST_AUTHORISATION_ID_ERROR_MESSAGE
             ));
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_ID);
         }

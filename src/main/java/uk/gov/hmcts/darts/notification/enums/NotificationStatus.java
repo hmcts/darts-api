@@ -4,5 +4,5 @@ public enum NotificationStatus {
     OPEN,
     PROCESSING,
     FAILED,
-    SENT;
+    SENT
 }

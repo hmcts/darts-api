@@ -1,6 +1,7 @@
 {
   "transcription_id": 1,
   "case_id": 101,
+  "hearing_id": 102,
   "case_number": "case1",
   "courthouse": "case_courthouse",
   "from": "testUsername",
@@ -16,5 +17,6 @@
   "transcript_file_name": "test.doc",
   "hearing_date": "2023-06-20",
   "urgency": "STANDARD",
-  "request_type": "SENTENCING_REMARKS"
+  "request_type": "SENTENCING_REMARKS",
+  "is_manual": true
 }

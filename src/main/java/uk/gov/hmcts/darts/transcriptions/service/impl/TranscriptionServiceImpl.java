@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.exception.PartialFailureException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
@@ -47,6 +48,7 @@ import uk.gov.hmcts.darts.transcriptions.config.TranscriptionConfigurationProper
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
+import uk.gov.hmcts.darts.transcriptions.helper.UpdateTranscriptionEntityHelper;
 import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
@@ -60,7 +62,9 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
+import uk.gov.hmcts.darts.transcriptions.service.TranscriptionsUpdateValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.TranscriptFileValidator;
 import uk.gov.hmcts.darts.transcriptions.validator.WorkflowValidator;
 
@@ -70,7 +74,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 import static java.time.ZoneOffset.UTC;
@@ -143,6 +149,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final YourTranscriptsQuery yourTranscriptsQuery;
     private final DuplicateRequestDetector duplicateRequestDetector;
     private final TranscriberTranscriptsQuery transcriberTranscriptsQuery;
+    private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
 
     @Override
     @Transactional
@@ -477,6 +484,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(transcript.getOriginalFilename());
         transcriptionDocumentEntity.setFileType(transcript.getContentType());
+        transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setFileSize((int) transcript.getSize());
         transcriptionDocumentEntity.setChecksum(checksum);
         transcriptionDocumentEntity.setUploadedBy(userAccountEntity);
@@ -555,7 +563,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     public List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned) {
-        if (assigned != null && TRUE.equals(assigned)) {
+        if (TRUE.equals(assigned)) {
             return transcriberTranscriptsQuery.getTranscriberTranscriptions(userId);
         }
         return transcriberTranscriptsQuery.getTranscriptRequests(userId);
@@ -593,4 +601,66 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         return TranscriptionResponseMapper.mapToTranscriptionResponse(transcription);
     }
 
+    @Override
+    public List<UpdateTranscriptionsItem> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
+
+        final List<TranscriptionEntity> processed = processTranscriptionUpdates(request);
+
+        List<UpdateTranscriptionsItem> unprocessedUpdates = new ArrayList<>(request);
+        List<UpdateTranscriptionsItem> processedUpdates = getTranscriptionForIds(getTranscriptionIdsForEntities(processed), request);
+        unprocessedUpdates.removeAll(processedUpdates);
+
+        // return a partial success
+        if (!unprocessedUpdates.isEmpty() && !processedUpdates.isEmpty()) {
+            throw PartialFailureException.getPartialPayloadJson(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS, unprocessedUpdates);
+        } else if (processedUpdates.isEmpty()) {
+            throw new DartsApiException(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS);
+        }
+
+        return processedUpdates;
+    }
+
+    private List<TranscriptionEntity> processTranscriptionUpdates(List<UpdateTranscriptionsItem> request) {
+        List<TranscriptionEntity> foundTranscriptionEntities = transcriptionRepository.findByIdIn(getTranscriptionIdsForRequest(request));
+        final List<TranscriptionEntity> validated = new ArrayList<>();
+        for (UpdateTranscriptionsItem requestItem : request) {
+            Optional<TranscriptionEntity> matchingEntity = getTranscriptionEntityForId(requestItem.getTranscriptionId(), foundTranscriptionEntities);
+            updateTranscriptionsValidator.forEach(validator -> {
+                if (validator.validate(matchingEntity, requestItem)) {
+                    validated.add(matchingEntity.get());
+                }
+            });
+        }
+
+        if (!validated.isEmpty()) {
+            validated.stream().forEach(entity -> {
+                UpdateTranscriptionEntityHelper.updateTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request).get());
+            });
+
+            transcriptionRepository.saveAll(validated);
+        }
+        return validated;
+    }
+
+    private List<Integer> getTranscriptionIdsForRequest(List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
+        return updateTranscriptionsItems.stream().map(UpdateTranscriptionsItem::getTranscriptionId).collect(Collectors.toList());
+    }
+
+    private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
+        return transcriptionEntities.stream().map(e -> e.getId()).collect(Collectors.toList());
+    }
+
+    private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Integer> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
+        return updateTranscriptionsItems.stream().filter(e -> transcriptionIds.contains(e.getTranscriptionId())).collect(Collectors.toList());
+    }
+
+    private Optional<UpdateTranscriptionsItem> getTranscriptionsItemForId(Integer transcriptionId, List<UpdateTranscriptionsItem> updateTranscriptions) {
+        return updateTranscriptions.stream().filter(e -> e.getTranscriptionId().equals(transcriptionId)).findAny();
+    }
+
+    private Optional<TranscriptionEntity> getTranscriptionEntityForId(Integer transcriptionId,
+                                                                      List<TranscriptionEntity> updateTranscriptions) {
+        return updateTranscriptions.stream().filter(e ->
+                                                        e.getId().equals(transcriptionId)).findAny();
+    }
 }

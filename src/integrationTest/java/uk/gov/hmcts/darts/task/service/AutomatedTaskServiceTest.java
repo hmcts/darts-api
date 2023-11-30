@@ -19,9 +19,11 @@ import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreD
 import uk.gov.hmcts.darts.audio.deleter.impl.unstructured.ExternalUnstructuredDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
+import uk.gov.hmcts.darts.audio.service.UnstructuredAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.AutomatedTaskEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
+import uk.gov.hmcts.darts.datamanagement.service.InboundToUnstructuredProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError;
 import uk.gov.hmcts.darts.task.runner.AutomatedTask;
@@ -29,8 +31,10 @@ import uk.gov.hmcts.darts.task.runner.impl.AbstractLockableAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.CloseUnfinishedTranscriptionsAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 import uk.gov.hmcts.darts.transcriptions.api.TranscriptionsApi;
@@ -73,6 +77,12 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
     @Autowired
     private InboundAudioDeleterProcessor inboundAudioDeleterProcessor;
+
+    @Autowired
+    private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+
+    @Autowired
+    private UnstructuredAudioDeleterProcessor unstructuredAudioDeleterProcessor;
 
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());
@@ -465,6 +475,55 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
         boolean mayInterruptIfRunning = false;
         boolean taskCancelled = automatedTaskService.cancelAutomatedTask(automatedTask.getTaskName(), mayInterruptIfRunning);
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
+    }
+
+    @Test
+    @Order(15)
+    void givenConfiguredTaskCancelInboundToUnstructuredAutomatedTask() {
+        AutomatedTask automatedTask =
+            new InboundToUnstructuredAutomatedTask(automatedTaskRepository,
+                                                   lockProvider,
+                                                   automatedTaskConfigurationProperties, inboundToUnstructuredProcessor
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
+    }
+
+    @Test
+    @Order(16)
+    void givenConfiguredTaskCancelUnstructuredAudioDeleterAutomatedTask() {
+        AutomatedTask automatedTask =
+            new UnstructuredAudioDeleterAutomatedTask(automatedTaskRepository,
+                                                      lockProvider,
+                                                      automatedTaskConfigurationProperties,
+                                                      unstructuredAudioDeleterProcessor
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
         assertTrue(taskCancelled);
 
         log.info("About to reload task {}", automatedTask.getTaskName());
