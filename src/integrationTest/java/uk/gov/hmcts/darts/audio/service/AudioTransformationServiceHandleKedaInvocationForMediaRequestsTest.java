@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +23,6 @@ import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +34,7 @@ import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 
 @Import(SystemCommandExecutorStubImpl.class)
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
 
@@ -126,6 +127,14 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
+
+        String  templateValues1 = """
+            {"hearing_date":"2023-11-30","start_time":"12:00:00","defendants":"","courthouse":"some-courthouse","end_time":"13:00:00","request_id":"1"}""";
+
+        String  templateValues2 = """
+            {"hearing_date":"2023-11-30","start_time":"12:00:00","defendants":"","courthouse":"some-courthouse","end_time":"13:00:00","request_id":"2"}""";
+
+
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
             hearing,
@@ -152,7 +161,15 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
         var notificationEntity = scheduledNotifications.get(0);
         assertEquals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(), notificationEntity.getEventId());
-        assertNotNull(notificationEntity.getTemplateValues());
+
+        final int nRequestId1 = 1;
+        final int nRequestId2 = 2;
+
+        if (mediaRequestId == nRequestId1) {
+            assertEquals(templateValues1.trim(),  notificationEntity.getTemplateValues().trim());
+        } else if (mediaRequestId == nRequestId2) {
+            assertEquals(templateValues2.trim(),  notificationEntity.getTemplateValues().trim());
+        }
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
     }

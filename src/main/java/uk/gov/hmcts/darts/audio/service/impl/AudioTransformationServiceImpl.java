@@ -70,6 +70,8 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"}) // DMP-715 to resolve
 public class AudioTransformationServiceImpl implements AudioTransformationService {
 
+    public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
+    public static final String NOT_APPLICABLE = "N/A";
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
@@ -324,7 +326,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return handlePlayback(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
     }
 
-    private void notifyUser(MediaRequestEntity mediaRequestEntity,
+    public void notifyUser(MediaRequestEntity mediaRequestEntity,
                             CourtCaseEntity courtCase,
                             String notificationTemplateName) {
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
@@ -339,19 +341,38 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             if (notificationTemplateName.equals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString())) {
 
                 List<DefendantEntity> defendantList = mediaRequestEntity.getHearing().getCourtCase().getDefendantList();
+
                 List<String> defendantNames = new ArrayList<>();
-                for (DefendantEntity defendant : defendantList) {
-                    defendantNames.add(defendant.getName());
+                String defendants = NO_DEFENDANTS;
+                if (!defendantList.isEmpty()) {
+                    for (DefendantEntity defendant : defendantList) {
+                        defendantNames.add(defendant.getName());
+
+                    }
+
+                    defendants = defendantNames.stream().collect(Collectors.joining(","));
                 }
 
-                String defendants = defendantNames.stream().collect(Collectors.joining(","));
+                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName();
+                String hearingDate = "";
+                if (courthouseName == null || courthouseName.isBlank()) {
+                    courthouseName = NOT_APPLICABLE;
+                }
+
+                if (mediaRequestEntity.getHearing().getHearingDate() == null) {
+                    hearingDate = NOT_APPLICABLE;
+                } else {
+                    hearingDate = String.valueOf(mediaRequestEntity.getHearing().getHearingDate());
+                }
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
                 templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
-                templateParams.put(COURTHOUSE, String.valueOf(mediaRequestEntity.getHearing().getCourtCase().getCourthouse()));
+                templateParams.put(COURTHOUSE, courthouseName);
                 templateParams.put(DEFENDANTS, defendants);
-                templateParams.put(HEARING_DATE, String.valueOf(mediaRequestEntity.getHearing().getHearingDate()));
-                templateParams.put(AUDIO_START_TIME, String.valueOf(mediaRequestEntity.getStartTime()));
-                templateParams.put(AUDIO_END_TIME, String.valueOf(mediaRequestEntity.getEndTime()));
+                templateParams.put(HEARING_DATE, hearingDate);
+                templateParams.put(AUDIO_START_TIME, String.valueOf(mediaRequestEntity.getStartTime().format(formatter)));
+                templateParams.put(AUDIO_END_TIME, String.valueOf(mediaRequestEntity.getEndTime().format(formatter)));
             }
 
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
