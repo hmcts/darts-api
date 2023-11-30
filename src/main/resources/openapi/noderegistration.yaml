@@ -30,7 +30,7 @@ paths:
           description: ""
           required: true
         - in: query
-          name: court_room
+          name: courtroom
           schema:
             type: string
             minLength: 1

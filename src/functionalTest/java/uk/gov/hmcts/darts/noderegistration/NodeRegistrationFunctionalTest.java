@@ -26,7 +26,7 @@ class NodeRegistrationFunctionalTest extends FunctionalTest {
             .contentType(ContentType.JSON)
             .queryParam("node_type", "DAR")
             .queryParam("courthouse", courthouseName)
-            .queryParam("court_room", courtroomName)
+            .queryParam("courtroom", courtroomName)
             .queryParam("host_name", "XXXXX.MMM.net")
             .queryParam("mac_address", "6A-5F-90-A4-2C-12")
             .queryParam("ip_address", ipAddress)
