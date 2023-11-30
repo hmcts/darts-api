@@ -2151,7 +2151,7 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "{{serverUrl}}/register-devices?node_type=DAR&courthouse=swansea&court_room=1&host_name=XXXXX.MMM.net&mac_address=6A-5F-90-A4-2C-12&ip_address=192.0.0.1",
+							"raw": "{{serverUrl}}/register-devices?node_type=DAR&courthouse=swansea&courtroom=1&host_name=XXXXX.MMM.net&mac_address=6A-5F-90-A4-2C-12&ip_address=192.0.0.1",
 							"host": [
 								"{{serverUrl}}"
 							],
@@ -2168,7 +2168,7 @@
 									"value": "swansea"
 								},
 								{
-									"key": "court_room",
+									"key": "courtroom",
 									"value": "1"
 								},
 								{
