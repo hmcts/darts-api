@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -12,20 +13,31 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.util.FileContentChecksum;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+
+import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
+import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -33,14 +45,18 @@ import java.util.concurrent.ExecutionException;
 public class AudioServiceImpl implements AudioService {
 
     private final AudioTransformationService audioTransformationService;
-    private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
     private final AudioOperationService audioOperationService;
     private final FileOperationService fileOperationService;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final HearingRepository hearingRepository;
     private final AddAudioRequestMapper mapper;
-    private final AuditService auditService;
+    private final DataManagementApi dataManagementApi;
+    private final UserIdentity userIdentity;
+    private final FileContentChecksum fileContentChecksum;
 
     private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return new AudioFileInfo(
@@ -80,9 +96,25 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     @Transactional
-    public void addAudio(AddAudioMetadataRequest addAudioMetadataRequest) {
+    public void addAudio(MultipartFile audioFileStream, AddAudioMetadataRequest addAudioMetadataRequest) {
+        final UUID externalLocation;
+        final String checksum;
+
+        try {
+            BinaryData binaryData = BinaryData.fromStream(audioFileStream.getInputStream());
+            checksum = fileContentChecksum.calculate(binaryData.toBytes());
+            externalLocation = dataManagementApi.saveBlobDataToInboundContainer(binaryData);
+        } catch (IOException e) {
+            throw new DartsApiException(FAILED_TO_UPLOAD_AUDIO_FILE, e);
+        }
+
         MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
         linkAudioAndHearing(addAudioMetadataRequest, savedMedia);
+
+        saveExternalObjectDirectory(externalLocation,
+                                    checksum,
+                                    userIdentity.getUserAccount(),
+                                    savedMedia);
     }
 
     @Override
@@ -97,6 +129,23 @@ public class AudioServiceImpl implements AudioService {
             hearing.addMedia(savedMedia);
             hearingRepository.saveAndFlush(hearing);
         }
+    }
+
+    private ExternalObjectDirectoryEntity saveExternalObjectDirectory(UUID externalLocation,
+                                                                      String checksum,
+                                                                      UserAccountEntity userAccountEntity,
+                                                                      MediaEntity mediaEntity) {
+        var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        externalObjectDirectoryEntity.setMedia(mediaEntity);
+        externalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(
+            ObjectDirectoryStatusEnum.STORED.getId()));
+        externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
+        externalObjectDirectoryEntity.setExternalLocation(externalLocation);
+        externalObjectDirectoryEntity.setChecksum(checksum);
+        externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
+        externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
+        externalObjectDirectoryEntity = externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
+        return externalObjectDirectoryEntity;
     }
 
 }

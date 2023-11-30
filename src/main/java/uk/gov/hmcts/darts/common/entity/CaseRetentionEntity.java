@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,16 +13,15 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
 
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = CaseRetentionEntity.TABLE_NAME)
-@SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
-public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
+public class CaseRetentionEntity extends CreatedBaseEntity {
 
 
     public static final String ID = "car_id";
@@ -37,14 +37,33 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 
-    @ManyToOne
-    @JoinColumn(name = "rtp_id")
-    private RetentionPolicyEntity retentionPolicy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "rpt_id", nullable = false)
+    private RetentionPolicyTypeEntity retentionPolicyType;
 
-    @Column(name = "retain_until_ts")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cmr_id")
+    private CaseManagementRetentionEntity caseManagementRetention;
+
+    @Column(name = "total_sentence", nullable = false)
+    private String totalSentence;
+
+    @Column(name = "retain_until_ts", nullable = false)
     private OffsetDateTime retainUntil;
 
-    @Column(name = "manual_override")
-    private boolean manualOverride;
+    @Column(name = "retain_until_applied_on_ts", nullable = false)
+    private OffsetDateTime retainUntilAppliedOn;
+
+    @Column(name = "current_state", nullable = false)
+    private String currentState;
+
+    @Column(name = "comments")
+    private String comments;
+
+    @Column(name = "retention_object_id")
+    private String retentionObjectId;
+
+    @Column(name = "submitted_ts", nullable = false)
+    private OffsetDateTime submitted;
 
 }

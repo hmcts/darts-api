@@ -24,7 +24,7 @@ import java.util.UUID;
 @Table(name = "transient_object_directory")
 @Getter
 @Setter
-public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity {
+public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity implements ObjectDirectory {
 
     @Id
     @Column(name = "tod_id")
@@ -50,4 +50,13 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity {
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
 
+    @Override
+    public int getStatusId() {
+        return getStatus().getId();
+    }
+
+    @Override
+    public UUID getLocation() {
+        return externalLocation;
+    }
 }

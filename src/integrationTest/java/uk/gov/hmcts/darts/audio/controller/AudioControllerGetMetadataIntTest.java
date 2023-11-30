@@ -49,7 +49,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         var requestBuilder = get(URI.create(String.format("/audio/hearings/%d/audios", hearingEntity.getId())));
 
@@ -81,7 +81,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
         var requestBuilder = get(URI.create(String.format("/audio/hearings/%d/audios", hearingEntity.getId())));
 

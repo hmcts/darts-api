@@ -18,25 +18,25 @@ java:
           alias: DARTS_API_DB_NAME
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
-        - name: AzureAdB2CTenantIdKey
+        - name: AzureAdB2CTenantId
           alias: AAD_B2C_TENANT_ID_KEY
-        - name: AzureAdB2CClientIdKey
+        - name: AzureAdB2CClientId
           alias: AAD_B2C_CLIENT_ID_KEY
-        - name: AzureAdB2CClientSecretKey
+        - name: AzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
-        - name: api-FUNC-TEST-ROPC-USERNAME
+        - name: AzureAdB2CFuncTestROPCUsername
           alias: FUNC_TEST_ROPC_USERNAME
-        - name: api-FUNC-TEST-ROPC-PASSWORD
+        - name: AzureAdB2CFuncTestROPCPassword
           alias: FUNC_TEST_ROPC_PASSWORD
         - name: AzureADFunctionalTestUsername
           alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
         - name: AzureADFunctionalTestPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
-        - name: AzureAdB2CFuncTestROPCClientIdKey
+        - name: AzureAdB2CFuncTestROPCClientId
           alias: AAD_B2C_ROPC_CLIENT_ID_KEY
-        - name: AzureAdB2CFuncTestROPCClientSecretKey
+        - name: AzureAdB2CFuncTestROPCClientSecret
           alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
         - name: AzureStorageConnectionString
           alias: AZURE_STORAGE_CONNECTION_STRING
@@ -68,6 +68,10 @@ java:
           alias: SYSTEM_USER_EMAIL
         - name: redis-connection-string
           alias: REDIS_CONNECTION_STRING
+        - name: AzureAdB2CFuncTestROPCGlobalUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
+        - name: AzureAdB2CFuncTestROPCGlobalPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -98,25 +102,25 @@ function:
           alias: DARTS_API_DB_NAME
         - name: api-POSTGRES-SCHEMA
           alias: DARTS_API_DB_SCHEMA
-        - name: AzureAdB2CTenantIdKey
+        - name: AzureAdB2CTenantId
           alias: AAD_B2C_TENANT_ID_KEY
-        - name: AzureAdB2CClientIdKey
+        - name: AzureAdB2CClientId
           alias: AAD_B2C_CLIENT_ID_KEY
-        - name: AzureAdB2CClientSecretKey
+        - name: AzureAdB2CClientSecret
           alias: AAD_B2C_CLIENT_SECRET_KEY
         - name: app-insights-connection-string
           alias: app-insights-connection-string
-        - name: api-FUNC-TEST-ROPC-USERNAME
+        - name: AzureAdB2CFuncTestROPCUsername
           alias: FUNC_TEST_ROPC_USERNAME
-        - name: api-FUNC-TEST-ROPC-PASSWORD
+        - name: AzureAdB2CFuncTestROPCPassword
           alias: FUNC_TEST_ROPC_PASSWORD
         - name: AzureADFunctionalTestUsername
           alias: AZURE_AD_FUNCTIONAL_TEST_USERNAME
         - name: AzureADFunctionalTestPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_PASSWORD
-        - name: AzureAdB2CFuncTestROPCClientIdKey
+        - name: AzureAdB2CFuncTestROPCClientId
           alias: AAD_B2C_ROPC_CLIENT_ID_KEY
-        - name: AzureAdB2CFuncTestROPCClientSecretKey
+        - name: AzureAdB2CFuncTestROPCClientSecret
           alias: AAD_B2C_ROPC_CLIENT_SECRET_KEY
         - name: AzureStorageConnectionString
           alias: AZURE_STORAGE_CONNECTION_STRING
@@ -148,6 +152,10 @@ function:
           alias: SYSTEM_USER_EMAIL
         - name: redis-connection-string
           alias: REDIS_CONNECTION_STRING
+        - name: AzureAdB2CFuncTestROPCGlobalUsername
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
+        - name: AzureAdB2CFuncTestROPCGlobalPassword
+          alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require

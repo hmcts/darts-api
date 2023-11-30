@@ -466,6 +466,7 @@ INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUE
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (8, 'CPP', 'CPP', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (9, 'DAR_PC', 'DAR PC', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (10, 'MID_TIER', 'Mid Tier', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (11, 'ADMIN', 'Admin', true);
 
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 2);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (1, 4);
@@ -535,6 +536,8 @@ INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 19);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 20);
 INSERT INTO security_role_permission_ae (rol_id, per_id) VALUES (10, 21);
 
+INSERT INTO security_group (grp_id, rol_id, group_name, group_display_name, global_access, display_state) VALUES (nextval('grp_seq'), 11, 'ADMIN', 'Admin', true, true);
+
 INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (1, 'Requested', 'Requested');
 INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (2, 'Awaiting Authorisation', 'Awaiting Authorisation');
 INSERT INTO transcription_status (trs_id, status_type, display_name) VALUES (3, 'Approved', 'Approved');
@@ -557,6 +560,6 @@ INSERT INTO transcription_type (trt_id, description, display_state) VALUES (999,
 INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (1, 'Standard', false);
 INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (2, 'Overnight', true);
 INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (3, 'Other', false);
-INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (4, '3 working days', true);
-INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (5, '7 working days', true);
-INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (6, '12 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (4, 'Up to 3 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (5, 'Up to 7 working days', true);
+INSERT INTO transcription_urgency (tru_id, description, display_state) VALUES (6, 'Up to 12 working days', true);

@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEARING_ID_TRANSCRIBER;
 
@@ -43,6 +44,16 @@ class AudioRequestsControllerAuthorisationImpl extends BaseControllerAuthorisati
         }
 
         hearingIdControllerAuthorisation.checkAuthorisation(request, roles);
+    }
+
+    @Override
+    public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
+        Optional<String> optionalId = idToAuthorise.get();
+        if (optionalId.isPresent()) {
+            roles = setDownloadRequestSecurityRoles(roles, optionalId.get());
+        }
+
+        hearingIdControllerAuthorisation.checkAuthorisation(idToAuthorise, roles);
     }
 
     @Override

@@ -136,7 +136,6 @@ public class CaseServiceImpl implements CaseService {
     @Override
     public SingleCase patchCase(Integer caseId, PatchRequestObject patchRequestObject) {
         CourtCaseEntity foundCase = getCourtCaseById(caseId);
-        foundCase.setRetainUntilTimestamp(patchRequestObject.getRetainUntil());
         caseRepository.save(foundCase);
         return casesMapper.mapToSingleCase(foundCase);
     }

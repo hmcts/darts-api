@@ -6,6 +6,6 @@ public enum AutomatedTaskStatus {
     COMPLETED,
     FAILED,
     SKIPPED,
-    LOCK_FAILED;
+    LOCK_FAILED
 
 }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
@@ -15,10 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalTime;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -112,7 +111,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     }
 
     @Override
-    public AudioFileInfo trim(String workspaceDir, AudioFileInfo audioFileInfo, String startTime, String endTime)
+    public AudioFileInfo trim(String workspaceDir, AudioFileInfo audioFileInfo, Duration startDuration, Duration endDuration)
         throws ExecutionException, InterruptedException, IOException {
 
         Path basePath = Path.of(audioConfigurationProperties.getTrimWorkspace(), workspaceDir);
@@ -125,18 +124,27 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
-        command.addArgument("-ss").addArgument(startTime);
-        command.addArgument("-to").addArgument(endTime);
+        command.addArgument("-ss").addArgument(toTimeString(startDuration));
+        command.addArgument("-to").addArgument(toTimeString(endDuration));
         command.addArgument("-c").addArgument("copy").addArgument(outputPath.toString());
 
         systemCommandExecutor.execute(command);
 
         return new AudioFileInfo(
-            adjustTimeDuration(audioFileInfo.getStartTime(), startTime),
-            adjustTimeDuration(audioFileInfo.getStartTime(), endTime),
+            adjustTimeDuration(audioFileInfo.getStartTime(), startDuration),
+            adjustTimeDuration(audioFileInfo.getStartTime(), endDuration),
             outputPath.toString(),
             audioFileInfo.getChannel()
         );
+    }
+
+    private String toTimeString(Duration duration) {
+        // Format per http://ffmpeg.org/ffmpeg-utils.html#Time-duration
+        return String.format("%s%02d:%02d:%02d",
+                             duration.isNegative() ? "-" : StringUtils.EMPTY,
+                             Math.abs(duration.toHours()),
+                             Math.abs(duration.toMinutesPart()),
+                             Math.abs(duration.toSecondsPart()));
     }
 
     @Override
@@ -165,13 +173,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         );
     }
 
-    Instant adjustTimeDuration(Instant time, String timeDuration) {
-        Instant adjustedInstant = Instant.from(time);
-        LocalTime localTime = LocalTime.parse(timeDuration);
-        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.HOUR_OF_DAY), ChronoUnit.HOURS);
-        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.MINUTE_OF_HOUR), ChronoUnit.MINUTES);
-        adjustedInstant = adjustedInstant.plus(localTime.get(ChronoField.SECOND_OF_MINUTE), ChronoUnit.SECONDS);
-        return adjustedInstant;
+    Instant adjustTimeDuration(Instant time, Duration timeDuration) {
+        return time.plus(timeDuration);
     }
 
     private Instant getEarliestStartTime(final List<AudioFileInfo> audioFilesInfo) {

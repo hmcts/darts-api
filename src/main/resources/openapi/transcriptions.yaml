@@ -10,6 +10,29 @@ info:
 
 paths:
   /transcriptions:
+    get:
+      tags:
+        - Transcription
+      summary: Requester / Approver view for Transcript requests
+      operationId: getYourTranscripts
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetYourTranscriptsResponse'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
     post:
       tags:
         - Transcription
@@ -37,14 +60,119 @@ paths:
                         $ref: '#/components/schemas/RequestTranscription400ErrorCode'
         '401':
           description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '404':
           description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/RequestTranscription404ErrorCode'
+        '409':
+          description: Duplicate transcription request
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/RequestTranscription409ErrorCode'
+                      duplicate_transcription_id:
+                        type: integer
+                        example: 1
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/TranscriptionRequestDetails'
+
+    patch:
+      tags:
+        - Transcription
+      summary: Update multiple transcriptions
+      operationId: updateTranscriptions
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdateTranscriptionsItem'
+        '400':
+          description: Bad Request Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/UpdateTranscriptions400ErrorCode'
+              example:
+                type: "TRANSCRIPTION_112"
+                title: "Failed to update some of the transcriptions"
+                status: 400
+                partial_failure: [{"transcription_id":100,"hide_request_from_requestor":false}]
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpdateTranscriptionsItem'
+
   /transcriptions/{transcription_id}:
     get:
       tags:
@@ -64,7 +192,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TranscriptionResponse'
+                $ref: '#/components/schemas/GetTranscriptionByIdResponse'
+        '401':
+          description: Unauthorised Error
         '403':
           description: Forbidden Error
           content:
@@ -374,6 +504,38 @@ paths:
                 type: "TRANSCRIPTION_105"
                 title: "Transcription workflow action is not permitted"
                 status: 409
+  /transcriptions/transcriber-view:
+    get:
+      tags:
+        - Transcription
+      summary: Transcriber view for Transcript requests
+      operationId: getTranscriberTranscripts
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+        - in: query
+          name: assigned
+          schema:
+            type: boolean
+          description: '"Your work" view (assigned=true), "Transcript requests" (assigned=false)'
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TranscriberViewSummary'
+        '400':
+          description: Bad Request Error
+        '401':
+          description: Unauthorised Error
   /transcriptions/types:
     get:
       tags:
@@ -444,7 +606,18 @@ components:
         - "TRANSCRIPTION_104"
         - "TRANSCRIPTION_106"
         - "TRANSCRIPTION_107"
-      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION ]
+      x-enum-varnames: [ FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, BAD_REQUEST_TRANSCRIPTION_TYPE, BAD_REQUEST_TRANSCRIPTION_URGENCY ]
+    RequestTranscription404ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_101"
+        - "TRANSCRIPTION_110"
+        - "TRANSCRIPTION_111"
+    RequestTranscription409ErrorCode:
+      type: string
+      enum:
+        - "TRANSCRIPTION_107"
+      x-enum-varnames: [ DUPLICATE_TRANSCRIPTION ]
     UpdateTranscription:
       type: object
       required:
@@ -455,6 +628,19 @@ components:
           example: 3
         workflow_comment:
           type: string
+
+    UpdateTranscriptionsItem:
+      type: object
+      required:
+        - transcriptionId
+      properties:
+        transcription_id:
+          type: integer
+          example: "1001"
+        hide_request_from_requestor:
+          type: boolean
+          example: true
+
     RequestTranscriptionResponse:
       type: object
       required:
@@ -462,6 +648,88 @@ components:
       properties:
         transcription_id:
           type: integer
+    GetYourTranscriptsResponse:
+      type: object
+      properties:
+        requester_transcriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/YourTranscriptsSummary'
+        approver_transcriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/YourTranscriptsSummary'
+    YourTranscriptsSummary:
+      type: object
+      required:
+        - transcription_id
+        - case_id
+        - case_number
+        - courthouse_name
+        - hearing_date
+        - transcription_type
+        - status
+        - requested_ts
+      properties:
+        transcription_id:
+          type: integer
+        case_id:
+          type: integer
+        case_number:
+          type: string
+        courthouse_name:
+          type: string
+        hearing_date:
+          type: string
+          format: date
+        transcription_type:
+          type: string
+        status:
+          type: string
+        urgency:
+          type: string
+        requested_ts:
+          type: string
+          format: date-time
+    TranscriberViewSummary:
+      type: object
+      required:
+        - transcription_id
+        - case_id
+        - case_number
+        - courthouse_name
+        - hearing_date
+        - transcription_type
+        - status
+        - requested_ts
+        - state_change_ts
+        - is_manual
+      properties:
+        transcription_id:
+          type: integer
+        case_id:
+          type: integer
+        case_number:
+          type: string
+        courthouse_name:
+          type: string
+        hearing_date:
+          type: string
+          format: date
+        transcription_type:
+          type: string
+        status:
+          type: string
+        urgency:
+          type: string
+        requested_ts:
+          type: string
+          format: date-time
+        state_change_ts:
+          type: string
+          format: date-time
+        is_manual:
+          type: boolean
     UpdateTranscriptionResponse:
       type: object
       required:
@@ -558,19 +826,47 @@ components:
         description:
           type: string
           example: Standard
-
-    TranscriptionResponse:
+    UpdateTranscriptions400ErrorCode:
+      type: string
+      enum:
+        - "112"
+      x-enum-varnames:
+        - UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM
+    GetTranscriptionByIdResponse:
       type: object
       properties:
+        transcription_id:
+          type: integer
+          example: 12345
+          description: The transcription_id of the transcription request.
         case_id:
           type: integer
           example: 1
+        hearing_id:
+          type: integer
+          example: 1234
         case_number:
           type: string
           example: Swansea_case_1
         courthouse:
           type: string
           example: Swansea
+        reporting_restriction:
+          type: string
+          example: "Section 4(2) of the Contempt of Court Act 1981"
+          description: 'Any reporting restrictions associated with the case.'
+        status:
+          type: string
+        from:
+          type: string
+        received:
+          type: string
+          format: date-time
+        requestor_comments:
+          type: string
+        rejection_reason:
+          type: string
+          description: Optional parameter that is only shown when a transcription has been rejected.
         defendants:
           type: array
           items:
@@ -592,6 +888,9 @@ components:
         request_type:
           type: string
           example: Specified Times
+        is_manual:
+          type: boolean
+          example: false
         transcription_start_ts:
           type: string
           format: date-time

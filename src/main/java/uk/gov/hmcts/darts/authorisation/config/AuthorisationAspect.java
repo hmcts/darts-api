@@ -16,6 +16,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.exception.AuthorisationError;
 import uk.gov.hmcts.darts.authorisation.service.ControllerAuthorisationFactory;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
@@ -31,6 +32,7 @@ public class AuthorisationAspect {
 
     private final ControllerAuthorisationFactory controllerAuthorisationFactory;
     private final ObjectMapper objectMapper;
+    private final UserIdentity userIdentity;
 
     @Pointcut("within(uk.gov.hmcts.darts.*.controller..*)")
     public void withinControllerPointcut() {
@@ -52,13 +54,25 @@ public class AuthorisationAspect {
         }
 
         Set<SecurityRoleEnum> roles = Set.of(authorisationAnnotation.securityRoles());
-        if (roles.isEmpty()) {
+        Set<SecurityRoleEnum> globalAccessRoles = Set.of(authorisationAnnotation.globalAccessSecurityRoles());
+
+        if (roles.isEmpty() && globalAccessRoles.isEmpty()) {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
 
-        JsonNode jsonNode = objectMapper.valueToTree(body);
+        boolean hasGlobalAccess = false;
 
-        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(jsonNode, roles);
+        if (!globalAccessRoles.isEmpty()) {
+            hasGlobalAccess = userIdentity.userHasGlobalAccess(globalAccessRoles);
+        }
+
+        if (!hasGlobalAccess) {
+            JsonNode jsonNode = objectMapper.valueToTree(body);
+            controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(
+                jsonNode,
+                roles
+            );
+        }
 
         return joinPoint.proceed();
     }
@@ -74,11 +88,21 @@ public class AuthorisationAspect {
         }
 
         Set<SecurityRoleEnum> roles = Set.of(authorisationAnnotation.securityRoles());
-        if (roles.isEmpty()) {
+        Set<SecurityRoleEnum> globalAccessRoles = Set.of(authorisationAnnotation.globalAccessSecurityRoles());
+
+        if (roles.isEmpty() && globalAccessRoles.isEmpty()) {
             throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE);
         }
 
-        controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(request, roles);
+        boolean hasGlobalAccess = false;
+
+        if (!globalAccessRoles.isEmpty()) {
+            hasGlobalAccess = userIdentity.userHasGlobalAccess(globalAccessRoles);
+        }
+
+        if (!hasGlobalAccess) {
+            controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(request, roles);
+        }
     }
 
     private boolean handleRequestBodyAuthorisation(@NotNull String method) {

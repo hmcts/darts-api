@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions400ErrorCode;
 
 @Getter
 @RequiredArgsConstructor
@@ -57,7 +58,23 @@ public enum TranscriptionApiError implements DartsApiError {
         "109",
         HttpStatus.BAD_REQUEST,
         "Failed to download transcript"
+    ),
+    AUDIO_NOT_FOUND(
+        "110",
+        HttpStatus.NOT_FOUND,
+        "Transcription could not be requested, no audio"
+    ),
+    TIMES_OUTSIDE_OF_HEARING_TIMES(
+        "111",
+        HttpStatus.NOT_FOUND,
+        "Transcription could not be requested, times outside of hearing times"
+    ),
+    FAILED_TO_UPDATE_TRANSCRIPTIONS(
+        UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
+        HttpStatus.BAD_REQUEST,
+        "Failed to update some of the transcriptions"
     );
+
 
     private static final String ERROR_TYPE_PREFIX = "TRANSCRIPTION";
 

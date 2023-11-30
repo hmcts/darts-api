@@ -17,7 +17,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CO
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.OTHER;
 
 @Component
 @Slf4j
@@ -45,30 +44,28 @@ public class WorkflowValidator {
         automaticWorkflowTransitionRules.put(CLOSED, Collections.emptySet());
     }
 
-    public boolean isAutomatedTranscription(TranscriptionTypeEnum transcriptionTypeEnum) {
-        return OTHER.equals(transcriptionTypeEnum);
-    }
-
-    public boolean validateChangeToWorkflowStatus(TranscriptionTypeEnum transcriptionTypeEnum,
+    public boolean validateChangeToWorkflowStatus(boolean isManual, TranscriptionTypeEnum transcriptionTypeEnum,
                                                   TranscriptionStatusEnum currentTranscriptionStatus,
                                                   TranscriptionStatusEnum desiredTargetTranscriptionStatus) {
-        if (isAutomatedTranscription(transcriptionTypeEnum)) {
-            return isValid(automaticWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum);
+        if (isManual) {
+            return isValid(manualWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum,
+                           isManual);
         }
-        return isValid(manualWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum);
+        return isValid(automaticWorkflowTransitionRules, currentTranscriptionStatus, desiredTargetTranscriptionStatus, transcriptionTypeEnum,
+                       isManual);
     }
 
     private boolean isValid(Map<TranscriptionStatusEnum, Set<TranscriptionStatusEnum>> transitionRules,
                             TranscriptionStatusEnum currentTranscriptionStatus,
                             TranscriptionStatusEnum desiredTargetTranscriptionStatus,
-                            TranscriptionTypeEnum transcriptionTypeEnum) {
+                            TranscriptionTypeEnum transcriptionTypeEnum, boolean isManual) {
         boolean isValid = transitionRules.get(currentTranscriptionStatus) != null
                           && transitionRules.get(currentTranscriptionStatus).contains(desiredTargetTranscriptionStatus);
         if (!isValid) {
-            log.warn("Unable to go from workflow state {} to {} for type {}",
+            log.warn("Unable to go from workflow state {} to {} for type {} for isManual {}",
                      currentTranscriptionStatus,
                      desiredTargetTranscriptionStatus,
-                     transcriptionTypeEnum);
+                     transcriptionTypeEnum, isManual);
         }
         return isValid;
     }

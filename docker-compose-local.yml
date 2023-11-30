@@ -38,6 +38,8 @@ services:
       - REDIS_CONNECTION_STRING=redis://darts-redis:6379
       - REDIS_SSL_ENABLED=false
       - DARTS_GATEWAY_URL=http://darts-gateway:8070
+      - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
+      - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
     build:
       context: .
       dockerfile: Dockerfile
@@ -83,7 +85,7 @@ services:
 
   darts-redis:
     container_name: darts-redis
-    image: redis:6.2.14-alpine
+    image: redis:7.2.3-alpine
     restart: always
     ports:
       - "6379:6379"

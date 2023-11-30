@@ -87,6 +87,15 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
+              examples:
+                example1:
+                  summary: Not in database
+                  description: type+subType has not been found in the database
+                  value:
+                    type: EVENT_101
+                    title: No event handler found in database
+                    status: 404
+                    detail: "No event handler could be found for messageId: 100 type: 407301 and subtype: 108081"
 
         '500':
           description: Internal Server Error

@@ -92,7 +92,6 @@ public class CasesMapper {
         singleCase.setCaseId(caseEntity.getId());
         singleCase.setCaseNumber(caseEntity.getCaseNumber());
         singleCase.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
-        singleCase.setRetainUntil(caseEntity.getRetainUntilTimestamp());
         singleCase.setDefendants(caseEntity.getDefendantStringList());
         singleCase.setDefenders(caseEntity.getDefenceStringList());
         singleCase.setProsecutors(caseEntity.getProsecutorsStringList());

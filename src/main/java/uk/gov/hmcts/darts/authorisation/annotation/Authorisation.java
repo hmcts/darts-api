@@ -16,6 +16,8 @@ public @interface Authorisation {
 
     ContextIdEnum contextId();
 
-    SecurityRoleEnum[] securityRoles();
+    SecurityRoleEnum[] securityRoles() default {};
+
+    SecurityRoleEnum[] globalAccessSecurityRoles() default {};
 
 }

@@ -19,19 +19,19 @@ class TemplateIdHelperTest {
     @Test
     void okCourtManagerApproveTranscript() throws TemplateNotFoundException {
         String templateId = templateIdHelper.findTemplateId("court_manager_approve_transcript");
-        assertEquals("2f9e18b5-5046-44c2-8abd-e4ff15008a60", templateId);
+        assertEquals("a8390fa6-3f18-44c0-b224-f59971a5e20a", templateId);
     }
 
     @Test
     void okRequestedAudioIsAvailable() throws TemplateNotFoundException {
         String templateId = templateIdHelper.findTemplateId("requested_audio_is_available");
-        assertEquals("66a1864f-24a6-469a-ac55-66bc57c7e4f6", templateId);
+        assertEquals("5038c158-f7c9-4781-837e-3aaae8e906ed", templateId);
     }
 
     @Test
     void okRequestToTranscriber() throws TemplateNotFoundException {
         String templateId = templateIdHelper.findTemplateId("request_to_transcriber");
-        assertEquals("976bf288-705d-4cbb-b24f-c5529abf14cf", templateId);
+        assertEquals("12a70a9c-9bcf-4880-8291-1a5c6a4c4b08", templateId);
     }
 
     @Test

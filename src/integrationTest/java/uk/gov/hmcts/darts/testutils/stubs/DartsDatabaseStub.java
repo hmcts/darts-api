@@ -19,6 +19,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -75,7 +76,7 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {
@@ -413,6 +414,14 @@ public class DartsDatabaseStub {
         return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflowEntity);
     }
 
+    public void save(TranscriptionWorkflowEntity... transcriptionWorkflowEntity) {
+        transcriptionWorkflowRepository.saveAllAndFlush(asList(transcriptionWorkflowEntity));
+    }
+
+    public void save(TranscriptionCommentEntity... transcriptionCommentEntities) {
+        transcriptionCommentRepository.saveAllAndFlush(asList(transcriptionCommentEntities));
+    }
+
     public void saveAll(HearingEntity... hearingEntities) {
         hearingRepository.saveAllAndFlush(asList(hearingEntities));
     }
@@ -437,7 +446,7 @@ public class DartsDatabaseStub {
         }
         UserAccountEntity testUser = new UserAccountEntity();
         testUser.setEmailAddress("test.user@example.com");
-        testUser.setUsername("testuser");
+        testUser.setUserName("testuser");
         testUser.setAccountGuid(UUID.randomUUID().toString());
         testUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(testUser);

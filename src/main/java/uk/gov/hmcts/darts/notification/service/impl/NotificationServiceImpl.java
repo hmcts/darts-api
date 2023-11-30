@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.notification.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,15 +22,17 @@ import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
+import uk.gov.hmcts.darts.notification.helper.GovNotifyRequestHelper;
 import uk.gov.hmcts.darts.notification.helper.TemplateIdHelper;
-import uk.gov.hmcts.darts.notification.mapper.GovNotifyRequestMapper;
 import uk.gov.hmcts.darts.notification.service.GovNotifyService;
 import uk.gov.hmcts.darts.notification.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RequiredArgsConstructor
@@ -40,6 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final CaseRepository caseRepository;
     private final GovNotifyService govNotifyService;
     private final TemplateIdHelper templateIdHelper;
+    private final GovNotifyRequestHelper govNotifyRequestHelper;
     private final EmailValidator emailValidator = EmailValidator.getInstance();
     private static final List<NotificationStatus> STATUS_ELIGIBLE_TO_SEND = Arrays.asList(
         NotificationStatus.OPEN,
@@ -53,21 +59,43 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void scheduleNotification(SaveNotificationToDbRequest request) {
         List<String> emailAddresses = getEmailAddresses(request);
+        String templateParamsString = getTemplateParamsString(request);
         for (String emailAddress : emailAddresses) {
             saveNotificationToDb(
                 request.getEventId(),
                 request.getCaseId(),
                 StringUtils.trim(emailAddress),
-                request.getTemplateValues()
+                templateParamsString
             );
         }
+    }
+
+    private String getTemplateParamsString(SaveNotificationToDbRequest request) {
+
+        Map<String, String> templateValues = request.getTemplateValues();
+
+        if (MapUtils.isEmpty(templateValues)) {
+            return null;
+        }
+
+        ObjectWriter objectWriter = new ObjectMapper().writerFor(HashMap.class);
+        try {
+            return objectWriter.writeValueAsString(templateValues);
+        } catch (JsonProcessingException e) {
+            log.error(
+                "Serialisation of request params for event {} with params {} has failed with error :- {}",
+                request.getEventId(), request.getTemplateValues(),
+                e.getMessage()
+            );
+        }
+        return null;
     }
 
     private List<String> getEmailAddresses(SaveNotificationToDbRequest request) {
         String emailAddressesStr = request.getEmailAddresses();
         List<String> emailAddressList = new ArrayList<>();
         if (StringUtils.isNotBlank(emailAddressesStr)) {
-            CollectionUtils.addAll(emailAddressList, StringUtils.split(emailAddressesStr, ","));
+            CollectionUtils.addAll(emailAddressList, StringUtils.split(emailAddressesStr, ", "));
         }
         if (request.getUserAccountsToEmail() != null) {
             CollectionUtils.addAll(
@@ -129,7 +157,7 @@ public class NotificationServiceImpl implements NotificationService {
 
             GovNotifyRequest govNotifyRequest = null;
             try {
-                govNotifyRequest = GovNotifyRequestMapper.map(notification, templateId);
+                govNotifyRequest = govNotifyRequestHelper.map(notification, templateId);
                 govNotifyService.sendNotification(govNotifyRequest);
                 updateNotificationStatus(notification, NotificationStatus.SENT);
             } catch (JsonProcessingException e) {

@@ -27,6 +27,7 @@ public class AccessTokenClient {
     private final String clientId;
     private final String clientSecret;
 
+
     @SneakyThrows
     public String getAccessToken() {
         Map<String, String> params = Map.of("client_id", clientId,
@@ -36,7 +37,6 @@ public class AccessTokenClient {
                                             "username", username,
                                             "password", password
         );
-
         HttpRequest request = HttpRequest.newBuilder(URI.create(tokenUri))
             .POST(encode(params))
             .header("Content-Type", "application/x-www-form-urlencoded")

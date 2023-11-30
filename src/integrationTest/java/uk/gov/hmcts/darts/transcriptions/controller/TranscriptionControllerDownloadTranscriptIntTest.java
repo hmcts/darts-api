@@ -6,15 +6,13 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.darts.audit.service.AuditService;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
@@ -23,7 +21,6 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.util.List;
@@ -38,15 +35,13 @@ import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.audit.enums.AuditActivityEnum.DOWNLOAD_TRANSCRIPTION;
+import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Transactional
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -60,8 +55,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     private AuthorisationStub authorisationStub;
     @Autowired
     private TranscriptionStub transcriptionStub;
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private MockMvc mockMvc;
@@ -69,7 +62,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
     @MockBean
-    private AuditService mockAuditService;
+    private AuditApi mockAuditApi;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
@@ -81,7 +74,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
 
         transcriptionEntity = authorisationStub.getTranscriptionEntity();
 
-        TranscriptionStub transcriptionStub = dartsDatabaseStub.getTranscriptionStub();
+        TranscriptionStub transcriptionStub = dartsDatabase.getTranscriptionStub();
 
         TranscriptionWorkflowEntity approvedTranscriptionWorkflowEntity = transcriptionStub.createTranscriptionWorkflowEntity(
             transcriptionEntity,
@@ -104,7 +97,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             transcriptionStub.getTranscriptionStatusByEnum(COMPLETE)
         );
 
-        assertEquals(0, dartsDatabaseStub.getTranscriptionCommentRepository().findAll().size());
+        assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
         transcriptionEntity.getTranscriptionWorkflowEntities()
             .addAll(List.of(
                 approvedTranscriptionWorkflowEntity,
@@ -112,7 +105,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 completeTranscriptionWorkflowEntity
             ));
         transcriptionEntity.setTranscriptionStatus(completeTranscriptionWorkflowEntity.getTranscriptionStatus());
-        transcriptionEntity = dartsDatabaseStub.getTranscriptionRepository().save(transcriptionEntity);
+        transcriptionEntity = dartsDatabase.getTranscriptionRepository().save(transcriptionEntity);
 
         assertEquals(COMPLETE.getId(), transcriptionEntity.getTranscriptionStatus().getId());
         assertEquals(5, transcriptionEntity.getTranscriptionWorkflowEntities().size());
@@ -120,16 +113,15 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         transcriptionId = transcriptionEntity.getId();
 
         testUser = authorisationStub.getTestUser();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(testUser.getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
-        doNothing().when(mockAuditService)
+        doNothing().when(mockAuditApi)
             .recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
     void downloadTranscriptShouldReturnForbiddenError() throws Exception {
-        when(mockUserIdentity.getEmailAddress()).thenReturn("forbidden.user@example.com");
+        when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.get(URL_TEMPLATE, transcriptionId)
             .header(
@@ -144,11 +136,11 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -170,7 +162,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
-        verifyNoInteractions(mockAuditService);
+        verifyNoInteractions(mockAuditApi);
     }
 
     @Test
@@ -178,9 +170,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
-        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabaseStub.getObjectDirectoryStatusEntity(
+        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
             STORED);
-        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
+        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
@@ -222,7 +214,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
-        verify(mockAuditService).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 
     @Test
@@ -230,9 +222,9 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.doc";
         final String fileType = "application/msword";
         final int fileSize = 22_528;
-        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabaseStub.getObjectDirectoryStatusEntity(
+        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
             STORED);
-        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
+        final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
         final UUID externalLocation = UUID.randomUUID();
         final String checksum = "KQ9vVogyRdsnEvxyNQz77g==";
@@ -274,6 +266,6 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
                 String.valueOf(transcriptionEntity.getTranscriptionDocumentEntities().get(0).getId())
             ));
 
-        verify(mockAuditService).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(DOWNLOAD_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
 }

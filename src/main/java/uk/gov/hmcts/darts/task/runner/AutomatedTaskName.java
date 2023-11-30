@@ -9,8 +9,11 @@ import java.util.Map;
 public enum AutomatedTaskName {
     PROCESS_DAILY_LIST_TASK_NAME("ProcessDailyList"),
     CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME("CloseOldUnfinishedTranscriptions"),
-    OUTBOUND_AUDIO_DELETER_TASK_NAME("OutboundAudioDeleter");
-
+    OUTBOUND_AUDIO_DELETER_TASK_NAME("OutboundAudioDeleter"),
+    INBOUND_TO_UNSTRUCTURED_TASK_NAME("InboundToUnstructuredDataStore"),
+    INBOUND_AUDIO_DELETER_TASK_NAME("InboundAudioDeleter"),
+    EXTERNAL_DATASTORE_DELETER("ExternalDataStoreDeleter"),
+    UNSTRUCTURED_AUDIO_DELETER_TASK_NAME("UnstructuredAudioDeleter");
     private final String taskName;
 
     private static final Map<String, AutomatedTaskName> BY_TASK_NAME = new HashMap<>();

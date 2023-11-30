@@ -15,7 +15,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.CASE_NUMBER;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.DEFENDANTS;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.PORTAL_URL;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REQUEST_ID;
 
 // These tests are functional in that they connect to the real external gov.uk notify service.
 // However, unlike other functional tests these will run against the locally spun up application.
@@ -37,10 +44,11 @@ class GovNotifyServiceTest {
     void courtManagerApproveTranscript() throws NotificationClientException, TemplateNotFoundException {
 
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT.toString());
-        assertEquals("New transcript request submitted and awaiting review", emailResponse.getSubject());
+        assertEquals("A new transcript is ready for you to review", emailResponse.getSubject());
         compare("""
                     There is a new transcript available for you to review.
-                    Sign into the DARTS Portal to access it.""", emailResponse);
+
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
     private static void compare(String expected, SendEmailResponse emailResponse) {
@@ -55,6 +63,7 @@ class GovNotifyServiceTest {
         govNotifyRequest.setTemplateId(templateId);
         govNotifyRequest.setEmailAddress(EMAIL_ADDRESS);
         parameterMap.put(CASE_NUMBER, "TheCaseId");
+        parameterMap.put(PORTAL_URL, "ThePortalURL");
         govNotifyRequest.setParameterMap(parameterMap);
 
         return govNotifyService.sendNotification(govNotifyRequest);
@@ -70,24 +79,27 @@ class GovNotifyServiceTest {
     @Test
     void requestToTranscriber() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER.toString());
-        assertEquals("New transcript request", emailResponse.getSubject());
+        assertEquals("New DARTS transcription request", emailResponse.getSubject());
         compare("""
-                    You have received a new transcription request from the DARTS Portal.\s
+                    You have received a new transcription request from the DARTS Portal.
 
-                    To access the request, please [sign in to the DARTS Portal]""", emailResponse);
+                    [Sign into the DARTS Portal](ThePortalURL) to access it.""", emailResponse);
     }
 
 
     @Test
     void requestedAudioIsAvailable() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
-        assertEquals("DARTS: Requested Audio is Available", emailResponse.getSubject());
-        compare("""
-                    Hello,
-                    The audio you requested for case TheCaseId is now available.
-                    Please visit the My Audio section within DARTS to access your requested Audio.
-                    Regards
-                    DARTS""", emailResponse);
+        assertEquals("Your requested audio is available", emailResponse.getSubject());
+        compare(
+            """
+                The audio recording for case ID TheCaseId is ready.
+
+                [Sign into the DARTS Portal](ThePortalURL) to access it.
+
+                The recording will expire in 2 working days (this does not include Saturdays and Sundays) but you can extend it by opening the file.""",
+            emailResponse
+        );
     }
 
     @Test
@@ -106,9 +118,10 @@ class GovNotifyServiceTest {
     @Test
     void transcriptionRequestApproved() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED.toString());
-        assertEquals("Transcript Request Approved", emailResponse.getSubject());
+        assertEquals("Your transcript request was approved", emailResponse.getSubject());
         compare("""
                     Your transcript request for case ID TheCaseId has been approved.
+
                     We’ll notify you when it’s available to download.""", emailResponse);
     }
 
@@ -121,11 +134,11 @@ class GovNotifyServiceTest {
             NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED.toString(),
             parameterMap
         );
-        assertEquals("DARTS: Transcript Request Rejected", emailResponse.getSubject());
-        compare(
-            """
-                Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason
-                Please resubmit your request, taking into account the reason for the original request's rejection.""",
+        assertEquals("Your transcript request was rejected", emailResponse.getSubject());
+        compare("""
+                 Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
+
+                 You can resubmit your request, but take into account the reason for the original request's rejection.""",
             emailResponse
         );
     }
@@ -133,25 +146,50 @@ class GovNotifyServiceTest {
     @Test
     void audioRequestBeingProcessed() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString());
-        assertEquals("DARTS: Audio Request Being Processed", emailResponse.getSubject());
+        assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    The audio you requested for case TheCaseId is currently being processed.
-                    You will be further notified once the audio is available in your My Audio section in DARTS.
-                    Regards,
-                    DARTS""", emailResponse);
+                    We have received your audio recording order for case ID TheCaseId, and it's currently being processed.
+
+                    We'll notify you when it's ready and available for use.
+
+                    Alternatively, you can visit the Your audio section in the DARTS Portal to check its progress.""", emailResponse);
     }
 
     @Test
     void errorProcessingAudio() throws NotificationClientException, TemplateNotFoundException {
-        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
-        assertEquals("DARTS: Audio Request has Failed", emailResponse.getSubject());
+        Map<String, String> parameterMap = new ConcurrentHashMap<>();
+        parameterMap.put(REQUEST_ID, "TheRequestID");
+        parameterMap.put(COURTHOUSE, "TheCourthouse");
+        parameterMap.put(DEFENDANTS, "Defendant1,Defendant2");
+        parameterMap.put(HEARING_DATE, "TheHearingDate");
+        parameterMap.put(AUDIO_START_TIME,"TheStartTime");
+        parameterMap.put(AUDIO_END_TIME, "TheEndTime");
+        SendEmailResponse emailResponse = createAndSend(
+            NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(),
+            parameterMap
+        );
+        assertEquals("Your audio recording order has failed", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    Your audio request for case TheCaseId has failed.Please contact the helpdesk.
-                    Regards,
-                    DARTS""", emailResponse);
+                    Your audio recording order for case ID TheCaseId has failed.
 
+                    Due to unforeseen errors, your audio recording order has failed.
+
+                    To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
+
+                    ## Case details
+
+                    Case ID: TheCaseId
+                    Courthouse: TheCourthouse
+                    Defendants: Defendant1,Defendant2
+
+                    ## Audio details
+
+                    Hearing date: TheHearingDate
+                    Requested start time: TheStartTime
+                    Requested end time: TheEndTime
+
+                    They will raise a Service Now ticket to process this issue.""",
+                emailResponse
+        );
     }
-
 }

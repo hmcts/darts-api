@@ -44,7 +44,6 @@ class AuthorisationImplTest extends IntegrationBase {
     @BeforeEach
     void beforeEach() {
         authorisationStub.givenTestSchema();
-        when(mockUserIdentity.getEmailAddress()).thenReturn(authorisationStub.getTestUser().getEmailAddress());
         when(mockUserIdentity.getUserAccount()).thenReturn(authorisationStub.getTestUser());
     }
 

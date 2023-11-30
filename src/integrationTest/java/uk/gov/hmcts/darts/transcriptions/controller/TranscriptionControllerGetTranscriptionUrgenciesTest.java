@@ -25,7 +25,7 @@ class TranscriptionControllerGetTranscriptionUrgenciesTest extends IntegrationBa
     private MockMvc mockMvc;
 
     @Test
-    void getTranscriptionTypesSuccess() throws Exception {
+    void getTranscriptionUrgencySuccess() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI);
 
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();

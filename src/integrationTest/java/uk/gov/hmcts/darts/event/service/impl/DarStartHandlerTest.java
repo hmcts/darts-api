@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.event.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
@@ -21,6 +22,7 @@ class DarStartHandlerTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_ROOM = "some-room";
     private static final String SOME_CASE_NUMBER = "CASE1";
+    private static final String SOME_CLOSED_CASE_NUMBER = "CASE_CLOSED_1";
     private static final String HEARING_STARTED_EVENT_TYPE = "1100";
     private static final String HEARING_STARTED_EVENT_NAME = "Hearing started";
     private static final String DAR_START_HANDLER = "DarStartHandler";
@@ -81,6 +83,74 @@ class DarStartHandlerTest extends IntegrationBase {
         assertThat(persistedCase.getCaseClosedTimestamp()).isNull();
 
         dartsGateway.verifyReceivedNotificationType(1);
+    }
+
+    @Test
+    /*
+    Should not Notify DAR PC when case is closed.
+     */
+    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosed() {
+        dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        dartsGateway.darNotificationReturnsSuccess();
+
+        List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
+            DAR_START_HANDLER);
+        assertThat(eventHandlerEntityList.size()).isEqualTo(6);
+
+        EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
+            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+            .findFirst()
+            .orElseThrow();
+
+        CourtCaseEntity createdCase = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CLOSED_CASE_NUMBER);
+        createdCase.setClosed(true);
+        dartsDatabase.getCaseRepository().saveAndFlush(createdCase);
+
+        DartsEvent dartsEvent = someMinimalDartsEvent()
+            .type(hearingStartedEventHandler.getType())
+            .subType(hearingStartedEventHandler.getSubType())
+            .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
+            .dateTime(today);
+
+        eventDispatcher.receive(dartsEvent);
+
+        dartsGateway.verifyDoesntReceiveDarEvent();
+    }
+
+    @Test
+    /*
+    Should not Notify DAR PC when case is closed. Same case number exists at another courthouse.
+     */
+    void shouldNotNotifyDarStartRecordingForHearingStartedCaseClosedOtherCourthouse() {
+        dartsDatabase.createCourtroomUnlessExists(SOME_COURTHOUSE, SOME_ROOM);
+        dartsGateway.darNotificationReturnsSuccess();
+
+        List<EventHandlerEntity> eventHandlerEntityList = dartsDatabase.findByHandlerAndActiveTrue(
+            DAR_START_HANDLER);
+        assertThat(eventHandlerEntityList.size()).isEqualTo(6);
+
+
+        CourtCaseEntity createdCase = dartsDatabase.createCase(SOME_COURTHOUSE, SOME_CLOSED_CASE_NUMBER);
+        createdCase.setClosed(true);
+        dartsDatabase.getCaseRepository().saveAndFlush(createdCase);
+
+        //create another case at a different courthouse, but same case number thats still open.
+        dartsDatabase.createCase("another courthouse", SOME_CLOSED_CASE_NUMBER);
+
+        EventHandlerEntity hearingStartedEventHandler = eventHandlerEntityList.stream()
+            .filter(eventHandlerEntity -> HEARING_STARTED_EVENT_NAME.equals(eventHandlerEntity.getEventName()))
+            .findFirst()
+            .orElseThrow();
+
+        DartsEvent dartsEvent = someMinimalDartsEvent()
+            .type(hearingStartedEventHandler.getType())
+            .subType(hearingStartedEventHandler.getSubType())
+            .caseNumbers(List.of(SOME_CLOSED_CASE_NUMBER))
+            .dateTime(today);
+
+        eventDispatcher.receive(dartsEvent);
+
+        dartsGateway.verifyDoesntReceiveDarEvent();
     }
 
     private static DartsEvent someMinimalDartsEvent() {

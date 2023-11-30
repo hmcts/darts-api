@@ -3,8 +3,9 @@ package uk.gov.hmcts.darts.task.service;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
@@ -14,6 +15,8 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -35,6 +38,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
@@ -44,6 +49,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 //Requires transactional as the object is being created manually rather than being autowired.
 // We are doing this, so we can mock out different dates to test the service.
 @Transactional
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.ExcessiveImports")
 class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
@@ -60,12 +66,22 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @Mock
     private BankHolidaysService bankHolidaysService;
 
+    @Mock
+    private SystemUserHelper systemUserHelper;
+
+    @Mock
+    private UserAccountRepository userAccountRepository;
+
     @BeforeEach
     void setUp() {
         requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         //setting clock to 2023-10-27 13:56:17 with local offset on a friday
         clock = Clock.fixed(Instant.ofEpochSecond(1_698_414_977L), ZoneId.of("Europe/London"));
         outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 2);
+        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");
+        UserAccountEntity systemUser = new UserAccountEntity();
+        systemUser.setId(0);
+        when(userAccountRepository.findSystemUser(anyString())).thenReturn(systemUser);
     }
 
     private OutboundAudioDeleterProcessorImpl createOutboundDeleterService(Clock clock, int lastAccessedDeletionDays) {
@@ -77,8 +93,9 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         return new OutboundAudioDeleterProcessorImpl(
             dartsDatabase.getMediaRequestRepository(),
             dartsDatabase.getTransientObjectDirectoryRepository(),
-            dartsDatabase.getUserAccountRepository(),
-            dartsDatabase.getObjectDirectoryStatusRepository(), lastAccessedDeletionDayCalculator
+            userAccountRepository,
+            dartsDatabase.getObjectDirectoryStatusRepository(), lastAccessedDeletionDayCalculator,
+            systemUserHelper
         );
     }
 
@@ -117,7 +134,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
 
 
     }
@@ -148,7 +165,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        outboundAudioDeleterProcessorImpl.delete();
+        outboundAudioDeleterProcessorImpl.markForDeletion();
 
 
         assertEntityStateNotChanged(currentMediaRequest);
@@ -181,7 +198,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1_698_019_200L), ZoneId.of("Europe/London"));
         outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 2);
 
-        outboundAudioDeleterProcessorImpl.delete();
+        outboundAudioDeleterProcessorImpl.markForDeletion();
 
         assertEntityStateNotChanged(currentMediaRequest);
     }
@@ -220,7 +237,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         Event bankHoliday3 = new Event();
         bankHoliday3.setDate(DATE_27TH_OCTOBER.minusDays(10));
 
-        Mockito.when(bankHolidaysService.getBankHolidaysFor(anyInt())).thenReturn(List.of(
+        when(bankHolidaysService.getBankHolidaysFor(anyInt())).thenReturn(List.of(
             bankHoliday1,
             bankHoliday2,
             bankHoliday3
@@ -228,7 +245,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 10);
-        outboundAudioDeleterProcessorImpl.delete();
+        outboundAudioDeleterProcessorImpl.markForDeletion();
 
         assertEntityStateNotChanged(currentMediaRequest);
     }
@@ -258,7 +275,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
         OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 4);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
     }
 
     @Test
@@ -289,7 +306,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         clock = Clock.fixed(Instant.ofEpochSecond(1_698_142_250L), ZoneId.of("Europe/London"));
         OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl =
             createOutboundDeleterService(clock, 2);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
 
 
         //last accessed saturday
@@ -307,7 +324,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.delete());
+        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
 
     }
 
@@ -316,7 +333,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     void whereLastAccessedIsNullUseCreatedAndInProgressStatus() {
         MediaRequestEntity matchingMediaRequest = createMediaRequestsWithHearingWithLastAccessedTimeIsNull();
 
-        List<MediaRequestEntity> markedForDeletion = outboundAudioDeleterProcessorImpl.delete();
+        List<MediaRequestEntity> markedForDeletion = outboundAudioDeleterProcessorImpl.markForDeletion();
 
         MediaRequestEntity expiredMediaRequest = dartsDatabase.getMediaRequestRepository().findById(markedForDeletion.get(
             0).getId()).get();

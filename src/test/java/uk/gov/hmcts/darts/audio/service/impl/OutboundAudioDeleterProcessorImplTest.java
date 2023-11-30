@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -14,9 +15,9 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -35,14 +36,20 @@ class OutboundAudioDeleterProcessorImplTest {
     private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
 
+    @Mock
+    private SystemUserHelper systemUserHelper;
+
     @BeforeEach
     void setUp() {
         this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
             mediaRequestRepository,
             transientObjectDirectoryRepository,
             userAccountRepository,
-            objectDirectoryStatusRepository, lastAccessedDeletionDayCalculator
+            objectDirectoryStatusRepository, lastAccessedDeletionDayCalculator,
+            systemUserHelper
         );
+        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");
+
     }
 
     @Test
@@ -57,9 +64,9 @@ class OutboundAudioDeleterProcessorImplTest {
         )).thenReturn(value);
         when(transientObjectDirectoryRepository.findByMediaRequest_idIn(any())).thenReturn(List.of(new TransientObjectDirectoryEntity()));
 
-        when(userAccountRepository.findById(0)).thenReturn(Optional.empty());
+        when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn(null);
         assertThrows(DartsApiException.class, () ->
-            outboundAudioDeleterProcessorImpl.delete());
+            outboundAudioDeleterProcessorImpl.markForDeletion());
     }
 }
 

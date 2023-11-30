@@ -1,0 +1,65 @@
+package uk.gov.hmcts.darts.usermanagement.controller;
+
+import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
+
+import java.util.Set;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
+
+@AutoConfigureMockMvc
+class UserControllerGetUsersIntTest extends IntegrationBase {
+
+    private static final String ENDPOINT_URL = "/users";
+
+    @Autowired
+    private MockMvc mockMvc;
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    @Test
+    void usersGetShouldReturnForbiddenError() throws Exception {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
+            .andExpect(status().isForbidden())
+            .andReturn();
+
+        String expectedResponse = """
+            {"type":"AUTHORISATION_107","title":"Failed to check authorisation","status":403}
+            """;
+        JSONAssert.assertEquals(
+            expectedResponse,
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
+        );
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void usersGetShouldReturnNotImplemented() throws Exception {
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+
+        mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
+            .andExpect(status().isNotImplemented());
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+}
