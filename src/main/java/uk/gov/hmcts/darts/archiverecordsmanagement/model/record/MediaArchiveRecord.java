@@ -1,9 +1,11 @@
-package uk.gov.hmcts.darts.archiverecordsmanagement.model.impl;
+package uk.gov.hmcts.darts.archiverecordsmanagement.model.record;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Value;
 
 
-@Data
+@Value
+@Builder
 public class MediaArchiveRecord {
     private CreateArchiveRecord createArchiveRecord;
     private UploadNewFileRecord uploadNewFileRecord;
