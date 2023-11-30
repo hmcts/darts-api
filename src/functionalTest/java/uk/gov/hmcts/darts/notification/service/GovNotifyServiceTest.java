@@ -93,7 +93,7 @@ class GovNotifyServiceTest {
         assertEquals("Your requested audio is available", emailResponse.getSubject());
         compare(
             """
-                The audio recording for case number TheCaseId is ready.
+                The audio recording for case ID TheCaseId is ready.
 
                 [Sign into the DARTS Portal](ThePortalURL) to access it.
 
@@ -176,17 +176,17 @@ class GovNotifyServiceTest {
 
                     To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
 
-                    Case details
+                    ## Case details
 
-                    TheCaseId
-                    TheCourthouse
-                    Defendant1,Defendant2
+                    Case ID: TheCaseId
+                    Courthouse: TheCourthouse
+                    Defendants: Defendant1,Defendant2
 
-                    Audio details
+                    ## Audio details
 
-                    TheHearingDate
-                    TheStartTime
-                    TheEndTime
+                    Hearing date: TheHearingDate
+                    Requested start time: TheStartTime
+                    Requested end time: TheEndTime
 
                     They will raise a Service Now ticket to process this issue.""",
                 emailResponse
