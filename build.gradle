@@ -273,6 +273,7 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven { url 'https://jitpack.io' }
+  maven { url  'https://repo.spring.io/milestone/'}
 }
 
 ext {
@@ -347,7 +348,7 @@ dependencies {
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.4'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.1.0'
   implementation 'org.springframework.retry:spring-retry:2.0.5'
 
   implementation 'net.javacrumbs.shedlock:shedlock-spring:5.10.2'
