@@ -137,7 +137,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnBadRequestWhenMissingUserIdHeader() throws Exception {
+    void givenAssignedQueryParamOnly_thenReturnBadRequest() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
@@ -157,11 +157,11 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnBadRequestWhenMissingAssignedQueryParam() throws Exception {
+    void givenUserIdHeaderOnly_thenReturnBadRequest() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
-                -1
+                -10
             );
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -180,7 +180,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnOkTranscriptRequestsWithEmptyArray() throws Exception {
+    void givenSomeOtherUserAndTranscriptRequestsViewRequested_thenReturnEmptyArray() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -198,7 +198,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnOkTranscriberTranscriptionsWorkWithEmptyArray() throws Exception {
+    void givenSomeOtherUserAndYourWorkViewRequested_thenReturnEmptyArray() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -216,7 +216,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnOkTranscriptRequestsWithApprovedStatus() throws Exception {
+    void givenTranscriberUserAndTranscriptRequestsViewRequested_thenReturnApprovedTranscription() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -250,10 +250,10 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
     }
 
     @Test
-    void shouldReturnOkTranscriberTranscriptionsWorkWithTranscriberAndCompletedTodayStatus() throws Exception {
-        // This test expects that this "Complete" (trs_id=6) transcription (tra_id=101) is hidden from "Your work > Completed today" view
+    @SuppressWarnings({"checkstyle.LineLengthCheck"})
+    void givenTranscriberUserAndYourWorkViewRequested_thenReturnAssignedTranscriptionAndCompletedTranscriptionTodayAndDoNotReturnCompletedTranscriptionFromBeforeToday() throws Exception {
+        // This test expects the "Complete" (trs_id=6) transcription (tra_id=101) to be hidden from "Your work > Completed today" view
         // because the workflow_ts is BEFORE TODAY (workflow_ts='2023-11-24 12:53:42.839577+00').
-
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,

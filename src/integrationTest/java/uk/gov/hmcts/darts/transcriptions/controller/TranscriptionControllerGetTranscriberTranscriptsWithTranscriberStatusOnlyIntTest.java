@@ -113,7 +113,7 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
     }
 
     @Test
-    void shouldReturnOkTranscriberTranscriptionsWorkWithTranscriberStatus() throws Exception {
+    void givenTranscriberUserAndYourWorkViewRequested_thenReturnAssignedTranscriptionAndDoNotReturnCompletedTranscriptionFromBeforeToday() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
