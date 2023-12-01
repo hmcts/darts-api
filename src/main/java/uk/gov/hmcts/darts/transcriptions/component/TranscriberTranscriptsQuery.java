@@ -10,4 +10,7 @@ public interface TranscriberTranscriptsQuery {
 
     List<TranscriberViewSummary> getTranscriberTranscriptions(Integer userId);
 
+    List<Integer> getAuthorisedCourthouses(Integer userId, Integer roleId);
+
+    Integer getTranscriptionsCountForCourthouses(List<Integer> courthouseIds, Integer transcriptionStatusId, int userId);
 }

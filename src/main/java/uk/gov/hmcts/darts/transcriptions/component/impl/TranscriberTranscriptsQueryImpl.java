@@ -10,11 +10,14 @@ import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
 
 @Component
 @RequiredArgsConstructor
 public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQuery {
 
+    private static final String USR_ID = "usr_id";
+    private static final String ROL_ID = "rol_id";
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final TranscriberViewSummaryRowMapper transcriberViewSummaryRowMapper;
 
@@ -96,8 +99,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 ORDER BY
                     transcription_id desc
                 """,
-            new MapSqlParameterSource("usr_id", userId)
-                .addValue("rol_id", TRANSCRIBER.getId()),
+            new MapSqlParameterSource(USR_ID, userId)
+                .addValue(ROL_ID, TRANSCRIBER.getId()),
             transcriberViewSummaryRowMapper
         );
     }
@@ -262,5 +265,70 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
             transcriberViewSummaryRowMapper
         );
     }
+
+    @Override
+    public List<Integer> getAuthorisedCourthouses(Integer userId, Integer roleId) {
+        return jdbcTemplate.queryForList(
+            """
+                select
+                    distinct courthouse.cth_id
+                from
+                    darts.user_account user_account
+                join
+                    (darts.security_group_user_account_ae security_group_user_account_ae
+                join
+                    darts.security_group security_group
+                        on security_group.grp_id=security_group_user_account_ae.grp_id)
+                            on user_account.usr_id=security_group_user_account_ae.usr_id
+                    join
+                        (darts.security_group_courthouse_ae security_group_courthouse_ae
+                    join
+                        darts.courthouse courthouse
+                            on courthouse.cth_id=security_group_courthouse_ae.cth_id)
+                                on security_group.grp_id=security_group_courthouse_ae.grp_id
+                        where
+                            user_account.usr_id=:usr_id
+                            and security_group.rol_id in (:rol_id)
+                """,
+            new MapSqlParameterSource(USR_ID, userId)
+                .addValue(ROL_ID, roleId),
+            Integer.class
+        );
+    }
+
+    @Override
+    public Integer getTranscriptionsCountForCourthouses(List<Integer> courthouseIds, Integer transcriptionStatusId, int userId) {
+        String sql = """
+            SELECT
+                count(*)
+            FROM
+                darts.transcription transcription
+            JOIN
+                darts.court_case court_case
+                    on court_case.cas_id=transcription.cas_id
+            JOIN
+                darts.courthouse courthouse
+                    on courthouse.cth_id=court_case.cth_id
+            INNER JOIN
+                darts.transcription_workflow trw
+            ON
+                transcription.tra_id = trw.tra_id
+            AND trw.trs_id = :trs_id
+            WHERE
+                court_case.cth_id IN (:cth_ids)
+                AND transcription.trs_id=:trs_id
+            """;
+        if (transcriptionStatusId.equals(WITH_TRANSCRIBER.getId())) {
+            sql += " AND trw.workflow_actor = " + userId;
+        }
+
+        return jdbcTemplate.queryForObject(
+            sql,
+            new MapSqlParameterSource("cth_ids", courthouseIds)
+                .addValue("trs_id", transcriptionStatusId),
+            Integer.class
+        );
+    }
+
 
 }

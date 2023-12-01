@@ -1328,8 +1328,35 @@
 						}
 					},
 					"response": []
-				}
-			]
+				},
+        {
+          "name": "/transcriptions/transcriber-counts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              },
+              {
+                "key": "user_id",
+                "value": "{{user_id}}"
+              }
+            ],
+            "url": {
+              "raw": "{{serverUrl}}/transcriptions/transcriber-counts",
+              "host": [
+                "{{serverUrl}}"
+              ],
+              "path": [
+                "transcriptions",
+                "transcriber-counts"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
 		},
 		{
 			"name": "Token",

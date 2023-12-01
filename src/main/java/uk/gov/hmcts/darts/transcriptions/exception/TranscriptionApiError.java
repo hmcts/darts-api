@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionAuthorisation403ErrorCode;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions400ErrorCode;
 
 @Getter
@@ -73,6 +74,11 @@ public enum TranscriptionApiError implements DartsApiError {
         UpdateTranscriptions400ErrorCode.UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM.getValue(),
         HttpStatus.BAD_REQUEST,
         "Failed to update some of the transcriptions"
+    ),
+    USER_NOT_TRANSCRIBER(
+        TranscriptionAuthorisation403ErrorCode.USER_NOT_TRANSCRIBER.getValue(),
+        HttpStatus.FORBIDDEN,
+        "User is not a transcriber user"
     );
 
 
