@@ -372,6 +372,9 @@ dependencies {
 
   implementation 'uk.gov.service.notify:notifications-java-client:4.1.0-RELEASE'
 
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.13'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.4.13'
+
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
   annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.0.Final')

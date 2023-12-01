@@ -1,7 +1,9 @@
 [
   {
     "tra_id": 1,
+    "transcription_id": 1,
     "hea_id": 1,
+    "hearing_id": 1,
     "hearing_date": "2023-01-01",
     "type": "SENTENCING_REMARKS",
     "requested_on": "2023-06-20T10:00:00Z",
@@ -10,7 +12,9 @@
   },
   {
     "tra_id": 2,
+    "transcription_id": 2,
     "hea_id": 1,
+    "hearing_id": 1,
     "hearing_date": "2023-01-01",
     "type": "SENTENCING_REMARKS",
     "requested_on": "2023-06-20T10:00:00Z",

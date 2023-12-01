@@ -612,6 +612,7 @@ components:
       type: object
       required:
         - urgency_id
+        - transcription_urgency_id
         - transcription_type_id
       properties:
         hearing_id:
@@ -621,6 +622,9 @@ components:
           type: integer
           example: 4567
         urgency_id:
+          type: integer
+          example: 2
+        transcription_urgency_id:
           type: integer
           example: 2
         transcription_type_id:
@@ -849,6 +853,9 @@ components:
         trt_id:
           type: integer
           example: 1
+        transcription_type_id:
+          type: integer
+          example: 1
         description:
           type: string
           example: Sentencing remarks
@@ -860,6 +867,9 @@ components:
       type: object
       properties:
         tru_id:
+          type: integer
+          example: 1
+        transcription_urgency_id:
           type: integer
           example: 1
         description:

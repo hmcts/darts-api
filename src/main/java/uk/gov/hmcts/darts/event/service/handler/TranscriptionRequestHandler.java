@@ -35,6 +35,7 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
         transcriptionRequestDetails.setCaseId(createdHearing.getHearingEntity().getCourtCase().getId());
         transcriptionRequestDetails.setTranscriptionTypeId(TranscriptionTypeEnum.OTHER.getId());
         transcriptionRequestDetails.setUrgencyId(TranscriptionUrgencyEnum.OVERNIGHT.getId());
+        transcriptionRequestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.OVERNIGHT.getId());
         transcriptionRequestDetails.setStartDateTime(dartsEvent.getStartTime());
         transcriptionRequestDetails.setEndDateTime(dartsEvent.getEndTime());
         transcriptionRequestDetails.setHearingId(createdHearing.getHearingEntity().getId());

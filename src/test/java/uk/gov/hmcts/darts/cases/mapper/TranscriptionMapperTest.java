@@ -27,8 +27,8 @@ class TranscriptionMapperTest {
 
         List<Transcript> transcripts = TranscriptionMapper.mapResponse(transcriptionList);
         Transcript transcript = transcripts.get(0);
-        assertEquals(1, transcript.getTraId());
-        assertEquals(102, transcript.getHeaId());
+        assertEquals(1, transcript.getTranscriptionId());
+        assertEquals(102, transcript.getHearingId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
         assertEquals("SENTENCING_REMARKS", transcript.getType());
         assertEquals(OffsetDateTime.of(2020, 6, 20,10, 10, 0, 0,ZoneOffset.UTC), transcript.getRequestedOn());
@@ -56,7 +56,7 @@ class TranscriptionMapperTest {
 
         List<Transcript> transcripts = TranscriptionMapper.mapResponse(List.of(transcription));
         Transcript transcript = transcripts.get(0);
-        assertEquals(1, transcript.getTraId());
+        assertEquals(1, transcript.getTranscriptionId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
         assertEquals("SENTENCING_REMARKS", transcript.getType());
         assertEquals(OffsetDateTime.of(2020, 6, 20,10, 10, 0, 0,ZoneOffset.UTC), transcript.getRequestedOn());
