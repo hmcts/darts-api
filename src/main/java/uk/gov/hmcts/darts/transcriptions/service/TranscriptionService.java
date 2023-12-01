@@ -36,7 +36,7 @@ public interface TranscriptionService {
 
     DownloadTranscriptResponse downloadTranscript(Integer transcriptionId);
 
-    GetYourTranscriptsResponse getYourTranscripts(Integer userId);
+    GetYourTranscriptsResponse getYourTranscripts(Integer userId, Boolean includeHiddenFromRequester);
 
     List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned);
 
