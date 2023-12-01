@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 
-import java.time.Clock;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -21,7 +20,6 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
     private static final String ROL_ID = "rol_id";
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final TranscriberViewSummaryRowMapper transcriberViewSummaryRowMapper;
-    private final Clock clock;
 
     @Override
     public List<TranscriberViewSummary> getTranscriptRequests(Integer userId) {
