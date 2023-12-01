@@ -11,11 +11,14 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,11 +34,17 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     private AuthorisationStub authorisationStub;
 
     @Autowired
+    private TranscriptionStub transcriptionStub;
+
+    @Autowired
     private MockMvc mockMvc;
 
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity testUser;
     private UserAccountEntity systemUser;
+
+    private static final OffsetDateTime YESTERDAY = now(UTC).minusDays(1).withHour(9).withMinute(0)
+        .withSecond(0).withNano(0);
 
     @BeforeEach
     void beforeEach() {
@@ -50,6 +59,8 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
     @Test
     void getYourTranscriptsShouldReturnRequesterOnlyOk() throws Exception {
         var courtCase = authorisationStub.getCourtCaseEntity();
+        var hearing = authorisationStub.getHearingEntity();
+        transcriptionStub.createAndSaveCompletedTranscription(authorisationStub.getTestUser(), courtCase, hearing, YESTERDAY, true);
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
@@ -59,6 +70,7 @@ class TranscriptionControllerGetYourTranscriptsIntTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
+            .andExpect(jsonPath("$.requester_transcriptions", hasSize(1)))
             .andExpect(jsonPath("$.requester_transcriptions[0].transcription_id", is(transcriptionEntity.getId())))
             .andExpect(jsonPath("$.requester_transcriptions[0].case_id", is(courtCase.getId())))
             .andExpect(jsonPath(

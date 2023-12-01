@@ -68,6 +68,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
+                AND tra.hide_request_from_requestor = false
 
                 UNION
 
@@ -113,6 +114,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
                 AND tra.hea_id IS NULL
+                AND tra.hide_request_from_requestor = false
                 ORDER BY transcription_id desc
                 """,
             new MapSqlParameterSource("usr_id", userId),
