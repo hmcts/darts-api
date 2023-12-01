@@ -152,7 +152,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<GetYourTranscriptsResponse> getYourTranscripts(Integer userId) {
-        return ResponseEntity.ok(transcriptionService.getYourTranscripts(userId));
+        return ResponseEntity.ok(transcriptionService.getYourTranscripts(userId, false));
     }
 
     @Override

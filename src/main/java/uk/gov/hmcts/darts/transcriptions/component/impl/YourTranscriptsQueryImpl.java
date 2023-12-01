@@ -20,7 +20,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
     private final YourTranscriptsSummaryRowMapper yourTranscriptsSummaryRowMapper;
 
     @Override
-    public List<YourTranscriptsSummary> getRequesterTranscriptions(Integer userId) {
+    public List<YourTranscriptsSummary> getRequesterTranscriptions(Integer userId, Boolean includeHiddenFromRequester) {
         return jdbcTemplate.query(
             """
                 -- "requester_transcriptions"
@@ -68,6 +68,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
+                AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
 
                 UNION
 
@@ -113,9 +114,12 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
                 AND tra.hea_id IS NULL
+                AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
                 ORDER BY transcription_id desc
                 """,
-            new MapSqlParameterSource("usr_id", userId),
+            new MapSqlParameterSource()
+                .addValue("usr_id", userId)
+                .addValue("include_hidden_from_requester", includeHiddenFromRequester),
             yourTranscriptsSummaryRowMapper
         );
     }
