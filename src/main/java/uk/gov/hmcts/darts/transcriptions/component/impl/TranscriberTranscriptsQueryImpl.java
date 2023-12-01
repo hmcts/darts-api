@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.transcriptions.component.TranscriberTranscriptsQuery;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 
 import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
@@ -18,8 +17,8 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 @RequiredArgsConstructor
 public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQuery {
 
-    public static final String USR_ID = "usr_id";
-    public static final String ROL_ID = "rol_id";
+    private static final String USR_ID = "usr_id";
+    private static final String ROL_ID = "rol_id";
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final TranscriberViewSummaryRowMapper transcriberViewSummaryRowMapper;
     private final Clock clock;
@@ -259,13 +258,12 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 AND complete_trw.workflow_actor = :usr_id
                 WHERE
                     tra.trs_id = 6
-                AND complete_trw.workflow_ts >= :current_date
+                AND complete_trw.workflow_ts >= CURRENT_DATE
                 ORDER BY
                     transcription_id desc
                 """,
             new MapSqlParameterSource(USR_ID, userId)
-                .addValue(ROL_ID, TRANSCRIBER.getId())
-                .addValue("current_date", LocalDate.now(clock).toString()),
+                .addValue(ROL_ID, TRANSCRIBER.getId()),
             transcriberViewSummaryRowMapper
         );
     }
@@ -301,7 +299,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
     }
 
     @Override
-    public Integer getTranscriptionsCountForCourthouses(List<Integer> courthouses, Integer transcriptionStatusId, int userId) {
+    public Integer getTranscriptionsCountForCourthouses(List<Integer> courthouseIds, Integer transcriptionStatusId, int userId) {
         String sql = """
             SELECT
                 count(*)
@@ -328,7 +326,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
 
         return jdbcTemplate.queryForObject(
             sql,
-            new MapSqlParameterSource("cth_ids", courthouses)
+            new MapSqlParameterSource("cth_ids", courthouseIds)
                 .addValue("trs_id", transcriptionStatusId),
             Integer.class
         );

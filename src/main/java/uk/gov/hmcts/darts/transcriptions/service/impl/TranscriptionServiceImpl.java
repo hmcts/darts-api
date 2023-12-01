@@ -546,14 +546,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @Override
     public TranscriptionTranscriberCountsResponse getTranscriptionTranscriberCounts(Integer userId) {
 
-        UserAccountEntity user = userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), userId);
-        if (user == null) {
+        Optional<UserAccountEntity> user = userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), userId);
+        if (!user.isPresent()) {
             throw new DartsApiException(USER_NOT_TRANSCRIBER);
         }
 
-        List<Integer> courthouseIds = transcriberTranscriptsQuery.getAuthorisedCourthouses(userId, 4);
+        List<Integer> courthouseIds = transcriberTranscriptsQuery.getAuthorisedCourthouses(userId, TRANSCRIBER.getId());
 
-        Integer numUnassigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, APPROVED.getId(), 0);
+        Integer numUnassigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, APPROVED.getId(), userId);
         Integer numAssigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, WITH_TRANSCRIBER.getId(),userId);
 
         final var getTranscriptionTranscriberCounts = new TranscriptionTranscriberCountsResponse();

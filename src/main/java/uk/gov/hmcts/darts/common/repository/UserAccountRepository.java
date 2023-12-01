@@ -57,8 +57,8 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.securityRoleEntity securityRole
         WHERE userAccount.id = :userId
-        AND securityRole.id = :securityRole
+        AND securityRole.id = :securityRoleId
         """)
-    UserAccountEntity findByRoleAndUserId(Integer securityRole, Integer userId);
+    Optional<UserAccountEntity> findByRoleAndUserId(Integer securityRoleId, Integer userId);
 
 }

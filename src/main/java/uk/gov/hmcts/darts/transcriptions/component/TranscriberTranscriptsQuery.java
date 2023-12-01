@@ -12,5 +12,5 @@ public interface TranscriberTranscriptsQuery {
 
     List<Integer> getAuthorisedCourthouses(Integer userId, Integer roleId);
 
-    Integer getTranscriptionsCountForCourthouses(List<Integer> courthouses, Integer transcriptionStatusId, int i);
+    Integer getTranscriptionsCountForCourthouses(List<Integer> courthouseIds, Integer transcriptionStatusId, int userId);
 }

@@ -112,7 +112,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
 
 
     @Test
-    void getTranscriberCounts() throws Exception {
+    void getTranscriberCountsShouldReturnOk() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -134,7 +134,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
     }
 
     @Test
-    void getTranscriberCountsUserNotTranscriber() throws Exception {
+    void getTranscriberCountsShouldReturnForbiddenWhenUserNotTranscriber() throws Exception {
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URI)
             .header(
                 USER_ID_HEADER,
@@ -148,7 +148,7 @@ class TranscriptionControllerGetTranscriptionTranscriberCountsIntTest extends In
         String actualResponse = mvcResult.getResponse().getContentAsString();
         String expectedResponse = """
             {
-                "type":"TRANSCRIPTION_112",
+                "type":"TRANSCRIPTION_113",
                 "title":"User is not a transcriber user",
                 "status":403
             }

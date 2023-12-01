@@ -602,8 +602,8 @@ paths:
                       type:
                         $ref: '#/components/schemas/TranscriptionAuthorisation403ErrorCode'
               example:
-                type: "AUTHORISATION_100"
-                title: "User is not authorised for the associated courthouse"
+                type: "113"
+                title: "User is not a transcriber user"
                 status: 403
 
 components:
@@ -797,7 +797,8 @@ components:
       type: string
       enum:
         - "AUTHORISATION_100"
-      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
+        - "113"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE, USER_NOT_TRANSCRIBER ]
     UpdateTranscription409ErrorCode:
       type: string
       enum:
