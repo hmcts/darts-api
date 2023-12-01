@@ -260,8 +260,8 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 ORDER BY
                     transcription_id desc
                 """,
-            new MapSqlParameterSource(USR_ID, userId)
-                .addValue(ROL_ID, TRANSCRIBER.getId()),
+            new MapSqlParameterSource("usr_id", userId)
+                .addValue("rol_id", TRANSCRIBER.getId()),
             transcriberViewSummaryRowMapper
         );
     }
