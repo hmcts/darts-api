@@ -1,22 +1,27 @@
 [
   {
     "tru_id": 2,
+    "transcription_urgency_id": 2,
     "description": "OVERNIGHT"
   },
   {
     "tru_id": 4,
+    "transcription_urgency_id": 4,
     "description": "WORKING_DAYS_3"
   },
   {
     "tru_id": 5,
+    "transcription_urgency_id": 5,
     "description": "WORKING_DAYS_7"
   },
   {
     "tru_id": 6,
+    "transcription_urgency_id": 6,
     "description": "WORKING_DAYS_12"
   },
   {
     "tru_id": 7,
+    "transcription_urgency_id": 7,
     "description": "WORKING_DAYS_2"
   }
 ]

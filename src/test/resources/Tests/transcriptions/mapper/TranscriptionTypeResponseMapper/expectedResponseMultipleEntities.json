@@ -1,32 +1,52 @@
 [
   {
-    "trt_id": 1, "description": "SENTENCING_REMARKS"
+    "trt_id": 1,
+    "transcription_type_id": 1,
+    "description": "SENTENCING_REMARKS"
   },
   {
-    "trt_id": 2, "description": "INCLUDING_VERDICT"
+    "trt_id": 2,
+    "transcription_type_id": 2,
+    "description": "INCLUDING_VERDICT"
   },
   {
-    "trt_id": 3, "description": "ANTECEDENTS"
+    "trt_id": 3,
+    "transcription_type_id": 3,
+    "description": "ANTECEDENTS"
   },
   {
-    "trt_id": 4, "description": "ARGUMENT_AND_SUBMISSION_OF_RULING"
+    "trt_id": 4,
+    "transcription_type_id": 4,
+    "description": "ARGUMENT_AND_SUBMISSION_OF_RULING"
   },
   {
-    "trt_id": 5, "description": "COURT_LOG"
+    "trt_id": 5,
+    "transcription_type_id": 5,
+    "description": "COURT_LOG"
   },
   {
-    "trt_id": 6, "description": "MITIGATION"
+    "trt_id": 6,
+    "transcription_type_id": 6,
+    "description": "MITIGATION"
   },
   {
-    "trt_id": 7, "description": "PROCEEDINGS_AFTER_VERDICT"
+    "trt_id": 7,
+    "transcription_type_id": 7,
+    "description": "PROCEEDINGS_AFTER_VERDICT"
   },
   {
-    "trt_id": 8, "description": "PROSECUTION_OPENING_OF_FACTS"
+    "trt_id": 8,
+    "transcription_type_id": 8,
+    "description": "PROSECUTION_OPENING_OF_FACTS"
   },
   {
-    "trt_id": 9, "description": "SPECIFIED_TIMES"
+    "trt_id": 9,
+    "transcription_type_id": 9,
+    "description": "SPECIFIED_TIMES"
   },
   {
-    "trt_id": 999, "description": "OTHER"
+    "trt_id": 999,
+    "transcription_type_id": 999,
+    "description": "OTHER"
   }
 ]

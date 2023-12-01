@@ -33,6 +33,7 @@ public class TranscriptionResponseMapper {
     TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
         TranscriptionTypeResponse transcriptionTypeResponse = new TranscriptionTypeResponse();
         transcriptionTypeResponse.setTrtId(transcriptionTypeEntity.getId());
+        transcriptionTypeResponse.setTranscriptionTypeId(transcriptionTypeEntity.getId());
         transcriptionTypeResponse.setDescription(transcriptionTypeEntity.getDescription());
         return transcriptionTypeResponse;
     }
@@ -47,6 +48,7 @@ public class TranscriptionResponseMapper {
     TranscriptionUrgencyResponse mapToTranscriptionUrgencyResponse(TranscriptionUrgencyEntity transcriptionUrgencyEntity) {
         TranscriptionUrgencyResponse transcriptionUrgencyResponse = new TranscriptionUrgencyResponse();
         transcriptionUrgencyResponse.setTruId(transcriptionUrgencyEntity.getId());
+        transcriptionUrgencyResponse.setTranscriptionUrgencyId(transcriptionUrgencyEntity.getId());
         transcriptionUrgencyResponse.setDescription(transcriptionUrgencyEntity.getDescription());
         return transcriptionUrgencyResponse;
     }

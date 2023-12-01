@@ -154,6 +154,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         duplicateRequestDetector.checkForDuplicate(transcriptionRequestDetails, isManual);
 
+        // todo: change getUrgencyId to getTranscriptionUrgencyId
         TranscriptionEntity transcription = saveTranscription(
             userAccount,
             transcriptionRequestDetails,

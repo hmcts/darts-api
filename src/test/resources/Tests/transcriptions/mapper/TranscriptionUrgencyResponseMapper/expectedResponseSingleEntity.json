@@ -1,1 +1,5 @@
-{"tru_id":1,"description":"STANDARD"}
+{
+  "tru_id": 1,
+  "transcription_urgency_id": 1,
+  "description": "STANDARD"
+}
