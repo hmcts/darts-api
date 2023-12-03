@@ -1,15 +1,17 @@
-package uk.gov.hmcts.darts.archiverecordsmanagement.model.metadata;
+package uk.gov.hmcts.darts.archiverecords.model.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
-import lombok.Value;
-import uk.gov.hmcts.darts.archiverecordsmanagement.model.ArchiveMetadata;
+import lombok.Getter;
+import lombok.Setter;
+import uk.gov.hmcts.darts.archiverecords.model.ArchiveMetadata;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Value
+@Getter
+@Setter
 @Builder
-public class CreateArchiveRecordMetadata implements ArchiveMetadata {
+public class MediaCreateArchiveRecordMetadata implements ArchiveMetadata {
 
     @JsonProperty("publisher")
     private String publisher;
