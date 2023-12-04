@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -25,6 +26,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityGroupMapper securityGroupMapper;
 
     @Override
+    @Transactional
     public SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroup) {
         validateName(securityGroup.getName());
 
