@@ -95,7 +95,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     }
 
     @Test
-    void updateTranscriptionApprovedWithoutComment() throws Exception {
+    void givenAwaitingAuthorisationTranscription_whenApproveWithoutCommentIsRequested_thenNewStatusIsApprovedAndHasNoComment() throws Exception {
 
         TranscriptionEntity existingTranscription = dartsDatabase.getTranscriptionRepository().findById(
             transcriptionId).orElseThrow();
@@ -145,7 +145,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     }
 
     @Test
-    void updateTranscriptionApprovedWithComment() throws Exception {
+    void givenAwaitingAuthorisationTranscription_whenApproveWithCommentIsRequested_thenNewStatusIsApprovedAndHasComment() throws Exception {
 
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
@@ -190,7 +190,9 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     }
 
     @Test
-    void updateTranscriptionShouldReturnTranscriptionNotFoundError() throws Exception {
+//    alternative naming if we want to allow empty given
+//    void given_whenUpdateTranscriptionForNonExistingTranscriptionIsRequested_thenTranscriptionNotFoundErrorIsReturned() throws Exception {
+    void givenRequestedTranscriptionDoesNotExist_whenUpdateTranscriptionIsRequested_thenTranscriptionNotFoundErrorIsReturned() throws Exception {
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(APPROVED.getId());
         updateTranscription.setWorkflowComment("APPROVED");
@@ -216,7 +218,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     }
 
     @Test
-    void updateTranscriptionShouldReturnTranscriptionWorkflowActionInvalidError() throws Exception {
+    void givenExistingTranscription_whenUpdateToInvalidStatusIsRequested_thenTranscriptionWorkflowActionInvalidErrorIsReturned() throws Exception {
         UpdateTranscription updateTranscription = new UpdateTranscription();
         updateTranscription.setTranscriptionStatusId(WITH_TRANSCRIBER.getId());
         updateTranscription.setWorkflowComment("APPROVED");
