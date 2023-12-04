@@ -15,7 +15,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
-    public String saveBlobDataToARM(String filename, BinaryData binaryData) {
+    public String saveBlobDataToArm(String filename, BinaryData binaryData) {
         return armService.saveBlobData(getArmContainerName(), filename, binaryData);
     }
 

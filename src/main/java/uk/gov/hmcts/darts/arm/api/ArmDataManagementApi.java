@@ -4,5 +4,5 @@ import com.azure.core.util.BinaryData;
 
 public interface ArmDataManagementApi {
 
-    String saveBlobDataToARM(String filename, BinaryData binaryData);
+    String saveBlobDataToArm(String filename, BinaryData binaryData);
 }

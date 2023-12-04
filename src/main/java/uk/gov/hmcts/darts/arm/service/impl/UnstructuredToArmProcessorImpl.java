@@ -2,11 +2,11 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -21,7 +21,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
-import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -45,6 +44,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     @Override
     public void processUnstructuredToArm() {
+        processPendingUnstructured();
     }
 
     private void processPendingUnstructured() {
@@ -64,19 +64,20 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         );
 
         for (var unstructuredExternalObjectDirectoryEntity : pendingUnstructuredExternalObjectDirectoryEntities) {
-                ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity =
-                    createArmExternalObjectDirectoryEntity(unstructuredExternalObjectDirectoryEntity);
+            ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity =
+                createArmExternalObjectDirectoryEntity(unstructuredExternalObjectDirectoryEntity);
 
-                armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(ARM_INGESTION.getId()));
-                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
+            armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(ARM_INGESTION.getId()));
+            externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
 
             try {
-                BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(unstructuredExternalObjectDirectoryEntity.getExternalLocation());
                 String filename = generateFilename(armExternalObjectDirectoryEntity);
+                BinaryData inboundFile = dataManagementApi
+                    .getBlobDataFromUnstructuredContainer(unstructuredExternalObjectDirectoryEntity.getExternalLocation());
 
-                String blodId = armDataManagementApi.saveBlobDataToARM(filename, inboundFile);
+                String blobName = armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
                 armExternalObjectDirectoryEntity.setChecksum(unstructuredExternalObjectDirectoryEntity.getChecksum());
-                armExternalObjectDirectoryEntity.setExternalLocation(UUID.randomUUID());
+                armExternalObjectDirectoryEntity.setExternalLocation(UUID.randomUUID()); //TODO: change to use filename not UUID???
                 armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(STORED.getId()));
 
             } catch (BlobStorageException e) {
@@ -124,11 +125,12 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         return armExternalObjectDirectoryEntity;
     }
 
-    private String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
-        Integer entityId = externalObjectDirectoryEntity.getId();
-        Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
-        Integer documentId = 0;
+    @Override
+    public String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        final Integer entityId = externalObjectDirectoryEntity.getId();
+        final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
 
+        Integer documentId = 0;
         if (externalObjectDirectoryEntity.getMedia() != null) {
             documentId = externalObjectDirectoryEntity.getMedia().getId();
         }

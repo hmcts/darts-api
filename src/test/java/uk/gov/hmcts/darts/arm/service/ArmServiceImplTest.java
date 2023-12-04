@@ -20,7 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ArmServiceImplTest {
+class ArmServiceImplTest {
 
     private static final String ARM_BLOB_CONTAINER_NAME = "arm_dummy_container";
     private static final String BLOB_FILENAME = "test_filename";
@@ -49,6 +49,6 @@ public class ArmServiceImplTest {
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
         String blobId = armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, BLOB_FILENAME, BINARY_DATA);
         assertNotNull(blobId);
-        assertEquals(TEST_DROP_ZONE+BLOB_FILENAME, blobId);
+        assertEquals(TEST_DROP_ZONE + BLOB_FILENAME, blobId);
     }
 }
