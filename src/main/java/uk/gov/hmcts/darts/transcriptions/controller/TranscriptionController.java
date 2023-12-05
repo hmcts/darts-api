@@ -217,13 +217,11 @@ public class TranscriptionController implements TranscriptionApi {
     }
 
     private boolean checkEndTime(OffsetDateTime mediaEndDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
-        return mediaEndDateTime.isAfter(requestStartDateTime)
-            && (mediaEndDateTime.isEqual(requestEndDateTime) || mediaEndDateTime.isAfter(requestEndDateTime));
+        return (mediaEndDateTime.isEqual(requestEndDateTime) || mediaEndDateTime.isAfter(requestEndDateTime));
     }
 
     private boolean checkStartTime(OffsetDateTime mediaStartDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
-        return (mediaStartDateTime.isEqual(requestStartDateTime) || mediaStartDateTime.isBefore(requestStartDateTime))
-            && mediaStartDateTime.isBefore(requestEndDateTime);
+        return (mediaStartDateTime.isEqual(requestStartDateTime) || mediaStartDateTime.isBefore(requestStartDateTime));
     }
 
     private boolean transcriptionTypesThatRequireDates(Integer transcriptionTypeId) {
