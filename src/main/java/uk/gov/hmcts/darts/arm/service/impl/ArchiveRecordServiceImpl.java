@@ -99,7 +99,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     }
 
     @Transactional()
-    ExternalObjectDirectoryEntity getExternalObjectDirectoryEntityById(Integer externalObjectDirectoryId) {
+    public ExternalObjectDirectoryEntity getExternalObjectDirectoryEntityById(Integer externalObjectDirectoryId) {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
         try {
             externalObjectDirectoryEntity = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectoryId);

@@ -52,7 +52,7 @@ class ArchiveRecordFileGeneratorImplTest {
         log.info("Reading file " + archiveFile.getAbsolutePath());
 
         String actualResponse = getFileContents(archiveFile);
-        String expectedResponse = getContentsFromFile("Tests/arm/ArchiveMediaMetadata/expectedResponse.a360");
+        String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveMediaMetadata/expectedResponse.a360");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
