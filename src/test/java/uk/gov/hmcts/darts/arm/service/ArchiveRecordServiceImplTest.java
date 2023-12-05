@@ -103,7 +103,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecordWithMedia() throws IOException {
+    void givenGenerateArchiveRecord_WithMedia() throws IOException {
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
@@ -142,6 +142,12 @@ class ArchiveRecordServiceImplTest {
         log.info("actualResponse {}", actualResponse);
 
         assertTrue(actualResponse.startsWith("{\"operation\":\"create_record\""));
+    }
+
+    @Test
+    void generateArchiveRecordWithNoData() {
+        Map<String, ArchiveRecordFileInfo> archiveRecordFiles = archiveRecordService.generateArchiveRecord(1234, 1);
+        assertTrue(archiveRecordFiles.isEmpty());
     }
 
     @Test
