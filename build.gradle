@@ -344,7 +344,7 @@ dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.4'
   implementation 'org.springframework.retry:spring-retry:2.0.4'
 
