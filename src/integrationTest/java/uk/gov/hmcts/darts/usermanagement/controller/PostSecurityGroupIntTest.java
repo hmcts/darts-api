@@ -144,8 +144,11 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            "display_name": "Weyland Transcription Services"
                          }
                            """);
-        mockMvc.perform(requestForInitialGroup)
-            .andExpect(status().isCreated());
+        MvcResult initialResponse = mockMvc.perform(requestForInitialGroup)
+            .andExpect(status().isCreated())
+            .andReturn();
+        JSONObject initialSecurityGroup = new JSONObject(initialResponse.getResponse()
+                                                   .getContentAsString());
 
         MockHttpServletRequestBuilder requestForDuplicateGroup = buildRequest()
             .content("""
@@ -156,7 +159,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                            """);
         mockMvc.perform(requestForDuplicateGroup)
             .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_110"));
+            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_110"))
+            .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
     }
 
     private MockHttpServletRequestBuilder buildRequest() {

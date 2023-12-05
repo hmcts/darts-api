@@ -3,19 +3,14 @@ package uk.gov.hmcts.darts.usermanagement.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
-import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.component.validation.Validator;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupMapper;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
-
-import java.util.Collections;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,10 +20,12 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
     private final SecurityRoleRepository securityRoleRepository;
     private final SecurityGroupMapper securityGroupMapper;
 
+    private final Validator<SecurityGroup> securityGroupCreationValidation;
+
     @Override
     @Transactional
     public SecurityGroupWithIdAndRole createSecurityGroup(SecurityGroup securityGroup) {
-        validateName(securityGroup.getName());
+        securityGroupCreationValidation.validate(securityGroup);
 
         var securityGroupEntity = securityGroupMapper.mapToSecurityGroupEntity(securityGroup);
         securityGroupEntity.setGlobalAccess(false);
@@ -43,15 +40,6 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         securityGroupWithIdAndRole.setRoleId(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
 
         return securityGroupWithIdAndRole;
-    }
-
-    private void validateName(String name) {
-        Optional<SecurityGroupEntity> existingGroup = securityGroupRepository.findByGroupName(name);
-        if (existingGroup.isPresent()) {
-            throw new DartsApiException(UserManagementError.DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED,
-                                        "Attempt to create group that already exists",
-                                        Collections.singletonMap("existing_group_id", existingGroup.get().getId()));
-        }
     }
 
 }
