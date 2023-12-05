@@ -30,8 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.DISABLED;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
 
 @AutoConfigureMockMvc
 class UserControllerSearchIntTest extends IntegrationBase {
@@ -140,7 +138,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(ENABLED.getId());
+        testUser.setActive(true);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
@@ -170,7 +168,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(ENABLED.getId());
+        testUser.setActive(true);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
@@ -200,7 +198,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(ENABLED.getId());
+        testUser.setActive(true);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
@@ -231,7 +229,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(DISABLED.getId());
+        testUser.setActive(false);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);

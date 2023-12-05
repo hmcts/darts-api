@@ -95,7 +95,7 @@ class PatchUserIntTest extends IntegrationBase {
             assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
-            assertEquals(0, latestUserAccountEntity.getState());
+            assertEquals(true, latestUserAccountEntity.isActive());
             assertThat(
                 getSecurityGroupIds(latestUserAccountEntity),
                 hasItems(ORIGINAL_SECURITY_GROUP_ID_1, ORIGINAL_SECURITY_GROUP_ID_2)
@@ -142,7 +142,7 @@ class PatchUserIntTest extends IntegrationBase {
             assertEquals("Jimmy Smith", latestUserAccountEntity.getUserName());
             assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
             assertEquals("An updated description", latestUserAccountEntity.getUserDescription());
-            assertEquals(1, latestUserAccountEntity.getState());
+            assertEquals(false, latestUserAccountEntity.isActive());
             assertThat(getSecurityGroupIds(latestUserAccountEntity), empty()
             );
             assertEquals(ORIGINAL_SYSTEM_USER_FLAG, latestUserAccountEntity.getIsSystemUser());
@@ -213,7 +213,7 @@ class PatchUserIntTest extends IntegrationBase {
                 .findById(userId)
                 .orElseThrow();
 
-            assertEquals(1, latestUserAccountEntity.getState());
+            assertEquals(false, latestUserAccountEntity.isActive());
             assertThat(getSecurityGroupIds(latestUserAccountEntity), empty());
 
             return null;
@@ -245,7 +245,7 @@ class PatchUserIntTest extends IntegrationBase {
                 .findById(userId)
                 .orElseThrow();
 
-            assertEquals(0, latestUserAccountEntity.getState());
+            assertEquals(true, latestUserAccountEntity.isActive());
             assertThat(getSecurityGroupIds(latestUserAccountEntity), empty());
 
             return null;
@@ -316,7 +316,7 @@ class PatchUserIntTest extends IntegrationBase {
         assertEquals(ORIGINAL_USERNAME, latestUserAccountEntity.getUserName());
         assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
         assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
-        assertEquals(0, latestUserAccountEntity.getState());
+        assertEquals(true, latestUserAccountEntity.isActive());
         assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
     }
 
@@ -325,7 +325,7 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
-        userAccountEntity.setState(0);
+        userAccountEntity.setActive(true);
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
 
         userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
@@ -347,7 +347,7 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
-        userAccountEntity.setState(1);
+        userAccountEntity.setActive(false);
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
 
         userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);

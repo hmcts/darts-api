@@ -93,7 +93,7 @@ class PostUserIntTest extends IntegrationBase {
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
-            assertEquals(0, createdUserAccountEntity.getState());
+            assertEquals(true, createdUserAccountEntity.isActive());
             assertTrue(createdUserAccountEntity.getSecurityGroupEntities().isEmpty());
             assertEquals(SYSTEM_USER_FLAG, createdUserAccountEntity.getIsSystemUser());
 
@@ -144,7 +144,7 @@ class PostUserIntTest extends IntegrationBase {
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertEquals(DESCRIPTION, createdUserAccountEntity.getUserDescription());
-            assertEquals(0, createdUserAccountEntity.getState());
+            assertEquals(true, createdUserAccountEntity.isActive());
             assertThat(
                 getSecurityGroupIds(createdUserAccountEntity),
                 hasItems(SECURITY_GROUP_ID_1, SECURITY_GROUP_ID_2)
@@ -184,7 +184,7 @@ class PostUserIntTest extends IntegrationBase {
         userAccountEntity.setUserName("James Smith");
         userAccountEntity.setEmailAddress("james.smith@hmcts.net");
         userAccountEntity.setIsSystemUser(false);
-        userAccountEntity.setState(1);
+        userAccountEntity.setActive(false);
         dartsDatabase.getUserAccountRepository()
             .save(userAccountEntity);
 

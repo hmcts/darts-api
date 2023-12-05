@@ -105,7 +105,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         UserState state = user.getState();
         if (state != null) {
-            userAccountEntity.setState(userAccountMapper.mapToUserStateValue(state));
+            userAccountEntity.setActive(userAccountMapper.mapToUserStateValue(state));
         }
 
         if (UserState.DISABLED.equals(user.getState())) {

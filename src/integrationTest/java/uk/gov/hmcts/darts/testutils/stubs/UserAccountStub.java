@@ -16,8 +16,6 @@ import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.DISABLED;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
 
 @Component
 @RequiredArgsConstructor
@@ -39,7 +37,7 @@ public class UserAccountStub {
             var newUser = new UserAccountEntity();
             newUser.setUserName("System User");
             newUser.setEmailAddress("system.user@example.com");
-            newUser.setState(ENABLED.getId());
+            newUser.setActive(true);
             newUser.setAccountGuid(UUID.randomUUID().toString());
             newUser.setIsSystemUser(true);
             return userAccountRepository.saveAndFlush(newUser);
@@ -64,7 +62,7 @@ public class UserAccountStub {
         newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
-        newUser.setState(DISABLED.getId());
+        newUser.setActive(true);
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
         return userAccountRepository.saveAndFlush(newUser);
