@@ -18,11 +18,6 @@ import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.impl.AnnotationArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.MediaArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
-import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
-import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
-import uk.gov.hmcts.darts.arm.model.record.metadata.MediaCreateArchiveRecordMetadata;
-import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
-import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -53,18 +48,15 @@ class ArchiveRecordServiceImplTest {
     public static final String TEST_TRANSCRIPTION_ARCHIVE_A_360 = "test-transcription-arm.a360";
     public static final String TEST_ANNOTATION_ARCHIVE_A_360 = "test-annotation-arm.a360";
     public static final String MP_2 = "mp2";
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String DARTS = "DARTS";
+    public static final String REGION = "GBR";
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
-    private ArchiveRecordFileGenerator archiveRecordFileGenerator;
-
-    private MediaArchiveRecordMapper mediaArchiveRecordMapper;
-    private TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;
-    private AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
 
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
@@ -89,18 +81,19 @@ class ArchiveRecordServiceImplTest {
     void setUp() {
         when(externalObjectDirectoryRepository.getReferenceById(anyInt())).thenReturn(externalObjectDirectoryEntity);
 
-        archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
+        ArchiveRecordFileGenerator archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
 
-        mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration);
-        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(armDataManagementConfiguration);
-        annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
+        MediaArchiveRecordMapper mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration);
+        TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(armDataManagementConfiguration);
+        AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
 
         archiveRecordService = new ArchiveRecordServiceImpl(armDataManagementConfiguration,
                                                             externalObjectDirectoryRepository,
                                                             archiveRecordFileGenerator,
                                                             mediaArchiveRecordMapper,
                                                             transcriptionArchiveRecordMapper,
-                                                            annotationArchiveRecordMapper);
+                                                            annotationArchiveRecordMapper
+        );
 
     }
 
@@ -113,9 +106,9 @@ class ArchiveRecordServiceImplTest {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
-        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss");
-        when(armDataManagementConfiguration.getPublisher()).thenReturn("DARTS");
-        when(armDataManagementConfiguration.getRegion()).thenReturn("GBR");
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn(DATE_TIME_FORMAT);
+        when(armDataManagementConfiguration.getPublisher()).thenReturn(DARTS);
+        when(armDataManagementConfiguration.getRegion()).thenReturn(REGION);
 
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
@@ -147,7 +140,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecordWithTranscription() throws IOException {
+    void generateArchiveRecordWithTranscription() {
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
 
         String relationId = "1234";
@@ -158,7 +151,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecordWithAnnotation() throws IOException {
+    void generateArchiveRecordWithAnnotation() {
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
 
         String relationId = "1234";
@@ -178,56 +171,5 @@ class ArchiveRecordServiceImplTest {
         return fileContents.toString();
     }
 
-    private MediaArchiveRecord createMediaArchiveRecord(String relationId) {
-        return MediaArchiveRecord.builder()
-            .mediaCreateArchiveRecord(createArchiveRecord(relationId))
-            .uploadNewFileRecord(createUploadNewFileRecord(relationId))
-            .build();
-    }
 
-    private MediaCreateArchiveRecordOperation createArchiveRecord(String relationId) {
-        return MediaCreateArchiveRecordOperation.builder()
-            .relationId(relationId)
-            .recordMetadata(createArchiveRecordMetadata())
-            .build();
-    }
-
-    private MediaCreateArchiveRecordMetadata createArchiveRecordMetadata() {
-        return MediaCreateArchiveRecordMetadata.builder()
-            .publisher("DARTS")
-            .recordClass("DARTSMedia")
-            .recordDate("2023-07-19T11:39:30Z")
-            .region("GBR")
-            .id("12345")
-            .type("Media")
-            .channel("1")
-            .maxChannels("4")
-            .courthouse("Swansea")
-            .courtroom("1234")
-            .mediaFile("media_filename")
-            .mediaFormat(MP_2)
-            .startDateTime("2023-07-18T11:39:30Z")
-            .endDateTime("2023-07-18T12:39:30Z")
-            .createdDateTime("2023-07-14T12:39:30Z")
-            .caseNumbers("Case_1|Case_2|Case_3")
-            .build();
-    }
-
-
-    private UploadNewFileRecord createUploadNewFileRecord(String relationId) {
-        return UploadNewFileRecord.builder()
-            .relationId(relationId)
-            .fileMetadata(createUploadNewFileRecordMetadata())
-            .build();
-
-    }
-
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata() {
-        return UploadNewFileRecordMetadata.builder()
-            .publisher("DARTS")
-            .dzFilename("<EOD>_<MEDID>_<ATTEMPT>.mp2")
-            .fileTag(MP_2)
-            .build();
-
-    }
 }
