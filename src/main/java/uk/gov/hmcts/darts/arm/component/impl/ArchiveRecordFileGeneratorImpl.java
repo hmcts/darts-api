@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.arm.component.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,11 +38,9 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
                 printWriter.print(archiveRecordOperation);
                 printWriter.println(uploadNewFileRecord);
                 generatedArchiveRecord = true;
-            } catch (IOException e) {
-                log.error("Unable to write ARM file {}, due to {}", archiveRecordFile.getAbsoluteFile(), e.getMessage());
             }
-        } catch (JsonProcessingException e) {
-            log.error("Unable to write arm record: {}", e.getMessage());
+        } catch (IOException e) {
+            log.error("Unable to write ARM file {}, due to {}", archiveRecordFile.getAbsoluteFile(), e.getMessage());
         }
         return generatedArchiveRecord;
     }

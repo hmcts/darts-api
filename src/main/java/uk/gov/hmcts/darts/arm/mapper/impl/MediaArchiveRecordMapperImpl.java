@@ -78,19 +78,17 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
 
     private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {
-        UploadNewFileRecord uploadNewFileRecord = UploadNewFileRecord.builder()
+        return UploadNewFileRecord.builder()
             .relationId(relationId.toString())
             .fileMetadata(createUploadNewFileRecordMetadata(media))
             .build();
-        return uploadNewFileRecord;
     }
 
     private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(MediaEntity media) {
-        UploadNewFileRecordMetadata uploadNewFileRecordMetadata = UploadNewFileRecordMetadata.builder()
+        return UploadNewFileRecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .dzFilename(media.getMediaFile()) //"<EOD>_<MEDID>_<ATTEMPT>.mp2"
             .fileTag(media.getMediaFormat())
             .build();
-        return uploadNewFileRecordMetadata;
     }
 }

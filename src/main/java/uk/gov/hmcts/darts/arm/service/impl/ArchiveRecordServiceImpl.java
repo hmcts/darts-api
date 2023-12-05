@@ -40,45 +40,72 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     private final TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;
     private final AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
 
+    @Transactional
     public Map<String, ArchiveRecordFileInfo> generateArchiveRecord(Integer externalObjectDirectoryId, Integer archiveRecordAttempt) {
         Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList = new HashMap<>();
-        boolean generatedArchiveRecord = false;
-        ExternalObjectDirectoryEntity externalObjectDirectory = getExternalObjectDirectoryEntityById(externalObjectDirectoryId);
+        try {
+            ExternalObjectDirectoryEntity externalObjectDirectory = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectoryId);
 
-        if (nonNull(externalObjectDirectory.getMedia())) {
-            String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
-                                                          externalObjectDirectory.getMedia().getId(), archiveRecordAttempt);
-            File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
-            MediaArchiveRecord mediaArchiveRecord =
-                mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, archiveRecordFile);
-            generatedArchiveRecord = archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile,
-                                                                                      ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
-            archiveRecordFileInfoList.put(ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription(),
-                                          generateArchiveRecordFileInfo(archiveRecordFile, generatedArchiveRecord));
-        }
-        if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
-                                                          externalObjectDirectory.getTranscriptionDocumentEntity().getId(), archiveRecordAttempt);
-            File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
-            TranscriptionArchiveRecord transcriptionArchiveRecord =
-                transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, archiveRecordFile);
-            generatedArchiveRecord = archiveRecordFileGenerator.generateArchiveRecord(transcriptionArchiveRecord, archiveRecordFile,
-                                                                                      ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE);
-            archiveRecordFileInfoList.put(ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE.getArchiveTypeDescription(),
-                                          generateArchiveRecordFileInfo(archiveRecordFile, generatedArchiveRecord));
-        }
-        if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
-                                                          externalObjectDirectory.getAnnotationDocumentEntity().getId(), archiveRecordAttempt);
-            File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
-            AnnotationArchiveRecord annotationArchiveRecord =
-                annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, archiveRecordFile);
-            generatedArchiveRecord = archiveRecordFileGenerator.generateArchiveRecord(annotationArchiveRecord, archiveRecordFile,
-                                                                                      ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE);
-            archiveRecordFileInfoList.put(ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE.getArchiveTypeDescription(),
-                                          generateArchiveRecordFileInfo(archiveRecordFile, generatedArchiveRecord));
+            if (nonNull(externalObjectDirectory.getMedia())) {
+                generateMediaArchiveRecordFile(externalObjectDirectoryId, archiveRecordAttempt, archiveRecordFileInfoList, externalObjectDirectory);
+            }
+            if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
+                generateTranscriptionArchiveRecordFile(externalObjectDirectoryId, archiveRecordAttempt, archiveRecordFileInfoList, externalObjectDirectory);
+            }
+            if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
+                generateAnnotationArchiveRecordFile(externalObjectDirectoryId, archiveRecordAttempt, archiveRecordFileInfoList, externalObjectDirectory);
+            }
+        } catch (EntityNotFoundException e) {
+            throw new DartsApiException(ArchiveRecordApiError.FAILED_TO_GENERATE_ARCHIVE_RECORD);
         }
         return archiveRecordFileInfoList;
+    }
+
+    private void generateAnnotationArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt, Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList, ExternalObjectDirectoryEntity externalObjectDirectory) {
+        String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
+                                                      externalObjectDirectory.getAnnotationDocumentEntity().getId(), archiveRecordAttempt
+        );
+        File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
+        AnnotationArchiveRecord annotationArchiveRecord =
+            annotationArchiveRecordMapper.mapToAnnotationArchiveRecord(externalObjectDirectory, archiveRecordFile);
+        boolean generatedArchiveRecord = archiveRecordFileGenerator.generateArchiveRecord(annotationArchiveRecord, archiveRecordFile,
+                                                                                          ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE);
+        archiveRecordFileInfoList.put(
+            ArchiveRecordType.ANNOTATION_ARCHIVE_TYPE.getArchiveTypeDescription(),
+            generateArchiveRecordFileInfo(archiveRecordFile, generatedArchiveRecord)
+        );
+    }
+
+    private void generateTranscriptionArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt, Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList, ExternalObjectDirectoryEntity externalObjectDirectory) {
+        String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
+                                                      externalObjectDirectory.getTranscriptionDocumentEntity().getId(), archiveRecordAttempt
+        );
+        File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
+        TranscriptionArchiveRecord transcriptionArchiveRecord =
+            transcriptionArchiveRecordMapper.mapToTranscriptionArchiveRecord(externalObjectDirectory, archiveRecordFile);
+        boolean generatedArchiveRecord = archiveRecordFileGenerator.generateArchiveRecord(transcriptionArchiveRecord, archiveRecordFile,
+                                                                                          ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE
+        );
+        archiveRecordFileInfoList.put(
+            ArchiveRecordType.TRANSCRIPTION_ARCHIVE_TYPE.getArchiveTypeDescription(),
+            generateArchiveRecordFileInfo(archiveRecordFile, generatedArchiveRecord)
+        );
+    }
+
+    private void generateMediaArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt, Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList, ExternalObjectDirectoryEntity externalObjectDirectory) {
+        String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
+                                                      externalObjectDirectory.getMedia().getId(), archiveRecordAttempt
+        );
+        File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), fullFilename);
+        MediaArchiveRecord mediaArchiveRecord =
+            mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, archiveRecordFile);
+        boolean generatedArchiveRecord = archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile,
+                                                                                          ArchiveRecordType.MEDIA_ARCHIVE_TYPE
+        );
+        archiveRecordFileInfoList.put(
+            ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription(),
+            generateArchiveRecordFileInfo(archiveRecordFile, generatedArchiveRecord)
+        );
     }
 
     private ArchiveRecordFileInfo generateArchiveRecordFileInfo(File archiveRecordFile, boolean generatedArchiveRecord) {
@@ -98,14 +125,4 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
             .toString();
     }
 
-    @Transactional()
-    public ExternalObjectDirectoryEntity getExternalObjectDirectoryEntityById(Integer externalObjectDirectoryId) {
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
-        try {
-            externalObjectDirectoryEntity = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectoryId);
-        } catch (EntityNotFoundException e) {
-            throw new DartsApiException(ArchiveRecordApiError.FAILED_TO_GENERATE_ARCHIVE_RECORD);
-        }
-        return externalObjectDirectoryEntity;
-    }
 }
