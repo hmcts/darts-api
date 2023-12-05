@@ -274,6 +274,7 @@ class AudioTransformationServiceImplTest {
         mediaRequest.setEndTime(endTime);
         return mediaRequest;
     }
+    
     @SneakyThrows
     @Test
     void testNotifyUserScheduleErrorNotificationNoDefendants() {
