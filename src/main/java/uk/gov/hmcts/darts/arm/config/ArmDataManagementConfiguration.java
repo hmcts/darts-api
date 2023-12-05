@@ -42,4 +42,7 @@ public class ArmDataManagementConfiguration {
     @Value("${darts.storage.arm.max-retry-attempts}")
     private Integer maxRetryAttempts;
 
+    @Value("${darts.storage.arm.file_extension}")
+    private String fileExtension;
+
 }

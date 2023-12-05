@@ -12,12 +12,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.impl.AnnotationArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.MediaArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
+import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -33,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 
+@SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordServiceImplTest {
@@ -51,6 +55,7 @@ class ArchiveRecordServiceImplTest {
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String DARTS = "DARTS";
     public static final String REGION = "GBR";
+    public static final int EODID = 1234;
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -123,17 +128,17 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
         when(mediaEntity.getCaseIdList()).thenReturn(List.of("Case1", "Case2", "Case3"));
 
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn(".a360");
 
-        String relationId = "1234";
+        Map<String, ArchiveRecordFileInfo> archiveRecordFiles = archiveRecordService.generateArchiveRecord(1234, 1);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordFiles.get(ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription());
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
 
-        File archiveRecordFile = archiveRecordService.generateArchiveRecord(1, relationId, TEST_MEDIA_ARCHIVE_A_360);
-
-        log.info("Reading file {}", archiveRecordFile);
-
-        String actualResponse = getFileContents(archiveRecordFile.getAbsoluteFile());
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("actualResponse {}", actualResponse);
 
         assertTrue(actualResponse.startsWith("{\"operation\":\"create_record\""));
@@ -143,10 +148,8 @@ class ArchiveRecordServiceImplTest {
     void generateArchiveRecordWithTranscription() {
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
 
-        String relationId = "1234";
-
         assertThrows(NotImplementedException.class, () ->
-            archiveRecordService.generateArchiveRecord(1, relationId, TEST_TRANSCRIPTION_ARCHIVE_A_360));
+            archiveRecordService.generateArchiveRecord(1, 2));
 
     }
 
@@ -154,10 +157,8 @@ class ArchiveRecordServiceImplTest {
     void generateArchiveRecordWithAnnotation() {
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
 
-        String relationId = "1234";
-
         assertThrows(NotImplementedException.class, () ->
-            archiveRecordService.generateArchiveRecord(1, relationId, TEST_ANNOTATION_ARCHIVE_A_360));
+            archiveRecordService.generateArchiveRecord(1, 3));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {

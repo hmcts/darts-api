@@ -6,6 +6,5 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import java.io.File;
 
 public interface MediaArchiveRecordMapper {
-    MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                               String relationId, File archiveRecordFile);
+    MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile);
 }

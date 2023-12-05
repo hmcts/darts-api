@@ -24,11 +24,11 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                      String relationId, File archiveRecordFile) {
+    public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         MediaEntity media = externalObjectDirectory.getMedia();
-        MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory, relationId);
-        UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, relationId);
+        MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory,
+                                                                                                           externalObjectDirectory.getId());
+        UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId());
         return createMediaArchiveRecord(mediaCreateArchiveRecordOperation, uploadNewFileRecord);
     }
 
@@ -41,9 +41,9 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     }
 
     private MediaCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                           String relationId) {
+                                                                           Integer relationId) {
         return MediaCreateArchiveRecordOperation.builder()
-            .relationId(relationId)
+            .relationId(relationId.toString())
             .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
             .build();
     }
@@ -77,9 +77,9 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     }
 
 
-    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, String relationId) {
+    private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {
         UploadNewFileRecord uploadNewFileRecord = UploadNewFileRecord.builder()
-            .relationId(relationId)
+            .relationId(relationId.toString())
             .fileMetadata(createUploadNewFileRecordMetadata(media))
             .build();
         return uploadNewFileRecord;

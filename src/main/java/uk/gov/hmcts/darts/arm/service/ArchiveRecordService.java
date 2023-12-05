@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.arm.service;
 
-import java.io.File;
+import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
+
+import java.util.Map;
 
 public interface ArchiveRecordService {
 
-    File generateArchiveRecord(Integer externalObjectDirectoryId, String relationId, String archiveRecordFilename);
+    Map<String, ArchiveRecordFileInfo> generateArchiveRecord(Integer externalObjectDirectoryId, Integer archiveRecordAttempt);
 }

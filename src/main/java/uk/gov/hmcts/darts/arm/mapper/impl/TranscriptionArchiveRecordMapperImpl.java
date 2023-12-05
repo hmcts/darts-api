@@ -17,8 +17,7 @@ public class TranscriptionArchiveRecordMapperImpl implements TranscriptionArchiv
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
-    public TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                      String relationId, File archiveRecordFile) {
+    public TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         //TODO fill in behaviour
         throw new NotImplementedException();
     }

@@ -17,8 +17,7 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
-    public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                                                String relationId, File archiveRecordFile) {
+    public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         //TODO fill in behaviour
         throw new NotImplementedException();
     }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.component.impl;
+package uk.gov.hmcts.darts.arm.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
@@ -24,6 +25,7 @@ import java.nio.file.Files;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
+@SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordFileGeneratorImplTest {

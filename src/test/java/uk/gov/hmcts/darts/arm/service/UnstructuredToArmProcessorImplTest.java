@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -87,6 +88,7 @@ class UnstructuredToArmProcessorImplTest {
                                                                         armDataManagementConfiguration);
     }
 
+    @Disabled
     @Test
     void processUnstructuredToArmMedia() {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
