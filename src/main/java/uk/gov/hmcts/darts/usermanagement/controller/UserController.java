@@ -26,7 +26,6 @@ public class UserController implements UserApi {
 
     private final UserManagementService userManagementService;
 
-
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
