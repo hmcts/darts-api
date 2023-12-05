@@ -20,7 +20,8 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, String relationId, File archiveRecordFile) {
+    public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                      String relationId, File archiveRecordFile) {
         MediaEntity media = externalObjectDirectory.getMedia();
         MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory, relationId);
         UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, relationId);
