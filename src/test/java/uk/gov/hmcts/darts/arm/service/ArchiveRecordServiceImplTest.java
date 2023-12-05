@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,8 +9,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
+import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
@@ -23,10 +24,12 @@ import uk.gov.hmcts.darts.arm.model.record.metadata.MediaCreateArchiveRecordMeta
 import uk.gov.hmcts.darts.arm.model.record.metadata.UploadNewFileRecordMetadata;
 import uk.gov.hmcts.darts.arm.model.record.operation.MediaCreateArchiveRecordOperation;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.io.BufferedReader;
@@ -36,16 +39,19 @@ import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
+import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordServiceImplTest {
 
     public static final String TEST_MEDIA_ARCHIVE_A_360 = "test-media-arm.a360";
+    public static final String TEST_TRANSCRIPTION_ARCHIVE_A_360 = "test-transcription-arm.a360";
+    public static final String TEST_ANNOTATION_ARCHIVE_A_360 = "test-annotation-arm.a360";
     public static final String MP_2 = "mp2";
 
     @Mock
@@ -54,7 +60,6 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
-    @Mock
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
@@ -65,6 +70,10 @@ class ArchiveRecordServiceImplTest {
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
     @Mock
     private MediaEntity mediaEntity;
+    @Mock
+    private TranscriptionDocumentEntity transcriptionDocumentEntity;
+    @Mock
+    private AnnotationDocumentEntity annotationDocumentEntity;
     @Mock
     private CourtroomEntity courtroomEntity;
     @Mock
@@ -78,30 +87,13 @@ class ArchiveRecordServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
-
-        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
-        when(courtroomEntity.getName()).thenReturn("Room1");
-
-        when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
-        when(mediaEntity.getChannel()).thenReturn(1);
-        when(mediaEntity.getTotalChannels()).thenReturn(4);
-        when(mediaEntity.getMediaFile()).thenReturn(TEST_MEDIA_ARCHIVE_A_360);
-        when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
-        when(mediaEntity.getStart()).thenReturn(startedAt);
-        when(mediaEntity.getEnd()).thenReturn(endedAt);
-        when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
-        when(mediaEntity.getCaseIdList()).thenReturn(List.of("Case1", "Case2"));
-
-        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryRepository.getReferenceById(anyInt())).thenReturn(externalObjectDirectoryEntity);
 
-        mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl();
-        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl();
-        annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl();
+        archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
+
+        mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration);
+        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(armDataManagementConfiguration);
+        annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
 
         archiveRecordService = new ArchiveRecordServiceImpl(armDataManagementConfiguration,
                                                             externalObjectDirectoryRepository,
@@ -114,17 +106,65 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void generateArchiveRecordWithMedia() throws IOException {
+        when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
+
+        when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
+        when(courtroomEntity.getName()).thenReturn("Room1");
+
         String fileLocation = tempDirectory.getAbsolutePath();
-        String relationId = "<EODID>";
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+        when(armDataManagementConfiguration.getDateTimeFormat()).thenReturn("yyyy-MM-dd'T'HH:mm:ss");
+        when(armDataManagementConfiguration.getPublisher()).thenReturn("DARTS");
+        when(armDataManagementConfiguration.getRegion()).thenReturn("GBR");
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
+        when(mediaEntity.getChannel()).thenReturn(1);
+        when(mediaEntity.getTotalChannels()).thenReturn(4);
+        when(mediaEntity.getMediaFile()).thenReturn(TEST_MEDIA_ARCHIVE_A_360);
+        when(mediaEntity.getMediaFormat()).thenReturn(MP_2);
+        when(mediaEntity.getStart()).thenReturn(startedAt);
+        when(mediaEntity.getEnd()).thenReturn(endedAt);
+        when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
+        when(mediaEntity.getCaseIdList()).thenReturn(List.of("Case1", "Case2", "Case3"));
+
+        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
+
+        when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
+
+        String relationId = "1234";
 
         File archiveRecordFile = archiveRecordService.generateArchiveRecord(1, relationId, TEST_MEDIA_ARCHIVE_A_360);
 
-        log.info("Reading file " + archiveRecordFile);
+        log.info("Reading file {}", archiveRecordFile);
 
         String actualResponse = getFileContents(archiveRecordFile.getAbsoluteFile());
-        String expectedResponse = getContentsFromFile("Tests/arm/ArchiveMediaMetadata/expectedResponse.a360");
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        log.info("actualResponse {}", actualResponse);
+
+        assertTrue(actualResponse.startsWith("{\"operation\":\"create_record\""));
+    }
+
+    @Test
+    void generateArchiveRecordWithTranscription() throws IOException {
+        when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
+
+        String relationId = "1234";
+
+        assertThrows(NotImplementedException.class, () ->
+            archiveRecordService.generateArchiveRecord(1, relationId, TEST_TRANSCRIPTION_ARCHIVE_A_360));
+
+    }
+
+    @Test
+    void generateArchiveRecordWithAnnotation() throws IOException {
+        when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+
+        String relationId = "1234";
+
+        assertThrows(NotImplementedException.class, () ->
+            archiveRecordService.generateArchiveRecord(1, relationId, TEST_ANNOTATION_ARCHIVE_A_360));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {

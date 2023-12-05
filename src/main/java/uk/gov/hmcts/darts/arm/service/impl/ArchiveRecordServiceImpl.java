@@ -65,7 +65,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     ExternalObjectDirectoryEntity getExternalObjectDirectoryEntityById(Integer externalObjectDirectoryId) {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
         try {
-            externalObjectDirectoryRepository.getReferenceById(externalObjectDirectoryId);
+            externalObjectDirectoryEntity = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectoryId);
         } catch (EntityNotFoundException e) {
             throw new DartsApiException(ArchiveRecordApiError.FAILED_TO_GENERATE_ARCHIVE_RECORD);
         }

@@ -1,5 +1,7 @@
 package uk.gov.hmcts.darts.arm.mapper.impl;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
@@ -16,9 +18,11 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Component
+@RequiredArgsConstructor
 public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                       String relationId, File archiveRecordFile) {
@@ -36,7 +40,8 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             .build();
     }
 
-    private MediaCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory, String relationId) {
+    private MediaCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                                           String relationId) {
         return MediaCreateArchiveRecordOperation.builder()
             .relationId(relationId)
             .recordMetadata(createArchiveRecordMetadata(externalObjectDirectory))
