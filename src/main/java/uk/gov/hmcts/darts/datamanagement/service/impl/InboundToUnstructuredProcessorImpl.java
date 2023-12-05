@@ -97,7 +97,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             if (unstructuredStatus == null
                 || unstructuredStatus.getId().equals(STORED.getId())
                 || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
-                break;
+                continue;
             }
 
             // save it as AWAITING_VERIFICATION

@@ -144,7 +144,7 @@ paths:
                 type: "TRANSCRIPTION_112"
                 title: "Failed to update some of the transcriptions"
                 status: 400
-                partial_failure: [{"transcription_id":100,"hide_request_from_requestor":false}]
+                partial_failure: [ { "transcription_id": 100,"hide_request_from_requestor": false } ]
         '401':
           description: Unauthorised Error
         '403':
@@ -611,7 +611,6 @@ components:
     TranscriptionRequestDetails:
       type: object
       required:
-        - urgency_id
         - transcription_urgency_id
         - transcription_type_id
       properties:
@@ -621,9 +620,6 @@ components:
         case_id:
           type: integer
           example: 4567
-        urgency_id:
-          type: integer
-          example: 2
         transcription_urgency_id:
           type: integer
           example: 2
@@ -850,9 +846,6 @@ components:
     TranscriptionTypeResponse:
       type: object
       properties:
-        trt_id:
-          type: integer
-          example: 1
         transcription_type_id:
           type: integer
           example: 1
@@ -866,9 +859,6 @@ components:
     TranscriptionUrgencyResponse:
       type: object
       properties:
-        tru_id:
-          type: integer
-          example: 1
         transcription_urgency_id:
           type: integer
           example: 1

@@ -167,7 +167,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             transcriptionRequestDetails,
             transcriptionStatus,
             getTranscriptionTypeById(transcriptionRequestDetails.getTranscriptionTypeId()),
-            getTranscriptionUrgencyById(transcriptionRequestDetails.getUrgencyId()),
+            getTranscriptionUrgencyById(transcriptionRequestDetails.getTranscriptionUrgencyId()),
             isManual
         );
 

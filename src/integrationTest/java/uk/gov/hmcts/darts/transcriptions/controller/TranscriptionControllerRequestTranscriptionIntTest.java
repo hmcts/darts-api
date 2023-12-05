@@ -705,7 +705,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
         transcriptionRequestDetails.setHearingId(hearingId);
         transcriptionRequestDetails.setCaseId(caseId);
-        transcriptionRequestDetails.setUrgencyId(urgencyId);
         transcriptionRequestDetails.setTranscriptionUrgencyId(urgencyId);
         transcriptionRequestDetails.setTranscriptionTypeId(transcriptionTypeId);
         transcriptionRequestDetails.setComment(comment);
