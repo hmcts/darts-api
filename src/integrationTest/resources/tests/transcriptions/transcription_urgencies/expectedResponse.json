@@ -1,31 +1,25 @@
 [
   {
-    "tru_id": 2,
     "transcription_urgency_id" : 2,
     "description": "Overnight"
   },
   {
-    "tru_id": 3,
     "transcription_urgency_id" : 3,
     "description": "Other"
   },
   {
-    "tru_id": 4,
     "transcription_urgency_id" : 4,
     "description": "Up to 3 working days"
   },
   {
-    "tru_id": 5,
     "transcription_urgency_id" : 5,
     "description": "Up to 7 working days"
   },
   {
-    "tru_id": 6,
     "transcription_urgency_id" : 6,
     "description": "Up to 12 working days"
   },
   {
-    "tru_id": 7,
     "transcription_urgency_id" : 7,
     "description": "Up to 2 working days"
   }
