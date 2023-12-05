@@ -61,7 +61,9 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         return archiveRecordFileInfoList;
     }
 
-    private void generateAnnotationArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt, Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList, ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void generateAnnotationArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt,
+                                                     Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList,
+                                                     ExternalObjectDirectoryEntity externalObjectDirectory) {
         String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
                                                       externalObjectDirectory.getAnnotationDocumentEntity().getId(), archiveRecordAttempt
         );
@@ -76,7 +78,9 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         );
     }
 
-    private void generateTranscriptionArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt, Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList, ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void generateTranscriptionArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt,
+                                                        Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList,
+                                                        ExternalObjectDirectoryEntity externalObjectDirectory) {
         String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
                                                       externalObjectDirectory.getTranscriptionDocumentEntity().getId(), archiveRecordAttempt
         );
@@ -92,7 +96,9 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         );
     }
 
-    private void generateMediaArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt, Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList, ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void generateMediaArchiveRecordFile(Integer externalObjectDirectoryId, Integer archiveRecordAttempt,
+                                                Map<String, ArchiveRecordFileInfo> archiveRecordFileInfoList,
+                                                ExternalObjectDirectoryEntity externalObjectDirectory) {
         String fullFilename = generateArchiveFilename(externalObjectDirectoryId,
                                                       externalObjectDirectory.getMedia().getId(), archiveRecordAttempt
         );
