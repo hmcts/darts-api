@@ -344,7 +344,7 @@ dependencies {
   implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
   implementation 'org.zalando:problem-spring-web-starter:0.29.1'
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.3.0'
   implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '4.0.4'
   implementation 'org.springframework.retry:spring-retry:2.0.4'
 
@@ -370,10 +370,10 @@ dependencies {
   //database
   implementation 'org.postgresql:postgresql:42.7.0'
 
-  implementation 'uk.gov.service.notify:notifications-java-client:4.1.0-RELEASE'
+  implementation 'uk.gov.service.notify:notifications-java-client:4.1.1-RELEASE'
 
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.13'
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.4.13'
+  implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.14'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.4.14'
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
