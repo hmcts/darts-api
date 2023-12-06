@@ -81,10 +81,10 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
         for (var currentExternalObjectDirectoryEntity : allPendingUnstructuredToArmEntities) {
 
-            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = null;
-            ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = null;
+            ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity;
+            ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity;
 
-            if (currentExternalObjectDirectoryEntity.getExternalLocationType().getId() == armLocation.getId()) {
+            if (currentExternalObjectDirectoryEntity.getExternalLocationType().getId().equals(armLocation.getId())) {
                 armExternalObjectDirectoryEntity = currentExternalObjectDirectoryEntity;
 
                 var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectoryEntity);

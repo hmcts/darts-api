@@ -123,7 +123,6 @@ class UnstructuredToArmProcessorImplTest {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        //when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
