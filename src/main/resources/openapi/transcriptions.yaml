@@ -629,6 +629,7 @@ components:
         comment:
           type: string
           example: 'Please expedite my transcription request'
+          maxLength: 2000
         start_date_time:
           type: string
           format: date-time
@@ -666,6 +667,7 @@ components:
           example: 3
         workflow_comment:
           type: string
+          maxLength: 2000
 
     UpdateTranscriptionsItem:
       type: object
