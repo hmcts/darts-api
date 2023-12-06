@@ -61,7 +61,7 @@ class ArchiveRecordServiceImplTest {
     public static final String REGION = "GBR";
     public static final int EODID = 1234;
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
 
     @Mock
