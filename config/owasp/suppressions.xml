@@ -11,6 +11,12 @@
     <cve>CVE-2023-36052</cve>
   </suppress>
 
+  <suppress until="2024-01-14">
+    <notes>Need a Spring boot update to fix</notes>
+    <cve>CVE-2023-6378</cve>
+  </suppress>
+
+
   <!--Please add all the false positives under the below section-->
   <suppress>
     <notes>False Positive

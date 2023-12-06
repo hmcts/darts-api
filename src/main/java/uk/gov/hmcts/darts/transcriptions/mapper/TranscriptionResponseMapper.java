@@ -32,7 +32,7 @@ public class TranscriptionResponseMapper {
 
     TranscriptionTypeResponse mapToTranscriptionTypeResponse(TranscriptionTypeEntity transcriptionTypeEntity) {
         TranscriptionTypeResponse transcriptionTypeResponse = new TranscriptionTypeResponse();
-        transcriptionTypeResponse.setTrtId(transcriptionTypeEntity.getId());
+        transcriptionTypeResponse.setTranscriptionTypeId(transcriptionTypeEntity.getId());
         transcriptionTypeResponse.setDescription(transcriptionTypeEntity.getDescription());
         return transcriptionTypeResponse;
     }
@@ -46,7 +46,7 @@ public class TranscriptionResponseMapper {
 
     TranscriptionUrgencyResponse mapToTranscriptionUrgencyResponse(TranscriptionUrgencyEntity transcriptionUrgencyEntity) {
         TranscriptionUrgencyResponse transcriptionUrgencyResponse = new TranscriptionUrgencyResponse();
-        transcriptionUrgencyResponse.setTruId(transcriptionUrgencyEntity.getId());
+        transcriptionUrgencyResponse.setTranscriptionUrgencyId(transcriptionUrgencyEntity.getId());
         transcriptionUrgencyResponse.setDescription(transcriptionUrgencyEntity.getDescription());
         return transcriptionUrgencyResponse;
     }
@@ -86,7 +86,10 @@ public class TranscriptionResponseMapper {
                 transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
             if (transcriptionEntity.getHearing() != null) {
+                transcriptionResponse.setHearingId(transcriptionEntity.getHearing().getId());
                 transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
+            } else {
+                transcriptionResponse.setHearingDate(transcriptionEntity.getHearingDate());
             }
             if (transcriptionEntity.getTranscriptionUrgency() != null) {
                 transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
@@ -94,6 +97,7 @@ public class TranscriptionResponseMapper {
             transcriptionResponse.setRequestType(transcriptionEntity.getTranscriptionType().getDescription());
             transcriptionResponse.setTranscriptionStartTs(transcriptionEntity.getStartTime());
             transcriptionResponse.setTranscriptionEndTs(transcriptionEntity.getEndTime());
+            transcriptionResponse.setIsManual(transcriptionEntity.getIsManualTranscription());
         } catch (Exception exception) {
             throw new DartsApiException(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND);
         }

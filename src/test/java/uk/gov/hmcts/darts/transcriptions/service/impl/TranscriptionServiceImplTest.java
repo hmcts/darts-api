@@ -114,6 +114,9 @@ class TranscriptionServiceImplTest {
     @Mock
     private TranscriptionEntity mockTranscription;
 
+    @Mock
+    private DuplicateRequestDetector duplicateRequestDetector;
+
     @InjectMocks
     private TranscriptionServiceImpl transcriptionService;
 
@@ -159,6 +162,8 @@ class TranscriptionServiceImplTest {
     @Test
     void saveTranscriptionRequestWithValidValuesAndCourtLogTypeReturnSuccess() {
 
+        doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
+
         Integer hearingId = 1;
         when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
 
@@ -190,16 +195,18 @@ class TranscriptionServiceImplTest {
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
-        transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearingId,
             caseId,
             transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(),
             TEST_COMMENT,
             startDateTime,
-            endDateTime
-        ), true);
+            endDateTime);
 
+        transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true);
+
+        verify(duplicateRequestDetector).checkForDuplicate(transcriptionRequestDetails, true);
         verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
 
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
@@ -241,6 +248,7 @@ class TranscriptionServiceImplTest {
 
     @Test
     void saveTranscriptionRequestWithValidValuesNullHearingAndCourtLogTypeReturnSuccess() {
+        doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer caseId = 1;
         when(mockCaseService.getCourtCaseById(caseId)).thenReturn(mockCourtCase);
@@ -271,16 +279,18 @@ class TranscriptionServiceImplTest {
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
-        transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearingId,
             caseId,
             transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(),
             TEST_COMMENT,
             startDateTime,
-            endDateTime
-        ), true);
+            endDateTime);
 
+        transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true);
+
+        verify(duplicateRequestDetector).checkForDuplicate(transcriptionRequestDetails, true);
         verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
 
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
@@ -318,6 +328,7 @@ class TranscriptionServiceImplTest {
 
     @Test
     void saveTranscriptionRequestWithValidValuesNullCourtCaseAndCourtLogTypeReturnSuccess() {
+        doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
         when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
@@ -349,16 +360,18 @@ class TranscriptionServiceImplTest {
         OffsetDateTime startDateTime = CommonTestDataUtil.createOffsetDateTime(START_TIME);
         OffsetDateTime endDateTime = CommonTestDataUtil.createOffsetDateTime(END_TIME);
 
-        transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearingId,
             caseId,
             transcriptionUrgencyEnum.getId(),
             transcriptionTypeEnum.getId(),
             TEST_COMMENT,
             startDateTime,
-            endDateTime
-        ), true);
+            endDateTime);
 
+        transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true);
+
+        verify(duplicateRequestDetector).checkForDuplicate(transcriptionRequestDetails, true);
         verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
 
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
@@ -400,6 +413,7 @@ class TranscriptionServiceImplTest {
 
     @Test
     void saveTranscriptionRequestWithValidValuesNullDatesAndSentencingRemarksTypeReturnSuccess() {
+        doNothing().when(duplicateRequestDetector).checkForDuplicate(any(TranscriptionRequestDetails.class), any(Boolean.class));
 
         Integer hearingId = 1;
         when(mockHearingsService.getHearingById(hearingId)).thenReturn(mockHearing);
@@ -432,7 +446,7 @@ class TranscriptionServiceImplTest {
         OffsetDateTime startDateTime = null;
         OffsetDateTime endDateTime = null;
 
-        transcriptionService.saveTranscriptionRequest(createTranscriptionRequestDetails(
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
             hearingId,
             caseId,
             transcriptionUrgencyEnum.getId(),
@@ -440,8 +454,11 @@ class TranscriptionServiceImplTest {
             TEST_COMMENT,
             startDateTime,
             endDateTime
-        ), false);
+        );
 
+        transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, false);
+
+        verify(duplicateRequestDetector).checkForDuplicate(transcriptionRequestDetails, false);
         verify(mockTranscriptionRepository).saveAndFlush(transcriptionEntityArgumentCaptor.capture());
 
         TranscriptionEntity transcriptionEntity = transcriptionEntityArgumentCaptor.getValue();
@@ -536,7 +553,7 @@ class TranscriptionServiceImplTest {
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
         transcriptionRequestDetails.setHearingId(hearingId);
         transcriptionRequestDetails.setCaseId(caseId);
-        transcriptionRequestDetails.setUrgencyId(urgencyId);
+        transcriptionRequestDetails.setTranscriptionUrgencyId(urgencyId);
         transcriptionRequestDetails.setTranscriptionTypeId(transcriptionTypeId);
         transcriptionRequestDetails.setComment(comment);
         transcriptionRequestDetails.setStartDateTime(startDateTime);

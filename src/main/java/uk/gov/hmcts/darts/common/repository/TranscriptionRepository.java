@@ -49,11 +49,15 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
         AND t.transcriptionType = :transcriptionType
         AND t.startTime = :startTime
         AND t.endTime = :endTime
+        AND t.isManualTranscription = :isManual
         """)
-    List<TranscriptionEntity> findByHearingIdTypeStartAndEnd(
+    List<TranscriptionEntity> findByHearingIdTypeStartAndEndAndIsManual(
         Integer hearingId,
         TranscriptionTypeEntity transcriptionType,
         OffsetDateTime startTime,
-        OffsetDateTime endTime
+        OffsetDateTime endTime,
+        Boolean isManual
     );
+
+    List<TranscriptionEntity> findByIdIn(List<Integer> transcriptionIds);
 }

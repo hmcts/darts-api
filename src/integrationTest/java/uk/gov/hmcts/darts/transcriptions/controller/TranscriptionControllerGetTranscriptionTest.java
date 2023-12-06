@@ -39,7 +39,7 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_ID = "1";
-    private static final List<String> TAGS_TO_IGNORE = List.of("case_id", "transcription_id");
+    private static final List<String> TAGS_TO_IGNORE = List.of("case_id", "hearing_id", "transcription_id");
 
     @Autowired
     private MockMvc mockMvc;

@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface YourTranscriptsQuery {
 
-    List<YourTranscriptsSummary> getRequesterTranscriptions(Integer userId);
+    List<YourTranscriptsSummary> getRequesterTranscriptions(Integer userId, Boolean includeHiddenFromRequester);
 
     List<YourTranscriptsSummary> getApproverTranscriptions(Integer userId);
 

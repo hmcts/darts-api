@@ -11,12 +11,15 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static java.time.temporal.ChronoUnit.HOURS;
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -255,8 +258,8 @@ class OutboundFileProcessorImplTest {
         verify(audioOperationService, times(1)).trim(
             any(),
             eq(mergedAudioFile),
-            eq("00:00:00"),
-            eq("01:00:00")
+            eq(Duration.of(0, MINUTES)),
+            eq(Duration.of(1, HOURS))
         );
         verify(audioOperationService, times(1)).reEncode(
             any(),
@@ -297,8 +300,8 @@ class OutboundFileProcessorImplTest {
         verify(audioOperationService, times(1)).trim(
             any(),
             eq(mergedAudioFile),
-            eq("00:00:00"),
-            eq("01:00:00")
+            eq(Duration.of(0, MINUTES)),
+            eq(Duration.of(1, HOURS))
         );
     }
 
@@ -335,8 +338,8 @@ class OutboundFileProcessorImplTest {
         verify(audioOperationService, times(1)).trim(
             any(),
             eq(mergedAudioFile),
-            eq("-00:10:00"),
-            eq("00:50:00")
+            eq(Duration.of(-10, MINUTES)),
+            eq(Duration.of(50, MINUTES))
         );
     }
 

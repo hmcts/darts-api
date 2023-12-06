@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +29,6 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -60,7 +58,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.RE
 
 
 @AutoConfigureMockMvc
-@Slf4j
 @SuppressWarnings({"PMD.ExcessiveImports"})
 @Transactional
 class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase {
@@ -77,9 +74,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @MockBean
     private UserIdentity mockUserIdentity;
-
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private AuthorisationStub authorisationStub;
@@ -138,7 +132,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             .read("$.transcription_id");
         assertNotNull(transcriptionId);
 
-        TranscriptionRepository transcriptionRepository = dartsDatabaseStub.getTranscriptionRepository();
+        TranscriptionRepository transcriptionRepository = dartsDatabase.getTranscriptionRepository();
         TranscriptionEntity transcriptionEntity = transcriptionRepository.findById(transcriptionId).orElseThrow();
         assertTrue(transcriptionEntity.getIsManualTranscription());
         List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = transcriptionEntity.getTranscriptionWorkflowEntities();
@@ -150,12 +144,12 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
                                     AWAITING_AUTHORISATION, testUser
         );
 
-        assertThat(dartsDatabaseStub.getTranscriptionCommentRepository().findAll())
+        assertThat(dartsDatabase.getTranscriptionCommentRepository().findAll())
             .hasSize(1)
             .extracting(TranscriptionCommentEntity::getComment)
             .containsExactly(TEST_COMMENT);
 
-        List<NotificationEntity> notificationEntities = dartsDatabaseStub.getNotificationRepository().findAll();
+        List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
         assertTrue(templateList.contains(COURT_MANAGER_APPROVE_TRANSCRIPT.toString()));
 
@@ -258,7 +252,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         );
 
         hearing.setMediaList(null);
-        dartsDatabaseStub.save(hearing);
+        dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
@@ -296,7 +290,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             transcriptionTypeEnum.getId(), TEST_COMMENT, now().minusHours(1), now().plusMinutes(10)
         );
 
-        dartsDatabaseStub.save(hearing);
+        dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
@@ -322,7 +316,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
             transcriptionTypeEnum.getId(), TEST_COMMENT, now().plusMinutes(1), now().plusHours(10)
         );
 
-        dartsDatabaseStub.save(hearing);
+        dartsDatabase.save(hearing);
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
             .header("Content-Type", "application/json")
@@ -632,7 +626,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
         transcriptionRequestDetails.setHearingId(hearingId);
         transcriptionRequestDetails.setCaseId(caseId);
-        transcriptionRequestDetails.setUrgencyId(urgencyId);
+        transcriptionRequestDetails.setTranscriptionUrgencyId(urgencyId);
         transcriptionRequestDetails.setTranscriptionTypeId(transcriptionTypeId);
         transcriptionRequestDetails.setComment(comment);
         transcriptionRequestDetails.setStartDateTime(startDateTime);

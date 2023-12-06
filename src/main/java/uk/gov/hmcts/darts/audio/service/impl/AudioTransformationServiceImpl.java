@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -42,18 +43,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.DEFENDANTS;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REQUEST_ID;
 
 @Service
 @RequiredArgsConstructor
@@ -192,7 +201,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
             }
 
-            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(mediaEntitiesForRequest);
+            List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestDates(mediaEntitiesForRequest, mediaRequestEntity);
+
+            Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
             Path generatedFilePath;
             try {
@@ -212,15 +223,16 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
         } catch (Exception e) {
             log.error(
-                "Exception occurred for request id {}. Exception message: {}",
+                "Exception occurred for request id {}.",
                 requestId,
-                e.getMessage()
+                e
             );
             mediaRequestService.updateAudioRequestStatus(requestId, FAILED);
 
             if (mediaRequestEntity != null && hearingEntity != null) {
                 notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(),
-                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+                           NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString()
+                );
             }
 
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, e);
@@ -229,6 +241,13 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
 
         return blobId;
+    }
+
+    List<MediaEntity> filterMediaByMediaRequestDates(List<MediaEntity> mediaEntitiesForRequest, MediaRequestEntity mediaRequestEntity) {
+        return mediaEntitiesForRequest.stream().filter(
+            media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd())
+                && (media.getStart().isBefore(mediaRequestEntity.getEndTime())))
+            .collect(Collectors.toList());
     }
 
     @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
@@ -249,7 +268,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
             )));
 
-        log.debug("Downloading audio blob for {}", id);
+        log.debug("Downloading audio blob for {} from unstructured datastore", id);
         BinaryData binaryData = getUnstructuredAudioBlob(id);
         log.debug("Download audio blob complete for {}", id);
 
@@ -309,16 +328,37 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                             CourtCaseEntity courtCase,
                             String notificationTemplateName) {
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
-                 courtCase.getId());
+                 courtCase.getId()
+        );
 
         Optional<UserAccountEntity> userAccount = userAccountRepository.findById(mediaRequestEntity.getRequestor().getId());
 
         if (userAccount.isPresent()) {
+            Map<String, String> templateParams = new HashMap<>();
+
+            if (notificationTemplateName.equals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString())) {
+
+                List<DefendantEntity> defendantList = mediaRequestEntity.getHearing().getCourtCase().getDefendantList();
+                List<String> defendantNames = new ArrayList<>();
+                for (DefendantEntity defendant : defendantList) {
+                    defendantNames.add(defendant.getName());
+                }
+
+                String defendants = defendantNames.stream().collect(Collectors.joining(","));
+
+                templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
+                templateParams.put(COURTHOUSE, String.valueOf(mediaRequestEntity.getHearing().getCourtCase().getCourthouse()));
+                templateParams.put(DEFENDANTS, defendants);
+                templateParams.put(HEARING_DATE, String.valueOf(mediaRequestEntity.getHearing().getHearingDate()));
+                templateParams.put(AUDIO_START_TIME, String.valueOf(mediaRequestEntity.getStartTime()));
+                templateParams.put(AUDIO_END_TIME, String.valueOf(mediaRequestEntity.getEndTime()));
+            }
 
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
                 .eventId(notificationTemplateName)
                 .caseId(courtCase.getId())
                 .emailAddresses(userAccount.get().getEmailAddress())
+                .templateValues(templateParams)
                 .build();
 
             notificationApi.scheduleNotification(saveNotificationToDbRequest);

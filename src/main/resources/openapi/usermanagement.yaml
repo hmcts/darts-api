@@ -301,8 +301,8 @@ components:
       type: string
       minLength: 1
       maxLength: 256
-    SecurityGroupRole:
-      type: string
+    SecurityGroupRoleId:
+      type: integer
     SecurityGroupGlobalAccess:
       type: boolean
     SecurityGroupDisplayState:
@@ -378,8 +378,8 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/SecurityGroupId'
-        role:
-          $ref: '#/components/schemas/SecurityGroupRole'
+        role_id:
+          $ref: '#/components/schemas/SecurityGroupRoleId'
         global_access:
           $ref: '#/components/schemas/SecurityGroupGlobalAccess'
         display_state:

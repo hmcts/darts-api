@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -155,6 +156,26 @@ class TranscriptionIdControllerAuthorisationImplTest {
         var exception = assertThrows(
             DartsApiException.class,
             () -> controllerAuthorisation.checkAuthorisation(request, roles)
+        );
+
+        assertEquals(BAD_REQUEST_TRANSCRIPTION_ID.getTitle(), exception.getMessage());
+        assertEquals(BAD_REQUEST_TRANSCRIPTION_ID, exception.getError());
+
+        verifyNoInteractions(authorisation);
+    }
+
+    @Test
+    void checkAuthorisationSupplierIdParameter() {
+        assertDoesNotThrow(() -> controllerAuthorisation.checkAuthorisation(() -> Optional.of(TRANSCRIPTION_ID_PARAM_VALUE), roles));
+
+        verify(authorisation).authoriseByTranscriptionId(5, roles);
+    }
+
+    @Test
+    void checkAuthorisationSupplierIdMissingParameter() {
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> controllerAuthorisation.checkAuthorisation(() -> Optional.empty(), roles)
         );
 
         assertEquals(BAD_REQUEST_TRANSCRIPTION_ID.getTitle(), exception.getMessage());

@@ -1,3 +1,4 @@
 {
-  "trt_id":1,"description":"SENTENCING_REMARKS"
+  "transcription_type_id": 1,
+  "description": "SENTENCING_REMARKS"
 }

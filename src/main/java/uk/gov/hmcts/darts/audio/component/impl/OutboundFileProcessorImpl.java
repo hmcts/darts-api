@@ -173,19 +173,12 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return audioOperationService.trim(
             StringUtils.EMPTY,
             audioFileInfo,
-            toTimeString(trimStartDuration),
-            toTimeString(trimEndDuration)
+            trimStartDuration,
+            trimEndDuration
         );
     }
 
-    private String toTimeString(Duration duration) {
-        // Format per http://ffmpeg.org/ffmpeg-utils.html#Time-duration
-        return String.format("%s%02d:%02d:%02d",
-                                   duration.isNegative() ? "-" : StringUtils.EMPTY,
-                                   Math.abs(duration.toHours()),
-                                   Math.abs(duration.toMinutesPart()),
-                                   Math.abs(duration.toSecondsPart()));
-    }
+
 
     private List<AudioFileInfo> trimAllToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,
                                                 OffsetDateTime end)

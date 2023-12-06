@@ -607,10 +607,10 @@ components:
     transcript:
       type: object
       properties:
-        tra_id:
+        transcription_id:
           type: integer
           example: 1
-        hea_id:
+        hearing_id:
           type: integer
           example: 2
         hearing_date:

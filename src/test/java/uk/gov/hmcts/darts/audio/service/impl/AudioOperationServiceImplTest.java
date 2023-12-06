@@ -14,14 +14,16 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static java.time.temporal.ChronoUnit.HOURS;
+import static java.time.temporal.ChronoUnit.MINUTES;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -152,8 +154,8 @@ class AudioOperationServiceImplTest {
                 file.toString(),
                 1
             ),
-            "00:45:00",
-            "01:15:00"
+            Duration.of(45, MINUTES),
+            Duration.of(75, MINUTES)
         );
 
         assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-trim-[0-9]*.mp2"));
@@ -167,44 +169,40 @@ class AudioOperationServiceImplTest {
         AudioFileInfo audioFileInfo = inputAudioFileInfos.get(0);
         assertEquals(
             Instant.parse(T_09_00_00_Z),
-            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), "00:00:00")
+            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(0, SECONDS))
         );
         assertEquals(
             Instant.parse("2023-04-28T09:00:05Z"),
-            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), "00:00:05")
+            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(5, SECONDS))
         );
         assertEquals(
             Instant.parse("2023-04-28T09:01:30Z"),
-            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), "00:01:30")
+            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(90, SECONDS))
         );
         assertEquals(
             Instant.parse("2023-04-28T10:15:00Z"),
-            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), "01:15:00")
+            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(75, MINUTES))
         );
 
         assertEquals(
             Instant.parse("2023-05-12T15:05:00Z"),
-            audioOperationService.adjustTimeDuration(Instant.parse("2023-05-12T14:20:00Z"), "00:45:00")
+            audioOperationService.adjustTimeDuration(Instant.parse("2023-05-12T14:20:00Z"), Duration.of(45, MINUTES))
         );
         assertEquals(
             Instant.parse("2023-05-13T01:00:00Z"),
-            audioOperationService.adjustTimeDuration(Instant.parse("2023-05-12T23:20:00Z"), "01:40:00")
+            audioOperationService.adjustTimeDuration(Instant.parse("2023-05-12T23:20:00Z"), Duration.of(100, MINUTES))
         );
         assertEquals(
             Instant.parse("2023-03-26T01:30:00Z"),
-            audioOperationService.adjustTimeDuration(Instant.parse("2023-03-25T23:30:00Z"), "02:00:00")
+            audioOperationService.adjustTimeDuration(Instant.parse("2023-03-25T23:30:00Z"), Duration.of(2, HOURS))
         );
         assertEquals(
             Instant.parse("2023-10-29T02:15:00Z"),
-            audioOperationService.adjustTimeDuration(Instant.parse("2023-10-29T00:30:00Z"), "01:45:00")
+            audioOperationService.adjustTimeDuration(Instant.parse("2023-10-29T00:30:00Z"), Duration.of(105, MINUTES))
         );
-    }
-
-    @Test
-    void shouldThrowExceptionWhenAdjustTimeDurationNotValid() {
-        assertThrows(
-            DateTimeParseException.class,
-            () -> audioOperationService.adjustTimeDuration(Instant.parse("2023-05-12T10:00:00Z"), "60")
+        assertEquals(
+            Instant.parse("2023-04-28T08:59:00Z"),
+            audioOperationService.adjustTimeDuration(audioFileInfo.getStartTime(), Duration.of(-1, MINUTES))
         );
     }
 

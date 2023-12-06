@@ -32,6 +32,7 @@ import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
+import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SENTENCING_REMARKS;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
@@ -103,7 +104,6 @@ public class TranscriptionStub {
         transcription.setCreatedBy(testUser);
         transcription.setLastModifiedBy(testUser);
         transcription.setIsManualTranscription(true);
-        transcription.setIsManualTranscription(true);
         transcription.setHideRequestFromRequestor(false);
         return transcriptionRepository.saveAndFlush(transcription);
     }
@@ -113,41 +113,30 @@ public class TranscriptionStub {
                                                                                CourtCaseEntity courtCaseEntity,
                                                                                HearingEntity hearingEntity,
                                                                                OffsetDateTime workflowTimestamp) {
-        final var awaitingAuthorisationTranscriptionStatus = getTranscriptionStatusByEnum(AWAITING_AUTHORISATION);
-
-        final var transcriptionEntity = new TranscriptionEntity();
-        transcriptionEntity.setCourtCase(courtCaseEntity);
-        transcriptionEntity.setHearing(hearingEntity);
-        transcriptionEntity.setTranscriptionType(getTranscriptionTypeByEnum(SPECIFIED_TIMES));
-        transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
-        transcriptionEntity.setTranscriptionStatus(awaitingAuthorisationTranscriptionStatus);
-        OffsetDateTime now = now(UTC);
-        OffsetDateTime yesterday = now(UTC).minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
-        transcriptionEntity.setStartTime(yesterday);
-        transcriptionEntity.setEndTime(yesterday.plusHours(now.getHour()).plusMinutes(now.getMinute())
-                                           .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
-        transcriptionEntity.setCreatedBy(userAccountEntity);
-        transcriptionEntity.setLastModifiedBy(userAccountEntity);
-        transcriptionEntity.setIsManualTranscription(true);
-        transcriptionEntity.setIsManualTranscription(true);
-        transcriptionEntity.setHideRequestFromRequestor(false);
-
-        final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
-            transcriptionEntity,
+        var transcriptionEntity = this.createTranscriptionWithStatus(
             userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
             workflowTimestamp,
-            getTranscriptionStatusByEnum(REQUESTED)
+            getTranscriptionStatusByEnum(AWAITING_AUTHORISATION)
         );
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
 
-        TranscriptionWorkflowEntity awaitingAuthorisationTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
-            transcriptionEntity,
+    @Transactional
+    public TranscriptionEntity createAndSaveCompletedTranscription(UserAccountEntity userAccountEntity,
+                                                                   CourtCaseEntity courtCaseEntity,
+                                                                   HearingEntity hearingEntity,
+                                                                   OffsetDateTime workflowTimestamp,
+                                                                   Boolean hideRequestFromRequester) {
+        var transcriptionEntity = this.createTranscriptionWithStatus(
             userAccountEntity,
+            courtCaseEntity,
+            hearingEntity,
             workflowTimestamp,
-            awaitingAuthorisationTranscriptionStatus
+            getTranscriptionStatusByEnum(COMPLETE)
         );
-
-        transcriptionEntity.getTranscriptionWorkflowEntities()
-            .addAll(List.of(requestedTranscriptionWorkflowEntity, awaitingAuthorisationTranscriptionWorkflowEntity));
+        transcriptionEntity.setHideRequestFromRequestor(hideRequestFromRequester);
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
@@ -209,5 +198,45 @@ public class TranscriptionStub {
 
     public TranscriptionUrgencyEntity getTranscriptionUrgencyByEnum(TranscriptionUrgencyEnum transcriptionUrgencyEnum) {
         return transcriptionUrgencyRepository.getReferenceById(transcriptionUrgencyEnum.getId());
+    }
+
+    private TranscriptionEntity createTranscriptionWithStatus(UserAccountEntity userAccountEntity,
+                                                              CourtCaseEntity courtCaseEntity,
+                                                              HearingEntity hearingEntity,
+                                                              OffsetDateTime workflowTimestamp,
+                                                              TranscriptionStatusEntity status) {
+        final var transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.setCourtCase(courtCaseEntity);
+        transcriptionEntity.setHearing(hearingEntity);
+        transcriptionEntity.setTranscriptionType(getTranscriptionTypeByEnum(SPECIFIED_TIMES));
+        transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
+        transcriptionEntity.setTranscriptionStatus(status);
+        OffsetDateTime now = now(UTC);
+        OffsetDateTime yesterday = now(UTC).minusDays(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        transcriptionEntity.setStartTime(yesterday);
+        transcriptionEntity.setEndTime(yesterday.plusHours(now.getHour()).plusMinutes(now.getMinute())
+                                           .plusSeconds(now.getSecond()).plusNanos(now.getNano()));
+        transcriptionEntity.setCreatedBy(userAccountEntity);
+        transcriptionEntity.setLastModifiedBy(userAccountEntity);
+        transcriptionEntity.setIsManualTranscription(true);
+        transcriptionEntity.setHideRequestFromRequestor(false);
+
+        final var requestedTranscriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+            transcriptionEntity,
+            userAccountEntity,
+            workflowTimestamp,
+            getTranscriptionStatusByEnum(REQUESTED)
+        );
+
+        TranscriptionWorkflowEntity transcriptionWorkflowEntity = createTranscriptionWorkflowEntity(
+            transcriptionEntity,
+            userAccountEntity,
+            workflowTimestamp,
+            status
+        );
+
+        transcriptionEntity.getTranscriptionWorkflowEntities()
+            .addAll(List.of(requestedTranscriptionWorkflowEntity, transcriptionWorkflowEntity));
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 }

@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_ANY_ID;
@@ -61,6 +62,11 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         ) {
             entitiesNotFound("parameters");
         }
+    }
+
+    @Override
+    public void checkAuthorisation(Supplier<Optional<String>> idToAuthorise, Set<SecurityRoleEnum> roles) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

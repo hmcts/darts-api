@@ -6,11 +6,14 @@ import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 
 import java.util.List;
 
@@ -25,8 +28,6 @@ public interface TranscriptionService {
 
     List<TranscriptionTypeResponse> getTranscriptionTypes();
 
-    List<TranscriptionUrgencyResponse> getTranscriptionUrgencies();
-
     List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState();
 
     GetTranscriptionByIdResponse getTranscription(Integer transcriptionId);
@@ -35,6 +36,12 @@ public interface TranscriptionService {
 
     DownloadTranscriptResponse downloadTranscript(Integer transcriptionId);
 
-    GetYourTranscriptsResponse getYourTranscripts(Integer userId);
+    GetYourTranscriptsResponse getYourTranscripts(Integer userId, Boolean includeHiddenFromRequester);
+
+    List<TranscriberViewSummary> getTranscriberTranscripts(Integer userId, Boolean assigned);
+
+    TranscriptionTranscriberCountsResponse getTranscriptionTranscriberCounts(Integer userId);
+
+    List<UpdateTranscriptionsItem> updateTranscriptions(List<UpdateTranscriptionsItem> request);
 
 }

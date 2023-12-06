@@ -24,4 +24,5 @@ public class TranscriptionConfigurationProperties {
     @NotNull
     private Duration maxCreatedByDuration;
 
+    private Integer maxFileSize;
 }

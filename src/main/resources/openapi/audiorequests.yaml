@@ -300,6 +300,11 @@ paths:
           required: true
           schema:
             type: integer
+        - in: header
+          name: range
+          schema:
+            type: string
+          description: "Range header"
       responses:
         '200':
           description: OK
@@ -307,7 +312,7 @@ paths:
             audio/mpeg:
               schema:
                 type: string
-                format: binary
+                format: byte
         '400':
           description: Bad Request Error
           content:

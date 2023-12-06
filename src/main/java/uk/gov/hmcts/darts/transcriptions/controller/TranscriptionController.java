@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.authorisation.util.AuthorisationUnitOfWork;
 import uk.gov.hmcts.darts.cases.service.CaseService;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
@@ -27,14 +29,18 @@ import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetTranscriptionByIdResponse;
 import uk.gov.hmcts.darts.transcriptions.model.GetYourTranscriptsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriberViewSummary;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
+import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTranscriberCountsResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Objects.isNull;
@@ -63,7 +69,7 @@ public class TranscriptionController implements TranscriptionApi {
     private final TranscriptionService transcriptionService;
     private final CaseService caseService;
     private final HearingsService hearingsService;
-
+    private final AuthorisationUnitOfWork authorisation;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -146,7 +152,13 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<GetYourTranscriptsResponse> getYourTranscripts(Integer userId) {
-        return ResponseEntity.ok(transcriptionService.getYourTranscripts(userId));
+        return ResponseEntity.ok(transcriptionService.getYourTranscripts(userId, false));
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<TranscriberViewSummary>> getTranscriberTranscripts(Integer userId, Boolean assigned) {
+        return ResponseEntity.ok(transcriptionService.getTranscriberTranscripts(userId, assigned));
     }
 
     private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
@@ -155,8 +167,10 @@ public class TranscriptionController implements TranscriptionApi {
         } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
             HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
             if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
-                log.error("Transcription could not be requested. No audio found for hearing id {}",
-                          transcriptionRequestDetails.getHearingId());
+                log.error(
+                    "Transcription could not be requested. No audio found for hearing id {}",
+                    transcriptionRequestDetails.getHearingId()
+                );
                 throw new DartsApiException(AUDIO_NOT_FOUND);
             } else {
                 //check times
@@ -181,7 +195,7 @@ public class TranscriptionController implements TranscriptionApi {
 
         Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
         TranscriptionTypeEnum.fromId(transcriptionTypeId);
-        TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getUrgencyId());
+        TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getTranscriptionUrgencyId());
 
         if (transcriptionTypesThatRequireDates(transcriptionTypeId)
             && !transcriptionDatesAreSet(
@@ -220,6 +234,33 @@ public class TranscriptionController implements TranscriptionApi {
             transcriptionService.getTranscription(transcriptionId),
             HttpStatus.OK
         );
+    }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<UpdateTranscriptionsItem>> updateTranscriptions(List<UpdateTranscriptionsItem> request) {
+        List<UpdateTranscriptionsItem> responseList = new ArrayList<>();
+
+        Runnable executeOnAuth = () -> {
+            responseList.addAll(transcriptionService.updateTranscriptions(request));
+        };
+
+        // we authorise the transcription ids
+        authorisation.authoriseWithIdsForTranscription(request,
+                                                       e -> e.getTranscriptionId().toString(),
+                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+                                                       executeOnAuth
+        );
+
+        return new ResponseEntity<>(
+            responseList,
+            HttpStatus.OK
+        );
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<TranscriptionTranscriberCountsResponse> getTranscriptionTranscriberCounts(Integer userId) {
+        return ResponseEntity.ok(transcriptionService.getTranscriptionTranscriberCounts(userId));
     }
 }
