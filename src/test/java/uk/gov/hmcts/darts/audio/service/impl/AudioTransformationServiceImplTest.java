@@ -123,6 +123,7 @@ class AudioTransformationServiceImplTest {
 
         BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
         blobClientBuilder.blobName("blobname");
+        blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
         BlobClient blobClient = blobClientBuilder.buildClient();
 
         when(mockDataManagementApi.saveBlobDataToContainer(any(), any(), any()))

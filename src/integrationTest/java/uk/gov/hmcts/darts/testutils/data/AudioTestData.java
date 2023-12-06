@@ -9,8 +9,6 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
 
-import static java.time.ZoneOffset.UTC;
-
 @UtilityClass
 public class AudioTestData {
 
@@ -35,7 +33,6 @@ public class AudioTestData {
                                                         OffsetDateTime startTime, OffsetDateTime endTime,
                                                         AudioRequestType audioRequestType) {
 
-        OffsetDateTime now = OffsetDateTime.now(UTC);
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(requestor);

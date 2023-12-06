@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
@@ -89,6 +90,9 @@ class MediaRequestServiceImplTest {
 
     @Mock
     private UserAccountEntity mockUserAccountEntity;
+
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
 
     @BeforeEach
     void beforeEach() {
@@ -177,7 +181,13 @@ class MediaRequestServiceImplTest {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobId);
 
-        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+
+        when(transformedMediaRepository.findByMediaRequestId(mediaRequestId))
+            .thenReturn(List.of(transformedMediaEntity));
+
+        when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
@@ -193,8 +203,15 @@ class MediaRequestServiceImplTest {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(null);
 
-        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+
+        when(transformedMediaRepository.findByMediaRequestId(mediaRequestId))
+            .thenReturn(List.of(transformedMediaEntity));
+
+        when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
+
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -206,7 +223,13 @@ class MediaRequestServiceImplTest {
     @Test
     void whenNoAudioIsPresentOnlyDeleteAudioRequest() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+
+        when(transformedMediaRepository.findByMediaRequestId(mediaRequestId))
+            .thenReturn(List.of(transformedMediaEntity));
+
+        when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
             .thenReturn(Optional.empty());
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
