@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.events;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import uk.gov.hmcts.darts.FunctionalTest;
@@ -28,6 +29,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Order(1)
 
     void postSuccess() {
 
@@ -62,6 +64,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Order(2)
 
     void postFail() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
@@ -87,6 +90,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Order(3)
 
     void getSuccess() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
@@ -116,6 +120,7 @@ class CourtlogsFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Order(4)
 
     void getFail() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
