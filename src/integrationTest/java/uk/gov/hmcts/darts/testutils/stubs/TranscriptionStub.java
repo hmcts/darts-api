@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionStatusEntity;
@@ -158,7 +158,7 @@ public class TranscriptionStub {
                                                                String fileType,
                                                                int fileSize,
                                                                UserAccountEntity testUser,
-                                                               ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                UUID externalLocation,
                                                                String checksum) {
@@ -172,7 +172,7 @@ public class TranscriptionStub {
         transcriptionDocumentEntity.setChecksum(checksum);
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
-        externalObjectDirectoryEntity.setStatus(objectDirectoryStatusEntity);
+        externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeEntity);
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);

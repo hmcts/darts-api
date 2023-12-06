@@ -80,5 +80,14 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "media_type")
     private Character mediaType;
 
+    @Column(name = "content_object_id")
+    private String contentObjectId;
+
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden;
+
+    @Column(name = "media_status")//leaving nullable for now
+    private String mediaStatus;
+
 
 }

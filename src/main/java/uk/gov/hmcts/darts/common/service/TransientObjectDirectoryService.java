@@ -1,12 +1,11 @@
 package uk.gov.hmcts.darts.common.service;
 
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import com.azure.storage.blob.BlobClient;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-
-import java.util.UUID;
 
 public interface TransientObjectDirectoryService {
 
-    TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest, UUID externalLocation);
-
+    TransientObjectDirectoryEntity saveTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
+                                                                      BlobClient blobClient);
 }

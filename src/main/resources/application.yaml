@@ -105,6 +105,7 @@ spring:
 
 darts:
   audio:
+    audio_gap_seconds: 1
     ffmpeg-executable: ffmpeg
     concat-workspace: ${user.home}/audiotransform/concatenate
     merge-workspace: ${user.home}/audiotransform/merge

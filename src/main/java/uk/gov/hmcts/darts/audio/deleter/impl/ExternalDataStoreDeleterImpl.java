@@ -8,7 +8,7 @@ import uk.gov.hmcts.darts.audio.deleter.ExternalDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.ObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectory;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -38,7 +38,7 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
 
 
         UserAccountEntity systemUser = getSystemUser();
-        ObjectDirectoryStatusEntity deletedStatus = getDeletedStatus();
+        ObjectRecordStatusEntity deletedStatus = getDeletedStatus();
 
         for (T entityToBeDeleted : toBeDeleted) {
             UUID externalLocation = entityToBeDeleted.getLocation();
@@ -70,7 +70,7 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
     }
 
 
-    private ObjectDirectoryStatusEntity getDeletedStatus() {
+    private ObjectRecordStatusEntity getDeletedStatus() {
         return objectDirectoryStatusRepository.getReferenceById(ObjectDirectoryStatusEnum.DELETED.getId());
     }
 }

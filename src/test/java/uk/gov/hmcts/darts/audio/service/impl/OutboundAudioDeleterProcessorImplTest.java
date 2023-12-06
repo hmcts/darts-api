@@ -62,7 +62,7 @@ class OutboundAudioDeleterProcessorImplTest {
             any(),
             any()
         )).thenReturn(value);
-        when(transientObjectDirectoryRepository.findByMediaRequest_idIn(any())).thenReturn(List.of(new TransientObjectDirectoryEntity()));
+        when(transientObjectDirectoryRepository.findByMediaRequestIds(any())).thenReturn(List.of(new TransientObjectDirectoryEntity()));
 
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn(null);
         assertThrows(DartsApiException.class, () ->

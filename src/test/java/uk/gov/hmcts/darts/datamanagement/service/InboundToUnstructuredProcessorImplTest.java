@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -89,21 +89,21 @@ class InboundToUnstructuredProcessorImplTest {
     @Mock
     ExternalLocationTypeEntity externalLocationTypeUnstructured;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityAwaiting;
+    ObjectRecordStatusEntity objectRecordStatusEntityAwaiting;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityStored;
+    ObjectRecordStatusEntity objectRecordStatusEntityStored;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailure;
+    ObjectRecordStatusEntity objectRecordStatusEntityFailure;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureFileSize;
+    ObjectRecordStatusEntity objectRecordStatusEntityFailureFileSize;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureFileType;
+    ObjectRecordStatusEntity objectRecordStatusEntityFailureFileType;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureChecksum;
+    ObjectRecordStatusEntity objectRecordStatusEntityFailureChecksum;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureFileNotFound;
+    ObjectRecordStatusEntity objectRecordStatusEntityFailureFileNotFound;
     @Mock
-    ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailureArm;
+    ObjectRecordStatusEntity objectRecordStatusEntityFailureArm;
 
     @BeforeEach
     void setUp() {
@@ -113,7 +113,8 @@ class InboundToUnstructuredProcessorImplTest {
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorImpl(externalObjectDirectoryRepository,
                                                                                 objectDirectoryStatusRepository, externalLocationTypeRepository,
                                                                                 dataManagementService, dataManagementConfiguration, userAccountRepository,
-                               transcriptionConfigurationProperties, audioConfigurationProperties);
+                                                                                transcriptionConfigurationProperties, audioConfigurationProperties
+        );
 
     }
 
@@ -129,62 +130,61 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
         setExpectationsForFailedStates();
-
 
 
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(List.of(MP_2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
 
         assertEquals(STORED.getId(), savedStatus.getId());
     }
 
     private void setExpectationsForFailedStates() {
-        when(objectDirectoryStatusRepository.getReferenceById(3)).thenReturn(objectDirectoryStatusEntityFailure);
-        when(objectDirectoryStatusRepository.getReferenceById(4)).thenReturn(objectDirectoryStatusEntityFailureFileNotFound);
-        when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectDirectoryStatusEntityFailureFileSize);
-        when(objectDirectoryStatusRepository.getReferenceById(6)).thenReturn(objectDirectoryStatusEntityFailureFileType);
-        when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectDirectoryStatusEntityFailureChecksum);
-        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailureArm);
+        when(objectDirectoryStatusRepository.getReferenceById(3)).thenReturn(objectRecordStatusEntityFailure);
+        when(objectDirectoryStatusRepository.getReferenceById(4)).thenReturn(objectRecordStatusEntityFailureFileNotFound);
+        when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectRecordStatusEntityFailureFileSize);
+        when(objectDirectoryStatusRepository.getReferenceById(6)).thenReturn(objectRecordStatusEntityFailureFileType);
+        when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
+        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailureArm);
     }
 
     @Test
     void processInboundToUnstructuredMediaBlobException() {
         when(externalLocationTypeRepository.getReferenceById(1)).thenReturn(externalLocationTypeInbound);
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
-        when(objectDirectoryStatusEntityFailureFileNotFound.getId()).thenReturn(4);
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
-        when(objectDirectoryStatusRepository.getReferenceById(4)).thenReturn(objectDirectoryStatusEntityFailureFileNotFound);
+        when(objectRecordStatusEntityFailureFileNotFound.getId()).thenReturn(4);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectDirectoryStatusRepository.getReferenceById(4)).thenReturn(objectRecordStatusEntityFailureFileNotFound);
         when(dataManagementService.getBlobData(any(), any())).thenThrow(new BlobStorageException("Blobbed it", null, null));
         setExpectationsForFailedStates();
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
 
         assertEquals(FAILURE_FILE_NOT_FOUND.getId(), savedStatus.getId());
     }
@@ -201,28 +201,28 @@ class InboundToUnstructuredProcessorImplTest {
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityFailed.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityFailed.getStatus())
-            .thenReturn(objectDirectoryStatusEntityFailureChecksum)
-            .thenReturn(objectDirectoryStatusEntityFailureChecksum)
-            .thenReturn(objectDirectoryStatusEntityAwaiting)
-            .thenReturn(objectDirectoryStatusEntityAwaiting)
-            .thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusEntityFailureChecksum.getId()).thenReturn(7);
+            .thenReturn(objectRecordStatusEntityFailureChecksum)
+            .thenReturn(objectRecordStatusEntityFailureChecksum)
+            .thenReturn(objectRecordStatusEntityAwaiting)
+            .thenReturn(objectRecordStatusEntityAwaiting)
+            .thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusEntityFailureChecksum.getId()).thenReturn(7);
 
         when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         //when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(List.of(MP_2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
 
 
         List<ExternalObjectDirectoryEntity> failedList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityFailed));
-        when(externalObjectDirectoryRepository.findByFailedAndType(any(), any(),any(),any(),any(),any(),any())).thenReturn(failedList);
+        when(externalObjectDirectoryRepository.findByFailedAndType(any(), any(), any(), any(), any(), any(), any())).thenReturn(failedList);
 
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -230,7 +230,7 @@ class InboundToUnstructuredProcessorImplTest {
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityActualList = externalObjectDirectoryEntityCaptor.getAllValues();
-        ObjectDirectoryStatusEntity savedStatusUnstructured = externalObjectDirectoryEntityActualList.get(1).getStatus();
+        ObjectRecordStatusEntity savedStatusUnstructured = externalObjectDirectoryEntityActualList.get(1).getStatus();
 
         assertEquals(STORED.getId(), savedStatusUnstructured.getId());
     }
@@ -246,16 +246,16 @@ class InboundToUnstructuredProcessorImplTest {
         when(transcriptionDocumentEntity.getFileName()).thenReturn(TEST_DOC);
         when(transcriptionDocumentEntity.getFileSize()).thenReturn(binaryData.toString().length());
         when(transcriptionDocumentEntity.getChecksum()).thenReturn(calculatedChecksum);
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(transcriptionConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList(DOC, DOCX));
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
         setExpectationsForFailedStates();
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -263,7 +263,7 @@ class InboundToUnstructuredProcessorImplTest {
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
 
         assertEquals(STORED.getId(), savedStatus.getId());
     }
@@ -279,15 +279,15 @@ class InboundToUnstructuredProcessorImplTest {
         when(annotationDocumentEntity.getFileName()).thenReturn(TEST_DOC);
         when(annotationDocumentEntity.getFileSize()).thenReturn(binaryData.toString().length());
         when(annotationDocumentEntity.getChecksum()).thenReturn(calculatedChecksum);
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(transcriptionConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList(DOC, DOCX));
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
         setExpectationsForFailedStates();
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -295,7 +295,7 @@ class InboundToUnstructuredProcessorImplTest {
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
 
         assertEquals(STORED.getId(), savedStatus.getId());
     }
@@ -312,18 +312,18 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
 
-        when(objectDirectoryStatusEntityFailureFileType.getId()).thenReturn(6);
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(6)).thenReturn(objectDirectoryStatusEntityFailureFileType);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
+        when(objectRecordStatusEntityFailureFileType.getId()).thenReturn(6);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(6)).thenReturn(objectRecordStatusEntityFailureFileType);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
 
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(100);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
         setExpectationsForFailedStates();
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -331,7 +331,7 @@ class InboundToUnstructuredProcessorImplTest {
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
 
         assertEquals(FAILURE_FILE_TYPE_CHECK_FAILED.getId(), savedStatus.getId());
         assertEquals(1, externalObjectDirectoryEntityActual.getTransferAttempts());
@@ -347,16 +347,16 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn("invalid-checksum");
-        when(objectDirectoryStatusEntityFailureChecksum.getId()).thenReturn(7);
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectDirectoryStatusEntityFailureChecksum);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
-        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(List.of("mp2"));
+        when(objectRecordStatusEntityFailureChecksum.getId()).thenReturn(7);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
         setExpectationsForFailedStates();
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -364,7 +364,7 @@ class InboundToUnstructuredProcessorImplTest {
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
 
         assertEquals(FAILURE_CHECKSUM_FAILED.getId(), savedStatus.getId());
         assertEquals(1, externalObjectDirectoryEntityActual.getTransferAttempts());
@@ -381,16 +381,16 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
-        when(objectDirectoryStatusEntityFailureFileSize.getId()).thenReturn(5);
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectDirectoryStatusEntityFailureFileSize);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
-        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(List.of("mp2"));
+        when(objectRecordStatusEntityFailureFileSize.getId()).thenReturn(5);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectRecordStatusEntityFailureFileSize);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(1);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
         setExpectationsForFailedStates();
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
@@ -398,7 +398,7 @@ class InboundToUnstructuredProcessorImplTest {
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
+        ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
 
         assertEquals(FAILURE_FILE_SIZE_CHECK_FAILED.getId(), savedStatus.getId());
         assertEquals(1, externalObjectDirectoryEntityActual.getTransferAttempts());
@@ -417,14 +417,14 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
 
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
 
 
-        when(objectDirectoryStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
+        when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
+        when(objectRecordStatusEntityStored.getId()).thenReturn(2);
 
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(List.of("mp2"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(100);
@@ -433,7 +433,7 @@ class InboundToUnstructuredProcessorImplTest {
         setExpectationsForFailedStates();
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
-        when(externalObjectDirectoryRepository.findByStatusAndType(objectDirectoryStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
+        when(externalObjectDirectoryRepository.findByStatusAndType(objectRecordStatusEntityStored, externalLocationTypeInbound)).thenReturn(inboundList);
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
@@ -441,7 +441,7 @@ class InboundToUnstructuredProcessorImplTest {
 
         ExternalObjectDirectoryEntity saved = externalObjectDirectoryEntityCaptor.getValue();
 
-        ObjectDirectoryStatusEntity savedStatus = saved.getStatus();
+        ObjectRecordStatusEntity savedStatus = saved.getStatus();
 
         assertEquals(STORED.getId(), savedStatus.getId());
 

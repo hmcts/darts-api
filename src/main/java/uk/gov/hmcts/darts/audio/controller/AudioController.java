@@ -6,6 +6,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
@@ -67,6 +69,17 @@ public class AudioController implements AudioApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<Void> addAudio(MultipartFile file, AddAudioMetadataRequest metadata) {
         audioService.addAudio(file, metadata);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/audio/keda"
+    )
+
+    public ResponseEntity preview2() {
+        audioTransformationService.handleKedaInvocationForMediaRequests();
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

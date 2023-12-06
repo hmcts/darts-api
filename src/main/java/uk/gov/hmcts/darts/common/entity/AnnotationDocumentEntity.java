@@ -28,7 +28,6 @@ public class AnnotationDocumentEntity {
     @SequenceGenerator(name = "ado_gen", sequenceName = "ado_seq", allocationSize = 1)
     private Integer id;
 
-
     @Column(name = "ann_id", nullable = false)
     private Integer annotationId;
 
@@ -51,4 +50,11 @@ public class AnnotationDocumentEntity {
 
     @Column(name = "checksum", nullable = false)
     private String checksum;
+
+    @Column(name = "content_object_id")
+    private String contentObjectId;
+
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden;
+
 }

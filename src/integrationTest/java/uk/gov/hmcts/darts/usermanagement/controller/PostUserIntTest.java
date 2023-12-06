@@ -24,6 +24,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -93,7 +94,7 @@ class PostUserIntTest extends IntegrationBase {
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
-            assertEquals(true, createdUserAccountEntity.isActive());
+            assertTrue(createdUserAccountEntity.isActive());
             assertTrue(createdUserAccountEntity.getSecurityGroupEntities().isEmpty());
             assertEquals(SYSTEM_USER_FLAG, createdUserAccountEntity.getIsSystemUser());
 

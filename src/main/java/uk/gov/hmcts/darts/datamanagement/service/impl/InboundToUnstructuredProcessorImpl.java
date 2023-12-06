@@ -12,7 +12,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -60,12 +60,14 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final List<Integer> failureStatesList =
-        new ArrayList<>(Arrays.asList(FAILURE.getId(),
-                                     FAILURE_FILE_NOT_FOUND.getId(),
-                                     FAILURE_FILE_SIZE_CHECK_FAILED.getId(),
-                                     FAILURE_FILE_TYPE_CHECK_FAILED.getId(),
-                                     FAILURE_CHECKSUM_FAILED.getId(),
-                                     FAILURE_ARM_INGESTION_FAILED.getId()));
+        new ArrayList<>(Arrays.asList(
+            FAILURE.getId(),
+            FAILURE_FILE_NOT_FOUND.getId(),
+            FAILURE_FILE_SIZE_CHECK_FAILED.getId(),
+            FAILURE_FILE_TYPE_CHECK_FAILED.getId(),
+            FAILURE_CHECKSUM_FAILED.getId(),
+            FAILURE_ARM_INGESTION_FAILED.getId()
+        ));
     private List<ExternalObjectDirectoryEntity> unstructuredStoredList;
     private List<ExternalObjectDirectoryEntity> unstructuredFailedList;
 
@@ -88,12 +90,13 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             getStatus(FAILURE_FILE_TYPE_CHECK_FAILED),
             getStatus(FAILURE_FILE_SIZE_CHECK_FAILED),
             getStatus(FAILURE_CHECKSUM_FAILED),
-            getType(UNSTRUCTURED));
+            getType(UNSTRUCTURED)
+        );
 
         for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
 
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
-            ObjectDirectoryStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
+            ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
             if (unstructuredStatus == null
                 || unstructuredStatus.getId().equals(STORED.getId())
                 || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
@@ -126,7 +129,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         }
     }
 
-    private boolean attemptsExceeded(ObjectDirectoryStatusEntity unstructuredStatus, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
+    private boolean attemptsExceeded(ObjectRecordStatusEntity unstructuredStatus, ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity) {
         if (failureStatesList.contains(unstructuredStatus.getId()) && (unstructuredExternalObjectDirectoryEntity.getTransferAttempts() != null)) {
             int numAttempts = unstructuredExternalObjectDirectoryEntity.getTransferAttempts();
             return numAttempts >= 3;
@@ -151,7 +154,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = null;
         for (ExternalObjectDirectoryEntity eod : unstructuredFailedList) {
             if (failureStatesList.contains(eod.getStatus().getId())) {
-                externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(inboundExternalObjectDirectory,eod);
+                externalObjectDirectoryEntity = getMatchingExternalObjectDirectoryEntity(inboundExternalObjectDirectory, eod);
                 if (externalObjectDirectoryEntity != null) {
                     break;
                 }
@@ -213,7 +216,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 audioConfigurationProperties.getAllowedExtensions(),
                 mediaEntity.getMediaFormat().toLowerCase(),
                 audioConfigurationProperties.getMaxFileSize(),
-                mediaEntity.getFileSize());
+                mediaEntity.getFileSize()
+            );
         }
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = inbound.getTranscriptionDocumentEntity();
@@ -274,7 +278,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
 
     private ExternalObjectDirectoryEntity createUnstructuredExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
 
-        ExternalObjectDirectoryEntity  unstructuredExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         unstructuredExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId()));
         unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
         unstructuredExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
@@ -308,7 +312,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
-    private ObjectDirectoryStatusEntity getStatus(ObjectDirectoryStatusEnum status) {
+    private ObjectRecordStatusEntity getStatus(ObjectDirectoryStatusEnum status) {
         if (objectDirectoryStatusRepository != null) {
             return objectDirectoryStatusRepository.getReferenceById(status.getId());
         }
