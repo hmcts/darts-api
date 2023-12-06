@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CourtlogsFunctionalTest extends FunctionalTest {
 
-
     public static final String ENDPOINT_URL = "/courtlogs";
     public final String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
 
@@ -28,7 +27,6 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             .redirects().follow(false)
             .delete();
     }
-
 
     @Test
     @Order(1)
