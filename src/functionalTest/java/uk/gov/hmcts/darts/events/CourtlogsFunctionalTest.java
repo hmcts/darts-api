@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CourtlogsFunctionalTest extends FunctionalTest {
 
+
     public static final String ENDPOINT_URL = "/courtlogs";
     public final String courthouseName = "func-swansea-house-" + randomAlphanumeric(7);
 
@@ -28,9 +29,9 @@ class CourtlogsFunctionalTest extends FunctionalTest {
             .delete();
     }
 
+
     @Test
     @Order(1)
-
     void postSuccess() {
 
         String courtroomName = "func-swansea-room-" + randomAlphanumeric(7);
@@ -65,7 +66,6 @@ class CourtlogsFunctionalTest extends FunctionalTest {
 
     @Test
     @Order(2)
-
     void postFail() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
@@ -91,7 +91,6 @@ class CourtlogsFunctionalTest extends FunctionalTest {
 
     @Test
     @Order(3)
-
     void getSuccess() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
@@ -121,7 +120,6 @@ class CourtlogsFunctionalTest extends FunctionalTest {
 
     @Test
     @Order(4)
-
     void getFail() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
