@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.audit.controller;
 
 import jakarta.validation.ValidationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.DataBinder;
@@ -20,15 +20,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@RequiredArgsConstructor
 public class AuditController implements AuditApi {
-    @Autowired
-    AuditService auditService;
 
-    @Autowired
-    AuditDtoMapper auditDtoMapper;
-
-    @Autowired
-    AuditSearchQueryValidator validator;
+    private final AuditService auditService;
+    private final AuditDtoMapper auditDtoMapper;
+    private final AuditSearchQueryValidator validator;
 
     @Override
     public ResponseEntity<List<SearchResult>> search(OffsetDateTime fromDate, OffsetDateTime toDate, Integer caseId, Integer auditActivityId) {

@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.courthouse.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
@@ -21,14 +21,13 @@ import java.util.List;
 import javax.validation.Valid;
 
 @RestController
+@RequiredArgsConstructor
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class CourthousesController implements CourthousesApi {
 
-    @Autowired
-    CourthouseService courthouseService;
+    private final CourthouseService courthouseService;
 
-    @Autowired
-    CourthouseToCourthouseEntityMapper mapper;
+    private final CourthouseToCourthouseEntityMapper mapper;
 
     @Override
     public ResponseEntity<Void> courthousesCourthouseIdDelete(

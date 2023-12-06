@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.event.service.handler;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
@@ -14,11 +17,19 @@ import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.STOP_RECORDING;
 
 @Service
-@RequiredArgsConstructor
 public class StopAndCloseHandler extends EventHandlerBase {
 
-    private final ApplicationEventPublisher eventPublisher;
     private final DarNotifyServiceImpl darNotifyService;
+
+    public StopAndCloseHandler(RetrieveCoreObjectService retrieveCoreObjectService,
+                               EventRepository eventRepository,
+                               HearingRepository hearingRepository,
+                               CaseRepository caseRepository,
+                               ApplicationEventPublisher eventPublisher,
+                               DarNotifyServiceImpl darNotifyService) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+        this.darNotifyService = darNotifyService;
+    }
 
     @Override
     @Transactional
