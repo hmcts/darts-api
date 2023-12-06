@@ -10,6 +10,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class DartsGatewayStub {
@@ -28,10 +29,11 @@ public class DartsGatewayStub {
 
     public void verifyReceivedNotificationType(int type) {
         var notificationType = "\"notification_type\":\"" + type + "\"";
-        wait(1000);
-        verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
-            .withRequestBody(containing(notificationType)));
-
+        waitForMax10SecondsWithOneSecondPoll(() -> {
+            verify(exactly(1), postRequestedFor(urlEqualTo(DAR_NOTIFY_PATH))
+                .withRequestBody(containing(notificationType)));
+            return true;
+        });
     }
 
     public void clearStubs() {

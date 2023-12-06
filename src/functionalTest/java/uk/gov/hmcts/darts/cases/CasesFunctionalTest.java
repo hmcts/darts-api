@@ -5,7 +5,6 @@ import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -36,7 +35,6 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(1)
     void createCaseAndEvent() {
         String caseBody = """
         {
@@ -94,7 +92,6 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(2)
     void getCases() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
@@ -115,7 +112,6 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(3)
     void searchCase() {
         // search for case using case number
         Response response = buildRequestWithExternalAuth()
@@ -135,7 +131,6 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(4)
     void getCaseById() {
         Response getCaseresponse = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -150,7 +145,6 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(5)
     void getCaseByIdNotFound() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -164,7 +158,6 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(6)
     void patchCase() {
         String patchCaseBody = """
             {
