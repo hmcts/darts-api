@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.usermanagement;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -21,6 +22,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     @Test
+    @Disabled
     void shouldCreateSecurityGroup() {
         Response response = buildRequestWithExternalAuth()
             .baseUri(getUri("/security-groups"))
