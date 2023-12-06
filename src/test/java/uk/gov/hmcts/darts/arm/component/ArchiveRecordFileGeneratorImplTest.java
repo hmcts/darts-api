@@ -58,10 +58,9 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
     @Test
-    void generateArchiveRecordWithNullArchiveRecord() throws IOException {
+    void generateArchiveRecordWithNullArchiveRecord() {
         String fileLocation = tempDirectory.getAbsolutePath();
-        String relationId = "<EODID>";
-        File archiveFile = null;
+        File archiveFile = new File(fileLocation, "test-media-arm.a360");
         boolean result = archiveRecordFileGenerator.generateArchiveRecord(null, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
         assertFalse(result);
     }
