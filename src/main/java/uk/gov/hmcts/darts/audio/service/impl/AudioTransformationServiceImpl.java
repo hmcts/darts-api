@@ -355,17 +355,17 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() != null ?
-                    mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() : NOT_AVAILABLE;
+                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() != null
+                    ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() : NOT_AVAILABLE;
 
-                String hearingDate = mediaRequestEntity.getHearing().getHearingDate() != null ?
-                    String.valueOf(mediaRequestEntity.getHearing().getHearingDate()) : NOT_AVAILABLE;
+                String hearingDate = mediaRequestEntity.getHearing().getHearingDate() != null
+                    ? String.valueOf(mediaRequestEntity.getHearing().getHearingDate()) : NOT_AVAILABLE;
 
-                String audioStartTime = mediaRequestEntity.getStartTime() != null ?
-                    mediaRequestEntity.getStartTime().format(formatter) : NOT_AVAILABLE;
+                String audioStartTime = mediaRequestEntity.getStartTime() != null
+                    ? mediaRequestEntity.getStartTime().format(formatter) : NOT_AVAILABLE;
 
-                String audioEndTime = mediaRequestEntity.getEndTime() != null ?
-                    mediaRequestEntity.getEndTime().format(formatter) : NOT_AVAILABLE;
+                String audioEndTime = mediaRequestEntity.getEndTime() != null
+                    ? mediaRequestEntity.getEndTime().format(formatter) : NOT_AVAILABLE;
 
                 templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
                 templateParams.put(COURTHOUSE, courthouseName);
