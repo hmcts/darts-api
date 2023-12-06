@@ -20,6 +20,8 @@ public interface DataManagementApi {
 
     void addMetadata(BlobClient client, Map<String, String> metadata);
 
+    void addMetadata(BlobClient client, String key, String value);
+
     void deleteBlobDataFromOutboundContainer(UUID blobId) throws AzureDeleteBlobException;
 
     void deleteBlobDataFromInboundContainer(UUID blobId) throws AzureDeleteBlobException;

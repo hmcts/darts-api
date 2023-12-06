@@ -43,10 +43,7 @@ public class TransformedMediaHelper {
             blobClient
         );
 
-
-        Map<String, String> newMetadata = new HashMap<>();
-        metadata.put(TRANSFORMED_MEDIA_ID, String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
-        dataManagementApi.addMetadata(blobClient, newMetadata);
+        dataManagementApi.addMetadata(blobClient, TRANSFORMED_MEDIA_ID, String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
         return UUID.fromString(blobClient.getBlobName());
     }
 

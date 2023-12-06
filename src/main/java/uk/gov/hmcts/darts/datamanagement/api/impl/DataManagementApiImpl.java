@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,6 +45,13 @@ public class DataManagementApiImpl implements DataManagementApi {
     @Override
     public void addMetadata(BlobClient client, Map<String, String> metadata) {
         dataManagementService.addMetaData(client, metadata);
+    }
+
+    @Override
+    public void addMetadata(BlobClient client, String key, String value) {
+        Map<String, String> newMetadata = new HashMap<>();
+        newMetadata.put(key, value);
+        addMetadata(client, newMetadata);
     }
 
     @Override

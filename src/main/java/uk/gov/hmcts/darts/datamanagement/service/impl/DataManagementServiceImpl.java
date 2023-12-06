@@ -53,7 +53,6 @@ public class DataManagementServiceImpl implements DataManagementService {
 
     @Override
     public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
-
         UUID uniqueBlobId = UUID.randomUUID();
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
         BlobClient client = dataManagementDao.getBlobClient(containerClient, uniqueBlobId);
