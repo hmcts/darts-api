@@ -1,6 +1,6 @@
 {
   "operation": "create_record",
-  "relation_id": "<EODID>",
+  "relation_id": "1234",
   "record_metadata": {
     "publisher": "DARTS",
     "record_class": "DARTSMedia",
@@ -12,8 +12,8 @@
     "MaxChannels": "4",
     "Courthouse": "Swansea",
     "Courtroom": "1234",
-    "MediaFile": "media_filename",
-    "MediaFormat": "mp2",
+    "FileName": "media_filename",
+    "FileFormat": "mp2",
     "StartDateTime": "2023-07-18T11:39:30Z",
     "EndDateTime": "2023-07-18T12:39:30Z",
     "CreatedDateTime": "2023-07-14T12:39:30Z",

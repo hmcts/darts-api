@@ -33,10 +33,12 @@ public class MediaCreateArchiveRecordMetadata implements ArchiveMetadata {
     private String courthouse;
     @JsonProperty("Courtroom")
     private String courtroom;
-    @JsonProperty("MediaFile")
-    private String mediaFile;
-    @JsonProperty("MediaFormat")
-    private String mediaFormat;
+    @JsonProperty("FileName")
+    private String fileName;
+    @JsonProperty("FileFormat")
+    private String fileFormat;
+    @JsonProperty("FileType")
+    private String fileType;
     @JsonProperty("StartDateTime")
     private String startDateTime;
     @JsonProperty("EndDateTime")
