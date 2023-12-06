@@ -55,7 +55,6 @@ public abstract class AbstractLockableAutomatedTask implements AutomatedTask {
             .claim("emails", List.of(automatedTaskConfigurationProperties.getSystemUserEmail()))
             .build();
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-
     }
 
     @Override
