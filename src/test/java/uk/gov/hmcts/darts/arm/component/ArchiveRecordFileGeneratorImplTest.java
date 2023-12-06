@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
@@ -54,6 +55,15 @@ class ArchiveRecordFileGeneratorImplTest {
         String actualResponse = getFileContents(archiveFile);
         String expectedResponse = getContentsFromFile("Tests/arm/component/ArchiveMediaMetadata/expectedResponse.a360");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void generateArchiveRecordWithNullArchiveRecord() throws IOException {
+        String fileLocation = tempDirectory.getAbsolutePath();
+        String relationId = "<EODID>";
+        File archiveFile = null;
+        boolean result = archiveRecordFileGenerator.generateArchiveRecord(null, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
+        assertFalse(result);
     }
 
     private static String getFileContents(File archiveFile) throws IOException {
