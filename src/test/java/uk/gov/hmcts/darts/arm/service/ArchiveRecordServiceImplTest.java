@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -34,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -41,13 +44,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 
 @SuppressWarnings("PMD.AssignmentInOperand")
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordServiceImplTest {
-
     public static final String TEST_MEDIA_ARCHIVE_A_360 = "test-media-arm.a360";
     public static final String TEST_TRANSCRIPTION_ARCHIVE_A_360 = "test-transcription-arm.a360";
     public static final String TEST_ANNOTATION_ARCHIVE_A_360 = "test-annotation-arm.a360";
@@ -56,6 +60,9 @@ class ArchiveRecordServiceImplTest {
     public static final String DARTS = "DARTS";
     public static final String REGION = "GBR";
     public static final int EODID = 1234;
+
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
+
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -137,11 +144,16 @@ class ArchiveRecordServiceImplTest {
         Map<String, ArchiveRecordFileInfo> archiveRecordFiles = archiveRecordService.generateArchiveRecord(1234, 1);
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordFiles.get(ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription());
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_0_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        log.info("actualResponse {}", actualResponse);
+        log.info("aResponse {}", actualResponse);
 
-        assertTrue(actualResponse.startsWith("{\"operation\":\"create_record\""));
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
