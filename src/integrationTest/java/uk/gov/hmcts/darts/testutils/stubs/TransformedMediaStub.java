@@ -19,7 +19,8 @@ public class TransformedMediaStub {
         return createTransformedMediaEntity(mediaRequestEntity, null, null, null);
     }
 
-    public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequestEntity, String filename, OffsetDateTime expiry, OffsetDateTime lastAccessed) {
+    public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequestEntity, String filename, OffsetDateTime expiry,
+                                                               OffsetDateTime lastAccessed) {
         TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
         transformedMediaEntity.setMediaRequest(mediaRequestEntity);
         transformedMediaEntity.setStartTime(mediaRequestEntity.getStartTime());

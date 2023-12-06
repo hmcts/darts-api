@@ -41,13 +41,14 @@ public class TransformedMediaHelper {
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobClient
-        );
+                                                                                                                                          );
 
         dataManagementApi.addMetadata(blobClient, TRANSFORMED_MEDIA_ID, String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
         return UUID.fromString(blobClient.getBlobName());
     }
 
-    private TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename) {
+    @Transactional
+    public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename) {
         TransformedMediaEntity entity = new TransformedMediaEntity();
         entity.setMediaRequest(mediaRequest);
         entity.setOutputFilename(filename);
