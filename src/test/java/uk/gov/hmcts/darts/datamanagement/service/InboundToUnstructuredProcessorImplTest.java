@@ -49,7 +49,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class InboundToUnstructuredProcessorImplTest {
 
-    public static final String TEST_MP_2 = "test.mp2";
+    public static final String TEST_MP_2 = "test";
     public static final int MAX_FILE_SIZE_VALID = 100;
     public static final String MP_2 = "mp2";
     public static final String TEST_DOC = "test.doc";
@@ -128,6 +128,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
 
         when(mediaEntity.getMediaFile()).thenReturn(TEST_MP_2);
+        when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
@@ -210,6 +211,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(objectDirectoryStatusEntityFailureChecksum.getId()).thenReturn(7);
 
         when(mediaEntity.getMediaFile()).thenReturn(TEST_MP_2);
+        when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
@@ -310,6 +312,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(externalLocationTypeRepository.getReferenceById(1)).thenReturn(externalLocationTypeInbound);
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(mediaEntity.getMediaFile()).thenReturn("test.error");
+        when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
 
@@ -346,6 +349,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(externalLocationTypeRepository.getReferenceById(1)).thenReturn(externalLocationTypeInbound);
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(mediaEntity.getMediaFile()).thenReturn(TEST_DOC);
+        when(mediaEntity.getMediaFormat()).thenReturn("mp2");
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn("invalid-checksum");
         when(objectDirectoryStatusEntityFailureChecksum.getId()).thenReturn(7);
@@ -387,7 +391,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
         when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectDirectoryStatusEntityFailureFileSize);
         when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
-        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
+        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("mp2"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(1);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
@@ -427,7 +431,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
         when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
 
-        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
+        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("mp2"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(100);
 
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
