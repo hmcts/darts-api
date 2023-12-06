@@ -40,6 +40,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.DEFENDANTS;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
 
@@ -61,8 +64,10 @@ class AudioTransformationServiceImplTest {
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
     public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
-    public static final String TEST_DEFENDANT_NAME = "Any Defendant";
-    public static final String TEST_NA = "N/A";
+    public static final String MOCK_DEFENDANT_NAME = "Any Defendant";
+    public static final String NOT_AVAILABLE = "N/A";
+    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 5, 1);
+    public static final String MOCK_COURTHOUSE_NAME = "mockCourtHouse";
 
     @Mock
     private DataManagementApi mockDataManagementApi;
@@ -274,78 +279,90 @@ class AudioTransformationServiceImplTest {
         mediaRequest.setEndTime(endTime);
         return mediaRequest;
     }
-    
-    @SneakyThrows
+
     @Test
     void testNotifyUserScheduleErrorNotificationNoDefendants() {
-        initNotifyUserScheduleErrorNotificationMocks();
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
 
         audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
         assertEquals(actual.getTemplateValues().get(DEFENDANTS), NO_DEFENDANTS);
-
     }
 
-    @SneakyThrows
     @Test
     void testNotifyUserScheduleErrorNotificationWithDefendants() {
         List<DefendantEntity> defendantList = new ArrayList<>();
         defendantList.add(mockDefendantEntity);
 
-        initNotifyUserScheduleErrorNotificationMocks();
-        when(mockDefendantEntity.getName()).thenReturn(TEST_DEFENDANT_NAME);
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
+        when(mockDefendantEntity.getName()).thenReturn(MOCK_DEFENDANT_NAME);
         when(mockCourtCase.getDefendantList()).thenReturn(defendantList);
 
         audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
-        assertEquals(actual.getTemplateValues().get(DEFENDANTS), TEST_DEFENDANT_NAME);
+        assertEquals(actual.getTemplateValues().get(DEFENDANTS), MOCK_DEFENDANT_NAME);
 
     }
 
-    @SneakyThrows
     @Test
-    void testNotifyUserScheduleErrorNotificationMissingHearingDataAndCourthouseName() {
-        List<DefendantEntity> defendantList = new ArrayList<>();
-        defendantList.add(mockDefendantEntity);
-
-        when(mockMediaRequestEntity.getId()).thenReturn(1);
-        when(mockHearing.getHearingDate()).thenReturn(null);
-        when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
-        when(mockMediaRequestEntity.getStartTime()).thenReturn(TIME_12_00);
-        when(mockMediaRequestEntity.getEndTime()).thenReturn(TIME_13_00);
-        when(mockMediaRequestEntity.getRequestor()).thenReturn(mockUserAccountEntity);
-        when(mockUserAccountEntity.getId()).thenReturn(1);
-        when(mockHearing.getCourtCase()).thenReturn(mockCourtCase);
-        when(mockCourtCase.getCourthouse()).thenReturn(mockCourthouse);
-        when(mockCourthouse.getCourthouseName()).thenReturn(null);
-        when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mockUserAccountEntity));
-        when(mockDefendantEntity.getName()).thenReturn(TEST_DEFENDANT_NAME);
-        when(mockCourtCase.getDefendantList()).thenReturn(defendantList);
+    void testNotifyUserScheduleErrorNotificationMissingCourthouseName() {
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, null, TIME_12_00, TIME_13_00);
 
         audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
 
         verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
         var actual = dbNotificationRequestCaptor.getValue();
-        assertEquals(actual.getTemplateValues().get(HEARING_DATE), TEST_NA);
-        assertEquals(actual.getTemplateValues().get(HEARING_DATE), TEST_NA);
+        assertEquals(actual.getTemplateValues().get(COURTHOUSE), NOT_AVAILABLE);
     }
 
-    private void initNotifyUserScheduleErrorNotificationMocks() {
-        LocalDate hearingDate = LocalDate.of(2023,5,1);
+    @Test
+    void testNotifyUserScheduleErrorNotificationMissingHearingData() {
+        initNotifyUserScheduleErrorNotificationMocks(null, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(actual.getTemplateValues().get(HEARING_DATE), NOT_AVAILABLE);
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationMissingNoStartTime() {
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, null, TIME_13_00);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(actual.getTemplateValues().get(AUDIO_START_TIME), NOT_AVAILABLE);
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationMissingNoEndTime() {
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, null);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(actual.getTemplateValues().get(AUDIO_END_TIME), NOT_AVAILABLE);
+    }
+
+    private void initNotifyUserScheduleErrorNotificationMocks(LocalDate hearingDate, String courthouseName, OffsetDateTime startTime, OffsetDateTime endTime) {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
-        when(mockMediaRequestEntity.getStartTime()).thenReturn(TIME_12_01);
-        when(mockMediaRequestEntity.getEndTime()).thenReturn(TIME_13_00);
+        when(mockMediaRequestEntity.getStartTime()).thenReturn(startTime);
+        when(mockMediaRequestEntity.getEndTime()).thenReturn(endTime);
         when(mockMediaRequestEntity.getRequestor()).thenReturn(mockUserAccountEntity);
         when(mockUserAccountEntity.getId()).thenReturn(1);
         when(mockHearing.getHearingDate()).thenReturn(hearingDate);
         when(mockHearing.getCourtCase()).thenReturn(mockCourtCase);
         when(mockCourtCase.getCourthouse()).thenReturn(mockCourthouse);
-        when(mockCourthouse.getCourthouseName()).thenReturn("mockCourthouse");
+        when(mockCourthouse.getCourthouseName()).thenReturn(courthouseName);
         when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mockUserAccountEntity));
     }
 }

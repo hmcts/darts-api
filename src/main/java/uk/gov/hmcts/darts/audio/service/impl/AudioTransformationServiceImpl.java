@@ -71,7 +71,7 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 public class AudioTransformationServiceImpl implements AudioTransformationService {
 
     public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
-    public static final String NOT_APPLICABLE = "N/A";
+    public static final String NOT_AVAILABLE = "N/A";
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
@@ -353,26 +353,26 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                     defendants = defendantNames.stream().collect(Collectors.joining(","));
                 }
 
-                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName();
-                String hearingDate = "";
-                if (courthouseName == null || courthouseName.isBlank()) {
-                    courthouseName = NOT_APPLICABLE;
-                }
-
-                if (mediaRequestEntity.getHearing().getHearingDate() == null) {
-                    hearingDate = NOT_APPLICABLE;
-                } else {
-                    hearingDate = String.valueOf(mediaRequestEntity.getHearing().getHearingDate());
-                }
-
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() != null ?
+                    mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() : NOT_AVAILABLE;
+
+                String hearingDate = mediaRequestEntity.getHearing().getHearingDate() != null ?
+                    String.valueOf(mediaRequestEntity.getHearing().getHearingDate()) : NOT_AVAILABLE;
+
+                String audioStartTime = mediaRequestEntity.getStartTime() != null ?
+                    mediaRequestEntity.getStartTime().format(formatter) : NOT_AVAILABLE;
+
+                String audioEndTime = mediaRequestEntity.getEndTime() != null ?
+                    mediaRequestEntity.getEndTime().format(formatter) : NOT_AVAILABLE;
 
                 templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
                 templateParams.put(COURTHOUSE, courthouseName);
                 templateParams.put(DEFENDANTS, defendants);
                 templateParams.put(HEARING_DATE, hearingDate);
-                templateParams.put(AUDIO_START_TIME, String.valueOf(mediaRequestEntity.getStartTime().format(formatter)));
-                templateParams.put(AUDIO_END_TIME, String.valueOf(mediaRequestEntity.getEndTime().format(formatter)));
+                templateParams.put(AUDIO_START_TIME, audioStartTime);
+                templateParams.put(AUDIO_END_TIME, audioEndTime);
             }
 
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
