@@ -110,7 +110,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenGenerateArchiveRecord_WithMedia() throws IOException {
+    void givenMedia_WhenGenerateArchiveRecord_ReturnFileSuccess() throws IOException {
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
         when(courtroomEntity.getCourthouse()).thenReturn(courthouseEntity);
@@ -157,7 +157,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void generateArchiveRecordWithNoData() {
+    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() {
         Map<String, ArchiveRecordFileInfo> archiveRecordFiles = archiveRecordService.generateArchiveRecord(1234, 1);
         assertTrue(archiveRecordFiles.isEmpty());
     }

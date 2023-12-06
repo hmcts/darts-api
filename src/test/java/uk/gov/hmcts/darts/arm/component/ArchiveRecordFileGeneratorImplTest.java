@@ -44,9 +44,9 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
     @Test
-    void generateArchiveRecord() throws IOException {
+    void generateArchiveRecordWithMedia() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
-        String relationId = "<EODID>";
+        String relationId = "1234";
         File archiveFile = new File(fileLocation, "test-media-arm.a360");
         archiveRecordFileGenerator.generateArchiveRecord(createMediaArchiveRecord(relationId), archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
@@ -78,19 +78,19 @@ class ArchiveRecordFileGeneratorImplTest {
 
     private MediaArchiveRecord createMediaArchiveRecord(String relationId) {
         return MediaArchiveRecord.builder()
-            .mediaCreateArchiveRecord(createArchiveRecord(relationId))
-            .uploadNewFileRecord(createUploadNewFileRecord(relationId))
+            .mediaCreateArchiveRecord(createMediaArchiveRecordOperation(relationId))
+            .uploadNewFileRecord(createMediaUploadNewFileRecord(relationId))
             .build();
     }
 
-    private MediaCreateArchiveRecordOperation createArchiveRecord(String relationId) {
+    private MediaCreateArchiveRecordOperation createMediaArchiveRecordOperation(String relationId) {
         return MediaCreateArchiveRecordOperation.builder()
             .relationId(relationId)
-            .recordMetadata(createArchiveRecordMetadata())
+            .recordMetadata(createMediaArchiveRecordMetadata())
             .build();
     }
 
-    private MediaCreateArchiveRecordMetadata createArchiveRecordMetadata() {
+    private MediaCreateArchiveRecordMetadata createMediaArchiveRecordMetadata() {
         return MediaCreateArchiveRecordMetadata.builder()
             .publisher("DARTS")
             .recordClass("DARTSMedia")
@@ -112,15 +112,15 @@ class ArchiveRecordFileGeneratorImplTest {
     }
 
 
-    private UploadNewFileRecord createUploadNewFileRecord(String relationId) {
+    private UploadNewFileRecord createMediaUploadNewFileRecord(String relationId) {
         return UploadNewFileRecord.builder()
             .relationId(relationId)
-            .fileMetadata(createUploadNewFileRecordMetadata())
+            .fileMetadata(createMediaUploadNewFileRecordMetadata())
             .build();
 
     }
 
-    private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata() {
+    private UploadNewFileRecordMetadata createMediaUploadNewFileRecordMetadata() {
         return UploadNewFileRecordMetadata.builder()
             .publisher("DARTS")
             .dzFilename("123_456_1.mp2") // <EOD>_<MEDID>_<ATTEMPT>.mp2"
