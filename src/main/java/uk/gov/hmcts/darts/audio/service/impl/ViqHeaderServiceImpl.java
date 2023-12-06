@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.audio.util.XmlUtil;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -56,9 +57,12 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     public static final String README_FORMAT = ": %s";
 
     private final OutboundDocumentGenerator annotationXmlGenerator;
+    private final EventRepository eventRepository;
 
-    public ViqHeaderServiceImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator) {
+    public ViqHeaderServiceImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator,
+                                EventRepository eventRepository) {
         this.annotationXmlGenerator = annotationXmlGenerator;
+        this.eventRepository = eventRepository;
     }
 
     @Override
@@ -87,7 +91,6 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
 
         return playlistFile;
     }
-
 
     @Override
     public String generateAnnotation(HearingEntity hearingEntity, ZonedDateTime startTime, ZonedDateTime endTime,
@@ -163,8 +166,8 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
         HearingEntity hearingEntity,
         ZonedDateTime startTime,
         ZonedDateTime endTime) {
-
-        return hearingEntity.getEventList().stream()
+        List<EventEntity> hearingEvents = eventRepository.findAllByHearingId(hearingEntity.getId());
+        return hearingEvents.stream()
             .filter(eventEntity -> !eventEntity.getTimestamp().isBefore(startTime.toOffsetDateTime()))
             .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime.toOffsetDateTime()))
             .sorted(Comparator.comparing(EventEntity::getTimestamp))
