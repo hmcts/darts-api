@@ -6,7 +6,6 @@ import org.mapstruct.Mappings;
 import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.User;
-import uk.gov.hmcts.darts.usermanagement.model.UserState;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 
@@ -19,7 +18,7 @@ public interface UserAccountMapper {
         @Mapping(source = "fullName", target = "userName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "description", target = "userDescription"),
-        @Mapping(source = "state", target = "active"),
+        @Mapping(source = "active", target = "active"),
     })
     UserAccountEntity mapToUserEntity(User user);
 
@@ -28,7 +27,7 @@ public interface UserAccountMapper {
         @Mapping(source = "userName", target = "fullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
-        @Mapping(source = "active", target = "state")
+        @Mapping(source = "active", target = "active")
     })
     UserWithId mapToUserWithIdModel(UserAccountEntity userAccountEntity);
 
@@ -37,17 +36,8 @@ public interface UserAccountMapper {
         @Mapping(source = "userName", target = "fullName"),
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
-        @Mapping(source = "active", target = "state"),
+        @Mapping(source = "active", target = "active"),
         @Mapping(source = "lastLoginTime", target = "lastLogin")
     })
     UserWithIdAndLastLogin mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
-
-    default UserState mapToUserState(boolean stateValue) {
-        return stateValue ? UserState.ENABLED : UserState.DISABLED;
-    }
-
-    default boolean mapToUserStateValue(UserState userState) {
-        return UserState.ENABLED.equals(userState);
-    }
-
 }

@@ -153,7 +153,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
@@ -183,7 +183,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
@@ -214,7 +214,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
@@ -225,7 +225,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     @Transactional
-    void searchByEmailAddressAndFullNameShouldReturnOkWithDisabledState() throws Exception {
+    void searchByEmailAddressAndFullNameShouldReturnOkWhenUserInactive() throws Exception {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
@@ -245,7 +245,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("DISABLED"))
+            .andExpect(jsonPath("$[0].active").value(false))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));

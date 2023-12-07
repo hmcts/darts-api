@@ -280,12 +280,8 @@ components:
       minLength: 1
       maxLength: 256
       type: string
-    UserState:
-      type: string
-      enum:
-        - ENABLED
-        - DISABLED
-      default: ENABLED
+    UserActive:
+      type: boolean
 
     SecurityGroupId:
       type: integer
@@ -320,8 +316,8 @@ components:
           $ref: '#/components/schemas/UserEmailAddress'
         description:
           $ref: '#/components/schemas/UserDescription'
-        state:
-          $ref: '#/components/schemas/UserState'
+        active:
+          $ref: '#/components/schemas/UserActive'
         security_groups:
           type: array
           items:
@@ -337,8 +333,8 @@ components:
           $ref: '#/components/schemas/UserName'
         description:
           $ref: '#/components/schemas/UserDescription'
-        state:
-          $ref: '#/components/schemas/UserState'
+        active:
+          $ref: '#/components/schemas/UserActive'
         security_groups:
           type: array
           items:

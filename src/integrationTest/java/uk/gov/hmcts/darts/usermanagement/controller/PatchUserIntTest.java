@@ -81,7 +81,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.state").value("ENABLED"))
+            .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_groups", Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
@@ -122,7 +122,7 @@ class PatchUserIntTest extends IntegrationBase {
                          {
                            "full_name": "Jimmy Smith",
                            "description": "An updated description",
-                           "state": "DISABLED",
+                           "active": false,
                            "security_groups": [ ]
                          }
                          """);
@@ -131,7 +131,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value("Jimmy Smith"))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value("An updated description"))
-            .andExpect(jsonPath("$.state").value("DISABLED"))
+            .andExpect(jsonPath("$.active").value(false))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_groups").isEmpty());
 
@@ -196,7 +196,7 @@ class PatchUserIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest(userId)
             .content("""
                          {
-                           "state": "DISABLED"
+                           "active": false
                          }
                          """);
         mockMvc.perform(request)
@@ -204,7 +204,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.state").value("DISABLED"))
+            .andExpect(jsonPath("$.active").value(false))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_groups").isEmpty());
 
@@ -228,7 +228,7 @@ class PatchUserIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest(userId)
             .content("""
                          {
-                           "state": "ENABLED"
+                           "active": true
                          }
                          """);
         mockMvc.perform(request)
@@ -236,7 +236,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.state").value("ENABLED"))
+            .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_groups").isEmpty());
 
@@ -268,7 +268,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
-            .andExpect(jsonPath("$.state").value("ENABLED"))
+            .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_groups", not(Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
