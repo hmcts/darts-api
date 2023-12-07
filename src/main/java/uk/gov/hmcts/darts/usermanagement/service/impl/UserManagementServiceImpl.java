@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -112,10 +113,10 @@ public class UserManagementServiceImpl implements UserManagementService {
             userAccountEntity.setActive(active);
         }
 
-        if (active != null && !active) {
-            userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
-        } else {
+        if (BooleanUtils.isTrue(userAccountEntity.isActive())) {
             mapSecurityGroupsToUserEntity(userPatch.getSecurityGroups(), userAccountEntity);
+        } else {
+            userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
         }
 
         userAccountEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
