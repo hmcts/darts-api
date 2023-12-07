@@ -49,11 +49,11 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
+    @Transactional
     public void processUnstructuredToArm() {
         processPendingUnstructured();
     }
 
-    @Transactional
     private void processPendingUnstructured() {
 
         ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
@@ -92,6 +92,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                     unstructuredExternalObjectDirectoryEntity = matchingEntity.get();
                 } else {
                     updateTransferAttempts(armExternalObjectDirectoryEntity);
+                    externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
                     continue;
                 }
             } else {
