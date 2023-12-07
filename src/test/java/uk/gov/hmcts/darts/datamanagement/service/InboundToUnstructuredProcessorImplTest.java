@@ -352,7 +352,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
         when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
-        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
+        when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("mp2"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityInbound));
