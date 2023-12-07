@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -125,10 +126,15 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             && groupedAudioFileInfo.getEndTime().equals(ungroupedAudioFileInfo.getEndTime());
 
         boolean hasContinuity = ungroupedAudioFileInfo.getChannel().equals(groupedAudioFileInfo.getChannel())
-            && (ungroupedAudioFileInfo.getStartTime().equals(groupedAudioFileInfo.getEndTime())
-            || !ungroupedAudioFileInfo.getEndTime().plusSeconds(acceptableAudioGapSecs).isBefore(groupedAudioFileInfo.getStartTime()));
+            && (timeOverlaps(ungroupedAudioFileInfo, groupedAudioFileInfo.getEndTime().plusSeconds(acceptableAudioGapSecs))
+            || timeOverlaps(groupedAudioFileInfo, ungroupedAudioFileInfo.getEndTime().plusSeconds(acceptableAudioGapSecs)));
 
         return hasEqualTimestamps || hasContinuity;
+    }
+
+    private boolean timeOverlaps(AudioFileInfo audioFileInfo, Instant timeToCheck) {
+        return !timeToCheck.isBefore(audioFileInfo.getStartTime())//is on or after start time
+            && !timeToCheck.isAfter(audioFileInfo.getEndTime()); //is on or before end time
     }
 
     private List<AudioFileInfo> concatenateByChannel(List<AudioFileInfo> audioFileInfos)
