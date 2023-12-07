@@ -2,6 +2,11 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
   <suppress until="2024-01-14">
+    <notes>Suppression for jackson-databind.</notes>
+    <cve>CVE-2023-35116</cve>
+  </suppress>
+
+  <suppress until="2024-01-14">
     <notes>Suppression for netty. Pulled in by springboot on latest version</notes>
     <cve>CVE-2023-4586</cve>
   </suppress>
