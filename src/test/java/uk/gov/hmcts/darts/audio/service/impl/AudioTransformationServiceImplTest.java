@@ -16,8 +16,10 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -29,6 +31,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
@@ -64,6 +68,9 @@ class AudioTransformationServiceImplTest {
 
     @Mock
     private MediaRepository mediaRepository;
+
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
 
 
     @InjectMocks
@@ -122,7 +129,7 @@ class AudioTransformationServiceImplTest {
         mediaRequestEntityUpdated.setStatus(COMPLETED);
 
         BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
-        blobClientBuilder.blobName("blobname");
+        blobClientBuilder.blobName("0ddf61c8-0cec-4164-a4a7-10c5e47df9f1");
         blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
         BlobClient blobClient = blobClientBuilder.buildClient();
 
@@ -134,15 +141,23 @@ class AudioTransformationServiceImplTest {
             any()
         )).thenReturn(mockTransientObjectDirectoryEntity);
 
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+        when(transformedMediaRepository.save(
+            any()
+        )).thenReturn(transformedMediaEntity);
+
+        when(mockTransientObjectDirectoryEntity.getTransformedMedia(
+        )).thenReturn(transformedMediaEntity);
+
         transformedMediaHelper.saveToStorage(
             mediaRequestEntity,
             BINARY_DATA, "filename"
         );
 
-        verify(mockDataManagementApi).saveBlobDataToOutboundContainer(BINARY_DATA);
-        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        verify(mockDataManagementApi).saveBlobDataToContainer(eq(BINARY_DATA), eq(DatastoreContainerType.OUTBOUND), anyMap());
 
-        verify(mockTransientObjectDirectoryService).saveTransientObjectDirectoryEntity(transformedMediaEntity, blobClient);
+        verify(mockTransientObjectDirectoryService).saveTransientObjectDirectoryEntity(any(TransformedMediaEntity.class), eq(blobClient));
     }
 
     @Test
