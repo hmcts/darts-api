@@ -67,7 +67,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
-            "WHERE eod.status = :status1 " +
+            "WHERE eod.status = :status " +
             "AND eod.externalLocationType = :type " +
             "AND eod.transferAttempts < :transferAttempts"
     )

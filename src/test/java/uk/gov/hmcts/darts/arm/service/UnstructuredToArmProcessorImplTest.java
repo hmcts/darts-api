@@ -160,4 +160,43 @@ class UnstructuredToArmProcessorImplTest {
 
     }
 
+    @Test
+    void processPreviousFailedAttempt() {
+        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
+
+        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
+        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
+        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+
+        List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(Collections.emptyList());
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(objectDirectoryStatusEntityStored,
+                                                                                         objectDirectoryStatusEntityStored,
+                                                                                         externalLocationTypeUnstructured,
+                                                                                         externalLocationTypeArm)).thenReturn(pendingUnstructuredStorageItems);
+
+
+        when(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId())).thenReturn(objectDirectoryStatusEntityFailed);
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
+        List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityArm));
+        when(externalObjectDirectoryRepository.findFailedNotExceedRetryInStorageLocation(objectDirectoryStatusEntityFailed,
+                                                                                         externalLocationTypeRepository.getReferenceById(3),
+                                                                                         armDataManagementConfiguration.getMaxRetryAttempts()))
+            .thenReturn(pendingFailureList);
+
+        when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
+        when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
+        when(externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(externalObjectDirectoryRepository
+                 .findMatchingExternalObjectDirectoryEntityByLocation(objectDirectoryStatusEntityStored,
+                                                                      externalLocationTypeUnstructured,
+                                                                      externalObjectDirectoryEntityArm.getMedia(),
+                                                                      externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
+                                                                      externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()))
+            .thenReturn(Optional.empty());
+
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        verify(externalObjectDirectoryRepository, times(1)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+    }
 }
