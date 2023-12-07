@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
-import uk.gov.hmcts.darts.usermanagement.model.UserState;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +42,9 @@ public class UserManagementServiceImpl implements UserManagementService {
     @Override
     public UserWithId createUser(User user) {
         var userEntity = userAccountMapper.mapToUserEntity(user);
+        if (isNull(userEntity.isActive())) {
+            userEntity.setActive(true);
+        }
         userEntity.setIsSystemUser(false);
         mapSecurityGroupsToUserEntity(user.getSecurityGroups(), userEntity);
 
@@ -92,26 +97,26 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userWithIdAndLastLoginList;
     }
 
-    private void updateEntity(UserPatch user, UserAccountEntity userAccountEntity) {
-        String name = user.getFullName();
+    private void updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
+        String name = userPatch.getFullName();
         if (name != null) {
             userAccountEntity.setUserName(name);
         }
 
-        String description = user.getDescription();
+        String description = userPatch.getDescription();
         if (description != null) {
             userAccountEntity.setUserDescription(description);
         }
 
-        UserState state = user.getState();
-        if (state != null) {
-            userAccountEntity.setState(userAccountMapper.mapToUserStateValue(state));
+        Boolean active = userPatch.getActive();
+        if (active != null) {
+            userAccountEntity.setActive(active);
         }
 
-        if (UserState.DISABLED.equals(user.getState())) {
-            userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
+        if (BooleanUtils.isTrue(userAccountEntity.isActive())) {
+            mapSecurityGroupsToUserEntity(userPatch.getSecurityGroups(), userAccountEntity);
         } else {
-            mapSecurityGroupsToUserEntity(user.getSecurityGroups(), userAccountEntity);
+            userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
         }
 
         userAccountEntity.setLastModifiedBy(authorisationApi.getCurrentUser());

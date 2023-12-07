@@ -30,8 +30,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.DISABLED;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
 
 @AutoConfigureMockMvc
 class UserControllerSearchIntTest extends IntegrationBase {
@@ -140,7 +138,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(ENABLED.getId());
+        testUser.setActive(true);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
@@ -155,7 +153,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
@@ -170,7 +168,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(ENABLED.getId());
+        testUser.setActive(true);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
@@ -185,7 +183,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
@@ -200,7 +198,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(ENABLED.getId());
+        testUser.setActive(true);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
@@ -216,7 +214,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("ENABLED"))
+            .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
@@ -227,11 +225,11 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     @Transactional
-    void searchByEmailAddressAndFullNameShouldReturnOkWithDisabledState() throws Exception {
+    void searchByEmailAddressAndFullNameShouldReturnOkWhenUserInactive() throws Exception {
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setState(DISABLED.getId());
+        testUser.setActive(false);
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
@@ -247,7 +245,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].state").value("DISABLED"))
+            .andExpect(jsonPath("$[0].active").value(false))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
             .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));

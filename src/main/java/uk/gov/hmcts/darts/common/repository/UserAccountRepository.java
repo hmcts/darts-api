@@ -26,14 +26,14 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         JOIN securityGroup.securityRoleEntity securityRole
         WHERE courthouse = :courthouse
         AND securityRole.id = :securityRole
-        AND userAccount.state = 1
+        AND userAccount.active = true
         """)
     List<UserAccountEntity> findByRoleAndCourthouse(int securityRole, CourthouseEntity courthouse);
 
     @Query("""
         SELECT userAccount
         FROM UserAccountEntity userAccount
-        WHERE userAccount.state = 1
+        WHERE userAccount.active = true
         AND userAccount.isSystemUser = true
         AND userAccount.accountGuid = :uuid
         """)

@@ -79,7 +79,7 @@ class PostUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value(USERNAME))
             .andExpect(jsonPath("$.email_address").value(EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").doesNotExist())
-            .andExpect(jsonPath("$.state").value("ENABLED"))
+            .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").doesNotExist())
             .andExpect(jsonPath("$.security_groups").isEmpty())
             .andReturn();
@@ -93,7 +93,7 @@ class PostUserIntTest extends IntegrationBase {
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
-            assertEquals(0, createdUserAccountEntity.getState());
+            assertEquals(true, createdUserAccountEntity.isActive());
             assertTrue(createdUserAccountEntity.getSecurityGroupEntities().isEmpty());
             assertEquals(SYSTEM_USER_FLAG, createdUserAccountEntity.getIsSystemUser());
 
@@ -115,7 +115,7 @@ class PostUserIntTest extends IntegrationBase {
                            "full_name": "James Smith",
                            "email_address": "james.smith@hmcts.net",
                            "description": "A test user",
-                           "state": "ENABLED",
+                           "active": true,
                            "security_groups": [
                              -1, -2
                            ]
@@ -127,7 +127,7 @@ class PostUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.full_name").value(USERNAME))
             .andExpect(jsonPath("$.email_address").value(EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(DESCRIPTION))
-            .andExpect(jsonPath("$.state").value("ENABLED"))
+            .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").doesNotExist())
             .andExpect(jsonPath("$.security_groups", Matchers.containsInAnyOrder(
                 SECURITY_GROUP_ID_1,
@@ -144,7 +144,7 @@ class PostUserIntTest extends IntegrationBase {
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertEquals(DESCRIPTION, createdUserAccountEntity.getUserDescription());
-            assertEquals(0, createdUserAccountEntity.getState());
+            assertEquals(true, createdUserAccountEntity.isActive());
             assertThat(
                 getSecurityGroupIds(createdUserAccountEntity),
                 hasItems(SECURITY_GROUP_ID_1, SECURITY_GROUP_ID_2)
@@ -168,7 +168,7 @@ class PostUserIntTest extends IntegrationBase {
             .content("""
                          {
                            "description": "",
-                           "state": "ENABLED",
+                           "active": true,
                            "security_groups": [
                              1
                            ]
@@ -184,7 +184,7 @@ class PostUserIntTest extends IntegrationBase {
         userAccountEntity.setUserName("James Smith");
         userAccountEntity.setEmailAddress("james.smith@hmcts.net");
         userAccountEntity.setIsSystemUser(false);
-        userAccountEntity.setState(1);
+        userAccountEntity.setActive(false);
         dartsDatabase.getUserAccountRepository()
             .save(userAccountEntity);
 

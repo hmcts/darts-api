@@ -70,6 +70,7 @@ class AuthorisationServiceTest {
         judgeUserAccount.setLastModifiedBy(testUser);
         judgeUserAccount.setAccountGuid(UUID.randomUUID().toString());
         judgeUserAccount.setIsSystemUser(false);
+        judgeUserAccount.setActive(true);
         UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
@@ -83,6 +84,7 @@ class AuthorisationServiceTest {
         bristolUserAccount.setLastModifiedBy(testUser);
         bristolUserAccount.setAccountGuid(UUID.randomUUID().toString());
         bristolUserAccount.setIsSystemUser(false);
+        bristolUserAccount.setActive(true);
         userAccountRepository.saveAndFlush(bristolUserAccount);
 
         UserAccountEntity newUser = new UserAccountEntity();
@@ -91,6 +93,7 @@ class AuthorisationServiceTest {
         newUser.setCreatedBy(testUser);
         newUser.setLastModifiedBy(testUser);
         newUser.setAccountGuid(UUID.randomUUID().toString());
+        newUser.setActive(true);
         newUser.setIsSystemUser(false);
         userAccountRepository.saveAndFlush(newUser);
     }
