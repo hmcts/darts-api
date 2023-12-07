@@ -40,6 +40,7 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -177,9 +178,11 @@ public class TranscriptionController implements TranscriptionApi {
                 OffsetDateTime requestStartDateTime = transcriptionRequestDetails.getStartDateTime();
                 OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime();
                 if (requestStartDateTime != null && requestEndDateTime != null) {
-                    boolean validTimes = hearing.getMediaList().stream().anyMatch(m -> m.getStart().isBefore(
-                        requestStartDateTime) && m.getStart().isBefore(requestEndDateTime)
-                        && m.getEnd().isAfter(requestStartDateTime) && m.getEnd().isAfter(requestEndDateTime));
+                    boolean validTimes = hearing.getMediaList().stream().anyMatch(
+                        m -> checkStartTime(m.getStart().truncatedTo(ChronoUnit.SECONDS),
+                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS))
+                            && checkEndTime(m.getEnd().truncatedTo(ChronoUnit.SECONDS),
+                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)));
                     if (!validTimes) {
                         log.error(
                             "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
@@ -210,6 +213,14 @@ public class TranscriptionController implements TranscriptionApi {
             );
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
         }
+    }
+
+    private boolean checkEndTime(OffsetDateTime mediaEndDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
+        return (mediaEndDateTime.isEqual(requestEndDateTime) || mediaEndDateTime.isAfter(requestEndDateTime));
+    }
+
+    private boolean checkStartTime(OffsetDateTime mediaStartDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
+        return (mediaStartDateTime.isEqual(requestStartDateTime) || mediaStartDateTime.isBefore(requestStartDateTime));
     }
 
     private boolean transcriptionTypesThatRequireDates(Integer transcriptionTypeId) {

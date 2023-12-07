@@ -211,7 +211,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 mediaEntity.getChecksum(),
                 checksum,
                 audioConfigurationProperties.getAllowedExtensions(),
-                FilenameUtils.getExtension(mediaEntity.getMediaFile()).toLowerCase(),
+                mediaEntity.getMediaFormat().toLowerCase(),
                 audioConfigurationProperties.getMaxFileSize(),
                 mediaEntity.getFileSize());
         }

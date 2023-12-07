@@ -339,6 +339,68 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         assertAudit(0);
     }
 
+    @Test
+    @Order(17)
+    void transcriptionRequestExactStartAndEnd() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        OffsetDateTime startTime = hearing.getMediaList().get(0).getStart().truncatedTo(ChronoUnit.SECONDS);
+        OffsetDateTime endTime = hearing.getMediaList().get(0).getEnd().truncatedTo(ChronoUnit.SECONDS);
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
+        );
+
+        dartsDatabase.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
+            .read("$.transcription_id");
+        assertNotNull(transcriptionId);
+
+        assertAudit(1);
+    }
+
+    @Test
+    @Order(18)
+    void transcriptionRequestInsideStartAndEnd() throws Exception {
+        TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
+        TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
+
+        OffsetDateTime startTime = hearing.getMediaList().get(0).getStart().plusMinutes(5);
+        OffsetDateTime endTime = hearing.getMediaList().get(0).getEnd().minusMinutes(15);
+
+        TranscriptionRequestDetails transcriptionRequestDetails = createTranscriptionRequestDetails(
+            hearing.getId(), courtCase.getId(), transcriptionUrgencyEnum.getId(),
+            transcriptionTypeEnum.getId(), TEST_COMMENT, startTime, endTime
+        );
+
+        dartsDatabase.save(hearing);
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URI)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(transcriptionRequestDetails));
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Integer transcriptionId = JsonPath.parse(mvcResult.getResponse().getContentAsString())
+            .read("$.transcription_id");
+        assertNotNull(transcriptionId);
+
+        assertAudit(1);
+    }
+
     private void assertFailedTranscription111Error(String actualJson) {
         String expectedJson = """
             {
