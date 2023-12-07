@@ -32,7 +32,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "full_name": "James Smith",
                     "email_address": "james.smith@hmcts.net",
                     "description": "Functional test user",
-                    "state": "ENABLED",
+                    "active": true,
                     "security_groups": [ ]
                 }
                 """,
@@ -68,7 +68,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "full_name": "Jimmy Smith",
                     "email_address": "james.smith@hmcts.net",
                     "description": "Functional test user",
-                    "state": "ENABLED",
+                    "active": true,
                     "security_groups": [ ]
                 }
                 """,
