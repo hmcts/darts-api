@@ -39,6 +39,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
+
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 
 @Component
 @SuppressWarnings({"PMD.TooManyMethods"})
@@ -58,7 +61,7 @@ public class AdvancedSearchRequestHelper {
         Predicate finalAndPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         criteriaQuery.where(finalAndPredicate);
         Path<Integer> namePath = caseRoot.get(CourtCaseEntity_.ID);
-        criteriaQuery.select(namePath);
+        criteriaQuery.select(namePath).distinct(true);
 
         TypedQuery<Integer> query = entityManager.createQuery(criteriaQuery);
         return query.getResultList();
@@ -73,9 +76,11 @@ public class AdvancedSearchRequestHelper {
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
-        CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
-        return predicates;
+        if (userIdentity.userHasGlobalAccess(Set.of(JUDGE))) {
+            CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
+        }
 
+        return predicates;
     }
 
     private List<Predicate> createCaseCriteria(GetCasesSearchRequest request, CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
@@ -151,11 +156,12 @@ public class AdvancedSearchRequestHelper {
     private List<Predicate> addUserSecurityRolesCriteria(CriteriaBuilder criteriaBuilder, Root<CourtCaseEntity> caseRoot) {
         List<Predicate> predicateList = new ArrayList<>();
         Join<CourtCaseEntity, UserAccountEntity> userJoin = joinUser(caseRoot);
+
         predicateList.add(criteriaBuilder.equal(
-                              criteriaBuilder.lower(userJoin.get(UserAccountEntity_.EMAIL_ADDRESS)),
-                              userIdentity.getUserAccount().getEmailAddress().toLowerCase()
-                          )
-        );
+            criteriaBuilder.lower(userJoin.get(UserAccountEntity_.EMAIL_ADDRESS)),
+            userIdentity.getUserAccount().getEmailAddress().toLowerCase()
+        ));
+
         return predicateList;
     }
 
@@ -214,7 +220,6 @@ public class AdvancedSearchRequestHelper {
         );
         return securityGroupJoin.join(SecurityGroupEntity_.USERS, JoinType.INNER);
     }
-
 
     @SuppressWarnings("unchecked")
     private Join<HearingEntity, CourtroomEntity> joinCourtroom(Root<CourtCaseEntity> caseRoot) {
