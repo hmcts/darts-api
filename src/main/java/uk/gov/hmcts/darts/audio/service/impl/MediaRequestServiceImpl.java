@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -255,13 +254,13 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional
     @Override
     public void updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
-        try {
-            TransformedMediaEntity foundEntity = transformedMediaRepository.findById(transformedMediaId).get();
-            foundEntity.setLastAccessed(OffsetDateTime.now());
-            transformedMediaRepository.saveAndFlush(foundEntity);
-        } catch (NoSuchElementException e) {
+        Optional<TransformedMediaEntity> foundEntityOpt = transformedMediaRepository.findById(transformedMediaId);
+        if (foundEntityOpt.isEmpty()) {
             throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND);
         }
+        TransformedMediaEntity foundEntity = foundEntityOpt.get();
+        foundEntity.setLastAccessed(OffsetDateTime.now());
+        transformedMediaRepository.saveAndFlush(foundEntity);
     }
 
     private Predicate expiredPredicate(Boolean expired, CriteriaBuilder criteriaBuilder,

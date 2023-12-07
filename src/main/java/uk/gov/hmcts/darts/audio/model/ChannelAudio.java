@@ -16,6 +16,10 @@ public class ChannelAudio {
     Integer channel;
     List<AudioFileInfo> audioFiles;
 
+    public ChannelAudio(Integer channel) {
+        this.channel = channel;
+    }
+
     public void addAudioFile(AudioFileInfo audioFileInfo) {
         if (audioFiles == null) {
             audioFiles = new ArrayList<>();
