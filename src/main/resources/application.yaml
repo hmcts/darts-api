@@ -156,6 +156,8 @@ darts:
   storage:
     arm:
       connection-string: ${ARM_STORAGE_CONNECTION_STRING:}
+      container-name: darts-arm
+      drop-zone: dropzone/DARTS/submission/
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

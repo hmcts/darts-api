@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.datamanagement.service;
+package uk.gov.hmcts.darts.arm.service;
 
 public interface UnstructuredToArmProcessor {
     void processUnstructuredToArm();

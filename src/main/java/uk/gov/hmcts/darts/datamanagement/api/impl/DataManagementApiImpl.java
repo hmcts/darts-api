@@ -74,11 +74,6 @@ public class DataManagementApiImpl implements DataManagementApi {
         return dataManagementService.saveBlobData(getInboundContainerName(), binaryData);
     }
 
-    @Override
-    public UUID saveBlobDataToARM(BinaryData binaryData) {
-        return dataManagementService.saveBlobData(getArmContainerName(), binaryData);
-    }
-
     private String getOutboundContainerName() {
         return dataManagementConfiguration.getOutboundContainerName();
     }
@@ -108,8 +103,4 @@ public class DataManagementApiImpl implements DataManagementApi {
         }
     }
 	
-    private String getArmContainerName() {
-        return null;
-    }
-
 }

@@ -1,10 +1,12 @@
-package uk.gov.hmcts.darts.datamanagement.service.impl;
+package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -19,7 +21,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
-import uk.gov.hmcts.darts.datamanagement.service.UnstructuredToArmProcessor;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -38,13 +40,14 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final DataManagementApi dataManagementApi;
+    private final ArmDataManagementApi armDataManagementApi;
     private final UserAccountRepository userAccountRepository;
 
     @Override
     public void processUnstructuredToArm() {
     }
 
-    private void processPending() {
+    private void processPendingUnstructured() {
 
         ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
             ObjectDirectoryStatusEnum.STORED.getId());
@@ -69,14 +72,18 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             try {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(unstructuredExternalObjectDirectoryEntity.getExternalLocation());
+                String filename = generateFilename(armExternalObjectDirectoryEntity);
 
-                UUID uuid = dataManagementApi.saveBlobDataToARM(inboundFile);
+                String blodId = armDataManagementApi.saveBlobDataToARM(filename, inboundFile);
                 armExternalObjectDirectoryEntity.setChecksum(unstructuredExternalObjectDirectoryEntity.getChecksum());
-                armExternalObjectDirectoryEntity.setExternalLocation(uuid);
+                armExternalObjectDirectoryEntity.setExternalLocation(UUID.randomUUID());
                 armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(STORED.getId()));
 
             } catch (BlobStorageException e) {
-                log.error("Failed to get BLOB from datastore for file {}", unstructuredExternalObjectDirectoryEntity.getExternalLocation());
+                log.error("Failed to move BLOB data for file {} due to {}",
+                          unstructuredExternalObjectDirectoryEntity.getExternalLocation(),
+                          e.getMessage());
+
                 armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_FILE_NOT_FOUND.getId()));
                 updateTransferAttempts(armExternalObjectDirectoryEntity);
             }
@@ -115,6 +122,27 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         armExternalObjectDirectoryEntity.setTransferAttempts(1);
 
         return armExternalObjectDirectoryEntity;
+    }
+
+    private String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
+        Integer entityId = externalObjectDirectoryEntity.getId();
+        Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+        Integer documentId = 0;
+
+        if (externalObjectDirectoryEntity.getMedia() != null) {
+            documentId = externalObjectDirectoryEntity.getMedia().getId();
+        }
+        if (externalObjectDirectoryEntity.getTranscriptionDocumentEntity() != null) {
+            documentId = externalObjectDirectoryEntity.getTranscriptionDocumentEntity().getId();
+        }
+        if (externalObjectDirectoryEntity.getAnnotationDocumentEntity() != null) {
+            documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
+        }
+
+        return String.format("{}_{}_{}",
+                             Integer.toString(entityId),
+                             Integer.toString(documentId),
+                             Integer.toString(transferAttempts));
     }
 
     private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
