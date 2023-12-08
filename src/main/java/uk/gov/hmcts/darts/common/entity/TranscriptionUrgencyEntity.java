@@ -21,4 +21,7 @@ public class TranscriptionUrgencyEntity {
     @Column(name = "display_state")
     private Boolean displayState;
 
+    @Column(name = "priority_order", nullable = false)
+    private int priorityOrder;
+
 }

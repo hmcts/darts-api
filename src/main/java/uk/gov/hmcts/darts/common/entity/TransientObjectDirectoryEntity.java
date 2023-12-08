@@ -15,7 +15,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.util.UUID;
@@ -33,12 +32,12 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity im
     private Integer id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mer_id", foreignKey = @ForeignKey(name = "tod_media_request_fk"), nullable = false)
-    private MediaRequestEntity mediaRequest;
+    @JoinColumn(name = "trm_id", foreignKey = @ForeignKey(name = "tod_transformed_media_fk"), nullable = false)
+    private TransformedMediaEntity transformedMedia;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ods_id", foreignKey = @ForeignKey(name = "tod_object_directory_status_fk"), nullable = false)
-    private ObjectDirectoryStatusEntity status;
+    @JoinColumn(name = "ors_id", foreignKey = @ForeignKey(name = "tod_object_record_status_fk"), nullable = false)
+    private ObjectRecordStatusEntity status;
 
     @NaturalId
     @Column(name = "external_location", unique = true, nullable = false)

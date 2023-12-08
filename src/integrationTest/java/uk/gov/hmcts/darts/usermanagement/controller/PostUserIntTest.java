@@ -93,7 +93,7 @@ class PostUserIntTest extends IntegrationBase {
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
-            assertEquals(true, createdUserAccountEntity.isActive());
+            assertTrue(createdUserAccountEntity.isActive());
             assertTrue(createdUserAccountEntity.getSecurityGroupEntities().isEmpty());
             assertEquals(SYSTEM_USER_FLAG, createdUserAccountEntity.getIsSystemUser());
 

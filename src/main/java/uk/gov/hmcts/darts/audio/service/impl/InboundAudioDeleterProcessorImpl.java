@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -40,7 +40,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
 
     @Transactional
     public void markForDeletion() {
-        ObjectDirectoryStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
+        ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
             ObjectDirectoryStatusEnum.STORED.getId());
         ExternalLocationTypeEntity inboundLocation = externalLocationTypeRepository.getReferenceById(
             ExternalLocationTypeEnum.INBOUND.getId());
@@ -64,7 +64,7 @@ public class InboundAudioDeleterProcessorImpl implements InboundAudioDeleterProc
         }
         log.debug("Marking the following ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
-        ObjectDirectoryStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
+        ObjectRecordStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
             MARKED_FOR_DELETION.getId());
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));

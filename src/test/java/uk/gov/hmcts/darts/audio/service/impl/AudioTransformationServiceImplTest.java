@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,12 +10,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -25,6 +31,8 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
@@ -61,9 +69,15 @@ class AudioTransformationServiceImplTest {
     @Mock
     private MediaRepository mediaRepository;
 
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
+
 
     @InjectMocks
     private AudioTransformationServiceImpl audioTransformationService;
+
+    @InjectMocks
+    private TransformedMediaHelper transformedMediaHelper;
 
     @Mock
     private MediaRequestServiceImpl mockMediaRequestService;
@@ -114,22 +128,36 @@ class AudioTransformationServiceImplTest {
         final MediaRequestEntity mediaRequestEntityUpdated = new MediaRequestEntity();
         mediaRequestEntityUpdated.setStatus(COMPLETED);
 
-        when(mockDataManagementApi.saveBlobDataToOutboundContainer(any()))
-            .thenReturn(BLOB_LOCATION);
+        BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
+        blobClientBuilder.blobName("0ddf61c8-0cec-4164-a4a7-10c5e47df9f1");
+        blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
+        BlobClient blobClient = blobClientBuilder.buildClient();
 
-        when(mockTransientObjectDirectoryService.saveTransientDataLocation(
+        when(mockDataManagementApi.saveBlobDataToContainer(any(), any(), any()))
+            .thenReturn(blobClient);
+
+        when(mockTransientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             any(),
             any()
         )).thenReturn(mockTransientObjectDirectoryEntity);
 
-        audioTransformationService.saveProcessedData(
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+        when(transformedMediaRepository.save(
+            any()
+        )).thenReturn(transformedMediaEntity);
+
+        when(mockTransientObjectDirectoryEntity.getTransformedMedia(
+        )).thenReturn(transformedMediaEntity);
+
+        transformedMediaHelper.saveToStorage(
             mediaRequestEntity,
-            BINARY_DATA
+            BINARY_DATA, "filename"
         );
 
-        verify(mockDataManagementApi).saveBlobDataToOutboundContainer(BINARY_DATA);
+        verify(mockDataManagementApi).saveBlobDataToContainer(eq(BINARY_DATA), eq(DatastoreContainerType.OUTBOUND), anyMap());
 
-        verify(mockTransientObjectDirectoryService).saveTransientDataLocation(mediaRequestEntity, BLOB_LOCATION);
+        verify(mockTransientObjectDirectoryService).saveTransientObjectDirectoryEntity(any(TransformedMediaEntity.class), eq(blobClient));
     }
 
     @Test
@@ -161,7 +189,7 @@ class AudioTransformationServiceImplTest {
     void filterMediaByMediaRequestDatesWithStartDateExactRequestAndEndDateExactRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_00);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
-        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframe(mediaEntities, mediaRequestEntity);
 
         assertEquals(3, mediaEntitiesResult.size());
         assertEquals(TIME_12_00, mediaEntitiesResult.get(0).getStart());
@@ -172,7 +200,7 @@ class AudioTransformationServiceImplTest {
     void filterMediaByMediaRequestDatesWithStartDateAfterRequestAndEndDateBeforeRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_01, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_12_59);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
-        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframe(mediaEntities, mediaRequestEntity);
         assertEquals(3, mediaEntitiesResult.size());
         assertEquals(TIME_12_01, mediaEntitiesResult.get(0).getStart());
         assertEquals(TIME_12_59, mediaEntitiesResult.get(2).getEnd());
@@ -182,7 +210,7 @@ class AudioTransformationServiceImplTest {
     void filterMediaByMediaRequestDatesWithStartDateBeforeRequestAndEndDateAfterRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_00, TIME_13_00);
-        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframe(mediaEntities, mediaRequestEntity);
         assertEquals(3, mediaEntitiesResult.size());
         assertEquals(TIME_11_59, mediaEntitiesResult.get(0).getStart());
         assertEquals(TIME_13_01, mediaEntitiesResult.get(2).getEnd());
@@ -192,7 +220,7 @@ class AudioTransformationServiceImplTest {
     void filterMediaByMediaRequestDatesWithStartDateAndEndDateExactMiddleMediaMatch() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_11_59, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_01);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_20, TIME_12_40);
-        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframe(mediaEntities, mediaRequestEntity);
         assertEquals(1, mediaEntitiesResult.size());
         assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getStart());
         assertEquals(TIME_12_40, mediaEntitiesResult.get(0).getEnd());
@@ -202,7 +230,7 @@ class AudioTransformationServiceImplTest {
     void filterMediaByMediaRequestDatesWithStartDateBetweenRequestAndEndDateBetweenRequest() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_13_00);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_12_21, TIME_12_39);
-        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframe(mediaEntities, mediaRequestEntity);
         assertEquals(1, mediaEntitiesResult.size());
         assertEquals(TIME_12_20, mediaEntitiesResult.get(0).getStart());
         assertEquals(TIME_12_40, mediaEntitiesResult.get(0).getEnd());
@@ -212,7 +240,7 @@ class AudioTransformationServiceImplTest {
     void filterMediaByMediaRequestDatesWithRequestStartAndEndDateOutSideMediaRange() {
         List<MediaEntity> mediaEntities = createMediaEntities(TIME_12_00, TIME_12_20, TIME_12_20, TIME_12_40, TIME_12_40, TIME_12_59);
         MediaRequestEntity mediaRequestEntity = createMediaRequest(TIME_13_00, TIME_13_01);
-        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestDates(mediaEntities, mediaRequestEntity);
+        List<MediaEntity> mediaEntitiesResult = audioTransformationService.filterMediaByMediaRequestTimeframe(mediaEntities, mediaRequestEntity);
         assertEquals(0, mediaEntitiesResult.size());
     }
 

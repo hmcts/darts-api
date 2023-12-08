@@ -1,7 +1,7 @@
 package uk.gov.hmcts.darts.audio.deleter;
 
 import lombok.RequiredArgsConstructor;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
@@ -19,7 +19,7 @@ public class TransientObjectDirectoryDeletedFinder implements ObjectDirectoryDel
         return transientObjectDirectoryRepository.findByStatus(getMarkedForDeletionStatus());
     }
 
-    private ObjectDirectoryStatusEntity getMarkedForDeletionStatus() {
+    private ObjectRecordStatusEntity getMarkedForDeletionStatus() {
         return objectDirectoryStatusRepository.getReferenceById(
             ObjectDirectoryStatusEnum.MARKED_FOR_DELETION.getId());
     }

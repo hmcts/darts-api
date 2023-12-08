@@ -1,17 +1,19 @@
 package uk.gov.hmcts.darts.common.service;
 
+import com.azure.storage.blob.BlobClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,6 +33,9 @@ class TransientObjectDirectoryServiceTest {
     @Autowired
     private TransientObjectDirectoryService transientObjectDirectoryService;
 
+    @Autowired
+    private TransformedMediaHelper transformedMediaHelper;
+
     @Test
     void shouldSaveTransientDataLocation() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
@@ -38,18 +43,22 @@ class TransientObjectDirectoryServiceTest {
         var mediaRequestEntity1 = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(mediaRequestEntity1.getId());
-        UUID externalLocation = UUID.fromString("f744a74f-83c0-47e4-8bb2-2fd4d2b68647");
+        String blodId = "f744a74f-83c0-47e4-8bb2-2fd4d2b68647";
+        BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
+        blobClientBuilder.blobName(blodId);
+        blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
 
-        TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientDataLocation(
-            mediaRequestEntity,
-            externalLocation
-        );
+        TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(mediaRequestEntity, "aFilename");
+        TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
+            transformedMediaEntity,
+            blobClientBuilder.buildClient()
+                                                                                                                                          );
 
         assertNotNull(transientObjectDirectoryEntity);
         assertTrue(transientObjectDirectoryEntity.getId() > 0);
-        assertEquals(mediaRequestEntity1.getId(), transientObjectDirectoryEntity.getMediaRequest().getId());
+        assertEquals(mediaRequestEntity1.getId(), transientObjectDirectoryEntity.getTransformedMedia().getMediaRequest().getId());
         assertEquals(STORED.getId(), transientObjectDirectoryEntity.getStatus().getId());
-        assertEquals(externalLocation, transientObjectDirectoryEntity.getExternalLocation());
+        assertEquals(blodId, transientObjectDirectoryEntity.getExternalLocation().toString());
         assertNull(transientObjectDirectoryEntity.getChecksum());
         assertTrue(transientObjectDirectoryEntity.getCreatedDateTime()
                        .isAfter(OffsetDateTime.parse("2023-07-06T16:00:00.000Z")));

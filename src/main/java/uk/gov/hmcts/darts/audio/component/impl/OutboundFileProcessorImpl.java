@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.component.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +32,9 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private final AudioOperationService audioOperationService;
 
+    @Value("${darts.audio.audio_gap_seconds:1}")
+    private int acceptableAudioGapSecs;
+
     /**
      * Group the provided media/audio into logical groups in preparation for zipping with OutboundFileZipGenerator.
      *
@@ -37,8 +42,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
      *                                      downloaded audio file.
      * @param overallStartTime              The time at which the audio start should be trimmed to.
      * @param overallEndTime                The time at which the audio end should be trimmed to.
-     * @return A grouping of trimmed and concatenated multichannel audio files, whereby each group is a collection of
-     *     audio files that belong to a continuous recording session.
+     * @return A grouping of trimmed and concatenated multichannel audio files, whereby each group is a collection of audio files
+     *     that belong to a continuous recording session.
      */
     @Override
     public List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
@@ -121,10 +126,15 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             && groupedAudioFileInfo.getEndTime().equals(ungroupedAudioFileInfo.getEndTime());
 
         boolean hasContinuity = ungroupedAudioFileInfo.getChannel().equals(groupedAudioFileInfo.getChannel())
-            && (ungroupedAudioFileInfo.getStartTime().equals(groupedAudioFileInfo.getEndTime())
-            || ungroupedAudioFileInfo.getEndTime().equals(groupedAudioFileInfo.getStartTime()));
+            && (timeOverlaps(ungroupedAudioFileInfo, groupedAudioFileInfo.getEndTime().plusSeconds(acceptableAudioGapSecs))
+            || timeOverlaps(groupedAudioFileInfo, ungroupedAudioFileInfo.getEndTime().plusSeconds(acceptableAudioGapSecs)));
 
         return hasEqualTimestamps || hasContinuity;
+    }
+
+    private boolean timeOverlaps(AudioFileInfo audioFileInfo, Instant timeToCheck) {
+        return !timeToCheck.isBefore(audioFileInfo.getStartTime())//is on or after start time
+            && !timeToCheck.isAfter(audioFileInfo.getEndTime()); //is on or before end time
     }
 
     private List<AudioFileInfo> concatenateByChannel(List<AudioFileInfo> audioFileInfos)
@@ -177,7 +187,6 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             trimEndDuration
         );
     }
-
 
 
     private List<AudioFileInfo> trimAllToPeriod(List<AudioFileInfo> audioFileInfos, OffsetDateTime start,

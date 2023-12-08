@@ -36,7 +36,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AudioRequestSummary'
+                  $ref: '#/components/schemas/GetAudioRequestResponse'
         '400':
           description: A required parameter is missing or an invalid.
           content:
@@ -365,7 +365,7 @@ paths:
 
 components:
   schemas:
-    AudioRequestSummary:
+    GetAudioRequestResponse:
       type: object
       properties:
         media_request_id:
