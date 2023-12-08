@@ -79,6 +79,15 @@ public class UserAccountStub {
         return testUser;
     }
 
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
     private void addCourthouseToSecurityGroup(SecurityGroupEntity securityGroupEntity,
                                               CourthouseEntity courthouseEntity) {
         if (!securityGroupEntity.getCourthouseEntities().contains(courthouseEntity)) {
