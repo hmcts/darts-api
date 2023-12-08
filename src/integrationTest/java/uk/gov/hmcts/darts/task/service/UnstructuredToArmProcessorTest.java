@@ -38,7 +38,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
 @Transactional
-public class UnstructuredToArmProcessorTest extends IntegrationBase {
+class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
     public static final String DUMMY_BLOB_ID = "DUMMY_FILE";

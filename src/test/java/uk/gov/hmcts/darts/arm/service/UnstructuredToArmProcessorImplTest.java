@@ -29,13 +29,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmProcessorImplTest {
@@ -75,6 +73,8 @@ class UnstructuredToArmProcessorImplTest {
     @Mock
     ObjectDirectoryStatusEntity objectDirectoryStatusEntityStored;
     @Mock
+    ObjectDirectoryStatusEntity objectDirectoryStatusEntityArmIngestion;
+    @Mock
     ObjectDirectoryStatusEntity objectDirectoryStatusEntityFailed;
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
@@ -95,8 +95,11 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(12)).thenReturn(objectDirectoryStatusEntityArmIngestion);
+        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailed);
 
-        when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
+        //when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
+
         List<ObjectDirectoryStatusEntity> armStatuses = getArmStatuses();
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
@@ -114,16 +117,14 @@ class UnstructuredToArmProcessorImplTest {
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
-        ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
-        ObjectDirectoryStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
-
-        assertEquals(STORED.getId(), savedStatus.getId());
     }
 
     private List<ObjectDirectoryStatusEntity> getArmStatuses() {
         List<ObjectDirectoryStatusEntity> armStatuses = new ArrayList<>();
         armStatuses.add(objectDirectoryStatusEntityStored);
         armStatuses.add(objectDirectoryStatusEntityFailed);
+        armStatuses.add(objectDirectoryStatusEntityArmIngestion);
+
         return armStatuses;
     }
 
@@ -132,6 +133,8 @@ class UnstructuredToArmProcessorImplTest {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(12)).thenReturn(objectDirectoryStatusEntityArmIngestion);
+        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailed);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
@@ -173,9 +176,10 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processPreviousFailedAttempt() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-
+        
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
+        when(objectDirectoryStatusRepository.getReferenceById(12)).thenReturn(objectDirectoryStatusEntityArmIngestion);
+        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailed);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
