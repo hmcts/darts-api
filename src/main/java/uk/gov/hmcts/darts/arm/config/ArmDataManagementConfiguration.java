@@ -18,4 +18,7 @@ public class ArmDataManagementConfiguration {
 
     @Value("${darts.storage.arm.drop-zone}")
     private String armDropZone;
+
+    @Value("${darts.storage.arm.max-retry-attempts}")
+    private Integer maxRetryAttempts;
 }
