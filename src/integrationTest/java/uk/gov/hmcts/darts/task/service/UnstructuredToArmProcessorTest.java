@@ -1,16 +1,25 @@
 package uk.gov.hmcts.darts.task.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
+import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
+import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
+import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
@@ -28,15 +37,40 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
+@Transactional
 public class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
     public static final String DUMMY_BLOB_ID = "DUMMY_FILE";
 
-    @Autowired
     UnstructuredToArmProcessor unstructuredToArmProcessor;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
+
+    @Autowired
+    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    @Autowired
+    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    @Autowired
+    private ExternalLocationTypeRepository externalLocationTypeRepository;
+    @Autowired
+    private DataManagementApi dataManagementApi;
+    @Autowired
+    private UserAccountRepository userAccountRepository;
+    @Autowired
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
+
+
+    @BeforeEach
+    void setupData() {
+        unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(externalObjectDirectoryRepository,
+                                                                        objectDirectoryStatusRepository,
+                                                                        externalLocationTypeRepository,
+                                                                        dataManagementApi,
+                                                                        armDataManagementApi,
+                                                                        userAccountRepository,
+                                                                        armDataManagementConfiguration);
+    }
 
     @Test
     void movePendingDataFromUnstructuredToArmStorage() {
@@ -104,11 +138,11 @@ public class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectDirectoryStatusEntity(STORED),
+            dartsDatabase.getObjectDirectoryStatusEntity(FAILURE_ARM_INGESTION_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
-        armEod.setStatus(dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
+        //armEod.setStatus(dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
@@ -123,7 +157,7 @@ public class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(STORED.getId(), foundMedia.getStatus().getId());
+        assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
     }
 
     @Test

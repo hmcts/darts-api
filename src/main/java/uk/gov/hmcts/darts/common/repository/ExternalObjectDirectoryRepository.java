@@ -34,18 +34,18 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eo.id NOT IN
               (
               SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-              WHERE (eod.media is not null AND eod.media = eod2.media)
+              WHERE ((eod.media is not null AND eod.media = eod2.media)
               OR (eod.transcriptionDocumentEntity is not null AND eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
-              OR (eod.annotationDocumentEntity is not null AND eod.annotationDocumentEntity = eod2.annotationDocumentEntity)
+              OR (eod.annotationDocumentEntity is not null AND eod.annotationDocumentEntity = eod2.annotationDocumentEntity))
               AND eod.status = :status1
-              AND eod2.status = :status2
+              AND eod2.status in :statuses2
               AND eod.externalLocationType = :location1
               AND eod2.externalLocationType = :location2
               )
             """
     )
     List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status1,
-                                                                                  ObjectRecordStatusEntity status2,
+                                                                List<ObjectRecordStatusEntity> statuses2,
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2);
 
@@ -54,9 +54,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         SELECT eod FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
         AND eod.externalLocationType = :location
-        AND eod.media = :media
-        AND eod.transcriptionDocumentEntity = :transcription
-        AND eod.annotationDocumentEntity = :annotation
+        AND (:media is null or eod.media = :media)
+        AND (:transcription is null or eod.transcriptionDocumentEntity = :transcription)
+        AND (:annotation is null or eod.annotationDocumentEntity = :annotation)
         """
     )
     Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectDirectoryStatusEntity status,
