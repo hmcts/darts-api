@@ -61,12 +61,12 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(
             ExternalLocationTypeEnum.ARM.getId());
-        ObjectDirectoryStatusEntity failedArmStatus = objectDirectoryStatusRepository.getReferenceById(
+        ObjectRecordStatusEntity failedArmStatus = objectDirectoryStatusRepository.getReferenceById(
             ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED.getId());
-        ObjectDirectoryStatusEntity armIngestionStatus = objectDirectoryStatusRepository.getReferenceById(
+        ObjectRecordStatusEntity armIngestionStatus = objectDirectoryStatusRepository.getReferenceById(
             ObjectDirectoryStatusEnum.ARM_INGESTION.getId());
 
-        List<ObjectDirectoryStatusEntity> armStatuses = getArmStatuses(storedStatus, failedArmStatus, armIngestionStatus);
+        List<ObjectRecordStatusEntity> armStatuses = getArmStatuses(storedStatus, failedArmStatus, armIngestionStatus);
 
         var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             storedStatus,
@@ -115,10 +115,10 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         }
     }
 
-    private static List<ObjectDirectoryStatusEntity> getArmStatuses(ObjectDirectoryStatusEntity storedStatus,
-                                                                    ObjectDirectoryStatusEntity failedArmStatus,
-                                                                    ObjectDirectoryStatusEntity armIngestionStatus) {
-        List<ObjectDirectoryStatusEntity> armStatuses = new ArrayList<>();
+    private static List<ObjectRecordStatusEntity> getArmStatuses(ObjectRecordStatusEntity storedStatus,
+                                                                 ObjectRecordStatusEntity failedArmStatus,
+                                                                 ObjectRecordStatusEntity armIngestionStatus) {
+        List<ObjectRecordStatusEntity> armStatuses = new ArrayList<>();
         armStatuses.add(storedStatus);
         armStatuses.add(failedArmStatus);
         armStatuses.add(armIngestionStatus);

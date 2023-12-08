@@ -3,5 +3,5 @@ VALUES (8,'UnstructuredToArmDataStore','Move files from Unstructured to ARM data
 
 ALTER SEQUENCE aut_seq RESTART WITH 9;
 
-INSERT INTO object_directory_status (ods_id,ods_description) VALUES (12,'Arm Ingestion');
+INSERT INTO object_record_status (ors_id,ors_description) VALUES (12,'Arm Ingestion');
 ALTER SEQUENCE ods_seq RESTART WITH 12;
