@@ -153,9 +153,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     private void deleteTransientObjectDirectoryByTransformedMediaId(Integer transformedMediaId) {
-        Optional<TransientObjectDirectoryEntity> transientObject = transientObjectDirectoryRepository.findByTransformedMediaId(transformedMediaId);
-        if (transientObject.isPresent()) {
-            TransientObjectDirectoryEntity mediaTransientObject = transientObject.get();
+        List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByTransformedMediaId(transformedMediaId);
+        for (TransientObjectDirectoryEntity mediaTransientObject : transientObjectDirectoryEntities) {
             log.debug("deleting TransientObjectDirectoryEntity with id {}.", mediaTransientObject.getId());
             UUID blobId = mediaTransientObject.getExternalLocation();
 

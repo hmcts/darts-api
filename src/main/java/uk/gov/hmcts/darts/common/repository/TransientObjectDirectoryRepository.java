@@ -17,7 +17,7 @@ public interface TransientObjectDirectoryRepository extends JpaRepository<Transi
         WHERE tod.transformedMedia = tm
         and tm.id = :transformedMediaId
         """)
-    Optional<TransientObjectDirectoryEntity> findByTransformedMediaId(Integer transformedMediaId);
+    List<TransientObjectDirectoryEntity> findByTransformedMediaId(Integer transformedMediaId);
 
     @Query("""
         SELECT tod FROM MediaRequestEntity mr, TransformedMediaEntity tm, TransientObjectDirectoryEntity tod

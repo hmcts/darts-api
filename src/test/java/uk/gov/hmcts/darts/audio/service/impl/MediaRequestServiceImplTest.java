@@ -38,6 +38,7 @@ import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -188,7 +189,7 @@ class MediaRequestServiceImplTest {
             .thenReturn(List.of(transformedMediaEntity));
 
         when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+            .thenReturn(List.of(transientObjectDirectoryEntity));
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -210,7 +211,7 @@ class MediaRequestServiceImplTest {
             .thenReturn(List.of(transformedMediaEntity));
 
         when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+            .thenReturn(List.of(transientObjectDirectoryEntity));
 
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
@@ -230,7 +231,7 @@ class MediaRequestServiceImplTest {
             .thenReturn(List.of(transformedMediaEntity));
 
         when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
-            .thenReturn(Optional.empty());
+            .thenReturn(new ArrayList<>());
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
