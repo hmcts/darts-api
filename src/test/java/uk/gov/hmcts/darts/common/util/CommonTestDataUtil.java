@@ -409,6 +409,7 @@ public class CommonTestDataUtil {
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
         transcriptionUrgencyEntity.setId(transcriptionUrgencyEnum.getId());
         transcriptionUrgencyEntity.setDescription(transcriptionUrgencyEnum.name());
+        transcriptionUrgencyEntity.setPriorityOrder(transcriptionUrgencyEnum.getPriorityOrder());
 
         return transcriptionUrgencyEntity;
     }

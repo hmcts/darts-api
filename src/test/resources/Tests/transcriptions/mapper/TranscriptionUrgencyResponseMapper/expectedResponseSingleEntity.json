@@ -1,4 +1,5 @@
 {
   "transcription_urgency_id": 1,
-  "description": "STANDARD"
+  "description": "STANDARD",
+  "priority_order": 999
 }

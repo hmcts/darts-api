@@ -1,22 +1,27 @@
 [
   {
-    "transcription_urgency_id" : 2,
-    "description": "OVERNIGHT"
+    "transcription_urgency_id": 2,
+    "description": "OVERNIGHT",
+    "priority_order": 1
   },
   {
-    "transcription_urgency_id" : 4,
-    "description": "WORKING_DAYS_3"
+    "transcription_urgency_id": 4,
+    "description": "WORKING_DAYS_3",
+    "priority_order": 3
   },
   {
-    "transcription_urgency_id" : 5,
-    "description": "WORKING_DAYS_7"
+    "transcription_urgency_id": 5,
+    "description": "WORKING_DAYS_7",
+    "priority_order": 4
   },
   {
-    "transcription_urgency_id" : 6,
-    "description": "WORKING_DAYS_12"
+    "transcription_urgency_id": 6,
+    "description": "WORKING_DAYS_12",
+    "priority_order": 5
   },
   {
-    "transcription_urgency_id" : 7,
-    "description": "WORKING_DAYS_2"
+    "transcription_urgency_id": 7,
+    "description": "WORKING_DAYS_2",
+    "priority_order": 2
   }
 ]
