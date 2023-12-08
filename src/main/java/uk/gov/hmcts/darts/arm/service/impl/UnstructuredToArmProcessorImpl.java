@@ -118,7 +118,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         }
     }
 
-    private void saveToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity, ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity) {
+    private void saveToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity,
+                           ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity) {
         try {
             String filename = generateFilename(armExternalObjectDirectoryEntity);
             BinaryData inboundFile = dataManagementApi
@@ -182,11 +183,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         Integer documentId = 0;
         if (nonNull(externalObjectDirectoryEntity.getMedia())) {
             documentId = externalObjectDirectoryEntity.getMedia().getId();
-        }
-        else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {
+        } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {
             documentId = externalObjectDirectoryEntity.getTranscriptionDocumentEntity().getId();
-        }
-        else if (nonNull(externalObjectDirectoryEntity.getAnnotationDocumentEntity())) {
+        } else if (nonNull(externalObjectDirectoryEntity.getAnnotationDocumentEntity())) {
             documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
         }
 
