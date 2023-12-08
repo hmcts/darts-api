@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.ARM_INGESTION;
@@ -116,7 +115,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         }
     }
 
-    private static List<ObjectDirectoryStatusEntity> getArmStatuses(ObjectDirectoryStatusEntity storedStatus, ObjectDirectoryStatusEntity failedArmStatus, ObjectDirectoryStatusEntity armIngestionStatus) {
+    private static List<ObjectDirectoryStatusEntity> getArmStatuses(ObjectDirectoryStatusEntity storedStatus,
+                                                                    ObjectDirectoryStatusEntity failedArmStatus,
+                                                                    ObjectDirectoryStatusEntity armIngestionStatus) {
         List<ObjectDirectoryStatusEntity> armStatuses = new ArrayList<>();
         armStatuses.add(storedStatus);
         armStatuses.add(failedArmStatus);
@@ -200,9 +201,6 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
-        if (isNull(currentNumberOfAttempts)) {
-            currentNumberOfAttempts = 0;
-        }
         externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
 }
