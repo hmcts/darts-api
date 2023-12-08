@@ -17,7 +17,8 @@ public enum ObjectDirectoryStatusEnum {
     FAILURE_ARM_INGESTION_FAILED(8),
     AWAITING_VERIFICATION(9),
     MARKED_FOR_DELETION(10),
-    DELETED(11);
+    DELETED(11),
+    ARM_INGESTION(12);
 
     private final Integer id;
 

@@ -30,4 +30,6 @@ public interface DataManagementApi {
 
     UUID saveBlobDataToInboundContainer(BinaryData binaryData);
 
+    UUID saveBlobDataToARM(BinaryData binaryData);
+
 }
