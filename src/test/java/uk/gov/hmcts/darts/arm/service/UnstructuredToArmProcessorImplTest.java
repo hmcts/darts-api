@@ -176,7 +176,7 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processPreviousFailedAttempt() {
-        
+
         when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
         when(objectDirectoryStatusRepository.getReferenceById(12)).thenReturn(objectDirectoryStatusEntityArmIngestion);
         when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailed);
