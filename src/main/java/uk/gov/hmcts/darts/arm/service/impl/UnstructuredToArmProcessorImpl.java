@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.ARM_INGESTION;
@@ -66,10 +67,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         ObjectDirectoryStatusEntity armIngestionStatus = objectDirectoryStatusRepository.getReferenceById(
             ObjectDirectoryStatusEnum.ARM_INGESTION.getId());
 
-        List<ObjectDirectoryStatusEntity> armStatuses = new ArrayList<>();
-        armStatuses.add(storedStatus);
-        armStatuses.add(failedArmStatus);
-        armStatuses.add(armIngestionStatus);
+        List<ObjectDirectoryStatusEntity> armStatuses = getArmStatuses(storedStatus, failedArmStatus, armIngestionStatus);
 
         var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             storedStatus,
@@ -116,6 +114,14 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
         }
+    }
+
+    private static List<ObjectDirectoryStatusEntity> getArmStatuses(ObjectDirectoryStatusEntity storedStatus, ObjectDirectoryStatusEntity failedArmStatus, ObjectDirectoryStatusEntity armIngestionStatus) {
+        List<ObjectDirectoryStatusEntity> armStatuses = new ArrayList<>();
+        armStatuses.add(storedStatus);
+        armStatuses.add(failedArmStatus);
+        armStatuses.add(armIngestionStatus);
+        return armStatuses;
     }
 
     private void saveToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity,
@@ -194,6 +200,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
+        if (isNull(currentNumberOfAttempts)) {
+            currentNumberOfAttempts = 0;
+        }
         externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
 }

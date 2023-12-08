@@ -98,8 +98,6 @@ class UnstructuredToArmProcessorImplTest {
         when(objectDirectoryStatusRepository.getReferenceById(12)).thenReturn(objectDirectoryStatusEntityArmIngestion);
         when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailed);
 
-        //when(objectDirectoryStatusEntityStored.getId()).thenReturn(2);
-
         List<ObjectDirectoryStatusEntity> armStatuses = getArmStatuses();
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
