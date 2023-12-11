@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.usermanagement;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.Customization;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -22,7 +21,6 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    @Disabled
     void shouldCreateSecurityGroup() {
         Response response = buildRequestWithExternalAuth()
             .baseUri(getUri("/security-groups"))
@@ -31,7 +29,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                     {
                       "name": "ACME",
                       "display_name": "ACME Transcription Services",
-                      "description": "A test group"
+                      "description": "A temporary group created by functional test"
                     }
                       """)
             .post()
@@ -45,7 +43,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
                   "id": "",
                   "name": "ACME",
                   "display_name": "ACME Transcription Services",
-                  "description": "A test group",
+                  "description": "A temporary group created by functional test",
                   "display_state": true,
                   "global_access": false,
                   "role_id": 4

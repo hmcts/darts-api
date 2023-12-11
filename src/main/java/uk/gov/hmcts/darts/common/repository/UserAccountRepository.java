@@ -13,9 +13,9 @@ import java.util.Set;
 @Repository
 public interface UserAccountRepository extends JpaRepository<UserAccountEntity, Integer> {
 
-    Optional<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
+    List<UserAccountEntity> findByEmailAddressIgnoreCase(String emailAddress);
 
-    Optional<UserAccountEntity> findByAccountGuid(String guid);
+    Optional<UserAccountEntity> findByAccountGuidAndActive(String guid, Boolean active);
 
     //todo find out what user states are Active
     @Query("""
@@ -45,7 +45,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         FROM UserAccountEntity userAccount
         JOIN userAccount.securityGroupEntities securityGroup
         JOIN securityGroup.securityRoleEntity securityRole
-        WHERE (userAccount.emailAddress = :emailAddress OR userAccount.accountGuid = :accountGuid)
+        WHERE (LOWER(userAccount.emailAddress) = LOWER(:emailAddress) OR userAccount.accountGuid = :accountGuid)
         AND securityRole.id IN (:roleIds)
         AND securityGroup.globalAccess = true
         """)
@@ -60,5 +60,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccountEntity, 
         AND securityRole.id = :securityRoleId
         """)
     Optional<UserAccountEntity> findByRoleAndUserId(Integer securityRoleId, Integer userId);
+
+    List<UserAccountEntity> findByEmailAddressIgnoreCaseAndActive(String emailAddress, Boolean active);
 
 }

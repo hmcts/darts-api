@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -63,6 +64,11 @@ class PatchUserIntTest extends IntegrationBase {
             .getIntegrationTestUserAccountEntity();
         Mockito.when(authorisationApi.getCurrentUser())
             .thenReturn(integrationTestUser);
+    }
+
+    @AfterEach
+    void deleteUser() {
+        dartsDatabase.addToUserAccountTrash(ORIGINAL_EMAIL_ADDRESS);
     }
 
     @Test

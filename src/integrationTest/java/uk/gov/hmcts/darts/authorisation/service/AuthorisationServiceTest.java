@@ -171,6 +171,7 @@ class AuthorisationServiceTest {
         var c3Court = dartsDatabaseStub.createCourthouseUnlessExists("C3 COURT");
 
         var bristolUser = dartsDatabaseStub.getUserAccountRepository().findByEmailAddressIgnoreCase(emailAddress)
+            .stream().findFirst()
             .orElseThrow();
         final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
