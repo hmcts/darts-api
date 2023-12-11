@@ -84,10 +84,11 @@ public class UserIdentityImpl implements UserIdentity {
         String guid = getGuidFromToken();
         if (nonNull(guid)) {
             // System users will use GUID not email address
-            userAccount = userAccountRepository.findByAccountGuid(guid).orElse(null);
+            userAccount = userAccountRepository.findByAccountGuidAndActive(guid, true).orElse(null);
         }
         if (isNull(userAccount)) {
-            userAccount = userAccountRepository.findByEmailAddressIgnoreCase(getEmailAddressFromToken())
+            userAccount = userAccountRepository.findByEmailAddressIgnoreCaseAndActive(getEmailAddressFromToken(), true).stream()
+                .findFirst()
                 .orElseThrow(() -> new DartsApiException(USER_DETAILS_INVALID));
         }
         return userAccount;
