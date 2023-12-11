@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.darts.common.exception.DartsApiError;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionAuthorisation403ErrorCode;
+import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription400ErrorCode;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptions400ErrorCode;
 
 @Getter
@@ -81,9 +82,9 @@ public enum TranscriptionApiError implements DartsApiError {
         "User is not a transcriber user"
     ),
     BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER(
-        "112",
+        UpdateTranscription400ErrorCode.REQUESTOR_CANNOT_BE_APPROVER.getValue(),
         HttpStatus.BAD_REQUEST,
-        "Transcription approver cannot approve their own transcription requests. "
+        "Transcription approver cannot approve their own transcription requests."
     );
 
 
