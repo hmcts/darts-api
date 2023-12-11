@@ -48,11 +48,9 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
             if (nonNull(externalObjectDirectory.getMedia())) {
                 generateMediaArchiveRecordFile(externalObjectDirectoryId, archiveRecordAttempt, archiveRecordFileInfoList, externalObjectDirectory);
-            }
-            else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
+            } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
                 generateTranscriptionArchiveRecordFile(externalObjectDirectoryId, archiveRecordAttempt, archiveRecordFileInfoList, externalObjectDirectory);
-            }
-            else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
+            } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
                 generateAnnotationArchiveRecordFile(externalObjectDirectoryId, archiveRecordAttempt, archiveRecordFileInfoList, externalObjectDirectory);
             }
         } catch (EntityNotFoundException e) {
