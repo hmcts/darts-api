@@ -198,7 +198,6 @@ public class TestSupportController {
             auditRepository.saveAndFlush(audit);
             return new ResponseEntity<>(CREATED);
         } catch (DataIntegrityViolationException e) {
-            // if I let the exception bubble up we'd get a 500 status code, I need to catch it
             throw new ResponseStatusException(BAD_REQUEST);
         }
     }
