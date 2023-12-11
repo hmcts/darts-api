@@ -81,7 +81,7 @@ class TranscriptionResponseMapperTest {
     @Test
     void mapToTranscriptionUrgencyResponse() throws Exception {
         TranscriptionUrgencyEntity transcriptionUrgencyEntity =
-            CommonTestDataUtil.createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD);
+            CommonTestDataUtil.createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD, 999);
 
         TranscriptionUrgencyResponse transcriptionUrgencyResponse =
             TranscriptionResponseMapper.mapToTranscriptionUrgencyResponse(transcriptionUrgencyEntity);

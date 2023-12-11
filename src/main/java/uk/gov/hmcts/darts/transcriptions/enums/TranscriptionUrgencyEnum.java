@@ -9,16 +9,15 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 @AllArgsConstructor
 @Getter
 public enum TranscriptionUrgencyEnum {
-    STANDARD(1, 999),
-    OVERNIGHT(2, 1),
-    OTHER(3, 6),
-    WORKING_DAYS_3(4, 3),
-    WORKING_DAYS_7(5, 4),
-    WORKING_DAYS_12(6, 5),
-    WORKING_DAYS_2(7, 2);
+    STANDARD(1),
+    OVERNIGHT(2),
+    OTHER(3),
+    WORKING_DAYS_3(4),
+    WORKING_DAYS_7(5),
+    WORKING_DAYS_12(6),
+    WORKING_DAYS_2(7);
 
     private final Integer id;
-    private final Integer priorityOrder;
 
     public static TranscriptionUrgencyEnum fromId(Integer id) {
         for (TranscriptionUrgencyEnum b : TranscriptionUrgencyEnum.values()) {
