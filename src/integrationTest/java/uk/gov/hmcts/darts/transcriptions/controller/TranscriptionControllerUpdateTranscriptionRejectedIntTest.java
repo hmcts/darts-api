@@ -210,4 +210,31 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         verifyNoInteractions(mockAuditApi);
     }
 
+    @Test
+    void updateTranscriptionRejectWithRequestorSameAsApprover() throws Exception {
+
+        transcriptionEntity.setRequestor(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getUserName());
+        dartsDatabase.save(transcriptionEntity);
+
+        UpdateTranscription updateTranscription = new UpdateTranscription();
+        updateTranscription.setTranscriptionStatusId(REJECTED.getId());
+        updateTranscription.setWorkflowComment("REJECTED");
+
+        MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
+            String.format("/transcriptions/%d", transcriptionId)))
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(updateTranscription));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            {"type":"TRANSCRIPTION_114","title":"Transcription requestor cannot approve or reject their own transcription requests.","status":400}
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
+    }
+
 }

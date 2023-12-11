@@ -260,6 +260,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private void validateUpdateTranscription(TranscriptionEntity transcription,
                                              UpdateTranscription updateTranscription) {
 
+
+        if (getUserAccount().getUserName().equals(transcription.getRequestor())) {
+            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
+        }
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
         if (!workflowValidator.validateChangeToWorkflowStatus(
@@ -276,9 +280,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
 
-        if (getUserAccount().getUserName().equals(transcription.getRequestor())) {
-            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
-        }
     }
 
     private void notifyApprovers(TranscriptionEntity transcription) {

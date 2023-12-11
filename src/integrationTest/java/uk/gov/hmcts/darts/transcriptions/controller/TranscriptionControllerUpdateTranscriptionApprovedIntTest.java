@@ -239,7 +239,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
 
 
     @Test
-    void updateTranscriptionApprovedWithRequestSameAsApprover() throws Exception {
+    void updateTranscriptionApprovedWithRequestorSameAsApprover() throws Exception {
 
         transcriptionEntity.setRequestor(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getUserName());
         dartsDatabase.save(transcriptionEntity);
@@ -259,7 +259,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_114","title":"Transcription approver cannot approve their own transcription requests.","status":400}
+            {"type":"TRANSCRIPTION_114","title":"Transcription requestor cannot approve or reject their own transcription requests.","status":400}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
