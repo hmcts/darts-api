@@ -16,9 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(MockitoExtension.class)
-class ArmDataManagementServiceTest {
+class ArmServiceTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
 
