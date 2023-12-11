@@ -31,5 +31,4 @@ public class ArmServiceImpl implements ArmService {
         return blobPathAndName;
     }
 
-
 }
