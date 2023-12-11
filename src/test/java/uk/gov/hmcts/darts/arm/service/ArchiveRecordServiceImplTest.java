@@ -52,9 +52,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordServiceImplTest {
-    public static final String TEST_MEDIA_ARCHIVE_A_360 = "test-media-arm.a360";
-    public static final String TEST_TRANSCRIPTION_ARCHIVE_A_360 = "test-transcription-arm.a360";
-    public static final String TEST_ANNOTATION_ARCHIVE_A_360 = "test-annotation-arm.a360";
+    public static final String TEST_MEDIA_ARCHIVE_A_360 = "1234-media-arm.a360";
     public static final String MP_2 = "mp2";
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String DARTS = "DARTS";
@@ -189,6 +187,5 @@ class ArchiveRecordServiceImplTest {
         }
         return fileContents.toString();
     }
-
 
 }
