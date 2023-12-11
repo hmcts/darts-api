@@ -16,8 +16,8 @@ public class ArmDataManagementConfiguration {
     @Value("${darts.storage.arm.container-name}")
     private String armContainerName;
 
-    @Value("${darts.storage.arm.drop-zone}")
-    private String armDropZone;
+    @Value("${darts.storage.arm.folders.submission}")
+    private String armSubmissionDropZone;
 
     @Value("${darts.storage.arm.max-retry-attempts}")
     private Integer maxRetryAttempts;

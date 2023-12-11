@@ -157,7 +157,8 @@ darts:
     arm:
       connection-string: ${ARM_STORAGE_CONNECTION_STRING:}
       container-name: darts-arm
-      drop-zone: dropzone/DARTS/submission/
+      folders:
+        submission: dropzone/DARTS/submission/
       max-retry-attempts: 3
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
