@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -63,6 +64,11 @@ class PostUserIntTest extends IntegrationBase {
             .thenReturn(integrationTestUser);
     }
 
+    @AfterEach
+    void deleteUser() {
+        dartsDatabase.addToUserAccountTrash(EMAIL_ADDRESS);
+    }
+
     @Test
     void createUserShouldSucceedWhenProvidedWithValidValuesForMinimumRequiredFields() throws Exception {
         MockHttpServletRequestBuilder request = buildRequest()
@@ -93,7 +99,7 @@ class PostUserIntTest extends IntegrationBase {
             assertEquals(USERNAME, createdUserAccountEntity.getUserName());
             assertEquals(EMAIL_ADDRESS, createdUserAccountEntity.getEmailAddress());
             assertNull(createdUserAccountEntity.getUserDescription());
-            assertEquals(true, createdUserAccountEntity.isActive());
+            assertTrue(createdUserAccountEntity.isActive());
             assertTrue(createdUserAccountEntity.getSecurityGroupEntities().isEmpty());
             assertEquals(SYSTEM_USER_FLAG, createdUserAccountEntity.getIsSystemUser());
 

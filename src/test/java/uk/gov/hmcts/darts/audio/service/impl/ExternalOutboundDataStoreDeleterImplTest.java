@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundExternalObjectDirectoryDeletedFinder;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
@@ -42,7 +42,7 @@ class ExternalOutboundDataStoreDeleterImplTest {
 
     ExternalOutboundDataStoreDeleter deleter;
 
-    private ObjectDirectoryStatusEntity markedForDeletionStatus;
+    private ObjectRecordStatusEntity markedForDeletionStatus;
 
 
     @Mock
@@ -67,7 +67,7 @@ class ExternalOutboundDataStoreDeleterImplTest {
     }
 
     private void mockStatus() {
-        this.markedForDeletionStatus = new ObjectDirectoryStatusEntity();
+        this.markedForDeletionStatus = new ObjectRecordStatusEntity();
         markedForDeletionStatus.setId(ObjectDirectoryStatusEnum.DELETED.getId());
         when(objectDirectoryStatusRepository.getReferenceById(ObjectDirectoryStatusEnum.DELETED.getId())).thenReturn(
             markedForDeletionStatus);

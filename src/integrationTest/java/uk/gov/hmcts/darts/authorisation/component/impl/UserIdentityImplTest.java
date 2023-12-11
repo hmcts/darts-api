@@ -198,4 +198,21 @@ class UserIdentityImplTest extends IntegrationBase {
         assertFalse(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
 
     }
+
+    @Test
+    @Transactional
+    void whenEmailAddressIsWrongCaseInToken_thenUserHasGlobalAccessReturnsTrue() {
+        String guid = UUID.randomUUID().toString();
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("preferred_username", "integrationtest.user@EXAMPLE.COM")
+            .build();
+
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        dartsDatabaseStub.getUserAccountStub().createXhibitExternalUser(guid, null);
+
+        assertTrue(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
+
+    }
 }

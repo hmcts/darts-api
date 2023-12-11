@@ -65,8 +65,8 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 350MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
+      max-request-size: 360MB #this affects addAudio as well, so needs to handle a 350mb mp2 file
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -105,6 +105,7 @@ spring:
 
 darts:
   audio:
+    audio_gap_seconds: 1
     ffmpeg-executable: ffmpeg
     concat-workspace: ${user.home}/audiotransform/concatenate
     merge-workspace: ${user.home}/audiotransform/merge

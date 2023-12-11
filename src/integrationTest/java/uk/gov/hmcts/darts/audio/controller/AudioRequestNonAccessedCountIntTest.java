@@ -7,9 +7,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.net.URI;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,6 +32,11 @@ class AudioRequestNonAccessedCountIntTest extends IntegrationBase {
         dartsDatabase.createAndLoadNonAccessedCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .header("user_id", requestor.getId().toString());
+        List<TransformedMediaEntity> transformedMediaEntities = dartsDatabase.getTransformedMediaRepository().findAll();
+        for (TransformedMediaEntity transformedMedia : transformedMediaEntities) {
+            transformedMedia.setLastAccessed(null);
+            dartsDatabase.getTransformedMediaRepository().save(transformedMedia);
+        }
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())

@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -45,14 +46,11 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCase(
-            INTEGRATION_TEST_USER_EMAIL);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
+        if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString());
         }
+        return userAccounts.get(0);
     }
 
     private UserAccountEntity createIntegrationUser(String guid) {
@@ -73,6 +71,15 @@ public class UserAccountStub {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
 
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);

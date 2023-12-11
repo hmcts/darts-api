@@ -10,17 +10,17 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
-@Table(name = "object_directory_status")
+@Table(name = "object_record_status")
 @Data
-public class ObjectDirectoryStatusEntity {
+public class ObjectRecordStatusEntity {
 
     @Id
-    @Column(name = "ods_id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ods_gen")
-    @SequenceGenerator(name = "ods_gen", sequenceName = "ods_seq", allocationSize = 1)
+    @Column(name = "ors_id")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ors_gen")
+    @SequenceGenerator(name = "ors_gen", sequenceName = "ors_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "ods_description")
+    @Column(name = "ors_description")
     private String description;
 
 }

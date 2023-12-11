@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.datamanagement;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,8 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -19,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles({"dev","h2db"})
+@ActiveProfiles({"dev", "h2db"})
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @ExtendWith(MockitoExtension.class)
 class DataManagementServiceTest {
@@ -54,8 +57,9 @@ class DataManagementServiceTest {
         var uniqueBlobName = dataManagementService.saveBlobData(unstructuredStorageContainerName, data);
 
         var blobData = dataManagementService.getBlobData(
-                 unstructuredStorageContainerName,
-                 uniqueBlobName);
+            unstructuredStorageContainerName,
+            uniqueBlobName
+        );
 
         assertEquals(TEST_BINARY_STRING, blobData.toString());
     }
@@ -65,7 +69,21 @@ class DataManagementServiceTest {
         assertThrows(BlobStorageException.class, () ->
             dataManagementService.getBlobData(
                 "INVALID_CONTAINER_NAME",
-                UUID.fromString(TEST_BLOB_ID)));
+                UUID.fromString(TEST_BLOB_ID)
+            ));
     }
+
+    @Test
+    void saveBinaryDataWithMetadataToBlobStorage() {
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+        Map<String, String> metaDataMap = new HashMap<>();
+        metaDataMap.put("TestKey", "TestValue");
+        BlobClient blobClient = dataManagementService.saveBlobData(unstructuredStorageContainerName, data, metaDataMap);
+
+        assertTrue(blobClient.getProperties().getMetadata().containsKey("TestKey"));
+    }
+
 
 }

@@ -24,13 +24,13 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | Environment Variable Name        | Corresponding Azure Key Vault Secret Name |
 |----------------------------------|-------------------------------------------|
 | GOVUK_NOTIFY_API_KEY             | GovukNotifyTestApiKey                     |
-| FUNC_TEST_ROPC_USERNAME          | AzureAdB2CFuncTestROPCUsername           |
-| FUNC_TEST_ROPC_PASSWORD          | AzureAdB2CFuncTestROPCPassword           |
-| AAD_B2C_TENANT_ID_KEY            | AzureAdB2CTenantId                       |
-| AAD_B2C_CLIENT_ID_KEY            | AzureAdB2CClientId                       |
-| AAD_B2C_CLIENT_SECRET_KEY        | AzureAdB2CClientSecret                   |
-| AAD_B2C_ROPC_CLIENT_ID_KEY       | AzureAdB2CFuncTestROPCClientId           |
-| AAD_B2C_ROPC_CLIENT_SECRET_KEY   | AzureAdB2CFuncTestROPCClientSecret       |
+| FUNC_TEST_ROPC_USERNAME          | AzureAdB2CFuncTestROPCUsername            |
+| FUNC_TEST_ROPC_PASSWORD          | AzureAdB2CFuncTestROPCPassword            |
+| AAD_B2C_TENANT_ID_KEY            | AzureAdB2CTenantId                        |
+| AAD_B2C_CLIENT_ID_KEY            | AzureAdB2CClientId                        |
+| AAD_B2C_CLIENT_SECRET_KEY        | AzureAdB2CClientSecret                    |
+| AAD_B2C_ROPC_CLIENT_ID_KEY       | AzureAdB2CFuncTestROPCClientId            |
+| AAD_B2C_ROPC_CLIENT_SECRET_KEY   | AzureAdB2CFuncTestROPCClientSecret        |
 | AZURE_STORAGE_CONNECTION_STRING  | AzureStorageConnectionString              |
 | AAD_TENANT_ID                    | AzureADTenantId                           |
 | AAD_CLIENT_ID                    | AzureADClientId                           |
@@ -46,6 +46,9 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | DAR_MIDTIER_PASSWORD             | DarMidTierPassword                        |
 | AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME  | AzureAdB2CFuncTestROPCGlobalUsername      |
 | AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD  | AzureAdB2CFuncTestROPCGlobalPassword      |
+| AZURE_AD_FUNCTIONAL_TEST_USERNAME  | AzureADFunctionalTestUsername             |
+| AZURE_AD_FUNCTIONAL_TEST_PASSWORD  | AzureADFunctionalTestPassword             |
+
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
@@ -94,6 +97,8 @@ export DAR_MIDTIER_USER_NAME=
 export DAR_MIDTIER_PASSWORD=
 export AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD=
+export AZURE_AD_FUNCTIONAL_TEST_USERNAME=
+export AZURE_AD_FUNCTIONAL_TEST_PASSWORD=
 ```
 
 ### Storage Account

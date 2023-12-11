@@ -97,6 +97,7 @@ public class TestSupportController {
         removeCourtHouses(session);
 
         removeUsers(session);
+        removeSecurityGroups(session);
 
         session.getTransaction().commit();
         session.close();
@@ -324,10 +325,18 @@ public class TestSupportController {
 
     private void removeUsers(Session session) {
         session.createNativeQuery("""
-                delete from darts.user_account where description = 'Functional test user'
+                delete from darts.user_account where description = 'A temporary user created by functional test'
                 """, Integer.class)
             .executeUpdate();
     }
+
+    private void removeSecurityGroups(Session session) {
+        session.createNativeQuery("""
+                delete from darts.security_group where description = 'A temporary group created by functional test'
+                """, Integer.class)
+            .executeUpdate();
+    }
+
 
     @GetMapping(value = "/bank-holidays/{year}")
     public ResponseEntity<List<Event>> getBankHolidaysForYear(@PathVariable(name = "year") String year) {

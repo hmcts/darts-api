@@ -28,7 +28,7 @@ import java.util.List;
 @SuppressWarnings({"PMD.ShortClassName"})
 @Getter
 @Setter
-public class  CourtCaseEntity extends CreatedModifiedBaseEntity {
+public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public static final String COURT_CASE = "courtCase";
     public static final String VERSION_LABEL = "version_label";
@@ -42,6 +42,7 @@ public class  CourtCaseEntity extends CreatedModifiedBaseEntity {
     public static final String CASE_OBJECT_ID = "case_object_id";
     public static final String EVH_ID = "evh_id";
     public static final String CAS_ID = "cas_id";
+    public static final String RETAIN_UNTIL_TS = "retain_until_ts";
     public static final String TABLE_NAME = "court_case";
 
     @Id
@@ -108,6 +109,9 @@ public class  CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = END_OF_SENTENCE_TS)
     private OffsetDateTime endOfSentenceTimestamp;
+
+    @Column(name = RETAIN_UNTIL_TS)
+    private OffsetDateTime retainUntilTs;
 
     public void addHearing(HearingEntity hearing) {
         if (hearings.stream().noneMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()))) {

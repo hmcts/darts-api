@@ -58,4 +58,12 @@ public class TranscriptionDocumentEntity {
 
     @Column(name = "checksum", nullable = false)
     private String checksum;
+
+    @Column(name = "content_object_id")
+    private String contentObjectId;
+
+    @Column(name = "is_hidden", nullable = false)
+    private boolean isHidden;
+
+
 }

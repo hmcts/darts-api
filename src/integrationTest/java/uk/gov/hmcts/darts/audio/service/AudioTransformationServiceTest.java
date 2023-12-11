@@ -6,13 +6,11 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
@@ -31,7 +29,6 @@ import java.util.UUID;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -111,30 +108,6 @@ class AudioTransformationServiceTest extends IntegrationBase {
             eq(BINARY_DATA)
         );
         verifyNoMoreInteractions(mockDataManagementService);
-    }
-
-    @Test
-    void shouldSaveTransientDataLocation() {
-        dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        MediaRequestEntity mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(testUser, AudioRequestType.DOWNLOAD);
-
-        when(mockTransientObjectDirectoryService.saveTransientDataLocation(
-            mediaRequestEntity,
-            BLOB_LOCATION
-        )).thenReturn(mockTransientObjectDirectoryEntity);
-
-        TransientObjectDirectoryEntity transientObjectDirectoryEntity = audioTransformationService.saveTransientDataLocation(
-            mediaRequestEntity,
-            BLOB_LOCATION
-        );
-
-        assertNotNull(transientObjectDirectoryEntity);
-        verify(mockTransientObjectDirectoryService).saveTransientDataLocation(
-            eq(mediaRequestEntity),
-            eq(BLOB_LOCATION)
-        );
-        verifyNoMoreInteractions(mockTransientObjectDirectoryService);
     }
 
     @Test
@@ -222,7 +195,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
         ExternalLocationTypeEntity externalLocationTypeEntity =
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
-        ObjectDirectoryStatusEntity objectDirectoryStatus =
+        ObjectRecordStatusEntity objectDirectoryStatus =
             dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId());
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();

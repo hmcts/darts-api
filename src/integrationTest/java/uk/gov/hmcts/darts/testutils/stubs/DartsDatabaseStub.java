@@ -18,7 +18,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
@@ -49,6 +49,7 @@ import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -70,6 +71,7 @@ import java.util.UUID;
 import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
@@ -103,6 +105,7 @@ public class DartsDatabaseStub {
     private final TranscriptionRepository transcriptionRepository;
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
+    private final TransformedMediaRepository transformedMediaRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
@@ -115,8 +118,10 @@ public class DartsDatabaseStub {
     private final AuditStub auditStub;
     private final EventStub eventStub;
     private final TranscriptionStub transcriptionStub;
+    private final TransformedMediaStub transformedMediaStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
+    private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
@@ -125,6 +130,7 @@ public class DartsDatabaseStub {
         transcriptionRepository.deleteAll();
         externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
+        transformedMediaRepository.deleteAll();
         mediaRequestRepository.deleteAll();
         eventRepository.deleteAll();
         hearingRepository.deleteAll();
@@ -141,6 +147,8 @@ public class DartsDatabaseStub {
         courthouseRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
+        userAccountRepository.deleteAll(userAccountBin);
+        userAccountBin.clear();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -301,7 +309,7 @@ public class DartsDatabaseStub {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    public ObjectDirectoryStatusEntity getObjectDirectoryStatusEntity(
+    public ObjectRecordStatusEntity getObjectDirectoryStatusEntity(
         ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
         return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
     }
@@ -328,14 +336,19 @@ public class DartsDatabaseStub {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 
-        return save(
-            AudioTestData.createCompletedMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                null, audioRequestType
-            ));
+        MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T14:00:00Z"), audioRequestType
+        );
+        save(completedMediaRequest);
+
+        OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, UTC);
+        OffsetDateTime lastAccessed = OffsetDateTime.of(2023, 6, 30, 13, 0, 0, 0, UTC);
+        transformedMediaStub.createTransformedMediaEntity(completedMediaRequest, "T20231010_0", expiryTime, lastAccessed);
+
+        return completedMediaRequest;
     }
 
     public MediaRequestEntity createAndLoadExpiredMediaRequestEntity(HearingEntity hearing,
@@ -355,15 +368,14 @@ public class DartsDatabaseStub {
     public MediaRequestEntity createAndLoadCompletedMediaRequestEntity(HearingEntity hearing,
                                                                        UserAccountEntity requestor,
                                                                        AudioRequestType audioRequestType) {
-        return save(
-            AudioTestData.createCompletedMediaRequest(
-                hearing,
-                requestor,
-                OffsetDateTime.parse("2023-06-26T13:00:00Z"),
-                OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                OffsetDateTime.parse("2023-06-30T13:00:00Z"),
-                audioRequestType
-            ));
+        MediaRequestEntity completedMediaRequest = AudioTestData.createCompletedMediaRequest(
+            hearing,
+            requestor,
+            OffsetDateTime.parse("2023-06-26T13:00:00Z"),
+            OffsetDateTime.parse("2023-06-26T13:45:00Z"),
+            audioRequestType
+        );
+        return save(completedMediaRequest);
     }
 
     public MediaEntity addMediaToHearing(HearingEntity hearing, MediaEntity mediaEntity) {
@@ -438,19 +450,21 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
-    public void createTestUserAccount() {
-        Optional<UserAccountEntity> foundAccount = userAccountRepository.findByEmailAddressIgnoreCase(
-            "test.user@example.com");
-        if (foundAccount.isPresent()) {
-            return;
-        }
-        UserAccountEntity testUser = new UserAccountEntity();
-        testUser.setEmailAddress("test.user@example.com");
-        testUser.setUserName("testuser");
-        testUser.setAccountGuid(UUID.randomUUID().toString());
-        testUser.setIsSystemUser(false);
-        testUser.setActive(true);
-        userAccountRepository.saveAndFlush(testUser);
+    public void addToUserAccountTrash(String... emailAddresses) {
+        stream(emailAddresses)
+            .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
+            .forEach(userAccountBin::add);
     }
 
+    public void createTestUserAccount() {
+        if (userAccountRepository.findByEmailAddressIgnoreCase("test.user@example.com").isEmpty()) {
+            UserAccountEntity testUser = new UserAccountEntity();
+            testUser.setEmailAddress("test.user@example.com");
+            testUser.setUserName("testuser");
+            testUser.setAccountGuid(UUID.randomUUID().toString());
+            testUser.setIsSystemUser(false);
+            testUser.setActive(true);
+            userAccountRepository.saveAndFlush(testUser);
+        }
+    }
 }
