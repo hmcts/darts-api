@@ -5,23 +5,34 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
+import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
+import uk.gov.hmcts.darts.notification.api.NotificationApi;
+import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,10 +48,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.DEFENDANTS;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
 
 @ExtendWith(MockitoExtension.class)
 class AudioTransformationServiceImplTest {
-
     private static final OffsetDateTime TIME_11_59 = OffsetDateTime.parse("2023-01-01T11:59Z");
     private static final OffsetDateTime TIME_12_00 = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final OffsetDateTime TIME_12_01 = OffsetDateTime.parse("2023-01-01T12:01Z");
@@ -56,6 +71,15 @@ class AudioTransformationServiceImplTest {
     private static final UUID BLOB_LOCATION = UUID.randomUUID();
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
     private static final BinaryData BINARY_DATA = BinaryData.fromBytes(TEST_BINARY_STRING.getBytes());
+    public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
+    public static final String MOCK_DEFENDANT_NAME = "Any Defendant";
+    public static final String MOCK_DEFENDANT_LIST = "Any Defendant, Any Defendant";
+    public static final String NOT_AVAILABLE = "N/A";
+    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 5, 1);
+    public static final String MOCK_HEARING_DATE_FORMATTED = "1st May 2023";
+    public static final String MOCK_COURTHOUSE_NAME = "mockCourtHouse";
+    public static final String MOCK_EMAIL = "mock.email@mock.com";
+    public static final int MOCK_CASEID = 99;
 
     @Mock
     private DataManagementApi mockDataManagementApi;
@@ -87,6 +111,27 @@ class AudioTransformationServiceImplTest {
 
     @Mock
     private HearingEntity mockHearing;
+
+    @Mock
+    private CourtCaseEntity mockCourtCase;
+
+    @Mock
+    private UserAccountEntity mockUserAccountEntity;
+
+    @Mock
+    private UserAccountRepository mockUserAccountRepository;
+
+    @Mock
+    private CourthouseEntity mockCourthouse;
+
+    @Mock
+    private NotificationApi mockNotificationApi;
+
+    @Mock
+    private DefendantEntity mockDefendantEntity;
+
+    @Captor
+    private ArgumentCaptor<SaveNotificationToDbRequest> dbNotificationRequestCaptor;
 
 
     @Test
@@ -266,5 +311,145 @@ class AudioTransformationServiceImplTest {
         mediaRequest.setStartTime(startTime);
         mediaRequest.setEndTime(endTime);
         return mediaRequest;
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotification() {
+        List<String> defendants = new ArrayList<>();
+        defendants.add(MOCK_DEFENDANT_NAME);
+        defendants.add(MOCK_DEFENDANT_NAME);
+
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
+        when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+        assertEquals(actual.getTemplateValues().get(AUDIO_START_TIME), TIME_12_00.format(formatter));
+        assertEquals(actual.getTemplateValues().get(AUDIO_END_TIME), TIME_13_00.format(formatter));
+        assertEquals(MOCK_HEARING_DATE_FORMATTED, actual.getTemplateValues().get(HEARING_DATE));
+        assertEquals(MOCK_COURTHOUSE_NAME, actual.getTemplateValues().get(COURTHOUSE));
+        assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
+        assertEquals(MOCK_EMAIL, actual.getEmailAddresses());
+        assertEquals(actual.getEventId(), NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+        assertEquals(MOCK_CASEID, actual.getCaseId());
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationNoDefendants() {
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(NO_DEFENDANTS, actual.getTemplateValues().get(DEFENDANTS));
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationWithADefendant() {
+        List<String> defendants = new ArrayList<>();
+        defendants.add(MOCK_DEFENDANT_NAME);
+
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
+        when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(MOCK_DEFENDANT_NAME, actual.getTemplateValues().get(DEFENDANTS));
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationWithDefendants() {
+        List<String> defendants = new ArrayList<>();
+        defendants.add(MOCK_DEFENDANT_NAME);
+        defendants.add(MOCK_DEFENDANT_NAME);
+
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
+        when(mockCourtCase.getDefendantStringList()).thenReturn(defendants);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(MOCK_DEFENDANT_LIST, actual.getTemplateValues().get(DEFENDANTS));
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationMissingCourthouseName() {
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, null, TIME_12_00, TIME_13_00);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(NOT_AVAILABLE, actual.getTemplateValues().get(COURTHOUSE));
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationMissingHearingData() {
+        initNotifyUserScheduleErrorNotificationMocks(null, MOCK_COURTHOUSE_NAME, TIME_12_00, TIME_13_00);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(NOT_AVAILABLE, actual.getTemplateValues().get(HEARING_DATE));
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationMissingNoStartTime() {
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, null, TIME_13_00);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(NOT_AVAILABLE, actual.getTemplateValues().get(AUDIO_START_TIME));
+    }
+
+    @Test
+    void testNotifyUserScheduleErrorNotificationMissingNoEndTime() {
+        initNotifyUserScheduleErrorNotificationMocks(MOCK_HEARING_DATE, MOCK_COURTHOUSE_NAME, TIME_12_00, null);
+
+        audioTransformationService.notifyUser(mockMediaRequestEntity, mockCourtCase, NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString());
+
+        verify(mockNotificationApi).scheduleNotification(dbNotificationRequestCaptor.capture());
+        var actual = dbNotificationRequestCaptor.getValue();
+        assertEquals(NOT_AVAILABLE, actual.getTemplateValues().get(AUDIO_END_TIME));
+    }
+
+    private void initNotifyUserScheduleErrorNotificationMocks(LocalDate hearingDate, String courthouseName, OffsetDateTime startTime, OffsetDateTime endTime) {
+        when(mockMediaRequestEntity.getId()).thenReturn(1);
+        when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
+        when(mockMediaRequestEntity.getStartTime()).thenReturn(startTime);
+        when(mockMediaRequestEntity.getEndTime()).thenReturn(endTime);
+        when(mockMediaRequestEntity.getRequestor()).thenReturn(mockUserAccountEntity);
+        when(mockUserAccountEntity.getId()).thenReturn(1);
+        when(mockUserAccountEntity.getEmailAddress()).thenReturn(MOCK_EMAIL);
+        when(mockHearing.getHearingDate()).thenReturn(hearingDate);
+        when(mockHearing.getCourtCase()).thenReturn(mockCourtCase);
+        when(mockCourtCase.getId()).thenReturn(MOCK_CASEID);
+        when(mockCourtCase.getCourthouse()).thenReturn(mockCourthouse);
+        when(mockCourthouse.getCourthouseName()).thenReturn(courthouseName);
+        when(mockUserAccountRepository.findById(any())).thenReturn(Optional.of(mockUserAccountEntity));
+    }
+
+    @Test
+    void getDayFormat() {
+        assertEquals("st", AudioTransformationServiceImpl.getNthNumber(1));
+        assertEquals("nd", AudioTransformationServiceImpl.getNthNumber(2));
+        assertEquals("rd", AudioTransformationServiceImpl.getNthNumber(3));
+        assertEquals("th", AudioTransformationServiceImpl.getNthNumber(4));
+        assertEquals("th", AudioTransformationServiceImpl.getNthNumber(18));
+        assertEquals("st", AudioTransformationServiceImpl.getNthNumber(21));
+        assertEquals("nd", AudioTransformationServiceImpl.getNthNumber(22));
+        assertEquals("rd", AudioTransformationServiceImpl.getNthNumber(23));
+        assertEquals("th", AudioTransformationServiceImpl.getNthNumber(24));
     }
 }
