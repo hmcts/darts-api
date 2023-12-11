@@ -104,6 +104,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CO
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
@@ -161,7 +162,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         duplicateRequestDetector.checkForDuplicate(transcriptionRequestDetails, isManual);
 
-        // todo: change getUrgencyId to getTranscriptionUrgencyId
         TranscriptionEntity transcription = saveTranscription(
             userAccount,
             transcriptionRequestDetails,
@@ -274,6 +274,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         if (REJECTED.equals(desiredTargetTranscriptionStatus)
             && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
+        }
+
+        if (getUserAccount().getUserName().equals(transcription.getRequestor())) {
+            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
         }
     }
 
@@ -548,14 +552,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     public TranscriptionTranscriberCountsResponse getTranscriptionTranscriberCounts(Integer userId) {
 
         Optional<UserAccountEntity> user = userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), userId);
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             throw new DartsApiException(USER_NOT_TRANSCRIBER);
         }
 
         List<Integer> courthouseIds = transcriberTranscriptsQuery.getAuthorisedCourthouses(userId, TRANSCRIBER.getId());
 
         Integer numUnassigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, APPROVED.getId(), userId);
-        Integer numAssigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, WITH_TRANSCRIBER.getId(),userId);
+        Integer numAssigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, WITH_TRANSCRIBER.getId(), userId);
 
         final var getTranscriptionTranscriberCounts = new TranscriptionTranscriberCountsResponse();
         getTranscriptionTranscriberCounts.setAssigned(numAssigned);
@@ -639,9 +643,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         if (!validated.isEmpty()) {
-            validated.stream().forEach(entity -> {
-                UpdateTranscriptionEntityHelper.updateTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request).get());
-            });
+            validated.forEach(entity -> UpdateTranscriptionEntityHelper.updateTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request)
+                                      .get()));
 
             transcriptionRepository.saveAll(validated);
         }
@@ -653,7 +656,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
-        return transcriptionEntities.stream().map(e -> e.getId()).collect(Collectors.toList());
+        return transcriptionEntities.stream().map(TranscriptionEntity::getId).collect(Collectors.toList());
     }
 
     private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Integer> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {
