@@ -456,8 +456,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState() {
-        return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(
-            transcriptionUrgencyRepository.findAllByDisplayStateTrue());
+        return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAllByDisplayStateTrue());
     }
 
     @Override
