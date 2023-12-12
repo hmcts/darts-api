@@ -49,13 +49,13 @@ class ArmServiceFunctionalTest {
         ArmBlobInfo armBlobInfo = armService.saveBlobData(armContainerName, filename, data);
         assertNotNull(armBlobInfo);
         log.info("Blob name {}, Blob path {}", armBlobInfo.getBlobName(), armBlobInfo.getBlobPathAndName());
-        blobsToBeDeleted.add(armBlobInfo.getBlobPathAndName());
+        blobsToBeDeleted.add(armBlobInfo.getBlobName());
     }
 
     @Test
     void cleanupArmBlobData() throws AzureDeleteBlobException {
-        for (String blobPathAndName: blobsToBeDeleted) {
-            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        for (String blobName: blobsToBeDeleted) {
+            armTestUtil.deleteBlobData(armContainerName, blobName);
         }
     }
 }
