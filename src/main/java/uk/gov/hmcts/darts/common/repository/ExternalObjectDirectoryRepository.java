@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
@@ -20,14 +20,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         "SELECT eod FROM ExternalObjectDirectoryEntity eod, MediaEntity med " +
             "WHERE eod.media = :media AND eod.status = :status AND eod.externalLocationType = :externalLocationType"
     )
-    List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media, ObjectDirectoryStatusEntity status,
+    List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media, ObjectRecordStatusEntity status,
                                                                  ExternalLocationTypeEntity externalLocationType);
 
     @Query(
         "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
             "WHERE eod.status = :status AND eod.externalLocationType = :type"
     )
-    List<ExternalObjectDirectoryEntity> findByStatusAndType(ObjectDirectoryStatusEntity status, ExternalLocationTypeEntity type);
+    List<ExternalObjectDirectoryEntity> findByStatusAndType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
 
     @Query(
         "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
@@ -39,17 +39,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             "OR eod.status = :status6) " +
             "AND eod.externalLocationType = :type"
     )
-    List<ExternalObjectDirectoryEntity> findByFailedAndType(ObjectDirectoryStatusEntity status1,
-                                                               ObjectDirectoryStatusEntity status2,
-                                                               ObjectDirectoryStatusEntity status3,
-                                                               ObjectDirectoryStatusEntity status4,
-                                                               ObjectDirectoryStatusEntity status5,
-                                                               ObjectDirectoryStatusEntity status6,
-                                                               ExternalLocationTypeEntity type);
+    List<ExternalObjectDirectoryEntity> findByFailedAndType(ObjectRecordStatusEntity status1,
+                                                            ObjectRecordStatusEntity status2,
+                                                            ObjectRecordStatusEntity status3,
+                                                            ObjectRecordStatusEntity status4,
+                                                            ObjectRecordStatusEntity status5,
+                                                            ObjectRecordStatusEntity status6,
+                                                            ExternalLocationTypeEntity type);
 
     @Query("SELECT eod FROM ExternalObjectDirectoryEntity eod WHERE eod.externalLocationType = :externalLocationTypeEntity AND eod.status = :status")
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndMarkedForDeletion(ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                                       ObjectDirectoryStatusEntity status);
+                                                                                       ObjectRecordStatusEntity status);
 
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);
@@ -66,8 +66,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod2.lastModifiedDateTime < :lastModifiedBefore
             """
     )
-    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(ObjectDirectoryStatusEntity status1,
-                                                                ObjectDirectoryStatusEntity status2,
+    List<Integer> findMediaFileIdsIn2StorageLocationsBeforeTime(ObjectRecordStatusEntity status1,
+                                                                ObjectRecordStatusEntity status2,
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2,
                                                                 OffsetDateTime lastModifiedBefore);
@@ -81,6 +81,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             eod.lastModifiedDateTime = :timestamp
             where eod.id in :idsToDelete
             """)
-    void updateStatus(ObjectDirectoryStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
+    void updateStatus(ObjectRecordStatusEntity newStatus, UserAccountEntity userAccount, List<Integer> idsToDelete, OffsetDateTime timestamp);
 
 }

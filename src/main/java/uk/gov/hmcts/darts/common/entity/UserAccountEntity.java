@@ -10,6 +10,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
@@ -42,8 +43,9 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "description")
     private String userDescription;
 
-    @Column(name = "user_state")
-    private Integer state;
+    @Getter(AccessLevel.NONE)
+    @Column(name = "is_active")
+    private Boolean active;
 
     @Column(name = "last_login_ts")
     private OffsetDateTime lastLoginTime;
@@ -59,5 +61,9 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
         joinColumns = {@JoinColumn(name = "usr_id")},
         inverseJoinColumns = {@JoinColumn(name = "grp_id")})
     private Set<SecurityGroupEntity> securityGroupEntities = new LinkedHashSet<>();
+
+    public Boolean isActive() {
+        return active;
+    }
 
 }

@@ -46,8 +46,8 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     private AnnotationDocumentEntity annotationDocumentEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ods_id", foreignKey = @ForeignKey(name = "eod_object_directory_status_fk"), nullable = false)
-    private ObjectDirectoryStatusEntity status;
+    @JoinColumn(name = "ors_id", foreignKey = @ForeignKey(name = "eod_object_record_status_fk"), nullable = false)
+    private ObjectRecordStatusEntity status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "elt_id", foreignKey = @ForeignKey(name = "eod_external_location_type_fk"), nullable = false)

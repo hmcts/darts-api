@@ -416,7 +416,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
     private void assertTransientObjectDirectoryStateChanged(MediaRequestEntity expiredMediaRequest) {
         var transientObjectDirectoryEntity
-            = dartsDatabase.getTransientObjectDirectoryRepository().getTransientObjectDirectoryEntityByMediaRequest_Id(
+            = dartsDatabase.getTransientObjectDirectoryRepository().findByMediaRequestId(
             expiredMediaRequest.getId()).get();
 
         assertEquals(
@@ -436,7 +436,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         assertEquals(COMPLETED, savedMediaRequest.getStatus());
 
         var transientObjectDirectoryEntity
-            = dartsDatabase.getTransientObjectDirectoryRepository().getTransientObjectDirectoryEntityByMediaRequest_Id(
+            = dartsDatabase.getTransientObjectDirectoryRepository().findByMediaRequestId(
             savedMediaRequest.getId()).get();
 
         assertEquals(

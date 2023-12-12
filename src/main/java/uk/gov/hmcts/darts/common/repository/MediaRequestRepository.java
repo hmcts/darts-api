@@ -15,13 +15,31 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
 
     Optional<MediaRequestEntity> findTopByStatusOrderByCreatedDateTimeAsc(AudioRequestStatus status);
 
-    long countByRequestor_IdAndStatusAndLastAccessedDateTime(Integer id, AudioRequestStatus status, OffsetDateTime lastAccessedDateTime);
+    @Query("""
+        SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
+        WHERE tm.mediaRequest = mr
+        AND mr.requestor.id = :userId
+        AND tm.lastAccessed = null
+        AND mr.status = :status
+        """)
+    long countTransformedEntitiesByRequestorIdAndStatusNotAccessed(Integer userId, AudioRequestStatus status);
 
 
-    @Query("SELECT m.id FROM MediaRequestEntity m WHERE lastAccessedDateTime < :lastAccessedDateTime AND status = :status")
+    @Query("""
+        SELECT distinct(mr.id) FROM MediaRequestEntity mr, TransformedMediaEntity tm
+        WHERE tm.mediaRequest = mr
+        AND tm.lastAccessed < :lastAccessedDateTime
+        AND mr.status = :status
+        """)
     List<Integer> findAllIdsByLastAccessedTimeBeforeAndStatus(OffsetDateTime lastAccessedDateTime, AudioRequestStatus status);
 
-    @Query("SELECT m.id FROM MediaRequestEntity m WHERE createdDateTime < :createdDateTime AND status <> :status AND lastAccessedDateTime IS NULL")
+    @Query("""
+        SELECT distinct(mr.id) FROM MediaRequestEntity mr, TransformedMediaEntity tm
+        WHERE tm.mediaRequest = mr
+        AND mr.createdDateTime < :createdDateTime
+        AND mr.status <> :status
+        AND tm.lastAccessed IS NULL
+        """)
     List<Integer> findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(OffsetDateTime createdDateTime, AudioRequestStatus status);
 
 }

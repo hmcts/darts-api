@@ -10,14 +10,13 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.DISABLED;
-import static uk.gov.hmcts.darts.common.enums.UserStateEnum.ENABLED;
 
 @Component
 @RequiredArgsConstructor
@@ -39,7 +38,7 @@ public class UserAccountStub {
             var newUser = new UserAccountEntity();
             newUser.setUserName("System User");
             newUser.setEmailAddress("system.user@example.com");
-            newUser.setState(ENABLED.getId());
+            newUser.setActive(true);
             newUser.setAccountGuid(UUID.randomUUID().toString());
             newUser.setIsSystemUser(true);
             return userAccountRepository.saveAndFlush(newUser);
@@ -47,14 +46,11 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCase(
-            INTEGRATION_TEST_USER_EMAIL);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
+        if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString());
         }
+        return userAccounts.get(0);
     }
 
     private UserAccountEntity createIntegrationUser(String guid) {
@@ -64,7 +60,7 @@ public class UserAccountStub {
         newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
-        newUser.setState(DISABLED.getId());
+        newUser.setActive(true);
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
         return userAccountRepository.saveAndFlush(newUser);
@@ -75,6 +71,15 @@ public class UserAccountStub {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
 
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         var testUser = getIntegrationTestUserAccountEntity();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);

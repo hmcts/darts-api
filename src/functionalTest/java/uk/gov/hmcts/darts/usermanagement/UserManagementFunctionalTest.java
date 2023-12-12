@@ -31,8 +31,8 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "id": "",
                     "full_name": "James Smith",
                     "email_address": "james.smith@hmcts.net",
-                    "description": "Functional test user",
-                    "state": "ENABLED",
+                    "description": "A temporary user created by functional test",
+                    "active": true,
                     "security_groups": [ ]
                 }
                 """,
@@ -67,8 +67,8 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "id": "",
                     "full_name": "Jimmy Smith",
                     "email_address": "james.smith@hmcts.net",
-                    "description": "Functional test user",
-                    "state": "ENABLED",
+                    "description": "A temporary user created by functional test",
+                    "active": true,
                     "security_groups": [ ]
                 }
                 """,
@@ -88,7 +88,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                       {
                            "full_name": "James Smith",
                            "email_address": "james.smith@hmcts.net",
-                           "description": "Functional test user"
+                           "description": "A temporary user created by functional test"
                       }
                       """)
             .post()

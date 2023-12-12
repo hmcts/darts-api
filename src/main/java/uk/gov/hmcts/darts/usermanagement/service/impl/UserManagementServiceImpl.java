@@ -1,20 +1,20 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
-import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.component.validation.Validator;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
-import uk.gov.hmcts.darts.usermanagement.model.UserState;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
@@ -27,6 +27,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 @Service
 @RequiredArgsConstructor
 public class UserManagementServiceImpl implements UserManagementService {
@@ -36,10 +38,18 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final SecurityGroupRepository securityGroupRepository;
     private final AuthorisationApi authorisationApi;
     private final UserSearchQuery userSearchQuery;
+    private final Validator<User> duplicateEmailValidator;
+    private final Validator<Integer> userAccountExistsValidator;
 
     @Override
+    @Transactional
     public UserWithId createUser(User user) {
+        duplicateEmailValidator.validate(user);
+
         var userEntity = userAccountMapper.mapToUserEntity(user);
+        if (isNull(userEntity.isActive())) {
+            userEntity.setActive(true);
+        }
         userEntity.setIsSystemUser(false);
         mapSecurityGroupsToUserEntity(user.getSecurityGroups(), userEntity);
 
@@ -61,15 +71,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    @Transactional
     public UserWithIdAndLastLogin modifyUser(Integer userId, UserPatch userPatch) {
-        var userEntity = userAccountRepository.findById(userId)
-            .orElseThrow(() -> new DartsApiException(
-                UserManagementError.USER_NOT_FOUND,
-                String.format("User id %d not found", userId)
-            ));
-        updateEntity(userPatch, userEntity);
+        userAccountExistsValidator.validate(userId);
 
-        UserAccountEntity updatedUserEntity = userAccountRepository.save(userEntity);
+        UserAccountEntity updatedUserEntity = userAccountRepository.findById(userId)
+            .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
 
         UserWithIdAndLastLogin user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
         List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
@@ -92,26 +99,31 @@ public class UserManagementServiceImpl implements UserManagementService {
         return userWithIdAndLastLoginList;
     }
 
-    private void updateEntity(UserPatch user, UserAccountEntity userAccountEntity) {
-        String name = user.getFullName();
+    private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
+        updateEntity(userPatch, userEntity);
+        return userAccountRepository.save(userEntity);
+    }
+
+    private void updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
+        String name = userPatch.getFullName();
         if (name != null) {
             userAccountEntity.setUserName(name);
         }
 
-        String description = user.getDescription();
+        String description = userPatch.getDescription();
         if (description != null) {
             userAccountEntity.setUserDescription(description);
         }
 
-        UserState state = user.getState();
-        if (state != null) {
-            userAccountEntity.setState(userAccountMapper.mapToUserStateValue(state));
+        Boolean active = userPatch.getActive();
+        if (active != null) {
+            userAccountEntity.setActive(active);
         }
 
-        if (UserState.DISABLED.equals(user.getState())) {
-            userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
+        if (BooleanUtils.isTrue(userAccountEntity.isActive())) {
+            mapSecurityGroupsToUserEntity(userPatch.getSecurityGroups(), userAccountEntity);
         } else {
-            mapSecurityGroupsToUserEntity(user.getSecurityGroups(), userAccountEntity);
+            userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
         }
 
         userAccountEntity.setLastModifiedBy(authorisationApi.getCurrentUser());
@@ -133,5 +145,4 @@ public class UserManagementServiceImpl implements UserManagementService {
             .map(SecurityGroupEntity::getId)
             .toList();
     }
-
 }

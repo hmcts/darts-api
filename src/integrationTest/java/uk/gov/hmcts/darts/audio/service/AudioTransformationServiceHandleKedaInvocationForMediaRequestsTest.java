@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,10 +20,13 @@ import uk.gov.hmcts.darts.notification.enums.NotificationStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.SystemCommandExecutorStubImpl;
 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,14 +34,30 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.DEFENDANTS;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.HEARING_DATE;
+import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REQUEST_ID;
 
 
 @Import(SystemCommandExecutorStubImpl.class)
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
 
     private static final String EMAIL_ADDRESS = "test@test.com";
+    public static final LocalDate MOCK_HEARING_DATE = LocalDate.of(2023, 5, 1);
+    public static final String MOCK_HEARING_DATE_FORMATTED = "1st May 2023";
+    public static final String MOCK_COURTHOUSE_NAME = "some-courthouse";
+    public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
+    private static final String MOCK_PLAYBACK_REQUEST_ID = "1";
+    private static final String MOCK_DOWNLOAD_REQUEST_ID = "2";
+    public static final String TIME_12_00 = "12:00:00";
+    public static final String TIME_13_00 = "13:00:00";
+    public static final String NOT_AVAILABLE = "N/A";
 
     @Autowired
     private AudioTransformationServiceHandleKedaInvocationForMediaRequestsGivenBuilder given;
@@ -53,7 +73,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @BeforeEach
     void setUp() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom");
+        hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom", MOCK_HEARING_DATE);
     }
 
     @Transactional
@@ -126,6 +146,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @SuppressWarnings("PMD.LawOfDemeter")
     public void handleKedaInvocationForMediaRequestsShouldFailAndUpdateRequestStatusToFailedAndScheduleFailureNotificationFor(
         AudioRequestType audioRequestType) {
+
         var userAccountEntity = given.aUserAccount(EMAIL_ADDRESS);
         given.aMediaRequestEntityForHearingWithRequestType(
             hearing,
@@ -152,9 +173,25 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
 
         var notificationEntity = scheduledNotifications.get(0);
         assertEquals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(), notificationEntity.getEventId());
-        assertNotNull(notificationEntity.getTemplateValues());
+
         assertEquals(NotificationStatus.OPEN, notificationEntity.getStatus());
         assertEquals(EMAIL_ADDRESS, notificationEntity.getEmailAddress());
+
+        Map<String, String> templateParams = getTemplateValuesMap(notificationEntity);
+
+        assertEquals(TIME_12_00, templateParams.get(AUDIO_START_TIME));
+        assertEquals(TIME_13_00, templateParams.get(AUDIO_END_TIME));
+        assertEquals(MOCK_HEARING_DATE_FORMATTED, templateParams.get(HEARING_DATE));
+        assertEquals(MOCK_COURTHOUSE_NAME, templateParams.get(COURTHOUSE));
+        assertEquals(NO_DEFENDANTS, templateParams.get(DEFENDANTS));
+
+        String requestId = "1".equals(templateParams.get(REQUEST_ID)) ? "2" : "1";
+        if ("1".equals(requestId)) {
+            assertEquals(MOCK_PLAYBACK_REQUEST_ID, requestId);
+        }
+        if ("2".equals(requestId)) {
+            assertEquals(MOCK_DOWNLOAD_REQUEST_ID, requestId);
+        }
     }
 
     @ParameterizedTest
@@ -169,4 +206,17 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
         verify(mediaRequestService, never()).updateAudioRequestStatus(any(), any());
     }
 
+
+    private static Map<String, String> getTemplateValuesMap(NotificationEntity notificationEntity) {
+        String templateValues = notificationEntity.getTemplateValues();
+
+        templateValues = templateValues != null
+            ? templateValues.replace("{\"", "").replace("\"}", "") : "";
+
+        return Arrays.stream(templateValues
+                                 .split("\",\""))
+            .map(kv -> kv.split("\":\""))
+            .filter(kvArray -> kvArray.length == 2)
+            .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+    }
 }

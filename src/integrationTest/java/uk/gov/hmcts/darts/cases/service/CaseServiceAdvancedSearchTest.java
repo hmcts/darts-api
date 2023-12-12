@@ -29,8 +29,10 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseAt;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.someMinimalCourthouse;
@@ -304,6 +306,42 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
             "tests/cases/CaseServiceAdvancedSearchTest/getWithCourtroomJudge/expectedResponse.json"));
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void whenAdvancedSearchIsRunForUserWithGlobalAccessWithNoCourthouseAccess_thenShouldReturnResultsOk() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("sE1")
+            .build();
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(JUDGE))).thenReturn(true);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
+
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void whenAdvancedSearchIsRunForUserWithoutGlobalAccessWithNoCourthouseAccess_thenShouldReturnEmptyArray() throws IOException {
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("sE1")
+            .build();
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = "[]";
+
         compareJson(actualResponse, expectedResponse);
     }
 

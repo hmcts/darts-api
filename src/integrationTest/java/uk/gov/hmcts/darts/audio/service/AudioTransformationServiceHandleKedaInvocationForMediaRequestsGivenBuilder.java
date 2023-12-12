@@ -132,12 +132,12 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         return userAccountEntity;
     }
 
-    public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName) {
+    public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
         hearingEntity = dartsDatabaseStub.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             caseNumber,
             courthouseName,
             courtroomName,
-            LocalDate.now()
+            hearingDate
         );
 
         return hearingEntity;

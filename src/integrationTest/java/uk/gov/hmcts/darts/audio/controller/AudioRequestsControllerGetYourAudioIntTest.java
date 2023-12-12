@@ -13,8 +13,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.TransformedMediaStub;
 
 import java.net.URI;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -52,6 +55,12 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
         currentMediaRequest2.setCurrentOwner(currentOwner);
         dartsDatabase.save(currentMediaRequest2);
 
+        TransformedMediaStub transformedMediaStub = dartsDatabase.getTransformedMediaStub();
+        transformedMediaStub.createTransformedMediaEntity(currentMediaRequest);
+        OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime lastAccessed = OffsetDateTime.of(2023, 6, 30, 13, 0, 0, 0, ZoneOffset.UTC);
+        transformedMediaStub.createTransformedMediaEntity(currentMediaRequest2, "T20231010_0", expiryTime, lastAccessed);
+
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", FALSE)))
             .header(
                 "user_id",
@@ -75,7 +84,6 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
                     "media_request_start_ts": "2023-06-26T13:00:00Z",
                     "media_request_end_ts": "2023-06-26T13:45:00Z",
                     "media_request_status": "OPEN",
-                    "last_accessed_ts": "2023-06-30T13:00:00Z",
                     "request_type": "DOWNLOAD"
                 },
                 {
@@ -109,6 +117,12 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
             currentMediaRequest.getRequestor(),
             AudioRequestType.DOWNLOAD
         );
+
+        TransformedMediaStub transformedMediaStub = dartsDatabase.getTransformedMediaStub();
+        OffsetDateTime expiryTime = OffsetDateTime.of(2023, 7, 2, 13, 0, 0, 0, ZoneOffset.UTC);
+        OffsetDateTime lastAccessed = OffsetDateTime.of(2023, 6, 30, 13, 0, 0, 0, ZoneOffset.UTC);
+        transformedMediaStub.createTransformedMediaEntity(expiredMediaRequest, "T20231010_0", expiryTime, lastAccessed);
+
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))
             .header(
