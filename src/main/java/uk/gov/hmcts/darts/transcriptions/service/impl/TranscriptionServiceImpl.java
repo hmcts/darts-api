@@ -279,7 +279,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             && StringUtils.isBlank(updateTranscription.getWorkflowComment())) {
             throw new DartsApiException(BAD_REQUEST_WORKFLOW_COMMENT);
         }
-
     }
 
     private void notifyApprovers(TranscriptionEntity transcription) {
