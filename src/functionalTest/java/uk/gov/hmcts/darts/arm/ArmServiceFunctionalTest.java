@@ -2,7 +2,10 @@ package uk.gov.hmcts.darts.arm;
 
 import com.azure.core.util.BinaryData;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles({"dev", "h2db"})
 @ExtendWith(MockitoExtension.class)
 @Slf4j
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
@@ -41,6 +45,7 @@ class ArmServiceFunctionalTest {
     private final List<String> blobsToBeDeleted = new ArrayList<>();
 
     @Test
+    @Order(1)
     void saveBlobData() {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
@@ -53,6 +58,7 @@ class ArmServiceFunctionalTest {
     }
 
     @Test
+    @Order(2)
     void cleanupArmBlobData() throws AzureDeleteBlobException {
         for (String blobName: blobsToBeDeleted) {
             armTestUtil.deleteBlobData(armContainerName, blobName);
