@@ -48,6 +48,7 @@ public class TranscriptionResponseMapper {
         TranscriptionUrgencyResponse transcriptionUrgencyResponse = new TranscriptionUrgencyResponse();
         transcriptionUrgencyResponse.setTranscriptionUrgencyId(transcriptionUrgencyEntity.getId());
         transcriptionUrgencyResponse.setDescription(transcriptionUrgencyEntity.getDescription());
+        transcriptionUrgencyResponse.setPriorityOrder(transcriptionUrgencyEntity.getPriorityOrder());
         return transcriptionUrgencyResponse;
     }
 
