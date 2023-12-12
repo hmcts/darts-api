@@ -2,9 +2,10 @@ package uk.gov.hmcts.darts.arm.component.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -19,11 +20,11 @@ import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.arm.exception.ArchiveRecordApiError.FAILED_TO_GENERATE_ARCHIVE_RECORD;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Slf4j
-public class ArchiveRecordFileGeneratorImpl {
+public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerator {
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public boolean generateArchiveRecord(ArchiveRecord archiveRecord, File archiveRecordFile, ArchiveRecordType archiveRecordType) {
         boolean generatedArchiveRecord = false;

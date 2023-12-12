@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.io.File;
 
-public class AnnotationArchiveRecordMapperIImpl implements AnnotationArchiveRecordMapper {
+public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecordMapper {
 
     @Override
     public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, String relationId, File archiveRecordFile) {

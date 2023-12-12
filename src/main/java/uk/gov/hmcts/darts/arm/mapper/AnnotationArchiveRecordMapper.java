@@ -6,5 +6,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import java.io.File;
 
 public interface AnnotationArchiveRecordMapper {
-    AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, String relationId, File archiveRecordFile);
+    AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                         String relationId, File archiveRecordFile);
 }

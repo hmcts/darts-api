@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.ArmService;
-
 @Service
 @Slf4j
 @Profile("!intTest")

@@ -5,15 +5,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
+import uk.gov.hmcts.darts.arm.mapper.impl.AnnotationArchiveRecordMapperImpl;
+import uk.gov.hmcts.darts.arm.mapper.impl.MediaArchiveRecordMapperImpl;
+import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.metadata.MediaCreateArchiveRecordMetadata;
@@ -42,12 +45,9 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 @Slf4j
 class ArchiveRecordServiceImplTest {
 
-    public static final String TEST_MP_2 = "test.mp2";
     public static final String TEST_MEDIA_ARCHIVE_A_360 = "test-media-arm.a360";
     public static final String MP_2 = "mp2";
 
-    @Mock
-    private ArmDataManagementDao armDataManagementDao;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
 
@@ -57,11 +57,8 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private ArchiveRecordFileGenerator archiveRecordFileGenerator;
 
-    @Mock
     private MediaArchiveRecordMapper mediaArchiveRecordMapper;
-    @Mock
     private TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;
-    @Mock
     private AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
 
     @Mock
@@ -76,15 +73,13 @@ class ArchiveRecordServiceImplTest {
     @TempDir
     private File tempDirectory;
 
-    private ArchiveRecordService archiveRecordService;
+    @InjectMocks
+    private ArchiveRecordServiceImpl archiveRecordService;
 
     @BeforeEach
     void setUp() {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
-
-        when(externalObjectDirectoryRepository.getReferenceById(anyInt())).thenReturn(externalObjectDirectoryEntity);
-        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
 
         when(courthouseEntity.getCourthouseName()).thenReturn("Swansea");
 
@@ -100,6 +95,13 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
         when(mediaEntity.getCaseIdList()).thenReturn(List.of("Case1", "Case2"));
+
+        when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryRepository.getReferenceById(anyInt())).thenReturn(externalObjectDirectoryEntity);
+
+        mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl();
+        transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl();
+        annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl();
 
         archiveRecordService = new ArchiveRecordServiceImpl(armDataManagementConfiguration,
                                                             externalObjectDirectoryRepository,

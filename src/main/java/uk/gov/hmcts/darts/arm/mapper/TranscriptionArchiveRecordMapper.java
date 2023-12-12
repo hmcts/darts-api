@@ -7,5 +7,6 @@ import java.io.File;
 
 public interface TranscriptionArchiveRecordMapper {
 
-    TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, String relationId, File archiveRecordFile);
+    TranscriptionArchiveRecord mapToTranscriptionArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                                               String relationId, File archiveRecordFile);
 }

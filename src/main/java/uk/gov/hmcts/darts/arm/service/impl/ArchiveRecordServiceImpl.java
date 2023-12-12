@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -23,17 +24,17 @@ import java.io.File;
 
 import static java.util.Objects.nonNull;
 
-@AllArgsConstructor
+@Service
+@RequiredArgsConstructor
 @Slf4j
 public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
-    private ArmDataManagementConfiguration armDataManagementConfiguration;
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private ArchiveRecordFileGenerator archiveRecordFileGenerator;
-    private MediaArchiveRecordMapper mediaArchiveRecordMapper;
-    private TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;
-    private AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
-
+    private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
+    private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
+    private final MediaArchiveRecordMapper mediaArchiveRecordMapper;
+    private final TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;
+    private final AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
 
     public File generateArchiveRecord(Integer externalObjectDirectoryId, String relationId, String archiveRecordFilename) {
         File archiveRecordFile = new File(armDataManagementConfiguration.getTempBlobWorkspace(), archiveRecordFilename);
