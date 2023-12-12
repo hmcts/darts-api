@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -97,7 +98,10 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         );
         dartsDatabase.save(unstructuredEod);
 
-        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(DUMMY_BLOB_ID);
+        ArmBlobInfo armBlobInfo = ArmBlobInfo.builder()
+            .blobName(DUMMY_BLOB_ID)
+            .build();
+        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(armBlobInfo);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
@@ -146,7 +150,10 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
-        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(DUMMY_BLOB_ID);
+        ArmBlobInfo armBlobInfo = ArmBlobInfo.builder()
+            .blobName(DUMMY_BLOB_ID)
+            .build();
+        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(armBlobInfo);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 

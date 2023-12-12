@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.arm.api;
 
 import com.azure.core.util.BinaryData;
+import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 
 public interface ArmDataManagementApi {
 
-    String saveBlobDataToArm(String filename, BinaryData binaryData);
+    ArmBlobInfo saveBlobDataToArm(String filename, BinaryData binaryData);
 }

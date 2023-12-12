@@ -72,8 +72,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             storedStatus,
             armStatuses,
             inboundLocation,
-            armLocation
-        );
+            armLocation);
 
         var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findFailedNotExceedRetryInStorageLocation(
             failedArmStatus,
@@ -109,7 +108,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(ARM_INGESTION.getId()));
             externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
 
-            saveToArm(unstructuredExternalObjectDirectoryEntity, armExternalObjectDirectoryEntity);
+            copyToArm(unstructuredExternalObjectDirectoryEntity, armExternalObjectDirectoryEntity);
 
             externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
         }
@@ -125,25 +124,25 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         return armStatuses;
     }
 
-    private void saveToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity,
-                           ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity) {
+    private void copyToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
+                           ExternalObjectDirectoryEntity armExternalObjectDirectory) {
         try {
-            String filename = generateFilename(armExternalObjectDirectoryEntity);
-            BinaryData inboundFile = dataManagementApi
-                .getBlobDataFromUnstructuredContainer(unstructuredExternalObjectDirectoryEntity.getExternalLocation());
+            String filename = generateFilename(armExternalObjectDirectory);
+            BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
+                unstructuredExternalObjectDirectory.getExternalLocation());
 
             armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
-            armExternalObjectDirectoryEntity.setChecksum(unstructuredExternalObjectDirectoryEntity.getChecksum());
-            armExternalObjectDirectoryEntity.setExternalLocation(UUID.randomUUID());
-            armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(MARKED_FOR_DELETION.getId()));
+            armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
+            armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+            armExternalObjectDirectory.setStatus(objectDirectoryStatusRepository.getReferenceById(MARKED_FOR_DELETION.getId()));
 
         } catch (BlobStorageException e) {
             log.error("Failed to move BLOB data for file {} due to {}",
-                      unstructuredExternalObjectDirectoryEntity.getExternalLocation(),
+                      unstructuredExternalObjectDirectory.getExternalLocation(),
                       e.getMessage());
 
-            armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
-            updateTransferAttempts(armExternalObjectDirectoryEntity);
+            armExternalObjectDirectory.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
+            updateTransferAttempts(armExternalObjectDirectory);
         }
     }
 

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 @Service
@@ -15,7 +16,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
-    public String saveBlobDataToArm(String filename, BinaryData binaryData) {
+    public ArmBlobInfo saveBlobDataToArm(String filename, BinaryData binaryData) {
         return armService.saveBlobData(getArmContainerName(), filename, binaryData);
     }
 

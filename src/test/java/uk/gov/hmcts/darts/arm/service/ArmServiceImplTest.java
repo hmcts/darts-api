@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
+import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,8 +48,8 @@ class ArmServiceImplTest {
         when(armDataManagementConfiguration.getArmSubmissionDropZone()).thenReturn(TEST_DROP_ZONE);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
-        String blobId = armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, BLOB_FILENAME, BINARY_DATA);
-        assertNotNull(blobId);
-        assertEquals(TEST_DROP_ZONE + BLOB_FILENAME, blobId);
+        ArmBlobInfo armBlobInfo = armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, BLOB_FILENAME, BINARY_DATA);
+        assertNotNull(armBlobInfo);
+        assertEquals(TEST_DROP_ZONE + BLOB_FILENAME, armBlobInfo.getBlobPathAndName());
     }
 }
