@@ -44,7 +44,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.DELETED;

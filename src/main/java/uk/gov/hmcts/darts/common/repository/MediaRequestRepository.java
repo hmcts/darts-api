@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity, Integer> {
 
-    Optional<MediaRequestEntity> findTopByStatusOrderByCreatedDateTimeAsc(AudioRequestStatus status);
+    Optional<MediaRequestEntity> findTopByStatusOrderByCreatedDateTimeAsc(MediaRequestStatus status);
 
     @Query("""
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
@@ -22,7 +22,7 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
         AND tm.lastAccessed = null
         AND mr.status = :status
         """)
-    long countTransformedEntitiesByRequestorIdAndStatusNotAccessed(Integer userId, AudioRequestStatus status);
+    long countTransformedEntitiesByRequestorIdAndStatusNotAccessed(Integer userId, MediaRequestStatus status);
 
 
     @Query("""
@@ -31,7 +31,7 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
         AND tm.lastAccessed < :lastAccessedDateTime
         AND mr.status = :status
         """)
-    List<Integer> findAllIdsByLastAccessedTimeBeforeAndStatus(OffsetDateTime lastAccessedDateTime, AudioRequestStatus status);
+    List<Integer> findAllIdsByLastAccessedTimeBeforeAndStatus(OffsetDateTime lastAccessedDateTime, MediaRequestStatus status);
 
     @Query("""
         SELECT distinct(mr.id) FROM MediaRequestEntity mr, TransformedMediaEntity tm
@@ -40,6 +40,6 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
         AND mr.status <> :status
         AND tm.lastAccessed IS NULL
         """)
-    List<Integer> findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(OffsetDateTime createdDateTime, AudioRequestStatus status);
+    List<Integer> findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(OffsetDateTime createdDateTime, MediaRequestStatus status);
 
 }

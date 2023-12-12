@@ -72,8 +72,8 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
-
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        mediaRequestService.updateTransformedMediaLastAccessedTimestampForMediaRequestId(mediaRequestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
@@ -121,4 +121,18 @@ public class AudioRequestsController implements AudioRequestsApi {
         return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, httpRangeList, mediaRequestId.toString());
     }
 
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<Void> updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
+        mediaRequestService.updateTransformedMediaLastAccessedTimestamp(transformedMediaId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<Void> deleteTransformedMedia(Integer transformedMediaId) {
+        mediaRequestService.deleteTransformedMedia(transformedMediaId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -140,7 +140,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(START_TIME, mediaRequestEntity.getStartTime());
         assertEquals(END_TIME, mediaRequestEntity.getEndTime());
         assertEquals(AUDIO_REQUEST_TYPE_PLAYBACK, mediaRequestEntity.getRequestType());
-        assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
+        assertEquals(MediaRequestStatus.OPEN, mediaRequestEntity.getStatus());
         assertEquals(0, mediaRequestEntity.getAttempts());
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()
@@ -195,7 +195,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(START_TIME, mediaRequestEntity.getStartTime());
         assertEquals(END_TIME, mediaRequestEntity.getEndTime());
         assertEquals(AUDIO_REQUEST_TYPE_DOWNLOAD, mediaRequestEntity.getRequestType());
-        assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
+        assertEquals(MediaRequestStatus.OPEN, mediaRequestEntity.getStatus());
         assertEquals(0, mediaRequestEntity.getAttempts());
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()

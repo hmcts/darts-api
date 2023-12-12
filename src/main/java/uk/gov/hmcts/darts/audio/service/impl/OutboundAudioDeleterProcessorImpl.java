@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -53,12 +53,12 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         List<Integer> mediaRequests = mediaRequestRepository.findAllIdsByLastAccessedTimeBeforeAndStatus(
             deletionStartDateTime,
-            AudioRequestStatus.COMPLETED
+            MediaRequestStatus.COMPLETED
         );
 
         mediaRequests.addAll(mediaRequestRepository.findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(
             deletionStartDateTime,
-            AudioRequestStatus.PROCESSING
+            MediaRequestStatus.PROCESSING
         ));
 
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByMediaRequestIds(
@@ -75,7 +75,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
 
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
-            entity.getTransformedMedia().getMediaRequest().setStatus(AudioRequestStatus.EXPIRED);
+            entity.getTransformedMedia().getMediaRequest().setStatus(MediaRequestStatus.EXPIRED);
             entity.getTransformedMedia().getMediaRequest().setLastModifiedBy(systemUser);
 
             entity.setLastModifiedBy(systemUser);

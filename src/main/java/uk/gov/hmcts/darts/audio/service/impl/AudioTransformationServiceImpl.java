@@ -10,7 +10,7 @@ import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -55,8 +55,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
@@ -147,7 +147,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public void handleKedaInvocationForMediaRequests() {
-        var openRequests = mediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN);
+        var openRequests = mediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN);
 
         if (openRequests.isEmpty()) {
             log.info("No open requests found for ATS to process.");
