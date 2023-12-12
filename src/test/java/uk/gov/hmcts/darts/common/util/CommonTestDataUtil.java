@@ -398,19 +398,22 @@ public class CommonTestDataUtil {
     public List<TranscriptionUrgencyEntity> createTranscriptionUrgencyEntities() {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = new ArrayList<>();
         for (TranscriptionUrgencyEnum transcriptionUrgencyEnum : TranscriptionUrgencyEnum.values()) {
-            if (transcriptionUrgencyEnum.getId() != 1 && transcriptionUrgencyEnum.getId() != 3) {
-                switch(transcriptionUrgencyEnum.getId()) {
-                    case 2: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 1));
-                        break;
-                    case 4: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 3));
-                        break;
-                    case 5: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 4));
-                        break;
-                    case 6: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 5));
-                        break;
-                    case 7: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 2));
-                }
+            switch (transcriptionUrgencyEnum.getId()) {
+                case 2: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 1));
+                    break;
+                case 3: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 6));
+                    break;
+                case 4: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 3));
+                    break;
+                case 5: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 4));
+                    break;
+                case 6: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 5));
+                    break;
+                case 7: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 2));
+                    break;
+                default:
             }
+
         }
         return transcriptionUrgencyEntities;
     }

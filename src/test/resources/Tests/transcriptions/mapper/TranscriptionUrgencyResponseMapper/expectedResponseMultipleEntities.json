@@ -5,6 +5,11 @@
     "priority_order": 1
   },
   {
+    "transcription_urgency_id": 3,
+    "description": "OTHER",
+    "priority_order": 6
+  },
+  {
     "transcription_urgency_id": 4,
     "description": "WORKING_DAYS_3",
     "priority_order": 3
