@@ -36,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -111,6 +112,7 @@ public class DartsDatabaseStub {
     private final SecurityGroupRepository securityGroupRepository;
     private final SecurityRoleRepository securityRoleRepository;
     private final NodeRegistrationRepository nodeRegistrationRepository;
+    private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
     private final UserAccountStub userAccountStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
@@ -174,6 +176,10 @@ public class DartsDatabaseStub {
 
     public JudgeEntity createSimpleJudge(String name) {
         return retrieveCoreObjectService.retrieveOrCreateJudge(name);
+    }
+
+    public EventEntity createEvent(HearingEntity hearing, int eventHandlerId) {
+        return eventStub.createEvent(hearing, eventHandlerId);
     }
 
     public EventEntity createEvent(HearingEntity hearing) {
