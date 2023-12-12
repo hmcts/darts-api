@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -37,7 +38,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
 @AutoConfigureMockMvc
 @Slf4j
-class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
+class AudioRequestsControllerTransMediaUpdateLastAccessedTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
@@ -46,6 +47,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
 
     private UserAccountEntity systemUser;
     private MediaRequestEntity mediaRequestEntity;
+    private TransformedMediaEntity transformedMediaEntity;
 
 
     @BeforeEach
@@ -53,17 +55,17 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
-        dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
+        transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
     }
 
     @Test
-    void updateAudioRequestLastAccessedTimestampReturnSuccess() throws Exception {
+    void updateTransformedNMediaLastAccessedTimestampReturnSuccess() throws Exception {
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
         );
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/audio-requests/%d", mediaRequestEntity.getId())));
+            String.format("/audio-requests/transformed_media/%d", transformedMediaEntity.getId())));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isNoContent())
@@ -72,7 +74,12 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
     }
 
     @Test
-    void updateAudioRequestLastAccessedTimestampWhenRequestorDifferentUserThrowsUnauthorizedError() throws Exception {
+    void updateAudioRequestLastAccessedTimestampWhenRequestorDifferentUserThrowsNotFoundError() throws Exception {
+        doNothing().when(authorisation).authoriseByMediaRequestId(
+            mediaRequestEntity.getId(),
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
+
         MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadCurrentMediaRequestEntity(
             systemUser, AudioRequestType.DOWNLOAD);
 
@@ -80,19 +87,19 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
             .when(authorisation).authoriseByMediaRequestId(anyInt(), anySet());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
-            String.format("/audio-requests/%d", mediaRequestEntityBySystemUser.getId())));
+            String.format("/audio-requests/transformed_media/%d", mediaRequestEntityBySystemUser.getId())));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isUnauthorized())
+            .andExpect(status().isNotFound())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         log.debug("Result: {}", actualJson);
         String expectedJson = """
             {
-              "type":"AUDIO_REQUESTS_101",
-              "title":"The audio request is not valid for this user",
-              "status":401
+              "type":"AUDIO_REQUESTS_103",
+              "title":"The requested transformed media cannot be found",
+              "status":404
             }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);

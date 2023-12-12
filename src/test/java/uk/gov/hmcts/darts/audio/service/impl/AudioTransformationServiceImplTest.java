@@ -11,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -46,7 +46,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
@@ -209,7 +209,7 @@ class AudioTransformationServiceImplTest {
     void testHandleKedaInvocationForMediaRequestsRequestTypeNull() {
 
         when(mockMediaRequestEntity.getId()).thenReturn(1);
-        when(mockMediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN))
+        when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
             .thenReturn(Optional.of(mockMediaRequestEntity));
         when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);
@@ -220,7 +220,7 @@ class AudioTransformationServiceImplTest {
     @Test
     void testHandleKedaInvocationForMediaRequestsCaseNull() {
         when(mockMediaRequestEntity.getId()).thenReturn(1);
-        when(mockMediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN))
+        when(mockMediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN))
             .thenReturn(Optional.of(mockMediaRequestEntity));
         when(mockMediaRequestService.getMediaRequestById(1)).thenReturn(mockMediaRequestEntity);
         when(mockMediaRequestEntity.getHearing()).thenReturn(mockHearing);

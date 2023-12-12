@@ -14,7 +14,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -63,7 +63,7 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = REQUEST_STATUS_COLUMN_NAME, nullable = false)
     @Enumerated(EnumType.STRING)
-    private AudioRequestStatus status;
+    private MediaRequestStatus status;
 
     @Column(name = REQUEST_TYPE_COLUMN_NAME, nullable = false)
     @Enumerated(EnumType.STRING)
