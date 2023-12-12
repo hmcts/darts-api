@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.audio.service;
 
 
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
@@ -18,7 +19,7 @@ public interface MediaRequestService {
 
     MediaRequestEntity getMediaRequestById(Integer id);
 
-    MediaRequestEntity updateAudioRequestStatus(Integer id, AudioRequestStatus audioRequestStatus);
+    MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus mediaRequestStatus);
 
     MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails);
 
@@ -26,11 +27,16 @@ public interface MediaRequestService {
 
     void deleteAudioRequest(Integer mediaRequestId);
 
+    void deleteTransformedMedia(Integer transformedMediaId);
+
     List<GetAudioRequestResponse> getAudioRequests(Integer userId, Boolean expired);
 
-    Optional<MediaRequestEntity> getOldestMediaRequestByStatus(AudioRequestStatus status);
+    Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status);
 
     void updateTransformedMediaLastAccessedTimestamp(Integer mediaRequestId);
+
+    @Transactional
+    void updateTransformedMediaLastAccessedTimestampForMediaRequestId(Integer mediaRequestId);
 
     InputStream download(Integer mediaRequestId);
 

@@ -113,6 +113,57 @@ paths:
         '401':
           description: Unauthorised Error
 
+  /audio-requests/transformed_media/{transformed_media_id}:
+    delete:
+      tags:
+        - Audio Requests
+      description: 'Delete Transformed Media and Processed Audio'
+      operationId: deleteTransformedMedia
+      parameters:
+        - in: path
+          name: transformed_media_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: Transformed Media has been deleted
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_103"
+                title: "The requested transformed media cannot be found"
+                status: 404
+
+    patch:
+      tags:
+        - Audio Requests
+      description: 'Update last accessed timestamp for transformed_media'
+      operationId: updateTransformedMediaLastAccessedTimestamp
+      parameters:
+        - in: path
+          name: transformed_media_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "AUDIO_REQUESTS_100"
+                title: "The requested transformed media cannot be found"
+                status: 404
+
   /audio-requests/{media_request_id}:
     delete:
       tags:

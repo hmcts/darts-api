@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "8f4d90a7-25b9-4fd7-a448-e873797fb06f",
+		"_postman_id": "e5cd0e01-efc7-4ede-98b9-552099849988",
 		"name": "ModernisedDarts",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30362290"
 	},
 	"item": [
 		{
@@ -787,23 +788,24 @@
 					"response": []
 				},
 				{
-					"name": "/audio-requests/{media_request_id}",
+					"name": "/audio-requests/transformed_media/{transformed_media_id}",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{serverUrl}}/audio-requests/:media_request_id",
+							"raw": "{{serverUrl}}/audio-requests/transformed_media/:transformed_media_id",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
 								"audio-requests",
-								":media_request_id"
+								"transformed_media",
+								":transformed_media_id"
 							],
 							"variable": [
 								{
-									"key": "media_request_id",
-									"value": "-1"
+									"key": "transformed_media_id",
+									"value": ""
 								}
 							]
 						}
@@ -811,23 +813,24 @@
 					"response": []
 				},
 				{
-					"name": "/audio-requests/{media_request_id}",
+					"name": "/audio-requests/transformed_media/{transformed_media_id}",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "{{serverUrl}}/audio-requests/:media_request_id",
+							"raw": "{{serverUrl}}/audio-requests/transformed_media/:transformed_media_id",
 							"host": [
 								"{{serverUrl}}"
 							],
 							"path": [
 								"audio-requests",
-								":media_request_id"
+								"transformed_media",
+								":transformed_media_id"
 							],
 							"variable": [
 								{
-									"key": "media_request_id",
-									"value": "-1"
+									"key": "transformed_media_id",
+									"value": "2"
 								}
 							]
 						}
@@ -1329,34 +1332,34 @@
 					},
 					"response": []
 				},
-        {
-          "name": "/transcriptions/transcriber-counts",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "accept",
-                "value": "application/json"
-              },
-              {
-                "key": "user_id",
-                "value": "{{user_id}}"
-              }
-            ],
-            "url": {
-              "raw": "{{serverUrl}}/transcriptions/transcriber-counts",
-              "host": [
-                "{{serverUrl}}"
-              ],
-              "path": [
-                "transcriptions",
-                "transcriber-counts"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
+				{
+					"name": "/transcriptions/transcriber-counts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "user_id",
+								"value": "{{user_id}}"
+							}
+						],
+						"url": {
+							"raw": "{{serverUrl}}/transcriptions/transcriber-counts",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"transcriptions",
+								"transcriber-counts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		},
 		{
 			"name": "Token",
