@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.service.impl.LastAccessedDeletionDayCalculator;
 import uk.gov.hmcts.darts.audio.service.impl.OutboundAudioDeleterProcessorImpl;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -40,9 +40,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
@@ -408,7 +408,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
     private void assertEntityStateChanged(List<MediaRequestEntity> currentMediaRequest) {
         for (MediaRequestEntity mediaRequestEntity : currentMediaRequest) {
-            assertEquals(AudioRequestStatus.EXPIRED, mediaRequestEntity.getStatus());
+            assertEquals(MediaRequestStatus.EXPIRED, mediaRequestEntity.getStatus());
             assertTransientObjectDirectoryStateChanged(mediaRequestEntity);
 
         }
@@ -416,7 +416,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
     private void assertTransientObjectDirectoryStateChanged(MediaRequestEntity expiredMediaRequest) {
         var transientObjectDirectoryEntity
-            = dartsDatabase.getTransientObjectDirectoryRepository().getTransientObjectDirectoryEntityByMediaRequest_Id(
+            = dartsDatabase.getTransientObjectDirectoryRepository().findByMediaRequestId(
             expiredMediaRequest.getId()).get();
 
         assertEquals(
@@ -436,7 +436,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         assertEquals(COMPLETED, savedMediaRequest.getStatus());
 
         var transientObjectDirectoryEntity
-            = dartsDatabase.getTransientObjectDirectoryRepository().getTransientObjectDirectoryEntityByMediaRequest_Id(
+            = dartsDatabase.getTransientObjectDirectoryRepository().findByMediaRequestId(
             savedMediaRequest.getId()).get();
 
         assertEquals(

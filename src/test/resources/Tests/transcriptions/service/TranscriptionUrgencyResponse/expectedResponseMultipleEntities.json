@@ -1,22 +1,32 @@
 [
   {
     "transcription_urgency_id": 2,
-    "description": "OVERNIGHT"
+    "description": "OVERNIGHT",
+    "priority_order": 1
+  },
+  {
+    "transcription_urgency_id": 3,
+    "description": "OTHER",
+    "priority_order": 6
   },
   {
     "transcription_urgency_id": 4,
-    "description": "WORKING_DAYS_3"
+    "description": "WORKING_DAYS_3",
+    "priority_order": 3
   },
   {
     "transcription_urgency_id": 5,
-    "description": "WORKING_DAYS_7"
+    "description": "WORKING_DAYS_7",
+    "priority_order": 4
   },
   {
     "transcription_urgency_id": 6,
-    "description": "WORKING_DAYS_12"
+    "description": "WORKING_DAYS_12",
+    "priority_order": 5
   },
   {
     "transcription_urgency_id": 7,
-    "description": "WORKING_DAYS_2"
+    "description": "WORKING_DAYS_2",
+    "priority_order": 2
   }
 ]

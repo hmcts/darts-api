@@ -162,7 +162,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -10
-            );
+                   );
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isBadRequest()).andReturn();
@@ -185,7 +185,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -1
-            )
+                   )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -203,7 +203,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -1
-            )
+                   )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -221,7 +221,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -10
-            )
+                   )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -258,7 +258,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -10
-            )
+                   )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)

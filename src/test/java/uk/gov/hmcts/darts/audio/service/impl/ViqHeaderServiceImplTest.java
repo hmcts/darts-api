@@ -2,10 +2,11 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.common.util.DateConverters;
 
@@ -38,6 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.COURTHOUSE_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.END_TIME_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_BY_README_LABEL;
@@ -56,14 +60,17 @@ class ViqHeaderServiceImplTest {
 
     private static final String CASE_NUMBER = "T2023041301_1";
 
-    private static ViqHeaderService viqHeaderService;
+    private ViqHeaderService viqHeaderService;
+
+    @Mock
+    private EventRepository eventRepository;
 
     @TempDir
     private File tempDirectory;
 
-    @BeforeAll
-    static void beforeAll() throws ParserConfigurationException {
-        viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(new DateConverters()));
+    @BeforeEach
+    void setUp() throws ParserConfigurationException {
+        viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(new DateConverters()), eventRepository);
     }
 
     @Test
@@ -266,7 +273,7 @@ class ViqHeaderServiceImplTest {
 
         eventEntities.add(eventEntity);
         hearingEntity.setEventList(eventEntities);
-
+        when(eventRepository.findAllByHearingId(anyInt())).thenReturn(eventEntities);
         return hearingEntity;
     }
 

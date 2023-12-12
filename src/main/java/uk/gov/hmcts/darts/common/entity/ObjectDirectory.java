@@ -7,7 +7,7 @@ public interface ObjectDirectory {
 
     UUID getLocation();
 
-    void setStatus(ObjectDirectoryStatusEntity deletedStatus);
+    void setStatus(ObjectRecordStatusEntity deletedStatus);
 
     void setLastModifiedBy(UserAccountEntity systemUser);
 

@@ -1,8 +1,9 @@
 package uk.gov.hmcts.darts.common.service.impl;
 
+import com.azure.storage.blob.BlobClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
@@ -23,14 +24,13 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
     private final UserAccountRepository userAccountRepository;
 
     @Override
-    public TransientObjectDirectoryEntity saveTransientDataLocation(MediaRequestEntity mediaRequest,
-                                                                    UUID externalLocation) {
+    public TransientObjectDirectoryEntity saveTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
+                                                                             BlobClient blobClient) {
 
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity.setMediaRequest(mediaRequest);
+        transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
         transientObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(STORED.getId()));
-        transientObjectDirectoryEntity.setExternalLocation(externalLocation);
-        transientObjectDirectoryEntity.setChecksum(null);
+        transientObjectDirectoryEntity.setExternalLocation(UUID.fromString(blobClient.getBlobName()));
         transientObjectDirectoryEntity.setTransferAttempts(null);
         var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
         transientObjectDirectoryEntity.setCreatedBy(systemUser);

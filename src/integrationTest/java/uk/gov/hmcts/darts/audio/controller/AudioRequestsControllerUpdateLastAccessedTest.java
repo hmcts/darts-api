@@ -53,6 +53,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
     }
 
     @Test
@@ -76,7 +77,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
             systemUser, AudioRequestType.DOWNLOAD);
 
         Mockito.doThrow(new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER))
-            .when(authorisation).authoriseByMediaRequestId(anyInt(),anySet());
+            .when(authorisation).authoriseByMediaRequestId(anyInt(), anySet());
 
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/audio-requests/%d", mediaRequestEntityBySystemUser.getId())));

@@ -3,7 +3,8 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 
@@ -16,14 +17,22 @@ public class TransientObjectDirectoryStub {
 
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
     private final UserAccountStub userAccountStub;
+    private final TransformedMediaStub transformedMediaStub;
 
     public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(MediaRequestEntity mediaRequestEntity,
-                                                                               ObjectDirectoryStatusEntity objectDirectoryStatusEntity,
+                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
+                                                                               UUID externalLocation) {
+        TransformedMediaEntity transformedMediaEntity = transformedMediaStub.createTransformedMediaEntity(mediaRequestEntity, null, null, null);
+        return createTransientObjectDirectoryEntity(transformedMediaEntity, objectRecordStatusEntity, externalLocation);
+    }
+
+    public TransientObjectDirectoryEntity createTransientObjectDirectoryEntity(TransformedMediaEntity transformedMediaEntity,
+                                                                               ObjectRecordStatusEntity objectRecordStatusEntity,
                                                                                UUID externalLocation) {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
-        transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
+        transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
         transientObjectDirectoryEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
-        transientObjectDirectoryEntity.setStatus(objectDirectoryStatusEntity);
+        transientObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
         transientObjectDirectoryEntity.setExternalLocation(externalLocation);
         transientObjectDirectoryEntity.setLastModifiedDateTime(OffsetDateTime.now());
         transientObjectDirectoryRepository.save(transientObjectDirectoryEntity);

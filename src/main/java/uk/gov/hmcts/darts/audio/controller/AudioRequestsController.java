@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.component.AudioRequestResponseMapper;
-import uk.gov.hmcts.darts.audio.component.AudioRequestSummaryMapper;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
@@ -18,7 +17,7 @@ import uk.gov.hmcts.darts.audiorequests.http.api.AudioRequestsApi;
 import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
-import uk.gov.hmcts.darts.audiorequests.model.AudioRequestSummary;
+import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 
 import java.io.InputStream;
@@ -41,7 +40,6 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     private final MediaRequestService mediaRequestService;
 
-    private final AudioRequestSummaryMapper audioRequestSummaryMapper;
     private final AudioRequestResponseMapper audioRequestResponseMapper;
 
     @Override
@@ -53,10 +51,9 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<List<AudioRequestSummary>> getYourAudio(Integer userId, Boolean expired) {
+    public ResponseEntity<List<GetAudioRequestResponse>> getYourAudio(Integer userId, Boolean expired) {
 
-        return new ResponseEntity<>(audioRequestSummaryMapper.mapToAudioRequestSummary(
-            mediaRequestService.viewAudioRequests(userId, expired)), HttpStatus.OK);
+        return new ResponseEntity<>(mediaRequestService.getAudioRequests(userId, expired), HttpStatus.OK);
     }
 
     @Override
@@ -75,7 +72,7 @@ public class AudioRequestsController implements AudioRequestsApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
-        mediaRequestService.updateAudioRequestLastAccessedTimestamp(mediaRequestId);
+        mediaRequestService.updateTransformedMediaLastAccessedTimestampForMediaRequestId(mediaRequestId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
@@ -124,4 +121,18 @@ public class AudioRequestsController implements AudioRequestsApi {
         return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, httpRangeList, mediaRequestId.toString());
     }
 
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<Void> updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
+        mediaRequestService.updateTransformedMediaLastAccessedTimestamp(transformedMediaId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<Void> deleteTransformedMedia(Integer transformedMediaId) {
+        mediaRequestService.deleteTransformedMedia(transformedMediaId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

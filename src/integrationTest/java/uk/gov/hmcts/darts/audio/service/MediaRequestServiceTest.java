@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 class MediaRequestServiceTest extends IntegrationPerClassBase {
@@ -174,22 +174,20 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     @Order(9)
     void shouldSetDownloadFileNameAndFormat() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
-                                                                                                AudioRequestOutputFormat.MP3);
+                                                                                                AudioRequestOutputFormat.MP3
+        );
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
-        assertEquals(TEST_FILENAME, mediaRequestEntity.getOutputFilename());
-        assertEquals(AudioRequestOutputFormat.MP3, mediaRequestEntity.getOutputFormat());
     }
 
     @Test
     @Order(10)
     void shouldSetPlaybackFileNameAndFormat() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
-                                                                                                AudioRequestOutputFormat.ZIP);
+                                                                                                AudioRequestOutputFormat.ZIP
+        );
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
-        assertEquals(TEST_FILENAME, mediaRequestEntity.getOutputFilename());
-        assertEquals(AudioRequestOutputFormat.ZIP, mediaRequestEntity.getOutputFormat());
     }
 
 }

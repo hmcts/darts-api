@@ -2,12 +2,15 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobClientBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -35,6 +38,24 @@ public class DataManagementServiceStubImpl implements DataManagementService {
         UUID uuid = UUID.randomUUID();
         log.warn("Returning random UUID to mimic successful upload: {}", uuid);
         return uuid;
+    }
+
+    @Override
+    public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
+        logStubUsageWarning();
+
+        UUID uuid = UUID.randomUUID();
+        BlobClientBuilder blobClientBuilder = new BlobClientBuilder();
+        blobClientBuilder.blobName(uuid.toString());
+        blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
+        blobClientBuilder.containerName(containerName);
+        log.warn("Returning random UUID to mimic successful upload: {}", uuid);
+        return blobClientBuilder.buildClient();
+    }
+
+    @Override
+    public void addMetaData(BlobClient client, Map<String, String> metadata) {
+
     }
 
     @Override

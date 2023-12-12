@@ -14,8 +14,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -38,10 +37,6 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
     public static final String REQ_PROC_ATTEMPTS_COLUMN_NAME = "req_proc_attempts";
     public static final String START_TIME_COLUMN_NAME = "start_ts";
     public static final String END_TIME_COLUMN_NAME = "end_ts";
-    public static final String OUTPUT_FORMAT_COLUMN_NAME = "output_format";
-    public static final String OUTPUT_FILENAME_COLUMN_NAME = "output_filename";
-    public static final String LAST_ACCESSED_TS_COLUMN_NAME = "last_accessed_ts";
-    public static final String EXPIRY_TS_COLUMN_NAME = "expiry_ts";
     public static final String CREATED_TS_COLUMN_NAME = "created_ts";
     public static final String CREATED_BY_COLUMN_NAME = "created_by";
     public static final String LAST_MODIFIED_TS_COLUMN_NAME = "last_modified_ts";
@@ -68,7 +63,7 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = REQUEST_STATUS_COLUMN_NAME, nullable = false)
     @Enumerated(EnumType.STRING)
-    private AudioRequestStatus status;
+    private MediaRequestStatus status;
 
     @Column(name = REQUEST_TYPE_COLUMN_NAME, nullable = false)
     @Enumerated(EnumType.STRING)
@@ -82,19 +77,5 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = END_TIME_COLUMN_NAME, nullable = false)
     private OffsetDateTime endTime;
-
-    @Column(name = OUTPUT_FORMAT_COLUMN_NAME)
-    @Enumerated(EnumType.STRING)
-    private AudioRequestOutputFormat outputFormat;
-
-    @Column(name = OUTPUT_FILENAME_COLUMN_NAME)
-    private String outputFilename;
-
-    @Column(name = LAST_ACCESSED_TS_COLUMN_NAME)
-    private OffsetDateTime lastAccessedDateTime;
-
-    @Column(name = EXPIRY_TS_COLUMN_NAME)
-    private OffsetDateTime expiryTime;
-
 }
 

@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -170,7 +170,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
-        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
+        final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
             STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
@@ -183,7 +183,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             fileType,
             fileSize,
             testUser,
-            objectDirectoryStatusEntity,
+            objectRecordStatusEntity,
             externalLocationTypeEntity,
             externalLocation,
             checksum
@@ -222,7 +222,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.doc";
         final String fileType = "application/msword";
         final int fileSize = 22_528;
-        final ObjectDirectoryStatusEntity objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
+        final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
             STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
@@ -235,7 +235,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
             fileType,
             fileSize,
             testUser,
-            objectDirectoryStatusEntity,
+            objectRecordStatusEntity,
             externalLocationTypeEntity,
             externalLocation,
             checksum

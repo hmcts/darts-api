@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.InboundExternalObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -42,7 +42,7 @@ class ExternalInboundDataStoreDeleterImplTest {
     @Mock
     private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
 
-    private ObjectDirectoryStatusEntity deletedStatus;
+    private ObjectRecordStatusEntity deletedStatus;
 
     @Mock
     private UserAccountRepository userAccountRepository;
@@ -74,7 +74,7 @@ class ExternalInboundDataStoreDeleterImplTest {
 
 
     private void mockStatus() {
-        this.deletedStatus = new ObjectDirectoryStatusEntity();
+        this.deletedStatus = new ObjectRecordStatusEntity();
         deletedStatus.setId(ObjectDirectoryStatusEnum.DELETED.getId());
         when(objectDirectoryStatusRepository.getReferenceById(ObjectDirectoryStatusEnum.DELETED.getId())).thenReturn(
             deletedStatus);

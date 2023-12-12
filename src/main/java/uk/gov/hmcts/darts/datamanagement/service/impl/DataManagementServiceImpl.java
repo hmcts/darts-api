@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -48,6 +49,23 @@ public class DataManagementServiceImpl implements DataManagementService {
         client.upload(binaryData);
 
         return uniqueBlobId;
+    }
+
+    @Override
+    public BlobClient saveBlobData(String containerName, BinaryData binaryData, Map<String, String> metadata) {
+        UUID uniqueBlobId = UUID.randomUUID();
+        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
+        BlobClient client = dataManagementDao.getBlobClient(containerClient, uniqueBlobId);
+        client.upload(binaryData);
+        client.setMetadata(metadata);
+        return client;
+    }
+
+    @Override
+    public void addMetaData(BlobClient client, Map<String, String> metadata) {
+        Map<String, String> realMetaData = client.getProperties().getMetadata();
+        realMetaData.putAll(metadata);
+        client.setMetadata(realMetaData);
     }
 
     @Override

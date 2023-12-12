@@ -118,7 +118,7 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
             .header(
                 USER_ID_HEADER,
                 -10
-            )
+                   )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)

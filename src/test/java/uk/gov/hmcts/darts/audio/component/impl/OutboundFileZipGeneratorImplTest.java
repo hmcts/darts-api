@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
@@ -37,9 +38,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 @SuppressWarnings({"PMD.AvoidThrowingRawExceptionTypes", "PMD.ExcessiveImports"})
@@ -58,11 +60,14 @@ class OutboundFileZipGeneratorImplTest {
     @Mock
     private AudioConfigurationProperties audioConfigurationProperties;
 
+    @Mock
+    private EventRepository eventRepository;
+
     @BeforeEach
     void setUp() throws IOException, ParserConfigurationException {
         DateConverters dateConverters = new DateConverters();
 
-        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(dateConverters));
+        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(dateConverters), eventRepository);
 
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(
             audioConfigurationProperties,
@@ -128,7 +133,7 @@ class OutboundFileZipGeneratorImplTest {
         OffsetDateTime utcStartTime = OffsetDateTime.ofInstant(SOME_START_TIME, UTC);
         eventEntity.setTimestamp(utcStartTime.plusMinutes(5));
 
-        when(mockHearingEntity.getEventList()).thenReturn(List.of(eventEntity));
+        when(eventRepository.findAllByHearingId(anyInt())).thenReturn(List.of(eventEntity));
         CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
         when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");

@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -21,12 +21,14 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
@@ -36,6 +38,7 @@ import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,7 +50,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 
@@ -89,6 +92,9 @@ class MediaRequestServiceImplTest {
     @Mock
     private UserAccountEntity mockUserAccountEntity;
 
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
+
     @BeforeEach
     void beforeEach() {
 
@@ -110,10 +116,9 @@ class MediaRequestServiceImplTest {
 
     @Test
     void countNonAccessedAudioForUser() {
-        when(mockMediaRequestRepository.countByRequestor_IdAndStatusAndLastAccessedDateTime(
+        when(mockMediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(
             any(),
-            eq(AudioRequestStatus.COMPLETED),
-            any()
+            eq(MediaRequestStatus.COMPLETED)
         )).thenReturn(10L);
 
         AudioNonAccessedResponse result = mediaRequestService.countNonAccessedAudioForUser(
@@ -177,8 +182,14 @@ class MediaRequestServiceImplTest {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobId);
 
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+
+        when(transformedMediaRepository.findByMediaRequestId(mediaRequestId))
+            .thenReturn(List.of(transformedMediaEntity));
+
+        when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
+            .thenReturn(List.of(transientObjectDirectoryEntity));
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -193,8 +204,15 @@ class MediaRequestServiceImplTest {
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(null);
 
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.of(transientObjectDirectoryEntity));
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+
+        when(transformedMediaRepository.findByMediaRequestId(mediaRequestId))
+            .thenReturn(List.of(transformedMediaEntity));
+
+        when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
+            .thenReturn(List.of(transientObjectDirectoryEntity));
+
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -206,8 +224,14 @@ class MediaRequestServiceImplTest {
     @Test
     void whenNoAudioIsPresentOnlyDeleteAudioRequest() throws AzureDeleteBlobException {
         var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
-            .thenReturn(Optional.empty());
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setId(1);
+
+        when(transformedMediaRepository.findByMediaRequestId(mediaRequestId))
+            .thenReturn(List.of(transformedMediaEntity));
+
+        when(transientObjectDirectoryRepository.findByTransformedMediaId(any()))
+            .thenReturn(new ArrayList<>());
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
@@ -235,10 +259,14 @@ class MediaRequestServiceImplTest {
         mediaRequestEntity.setId(1);
         mediaRequestEntity.setRequestor(userAccountEntity);
         mediaRequestEntity.setHearing(hearingEntity);
+
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setMediaRequest(mediaRequestEntity);
+
         var blobUuid = UUID.randomUUID();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);
-        transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
+        transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
 
         var mediaRequestId = 1;
         mockMediaRequestEntity.setId(mediaRequestId);
@@ -246,7 +274,7 @@ class MediaRequestServiceImplTest {
 
         when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
 
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
         doNothing().when(auditApi).recordAudit(any(), any(), any());
@@ -296,7 +324,7 @@ class MediaRequestServiceImplTest {
 
         when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
 
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
             .thenReturn(Optional.empty());
 
         var exception = assertThrows(
@@ -319,7 +347,7 @@ class MediaRequestServiceImplTest {
         transientObjectDirectoryEntity.setExternalLocation(null);
 
         var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
         var exception = assertThrows(
@@ -349,10 +377,14 @@ class MediaRequestServiceImplTest {
         mediaRequestEntity.setId(1);
         mediaRequestEntity.setRequestor(userAccountEntity);
         mediaRequestEntity.setHearing(hearingEntity);
+
+        TransformedMediaEntity transformedMediaEntity = new TransformedMediaEntity();
+        transformedMediaEntity.setMediaRequest(mediaRequestEntity);
+
         var blobUuid = UUID.randomUUID();
         var transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setExternalLocation(blobUuid);
-        transientObjectDirectoryEntity.setMediaRequest(mediaRequestEntity);
+        transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
 
         var mediaRequestId = 1;
         mockMediaRequestEntity.setId(mediaRequestId);
@@ -360,7 +392,7 @@ class MediaRequestServiceImplTest {
 
         when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
 
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
         doNothing().when(auditApi).recordAudit(any(), any(), any());
@@ -410,7 +442,7 @@ class MediaRequestServiceImplTest {
 
         when(mockMediaRequestRepository.findById(mediaRequestId)).thenReturn(Optional.ofNullable(mockMediaRequestEntity));
 
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
             .thenReturn(Optional.empty());
 
         var exception = assertThrows(
@@ -433,7 +465,7 @@ class MediaRequestServiceImplTest {
         transientObjectDirectoryEntity.setExternalLocation(null);
 
         var mediaRequestId = 1;
-        when(transientObjectDirectoryRepository.getTransientObjectDirectoryEntityByMediaRequest_Id(mediaRequestId))
+        when(transientObjectDirectoryRepository.findByMediaRequestId(mediaRequestId))
             .thenReturn(Optional.of(transientObjectDirectoryEntity));
 
         var exception = assertThrows(
