@@ -18,7 +18,6 @@ public class ArmServiceImpl implements ArmService {
 
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
-
     @Override
     public String saveBlobData(String containerName, String filename, BinaryData binaryData) {
 
