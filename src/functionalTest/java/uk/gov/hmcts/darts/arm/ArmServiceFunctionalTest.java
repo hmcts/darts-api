@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.testutil.ArmTestUtil;
@@ -28,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
+
+    private static final String TEST_BLOB_ID = "b0f23c628dd34e4eae6a321ff6eb61d8";
 
     @Value("${darts.storage.arm.container-name}")
     private String armContainerName;
