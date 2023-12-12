@@ -29,8 +29,6 @@ class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
 
-    private static final String TEST_BLOB_ID = "b0f23c628dd34e4eae6a321ff6eb61d8";
-
     @Value("${darts.storage.arm.container-name}")
     private String armContainerName;
 
@@ -40,7 +38,7 @@ class ArmServiceFunctionalTest {
     @Autowired
     private ArmTestUtil armTestUtil;
 
-    private List<String> blobsToBeDeleted = new ArrayList<>();
+    private final List<String> blobsToBeDeleted = new ArrayList<>();
 
     @Test
     void saveBlobData() {
