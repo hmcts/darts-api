@@ -91,7 +91,7 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, PLAYBACK);
+        var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, PLAYBACK);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
 
 
@@ -103,8 +103,10 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
             ));
 
         doNothing().when(authorisation)
-            .authoriseByMediaRequestId(mediaRequestEntity.getId(),
-                    Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+            .authoriseByMediaRequestId(
+                mediaRequestEntity.getId(),
+                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            );
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
@@ -116,7 +118,8 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
 
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
@@ -139,8 +142,10 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
             .queryParam("media_request_id", String.valueOf(authorisationStub.getMediaRequestEntity().getId()));
 
         doNothing().when(authorisation)
-            .authoriseByMediaRequestId(authorisationStub.getMediaRequestEntity().getId(),
-                                       Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+            .authoriseByMediaRequestId(
+                authorisationStub.getMediaRequestEntity().getId(),
+                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            );
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
@@ -149,7 +154,8 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
     }
 
     @Test
@@ -161,8 +167,10 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         dartsDatabase.save(mediaRequestEntity);
 
         doNothing().when(authorisation)
-            .authoriseByMediaRequestId(mediaRequestEntity.getId(),
-                                       Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+            .authoriseByMediaRequestId(
+                mediaRequestEntity.getId(),
+                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            );
 
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
             .queryParam("media_request_id", String.valueOf(mediaRequestEntity.getId()));
@@ -174,7 +182,8 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS));
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
     }
 
     @Test

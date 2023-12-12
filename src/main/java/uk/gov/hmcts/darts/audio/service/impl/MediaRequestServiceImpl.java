@@ -20,12 +20,18 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.mapper.GetAudioRequestResponseMapper;
+import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
+import uk.gov.hmcts.darts.audio.mapper.TransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
+import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV2;
+import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.TransformedMediaDetails;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -56,8 +62,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
-import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.DELETED;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
+import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -74,6 +81,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final NotificationApi notificationApi;
     private final AuditApi auditApi;
     private final TransformedMediaRepository transformedMediaRepository;
+    private final TransformedMediaDetailsMapper transformedMediaDetailsMapper;
+    private final MediaRequestDetailsMapper mediaRequestDetailsMapper;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -227,6 +236,29 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         return response;
     }
 
+    @Override
+    public GetAudioRequestResponseV2 getAudioRequestsV2(Integer userId, Boolean expired) {
+        GetAudioRequestResponseV2 response = new GetAudioRequestResponseV2();
+        response.setTransformedMediaDetails(getTransformedMediaDetails(userId, expired));
+        if (!expired) {
+            //no need to get media requests for expired tab
+            response.setMediaRequestDetails(getMediaRequestDetails(userId, expired));
+        }
+        return response;
+    }
+
+
+    private List<TransformedMediaDetails> getTransformedMediaDetails(Integer userId, Boolean expired) {
+        List<TransformedMediaDetailsDto> transformedMediaDetailsDtoList = transformedMediaRepository.findTransformedMediaDetails(userId, expired);
+        return transformedMediaDetailsMapper.mapToTransformedMediaDetails(transformedMediaDetailsDtoList);
+    }
+
+    private List<MediaRequestDetails> getMediaRequestDetails(Integer userId, Boolean expired) {
+        List<EnhancedMediaRequestInfo> enhancedMediaRequestInfoList = getEnhancedMediaRequestInfo(userId, expired);
+        return mediaRequestDetailsMapper.map(enhancedMediaRequestInfoList);
+    }
+
+
     private List<EnhancedMediaRequestInfo> getEnhancedMediaRequestInfo(Integer userId, Boolean expired) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<EnhancedMediaRequestInfo> criteriaQuery = criteriaBuilder.createQuery(EnhancedMediaRequestInfo.class);
@@ -253,7 +285,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);
         criteriaQuery.where(criteriaBuilder.and(
             criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
-            expiredPredicate(expired, criteriaBuilder, mediaRequest)
+            expiredPredicate(expired, criteriaBuilder, mediaRequest),
+            criteriaBuilder.notEqual(mediaRequest.get(MediaRequestEntity_.status), DELETED)
         ));
 
         criteriaQuery.orderBy(List.of(

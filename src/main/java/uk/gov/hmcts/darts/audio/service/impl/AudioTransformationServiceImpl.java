@@ -325,8 +325,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     public void notifyUser(MediaRequestEntity mediaRequestEntity,
-                            CourtCaseEntity courtCase,
-                            String notificationTemplateName) {
+                           CourtCaseEntity courtCase,
+                           String notificationTemplateName) {
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
                  courtCase.getId()
         );
