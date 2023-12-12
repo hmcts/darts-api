@@ -98,6 +98,20 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
     }
 
     @Test
+    void previewWithRangeFromStartWithNoEndShouldReturnSuccess() throws Exception {
+
+        MockHttpServletRequestBuilder requestBuilder = get(URI.create(
+            String.format("/audio/preview/%d", mediaEntity.getId()))).header("Range", "bytes=0-");
+
+        mockMvc.perform(requestBuilder).andExpect(status().isPartialContent());
+
+        verify(authorisation).authoriseByMediaId(
+            mediaEntity.getId(),
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+        );
+    }
+
+    @Test
     void previewWithRangeShouldReturnSuccess() throws Exception {
 
         MockHttpServletRequestBuilder requestBuilder = get(URI.create(
