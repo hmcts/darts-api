@@ -159,9 +159,9 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
         }
         TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
-        MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
         deleteTransientObjectDirectoryByTransformedMediaId(transformedMedia.getId());
         log.debug("deleting TransformedMediaEntity with id {}.", transformedMedia.getId());
+        MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
         transformedMediaRepository.delete(transformedMedia);
 
         if (transformedMediaRepository.findByMediaRequestId(mediaRequest.getId()).isEmpty()) {
