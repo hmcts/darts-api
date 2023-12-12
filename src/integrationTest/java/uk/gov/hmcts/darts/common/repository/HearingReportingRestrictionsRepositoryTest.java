@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-public class HearingReportingRestrictionsRepositoryTest extends IntegrationBase {
+class HearingReportingRestrictionsRepositoryTest extends IntegrationBase {
 
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
