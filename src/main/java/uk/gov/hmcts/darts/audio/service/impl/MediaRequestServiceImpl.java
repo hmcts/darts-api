@@ -29,7 +29,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
-import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV2;
+import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.TransformedMediaDetails;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
@@ -219,14 +219,14 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public List<GetAudioRequestResponse> getAudioRequests(Integer userId, Boolean expired) {
-        List<GetAudioRequestResponse> response = new ArrayList<>();
+    public List<GetAudioRequestResponseV1> getAudioRequestsV1(Integer userId, Boolean expired) {
+        List<GetAudioRequestResponseV1> response = new ArrayList<>();
         List<EnhancedMediaRequestInfo> enhancedMediaRequestInfoList = getEnhancedMediaRequestInfo(userId, expired);
         for (EnhancedMediaRequestInfo enhancedMediaRequestInfo : enhancedMediaRequestInfoList) {
             List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findByMediaRequestId(enhancedMediaRequestInfo.getMediaRequestId());
             if (transformedMediaList.size() > 0) {
                 TransformedMediaEntity transformedMedia = transformedMediaList.get(0);
-                GetAudioRequestResponse getAudioRequestResponseItem = GetAudioRequestResponseMapper.mapToAudioRequestSummary(
+                GetAudioRequestResponseV1 getAudioRequestResponseItem = GetAudioRequestResponseMapper.mapToAudioRequestSummary(
                     enhancedMediaRequestInfo,
                     transformedMedia
                 );
@@ -237,8 +237,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public GetAudioRequestResponseV2 getAudioRequestsV2(Integer userId, Boolean expired) {
-        GetAudioRequestResponseV2 response = new GetAudioRequestResponseV2();
+    public GetAudioRequestResponse getAudioRequests(Integer userId, Boolean expired) {
+        GetAudioRequestResponse response = new GetAudioRequestResponse();
         response.setTransformedMediaDetails(getTransformedMediaDetails(userId, expired));
         if (!expired) {
             //no need to get media requests for expired tab
