@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
-import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 @Service
@@ -22,17 +21,14 @@ public class ArmServiceImpl implements ArmService {
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     @Override
-    public ArmBlobInfo saveBlobData(String containerName, String filename, BinaryData binaryData) {
+    public String saveBlobData(String containerName, String filename, BinaryData binaryData) {
 
         String blobPathAndName = armDataManagementConfiguration.getArmSubmissionDropZone() + filename;
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         BlobClient client = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
         client.upload(binaryData);
 
-        return ArmBlobInfo.builder()
-            .blobPathAndName(blobPathAndName)
-            .blobName(client.getBlobName())
-            .build();
+        return filename;
     }
 
 }

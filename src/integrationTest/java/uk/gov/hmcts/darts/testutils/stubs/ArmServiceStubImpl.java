@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.ArmService;
-
-import java.util.UUID;
 
 @Component
 @Slf4j
@@ -16,15 +13,10 @@ import java.util.UUID;
 @Profile("intTest")
 public class ArmServiceStubImpl implements ArmService {
     @Override
-    public ArmBlobInfo saveBlobData(String containerName, String filename, BinaryData binaryData) {
+    public String saveBlobData(String containerName, String filename, BinaryData binaryData) {
         logStubUsageWarning();
-
-        String blobName = UUID.randomUUID().toString();
-        log.warn("Returning filename to mimic successful upload: {}", blobName);
-        return ArmBlobInfo.builder()
-            .blobPathAndName(filename)
-            .blobName(blobName)
-            .build();
+        log.warn("Returning filename to mimic successful upload: {}", filename);
+        return filename;
     }
 
     private void logStubUsageWarning() {

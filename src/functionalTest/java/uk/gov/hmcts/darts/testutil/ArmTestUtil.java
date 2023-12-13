@@ -32,7 +32,7 @@ public class ArmTestUtil {
 
             Response<Boolean> response = blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE,
                                                   null,
-                                                  Duration.of(DELETE_TIMEOUT,ChronoUnit.SECONDS),
+                                                  Duration.of(DELETE_TIMEOUT, ChronoUnit.SECONDS),
                                                   null);
 
             log.info("Status code {}", response.getStatusCode());
