@@ -62,9 +62,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.DELETED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.DELETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 
 @Slf4j
 @RequiredArgsConstructor

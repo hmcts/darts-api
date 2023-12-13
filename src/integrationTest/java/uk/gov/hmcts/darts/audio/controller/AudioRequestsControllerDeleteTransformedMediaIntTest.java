@@ -52,7 +52,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
@@ -86,7 +86,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(

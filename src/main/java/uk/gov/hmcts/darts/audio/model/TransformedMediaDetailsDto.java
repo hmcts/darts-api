@@ -3,7 +3,7 @@ package uk.gov.hmcts.darts.audio.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 
 import java.time.LocalDate;
@@ -36,7 +36,7 @@ public class TransformedMediaDetailsDto {
 
     private OffsetDateTime transformedMediaExpiryTs;
 
-    private AudioRequestStatus mediaRequestStatus;
+    private MediaRequestStatus mediaRequestStatus;
 
     private String transformedMediaFilename;
 

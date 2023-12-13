@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
@@ -23,7 +23,7 @@ public class MediaRequestStub {
 
 
     @Transactional
-    public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity requestor, AudioRequestType audioRequestType, AudioRequestStatus status) {
+    public MediaRequestEntity createAndLoadMediaRequestEntity(UserAccountEntity requestor, AudioRequestType audioRequestType, MediaRequestStatus status) {
 
         HearingEntity hearing = hearingStub.createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 

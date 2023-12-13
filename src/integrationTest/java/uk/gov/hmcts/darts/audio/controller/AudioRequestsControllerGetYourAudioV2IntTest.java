@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
@@ -43,11 +43,11 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
 
         {
             //create some OPEN media requests
-            var openMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, AudioRequestStatus.OPEN);
+            var openMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, MediaRequestStatus.OPEN);
             var someoneElsesOpenMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.OPEN
+                MediaRequestStatus.OPEN
             );
 
             transformedMediaStub.createTransformedMediaEntity(openMediaRequest);
@@ -56,11 +56,11 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
 
         {
             //create some COMPLETED media requests
-            var completedMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, AudioRequestStatus.COMPLETED);
+            var completedMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, MediaRequestStatus.COMPLETED);
             var someoneElsesCompletedMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.COMPLETED
+                MediaRequestStatus.COMPLETED
             );
 
             OffsetDateTime time = OffsetDateTime.of(3020, 6, 20, 15, 30, 0, 0, ZoneOffset.UTC);
@@ -71,11 +71,11 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
 
         {
             //create some EXPIRED transformed_media with EXPIRED media requests
-            var expiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, AudioRequestStatus.EXPIRED);
+            var expiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, MediaRequestStatus.EXPIRED);
             var someoneElsesExpiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.EXPIRED
+                MediaRequestStatus.EXPIRED
             );
 
             OffsetDateTime time = OffsetDateTime.of(2020, 6, 20, 15, 30, 0, 0, ZoneOffset.UTC);
@@ -86,11 +86,11 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
 
         {
             //create some EXPIRED transformed_media with COMPLETED media requests
-            var expiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, AudioRequestStatus.COMPLETED);
+            var expiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, MediaRequestStatus.COMPLETED);
             var someoneElsesExpiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.EXPIRED
+                MediaRequestStatus.EXPIRED
             );
 
             OffsetDateTime time = OffsetDateTime.of(2020, 6, 20, 15, 30, 0, 0, ZoneOffset.UTC);
@@ -101,11 +101,11 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
 
         {
             //create some DELETED media requests
-            mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, AudioRequestStatus.DELETED);
+            mediaRequestStub.createAndLoadMediaRequestEntity(thisOwner, AudioRequestType.DOWNLOAD, MediaRequestStatus.DELETED);
             mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.DELETED
+                MediaRequestStatus.DELETED
             );
 
         }
@@ -315,7 +315,7 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             var someoneElsesOpenMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.OPEN
+                MediaRequestStatus.OPEN
             );
 
             transformedMediaStub.createTransformedMediaEntity(someoneElsesOpenMediaRequest);
@@ -326,7 +326,7 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             var someoneElsesCompletedMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.COMPLETED
+                MediaRequestStatus.COMPLETED
             );
 
             OffsetDateTime futureDate = OffsetDateTime.of(3020, 6, 20, 15, 30, 0, 0, ZoneOffset.UTC);
@@ -338,7 +338,7 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             var someoneElsesExpiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.EXPIRED
+                MediaRequestStatus.EXPIRED
             );
 
             OffsetDateTime time = OffsetDateTime.of(2020, 6, 20, 15, 30, 0, 0, ZoneOffset.UTC);
@@ -350,7 +350,7 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             var someoneElsesExpiredMediaRequest = mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.EXPIRED
+                MediaRequestStatus.EXPIRED
             );
 
             OffsetDateTime time = OffsetDateTime.of(2020, 6, 20, 15, 30, 0, 0, ZoneOffset.UTC);
@@ -362,7 +362,7 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             mediaRequestStub.createAndLoadMediaRequestEntity(
                 differentOwner,
                 AudioRequestType.DOWNLOAD,
-                AudioRequestStatus.DELETED
+                MediaRequestStatus.DELETED
             );
 
         }

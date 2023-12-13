@@ -5,10 +5,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Mappings;
 import org.mapstruct.ValueMapping;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
 import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
-import uk.gov.hmcts.darts.audiorequests.model.MediaRequestStatus;
 
 import java.util.List;
 
@@ -24,5 +23,5 @@ public interface MediaRequestDetailsMapper {
     MediaRequestDetails map(EnhancedMediaRequestInfo enhancedMediaRequestInfo);
 
     @ValueMapping(source = "DELETED", target = MappingConstants.NULL)
-    MediaRequestStatus map(AudioRequestStatus status);
+    uk.gov.hmcts.darts.audiorequests.model.MediaRequestStatus map(MediaRequestStatus status);
 }
