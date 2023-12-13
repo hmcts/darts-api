@@ -24,7 +24,6 @@ import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,10 +88,6 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
-
-    public boolean isFor(OffsetDateTime dateTime) {
-        return hearingDate.equals(dateTime.toLocalDate());
-    }
 
     public void addMedia(MediaEntity mediaEntity) {
         mediaList.add(mediaEntity);

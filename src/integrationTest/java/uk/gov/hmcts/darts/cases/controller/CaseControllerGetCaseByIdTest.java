@@ -9,7 +9,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -22,7 +21,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @AutoConfigureMockMvc
-@Transactional
 class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @Autowired
@@ -40,7 +38,6 @@ class CaseControllerGetCaseByIdTest extends IntegrationBase {
 
     @BeforeEach
     void setUp() {
-
         HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             SOME_CASE_NUMBER,
             SOME_COURTHOUSE,

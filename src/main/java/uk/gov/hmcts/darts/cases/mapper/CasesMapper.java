@@ -1,22 +1,27 @@
 package uk.gov.hmcts.darts.cases.mapper;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
+import uk.gov.hmcts.darts.cases.model.ReportingRestriction;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @Component
@@ -25,10 +30,11 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 public class CasesMapper {
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
+    private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
     public List<ScheduledCase> mapToScheduledCases(List<HearingEntity> hearings) {
         return emptyIfNull(hearings).stream().map(this::mapToScheduledCase)
-            .sorted(Comparator.comparing(ScheduledCase::getScheduledStart))
+            .sorted(comparing(ScheduledCase::getScheduledStart))
             .toList();
     }
 
@@ -85,10 +91,9 @@ public class CasesMapper {
         return caseEntity;
     }
 
+    @Transactional
     public SingleCase mapToSingleCase(CourtCaseEntity caseEntity) {
-
         SingleCase singleCase = new SingleCase();
-
         singleCase.setCaseId(caseEntity.getId());
         singleCase.setCaseNumber(caseEntity.getCaseNumber());
         singleCase.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
@@ -96,11 +101,51 @@ public class CasesMapper {
         singleCase.setDefenders(caseEntity.getDefenceStringList());
         singleCase.setProsecutors(caseEntity.getProsecutorsStringList());
         singleCase.setJudges(caseEntity.getJudgeStringList());
+
+        var reportingRestrictions = hearingReportingRestrictionsRepository.findAllByCaseId(caseEntity.getId()).stream()
+            .map(this::toReportingRestriction)
+            .collect(toList());
+
+        if (caseEntity.getReportingRestrictions() != null && reportingRestrictions.isEmpty()) {
+            reportingRestrictions.add(
+                reportingRestrictionWithName(caseEntity.getReportingRestrictions().getEventName()));
+        }
+
+        singleCase.setReportingRestrictions(
+            sortedByTimestamp(reportingRestrictions));
+
+        // Will be removed when FE up to date
+        populateReportingRestrictionField(caseEntity, singleCase);
+
+        return singleCase;
+    }
+
+    private static List<ReportingRestriction> sortedByTimestamp(List<ReportingRestriction> reportingRestrictions) {
+        return reportingRestrictions.stream()
+            .sorted(comparing(ReportingRestriction::getEventTs))
+            .collect(toList());
+    }
+
+    private static ReportingRestriction reportingRestrictionWithName(String name) {
+        var reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setEventName(name);
+        return reportingRestriction;
+    }
+
+    private static void populateReportingRestrictionField(CourtCaseEntity caseEntity, SingleCase singleCase) {
         if (caseEntity.getReportingRestrictions() != null) {
             singleCase.setReportingRestriction(caseEntity.getReportingRestrictions().getEventName());
         }
+    }
 
-        return singleCase;
+    private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {
+        var reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setEventId(restrictionsEntity.getEventId());
+        reportingRestriction.setEventName(restrictionsEntity.getEventName());
+        reportingRestriction.setEventText(restrictionsEntity.getEventText());
+        reportingRestriction.setHearingId(restrictionsEntity.getHearingId());
+        reportingRestriction.setEventTs(restrictionsEntity.getEventDateTime());
+        return reportingRestriction;
     }
 
     private DefenceEntity createNewDefence(String newProsecutor, CourtCaseEntity caseEntity) {
