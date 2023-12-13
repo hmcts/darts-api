@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
@@ -13,8 +12,8 @@ public final class AwaitabilityUtil {
     }
 
     public static void waitForMax10SecondsWithOneSecondPoll(Callable<Boolean> callable) {
-        await().atMost(Duration.of(10, ChronoUnit.SECONDS))
-            .with().pollInterval(Duration.of(1, ChronoUnit.SECONDS))
+        await().atMost(Duration.ofSeconds(10))
+            .with().pollInterval(Duration.ofSeconds(1))
             .until(() -> {
                 boolean verified;
                 try {

@@ -333,7 +333,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(17)
     void transcriptionRequestExactStartAndEnd() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -364,7 +363,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(18)
     void transcriptionRequestInsideStartAndEnd() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
