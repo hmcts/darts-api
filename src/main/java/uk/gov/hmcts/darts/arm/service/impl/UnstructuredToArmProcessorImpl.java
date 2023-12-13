@@ -58,7 +58,6 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         processPendingUnstructured();
     }
 
-    @Transactional
     private void processPendingUnstructured() {
 
         ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
