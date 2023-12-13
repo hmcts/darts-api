@@ -10,12 +10,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 
 import java.util.Set;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
@@ -27,12 +27,16 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private AdminUserStub adminUserStub;
+
     @MockBean
     private UserIdentity mockUserIdentity;
 
     @Test
     void usersGetShouldReturnForbiddenError() throws Exception {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(false);
+        adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
             .andExpect(status().isForbidden())
@@ -53,7 +57,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
 
     @Test
     void usersGetShouldReturnNotImplemented() throws Exception {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
         mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
             .andExpect(status().isNotImplemented());

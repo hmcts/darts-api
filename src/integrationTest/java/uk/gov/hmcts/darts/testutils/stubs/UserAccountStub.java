@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -220,6 +222,16 @@ public class UserAccountStub {
         testUser.setAccountGuid(guid);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
+    }
+
+    public UserAccountEntity createAdminUser() {
+        var adminGroup = securityGroupRepository.findByGroupName(SecurityRoleEnum.ADMIN.name())
+            .orElseThrow();
+
+        var user = getIntegrationTestUserAccountEntity();
+        user.setSecurityGroupEntities(Collections.singleton(adminGroup));
+
+        return userAccountRepository.saveAndFlush(user);
     }
 
 }

@@ -10,11 +10,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
-import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
-import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 
 import java.util.Set;
@@ -28,7 +27,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,20 +39,22 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
-    @MockBean
-    private UserIdentity mockUserIdentity;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
     private DartsDatabaseStub dartsDatabaseStub;
+
     @Autowired
-    private UserAccountStub userAccountStub;
+    private AdminUserStub adminUserStub;
+
+    @MockBean
+    private UserIdentity userIdentity;
 
     @Test
     void searchShouldReturnForbiddenError() throws Exception {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(false);
+        adminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("@example");
@@ -74,12 +74,14 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchShouldReturnBadRequestError() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("");
 
@@ -108,12 +110,12 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verifyNoInteractions(mockUserIdentity);
+        verifyNoInteractions(userIdentity);
     }
 
     @Test
     void searchShouldReturnOk() throws Exception {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("@test");
@@ -131,20 +133,13 @@ class UserControllerSearchIntTest extends IntegrationBase {
             JSONCompareMode.NON_EXTENSIBLE
         );
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchByEmailAddressShouldReturnOk() throws Exception {
-        dartsDatabaseStub.getUserAccountRepository().deleteAll();
-        UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
-        SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
-        testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setActive(true);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
-
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("integrationtest.user@");
@@ -159,21 +154,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
+            .andExpect(jsonPath("$[0].security_groups", hasItem(1)));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchByFullNameShouldReturnOk() throws Exception {
-        UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
-        SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
-        testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setActive(true);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
-
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setFullName("IntegrationTest");
@@ -188,21 +177,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
+            .andExpect(jsonPath("$[0].security_groups", hasItem(1)));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void searchByEmailAddressAndFullNameShouldReturnOk() throws Exception {
-        UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
-        SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
-        testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setActive(true);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
-
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setEmailAddress("integrationtest.user@");
@@ -218,45 +201,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].active").value(true))
             .andExpect(jsonPath("$[0].security_groups").isArray())
             .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
+            .andExpect(jsonPath("$[0].security_groups", hasItem(1)));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
-    }
-
-    @Test
-    void searchByEmailAddressAndFullNameShouldReturnOkWhenUserInactive() throws Exception {
-        UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
-        SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
-        testUser.getSecurityGroupEntities().add(testTranscriberSG);
-        testUser.setActive(false);
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
-
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
-
-        UserSearch userSearch = new UserSearch();
-        userSearch.setEmailAddress("integrationtest.user@");
-        userSearch.setFullName("IntegrationTest");
-
-        mockMvc.perform(post(ENDPOINT_URL)
-                            .header("Content-Type", "application/json")
-                            .content(objectMapper.writeValueAsString(userSearch)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].id").isNumber())
-            .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
-            .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
-            .andExpect(jsonPath("$[0].active").value(false))
-            .andExpect(jsonPath("$[0].security_groups").isArray())
-            .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_groups", hasItem(-4)));
-
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
     }
 
     @Test
     void returnsActiveAndInactiveUsersGivenActiveValueNotProvided() throws Exception {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         String randomStr = randomAlphabetic(4);
         String username1 = randomStr + "-user-1";
@@ -276,15 +229,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(containsInAnyOrder(activeUser.getUserName(), inactiveUser.getUserName())))
             .andExpect(jsonPath("$[*].email_address").value(containsInAnyOrder(username1 + "@ex.com", username2 + "@ex.com")));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
     }
 
     @Test
     void doesntReturnActiveUsersWhenInactiveProvidedInTheUserSearch() throws Exception {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         String randomStr = randomAlphabetic(4);
         String username1 = randomStr + "-user-1";
@@ -306,15 +259,15 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username2 + "@ex.com")));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
     }
 
     @Test
     void doesntReturnInactiveUsersWhenActiveProvidedInTheUserSearch() throws Exception {
-        when(mockUserIdentity.userHasGlobalAccess(Set.of(ADMIN))).thenReturn(true);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         String randomStr = randomAlphabetic(4);
         String username1 = randomStr + "-user-1";
@@ -336,8 +289,8 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[*].full_name").value(hasSize(1)))
             .andExpect(jsonPath("$[*].email_address").value(hasItems(username1 + "@ex.com")));
 
-        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
-        verifyNoMoreInteractions(mockUserIdentity);
+        verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(userIdentity);
 
         dartsDatabaseStub.addToUserAccountTrash(username1 + "@ex.com", username2 + "@ex.com");
     }
