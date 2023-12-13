@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
@@ -39,6 +41,9 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    public static final String DUMMY_BLOB_ID = "DUMMY_FILE";
+
+    @Autowired
     UnstructuredToArmProcessor unstructuredToArmProcessor;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
@@ -93,6 +98,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         );
         dartsDatabase.save(unstructuredEod);
 
+        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(DUMMY_BLOB_ID);
+
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
@@ -139,6 +146,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
+
+        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(DUMMY_BLOB_ID);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 

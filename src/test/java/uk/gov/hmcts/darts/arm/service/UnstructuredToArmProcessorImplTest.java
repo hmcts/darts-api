@@ -166,8 +166,8 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processPreviousFailedAttempt() {
+        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
-        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
         when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailed);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
