@@ -521,7 +521,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(16)
     void givenConfiguredTasksUpdateCronAndResetCronForUnstructuredToArmAutomatedTask() {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
@@ -555,7 +554,6 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(17)
     void givenConfiguredTaskCancelUnstructuredToArmAutomatedTask() {
         AutomatedTask automatedTask =
             new UnstructuredToArmAutomatedTask(
