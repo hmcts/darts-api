@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface UserSearchQuery {
 
-    List<UserAccountEntity> getUsers(String fullName, String emailAddress);
+    List<UserAccountEntity> getUsers(String fullName, String emailAddress, Boolean active);
 
 }

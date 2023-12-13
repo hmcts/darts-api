@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.COMPLETED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 
 class MediaRequestServiceTest extends IntegrationPerClassBase {

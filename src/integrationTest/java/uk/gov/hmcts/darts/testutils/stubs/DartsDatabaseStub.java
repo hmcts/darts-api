@@ -36,6 +36,7 @@ import uk.gov.hmcts.darts.common.repository.EventHandlerRepository;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.JudgeRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
@@ -72,7 +73,7 @@ import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
@@ -111,6 +112,7 @@ public class DartsDatabaseStub {
     private final SecurityGroupRepository securityGroupRepository;
     private final SecurityRoleRepository securityRoleRepository;
     private final NodeRegistrationRepository nodeRegistrationRepository;
+    private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
     private final UserAccountStub userAccountStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
@@ -174,6 +176,10 @@ public class DartsDatabaseStub {
 
     public JudgeEntity createSimpleJudge(String name) {
         return retrieveCoreObjectService.retrieveOrCreateJudge(name);
+    }
+
+    public EventEntity createEvent(HearingEntity hearing, int eventHandlerId) {
+        return eventStub.createEvent(hearing, eventHandlerId);
     }
 
     public EventEntity createEvent(HearingEntity hearing) {
@@ -444,6 +450,15 @@ public class DartsDatabaseStub {
 
     public void saveAll(EventHandlerEntity... eventHandlerEntities) {
         eventHandlerRepository.saveAll(asList(eventHandlerEntities));
+    }
+
+    public void saveAll(UserAccountEntity... testUsers) {
+        stream(testUsers).forEach(user -> {
+            UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
+            user.setCreatedBy(systemUser);
+            user.setLastModifiedBy(systemUser);
+        });
+        userAccountRepository.saveAll(asList(testUsers));
     }
 
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {

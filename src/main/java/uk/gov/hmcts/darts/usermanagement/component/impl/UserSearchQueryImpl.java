@@ -5,6 +5,7 @@ import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.ParameterExpression;
+import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
@@ -26,7 +28,7 @@ public class UserSearchQueryImpl implements UserSearchQuery {
 
     private final EntityManager em;
 
-    public List<UserAccountEntity> getUsers(String fullName, String emailAddress) {
+    public List<UserAccountEntity> getUsers(String fullName, String emailAddress, Boolean active) {
         CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
         CriteriaQuery<UserAccountEntity> criteriaQuery = criteriaBuilder.createQuery(UserAccountEntity.class);
 
@@ -37,6 +39,7 @@ public class UserSearchQueryImpl implements UserSearchQuery {
         wherePredicates.add(criteriaBuilder.isFalse(root.get(UserAccountEntity_.isSystemUser)));
         ParameterExpression<String> paramEmailAddress = criteriaBuilder.parameter(String.class);
         ParameterExpression<String> paramFullName = criteriaBuilder.parameter(String.class);
+        ParameterExpression<Boolean> paramActive = criteriaBuilder.parameter(Boolean.class);
 
         boolean isNotBlankEmailAddress = isNotBlank(emailAddress);
         if (isNotBlankEmailAddress) {
@@ -54,6 +57,13 @@ public class UserSearchQueryImpl implements UserSearchQuery {
             ));
         }
 
+        boolean activeNonNull = nonNull(active);
+        if (activeNonNull) {
+            Path<Boolean> path = root.get(UserAccountEntity_.active);
+            Predicate activePredicate = criteriaBuilder.equal(paramActive, path);
+            wherePredicates.add(activePredicate);
+        }
+
         Predicate finalWherePredicate = criteriaBuilder.and(wherePredicates.toArray(Predicate[]::new));
         criteriaQuery.where(finalWherePredicate);
         criteriaQuery.orderBy(criteriaBuilder.desc(root.get(UserAccountEntity_.id)));
@@ -64,6 +74,10 @@ public class UserSearchQueryImpl implements UserSearchQuery {
         }
         if (isNotBlankFullName) {
             query.setParameter(paramFullName, String.format(LIKE_CONTAINS_STRING_VALUE, fullName));
+        }
+        if (activeNonNull) {
+            query.setParameter(paramActive, active);
+
         }
         return query.getResultList();
     }

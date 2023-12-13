@@ -53,6 +53,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
     }
 
     @Test
@@ -65,7 +66,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
             String.format("/audio-requests/%d", mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotImplemented())//todo fix in future ticket
+            .andExpect(status().isNoContent())
             .andReturn();
 
     }

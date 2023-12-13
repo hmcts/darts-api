@@ -69,7 +69,6 @@ public class DataManagementApiImpl implements DataManagementApi {
         dataManagementService.deleteBlobData(getUnstructuredContainerName(), blobId);
     }
 
-
     @Override
     public UUID saveBlobDataToInboundContainer(BinaryData binaryData) {
         return dataManagementService.saveBlobData(getInboundContainerName(), binaryData);
@@ -103,5 +102,4 @@ public class DataManagementApiImpl implements DataManagementApi {
             }
         }
     }
-
 }

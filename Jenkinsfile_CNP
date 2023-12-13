@@ -38,8 +38,8 @@ def secrets = [
     secret('AzureADFunctionalTestPassword', 'AZURE_AD_FUNCTIONAL_TEST_PASSWORD'),
     secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
     secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
-    secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD')
-
+    secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
+    secret('ARMConnectionString', 'ARM_STORAGE_CONNECTION_STRING')
   ],
 ]
 

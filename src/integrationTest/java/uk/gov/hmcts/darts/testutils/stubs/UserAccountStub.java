@@ -94,6 +94,7 @@ public class UserAccountStub {
         }
     }
 
+    @Transactional
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         securityGroupEntity.getCourthouseEntities().clear();

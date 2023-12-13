@@ -867,6 +867,9 @@ components:
         description:
           type: string
           example: Standard
+        priority_order:
+          type: integer
+          example: 1
     TranscriptionTranscriberCountsResponse:
       type: object
       properties:
