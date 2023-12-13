@@ -54,7 +54,7 @@ class AudioRequestsControllerTransMediaUpdateLastAccessedTest extends Integratio
     void beforeEach() {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
     }
 
@@ -80,7 +80,7 @@ class AudioRequestsControllerTransMediaUpdateLastAccessedTest extends Integratio
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
         );
 
-        MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadCurrentMediaRequestEntity(
+        MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadOpenMediaRequestEntity(
             systemUser, AudioRequestType.DOWNLOAD);
 
         Mockito.doThrow(new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER))

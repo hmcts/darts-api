@@ -193,7 +193,7 @@ class UserIdentityImplTest extends IntegrationBase {
 
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        dartsDatabaseStub.getUserAccountStub().createAuthorisedIntegrationTestUser(null);
+        dartsDatabaseStub.getUserAccountStub().createAuthorisedIntegrationTestUser("test");
 
         assertFalse(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
 
