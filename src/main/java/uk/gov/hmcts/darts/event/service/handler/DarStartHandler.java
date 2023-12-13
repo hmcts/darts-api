@@ -1,10 +1,13 @@
 package uk.gov.hmcts.darts.event.service.handler;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.HearingRepository;
+import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.event.model.DarNotifyApplicationEvent;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
@@ -12,10 +15,15 @@ import uk.gov.hmcts.darts.event.service.handler.base.EventHandlerBase;
 import static uk.gov.hmcts.darts.event.enums.DarNotifyType.START_RECORDING;
 
 @Service
-@RequiredArgsConstructor
 public class DarStartHandler extends EventHandlerBase {
 
-    private final ApplicationEventPublisher eventPublisher;
+    public DarStartHandler(RetrieveCoreObjectService retrieveCoreObjectService,
+                           EventRepository eventRepository,
+                           HearingRepository hearingRepository,
+                           CaseRepository caseRepository,
+                           ApplicationEventPublisher eventPublisher) {
+        super(retrieveCoreObjectService, eventRepository, hearingRepository, caseRepository, eventPublisher);
+    }
 
     @Override
     @Transactional
