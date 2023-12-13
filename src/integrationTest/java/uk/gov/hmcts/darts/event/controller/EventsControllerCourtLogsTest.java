@@ -52,10 +52,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     public static final String START_DATE_TIME = "start_date_time";
     public static final String CASE_NUMBER = "case_number";
     public static final String COURTHOUSE = "courthouse";
-
-    @Autowired
-    private EventRepository eventRepository;
-
     private static final URI ENDPOINT = URI.create("/courtlogs");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
@@ -63,6 +59,9 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     private static final String SOME_CASE_ID = "1";
     private static final String SOME_TEXT = "some-text";
     public static final String LOG = "LOG";
+
+    @Autowired
+    private EventRepository eventRepository;
 
     @Autowired
     private MockMvc mockMvc;

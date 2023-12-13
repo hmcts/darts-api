@@ -2,12 +2,8 @@ package uk.gov.hmcts.darts.authorisation.service;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.authorisation.model.Permission;
@@ -18,7 +14,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.IntegrationPerClassBase;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -37,17 +33,12 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
-@TestInstance(Lifecycle.PER_CLASS)
-class AuthorisationServiceTest {
+class AuthorisationServiceTest extends IntegrationPerClassBase {
 
     private static final String TEST_JUDGE_EMAIL = "test.judge@example.com";
     private static final String TEST_BRISTOL_EMAIL = "test.bristol@example.com";
     private static final String TEST_NEW_EMAIL = "test.new@example.com";
 
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -57,10 +48,10 @@ class AuthorisationServiceTest {
 
     @BeforeAll
     void beforeAll() {
-        dartsDatabaseStub.getUserAccountStub().getSystemUserAccountEntity();
-        var testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
+        var testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
-        SecurityGroupRepository securityGroupRepository = dartsDatabaseStub.getSecurityGroupRepository();
+        SecurityGroupRepository securityGroupRepository = dartsDatabase.getSecurityGroupRepository();
         SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(-3);
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setUserName("Test Judge");
@@ -71,7 +62,7 @@ class AuthorisationServiceTest {
         judgeUserAccount.setAccountGuid(UUID.randomUUID().toString());
         judgeUserAccount.setIsSystemUser(false);
         judgeUserAccount.setActive(true);
-        UserAccountRepository userAccountRepository = dartsDatabaseStub.getUserAccountRepository();
+        UserAccountRepository userAccountRepository = dartsDatabase.getUserAccountRepository();
         userAccountRepository.saveAndFlush(judgeUserAccount);
 
         SecurityGroupEntity bristolStaff = securityGroupRepository.getReferenceById(-2);
@@ -166,17 +157,17 @@ class AuthorisationServiceTest {
     void shouldCheckAuthorisationOK() {
         String emailAddress = TEST_BRISTOL_EMAIL;
 
-        var a1Court = dartsDatabaseStub.createCourthouseUnlessExists("A1 COURT");
-        var b2Court = dartsDatabaseStub.createCourthouseUnlessExists("B2 COURT");
-        var c3Court = dartsDatabaseStub.createCourthouseUnlessExists("C3 COURT");
+        var a1Court = dartsDatabase.createCourthouseUnlessExists("A1 COURT");
+        var b2Court = dartsDatabase.createCourthouseUnlessExists("B2 COURT");
+        var c3Court = dartsDatabase.createCourthouseUnlessExists("C3 COURT");
 
-        var bristolUser = dartsDatabaseStub.getUserAccountRepository().findByEmailAddressIgnoreCase(emailAddress)
+        var bristolUser = dartsDatabase.getUserAccountRepository().findByEmailAddressIgnoreCase(emailAddress)
             .stream().findFirst()
             .orElseThrow();
         final Iterator<SecurityGroupEntity> bristolUserGroupIt = bristolUser.getSecurityGroupEntities().iterator();
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(a1Court, b2Court));
         bristolUserGroupIt.next().getCourthouseEntities().addAll(Set.of(b2Court, c3Court));
-        dartsDatabaseStub.getUserAccountRepository().saveAndFlush(bristolUser);
+        dartsDatabase.getUserAccountRepository().saveAndFlush(bristolUser);
 
         when(mockUserIdentity.getUserAccount()).thenReturn(bristolUser);
         assertDoesNotThrow(() -> authorisationService.checkCourthouseAuthorisation(
@@ -189,8 +180,8 @@ class AuthorisationServiceTest {
     void shouldCheckAuthorisationThrowsDartsApiException() {
         when(mockUserIdentity.getUserAccount()).thenReturn(null);
 
-        var a1Court = dartsDatabaseStub.createCourthouseUnlessExists("A1 COURT");
-        var b2Court = dartsDatabaseStub.createCourthouseUnlessExists("B2 COURT");
+        var a1Court = dartsDatabase.createCourthouseUnlessExists("A1 COURT");
+        var b2Court = dartsDatabase.createCourthouseUnlessExists("B2 COURT");
 
         var exception = assertThrows(
             DartsApiException.class,

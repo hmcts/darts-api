@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,6 @@ import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 
-@ExtendWith(MockitoExtension.class)
 @Slf4j
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
