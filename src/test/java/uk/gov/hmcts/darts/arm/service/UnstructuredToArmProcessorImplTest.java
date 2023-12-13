@@ -1,6 +1,9 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -38,13 +40,13 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmProcessorImplTest {
 
-    private static final String TEST_BINARY_DATA = "test binary data";
-    private static final Integer MAX_RETRY_ATTEMPTS = 3;
 
+    private static final Integer EXAMPLE_MEDIA_ID = 20;
+    private static final Integer EXAMPLE_TRANSCRIPTION_ID = 50;
+    private static final Integer EXAMPLE_ANNOTATION_ID = 70;
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ObjectDirectoryStatusRepository objectRecordStatusRepository;
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Mock
@@ -81,20 +83,18 @@ class UnstructuredToArmProcessorImplTest {
 
     @BeforeEach
     void setUp() {
-
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(externalObjectDirectoryRepository,
-                                                                        objectRecordStatusRepository, externalLocationTypeRepository,
-                                                                        dataManagementApi, armDataManagementApi, userAccountRepository,
                                                                         armDataManagementConfiguration);
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArm() {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
-        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
         when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailed);
 
@@ -154,6 +154,7 @@ class UnstructuredToArmProcessorImplTest {
             .thenReturn(pendingFailureList);
 
         when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
+        when(unstructuredToArmProcessor.generateFilename(externalObjectDirectoryEntityArm)).thenReturn("100_10_1");
         when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
         when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
@@ -169,6 +170,7 @@ class UnstructuredToArmProcessorImplTest {
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+
 
     }
 

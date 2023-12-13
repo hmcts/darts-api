@@ -2,12 +2,12 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
@@ -23,7 +23,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
-import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -188,13 +187,12 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         return armExternalObjectDirectoryEntity;
     }
 
-
+    @Override
     public String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         final Integer entityId = externalObjectDirectoryEntity.getId();
         final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
 
         Integer documentId = 0;
-
         if (nonNull(externalObjectDirectoryEntity.getMedia())) {
             documentId = externalObjectDirectoryEntity.getMedia().getId();
         } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {
