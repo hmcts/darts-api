@@ -27,6 +27,7 @@ public class UserAccountStub {
 
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
+    private final CourthouseStub courthouseStub;
 
     public UserAccountEntity getSystemUserAccountEntity() {
 
@@ -78,6 +79,11 @@ public class UserAccountStub {
     }
 
     @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(String courthouse) {
+        return createAuthorisedIntegrationTestUser(courthouseStub.createCourthouseUnlessExists(courthouse));
+    }
+
+    @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         var testUser = getIntegrationTestUserAccountEntity();
@@ -94,6 +100,7 @@ public class UserAccountStub {
         }
     }
 
+    @Transactional
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         securityGroupEntity.getCourthouseEntities().clear();

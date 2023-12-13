@@ -16,16 +16,22 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.mapper.GetAudioRequestResponseMapper;
+import uk.gov.hmcts.darts.audio.mapper.MediaRequestDetailsMapper;
+import uk.gov.hmcts.darts.audio.mapper.TransformedMediaDetailsMapper;
 import uk.gov.hmcts.darts.audio.model.EnhancedMediaRequestInfo;
+import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
+import uk.gov.hmcts.darts.audiorequests.model.MediaRequestDetails;
+import uk.gov.hmcts.darts.audiorequests.model.TransformedMediaDetails;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -56,8 +62,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.EXPIRED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.DELETED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -74,10 +81,12 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final NotificationApi notificationApi;
     private final AuditApi auditApi;
     private final TransformedMediaRepository transformedMediaRepository;
+    private final TransformedMediaDetailsMapper transformedMediaDetailsMapper;
+    private final MediaRequestDetailsMapper mediaRequestDetailsMapper;
 
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
-    public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(AudioRequestStatus status) {
+    public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
         return mediaRequestRepository.findTopByStatusOrderByCreatedDateTimeAsc(status);
     }
 
@@ -85,7 +94,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
         AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
-        nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, AudioRequestStatus.COMPLETED));
+        nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, MediaRequestStatus.COMPLETED));
         return nonAccessedResponse;
     }
 
@@ -98,7 +107,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Transactional
     @Override
-    public MediaRequestEntity updateAudioRequestStatus(Integer id, AudioRequestStatus status) {
+    public MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus status) {
         MediaRequestEntity mediaRequestEntity = getMediaRequestById(id);
         mediaRequestEntity.setStatus(status);
 
@@ -152,6 +161,25 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
     }
 
+    @Override
+    public void deleteTransformedMedia(Integer transformedMediaId) {
+        Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
+        if (transformedMediaOpt.isEmpty()) {
+            throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
+        }
+        TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
+        deleteTransientObjectDirectoryByTransformedMediaId(transformedMedia.getId());
+        log.debug("deleting TransformedMediaEntity with id {}.", transformedMedia.getId());
+        MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
+        transformedMediaRepository.delete(transformedMedia);
+
+        if (transformedMediaRepository.findByMediaRequestId(mediaRequest.getId()).isEmpty()) {
+            log.debug("There are no more TransformedMediaEntities associated with media_request_id {}, so deleting.", mediaRequest.getId());
+            mediaRequest.setStatus(MediaRequestStatus.DELETED);
+            mediaRequestRepository.saveAndFlush(mediaRequest);
+        }
+    }
+
     private void deleteTransientObjectDirectoryByTransformedMediaId(Integer transformedMediaId) {
         List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transientObjectDirectoryRepository.findByTransformedMediaId(transformedMediaId);
         for (TransientObjectDirectoryEntity mediaTransientObject : transientObjectDirectoryEntities) {
@@ -191,14 +219,14 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public List<GetAudioRequestResponse> getAudioRequests(Integer userId, Boolean expired) {
-        List<GetAudioRequestResponse> response = new ArrayList<>();
+    public List<GetAudioRequestResponseV1> getAudioRequestsV1(Integer userId, Boolean expired) {
+        List<GetAudioRequestResponseV1> response = new ArrayList<>();
         List<EnhancedMediaRequestInfo> enhancedMediaRequestInfoList = getEnhancedMediaRequestInfo(userId, expired);
         for (EnhancedMediaRequestInfo enhancedMediaRequestInfo : enhancedMediaRequestInfoList) {
             List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findByMediaRequestId(enhancedMediaRequestInfo.getMediaRequestId());
             if (transformedMediaList.size() > 0) {
                 TransformedMediaEntity transformedMedia = transformedMediaList.get(0);
-                GetAudioRequestResponse getAudioRequestResponseItem = GetAudioRequestResponseMapper.mapToAudioRequestSummary(
+                GetAudioRequestResponseV1 getAudioRequestResponseItem = GetAudioRequestResponseMapper.mapToAudioRequestSummary(
                     enhancedMediaRequestInfo,
                     transformedMedia
                 );
@@ -207,6 +235,29 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         }
         return response;
     }
+
+    @Override
+    public GetAudioRequestResponse getAudioRequests(Integer userId, Boolean expired) {
+        GetAudioRequestResponse response = new GetAudioRequestResponse();
+        response.setTransformedMediaDetails(getTransformedMediaDetails(userId, expired));
+        if (!expired) {
+            //no need to get media requests for expired tab
+            response.setMediaRequestDetails(getMediaRequestDetails(userId, expired));
+        }
+        return response;
+    }
+
+
+    private List<TransformedMediaDetails> getTransformedMediaDetails(Integer userId, Boolean expired) {
+        List<TransformedMediaDetailsDto> transformedMediaDetailsDtoList = transformedMediaRepository.findTransformedMediaDetails(userId, expired);
+        return transformedMediaDetailsMapper.mapToTransformedMediaDetails(transformedMediaDetailsDtoList);
+    }
+
+    private List<MediaRequestDetails> getMediaRequestDetails(Integer userId, Boolean expired) {
+        List<EnhancedMediaRequestInfo> enhancedMediaRequestInfoList = getEnhancedMediaRequestInfo(userId, expired);
+        return mediaRequestDetailsMapper.map(enhancedMediaRequestInfoList);
+    }
+
 
     private List<EnhancedMediaRequestInfo> getEnhancedMediaRequestInfo(Integer userId, Boolean expired) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -234,7 +285,8 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         ParameterExpression<UserAccountEntity> paramRequestor = criteriaBuilder.parameter(UserAccountEntity.class);
         criteriaQuery.where(criteriaBuilder.and(
             criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
-            expiredPredicate(expired, criteriaBuilder, mediaRequest)
+            expiredPredicate(expired, criteriaBuilder, mediaRequest),
+            criteriaBuilder.notEqual(mediaRequest.get(MediaRequestEntity_.status), DELETED)
         ));
 
         criteriaQuery.orderBy(List.of(
@@ -255,12 +307,26 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public void updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
         Optional<TransformedMediaEntity> foundEntityOpt = transformedMediaRepository.findById(transformedMediaId);
         if (foundEntityOpt.isEmpty()) {
-            throw new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND);
+            throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
         }
         TransformedMediaEntity foundEntity = foundEntityOpt.get();
         foundEntity.setLastAccessed(OffsetDateTime.now());
         transformedMediaRepository.saveAndFlush(foundEntity);
     }
+
+    @Transactional
+    @Override
+    public void updateTransformedMediaLastAccessedTimestampForMediaRequestId(Integer mediaRequestId) {
+        List<TransformedMediaEntity> foundEntityList = transformedMediaRepository.findByMediaRequestId(mediaRequestId);
+        if (foundEntityList.isEmpty()) {
+            throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
+        }
+        for (TransformedMediaEntity transformedMedia : foundEntityList) {
+            transformedMedia.setLastAccessed(OffsetDateTime.now());
+            transformedMediaRepository.saveAndFlush(transformedMedia);
+        }
+    }
+
 
     private Predicate expiredPredicate(Boolean expired, CriteriaBuilder criteriaBuilder,
                                        Root<MediaRequestEntity> mediaRequest) {
@@ -314,7 +380,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     public MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName,
                                                           AudioRequestOutputFormat audioRequestOutputFormat) {
 
-        mediaRequestEntity.setStatus(AudioRequestStatus.COMPLETED);
+        mediaRequestEntity.setStatus(MediaRequestStatus.COMPLETED);
         //todo update transformed media info
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
     }

@@ -4,12 +4,13 @@ import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -17,7 +18,6 @@ import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -41,19 +41,22 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.FAILED;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
@@ -70,6 +73,8 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"}) // DMP-715 to resolve
 public class AudioTransformationServiceImpl implements AudioTransformationService {
 
+    public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
+    public static final String NOT_AVAILABLE = "N/A";
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
@@ -142,7 +147,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @Override
     public void handleKedaInvocationForMediaRequests() {
-        var openRequests = mediaRequestService.getOldestMediaRequestByStatus(AudioRequestStatus.OPEN);
+        var openRequests = mediaRequestService.getOldestMediaRequestByStatus(MediaRequestStatus.OPEN);
 
         if (openRequests.isEmpty()) {
             log.info("No open requests found for ATS to process.");
@@ -319,9 +324,9 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return handlePlayback(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
     }
 
-    private void notifyUser(MediaRequestEntity mediaRequestEntity,
-                            CourtCaseEntity courtCase,
-                            String notificationTemplateName) {
+    public void notifyUser(MediaRequestEntity mediaRequestEntity,
+                           CourtCaseEntity courtCase,
+                           String notificationTemplateName) {
         log.info("Scheduling notification for template name {}, request id {} and court case id {}", notificationTemplateName, mediaRequestEntity.getId(),
                  courtCase.getId()
         );
@@ -333,20 +338,31 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             if (notificationTemplateName.equals(NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString())) {
 
-                List<DefendantEntity> defendantList = mediaRequestEntity.getHearing().getCourtCase().getDefendantList();
-                List<String> defendantNames = new ArrayList<>();
-                for (DefendantEntity defendant : defendantList) {
-                    defendantNames.add(defendant.getName());
+                String defendants = String.join(", ", mediaRequestEntity.getHearing().getCourtCase().getDefendantStringList());
+
+                if (StringUtils.isBlank(defendants)) {
+                    defendants = NO_DEFENDANTS;
                 }
 
-                String defendants = defendantNames.stream().collect(Collectors.joining(","));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+                String courthouseName = mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() != null
+                    ? mediaRequestEntity.getHearing().getCourtCase().getCourthouse().getCourthouseName() : NOT_AVAILABLE;
+
+                String hearingDate = getFormattedHearingDate(mediaRequestEntity.getHearing().getHearingDate());
+
+                String audioStartTime = mediaRequestEntity.getStartTime() != null
+                    ? mediaRequestEntity.getStartTime().format(formatter) : NOT_AVAILABLE;
+
+                String audioEndTime = mediaRequestEntity.getEndTime() != null
+                    ? mediaRequestEntity.getEndTime().format(formatter) : NOT_AVAILABLE;
 
                 templateParams.put(REQUEST_ID, String.valueOf(mediaRequestEntity.getId()));
-                templateParams.put(COURTHOUSE, String.valueOf(mediaRequestEntity.getHearing().getCourtCase().getCourthouse()));
+                templateParams.put(COURTHOUSE, courthouseName);
                 templateParams.put(DEFENDANTS, defendants);
-                templateParams.put(HEARING_DATE, String.valueOf(mediaRequestEntity.getHearing().getHearingDate()));
-                templateParams.put(AUDIO_START_TIME, String.valueOf(mediaRequestEntity.getStartTime()));
-                templateParams.put(AUDIO_END_TIME, String.valueOf(mediaRequestEntity.getEndTime()));
+                templateParams.put(HEARING_DATE, hearingDate);
+                templateParams.put(AUDIO_START_TIME, audioStartTime);
+                templateParams.put(AUDIO_END_TIME, audioEndTime);
             }
 
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
@@ -362,6 +378,33 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         } else {
             log.error("No notification scheduled for request id {} and court case {} ", mediaRequestEntity.getId(), courtCase.getId());
         }
+    }
+
+    private static String getFormattedHearingDate(LocalDate dateOfHearing) {
+
+        if (dateOfHearing != null) {
+            int day = dateOfHearing.getDayOfMonth();
+            Month month = dateOfHearing.getMonth();
+            int year = dateOfHearing.getYear();
+
+            String strMonth = Pattern.compile("^.").matcher(month.toString().toLowerCase(Locale.UK)).replaceFirst(m -> m.group().toUpperCase(Locale.UK));
+            return day + getNthNumber(day) + " " + strMonth + " " + year;
+        } else {
+            return NOT_AVAILABLE;
+        }
+    }
+
+    public static String getNthNumber(int day) {
+        if (day > 3 && day < 21) {
+            return "th";
+        }
+
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 
 }

@@ -346,6 +346,8 @@ components:
           $ref: '#/components/schemas/UserName'
         email_address:
           $ref: '#/components/schemas/UserEmailAddress'
+        active:
+          $ref: '#/components/schemas/UserActive'
     UserWithId:
       type: object
       properties:

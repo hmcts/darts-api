@@ -52,7 +52,8 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
     void beforeEach() {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
     }
 
     @Test
@@ -65,14 +66,14 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
             String.format("/audio-requests/%d", mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotImplemented())//todo fix in future ticket
+            .andExpect(status().isNoContent())
             .andReturn();
 
     }
 
     @Test
     void updateAudioRequestLastAccessedTimestampWhenRequestorDifferentUserThrowsUnauthorizedError() throws Exception {
-        MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadCurrentMediaRequestEntity(
+        MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadOpenMediaRequestEntity(
             systemUser, AudioRequestType.DOWNLOAD);
 
         Mockito.doThrow(new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER))

@@ -31,3 +31,9 @@ azure-ad-b2c-darpc-midtier-global-auth:
     client-secret: ${AAD_B2C_ROPC_CLIENT_SECRET_KEY:#{null}}
 
 deployed-application-uri: ${TEST_URL:http://localhost:4550}
+
+darts:
+  storage:
+    arm:
+      connection-string: ${ARM_STORAGE_CONNECTION_STRING:}
+      container-name: darts-arm

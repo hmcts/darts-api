@@ -23,6 +23,11 @@ public enum AudioRequestsApiError implements DartsApiError {
         "102",
         HttpStatus.BAD_REQUEST,
         "The audio request is not valid for this action"
+    ),
+    TRANSFORMED_MEDIA_NOT_FOUND(
+        "103",
+        HttpStatus.NOT_FOUND,
+        "The requested transformed media cannot be found"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO_REQUESTS";

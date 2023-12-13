@@ -223,7 +223,7 @@ public class CommonTestDataUtil {
         transcription.setId(1);
         transcription.setCreatedBy(createUserAccount());
         transcription.setTranscriptionDocumentEntities(createTranscriptionDocuments());
-        transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD));
+        transcription.setTranscriptionUrgency(createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD, 999));
         transcription.setTranscriptionCommentEntities(createTranscriptionComments());
         transcription.setIsManualTranscription(true);
 
@@ -398,17 +398,31 @@ public class CommonTestDataUtil {
     public List<TranscriptionUrgencyEntity> createTranscriptionUrgencyEntities() {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = new ArrayList<>();
         for (TranscriptionUrgencyEnum transcriptionUrgencyEnum : TranscriptionUrgencyEnum.values()) {
-            if (transcriptionUrgencyEnum.getId() != 1 && transcriptionUrgencyEnum.getId() != 3) {
-                transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum));
+            switch (transcriptionUrgencyEnum.getId()) {
+                case 2: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 1));
+                    break;
+                case 3: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 6));
+                    break;
+                case 4: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 3));
+                    break;
+                case 5: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 4));
+                    break;
+                case 6: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 5));
+                    break;
+                case 7: transcriptionUrgencyEntities.add(createTranscriptionUrgencyEntityFromEnum(transcriptionUrgencyEnum, 2));
+                    break;
+                default:
             }
+
         }
         return transcriptionUrgencyEntities;
     }
 
-    public TranscriptionUrgencyEntity createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum transcriptionUrgencyEnum) {
+    public TranscriptionUrgencyEntity createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum transcriptionUrgencyEnum, int priorityOrder) {
         TranscriptionUrgencyEntity transcriptionUrgencyEntity = new TranscriptionUrgencyEntity();
         transcriptionUrgencyEntity.setId(transcriptionUrgencyEnum.getId());
         transcriptionUrgencyEntity.setDescription(transcriptionUrgencyEnum.name());
+        transcriptionUrgencyEntity.setPriorityOrder(priorityOrder);
 
         return transcriptionUrgencyEntity;
     }

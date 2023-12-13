@@ -1,6 +1,6 @@
 buildscript {
   dependencies {
-    classpath("org.flywaydb:flyway-database-postgresql:10.1.0")
+    classpath("org.flywaydb:flyway-database-postgresql:10.2.0")
   }
 }
 
@@ -11,7 +11,7 @@ plugins {
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.1.4'
   id 'org.springframework.boot' version '3.1.6'
-  id 'org.owasp.dependencycheck' version '9.0.3'
+  id 'org.owasp.dependencycheck' version '9.0.4'
   id 'com.github.ben-manes.versions' version '0.50.0'
   id 'org.sonarqube' version '4.4.1.3373'
   id "io.freefair.lombok" version "8.4"
@@ -280,7 +280,7 @@ repositories {
 
 ext {
   log4JVersion = "2.22.0"
-  tomcatEmbedVersion = "10.1.16"
+  tomcatEmbedVersion = "10.1.17"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -371,7 +371,7 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '10.2.0'
-  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.1.0'
+  implementation group: 'org.flywaydb', name: 'flyway-database-postgresql', version: '10.2.0'
   implementation group: 'io.hypersistence', name: 'hypersistence-utils-hibernate-60', version: '3.6.1'
 
   //database
@@ -402,7 +402,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.101.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.103.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
@@ -424,7 +424,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.1.13') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.1.14') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }
