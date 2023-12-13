@@ -39,7 +39,7 @@ class ArmServiceFunctionalTest {
     @Autowired
     private ArmTestUtil armTestUtil;
 
-    private List<String> blobsToBeDeleted = new ArrayList<>();
+    private final List<String> blobsToBeDeleted = new ArrayList<>();
 
     @Test
     void saveBlobData() {
