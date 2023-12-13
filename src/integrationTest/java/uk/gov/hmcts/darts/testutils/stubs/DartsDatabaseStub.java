@@ -452,6 +452,15 @@ public class DartsDatabaseStub {
         eventHandlerRepository.saveAll(asList(eventHandlerEntities));
     }
 
+    public void saveAll(UserAccountEntity... testUsers) {
+        stream(testUsers).forEach(user -> {
+            UserAccountEntity systemUser = userAccountRepository.getReferenceById(0);
+            user.setCreatedBy(systemUser);
+            user.setLastModifiedBy(systemUser);
+        });
+        userAccountRepository.saveAll(asList(testUsers));
+    }
+
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
