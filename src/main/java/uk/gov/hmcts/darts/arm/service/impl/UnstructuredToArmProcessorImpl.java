@@ -72,6 +72,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             ObjectDirectoryStatusEnum.ARM_INGESTION.getId());
 
         List<ObjectRecordStatusEntity> armStatuses = getArmStatuses(storedStatus, failedArmStatus, armIngestionStatus);
+        armStatuses.add(armIngestionStatus);
 
         var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             storedStatus,
@@ -149,9 +150,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             armExternalObjectDirectory.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
             updateTransferAttempts(armExternalObjectDirectory);
-        }
-
-            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+            externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectoryEntity);
     }
 
     private Optional<ExternalObjectDirectoryEntity> getUnstructuredExternalObjectDirectoryEntity(
@@ -197,9 +196,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         Integer documentId = 0;
         if (nonNull(externalObjectDirectoryEntity.getMedia())) {
             documentId = externalObjectDirectoryEntity.getMedia().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {
+        if (externalObjectDirectoryEntity.getTranscriptionDocumentEntity() != null) {
             documentId = externalObjectDirectoryEntity.getTranscriptionDocumentEntity().getId();
-        } else if (nonNull(externalObjectDirectoryEntity.getAnnotationDocumentEntity())) {
+        if (externalObjectDirectoryEntity.getAnnotationDocumentEntity() != null) {
             documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
         }
 
