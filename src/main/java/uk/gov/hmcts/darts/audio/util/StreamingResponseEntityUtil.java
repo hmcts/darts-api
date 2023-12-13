@@ -8,12 +8,11 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.MessageFormat;
 
 @UtilityClass
 public class StreamingResponseEntityUtil {
 
-    public ResponseEntity<byte[]> createResponseEntity(InputStream inputStream, String httpRangeList, String filename) throws IOException {
+    public ResponseEntity<byte[]> createResponseEntity(InputStream inputStream, String httpRangeList) throws IOException {
         byte[] bytes = IOUtils.toByteArray(inputStream);
         long fileSize = bytes.length;
         if (StringUtils.isNotBlank(httpRangeList)) {
@@ -24,20 +23,19 @@ public class StreamingResponseEntityUtil {
             long rangeEnd = getRangeEnd(fileSize, ranges);
             long requestedContentLength = (rangeEnd - rangeStart) + 1;
             String contentLengthStr = String.valueOf(requestedContentLength);
-            if (requestedContentLength < fileSize) {
-                String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
-                return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                    .header("Content-Type", "audio/mpeg")
-                    .header("Content-Length", contentLengthStr)
-                    .header("Content-Range", contentRange)
-                    .body(readByteRange(bytes, rangeStart, rangeEnd));
-            }
+            String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                .header("Content-Type", "audio/mpeg")
+                .header("Content-Length", contentLengthStr)
+                .header("Content-Range", contentRange)
+                .body(readByteRange(bytes, rangeStart, rangeEnd));
         }
-
+        long rangeEnd = fileSize - 1;
+        String contentRange = "bytes 0-" + rangeEnd + "/" + fileSize;
         return ResponseEntity.status(HttpStatus.OK)
             .header("Content-Type", "audio/mpeg")
-            .header("Content-Disposition", MessageFormat.format("attachment; filename=\"{0}.mp3\"", filename))
             .header("Content-Length", String.valueOf(bytes.length))
+            .header("Content-Range", contentRange)
             .body(bytes);
     }
 
