@@ -402,7 +402,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.101.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.102.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
@@ -424,7 +424,7 @@ dependencyManagement {
       entry 'netty-transport-native-unix-common'
     }
     //temporary fix for vulnerability https://spring.io/security/cve-2023-34062
-    dependencySet(group: 'io.projectreactor.netty', version: '1.1.13') {
+    dependencySet(group: 'io.projectreactor.netty', version: '1.1.14') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }

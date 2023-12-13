@@ -105,15 +105,12 @@ class GovNotifyServiceTest {
     @Test
     void transcriptionAvailable() throws NotificationClientException, TemplateNotFoundException {
         SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE.toString());
-        assertEquals("DARTS: Transcribed Document Available", emailResponse.getSubject());
+        assertEquals("Your transcript is available", emailResponse.getSubject());
         compare("""
-                    Hello,
-                    The transcript that you requested for case TheCaseId, has now been completed and available for you to view in DARTS.
-                    The completed transcribed document can be found under your My Transcriptions Section on the DARTS portal.
-                    Regards
-                    DARTS""", emailResponse);
-    }
+                    Your transcript request for case ID TheCaseId has been completed and is available for download.
 
+                    To access the transcript, [Sign into the DARTS Portal](ThePortalURL) and go to ‘Your transcripts’.""", emailResponse);
+    }
 
     @Test
     void transcriptionRequestApproved() throws NotificationClientException, TemplateNotFoundException {
