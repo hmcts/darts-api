@@ -26,6 +26,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -79,6 +80,14 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     @Test
     void movePendingDataFromUnstructuredToArmStorage() {
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
+            .archiveRecordFile(new File("Tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360"))
+            .fileGenerationSuccessful(true)
+            .build();
+
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
+
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -101,7 +110,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             UUID.randomUUID()
         );
         dartsDatabase.save(unstructuredEod);
-
 
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder().build();
         when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
