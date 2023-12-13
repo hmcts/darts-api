@@ -59,6 +59,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         AND (:annotation is null or eod.annotationDocumentEntity = :annotation)
         """
     )
+	
     Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectRecordStatusEntity status,
                                                                                                 ExternalLocationTypeEntity location,
                                                                                                 MediaEntity media,
@@ -108,7 +109,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         AND (:annotation is null or eod.annotationDocumentEntity = :annotation)
         """
     )
-    Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectDirectoryStatusEntity status,
+    Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectRecordStatusEntity status,
                                                                                                 ExternalLocationTypeEntity location,
                                                                                                 MediaEntity media,
                                                                                                 TranscriptionDocumentEntity transcription,
@@ -120,7 +121,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             "AND eod.externalLocationType = :type " +
             "AND eod.transferAttempts < :transferAttempts"
     )
-    List<ExternalObjectDirectoryEntity> findFailedNotExceedRetryInStorageLocation(ObjectDirectoryStatusEntity status,
+    List<ExternalObjectDirectoryEntity> findFailedNotExceedRetryInStorageLocation(ObjectRecordStatusEntity status,
                                                                                   ExternalLocationTypeEntity type,
                                                                                   Integer transferAttempts);
 
