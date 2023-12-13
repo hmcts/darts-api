@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 
 import java.io.InputStream;
 import java.util.List;
@@ -29,9 +30,11 @@ public interface MediaRequestService {
 
     void deleteTransformedMedia(Integer transformedMediaId);
 
-    List<GetAudioRequestResponse> getAudioRequests(Integer userId, Boolean expired);
+    List<GetAudioRequestResponseV1> getAudioRequestsV1(Integer userId, Boolean expired);
 
     Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status);
+
+    GetAudioRequestResponse getAudioRequests(Integer userId, Boolean expired);
 
     void updateTransformedMediaLastAccessedTimestamp(Integer mediaRequestId);
 

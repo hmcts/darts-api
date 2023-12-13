@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AddAudioResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
+import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 
 import java.io.InputStream;
@@ -51,9 +52,9 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<List<GetAudioRequestResponse>> getYourAudio(Integer userId, Boolean expired) {
+    public ResponseEntity<List<GetAudioRequestResponseV1>> getYourAudioV1(Integer userId, Boolean expired) {
 
-        return new ResponseEntity<>(mediaRequestService.getAudioRequests(userId, expired), HttpStatus.OK);
+        return new ResponseEntity<>(mediaRequestService.getAudioRequestsV1(userId, expired), HttpStatus.OK);
     }
 
     @Override
@@ -134,5 +135,10 @@ public class AudioRequestsController implements AudioRequestsApi {
     public ResponseEntity<Void> deleteTransformedMedia(Integer transformedMediaId) {
         mediaRequestService.deleteTransformedMedia(transformedMediaId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    public ResponseEntity<GetAudioRequestResponse> getYourAudio(Integer userId, Boolean expired) {
+        return new ResponseEntity<>(mediaRequestService.getAudioRequests(userId, expired), HttpStatus.OK);
     }
 }

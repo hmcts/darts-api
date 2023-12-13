@@ -44,7 +44,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
 
         var requestor = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         var currentOwner = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var currentMediaRequest = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         currentMediaRequest.setCurrentOwner(currentOwner);
         dartsDatabase.save(currentMediaRequest);
         MediaRequestEntity currentMediaRequest2 = dartsDatabase.createAndLoadCompletedMediaRequestEntity(
@@ -111,7 +111,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     void getYourAudioExpired() throws Exception {
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var currentMediaRequest = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var currentMediaRequest = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var expiredMediaRequest = dartsDatabase.createAndLoadExpiredMediaRequestEntity(
             currentMediaRequest.getHearing(),
             currentMediaRequest.getRequestor(),
@@ -168,7 +168,7 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
     void getYourAudioExpiredShouldReturnEmptyArrayInResponseBodyWhenNoExpiredMediaRequestExists() throws Exception {
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         var requestBuilder = get(URI.create(String.format("/audio-requests?expired=%s", TRUE)))
             .header(

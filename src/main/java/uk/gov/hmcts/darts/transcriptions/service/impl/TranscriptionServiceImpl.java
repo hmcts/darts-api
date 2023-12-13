@@ -613,8 +613,13 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         // return a partial success
         if (!unprocessedUpdates.isEmpty() && !processedUpdates.isEmpty()) {
+            for (UpdateTranscriptionsItem unprocessedUpdateItem : unprocessedUpdates) {
+                log.error("Transcription update failed for transcription {}", unprocessedUpdateItem.getTranscriptionId());
+            }
+
             throw PartialFailureException.getPartialPayloadJson(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS, unprocessedUpdates);
         } else if (processedUpdates.isEmpty()) {
+            log.error("All transcription updates failed");
             throw new DartsApiException(TranscriptionApiError.FAILED_TO_UPDATE_TRANSCRIPTIONS);
         }
 

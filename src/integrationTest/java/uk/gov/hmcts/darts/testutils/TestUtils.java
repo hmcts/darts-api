@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.testutils;
 
 import org.apache.commons.io.FileUtils;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,5 +45,9 @@ public final class TestUtils {
 
     public static String substituteHearingDateWithToday(String expectedResponse) {
         return expectedResponse.replace("todays_date", LocalDate.now().toString());
+    }
+
+    public static void compareJson(String expectedJson, String actualJson, List<String> tagsToRemove) {
+        JSONAssert.assertEquals(removeTags(tagsToRemove, expectedJson), removeTags(tagsToRemove, actualJson), JSONCompareMode.NON_EXTENSIBLE);
     }
 }

@@ -9,7 +9,7 @@ info:
   title: Modernised DARTS
 
 paths:
-  /audio-requests:
+  /audio-requests/v2:
     get:
       tags:
         - Audio Requests
@@ -34,9 +34,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/GetAudioRequestResponse'
+                $ref: '#/components/schemas/GetAudioRequestResponse'
         '400':
           description: A required parameter is missing or an invalid.
           content:
@@ -52,6 +50,48 @@ paths:
         '401':
           description: Unauthorised Error
 
+  /audio-requests:
+    get:
+      tags:
+        - Audio Requests
+      operationId: getYourAudioV1
+      description: 'Audio requests for a user to view whether Current / Expired'
+      parameters:
+        - in: header
+          name: user_id
+          schema:
+            type: integer
+          description: The user_account primary key
+          required: true
+        - in: query
+          name: expired
+          schema:
+            type: boolean
+          description: if true, will retrieve expired audio requests only, if false will get current requests only
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetAudioRequestResponseV1'
+        '400':
+          description: A required parameter is missing or an invalid.
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+              example:
+                type: "about:blank"
+                title: "Bad Request"
+                status: 400
+                detail: "Required parameter 'expired' is not present."
+                instance: "/audio-requests"
+        '401':
+          description: Unauthorised Error
     post:
       tags:
         - Audio Requests
@@ -417,6 +457,103 @@ paths:
 components:
   schemas:
     GetAudioRequestResponse:
+      type: object
+      properties:
+        media_request_details:
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaRequestDetails'
+        transformed_media_details:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformedMediaDetails'
+
+    MediaRequestDetails:
+      type: object
+      properties:
+        media_request_id:
+          type: integer
+          example: 12345
+        case_id:
+          type: integer
+          example: 123
+        hearing_id:
+          type: integer
+          example: 456
+        request_type:
+          $ref: '#/components/schemas/AudioRequestType'
+        case_number:
+          type: string
+          example: "T20200190"
+        courthouse_name:
+          type: string
+          example: "Manchester Minshull Street"
+        hearing_date:
+          type: string
+          format: date
+          example: "2023-08-17"
+        start_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T09:00:00Z"
+        end_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T10:00:00Z"
+        media_request_status:
+          $ref: '#/components/schemas/MediaRequestStatus'
+    TransformedMediaDetails:
+      type: object
+      properties:
+        media_request_id:
+          type: integer
+          example: 12345
+        transformed_media_id:
+          type: integer
+          example: 123
+        case_id:
+          type: integer
+          example: 123
+        hearing_id:
+          type: integer
+          example: 456
+        request_type:
+          $ref: '#/components/schemas/AudioRequestType'
+        case_number:
+          type: string
+          example: "T20200190"
+        courthouse_name:
+          type: string
+          example: "Manchester Minshull Street"
+        hearing_date:
+          type: string
+          format: date
+          example: "2023-08-17"
+        start_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T09:00:00Z"
+        end_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T10:00:00Z"
+        transformed_media_expiry_ts:
+          type: string
+          format: date-time
+          example: "2023-08-23T09:00:00Z"
+        media_request_status:
+          $ref: '#/components/schemas/MediaRequestStatus'
+        transformed_media_filename:
+          type: string
+          example: "T20200190.zip"
+        transformed_media_format:
+          $ref: '#/components/schemas/AudioRequestOutputFormat'
+        last_accessed_ts:
+          type: string
+          format: date-time
+          example: "2023-08-23T09:00:00Z"
+
+    GetAudioRequestResponseV1:
       type: object
       properties:
         media_request_id:

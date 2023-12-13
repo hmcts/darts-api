@@ -27,6 +27,7 @@ public class UserAccountStub {
 
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
+    private final CourthouseStub courthouseStub;
 
     public UserAccountEntity getSystemUserAccountEntity() {
 
@@ -75,6 +76,11 @@ public class UserAccountStub {
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(String courthouse) {
+        return createAuthorisedIntegrationTestUser(courthouseStub.createCourthouseUnlessExists(courthouse));
     }
 
     @Transactional

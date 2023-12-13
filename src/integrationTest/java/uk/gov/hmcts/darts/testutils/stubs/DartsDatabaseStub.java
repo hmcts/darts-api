@@ -114,13 +114,14 @@ public class DartsDatabaseStub {
     private final NodeRegistrationRepository nodeRegistrationRepository;
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
-    private final UserAccountStub userAccountStub;
-    private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
-    private final CourthouseStub courthouseStub;
     private final AuditStub auditStub;
+    private final CourthouseStub courthouseStub;
     private final EventStub eventStub;
+    private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
+    private final MediaRequestStub mediaRequestStub;
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;
+    private final UserAccountStub userAccountStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
@@ -321,7 +322,7 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public MediaRequestEntity createAndLoadCurrentMediaRequestEntity(UserAccountEntity requestor, AudioRequestType audioRequestType) {
+    public MediaRequestEntity createAndLoadOpenMediaRequestEntity(UserAccountEntity requestor, AudioRequestType audioRequestType) {
 
         HearingEntity hearing = createHearing("NEWCASTLE", "Int Test Courtroom 2", "2", LocalDate.of(2023, 6, 10));
 

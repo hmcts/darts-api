@@ -40,7 +40,7 @@ class TransientObjectDirectoryServiceTest {
     void shouldSaveTransientDataLocation() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity1 = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var mediaRequestEntity1 = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(mediaRequestEntity1.getId());
         String blodId = "f744a74f-83c0-47e4-8bb2-2fd4d2b68647";
@@ -52,7 +52,7 @@ class TransientObjectDirectoryServiceTest {
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobClientBuilder.buildClient()
-                                                                                                                                          );
+        );
 
         assertNotNull(transientObjectDirectoryEntity);
         assertTrue(transientObjectDirectoryEntity.getId() > 0);

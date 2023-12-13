@@ -87,7 +87,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
 
         dartsDatabase.getTransientObjectDirectoryRepository()
@@ -110,7 +110,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(TRANSCRIBER)
+        );
 
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
@@ -146,7 +147,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(TRANSCRIBER)
+        );
     }
 
     @Test
@@ -167,7 +169,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(TRANSCRIBER)
+        );
     }
 
     @Test
