@@ -5,10 +5,9 @@ import com.azure.core.http.rest.Response;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
@@ -16,16 +15,14 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 @Service
+@AllArgsConstructor
 @Slf4j
 public class ArmTestUtil {
 
     private static final int DELETE_TIMEOUT = 60;
-    public static final int ERROR_CODE_202 = 202;
-    @Autowired
-    private ArmDataManagementApi armDataManagementApi;
+    public static final int STATUS_CODE_202 = 202;
 
-    @Autowired
-    private ArmDataManagementDao armDataManagementDao;
+    private final ArmDataManagementDao armDataManagementDao;
 
 
     public void deleteBlobData(String containerName, String blobPathAndName) throws AzureDeleteBlobException {
@@ -39,7 +36,7 @@ public class ArmTestUtil {
                                                   null);
 
             log.info("Status code {}", response.getStatusCode());
-            if (ERROR_CODE_202 != response.getStatusCode()) {
+            if (STATUS_CODE_202 != response.getStatusCode()) {
                 throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
             }
 
