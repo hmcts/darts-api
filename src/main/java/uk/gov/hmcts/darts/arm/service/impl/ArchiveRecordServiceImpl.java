@@ -15,7 +15,6 @@ import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.io.File;
 
@@ -28,7 +27,6 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
     public static final String FILENAME_SEPERATOR = "_";
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
-    private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ArchiveRecordFileGenerator archiveRecordFileGenerator;
     private final MediaArchiveRecordMapper mediaArchiveRecordMapper;
     private final TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;

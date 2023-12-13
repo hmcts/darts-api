@@ -28,7 +28,6 @@ import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
-import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -61,10 +60,6 @@ class ArchiveRecordServiceImplTest {
 
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
-
-    @Mock
-    private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryEntity;
     @Mock
@@ -93,7 +88,6 @@ class ArchiveRecordServiceImplTest {
         AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
 
         archiveRecordService = new ArchiveRecordServiceImpl(armDataManagementConfiguration,
-                                                            externalObjectDirectoryRepository,
                                                             archiveRecordFileGenerator,
                                                             mediaArchiveRecordMapper,
                                                             transcriptionArchiveRecordMapper,
