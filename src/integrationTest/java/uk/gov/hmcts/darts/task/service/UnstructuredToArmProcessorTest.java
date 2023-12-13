@@ -43,7 +43,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
     public static final String DUMMY_BLOB_ID = "DUMMY_FILE";
 
-    @Autowired
     UnstructuredToArmProcessor unstructuredToArmProcessor;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;

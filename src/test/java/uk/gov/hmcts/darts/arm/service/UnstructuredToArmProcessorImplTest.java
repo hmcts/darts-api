@@ -119,6 +119,13 @@ class UnstructuredToArmProcessorImplTest {
 
     }
 
+    private List<ObjectDirectoryStatusEntity> getArmStatuses() {
+        List<ObjectDirectoryStatusEntity> armStatuses = new ArrayList<>();
+        armStatuses.add(objectDirectoryStatusEntityStored);
+        armStatuses.add(objectDirectoryStatusEntityFailed);
+        return armStatuses;
+    }
+
     @Test
     void processPreviousFailedAttemptMovingFromUnstructuredStorageToArm() {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);

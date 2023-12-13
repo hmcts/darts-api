@@ -94,7 +94,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status1,
-                                                                                  ObjectRecordStatusEntity status2,
+                                                                List<ObjectRecordStatusEntity> statuses2,
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2);
 
@@ -103,9 +103,9 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         SELECT eod FROM ExternalObjectDirectoryEntity eod
         WHERE eod.status = :status
         AND eod.externalLocationType = :location
-        AND eod.media = :media
-        AND eod.transcriptionDocumentEntity = :transcription
-        AND eod.annotationDocumentEntity = :annotation
+        AND (:media is null or eod.media = :media)
+        AND (:transcription is null or eod.transcriptionDocumentEntity = :transcription)
+        AND (:annotation is null or eod.annotationDocumentEntity = :annotation)
         """
     )
     Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectDirectoryStatusEntity status,
