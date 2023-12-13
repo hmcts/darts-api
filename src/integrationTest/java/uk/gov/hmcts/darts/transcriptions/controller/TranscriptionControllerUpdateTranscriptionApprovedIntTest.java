@@ -239,7 +239,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
 
 
     @Test
-    void updateTranscriptionApprovedWithRequestorSameAsApprover() throws Exception {
+    void givenAUpdateTranscriptionRequesnt_WhenRequestorIsSameAsApprover_ThenErrorIsReturned() throws Exception {
 
         transcriptionEntity.setRequestor(dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity().getUserName());
         dartsDatabase.save(transcriptionEntity);

@@ -643,8 +643,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         if (!validated.isEmpty()) {
-            validated.forEach(entity -> UpdateTranscriptionEntityHelper.updateTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request)
-                                      .get()));
+            validated.forEach(entity -> UpdateTranscriptionEntityHelper.updateTranscriptionEntity(
+                entity,
+                getTranscriptionsItemForId(entity.getId(), request).get()
+            ));
 
             transcriptionRepository.saveAll(validated);
         }

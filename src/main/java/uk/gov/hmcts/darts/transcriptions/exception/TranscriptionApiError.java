@@ -82,7 +82,7 @@ public enum TranscriptionApiError implements DartsApiError {
         "User is not a transcriber user"
     ),
     BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER(
-        UpdateTranscription400ErrorCode.REQUESTOR_CANNOT_BE_APPROVER.getValue(),
+        UpdateTranscription400ErrorCode.REQUESTER_CANNOT_BE_APPROVER_OR_REJECTER.getValue(),
         HttpStatus.BAD_REQUEST,
         "Transcription requestor cannot approve or reject their own transcription requests."
     );
