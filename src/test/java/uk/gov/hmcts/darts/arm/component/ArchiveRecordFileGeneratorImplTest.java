@@ -47,7 +47,7 @@ class ArchiveRecordFileGeneratorImplTest {
     void generateArchiveRecordWithMedia() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         String relationId = "1234";
-        File archiveFile = new File(fileLocation, "test-media-arm.a360");
+        File archiveFile = new File(fileLocation, "1234-1-1.a360");
         archiveRecordFileGenerator.generateArchiveRecord(createMediaArchiveRecord(relationId), archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
 
         log.info("Reading file " + archiveFile.getAbsolutePath());

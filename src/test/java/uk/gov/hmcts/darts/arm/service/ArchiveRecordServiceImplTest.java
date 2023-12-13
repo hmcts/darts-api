@@ -14,7 +14,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
@@ -38,11 +37,9 @@ import java.nio.file.Files;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
@@ -52,7 +49,7 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.getObjectMapper;
 @ExtendWith(MockitoExtension.class)
 @Slf4j
 class ArchiveRecordServiceImplTest {
-    public static final String TEST_MEDIA_ARCHIVE_A_360 = "1234-media-arm.a360";
+    public static final String TEST_MEDIA_ARCHIVE_A_360 = "1234-1-1.a360";
     public static final String MP_2 = "mp2";
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     public static final String DARTS = "DARTS";
@@ -89,8 +86,6 @@ class ArchiveRecordServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        when(externalObjectDirectoryRepository.getReferenceById(anyInt())).thenReturn(externalObjectDirectoryEntity);
-
         ArchiveRecordFileGenerator archiveRecordFileGenerator = new ArchiveRecordFileGeneratorImpl(getObjectMapper());
 
         MediaArchiveRecordMapper mediaArchiveRecordMapper = new MediaArchiveRecordMapperImpl(armDataManagementConfiguration);
@@ -123,6 +118,7 @@ class ArchiveRecordServiceImplTest {
         OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
         OffsetDateTime endedAt = OffsetDateTime.now();
 
+        when(mediaEntity.getId()).thenReturn(1);
         when(mediaEntity.getCourtroom()).thenReturn(courtroomEntity);
         when(mediaEntity.getChannel()).thenReturn(1);
         when(mediaEntity.getTotalChannels()).thenReturn(4);
@@ -139,10 +135,10 @@ class ArchiveRecordServiceImplTest {
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn(".a360");
 
-        Map<String, ArchiveRecordFileInfo> archiveRecordFiles = archiveRecordService.generateArchiveRecord(1234, 1);
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordFiles.get(ArchiveRecordType.MEDIA_ARCHIVE_TYPE.getArchiveTypeDescription());
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
-        Assertions.assertEquals("1234_0_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
 
         String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         log.info("aResponse {}", actualResponse);
@@ -156,25 +152,29 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() {
-        Map<String, ArchiveRecordFileInfo> archiveRecordFiles = archiveRecordService.generateArchiveRecord(1234, 1);
-        assertTrue(archiveRecordFiles.isEmpty());
+        ArchiveRecordFileInfo archiveRecordFileInfo =
+            archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+
+        assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
     }
 
     @Test
-    void generateArchiveRecordWithTranscription() {
+    void givenTranscription_WhenGenerateArchiveRecord_ReturnNotImplemented() {
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
 
         assertThrows(NotImplementedException.class, () ->
-            archiveRecordService.generateArchiveRecord(1, 2));
+            archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 2));
 
     }
 
     @Test
-    void generateArchiveRecordWithAnnotation() {
+    void givenAnnotation_WhenGenerateArchiveRecord_ReturnNotImplemented() {
+        when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
 
         assertThrows(NotImplementedException.class, () ->
-            archiveRecordService.generateArchiveRecord(1, 3));
+            archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 3));
     }
 
     private static String getFileContents(File archiveFile) throws IOException {

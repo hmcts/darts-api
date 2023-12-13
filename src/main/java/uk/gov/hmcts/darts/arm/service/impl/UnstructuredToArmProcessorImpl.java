@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
+import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
@@ -23,8 +25,10 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +55,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final ArmDataManagementApi armDataManagementApi;
     private final UserAccountRepository userAccountRepository;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+
+    private final FileOperationService fileOperationService;
+    private final ArchiveRecordService archiveRecordService;
 
     @Override
     @Transactional
@@ -150,7 +157,21 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
             armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
             armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+
+            ArchiveRecordFileInfo archiveRecordFileInfo =
+                archiveRecordService.generateArchiveRecord(unstructuredExternalObjectDirectoryEntity,
+                                                           unstructuredExternalObjectDirectoryEntity.getTransferAttempts());
+
+            File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
+            if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
+                BinaryData metadataFileBinary = fileOperationService.saveFileToBinaryData(archiveRecordFile.getAbsolutePath());
+                armDataManagementApi.saveBlobDataToArm(archiveRecordFileInfo.getArchiveRecordFile().getName(), metadataFileBinary);
             armExternalObjectDirectory.setStatus(objectDirectoryStatusRepository.getReferenceById(MARKED_FOR_DELETION.getId()));
+
+            } else {
+                armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
+                updateTransferAttempts(armExternalObjectDirectoryEntity);
+            }
 
         } catch (BlobStorageException e) {
             log.error("Failed to move BLOB data for file {} due to {}",
