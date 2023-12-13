@@ -75,6 +75,8 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
         - name: AzureAdB2CFuncTestROPCGlobalPassword
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
+        - name: ARMConnectionString
+          alias: ARM_STORAGE_CONNECTION_STRING
   environment:
     ENABLE_FLYWAY: true
     RUN_DB_MIGRATION_ON_STARTUP: true
