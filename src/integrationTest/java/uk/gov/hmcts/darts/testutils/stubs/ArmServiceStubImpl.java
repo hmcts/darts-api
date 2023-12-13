@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 @Component

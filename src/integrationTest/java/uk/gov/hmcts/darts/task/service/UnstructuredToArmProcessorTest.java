@@ -9,7 +9,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -30,8 +29,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
@@ -98,11 +95,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         );
         dartsDatabase.save(unstructuredEod);
 
-        ArmBlobInfo armBlobInfo = ArmBlobInfo.builder()
-            .blobName(DUMMY_BLOB_ID)
-            .build();
-        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(armBlobInfo);
-
         unstructuredToArmProcessor.processUnstructuredToArm();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
@@ -149,11 +141,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
-
-        ArmBlobInfo armBlobInfo = ArmBlobInfo.builder()
-            .blobName(DUMMY_BLOB_ID)
-            .build();
-        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(armBlobInfo);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 

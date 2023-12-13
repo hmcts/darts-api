@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
-import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 @Service
