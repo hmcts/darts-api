@@ -28,13 +28,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmProcessorImplTest {
@@ -111,18 +109,14 @@ class UnstructuredToArmProcessorImplTest {
 
         verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
-
-    private List<ObjectRecordStatusEntity> getArmStatuses() {
-        armStatuses.add(objectRecordStatusEntityStored);
-        armStatuses.add(objectRecordStatusEntityFailed);
-        armStatuses.add(objectRecordStatusEntityArmIngestion);
-
     }
 
     private List<ObjectDirectoryStatusEntity> getArmStatuses() {
         List<ObjectDirectoryStatusEntity> armStatuses = new ArrayList<>();
         armStatuses.add(objectDirectoryStatusEntityStored);
         armStatuses.add(objectDirectoryStatusEntityFailed);
+        armStatuses.add(objectDirectoryStatusEntityArmIngestion);
+
         return armStatuses;
     }
 
@@ -135,6 +129,8 @@ class UnstructuredToArmProcessorImplTest {
 
         when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity().getId()).thenReturn(EXAMPLE_TRANSCRIPTION_ID);
         when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailed);
+        when(objectDirectoryStatusRepository.getReferenceById(12)).thenReturn(objectDirectoryStatusEntityArmIngestion);
+        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailed);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
@@ -173,10 +169,9 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processPreviousFailedAttempt() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-
+        
         when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
-        when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailed);
+        when(objectDirectoryStatusRepository.getReferenceById(12)).thenReturn(objectDirectoryStatusEntityArmIngestion);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
