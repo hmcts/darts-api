@@ -30,15 +30,14 @@ public class ArmTestUtil {
 
     public void deleteBlobData(String containerName, String blobPathAndName) throws AzureDeleteBlobException {
         try {
-            //String blobPathAndName = armDataManagementConfiguration.getArmSubmissionDropZone() + filename;
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
             BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
 
-            //BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
-            Response<Void> response = blobClient.deleteWithResponse(DeleteSnapshotsOptionType.INCLUDE,
-                                                                    null,
-                                                                    Duration.of(DELETE_TIMEOUT,ChronoUnit.SECONDS),
-                                                                    null);
+            Response<Boolean> response = blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE,
+                                                  null,
+                                                  Duration.of(DELETE_TIMEOUT,ChronoUnit.SECONDS),
+                                                  null);
+
             log.info("Status code {}", response.getStatusCode());
             if (ERROR_CODE_202 != response.getStatusCode()) {
                 throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
