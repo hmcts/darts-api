@@ -27,13 +27,12 @@ public class ArmTestUtil {
 
     public void deleteBlobData(String containerName, String blobPathAndName) throws AzureDeleteBlobException {
         try {
-            //String blobPathAndName = armDataManagementConfiguration.getArmSubmissionDropZone() + filename;
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
             BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
 
             Response<Boolean> response = blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE,
                                                   null,
-                                                  Duration.of(DELETE_TIMEOUT, ChronoUnit.SECONDS),
+                                                                    Duration.of(DELETE_TIMEOUT,ChronoUnit.SECONDS),
                                                   null);
 
             log.info("Status code {}", response.getStatusCode());
