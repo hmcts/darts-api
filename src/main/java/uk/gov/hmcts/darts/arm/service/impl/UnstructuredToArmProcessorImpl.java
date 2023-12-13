@@ -159,8 +159,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
 
             ArchiveRecordFileInfo archiveRecordFileInfo =
-                archiveRecordService.generateArchiveRecord(unstructuredExternalObjectDirectoryEntity,
-                                                           unstructuredExternalObjectDirectoryEntity.getTransferAttempts());
+                archiveRecordService.generateArchiveRecord(unstructuredExternalObjectDirectory,
+                                                           unstructuredExternalObjectDirectory.getTransferAttempts());
 
             File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
             if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
@@ -169,8 +169,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armExternalObjectDirectory.setStatus(objectDirectoryStatusRepository.getReferenceById(MARKED_FOR_DELETION.getId()));
 
             } else {
-                armExternalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
-                updateTransferAttempts(armExternalObjectDirectoryEntity);
+                unstructuredExternalObjectDirectory.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
+                updateTransferAttempts(unstructuredExternalObjectDirectory);
             }
 
         } catch (BlobStorageException e) {

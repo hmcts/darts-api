@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
+import uk.gov.hmcts.darts.arm.model.ArmBlobInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
@@ -109,16 +109,14 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
             UUID.randomUUID()
         );
+        unstructuredEod.setTransferAttempts(1);
         dartsDatabase.save(unstructuredEod);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder().build();
-        when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
+        when(armDataManagementApi.saveBlobDataToArm(any(),any())).thenReturn(armBlobInfo);
         unstructuredToArmProcessor.processUnstructuredToArm();
 
-        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
-        );
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -127,6 +125,12 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     @Test
     void movePreviousFailedAttemptFromUnstructuredToArmStorage() {
+        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
+            .archiveRecordFile(new File("Tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360"))
+            .fileGenerationSuccessful(true)
+            .build();
+        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
+
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -160,8 +164,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder().build();
-        when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
+        //ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder().build();
+        //when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
