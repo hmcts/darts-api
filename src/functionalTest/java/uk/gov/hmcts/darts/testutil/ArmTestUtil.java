@@ -39,7 +39,7 @@ public class ArmTestUtil {
                                                                     null,
                                                                     Duration.of(DELETE_TIMEOUT,ChronoUnit.SECONDS),
                                                                     null);
-
+            log.info("Status code {}", response.getStatusCode());
             if (ERROR_CODE_202 != response.getStatusCode()) {
                 throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
             }
