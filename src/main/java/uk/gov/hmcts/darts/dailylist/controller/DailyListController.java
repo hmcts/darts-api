@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,14 +48,12 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
  */
 @SuppressWarnings({"checkstyle.LineLengthCheck"})
 @RestController
+@RequiredArgsConstructor
 public class DailyListController implements DailyListsApi {
 
-    @Autowired
-    CourthouseRepository courthouseRepository;
-    @Autowired
-    private DailyListService dailyListService;
-    @Autowired
-    private DailyListProcessor processor;
+    private final CourthouseRepository courthouseRepository;
+    private final DailyListService dailyListService;
+    private final DailyListProcessor processor;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
