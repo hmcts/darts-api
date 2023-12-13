@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,9 +64,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private UserIdentity mockUserIdentity;

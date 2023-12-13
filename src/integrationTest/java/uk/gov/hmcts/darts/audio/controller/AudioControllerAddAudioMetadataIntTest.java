@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +38,6 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
     @Autowired
     private AuthorisationStub authorisationStub;
     @MockBean

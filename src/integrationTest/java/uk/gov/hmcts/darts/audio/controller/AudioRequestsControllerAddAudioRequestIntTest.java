@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,9 +59,6 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private UserIdentity mockUserIdentity;

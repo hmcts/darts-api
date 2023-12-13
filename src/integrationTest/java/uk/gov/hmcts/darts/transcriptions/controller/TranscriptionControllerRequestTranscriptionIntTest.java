@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -81,9 +80,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @Autowired
     private AuditService auditService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private CourtCaseEntity courtCase;
     private HearingEntity hearing;
