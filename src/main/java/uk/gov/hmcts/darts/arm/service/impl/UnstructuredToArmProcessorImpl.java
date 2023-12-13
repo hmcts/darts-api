@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
@@ -57,6 +58,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         processPendingUnstructured();
     }
 
+    @Transactional
     private void processPendingUnstructured() {
 
         ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
@@ -86,6 +88,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities = Stream.concat(
             pendingUnstructuredExternalObjectDirectoryEntities.stream(),
             failedArmExternalObjectDirectoryEntities.stream()).toList();
+
 
         for (var currentExternalObjectDirectoryEntity : allPendingUnstructuredToArmEntities) {
 
@@ -187,7 +190,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         return armExternalObjectDirectoryEntity;
     }
 
-    @Override
+
     public String generateFilename(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         final Integer entityId = externalObjectDirectoryEntity.getId();
         final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
@@ -211,5 +214,4 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
         externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
-
 }
