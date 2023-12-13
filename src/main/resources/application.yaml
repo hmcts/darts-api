@@ -160,6 +160,13 @@ darts:
       folders:
         submission: dropzone/DARTS/submission/
       max-retry-attempts: 3
+      publisher: DARTS
+      region: GBR
+      media_record_class: DARTSMedia
+      transcription_record_class: DARTSTranscription
+      annotation_record_class: DARTSAnnotation
+      temp-blob-workspace: ${user.home}/arm/tempworkspace
+      date_time_format: yyyy-MM-dd'T'HH:mm:ss
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:
