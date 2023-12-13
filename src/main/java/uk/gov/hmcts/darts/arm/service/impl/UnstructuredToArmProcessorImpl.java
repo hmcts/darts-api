@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobStorageException;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,9 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
@@ -20,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -32,6 +36,7 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.ARM_INGESTION;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
 
 @Service
@@ -144,6 +149,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armExternalObjectDirectory.setStatus(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
             updateTransferAttempts(armExternalObjectDirectory);
         }
+
+            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
     }
 
     private Optional<ExternalObjectDirectoryEntity> getUnstructuredExternalObjectDirectoryEntity(
@@ -187,6 +194,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         final Integer transferAttempts = externalObjectDirectoryEntity.getTransferAttempts();
 
         Integer documentId = 0;
+
         if (nonNull(externalObjectDirectoryEntity.getMedia())) {
             documentId = externalObjectDirectoryEntity.getMedia().getId();
         } else if (nonNull(externalObjectDirectoryEntity.getTranscriptionDocumentEntity())) {
@@ -195,11 +203,15 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             documentId = externalObjectDirectoryEntity.getAnnotationDocumentEntity().getId();
         }
 
-        return String.format("%s_%s_%s", entityId, documentId, transferAttempts);
+        return String.format("{}_{}_{}",
+                             Integer.toString(entityId),
+                             Integer.toString(documentId),
+                             Integer.toString(transferAttempts));
     }
 
     private void updateTransferAttempts(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         int currentNumberOfAttempts = externalObjectDirectoryEntity.getTransferAttempts();
         externalObjectDirectoryEntity.setTransferAttempts(currentNumberOfAttempts + 1);
     }
+
 }

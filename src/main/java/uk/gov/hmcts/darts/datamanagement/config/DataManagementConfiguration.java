@@ -22,9 +22,6 @@ public class DataManagementConfiguration {
     @Value("${darts.storage.blob.container-name.outbound}")
     private String outboundContainerName;
 
-    @Value("${darts.storage.arm.connection-string}")
-    private String armStorageAccountConnectionString;
-
     @Value("${darts.storage.blob.delete.timeout:60}")
     private int deleteTimeout;
 }
