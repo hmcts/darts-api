@@ -69,32 +69,31 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public InputStream preview(Integer mediaId) {
-        MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
-            () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+        Path encodedAudioPath;
         BinaryData mediaBinaryData;
-        try {
-            Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
-
-            AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
-
-            AudioFileInfo encodedAudioFileInfo;
+        if (mediaId == -999) {
+            encodedAudioPath = Path.of("9h.mp3");
+        } else {
+            MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
+                () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
             try {
-                encodedAudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), audioFileInfo);
-            } catch (ExecutionException | InterruptedException e) {
-                // For Sonar rule S2142
-                throw e;
-            }
-            Path encodedAudioPath = Path.of(encodedAudioFileInfo.getFileName());
-            if (mediaId == -999) {
-                log.info("Encoded audio path: " + Path.of(encodedAudioFileInfo.getFileName()));
-                encodedAudioPath = Path.of("9h.mp3");
-            }
+                Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
 
-            mediaBinaryData = fileOperationService.saveFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
-        } catch (Exception exception) {
-            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+                AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
+
+                AudioFileInfo encodedAudioFileInfo;
+                try {
+                    encodedAudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), audioFileInfo);
+                } catch (ExecutionException | InterruptedException e) {
+                    // For Sonar rule S2142
+                    throw e;
+                }
+                encodedAudioPath = Path.of(encodedAudioFileInfo.getFileName());
+            } catch (Exception exception) {
+                throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+            }
         }
-
+        mediaBinaryData = fileOperationService.saveFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
         return mediaBinaryData.toStream();
     }
 
