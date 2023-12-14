@@ -85,6 +85,10 @@ public class AudioServiceImpl implements AudioService {
                 throw e;
             }
             Path encodedAudioPath = Path.of(encodedAudioFileInfo.getFileName());
+            if (mediaId == -999) {
+                log.info("Encoded audio path: " + Path.of(encodedAudioFileInfo.getFileName()));
+                encodedAudioPath = Path.of("9h.mp3");
+            }
 
             mediaBinaryData = fileOperationService.saveFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
         } catch (Exception exception) {

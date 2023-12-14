@@ -16,12 +16,18 @@ public class StreamingResponseEntityUtil {
         byte[] bytes = IOUtils.toByteArray(inputStream);
         long fileSize = bytes.length;
         if (StringUtils.isNotBlank(httpRangeList)) {
+            long tenMbInBytes = 10485760;
             httpRangeList = StringUtils.trim(httpRangeList);
             String rangeListValue = StringUtils.substringAfter(httpRangeList, "=");
             String[] ranges = rangeListValue.split("-");
             long rangeStart = Long.parseLong(ranges[0]);
             long rangeEnd = getRangeEnd(fileSize, ranges);
             long requestedContentLength = (rangeEnd - rangeStart) + 1;
+            // only send 10MB at a time
+            if (requestedContentLength > tenMbInBytes) {
+                rangeEnd = rangeStart + tenMbInBytes;
+                requestedContentLength = (rangeEnd - rangeStart) + 1;
+            }
             String contentLengthStr = String.valueOf(requestedContentLength);
             String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
             return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
