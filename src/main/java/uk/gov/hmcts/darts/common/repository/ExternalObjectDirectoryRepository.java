@@ -20,7 +20,7 @@ import java.util.Optional;
 public interface ExternalObjectDirectoryRepository extends JpaRepository<ExternalObjectDirectoryEntity, Integer> {
 
     @Query(
-        "SELECT eod FROM ExternalObjectDirectoryEntity eod, MediaEntity med " +
+        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
             "WHERE eod.media = :media AND eod.status = :status AND eod.externalLocationType = :externalLocationType"
     )
     List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media, ObjectRecordStatusEntity status,
