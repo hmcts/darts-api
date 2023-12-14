@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.task.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -64,7 +63,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Autowired
     private FileOperationService fileOperationService;
-    @Mock
+    @Autowired
     private ArchiveRecordService archiveRecordService;
 
     @BeforeEach
@@ -88,7 +87,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             .fileGenerationSuccessful(true)
             .build();
 
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
+        //when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -111,7 +110,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
             UUID.randomUUID()
         );
-        unstructuredEod.setTransferAttempts(1);
         dartsDatabase.save(unstructuredEod);
 
         unstructuredToArmProcessor.processUnstructuredToArm();

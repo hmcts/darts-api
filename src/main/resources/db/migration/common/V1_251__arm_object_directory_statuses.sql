@@ -1,7 +1,16 @@
-INSERT INTO darts.automated_task (aut_id,task_name,task_description,cron_expression,cron_editable)
-VALUES (8,'UnstructuredToArmDataStore','Move files from Unstructured to ARM data store','0 0/5 * * * *',true);
 
-ALTER SEQUENCE aut_seq RESTART WITH 9;
+INSERT INTO object_record_status (ors_id,ors_description) VALUES (13,'Arm Drop Zone');
+INSERT INTO object_record_status (ors_id,ors_description) VALUES (14,'Arm Raw Data Failed');
+INSERT INTO object_record_status (ors_id,ors_description) VALUES (15,'Arm Manifest Failed');
+ALTER SEQUENCE ors_seq RESTART WITH 16;
 
-INSERT INTO object_record_status (ors_id,ors_description) VALUES (12,'Arm Ingestion');
-ALTER SEQUENCE ors_seq RESTART WITH 12;
+-- Fix statuses that have now changed
+UPDATE darts.external_object_directory
+SET ors_id = 15
+WHERE elt_id = 3
+AND ors_id in (10,12);
+
+UPDATE darts.external_object_directory
+SET ors_id = 14
+WHERE elt_id = 3
+AND ors_id = 8;

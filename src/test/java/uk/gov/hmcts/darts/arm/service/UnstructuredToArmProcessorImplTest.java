@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
-import uk.gov.hmcts.darts.common.entity.ObjectDirectoryStatusEntity;
+import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -41,13 +41,13 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_
 @ExtendWith(MockitoExtension.class)
 class UnstructuredToArmProcessorImplTest {
 
-    public static final String TEST_BINARY_DATA = "test binary data";
-    private static final Integer EXAMPLE_ARM_ENTITY_ID = 100;
+    private static final String TEST_BINARY_DATA = "test binary data";
+    private static final Integer MAX_RETRY_ATTEMPTS = 3;
 
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private ObjectDirectoryStatusRepository objectRecordStatusRepository;
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Mock
@@ -88,12 +88,20 @@ class UnstructuredToArmProcessorImplTest {
     @Captor
     private ArgumentCaptor<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityCaptor;
 
+
     @BeforeEach
     void setUp() {
 
         unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(externalObjectDirectoryRepository,
-                                                                        dataManagementApi, armDataManagementApi, userAccountRepository);
-                                                                        armDataManagementConfiguration);
+                                                                        objectRecordStatusRepository,
+                                                                        externalLocationTypeRepository,
+                                                                        dataManagementApi,
+                                                                        armDataManagementApi,
+                                                                        userAccountRepository,
+                                                                        armDataManagementConfiguration,
+                                                                        fileOperationService,
+                                                                        archiveRecordService);
+
     }
 
     @Test
@@ -106,14 +114,11 @@ class UnstructuredToArmProcessorImplTest {
         when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
         when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailed);
 
-        List<ObjectRecordStatusEntity> armStatuses = getArmStatuses();
-
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder().build();
         when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(objectRecordStatusEntityStored,
-                                                                                         armStatuses,
                                                                                          externalLocationTypeUnstructured,
                                                                                          externalLocationTypeArm)).thenReturn(inboundList);
 
@@ -128,56 +133,40 @@ class UnstructuredToArmProcessorImplTest {
 
     }
 
-    private List<ObjectRecordStatusEntity> getArmStatuses() {
-        List<ObjectRecordStatusEntity> armStatuses = new ArrayList<>();
-        armStatuses.add(objectRecordStatusEntityStored);
-        armStatuses.add(objectRecordStatusEntityFailed);
-        armStatuses.add(objectRecordStatusEntityArmIngestion);
-
-        return armStatuses;
-    }
-
     @Test
     void processPreviousFailedAttemptMovingFromUnstructuredStorageToArm() {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
-        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
-        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
-
-        when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity().getId()).thenReturn(EXAMPLE_TRANSCRIPTION_ID);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
         when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailed);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
-        List<ObjectRecordStatusEntity> armStatuses = getArmStatuses();
-
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder().build();
         when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
 
         List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(Collections.emptyList());
-        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(objectDirectoryStatusEntityStored,
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(objectRecordStatusEntityStored,
                                                                                          externalLocationTypeUnstructured,
                                                                                          externalLocationTypeArm)).thenReturn(pendingUnstructuredStorageItems);
 
 
-        when(objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId())).thenReturn(objectDirectoryStatusEntityFailed);
+        when(objectRecordStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId())).thenReturn(objectRecordStatusEntityFailed);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
         List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityArm));
-        when(externalObjectDirectoryRepository.findFailedNotExceedRetryInStorageLocation(objectDirectoryStatusEntityFailed,
-                                                                                         externalLocationTypeRepository.getReferenceById(3),
-                                                                                         armDataManagementConfiguration.getMaxRetryAttempts()))
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(objectRecordStatusEntityFailed,
+                                                                                                   externalLocationTypeRepository.getReferenceById(3),
+                                                                                                   armDataManagementConfiguration.getMaxRetryAttempts()))
             .thenReturn(pendingFailureList);
 
         when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
-        when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
         when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
         when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
         when(externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
         when(externalObjectDirectoryRepository
-                 .findMatchingExternalObjectDirectoryEntityByLocation(objectDirectoryStatusEntityStored,
+                 .findMatchingExternalObjectDirectoryEntityByLocation(objectRecordStatusEntityStored,
                                                                       externalLocationTypeUnstructured,
                                                                       externalObjectDirectoryEntityArm.getMedia(),
                                                                       externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
@@ -192,19 +181,16 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processPreviousFailedAttempt() {
-        
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectDirectoryStatusEntityStored);
+
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
-        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectDirectoryStatusEntityFailed);
+        when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailed);
         when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
         when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
 
         List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(Collections.emptyList());
 
-        List<ObjectRecordStatusEntity> armStatuses = getArmStatuses();
-
         when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(objectRecordStatusEntityStored,
-                                                                                         armStatuses,
                                                                                          externalLocationTypeUnstructured,
                                                                                          externalLocationTypeArm)).thenReturn(pendingUnstructuredStorageItems);
 
@@ -212,9 +198,9 @@ class UnstructuredToArmProcessorImplTest {
         when(objectRecordStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId())).thenReturn(objectRecordStatusEntityFailed);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
         List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityArm));
-        when(externalObjectDirectoryRepository.findFailedNotExceedRetryInStorageLocation(objectRecordStatusEntityFailed,
-                                                                                         externalLocationTypeRepository.getReferenceById(3),
-                                                                                         armDataManagementConfiguration.getMaxRetryAttempts()))
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(objectRecordStatusEntityFailed,
+                                                                                                   externalLocationTypeRepository.getReferenceById(3),
+                                                                                                   armDataManagementConfiguration.getMaxRetryAttempts()))
             .thenReturn(pendingFailureList);
 
         when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);

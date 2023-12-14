@@ -27,7 +27,6 @@ public class ArmServiceImpl implements ArmService {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         BlobClient client = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
         client.upload(binaryData);
-
         return filename;
     }
 

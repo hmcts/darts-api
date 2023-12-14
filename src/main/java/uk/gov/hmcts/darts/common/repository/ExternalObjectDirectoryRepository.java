@@ -28,26 +28,24 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eo FROM ExternalObjectDirectoryEntity eo
-            WHERE eo.status = :status1
-            AND eo.externalLocationType = :location1
-            AND eo.id NOT IN
+            SELECT eo FROM ExternalObjectDirectoryEntity eod1
+            WHERE eod1.status = :status
+            AND eod1.externalLocationType = :location1
+            AND eod1.id NOT IN
               (
-              SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-              WHERE ((eod.media is not null AND eod.media = eod2.media)
-              OR (eod.transcriptionDocumentEntity is not null AND eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
-              OR (eod.annotationDocumentEntity is not null AND eod.annotationDocumentEntity = eod2.annotationDocumentEntity))
-              AND eod.status = :status1
-              AND eod2.status in :statuses2
-              AND eod.externalLocationType = :location1
+              SELECT eod2.id FROM ExternalObjectDirectoryEntity eod2
+              WHERE ((eod1.media is not null AND eod1.media = eod2.media)
+              OR (eod1.transcriptionDocumentEntity is not null AND eod1.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
+              OR (eod1.annotationDocumentEntity is not null AND eod1.annotationDocumentEntity = eod2.annotationDocumentEntity))
               AND eod2.externalLocationType = :location2
               )
             """
     )
-    List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status1,
-                                                                List<ObjectRecordStatusEntity> statuses2,
+    List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2);
+
+
 
     @Query(
         """
@@ -59,7 +57,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         AND (:annotation is null or eod.annotationDocumentEntity = :annotation)
         """
     )
-	
+
     Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectRecordStatusEntity status,
                                                                                                 ExternalLocationTypeEntity location,
                                                                                                 MediaEntity media,
@@ -68,62 +66,14 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
-            "WHERE eod.status = :status " +
+            "WHERE eod.status != :status " +
             "AND eod.externalLocationType = :type " +
             "AND eod.transferAttempts < :transferAttempts"
     )
-    List<ExternalObjectDirectoryEntity> findFailedNotExceedRetryInStorageLocation(ObjectRecordStatusEntity status,
-                                                                                  ExternalLocationTypeEntity type,
-                                                                                  Integer transferAttempts);
+    List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(ObjectRecordStatusEntity status,
+                                                                                            ExternalLocationTypeEntity type,
+                                                                                            Integer transferAttempts);
 
-    @Query(
-        """
-            SELECT eo FROM ExternalObjectDirectoryEntity eo
-            WHERE eo.status = :status1
-            AND eo.externalLocationType = :location1
-            AND eo.id NOT IN
-              (
-              SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-              WHERE (eod.media is not null AND eod.media = eod2.media)
-              OR (eod.transcriptionDocumentEntity is not null AND eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
-              OR (eod.annotationDocumentEntity is not null AND eod.annotationDocumentEntity = eod2.annotationDocumentEntity)
-              AND eod.status = :status1
-              AND eod2.status = :status2
-              AND eod.externalLocationType = :location1
-              AND eod2.externalLocationType = :location2
-              )
-            """
-    )
-    List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status1,
-                                                                List<ObjectRecordStatusEntity> statuses2,
-                                                                ExternalLocationTypeEntity location1,
-                                                                ExternalLocationTypeEntity location2);
-
-    @Query(
-        """
-        SELECT eod FROM ExternalObjectDirectoryEntity eod
-        WHERE eod.status = :status
-        AND eod.externalLocationType = :location
-        AND (:media is null or eod.media = :media)
-        AND (:transcription is null or eod.transcriptionDocumentEntity = :transcription)
-        AND (:annotation is null or eod.annotationDocumentEntity = :annotation)
-        """
-    )
-    Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectRecordStatusEntity status,
-                                                                                                ExternalLocationTypeEntity location,
-                                                                                                MediaEntity media,
-                                                                                                TranscriptionDocumentEntity transcription,
-                                                                                                AnnotationDocumentEntity annotation);
-
-    @Query(
-        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
-            "WHERE eod.status = :status " +
-            "AND eod.externalLocationType = :type " +
-            "AND eod.transferAttempts < :transferAttempts"
-    )
-    List<ExternalObjectDirectoryEntity> findFailedNotExceedRetryInStorageLocation(ObjectRecordStatusEntity status,
-                                                                                  ExternalLocationTypeEntity type,
-                                                                                  Integer transferAttempts);
 
     @Query(
         "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
