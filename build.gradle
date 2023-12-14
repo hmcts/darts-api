@@ -129,7 +129,7 @@ task smoke(type: Test) {
 
 checkstyle {
   maxWarnings = 0
-  toolVersion = '10.12.5'
+  toolVersion = '10.12.6'
   getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
@@ -432,6 +432,10 @@ dependencyManagement {
     dependencySet(group: 'io.projectreactor.netty', version: '1.1.14') {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
+    }
+    // Fix for checkstyle trying to bring in 2 incompatible version of guava. Look at removing this at some point
+    dependencySet(group: 'com.google.guava', version: '32.0.1-jre') {
+      entry 'guava'
     }
 
   }
