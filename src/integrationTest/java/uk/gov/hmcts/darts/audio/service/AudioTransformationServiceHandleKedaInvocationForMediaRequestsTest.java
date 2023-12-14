@@ -3,10 +3,8 @@ package uk.gov.hmcts.darts.audio.service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
@@ -43,7 +41,6 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 
 
 @Import(SystemCommandExecutorStubImpl.class)
-@ExtendWith(MockitoExtension.class)
 @Slf4j
 @SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends IntegrationBase {
