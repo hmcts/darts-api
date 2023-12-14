@@ -92,6 +92,11 @@ public class UserAccountStub {
     }
 
     @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(String courthouse) {
+        return createAuthorisedIntegrationTestUser(courthouseStub.createCourthouseUnlessExists(courthouse));
+    }
+
+    @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
@@ -113,10 +118,6 @@ public class UserAccountStub {
         return testUser;
     }
 
-    @Transactional
-    public UserAccountEntity createAuthorisedIntegrationTestUser(String courthouse) {
-        return createAuthorisedIntegrationTestUser(courthouseStub.createCourthouseUnlessExists(courthouse));
-    }
 
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
