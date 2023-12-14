@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.usermanagement.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -42,6 +43,10 @@ class UserControllerSearchIntTest extends IntegrationBase {
     private MockMvc mockMvc;
     @MockBean
     private UserIdentity mockUserIdentity;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Autowired
     private DartsDatabaseStub dartsDatabaseStub;
     @Autowired
@@ -132,6 +137,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     void searchByEmailAddressShouldReturnOk() throws Exception {
+        dartsDatabaseStub.getUserAccountRepository().deleteAll();
         UserAccountEntity testUser = userAccountStub.createUnauthorisedIntegrationTestUser();
         SecurityGroupEntity testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         testUser.getSecurityGroupEntities().add(testTranscriberSG);

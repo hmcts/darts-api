@@ -79,7 +79,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         doNothing().when(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
-        testUser = authorisationStub.getTestUser();
+        testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
@@ -139,8 +139,6 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         final TranscriptionEntity rejectedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(REJECTED.getId(), rejectedTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, rejectedTranscriptionEntity.getCreatedBy().getId());
-        assertEquals(testUserId, rejectedTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = rejectedTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);

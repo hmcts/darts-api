@@ -205,11 +205,19 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
+        return updateTranscription(transcriptionId,updateTranscription,false);
+    }
+
+    @Override
+    @Transactional
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
+    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
+                                                           UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        validateUpdateTranscription(transcriptionEntity, updateTranscription);
+        validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection);
 
         final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
@@ -258,13 +266,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private void validateUpdateTranscription(TranscriptionEntity transcription,
-                                             UpdateTranscription updateTranscription) {
+                                             UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
 
+        TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
-        if (getUserAccount().getUserName().equals(transcription.getRequestor())) {
+        if (!allowSelfApprovalOrRejection && getUserAccount().getUserName().equals(transcription.getCreatedBy().getUserName())
+            && (desiredTargetTranscriptionStatus.equals(REJECTED) || desiredTargetTranscriptionStatus.equals(APPROVED))) {
             throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
         }
-        TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
 
         if (!workflowValidator.validateChangeToWorkflowStatus(
             transcription.getIsManualTranscription(),

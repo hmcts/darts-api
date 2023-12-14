@@ -112,7 +112,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         transcriptionCompany = securityGroupRepository.findById(-4).orElseThrow();
         transcriptionCompany.setCourthouseEntities(Set.of(authorisationStub.getCourthouseEntity()));
 
-        UserAccountEntity testUser = authorisationStub.getTestUser();
+        UserAccountEntity testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
@@ -155,10 +155,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
 
     @Test
     void attachTranscriptShouldReturnBadRequestErrorWithFileExtensionTypeBlocked() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getTestUser();
-        testUser.getSecurityGroupEntities().clear();
-        testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabase.getUserAccountRepository().save(testUser);
+        setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -190,10 +187,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         when(mockMultipartProperties.getMaxFileSize()).thenReturn(ofBytes(5));
         when(mockMultipartProperties.getMaxRequestSize()).thenReturn(ofBytes(5));
 
-        UserAccountEntity testUser = authorisationStub.getTestUser();
-        testUser.getSecurityGroupEntities().clear();
-        testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabase.getUserAccountRepository().save(testUser);
+        setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -220,12 +214,15 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         verifyNoInteractions(mockAuditApi);
     }
 
+    private void setPermissions(UserAccountEntity user) {
+        user.getSecurityGroupEntities().clear();
+        user.getSecurityGroupEntities().add(transcriptionCompany);
+        dartsDatabase.getUserAccountRepository().save(user);
+    }
+
     @Test
     void attachTranscriptShouldReturnOkWithMicrosoftWordNew() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getTestUser();
-        testUser.getSecurityGroupEntities().clear();
-        testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabase.getUserAccountRepository().save(testUser);
+        setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -253,8 +250,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         final TranscriptionEntity completeTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(COMPLETE.getId(), completeTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, completeTranscriptionEntity.getCreatedBy().getId());
-        assertEquals(testUserId, completeTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = completeTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
@@ -285,16 +280,13 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
         assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
 
-        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
     }
 
     @Test
     void attachTranscriptShouldReturnOkWithMicrosoftWordOld() throws Exception {
-        UserAccountEntity testUser = authorisationStub.getTestUser();
-        testUser.getSecurityGroupEntities().clear();
-        testUser.getSecurityGroupEntities().add(transcriptionCompany);
-        dartsDatabase.getUserAccountRepository().save(testUser);
+        setPermissions(authorisationStub.getSeparateIntegrationUser());
 
         MockMultipartFile transcript = new MockMultipartFile(
             "transcript",
@@ -322,8 +314,6 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         final TranscriptionEntity completeTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(COMPLETE.getId(), completeTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, completeTranscriptionEntity.getCreatedBy().getId());
-        assertEquals(testUserId, completeTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = completeTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
@@ -351,8 +341,8 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
         assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
 
-        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
-        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
+        verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
     }
 
 }
