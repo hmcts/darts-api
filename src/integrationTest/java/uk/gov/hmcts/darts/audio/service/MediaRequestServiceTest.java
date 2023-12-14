@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -45,7 +44,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(1)
+
     void shouldSaveAudioRequestWithZuluTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -65,7 +64,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(2)
+
     void shouldSaveAudioRequestWithOffsetTimeOk() {
         requestDetails.setStartTime(OffsetDateTime.parse("2023-05-31T10:00:00+01:00"));
         requestDetails.setEndTime(OffsetDateTime.parse("2023-05-31T13:00:00+01:00"));
@@ -85,7 +84,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(3)
+
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeStarts() {
         // In the UK the clocks go forward 1 hour at 1am on the last Sunday in March.
         // The period when the clocks are 1 hour ahead is called British Summer Time (BST).
@@ -107,7 +106,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(4)
+
     void shouldSaveAudioRequestWithZuluTimeOkWhenDaylightSavingTimeEnds() {
         // In the UK the clocks go back 1 hour at 2am on the last Sunday in October.
         requestDetails.setStartTime(OffsetDateTime.parse("2023-10-29T00:30:00Z"));
@@ -128,7 +127,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(5)
+
     void shouldUpdateStatusToProcessing() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestStatus(1, PROCESSING);
 
@@ -136,7 +135,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(5)
+
     void shouldGetMediaRequestsByStatus() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -150,13 +149,13 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(7)
+
     void shouldThrowExceptionWhenGetMediaRequestByIdInvalid() {
         assertThrows(DartsApiException.class, () -> mediaRequestService.getMediaRequestById(-3));
     }
 
     @Test
-    @Order(8)
+
     void shouldDeleteAudioRequestById() {
         requestDetails.setStartTime(OffsetDateTime.parse(T_09_00_00_Z));
         requestDetails.setEndTime(OffsetDateTime.parse(T_12_00_00_Z));
@@ -171,7 +170,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(9)
+
     void shouldSetDownloadFileNameAndFormat() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
                                                                                                 AudioRequestOutputFormat.MP3
@@ -181,7 +180,7 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    @Order(10)
+
     void shouldSetPlaybackFileNameAndFormat() {
         MediaRequestEntity mediaRequestEntity = mediaRequestService.updateAudioRequestCompleted(mediaRequestService.getMediaRequestById(1), TEST_FILENAME,
                                                                                                 AudioRequestOutputFormat.ZIP

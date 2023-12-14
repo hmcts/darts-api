@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.DELETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
@@ -286,7 +287,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         criteriaQuery.where(criteriaBuilder.and(
             criteriaBuilder.equal(mediaRequest.get(MediaRequestEntity_.CURRENT_OWNER), paramRequestor),
             expiredPredicate(expired, criteriaBuilder, mediaRequest),
-            criteriaBuilder.notEqual(mediaRequest.get(MediaRequestEntity_.status), DELETED)
+            mediaRequest.get(MediaRequestEntity_.status).in(List.of(DELETED, COMPLETED)).not()
         ));
 
         criteriaQuery.orderBy(List.of(
