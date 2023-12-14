@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.transcriptions.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -112,8 +111,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES", "OTHER"})
-    @Order(1)
+    @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES","OTHER"})
     void transcriptionRequestWithValidValuesShouldReturnSuccess(TranscriptionTypeEnum transcriptionTypeEnum) throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
 
@@ -184,7 +182,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(12)
     void transcriptionRequestWithDuplicateValues() throws Exception {
         OffsetDateTime startTime = now().plusMinutes(5).truncatedTo(ChronoUnit.SECONDS);
         OffsetDateTime endTime = now().plusMinutes(10).truncatedTo(ChronoUnit.SECONDS);
@@ -217,7 +214,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(13)
     void transcriptionRequestWithDuplicateValuesWithNoTimes() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -246,7 +242,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
 
     @Test
-    @Order(14)
     void transcriptionRequestHearingWithNoAudio() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -286,7 +281,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(15)
     void transcriptionRequestStartTimeOutsideHearing() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -313,7 +307,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(16)
     void transcriptionRequestEndTimeOutsideHearing() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -340,7 +333,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(17)
     void transcriptionRequestExactStartAndEnd() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -371,7 +363,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(18)
     void transcriptionRequestInsideStartAndEnd() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.SENTENCING_REMARKS;
@@ -413,7 +404,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(2)
     void transcriptionRequestWithNullDatesAndSentencingRemarksTypeShouldReturnSuccess()
         throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
@@ -440,7 +430,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(3)
     void transcriptionRequestWithNullHearingAndNullCaseShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
@@ -478,7 +467,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @ParameterizedTest
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
-    @Order(4)
     void transcriptionRequestWithNullStartDateAndRequiredDatesTranscriptionTypeShouldThrowException(
         TranscriptionTypeEnum transcriptionTypeEnum)
         throws Exception {
@@ -506,7 +494,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
     @ParameterizedTest
     @EnumSource(names = {"COURT_LOG", "SPECIFIED_TIMES"})
-    @Order(5)
     void transcriptionRequestWithNullEndDateAndRequiredDatesTranscriptionTypeShouldThrowException(
         TranscriptionTypeEnum transcriptionTypeEnum)
         throws Exception {
@@ -534,7 +521,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(6)
     void transcriptionRequestWithInvalidUrgencyIdShouldThrowException() throws Exception {
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
@@ -556,7 +542,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(7)
     void transcriptionRequestWithNullUrgencyIdShouldThrowException() throws Exception {
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
 
@@ -578,7 +563,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(8)
     void transcriptionRequestWithInvalidTranscriptionTypeIdShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.OVERNIGHT;
 
@@ -600,7 +584,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(9)
     void transcriptionRequestWithInvalidHearingIdShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
@@ -649,7 +632,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(10)
     void transcriptionRequestWithInvalidCaseIdShouldThrowException() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;
@@ -675,7 +657,6 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     }
 
     @Test
-    @Order(11)
     void transcriptionRequestWithValidHearingAndNullCaseIdShouldReturnSuccess() throws Exception {
         TranscriptionUrgencyEnum transcriptionUrgencyEnum = TranscriptionUrgencyEnum.STANDARD;
         TranscriptionTypeEnum transcriptionTypeEnum = TranscriptionTypeEnum.COURT_LOG;

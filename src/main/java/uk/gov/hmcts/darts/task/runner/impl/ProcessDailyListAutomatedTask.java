@@ -5,8 +5,11 @@ import net.javacrumbs.shedlock.core.LockProvider;
 import uk.gov.hmcts.darts.common.repository.AutomatedTaskRepository;
 import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
+import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 
@@ -17,6 +20,7 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
     protected String taskName = PROCESS_DAILY_LIST_TASK_NAME.getTaskName();
     private DailyListProcessor dailyListProcessor;
 
+    private List<AutomatedTaskStatus> trackedStateChanges = new ArrayList<>();
 
     public ProcessDailyListAutomatedTask(AutomatedTaskRepository automatedTaskRepository, LockProvider lockProvider,
                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties) {
@@ -44,4 +48,17 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
         log.error("Exception: {}", exception.getMessage());
     }
 
+
+    @Override
+    protected void setAutomatedTaskStatus(AutomatedTaskStatus automatedTaskStatus) {
+        super.setAutomatedTaskStatus(automatedTaskStatus);
+        trackedStateChanges.add(automatedTaskStatus);
+    }
+
+    public boolean hasTransitionState(AutomatedTaskStatus automatedTaskStatus) {
+        if (trackedStateChanges.isEmpty()) {
+            trackedStateChanges.add(getAutomatedTaskStatus());
+        }
+        return trackedStateChanges.contains(automatedTaskStatus);
+    }
 }
