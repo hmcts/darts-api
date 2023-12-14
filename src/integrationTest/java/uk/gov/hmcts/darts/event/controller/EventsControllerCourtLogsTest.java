@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.event.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,10 +51,6 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     public static final String START_DATE_TIME = "start_date_time";
     public static final String CASE_NUMBER = "case_number";
     public static final String COURTHOUSE = "courthouse";
-
-    @Autowired
-    private EventRepository eventRepository;
-
     private static final URI ENDPOINT = URI.create("/courtlogs");
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
@@ -65,10 +60,10 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
     public static final String LOG = "LOG";
 
     @Autowired
-    private MockMvc mockMvc;
+    private EventRepository eventRepository;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private MockMvc mockMvc;
 
     @MockBean
     private UserIdentity mockUserIdentity;

@@ -38,6 +38,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 @AutoConfigureMockMvc
 @Slf4j
 class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
+
     @Autowired
     private MockMvc mockMvc;
 

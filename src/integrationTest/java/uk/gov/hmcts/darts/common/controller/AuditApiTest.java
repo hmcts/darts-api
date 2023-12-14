@@ -7,9 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -17,8 +15,8 @@ import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuditStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 import uk.gov.hmcts.darts.testutils.stubs.UserAccountStub;
 
 import java.time.OffsetDateTime;
@@ -34,11 +32,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Sql(scripts = "/sql/remove-audit-and-activity.sql", executionPhase = AFTER_TEST_METHOD)
-class AuditApiTest {
+class AuditApiTest extends IntegrationBase {
 
     public static final int AUDIT_ACTIVITY_ID = 1;
     public static final int ID = 1;
@@ -46,16 +42,13 @@ class AuditApiTest {
     @Autowired
     private transient MockMvc mockMvc;
 
-    @Autowired
-    protected DartsDatabaseStub dartsDatabaseStub;
-
     private UserAccountEntity defaultUser;
 
     @BeforeEach
     public void before() {
-        CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourthouse", "TestCourtCase");
-        AuditStub auditStub = dartsDatabaseStub.getAuditStub();
-        defaultUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        CourtCaseEntity courtCase = dartsDatabase.createCase("TestCourthouse", "TestCourtCase");
+        AuditStub auditStub = dartsDatabase.getAuditStub();
+        defaultUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         AuditActivityEntity anyAuditActivity = auditStub.getAnyAuditActivity();
 
         AuditEntity auditEntity = auditStub.createAuditEntity(
@@ -66,7 +59,7 @@ class AuditApiTest {
             "additional_data"
         );
         auditEntity.setCreatedDateTime(OffsetDateTime.of(2023, 6, 13, 8, 13, 9, 0, ZoneOffset.UTC));
-        dartsDatabaseStub.getAuditRepository().saveAndFlush(auditEntity);
+        dartsDatabase.getAuditRepository().saveAndFlush(auditEntity);
 
     }
 
@@ -86,9 +79,9 @@ class AuditApiTest {
 
     @Test
     void searchForAuditByIds() throws Exception {
-        CourtCaseEntity courtCase = dartsDatabaseStub.createCase("TestCourthouse", "TestCourtCase2");
-        AuditStub auditStub = dartsDatabaseStub.getAuditStub();
-        UserAccountStub userAccountStub = dartsDatabaseStub.getUserAccountStub();
+        CourtCaseEntity courtCase = dartsDatabase.createCase("TestCourthouse", "TestCourtCase2");
+        AuditStub auditStub = dartsDatabase.getAuditStub();
+        UserAccountStub userAccountStub = dartsDatabase.getUserAccountStub();
         UserAccountEntity defaultUser = userAccountStub.getIntegrationTestUserAccountEntity();
         AuditActivityEntity newAuditActivity = auditStub.createTestAuditActivityEntity();
         AuditEntity auditEntity = auditStub.createAuditEntity(
