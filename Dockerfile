@@ -15,6 +15,8 @@ COPY --from=build-env /usr/bin/ffmpeg /usr/bin
 
 COPY lib/applicationinsights.json /opt/app/
 COPY build/libs/darts-api.jar /opt/app/
+COPY 3h.mp3 /opt/app
+COPY 9h.mp3 /opt/app
 
 EXPOSE 4550
 ENTRYPOINT ["java","-Duser.timezone=UTC","-jar","/opt/app/darts-api.jar"]
