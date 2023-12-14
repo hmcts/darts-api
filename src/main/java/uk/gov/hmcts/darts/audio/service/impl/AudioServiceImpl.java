@@ -72,7 +72,7 @@ public class AudioServiceImpl implements AudioService {
         Path encodedAudioPath;
         BinaryData mediaBinaryData;
         if (mediaId == -999) {
-            encodedAudioPath = Path.of("9h.mp3");
+            encodedAudioPath = Path.of("3h.mp3");
         } else {
             MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
                 () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
