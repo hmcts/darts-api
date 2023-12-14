@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ActiveProfiles({"dev", "h2db"})
 @ExtendWith(MockitoExtension.class)
 @Slf4j
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ArmServiceFunctionalTest {
 
     private static final String TEST_BINARY_STRING = "Test String to be converted to binary!";
@@ -45,7 +44,6 @@ class ArmServiceFunctionalTest {
     private final List<String> blobsToBeDeleted = new ArrayList<>();
 
     @Test
-    @Order(1)
     void saveBlobData() {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);

@@ -19,6 +19,9 @@ public class ArmDataManagementConfiguration {
     @Value("${darts.storage.arm.folders.submission}")
     private String armSubmissionDropZone;
 
+    @Value("${darts.storage.arm.max-retry-attempts}")
+    private Integer maxRetryAttempts;
+
     @Value("${darts.storage.arm.publisher}")
     private String publisher;
 
@@ -39,8 +42,6 @@ public class ArmDataManagementConfiguration {
 
     @Value("${darts.storage.arm.date_time_format}")
     private String dateTimeFormat;
-    @Value("${darts.storage.arm.max-retry-attempts}")
-    private Integer maxRetryAttempts;
 
     @Value("${darts.storage.arm.file_extension}")
     private String fileExtension;
