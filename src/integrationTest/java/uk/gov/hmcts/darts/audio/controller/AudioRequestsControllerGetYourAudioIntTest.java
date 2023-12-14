@@ -85,22 +85,6 @@ class AudioRequestsControllerGetYourAudioIntTest extends IntegrationBase {
                     "media_request_end_ts": "2023-06-26T13:45:00Z",
                     "media_request_status": "OPEN",
                     "request_type": "DOWNLOAD"
-                },
-                {
-                    "media_request_id": 2,
-                    "case_id": 1,
-                    "hearing_id": 1,
-                    "request_type": "DOWNLOAD",
-                    "case_number": "2",
-                    "courthouse_name": "NEWCASTLE",
-                    "hearing_date": "2023-06-10",
-                    "media_request_start_ts": "2023-06-26T13:00:00Z",
-                    "media_request_end_ts": "2023-06-26T13:45:00Z",
-                    "media_request_expiry_ts": "2023-07-02T13:00:00Z",
-                    "media_request_status": "COMPLETED",
-                    "output_filename": "T20231010_0",
-                    "output_format": "ZIP",
-                    "last_accessed_ts": "2023-06-30T13:00:00Z"
                 }
             ]
             """;

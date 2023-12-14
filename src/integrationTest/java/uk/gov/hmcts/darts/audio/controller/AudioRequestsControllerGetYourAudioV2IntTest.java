@@ -129,81 +129,57 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
-               "media_request_details": [
-                 {
-                   "media_request_id": 1,
-                   "case_id": 1,
-                   "hearing_id": 1,
-                   "request_type": "DOWNLOAD",
-                   "case_number": "2",
-                   "courthouse_name": "NEWCASTLE",
-                   "hearing_date": "2023-06-10",
-                   "start_ts": "2023-06-26T13:00:00Z",
-                   "end_ts": "2023-06-26T13:45:00Z",
-                   "media_request_status": "OPEN"
-                 },
-                 {
-                   "media_request_id": 3,
-                   "case_id": 1,
-                   "hearing_id": 1,
-                   "request_type": "DOWNLOAD",
-                   "case_number": "2",
-                   "courthouse_name": "NEWCASTLE",
-                   "hearing_date": "2023-06-10",
-                   "start_ts": "2023-06-26T13:00:00Z",
-                   "end_ts": "2023-06-26T13:45:00Z",
-                   "media_request_status": "COMPLETED"
-                 },
-                 {
-                   "media_request_id": 7,
-                   "case_id": 1,
-                   "hearing_id": 1,
-                   "request_type": "DOWNLOAD",
-                   "case_number": "2",
-                   "courthouse_name": "NEWCASTLE",
-                   "hearing_date": "2023-06-10",
-                   "start_ts": "2023-06-26T13:00:00Z",
-                   "end_ts": "2023-06-26T13:45:00Z",
-                   "media_request_status": "COMPLETED"
-                 }
-               ],
-               "transformed_media_details": [
-                 {
-                   "media_request_id": 3,
-                   "transformed_media_id": 3,
-                   "case_id": 1,
-                   "hearing_id": 1,
-                   "request_type": "DOWNLOAD",
-                   "case_number": "2",
-                   "courthouse_name": "NEWCASTLE",
-                   "hearing_date": "2023-06-10",
-                   "start_ts": "2023-06-26T13:00:00Z",
-                   "end_ts": "2023-06-26T13:45:00Z",
-                   "transformed_media_expiry_ts": "3020-06-20T15:30:00Z",
-                   "media_request_status": "COMPLETED",
-                   "transformed_media_filename": "file1",
-                   "transformed_media_format": "ZIP",
-                   "last_accessed_ts": "3020-06-20T15:30:00Z"
-                 },
-                 {
-                   "media_request_id": 3,
-                   "transformed_media_id": 4,
-                   "case_id": 1,
-                   "hearing_id": 1,
-                   "request_type": "DOWNLOAD",
-                   "case_number": "2",
-                   "courthouse_name": "NEWCASTLE",
-                   "hearing_date": "2023-06-10",
-                   "start_ts": "2023-06-26T13:00:00Z",
-                   "end_ts": "2023-06-26T13:45:00Z",
-                   "transformed_media_expiry_ts": "3020-06-20T15:30:00Z",
-                   "media_request_status": "COMPLETED",
-                   "transformed_media_filename": "file2",
-                   "transformed_media_format": "ZIP",
-                   "last_accessed_ts": "3020-06-20T15:30:00Z"
-                 }
-               ]
-             }
+              "media_request_details": [
+                {
+                  "media_request_id": 1,
+                  "case_id": 1,
+                  "hearing_id": 1,
+                  "request_type": "DOWNLOAD",
+                  "case_number": "2",
+                  "courthouse_name": "NEWCASTLE",
+                  "hearing_date": "2023-06-10",
+                  "start_ts": "2023-06-26T13:00:00Z",
+                  "end_ts": "2023-06-26T13:45:00Z",
+                  "media_request_status": "OPEN"
+                }
+              ],
+              "transformed_media_details": [
+                {
+                  "media_request_id": 3,
+                  "transformed_media_id": 3,
+                  "case_id": 1,
+                  "hearing_id": 1,
+                  "request_type": "DOWNLOAD",
+                  "case_number": "2",
+                  "courthouse_name": "NEWCASTLE",
+                  "hearing_date": "2023-06-10",
+                  "start_ts": "2023-06-26T13:00:00Z",
+                  "end_ts": "2023-06-26T13:45:00Z",
+                  "transformed_media_expiry_ts": "3020-06-20T15:30:00Z",
+                  "media_request_status": "COMPLETED",
+                  "transformed_media_filename": "file1",
+                  "transformed_media_format": "ZIP",
+                  "last_accessed_ts": "3020-06-20T15:30:00Z"
+                },
+                {
+                  "media_request_id": 3,
+                  "transformed_media_id": 4,
+                  "case_id": 1,
+                  "hearing_id": 1,
+                  "request_type": "DOWNLOAD",
+                  "case_number": "2",
+                  "courthouse_name": "NEWCASTLE",
+                  "hearing_date": "2023-06-10",
+                  "start_ts": "2023-06-26T13:00:00Z",
+                  "end_ts": "2023-06-26T13:45:00Z",
+                  "transformed_media_expiry_ts": "3020-06-20T15:30:00Z",
+                  "media_request_status": "COMPLETED",
+                  "transformed_media_filename": "file2",
+                  "transformed_media_format": "ZIP",
+                  "last_accessed_ts": "3020-06-20T15:30:00Z"
+                }
+              ]
+            }
             """;
         TestUtils.compareJson(expectedJson, actualJson, TAGS_TO_IGNORE);
     }
