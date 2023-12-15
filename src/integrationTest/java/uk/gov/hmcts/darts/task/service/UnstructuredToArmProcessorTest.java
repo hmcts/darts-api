@@ -17,7 +17,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_INGESTION_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -46,7 +46,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Autowired
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Autowired
-    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Autowired
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Autowired
@@ -59,13 +59,15 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     @BeforeEach
     void setupData() {
-        unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(externalObjectDirectoryRepository,
-                                                                        objectDirectoryStatusRepository,
-                                                                        externalLocationTypeRepository,
-                                                                        dataManagementApi,
-                                                                        armDataManagementApi,
-                                                                        userAccountRepository,
-                                                                        armDataManagementConfiguration);
+        unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(
+            externalObjectDirectoryRepository,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            dataManagementApi,
+            armDataManagementApi,
+            userAccountRepository,
+            armDataManagementConfiguration
+        );
     }
 
     @Test
@@ -175,7 +177,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
-        armEod.setStatus(dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
+        armEod.setStatus(dartsDatabase.getObjectRecordStatusRepository().getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 

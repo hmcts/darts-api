@@ -13,11 +13,11 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ class ExternalInboundDataStoreDeleterImplTest {
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
 
     @Mock
-    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
 
     private ObjectRecordStatusEntity deletedStatus;
 
@@ -57,7 +57,7 @@ class ExternalInboundDataStoreDeleterImplTest {
     @BeforeEach
     public void setUp() {
         this.deleter = new ExternalInboundDataStoreDeleter(
-            objectDirectoryStatusRepository,
+            objectRecordStatusRepository,
             userAccountRepository,
             externalObjectDirectoryRepository,
             finder,
@@ -75,8 +75,8 @@ class ExternalInboundDataStoreDeleterImplTest {
 
     private void mockStatus() {
         this.deletedStatus = new ObjectRecordStatusEntity();
-        deletedStatus.setId(ObjectDirectoryStatusEnum.DELETED.getId());
-        when(objectDirectoryStatusRepository.getReferenceById(ObjectDirectoryStatusEnum.DELETED.getId())).thenReturn(
+        deletedStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
+        when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
             deletedStatus);
     }
 

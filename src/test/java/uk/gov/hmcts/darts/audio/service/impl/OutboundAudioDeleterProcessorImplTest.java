@@ -9,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -33,7 +33,7 @@ class OutboundAudioDeleterProcessorImplTest {
     @Mock
     private UserAccountRepository userAccountRepository;
     @Mock
-    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
     private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
 
     @Mock
@@ -45,7 +45,7 @@ class OutboundAudioDeleterProcessorImplTest {
             mediaRequestRepository,
             transientObjectDirectoryRepository,
             userAccountRepository,
-            objectDirectoryStatusRepository, lastAccessedDeletionDayCalculator,
+            objectRecordStatusRepository, lastAccessedDeletionDayCalculator,
             systemUserHelper
         );
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");

@@ -27,7 +27,7 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -93,7 +93,7 @@ class AudioServiceImplTest {
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Mock
-    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private DataManagementApi dataManagementApi;
     @Mock
@@ -108,7 +108,7 @@ class AudioServiceImplTest {
         audioService = new AudioServiceImpl(
             audioTransformationService,
             externalObjectDirectoryRepository,
-            objectDirectoryStatusRepository,
+            objectRecordStatusRepository,
             externalLocationTypeRepository,
             mediaRepository,
             audioOperationService,
@@ -197,7 +197,7 @@ class AudioServiceImplTest {
 
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
         var binaryData = inboundBlobStorageArgumentCaptor.getValue();
-        assertEquals(BinaryData.fromStream(audioFile.getInputStream()).toString(),binaryData.toString());
+        assertEquals(BinaryData.fromStream(audioFile.getInputStream()).toString(), binaryData.toString());
 
 
         verify(mediaRepository).save(mediaEntityArgumentCaptor.capture());

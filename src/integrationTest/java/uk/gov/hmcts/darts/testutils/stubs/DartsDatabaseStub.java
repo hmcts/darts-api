@@ -24,7 +24,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -43,7 +43,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
@@ -100,7 +100,7 @@ public class DartsDatabaseStub {
     private final MediaRepository mediaRepository;
     private final MediaRequestRepository mediaRequestRepository;
     private final NotificationRepository notificationRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final TranscriptionRepository transcriptionRepository;
@@ -317,8 +317,8 @@ public class DartsDatabaseStub {
     }
 
     public ObjectRecordStatusEntity getObjectDirectoryStatusEntity(
-        ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
-        return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
+        ObjectRecordStatusEnum objectDirectoryStatusEnum) {
+        return objectRecordStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
     }
 
     @Transactional

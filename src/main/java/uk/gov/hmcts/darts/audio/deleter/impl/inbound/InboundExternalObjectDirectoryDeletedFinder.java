@@ -5,13 +5,13 @@ import uk.gov.hmcts.darts.audio.deleter.impl.ExternalObjectDirectoryDeletedFinde
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
 @Service
 public class InboundExternalObjectDirectoryDeletedFinder extends ExternalObjectDirectoryDeletedFinder {
     public InboundExternalObjectDirectoryDeletedFinder(ExternalLocationTypeRepository externalLocationTypeRepository,
                                                        ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                                       ObjectDirectoryStatusRepository objectDirectoryStatusRepository) {
-        super(externalLocationTypeRepository, externalObjectDirectoryRepository, objectDirectoryStatusRepository, ExternalLocationTypeEnum.INBOUND);
+                                                       ObjectRecordStatusRepository objectRecordStatusRepository) {
+        super(externalLocationTypeRepository, externalObjectDirectoryRepository, objectRecordStatusRepository, ExternalLocationTypeEnum.INBOUND);
     }
 }

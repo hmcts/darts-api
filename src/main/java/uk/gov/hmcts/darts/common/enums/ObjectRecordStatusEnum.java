@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ObjectDirectoryStatusEnum {
+public enum ObjectRecordStatusEnum {
 
     NEW(1),
     STORED(2),

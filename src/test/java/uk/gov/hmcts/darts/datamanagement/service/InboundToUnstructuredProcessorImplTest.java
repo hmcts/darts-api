@@ -21,7 +21,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.impl.InboundToUnstructuredProcessorImpl;
@@ -39,11 +39,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_CHECKSUM_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_FILE_NOT_FOUND;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -58,7 +58,7 @@ class InboundToUnstructuredProcessorImplTest {
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
-    private ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @Mock
@@ -111,7 +111,7 @@ class InboundToUnstructuredProcessorImplTest {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         inboundToUnstructuredProcessor = new InboundToUnstructuredProcessorImpl(externalObjectDirectoryRepository,
-                                                                                objectDirectoryStatusRepository, externalLocationTypeRepository,
+                                                                                objectRecordStatusRepository, externalLocationTypeRepository,
                                                                                 dataManagementService, dataManagementConfiguration, userAccountRepository,
                                                                                 transcriptionConfigurationProperties, audioConfigurationProperties
         );
@@ -133,8 +133,8 @@ class InboundToUnstructuredProcessorImplTest {
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
         setExpectationsForFailedStates();
 
@@ -156,12 +156,12 @@ class InboundToUnstructuredProcessorImplTest {
     }
 
     private void setExpectationsForFailedStates() {
-        when(objectDirectoryStatusRepository.getReferenceById(3)).thenReturn(objectRecordStatusEntityFailure);
-        when(objectDirectoryStatusRepository.getReferenceById(4)).thenReturn(objectRecordStatusEntityFailureFileNotFound);
-        when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectRecordStatusEntityFailureFileSize);
-        when(objectDirectoryStatusRepository.getReferenceById(6)).thenReturn(objectRecordStatusEntityFailureFileType);
-        when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
-        when(objectDirectoryStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailureArm);
+        when(objectRecordStatusRepository.getReferenceById(3)).thenReturn(objectRecordStatusEntityFailure);
+        when(objectRecordStatusRepository.getReferenceById(4)).thenReturn(objectRecordStatusEntityFailureFileNotFound);
+        when(objectRecordStatusRepository.getReferenceById(5)).thenReturn(objectRecordStatusEntityFailureFileSize);
+        when(objectRecordStatusRepository.getReferenceById(6)).thenReturn(objectRecordStatusEntityFailureFileType);
+        when(objectRecordStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
+        when(objectRecordStatusRepository.getReferenceById(8)).thenReturn(objectRecordStatusEntityFailureArm);
     }
 
     @Test
@@ -170,9 +170,9 @@ class InboundToUnstructuredProcessorImplTest {
         when(externalObjectDirectoryEntityInbound.getMedia()).thenReturn(mediaEntity);
         when(objectRecordStatusEntityFailureFileNotFound.getId()).thenReturn(4);
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
-        when(objectDirectoryStatusRepository.getReferenceById(4)).thenReturn(objectRecordStatusEntityFailureFileNotFound);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(4)).thenReturn(objectRecordStatusEntityFailureFileNotFound);
         when(dataManagementService.getBlobData(any(), any())).thenThrow(new BlobStorageException("Blobbed it", null, null));
         setExpectationsForFailedStates();
 
@@ -212,7 +212,7 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getFileSize()).thenReturn((long) binaryData.toString().length());
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         //when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectDirectoryStatusEntityAwaiting);
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(List.of(MP_2));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
@@ -249,8 +249,8 @@ class InboundToUnstructuredProcessorImplTest {
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(transcriptionConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList(DOC, DOCX));
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
@@ -281,8 +281,8 @@ class InboundToUnstructuredProcessorImplTest {
         when(annotationDocumentEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(transcriptionConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList(DOC, DOCX));
         when(transcriptionConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
@@ -314,9 +314,9 @@ class InboundToUnstructuredProcessorImplTest {
 
         when(objectRecordStatusEntityFailureFileType.getId()).thenReturn(6);
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(6)).thenReturn(objectRecordStatusEntityFailureFileType);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(6)).thenReturn(objectRecordStatusEntityFailureFileType);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
 
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
@@ -349,9 +349,9 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getChecksum()).thenReturn("invalid-checksum");
         when(objectRecordStatusEntityFailureChecksum.getId()).thenReturn(7);
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(7)).thenReturn(objectRecordStatusEntityFailureChecksum);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("mp2"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(MAX_FILE_SIZE_VALID);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
@@ -383,9 +383,9 @@ class InboundToUnstructuredProcessorImplTest {
         when(mediaEntity.getChecksum()).thenReturn(calculatedChecksum);
         when(objectRecordStatusEntityFailureFileSize.getId()).thenReturn(5);
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(5)).thenReturn(objectRecordStatusEntityFailureFileSize);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(5)).thenReturn(objectRecordStatusEntityFailureFileSize);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(Arrays.asList("doc", "docx"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(1);
         when(dataManagementService.getBlobData(any(), any())).thenReturn(binaryData);
@@ -423,8 +423,8 @@ class InboundToUnstructuredProcessorImplTest {
         when(objectRecordStatusEntityAwaiting.getId()).thenReturn(9);
         when(objectRecordStatusEntityStored.getId()).thenReturn(2);
 
-        when(objectDirectoryStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
-        when(objectDirectoryStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(9)).thenReturn(objectRecordStatusEntityAwaiting);
 
         when(audioConfigurationProperties.getAllowedExtensions()).thenReturn(List.of("mp2"));
         when(audioConfigurationProperties.getMaxFileSize()).thenReturn(100);

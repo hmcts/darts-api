@@ -10,19 +10,19 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 
 @Service
 @Slf4j
@@ -34,15 +34,15 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
 
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final UserAccountRepository userAccountRepository;
     private final SystemUserHelper systemUserHelper;
 
     @Transactional
     public void markForDeletion() {
-        ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
-            ObjectDirectoryStatusEnum.STORED.getId());
+        ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(
+            ObjectRecordStatusEnum.STORED.getId());
         ExternalLocationTypeEntity unstructuredLocation = externalLocationTypeRepository.getReferenceById(
             ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(
@@ -67,7 +67,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
         }
         log.debug("Marking the following Unstructured ExternalObjectDirectory.Id's for deletion:- {}", audioFileIdsToBeMarked);
 
-        ObjectRecordStatusEntity deletionStatus = objectDirectoryStatusRepository.getReferenceById(
+        ObjectRecordStatusEntity deletionStatus = objectRecordStatusRepository.getReferenceById(
             MARKED_FOR_DELETION.getId());
 
         UserAccountEntity user = userAccountRepository.findSystemUser(systemUserHelper.findSystemUserGuid("housekeeping"));

@@ -41,8 +41,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 //Requires transactional as the object is being created manually rather than being autowired.
 // We are doing this, so we can mock out different dates to test the service.
@@ -91,7 +91,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
             dartsDatabase.getMediaRequestRepository(),
             dartsDatabase.getTransientObjectDirectoryRepository(),
             userAccountRepository,
-            dartsDatabase.getObjectDirectoryStatusRepository(), lastAccessedDeletionDayCalculator,
+            dartsDatabase.getObjectRecordStatusRepository(), lastAccessedDeletionDayCalculator,
             systemUserHelper
         );
     }

@@ -6,10 +6,10 @@ import uk.gov.hmcts.darts.audio.deleter.ObjectDirectoryDeletedFinder;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class ExternalObjectDirectoryDeletedFinder implements ObjectDirectoryDele
 
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeEnum locationType;
 
     @Override
@@ -32,7 +32,7 @@ public class ExternalObjectDirectoryDeletedFinder implements ObjectDirectoryDele
     }
 
     private ObjectRecordStatusEntity getMarkedForDeletionStatus() {
-        return objectDirectoryStatusRepository.getReferenceById(
-            ObjectDirectoryStatusEnum.MARKED_FOR_DELETION.getId());
+        return objectRecordStatusRepository.getReferenceById(
+            ObjectRecordStatusEnum.MARKED_FOR_DELETION.getId());
     }
 }

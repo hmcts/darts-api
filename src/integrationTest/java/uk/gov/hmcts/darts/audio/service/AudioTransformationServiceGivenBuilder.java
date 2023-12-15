@@ -20,7 +20,7 @@ import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaFor;
 import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
@@ -90,7 +90,7 @@ public class AudioTransformationServiceGivenBuilder {
     public ExternalObjectDirectoryEntity externalObjectDirForMedia(MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity1 = externalObjectDirectoryStub.createExternalObjectDirectory(
             mediaEntity,
-            dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId()),
+            dartsDatabase.getObjectRecordStatusRepository().getReferenceById(STORED.getId()),
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId()),
             UUID.randomUUID()
         );
