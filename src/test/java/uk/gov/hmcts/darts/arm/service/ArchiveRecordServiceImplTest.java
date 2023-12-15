@@ -127,7 +127,7 @@ class ArchiveRecordServiceImplTest {
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
-        when(armDataManagementConfiguration.getFileExtension()).thenReturn(".a360");
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
 
@@ -145,7 +145,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() {
+    void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() throws IOException {
         ArchiveRecordFileInfo archiveRecordFileInfo =
             archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
 
@@ -154,6 +154,8 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void givenTranscription_WhenGenerateArchiveRecord_ReturnNotImplemented() {
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
 
@@ -164,6 +166,8 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void givenAnnotation_WhenGenerateArchiveRecord_ReturnNotImplemented() {
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
 

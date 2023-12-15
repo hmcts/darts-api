@@ -9,7 +9,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
-import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
@@ -26,17 +25,15 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
-import java.io.File;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
+import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @SpringBootTest
@@ -82,13 +79,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Test
     void movePendingDataFromUnstructuredToArmStorage() {
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .archiveRecordFile(new File("Tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360"))
-            .fileGenerationSuccessful(true)
-            .build();
-
-        //when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -119,17 +109,11 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
     }
 
     @Test
     void movePreviousFailedAttemptFromUnstructuredToArmStorage() {
-        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
-            .archiveRecordFile(new File("Tests/arm/service/testGenerateMediaArchiveRecord/expectedResponse.a360"))
-            .fileGenerationSuccessful(true)
-            .build();
-        when(archiveRecordService.generateArchiveRecord(any(), any())).thenReturn(archiveRecordFileInfo);
-
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -151,12 +135,11 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
             UUID.randomUUID()
         );
-        unstructuredEod.setTransferAttempts(1);
         dartsDatabase.save(unstructuredEod);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectDirectoryStatusEntity(FAILURE_ARM_INGESTION_FAILED),
+            dartsDatabase.getObjectDirectoryStatusEntity(FAILURE_ARM_RAW_DATA_FAILED),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -173,7 +156,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(MARKED_FOR_DELETION.getId(), foundMedia.getStatus().getId());
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
     }
 
     @Test

@@ -28,15 +28,17 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
     @Query(
         """
-            SELECT eo FROM ExternalObjectDirectoryEntity eod1
-            WHERE eod1.status = :status
-            AND eod1.externalLocationType = :location1
-            AND eod1.id NOT IN
+            SELECT eo FROM ExternalObjectDirectoryEntity eo
+            WHERE eo.status = :status
+            AND eo.externalLocationType = :location1
+            AND eo.id NOT IN
               (
-              SELECT eod2.id FROM ExternalObjectDirectoryEntity eod2
-              WHERE ((eod1.media is not null AND eod1.media = eod2.media)
-              OR (eod1.transcriptionDocumentEntity is not null AND eod1.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
-              OR (eod1.annotationDocumentEntity is not null AND eod1.annotationDocumentEntity = eod2.annotationDocumentEntity))
+              SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
+              WHERE ((eod.media is not null AND eod.media = eod2.media)
+              OR (eod.transcriptionDocumentEntity is not null AND eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
+              OR (eod.annotationDocumentEntity is not null AND eod.annotationDocumentEntity = eod2.annotationDocumentEntity))
+              AND eod.status = :status
+              AND eod.externalLocationType = :location1
               AND eod2.externalLocationType = :location2
               )
             """
@@ -44,7 +46,6 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
     List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
                                                                 ExternalLocationTypeEntity location1,
                                                                 ExternalLocationTypeEntity location2);
-
 
 
     @Query(
