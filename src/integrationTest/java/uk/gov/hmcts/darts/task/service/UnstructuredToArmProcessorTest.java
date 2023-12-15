@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_RAW_DATA_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
@@ -182,7 +181,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
-        armEod.setStatus(dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId()));
+        armEod.setStatus(dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId()));
         armEod.setTransferAttempts(1);
         dartsDatabase.save(armEod);
 
@@ -195,7 +194,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_INGESTION_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(FAILURE_ARM_RAW_DATA_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(2, foundMedia.getTransferAttempts());
     }
 }

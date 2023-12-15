@@ -205,17 +205,16 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                                      String filename) {
         boolean copySuccessful = false;
         try {
+            if (armExternalObjectDirectory.getStatus().equals(FAILURE_ARM_RAW_DATA_FAILED)) {
+                BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
+                    unstructuredExternalObjectDirectory.getExternalLocation());
 
-            BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
-                unstructuredExternalObjectDirectory.getExternalLocation());
-
-            armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
-            armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
-            armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
-            externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
-
+                armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
+                armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
+                armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+            }
             copySuccessful = true;
-
         } catch (BlobStorageException e) {
             log.error("Failed to move BLOB data for file {} due to {}",
                       unstructuredExternalObjectDirectory.getExternalLocation(),

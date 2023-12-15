@@ -149,7 +149,6 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processPreviousFailedAttemptMovingFromUnstructuredStorageToArm() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
@@ -182,6 +181,7 @@ class UnstructuredToArmProcessorImplTest {
                                                                                                    armDataManagementConfiguration.getMaxRetryAttempts()))
             .thenReturn(pendingFailureList);
 
+        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
         when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
         when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
         when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
