@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.event.service.handler.base;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -20,17 +21,16 @@ import static java.lang.String.join;
 
 @SuppressWarnings({"PMD.TooManyMethods"})
 @Slf4j
+@AllArgsConstructor
 public abstract class EventHandlerBase implements EventHandler {
 
     private static final String MULTIPLE_CASE_NUMBERS = "Event: %s contains multiple caseNumbers: %s";
-    @Autowired
-    protected EventRepository eventRepository;
-    @Autowired
-    protected HearingRepository hearingRepository;
-    @Autowired
-    protected CaseRepository caseRepository;
-    @Autowired
+
     private RetrieveCoreObjectService retrieveCoreObjectService;
+    protected EventRepository eventRepository;
+    protected HearingRepository hearingRepository;
+    protected CaseRepository caseRepository;
+    protected ApplicationEventPublisher eventPublisher;
 
     @Override
     public boolean isHandlerFor(String handlerName) {

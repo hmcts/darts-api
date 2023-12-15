@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,9 +56,6 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     private AuthorisationStub authorisationStub;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private MockMvc mockMvc;
 
     @MockBean
@@ -71,7 +67,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
     private UserAccountEntity testUser;
 
     private Integer transcriptionId;
-    private Integer testUserId;
+    private Integer transcriptCreatorId;
 
     @BeforeEach
     void beforeEach() {
@@ -86,9 +82,9 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         doNothing().when(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
-        testUser = authorisationStub.getTestUser();
+        testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
-        testUserId = testUser.getId();
+        transcriptCreatorId = authorisationStub.getTestUser().getId();
 
         doNothing().when(mockAuditApi)
             .recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
@@ -123,8 +119,6 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         final TranscriptionEntity approvedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(APPROVED.getId(), approvedTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, approvedTranscriptionEntity.getCreatedBy().getId());
-        assertEquals(testUserId, approvedTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = approvedTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
@@ -134,7 +128,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionWorkflowEntity.getTranscriptionStatus().getId()
         );
         assertEquals(0, dartsDatabase.getTranscriptionCommentRepository().findAll().size());
-        assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
+        assertEquals(testUser.getId(), transcriptionWorkflowEntity.getWorkflowActor().getId());
 
         List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
         List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
@@ -170,8 +164,8 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
         final TranscriptionEntity approvedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(APPROVED.getId(), approvedTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, approvedTranscriptionEntity.getCreatedBy().getId());
-        assertEquals(testUserId, approvedTranscriptionEntity.getLastModifiedBy().getId());
+        assertEquals(transcriptCreatorId, approvedTranscriptionEntity.getCreatedBy().getId());
+        assertEquals(transcriptCreatorId, approvedTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = approvedTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
@@ -184,7 +178,7 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             APPROVED.toString(),
             dartsDatabase.getTranscriptionCommentRepository().findAll().get(0).getComment()
         );
-        assertEquals(testUserId, transcriptionWorkflowEntity.getWorkflowActor().getId());
+        assertEquals(testUser.getId(), transcriptionWorkflowEntity.getWorkflowActor().getId());
 
         verify(mockAuditApi).recordAudit(AUTHORISE_TRANSCRIPTION, testUser, transcriptionEntity.getCourtCase());
     }
@@ -239,6 +233,35 @@ class TranscriptionControllerUpdateTranscriptionApprovedIntTest extends Integrat
             transcriptionId, Set.of(APPROVER, TRANSCRIBER)
         );
         verifyNoInteractions(mockAuditApi);
+    }
+
+
+    @Test
+    void givenAUpdateTranscriptionRequest_WhenRequestorIsSameAsApprover_ThenErrorIsReturned() throws Exception {
+        //Test user is creating the transcription in base class
+        testUser = authorisationStub.getTestUser();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        transcriptCreatorId = authorisationStub.getTestUser().getId();
+
+        UpdateTranscription updateTranscription = new UpdateTranscription();
+        updateTranscription.setTranscriptionStatusId(APPROVED.getId());
+        updateTranscription.setWorkflowComment("APPROVED");
+
+        MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
+            String.format("/transcriptions/%d", transcriptionId)))
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(updateTranscription));
+        MvcResult mvcResult = mockMvc.perform(requestBuilder)
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+
+        String actualJson = mvcResult.getResponse().getContentAsString();
+        String expectedJson = """
+            {"type":"TRANSCRIPTION_114","title":"Transcription requestor cannot approve or reject their own transcription requests.","status":400}
+            """;
+        JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
+
     }
 
 }

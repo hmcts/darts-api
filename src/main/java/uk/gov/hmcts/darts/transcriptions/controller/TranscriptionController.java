@@ -52,10 +52,10 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.AUDIO_NOT_FOUND;
@@ -75,7 +75,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<RequestTranscriptionResponse> requestTranscription(
         TranscriptionRequestDetails transcriptionRequestDetails) {
@@ -110,7 +110,7 @@ public class TranscriptionController implements TranscriptionApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = TRANSCRIPTION_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Resource> downloadTranscript(Integer transcriptionId) {
         final DownloadTranscriptResponse downloadTranscriptResponse = transcriptionService.downloadTranscript(
@@ -259,7 +259,7 @@ public class TranscriptionController implements TranscriptionApi {
         // we authorise the transcription ids
         authorisation.authoriseWithIdsForTranscription(request,
                                                        e -> e.getTranscriptionId().toString(),
-                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+                                                       new SecurityRoleEnum[]{JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
                                                        executeOnAuth
         );
 

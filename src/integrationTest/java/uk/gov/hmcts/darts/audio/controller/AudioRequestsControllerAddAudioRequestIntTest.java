@@ -1,21 +1,18 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -41,8 +38,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Slf4j
 @Transactional
@@ -64,9 +59,6 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @MockBean
     private UserIdentity mockUserIdentity;
@@ -140,7 +132,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(START_TIME, mediaRequestEntity.getStartTime());
         assertEquals(END_TIME, mediaRequestEntity.getEndTime());
         assertEquals(AUDIO_REQUEST_TYPE_PLAYBACK, mediaRequestEntity.getRequestType());
-        assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
+        assertEquals(MediaRequestStatus.OPEN, mediaRequestEntity.getStatus());
         assertEquals(0, mediaRequestEntity.getAttempts());
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()
@@ -195,7 +187,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
         assertEquals(START_TIME, mediaRequestEntity.getStartTime());
         assertEquals(END_TIME, mediaRequestEntity.getEndTime());
         assertEquals(AUDIO_REQUEST_TYPE_DOWNLOAD, mediaRequestEntity.getRequestType());
-        assertEquals(AudioRequestStatus.OPEN, mediaRequestEntity.getStatus());
+        assertEquals(MediaRequestStatus.OPEN, mediaRequestEntity.getStatus());
         assertEquals(0, mediaRequestEntity.getAttempts());
 
         List<NotificationEntity> notifications = dartsDatabase.getNotificationRepository()

@@ -3,15 +3,13 @@ package uk.gov.hmcts.darts.common.service;
 import com.azure.storage.blob.BlobClientBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
 
@@ -21,12 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
-class TransientObjectDirectoryServiceTest {
-
-    @Autowired
-    private DartsDatabaseStub dartsDatabase;
+class TransientObjectDirectoryServiceTest extends IntegrationBase {
 
     @Autowired
     private MediaRequestService mediaRequestService;
@@ -40,7 +33,7 @@ class TransientObjectDirectoryServiceTest {
     void shouldSaveTransientDataLocation() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity1 = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var mediaRequestEntity1 = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
 
         MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(mediaRequestEntity1.getId());
         String blodId = "f744a74f-83c0-47e4-8bb2-2fd4d2b68647";
@@ -56,7 +49,7 @@ class TransientObjectDirectoryServiceTest {
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobClientBuilder.buildClient()
-                                                                                                                                          );
+        );
 
         assertNotNull(transientObjectDirectoryEntity);
         assertTrue(transientObjectDirectoryEntity.getId() > 0);

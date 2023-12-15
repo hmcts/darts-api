@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,22 +48,23 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
  */
 @SuppressWarnings({"checkstyle.LineLengthCheck"})
 @RestController
+@RequiredArgsConstructor
 public class DailyListController implements DailyListsApi {
 
-    @Autowired
-    CourthouseRepository courthouseRepository;
-    @Autowired
-    private DailyListService dailyListService;
-    @Autowired
-    private DailyListProcessor processor;
+    private final CourthouseRepository courthouseRepository;
+    private final DailyListService dailyListService;
+    private final DailyListProcessor processor;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPatch(
-        @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
-        @NotNull @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = true) DailyListJsonObject jsonDocument
+        @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY)
+        @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
+        @NotNull @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **" +
+            "Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER)
+        @RequestHeader(value = "json_document", required = true) DailyListJsonObject jsonDocument
     ) {
         DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
         dailyListPatchRequest.setDailyListId(dalId);
@@ -76,7 +77,8 @@ public class DailyListController implements DailyListsApi {
     @Override
     @Operation(
         operationId = "dailylistsPost",
-        summary = "XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.",
+        summary = "XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day " +
+            "within the courthouse for all of its courtrooms.",
         description = "description",
         tags = {"DailyLists"},
         responses = {
@@ -99,13 +101,24 @@ public class DailyListController implements DailyListsApi {
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPost(
-        @NotNull @Parameter(name = "source_system", description = "The source system that has sent the message", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "source_system", required = true) String sourceSystem,
-        @Parameter(name = "courthouse", description = "The courthouse that the dailyList represents. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = false) String courthouse,
-        @Parameter(name = "hearing_date", description = "The date that the dailyList represents. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "hearing_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hearingDate,
-        @Parameter(name = "unique_id", description = "The uniqueId. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "unique_id", required = false) String uniqueId,
-        @Parameter(name = "published_ts", description = "The date that the dailyList was published. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "published_ts", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime publishedTs,
-        @Parameter(name = "xml_document", description = "XML representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just stored in the database as a string", in = ParameterIn.HEADER) @RequestHeader(value = "xml_document", required = false) String xmlDocument,
-        @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = false) DailyListJsonObject jsonDocument
+        @NotNull @Parameter(name = "source_system", description = "The source system that has sent the message", required = true, in = ParameterIn.QUERY)
+        @Valid @RequestParam(value = "source_system", required = true) String sourceSystem,
+        @Parameter(name = "courthouse", description = "The courthouse that the dailyList represents. <p> **Conditional mandatory**, required if " +
+            "json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "courthouse", required = false) String courthouse,
+        @Parameter(name = "hearing_date", description = "The date that the dailyList represents. <p> **Conditional mandatory**, required if json_document " +
+            "not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "hearing_date", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hearingDate,
+        @Parameter(name = "unique_id", description = "The uniqueId. <p> **Conditional mandatory**, required if json_document not provided",
+            in = ParameterIn.QUERY) @Valid @RequestParam(value = "unique_id", required = false) String uniqueId,
+        @Parameter(name = "published_ts", description = "The date that the dailyList was published. <p> **Conditional mandatory**, required if json_document " +
+            "not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "published_ts", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime publishedTs,
+        @Parameter(name = "xml_document", description = "XML representation of the 'document' received in the addDocument request.<p> **Conditional " +
+            "mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just stored in the database as a string",
+            in = ParameterIn.HEADER) @RequestHeader(value = "xml_document", required = false) String xmlDocument,
+        @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional " +
+            "mandatory** either this or xml_document needs to be provided, or both.", in = ParameterIn.HEADER) @RequestHeader(value = "json_document",
+            required = false) DailyListJsonObject jsonDocument
     ) {
         DailyListPostRequest postRequest = new DailyListPostRequest();
         postRequest.setSourceSystem(sourceSystem);

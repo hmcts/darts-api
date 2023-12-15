@@ -4,9 +4,7 @@ package uk.gov.hmcts.darts.transcriptions.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -30,8 +28,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class TranscriptionServiceIntTest extends IntegrationBase {
 

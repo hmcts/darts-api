@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,9 +15,11 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -47,8 +50,14 @@ class PostUserIntTest extends IntegrationBase {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    private AdminUserStub adminUserStub;
+
     @MockBean
     private AuthorisationApi authorisationApi;
+
+    @MockBean
+    private UserIdentity userIdentity;
 
     private TransactionTemplate transactionTemplate;
     private UserAccountEntity integrationTestUser;
@@ -63,8 +72,15 @@ class PostUserIntTest extends IntegrationBase {
             .thenReturn(integrationTestUser);
     }
 
+    @AfterEach
+    void deleteUser() {
+        dartsDatabase.addToUserAccountTrash(EMAIL_ADDRESS);
+    }
+
     @Test
     void createUserShouldSucceedWhenProvidedWithValidValuesForMinimumRequiredFields() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
                          {
@@ -109,6 +125,8 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldSucceedWhenProvidedWithValidValuesForAllFields() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
                          {
@@ -163,6 +181,8 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldFailWhenRequiredFieldsAreMissing() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest()
             .header("Content-Type", "application/json")
             .content("""
@@ -180,6 +200,8 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldSucceedWhenProvidedWithAUserEmailAddressThatMatchesAnExistingDisabledAccount() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName("James Smith");
         userAccountEntity.setEmailAddress("james.smith@hmcts.net");
@@ -201,6 +223,8 @@ class PostUserIntTest extends IntegrationBase {
 
     @Test
     void createUserShouldFailWhenProvidedWithASecurityGroupThatDoesntExist() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
                          {

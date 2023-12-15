@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @Transactional
@@ -132,12 +132,12 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
         return userAccountEntity;
     }
 
-    public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName) {
+    public HearingEntity aHearingWith(String caseNumber, String courthouseName, String courtroomName, LocalDate hearingDate) {
         hearingEntity = dartsDatabaseStub.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             caseNumber,
             courthouseName,
             courtroomName,
-            LocalDate.now()
+            hearingDate
         );
 
         return hearingEntity;

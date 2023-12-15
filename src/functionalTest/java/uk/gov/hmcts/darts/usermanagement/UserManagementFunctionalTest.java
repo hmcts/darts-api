@@ -31,7 +31,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "id": "",
                     "full_name": "James Smith",
                     "email_address": "james.smith@hmcts.net",
-                    "description": "Functional test user",
+                    "description": "A temporary user created by functional test",
                     "active": true,
                     "security_groups": [ ]
                 }
@@ -50,7 +50,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
         int userId = new JSONObject(createUserResponse.asString())
             .getInt("id");
 
-        Response modifyUserResponse = buildRequestWithExternalAuth()
+        Response modifyUserResponse = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/users/" + userId))
             .contentType(ContentType.JSON)
             .body("""
@@ -67,7 +67,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "id": "",
                     "full_name": "Jimmy Smith",
                     "email_address": "james.smith@hmcts.net",
-                    "description": "Functional test user",
+                    "description": "A temporary user created by functional test",
                     "active": true,
                     "security_groups": [ ]
                 }
@@ -81,14 +81,14 @@ class UserManagementFunctionalTest extends FunctionalTest {
     }
 
     private Response createUser() {
-        Response response = buildRequestWithExternalAuth()
+        Response response = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/users"))
             .contentType(ContentType.JSON)
             .body("""
                       {
                            "full_name": "James Smith",
                            "email_address": "james.smith@hmcts.net",
-                           "description": "Functional test user"
+                           "description": "A temporary user created by functional test"
                       }
                       """)
             .post()

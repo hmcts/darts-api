@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
@@ -97,6 +99,7 @@ public class TestSupportController {
         removeCourtHouses(session);
 
         removeUsers(session);
+        removeSecurityGroups(session);
 
         session.getTransaction().commit();
         session.close();
@@ -162,7 +165,7 @@ public class TestSupportController {
     }
 
     @PostMapping(value = "/audit/{audit_activity}/courthouse/{courthouse_name}")
-    @Transactional
+    @Transactional(rollbackOn = DataIntegrityViolationException.class)
     public ResponseEntity<String> createAudit(@PathVariable(name = "audit_activity") String auditActivity,
                                               @PathVariable(name = "courthouse_name") String courthouseName) {
 
@@ -184,19 +187,19 @@ public class TestSupportController {
         AuditEntity audit = new AuditEntity();
         audit.setCourtCase(savedCase);
         audit.setUser(userAccountRepository.getReferenceById(0));
-        Optional<AuditActivityEntity> foundAuditActivity = auditActivityRepository.findById(AuditActivity.valueOf(
-            auditActivity).getId());
+        try {
+            AuditActivityEntity foundAuditActivity = auditActivityRepository.getReferenceById(
+                AuditActivity.valueOf(auditActivity).getId()
+            );
+            audit.setAuditActivity(foundAuditActivity);
 
-        if (foundAuditActivity.isPresent()) {
-            audit.setAuditActivity(foundAuditActivity.get());
-        } else {
-            return new ResponseEntity<>(BAD_REQUEST);
+            audit.setApplicationServer(applicationServer);
+
+            auditRepository.saveAndFlush(audit);
+            return new ResponseEntity<>(CREATED);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(BAD_REQUEST);
         }
-
-        audit.setApplicationServer(applicationServer);
-        auditRepository.saveAndFlush(audit);
-
-        return new ResponseEntity<>(CREATED);
     }
 
     private CourthouseEntity newCourthouse(String courthouseName) {
@@ -324,10 +327,18 @@ public class TestSupportController {
 
     private void removeUsers(Session session) {
         session.createNativeQuery("""
-                delete from darts.user_account where description = 'Functional test user'
+                delete from darts.user_account where description = 'A temporary user created by functional test'
                 """, Integer.class)
             .executeUpdate();
     }
+
+    private void removeSecurityGroups(Session session) {
+        session.createNativeQuery("""
+                delete from darts.security_group where description = 'A temporary group created by functional test'
+                """, Integer.class)
+            .executeUpdate();
+    }
+
 
     @GetMapping(value = "/bank-holidays/{year}")
     public ResponseEntity<List<Event>> getBankHolidaysForYear(@PathVariable(name = "year") String year) {

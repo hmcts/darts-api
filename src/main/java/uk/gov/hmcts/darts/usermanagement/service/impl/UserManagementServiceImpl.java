@@ -1,16 +1,16 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
-import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.component.validation.Validator;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
@@ -38,9 +38,14 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final SecurityGroupRepository securityGroupRepository;
     private final AuthorisationApi authorisationApi;
     private final UserSearchQuery userSearchQuery;
+    private final Validator<User> duplicateEmailValidator;
+    private final Validator<Integer> userAccountExistsValidator;
 
     @Override
+    @Transactional
     public UserWithId createUser(User user) {
+        duplicateEmailValidator.validate(user);
+
         var userEntity = userAccountMapper.mapToUserEntity(user);
         if (isNull(userEntity.isActive())) {
             userEntity.setActive(true);
@@ -66,15 +71,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
+    @Transactional
     public UserWithIdAndLastLogin modifyUser(Integer userId, UserPatch userPatch) {
-        var userEntity = userAccountRepository.findById(userId)
-            .orElseThrow(() -> new DartsApiException(
-                UserManagementError.USER_NOT_FOUND,
-                String.format("User id %d not found", userId)
-            ));
-        updateEntity(userPatch, userEntity);
+        userAccountExistsValidator.validate(userId);
 
-        UserAccountEntity updatedUserEntity = userAccountRepository.save(userEntity);
+        UserAccountEntity updatedUserEntity = userAccountRepository.findById(userId)
+            .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
 
         UserWithIdAndLastLogin user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
         List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
@@ -87,7 +89,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     public List<UserWithIdAndLastLogin> search(UserSearch userSearch) {
         List<UserWithIdAndLastLogin> userWithIdAndLastLoginList = new ArrayList<>();
 
-        userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress())
+        userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
             .forEach(userAccountEntity -> {
                 UserWithIdAndLastLogin userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
                 userWithIdAndLastLogin.setSecurityGroups(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
@@ -95,6 +97,11 @@ public class UserManagementServiceImpl implements UserManagementService {
             });
 
         return userWithIdAndLastLoginList;
+    }
+
+    private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
+        updateEntity(userPatch, userEntity);
+        return userAccountRepository.save(userEntity);
     }
 
     private void updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
@@ -138,5 +145,4 @@ public class UserManagementServiceImpl implements UserManagementService {
             .map(SecurityGroupEntity::getId)
             .toList();
     }
-
 }

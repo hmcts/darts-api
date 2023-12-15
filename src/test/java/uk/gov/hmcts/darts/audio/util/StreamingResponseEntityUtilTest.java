@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class StreamingResponseEntityUtilTest {
 
@@ -19,7 +18,7 @@ class StreamingResponseEntityUtilTest {
         String httpRangeList = "";
 
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
-            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList, "testFileName");
+            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
             assertEquals(HttpStatus.OK, response.getStatusCode().value());
             String contentLength = response.getHeaders().get("Content-Length").get(0);
@@ -32,7 +31,7 @@ class StreamingResponseEntityUtilTest {
         String httpRangeList = "bytes=10000";
 
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
-            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList, "testFileName");
+            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
             assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
             String contentLength = response.getHeaders().get("Content-Length").get(0);
@@ -46,7 +45,7 @@ class StreamingResponseEntityUtilTest {
         String httpRangeList = "bytes=1000-2500";
 
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
-            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList, "testFileName");
+            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
             assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
 
@@ -59,16 +58,33 @@ class StreamingResponseEntityUtilTest {
     }
 
     @Test
+    void openEndedRangeList() throws IOException {
+        String httpRangeList = "bytes=0-";
+
+        try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
+            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
+
+            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
+
+            String contentLength = response.getHeaders().get("Content-Length").get(0);
+
+            assertEquals("3248752", contentLength);
+            assertEquals("bytes 0-3248751/3248752", response.getHeaders().get("Content-Range").get(0));
+        }
+
+    }
+
+    @Test
     void startAndEndRangeListSameAsFile() throws IOException {
         String httpRangeList = "bytes=0-3248751";
 
         try (InputStream inputStream = Files.newInputStream(Paths.get("src/test/resources/Tests/audio/testAudio.mp2"))) {
-            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList, "testFileName");
+            ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(inputStream, httpRangeList);
 
-            assertEquals(HttpStatus.OK, response.getStatusCode().value());
+            assertEquals(HttpStatus.PARTIAL_CONTENT, response.getStatusCode().value());
 
             assertEquals("3248752", response.getHeaders().get("Content-Length").get(0));
-            assertNull(response.getHeaders().get("Content-Range"));
+            assertEquals("bytes 0-3248751/3248752", response.getHeaders().get("Content-Range").get(0));
         }
 
     }

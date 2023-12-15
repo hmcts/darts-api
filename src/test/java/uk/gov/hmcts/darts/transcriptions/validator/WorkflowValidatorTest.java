@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.validator;
 
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +29,6 @@ class WorkflowValidatorTest {
     private final WorkflowValidator workflowValidator = new WorkflowValidator();
 
     @ParameterizedTest
-    @Order(1)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusRequestedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -40,7 +38,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(2)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateAutomaticChangeToWorkflowStatusRequestedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -50,7 +47,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(3)
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
         "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusAwaitingAuthorisationSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
@@ -59,7 +55,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(4)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusAwaitingAuthorisationReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
         assertFalse(
@@ -68,7 +63,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(5)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateAutomaticChangeToWorkflowStatusAwaitingAuthorisationReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -78,7 +72,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(6)
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
         "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToApprovedWorkflowStatusSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
@@ -87,14 +80,12 @@ class WorkflowValidatorTest {
     }
 
     @Test
-    @Order(7)
     void validateAutomaticChangeToApprovedWorkflowStatusSuccess() {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(false, OTHER, REQUESTED, APPROVED));
     }
 
     @ParameterizedTest
-    @Order(8)
     @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToApprovedWorkflowStatusReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -104,7 +95,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(9)
     @EnumSource(names = {"AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateAutomaticChangeToApprovedWorkflowStatusReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -114,7 +104,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(10)
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
         "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusRejectedSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
@@ -123,7 +112,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(11)
     @EnumSource(names = {"REQUESTED", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusRejectedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -133,7 +121,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(12)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateAutomaticChangeToWorkflowStatusRejectedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -143,7 +130,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(13)
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
         "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusWithTranscriberSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
@@ -152,14 +138,13 @@ class WorkflowValidatorTest {
     }
 
     @Test
-    @Order(14)
+
     void validateAutomaticChangeToWorkflowStatusWithTranscriberSuccess() {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(false, OTHER, APPROVED, WITH_TRANSCRIBER));
     }
 
     @ParameterizedTest
-    @Order(15)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusWithTranscriberReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -169,7 +154,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(16)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "REJECTED", "WITH_TRANSCRIBER", "COMPLETE", "CLOSED"})
     void validateAutomaticChangeToWorkflowStatusWithTranscriberReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -179,7 +163,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(17)
     @EnumSource(names = {"SENTENCING_REMARKS", "INCLUDING_VERDICT", "ANTECEDENTS", "ARGUMENT_AND_SUBMISSION_OF_RULING", "COURT_LOG",
         "MITIGATION", "PROCEEDINGS_AFTER_VERDICT", "PROSECUTION_OPENING_OF_FACTS", "SPECIFIED_TIMES"})
     void validateManualChangeToWorkflowStatusCompleteSuccess(TranscriptionTypeEnum transcriptionTypeEnum) {
@@ -188,14 +171,13 @@ class WorkflowValidatorTest {
     }
 
     @Test
-    @Order(18)
+
     void validateAutomaticChangeToWorkflowStatusCompleteSuccess() {
 
         assertTrue(workflowValidator.validateChangeToWorkflowStatus(false, OTHER, WITH_TRANSCRIBER, COMPLETE));
     }
 
     @ParameterizedTest
-    @Order(19)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED"})
     void validateManualChangeToWorkflowStatusCompleteReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -205,7 +187,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(20)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "REJECTED", "COMPLETE", "CLOSED"})
     void validateAutomaticChangeToWorkflowStatusCompleteReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -215,7 +196,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(21)
     @EnumSource(names = {"REQUESTED", "AWAITING_AUTHORISATION", "APPROVED", "WITH_TRANSCRIBER"})
     void validateManualChangeToWorkflowStatusClosedSuccess(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -223,7 +203,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(21)
     @EnumSource(names = {"REQUESTED", "APPROVED", "WITH_TRANSCRIBER"})
     void validateAutomaticChangeToWorkflowStatusClosedSuccess(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -231,7 +210,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(22)
     @EnumSource(names = {"REJECTED", "CLOSED"})
     void validateManualChangeToWorkflowStatusClosedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 
@@ -241,7 +219,6 @@ class WorkflowValidatorTest {
     }
 
     @ParameterizedTest
-    @Order(23)
     @EnumSource(names = {"REJECTED", "CLOSED"})
     void validateAutomaticChangeToWorkflowStatusClosedReturnsFalse(TranscriptionStatusEnum currentTranscriptionStatus) {
 

@@ -39,13 +39,13 @@ spring:
           internal-azure-ad:
             client-id: ${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}
             client-secret: ${AAD_CLIENT_SECRET:}
-            scope: api://${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}/dartsinternaluser
+            scope: openid
             redirect-uri: ${darts.portal.url}/auth/internal/callback
             logout-redirect-uri: ${darts.portal.url}/auth/internal/logout-callback
             authorization-grant-type: authorization_code
             response-type: code
             response-mode: form_post
-            prompt: login
+            prompt:
             issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0
             claims: preferred_username
             provider: internal-azure-ad-provider
@@ -150,10 +150,16 @@ darts:
         error_processing_audio: 707fc9fd-4a64-4503-bf6a-4c6bd7dda1dd
         request_to_transcriber: 12a70a9c-9bcf-4880-8291-1a5c6a4c4b08
         requested_audio_is_available: 5038c158-f7c9-4781-837e-3aaae8e906ed
-        transcription_available: a928742c-5eb7-46f0-9f61-d89d5394785c
+        transcription_available: b3378991-ad90-4430-8005-45dcb35741b8
         transcription_request_approved: 29c26992-df77-4ba6-8ba7-03324eb5ae37
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
   storage:
+    arm:
+      connection-string: ${ARM_STORAGE_CONNECTION_STRING:}
+      container-name: darts-arm
+      folders:
+        submission: dropzone/DARTS/submission/
+      max-retry-attempts: 3
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

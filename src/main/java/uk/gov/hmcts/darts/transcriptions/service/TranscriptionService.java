@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.transcriptions.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
@@ -23,6 +24,11 @@ public interface TranscriptionService {
                                                           boolean isManual);
 
     UpdateTranscriptionResponse updateTranscription(Integer transcriptionId, UpdateTranscription updateTranscription);
+
+    @Transactional
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
+    UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
+                                                    UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection);
 
     void closeTranscriptions();
 

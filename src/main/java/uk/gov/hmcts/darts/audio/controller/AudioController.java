@@ -26,10 +26,10 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.HEARING_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,7 +43,7 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = HEARING_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioTransformationService.getMediaMetadata(hearingId);
@@ -56,11 +56,11 @@ public class AudioController implements AudioApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = MEDIA_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS},
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
-        return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList, mediaId.toString());
+        return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList);
     }
 
     @Override

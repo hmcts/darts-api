@@ -1,11 +1,8 @@
 package uk.gov.hmcts.darts.cases.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
-import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -42,7 +38,6 @@ import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWith;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createHearingWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithName;
 
-@ExtendWith(MockitoExtension.class)
 @Slf4j
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseServiceAdvancedSearchTest extends IntegrationBase {
@@ -52,21 +47,12 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
     CourthouseEntity swanseaCourthouse;
-    ObjectMapper objectMapper;
 
     @BeforeEach
     void setupData() {
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
-
         swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
         swanseaCourthouse.setDisplayName("SWANSEA");
-
-        CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
-        CourtroomEntity courtroom2 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom2");
-        CourtroomEntity courtroom3 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom3");
-
 
         CourtCaseEntity case1 = createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case1");
@@ -94,6 +80,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         case8.setCaseNumber("case8");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
+        CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
         HearingEntity hearing1a = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 20), judge);
 
         HearingEntity hearing1b = createHearingWithDefaults(case1, courtroom1, LocalDate.of(2023, 5, 21), judge);
@@ -114,6 +101,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         HearingEntity hearing3c = createHearingWithDefaults(case3, courtroom1, LocalDate.of(2023, 7, 22), judge);
 
+        CourtroomEntity courtroom2 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom2");
         HearingEntity hearing4a = createHearingWithDefaults(case4, courtroom2, LocalDate.of(2023, 8, 20), judge);
 
         HearingEntity hearing4b = createHearingWithDefaults(case4, courtroom1, LocalDate.of(2023, 8, 21), judge);
@@ -124,6 +112,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         HearingEntity hearing5b = createHearingWithDefaults(case5, courtroom1, LocalDate.of(2023, 9, 21), judge);
 
+        CourtroomEntity courtroom3 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom3");
         HearingEntity hearing5c = createHearingWithDefaults(case5, courtroom3, LocalDate.of(2023, 9, 22), judge);
 
         HearingEntity hearing6a = createHearingWithDefaults(case6, courtroom2, LocalDate.of(2023, 9, 20), judge);

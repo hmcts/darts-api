@@ -2,9 +2,7 @@ package uk.gov.hmcts.darts.task.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.audio.service.InboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -25,8 +23,6 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_F
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 
 @SuppressWarnings("PMD.ExcessiveImports")
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 class InboundAudioDeleterProcessorTest extends IntegrationBase {
 
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);

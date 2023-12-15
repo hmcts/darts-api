@@ -460,7 +460,7 @@ INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUE
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (2, 'REQUESTER', 'Requester', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (3, 'JUDGE', 'Judge', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (4, 'TRANSCRIBER', 'Transcriber', true);
-INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (5, 'LANGUAGE_SHOP_USER', 'Language Shop', true);
+INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (5, 'TRANSLATION_QA', 'Translation QA', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (6, 'RCJ_APPEALS', 'RCJ Appeals', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (7, 'XHIBIT', 'XHIBIT', true);
 INSERT INTO security_role (rol_id, role_name, display_name, display_state) VALUES (8, 'CPP', 'CPP', true);

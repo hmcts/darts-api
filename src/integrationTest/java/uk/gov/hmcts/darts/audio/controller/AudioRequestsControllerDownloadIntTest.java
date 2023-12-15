@@ -4,10 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,8 +44,6 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
@@ -87,7 +83,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         var blobId = UUID.randomUUID();
 
         var requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        var mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        var mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
         var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
 
         dartsDatabase.getTransientObjectDirectoryRepository()
@@ -110,7 +106,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(TRANSCRIBER)
+        );
 
         AuditSearchQuery searchQuery = new AuditSearchQuery();
         searchQuery.setCaseId(mediaRequestEntity.getHearing().getCourtCase().getId());
@@ -146,7 +143,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(TRANSCRIBER)
+        );
     }
 
     @Test
@@ -167,7 +165,8 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
 
         verify(authorisation, times(1)).authoriseByMediaRequestId(
             authorisationStub.getMediaRequestEntity().getId(),
-            Set.of(TRANSCRIBER));
+            Set.of(TRANSCRIBER)
+        );
     }
 
     @Test

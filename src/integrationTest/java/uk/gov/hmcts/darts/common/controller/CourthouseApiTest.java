@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.common.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,6 @@ class CourthouseApiTest extends IntegrationBase {
     public static final String REQUEST_BODY_400_MISSING_COURTHOUSE_DISPLAY_NAME_JSON =
         "tests/CourthousesTest/courthousesPostEndpoint/requestBody400_MissingCourthouseDisplayName.json";
     private static final String REQUEST_BODY_TEST_JSON = "tests/CourthousesTest/courthousesPostEndpoint/requestBodyTest.json";
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private MockMvc mockMvc;

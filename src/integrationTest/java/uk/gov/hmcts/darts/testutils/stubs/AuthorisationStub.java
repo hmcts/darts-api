@@ -23,7 +23,7 @@ import java.util.Set;
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 
@@ -49,6 +49,7 @@ public class AuthorisationStub {
     private MediaRequestEntity mediaRequestEntitySystemUser;
     private MediaEntity mediaEntity;
     private TranscriptionEntity transcriptionEntity;
+    private UserAccountEntity separateIntegrationUser;
 
     @Transactional
     public void givenTestSchema() {
@@ -68,7 +69,10 @@ public class AuthorisationStub {
         bristolStaff.setCourthouseEntities(Set.of(courthouseEntity));
         bristolAppr = securityGroupRepository.findById(-1).orElseThrow();
         bristolAppr.setCourthouseEntities(Set.of(courthouseEntity));
+
         testUser.getSecurityGroupEntities().addAll(List.of(bristolStaff, bristolAppr));
+
+
         dartsDatabaseStub.getUserAccountRepository().save(testUser);
 
         createCourtCase();
@@ -111,13 +115,17 @@ public class AuthorisationStub {
         hearingEntity.addMedia(mediaEntity);
         dartsDatabaseStub.save(hearingEntity);
 
+        separateIntegrationUser = dartsDatabaseStub.getUserAccountStub().getSeparateIntegrationTestUserAccountEntity();
+        separateIntegrationUser.getSecurityGroupEntities().addAll(List.of(bristolStaff, bristolAppr));
+        dartsDatabaseStub.getUserAccountRepository().save(separateIntegrationUser);
+
         transcriptionEntity = dartsDatabaseStub.getTranscriptionStub()
             .createAndSaveAwaitingAuthorisationTranscription(testUser, courtCaseEntity, hearingEntity, YESTERDAY);
     }
 
     public TranscriptionEntity addNewTranscription() {
         return dartsDatabaseStub.getTranscriptionStub()
-            .createAndSaveAwaitingAuthorisationTranscription(testUser, courtCaseEntity, hearingEntity, YESTERDAY);
+            .createAndSaveAwaitingAuthorisationTranscription(separateIntegrationUser, courtCaseEntity, hearingEntity, YESTERDAY);
     }
 
     private void createHearing() {

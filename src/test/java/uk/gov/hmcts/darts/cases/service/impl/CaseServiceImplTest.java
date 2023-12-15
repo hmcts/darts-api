@@ -194,7 +194,13 @@ class CaseServiceImplTest {
         Mockito.when(retrieveCoreObjectService.retrieveOrCreateJudge(anyString())).thenReturn(judge);
 
         AddCaseRequest request = CommonTestDataUtil.createAddCaseRequest();
+
         PostCaseResponse result = service.addCaseOrUpdate(request);
+
+        String actualResponse = TestUtils.removeTags(List.of("case_id"), objectMapper.writeValueAsString(result));
+        String expectedResponse = getContentsFromFile(
+            "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
         Mockito.verify(caseRepository).saveAndFlush(caseEntityArgumentCaptor.capture());
         Mockito.verifyNoInteractions(hearingRepository);
@@ -207,10 +213,6 @@ class CaseServiceImplTest {
         assertNotNull(savedCaseEntity.getProsecutorList());
         assertNotNull(savedCaseEntity.getDefenceList());
 
-        String actualResponse = TestUtils.removeTags(List.of("case_id"), objectMapper.writeValueAsString(result));
-        String expectedResponse = getContentsFromFile(
-            "Tests/cases/CaseServiceTest/testAddCase/expectedResponseWithoutCourtroom.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test

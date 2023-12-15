@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.authorisation.component.impl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.util.List;
 import java.util.Set;
@@ -28,7 +26,6 @@ import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.CPP;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.XHIBIT;
 
-@SpringBootTest()
 class UserIdentityImplTest extends IntegrationBase {
 
     @Autowired
@@ -36,9 +33,6 @@ class UserIdentityImplTest extends IntegrationBase {
 
     @Autowired
     private UserAccountRepository userAccountRepository;
-
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
 
     @Autowired
     private AuthorisationStub authorisationStub;
@@ -124,7 +118,7 @@ class UserIdentityImplTest extends IntegrationBase {
 
         assertEquals(email, userIdentity.getUserAccount().getEmailAddress());
 
-        UserAccountEntity testUser = dartsDatabaseStub.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
 
         UserAccountEntity currentUser = userIdentity.getUserAccount();
         assertEquals(testUser.getId(), currentUser.getId());
@@ -159,7 +153,7 @@ class UserIdentityImplTest extends IntegrationBase {
             .claim("oid", guid)
             .build();
 
-        dartsDatabaseStub.getUserAccountStub().createXhibitExternalUser(guid, null);
+        dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, null);
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
         assertEquals(guid, userIdentity.getUserAccount().getAccountGuid());
@@ -176,7 +170,7 @@ class UserIdentityImplTest extends IntegrationBase {
 
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        dartsDatabaseStub.getUserAccountStub().createXhibitExternalUser(guid, null);
+        dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, null);
 
         assertTrue(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
 
@@ -193,9 +187,26 @@ class UserIdentityImplTest extends IntegrationBase {
 
         SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
 
-        dartsDatabaseStub.getUserAccountStub().createAuthorisedIntegrationTestUser(null);
+        dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUser("test");
 
         assertFalse(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
+
+    }
+
+    @Test
+    @Transactional
+    void whenEmailAddressIsWrongCaseInToken_thenUserHasGlobalAccessReturnsTrue() {
+        String guid = UUID.randomUUID().toString();
+        Jwt jwt = Jwt.withTokenValue("test")
+            .header("alg", "RS256")
+            .claim("preferred_username", "integrationtest.user@EXAMPLE.COM")
+            .build();
+
+        SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+
+        dartsDatabase.getUserAccountStub().createXhibitExternalUser(guid, null);
+
+        assertTrue(userIdentity.userHasGlobalAccess(Set.of(XHIBIT, CPP)));
 
     }
 }

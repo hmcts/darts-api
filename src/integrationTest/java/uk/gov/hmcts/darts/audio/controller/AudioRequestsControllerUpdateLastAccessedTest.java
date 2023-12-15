@@ -30,14 +30,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @AutoConfigureMockMvc
 @Slf4j
 class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -52,27 +53,28 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
     void beforeEach() {
         systemUser = dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
         UserAccountEntity requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        mediaRequestEntity = dartsDatabase.createAndLoadCurrentMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        mediaRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
     }
 
     @Test
     void updateAudioRequestLastAccessedTimestampReturnSuccess() throws Exception {
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/audio-requests/%d", mediaRequestEntity.getId())));
 
         mockMvc.perform(requestBuilder)
-            .andExpect(status().isNotImplemented())//todo fix in future ticket
+            .andExpect(status().isNoContent())
             .andReturn();
 
     }
 
     @Test
     void updateAudioRequestLastAccessedTimestampWhenRequestorDifferentUserThrowsUnauthorizedError() throws Exception {
-        MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadCurrentMediaRequestEntity(
+        MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadOpenMediaRequestEntity(
             systemUser, AudioRequestType.DOWNLOAD);
 
         Mockito.doThrow(new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER))

@@ -7,9 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,10 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @Slf4j
-class FileOperationServiceTest {
+class FileOperationServiceTest extends IntegrationBase {
 
     @Autowired
     private FileOperationService fileOperationService;

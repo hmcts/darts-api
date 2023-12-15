@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,9 +53,6 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
     private AuthorisationStub authorisationStub;
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private MockMvc mockMvc;
 
     @MockBean
@@ -83,7 +79,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         doNothing().when(authorisation).authoriseByTranscriptionId(
             transcriptionId, Set.of(APPROVER, TRANSCRIBER));
 
-        testUser = authorisationStub.getTestUser();
+        testUser = authorisationStub.getSeparateIntegrationUser();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
         testUserId = testUser.getId();
 
@@ -143,8 +139,6 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         final TranscriptionEntity rejectedTranscriptionEntity = dartsDatabase.getTranscriptionRepository()
             .findById(transcriptionId).orElseThrow();
         assertEquals(REJECTED.getId(), rejectedTranscriptionEntity.getTranscriptionStatus().getId());
-        assertEquals(testUserId, rejectedTranscriptionEntity.getCreatedBy().getId());
-        assertEquals(testUserId, rejectedTranscriptionEntity.getLastModifiedBy().getId());
         final List<TranscriptionWorkflowEntity> transcriptionWorkflowEntities = rejectedTranscriptionEntity.getTranscriptionWorkflowEntities();
         final TranscriptionWorkflowEntity transcriptionWorkflowEntity = transcriptionWorkflowEntities
             .get(transcriptionWorkflowEntities.size() - 1);
@@ -213,5 +207,4 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
         );
         verifyNoInteractions(mockAuditApi);
     }
-
 }

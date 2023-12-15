@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
-import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
+import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.enums.AudioRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 
@@ -118,7 +118,7 @@ class MediaRequestServiceImplTest {
     void countNonAccessedAudioForUser() {
         when(mockMediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(
             any(),
-            eq(AudioRequestStatus.COMPLETED)
+            eq(MediaRequestStatus.COMPLETED)
         )).thenReturn(10L);
 
         AudioNonAccessedResponse result = mediaRequestService.countNonAccessedAudioForUser(

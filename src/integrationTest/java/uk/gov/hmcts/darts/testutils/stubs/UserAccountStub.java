@@ -9,7 +9,9 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -23,9 +25,11 @@ public class UserAccountStub {
 
     private static final int SYSTEM_USER_ID = 0;
     private static final String INTEGRATION_TEST_USER_EMAIL = "integrationtest.user@example.com";
+    private static final String SEPARATE_TEST_USER_EMAIL = "separateintegrationtest.user@example.com";
 
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
+    private final CourthouseStub courthouseStub;
 
     public UserAccountEntity getSystemUserAccountEntity() {
 
@@ -45,15 +49,21 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity getIntegrationTestUserAccountEntity() {
-        Optional<UserAccountEntity> userAccountEntityOptional = userAccountRepository.findByEmailAddressIgnoreCase(
-            INTEGRATION_TEST_USER_EMAIL);
-
-        if (userAccountEntityOptional.isPresent()) {
-            return userAccountEntityOptional.get();
-        } else {
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(INTEGRATION_TEST_USER_EMAIL);
+        if (userAccounts.isEmpty()) {
             return createIntegrationUser(UUID.randomUUID().toString());
         }
+        return userAccounts.get(0);
     }
+
+    public UserAccountEntity getSeparateIntegrationTestUserAccountEntity() {
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(SEPARATE_TEST_USER_EMAIL);
+        if (userAccounts.isEmpty()) {
+            return createSeparateUser(UUID.randomUUID().toString());
+        }
+        return userAccounts.get(0);
+    }
+
 
     private UserAccountEntity createIntegrationUser(String guid) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
@@ -68,6 +78,25 @@ public class UserAccountStub {
         return userAccountRepository.saveAndFlush(newUser);
     }
 
+
+    private UserAccountEntity createSeparateUser(String guid) {
+        UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
+        var newUser = new UserAccountEntity();
+        newUser.setUserName("Saad Integration User");
+        newUser.setEmailAddress(SEPARATE_TEST_USER_EMAIL);
+        newUser.setCreatedBy(systemUser);
+        newUser.setLastModifiedBy(systemUser);
+        newUser.setActive(true);
+        newUser.setAccountGuid(guid);
+        newUser.setIsSystemUser(false);
+        return userAccountRepository.saveAndFlush(newUser);
+    }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser(String courthouse) {
+        return createAuthorisedIntegrationTestUser(courthouseStub.createCourthouseUnlessExists(courthouse));
+    }
+
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
@@ -78,6 +107,18 @@ public class UserAccountStub {
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
     }
+
+    @Transactional
+    public UserAccountEntity createAuthorisedIntegrationTestUser2(CourthouseEntity courthouseEntity) {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
+        addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
+
+        var testUser = createIntegrationUser(UUID.randomUUID().toString());
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
 
     @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
@@ -96,6 +137,7 @@ public class UserAccountStub {
         }
     }
 
+    @Transactional
     public UserAccountEntity createUnauthorisedIntegrationTestUser() {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         securityGroupEntity.getCourthouseEntities().clear();
@@ -179,6 +221,16 @@ public class UserAccountStub {
         testUser.setAccountGuid(guid);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
+    }
+
+    public UserAccountEntity createAdminUser() {
+        var adminGroup = securityGroupRepository.findByGroupName("ADMIN")
+            .orElseThrow();
+
+        var user = getIntegrationTestUserAccountEntity();
+        user.setSecurityGroupEntities(Collections.singleton(adminGroup));
+
+        return userAccountRepository.saveAndFlush(user);
     }
 
 }

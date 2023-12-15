@@ -1,9 +1,10 @@
 package uk.gov.hmcts.darts.audio.enums;
 
-public enum AudioRequestStatus {
+public enum MediaRequestStatus {
     OPEN,
     PROCESSING,
     FAILED,
     COMPLETED,
-    EXPIRED
+    EXPIRED,
+    DELETED
 }
