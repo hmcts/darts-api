@@ -41,6 +41,7 @@ public class UnstructuredAudioDeleterProcessorImpl implements UnstructuredAudioD
 
     @Transactional
     public void markForDeletion() {
+        log.debug("Starting markForDeletion");
         ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(
             ObjectDirectoryStatusEnum.STORED.getId());
         ExternalLocationTypeEntity unstructuredLocation = externalLocationTypeRepository.getReferenceById(
