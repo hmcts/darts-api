@@ -209,7 +209,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                                      ObjectRecordStatusEntity failedStatus) {
         boolean copySuccessful = false;
         try {
-            if (failedStatus == null || failedStatus.equals(FAILURE_ARM_RAW_DATA_FAILED)) {
+            if (failedStatus == null || failedStatus.getId().equals(FAILURE_ARM_RAW_DATA_FAILED.getId())) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
 
