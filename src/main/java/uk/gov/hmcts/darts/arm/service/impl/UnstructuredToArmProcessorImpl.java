@@ -73,22 +73,31 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         this.fileOperationService = fileOperationService;
         this.archiveRecordService = archiveRecordService;
 
-        preloadObjectRecordStatuses(objectDirectoryStatusRepository);
 
     }
 
     private void preloadObjectRecordStatuses(ObjectDirectoryStatusRepository objectDirectoryStatusRepository) {
-        ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
-        ObjectRecordStatusEntity failedArmRawDataStatus = objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId());
-        ObjectRecordStatusEntity failedArmManifestFileStatus = objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId());
-        ObjectRecordStatusEntity armIngestionStatus = objectDirectoryStatusRepository.getReferenceById(ARM_INGESTION.getId());
-        ObjectRecordStatusEntity armDropZoneStatus = objectDirectoryStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
-
-        armStatuses.put(STORED, storedStatus);
-        armStatuses.put(FAILURE_ARM_RAW_DATA_FAILED, failedArmRawDataStatus);
-        armStatuses.put(FAILURE_ARM_MANIFEST_FILE_FAILED, failedArmManifestFileStatus);
-        armStatuses.put(ARM_INGESTION, armIngestionStatus);
-        armStatuses.put(ARM_DROP_ZONE, armDropZoneStatus);
+        if (!armStatuses.containsKey(STORED)) {
+            ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
+            armStatuses.put(STORED, storedStatus);
+        }
+        if (!armStatuses.containsKey(FAILURE_ARM_RAW_DATA_FAILED)) {
+            ObjectRecordStatusEntity failedArmRawDataStatus = objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId());
+            armStatuses.put(FAILURE_ARM_RAW_DATA_FAILED, failedArmRawDataStatus);
+        }
+        if (!armStatuses.containsKey(FAILURE_ARM_MANIFEST_FILE_FAILED)) {
+            ObjectRecordStatusEntity failedArmManifestFileStatus =
+                objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId());
+            armStatuses.put(FAILURE_ARM_MANIFEST_FILE_FAILED, failedArmManifestFileStatus);
+        }
+        if (!armStatuses.containsKey(ARM_INGESTION)) {
+            ObjectRecordStatusEntity armIngestionStatus = objectDirectoryStatusRepository.getReferenceById(ARM_INGESTION.getId());
+            armStatuses.put(ARM_INGESTION, armIngestionStatus);
+        }
+        if (!armStatuses.containsKey(ARM_DROP_ZONE)) {
+            ObjectRecordStatusEntity armDropZoneStatus = objectDirectoryStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
+            armStatuses.put(ARM_DROP_ZONE, armDropZoneStatus);
+        }
     }
 
     @Override
@@ -98,6 +107,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private void processPendingUnstructured() {
+        preloadObjectRecordStatuses(objectDirectoryStatusRepository);
 
         ExternalLocationTypeEntity inboundLocation = externalLocationTypeRepository.getReferenceById(
             ExternalLocationTypeEnum.UNSTRUCTURED.getId());
