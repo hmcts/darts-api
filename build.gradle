@@ -127,6 +127,10 @@ task smoke(type: Test) {
   classpath = sourceSets.smokeTest.runtimeClasspath
 }
 
+checkstyle {
+  maxWarnings = 0
+}
+
 var sourceSetsCopy = sourceSets
 pmd {
   toolVersion = "6.55.0"
