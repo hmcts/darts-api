@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -225,7 +224,7 @@ public class UserAccountStub {
     }
 
     public UserAccountEntity createAdminUser() {
-        var adminGroup = securityGroupRepository.findByGroupName(SecurityRoleEnum.ADMIN.name())
+        var adminGroup = securityGroupRepository.findByGroupName("ADMIN")
             .orElseThrow();
 
         var user = getIntegrationTestUserAccountEntity();
