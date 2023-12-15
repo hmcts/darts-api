@@ -120,12 +120,13 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
         for (var currentExternalObjectDirectory : allPendingUnstructuredToArmEntities) {
 
+            ObjectRecordStatusEntity failedStatus = null;
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory;
             ExternalObjectDirectoryEntity armExternalObjectDirectory;
 
             if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(armLocation.getId())) {
                 armExternalObjectDirectory = currentExternalObjectDirectory;
-
+                failedStatus = armExternalObjectDirectory.getStatus();
                 var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory);
                 if (matchingEntity.isPresent()) {
                     unstructuredExternalObjectDirectory = matchingEntity.get();
@@ -142,9 +143,11 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             armExternalObjectDirectory.setStatus(armStatuses.get(ARM_INGESTION));
             externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+
             String filename = generateFilename(armExternalObjectDirectory);
 
-            boolean copyRawDataToArmSuccessful = copyRawDataToArm(unstructuredExternalObjectDirectory, armExternalObjectDirectory, filename);
+            boolean copyRawDataToArmSuccessful = copyRawDataToArm(unstructuredExternalObjectDirectory, armExternalObjectDirectory,
+                                                                  filename, failedStatus);
             if (copyRawDataToArmSuccessful) {
                 generateAndCopyMetadataToArm(armExternalObjectDirectory);
             }
@@ -202,10 +205,11 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
                                      ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                     String filename) {
+                                     String filename,
+                                     ObjectRecordStatusEntity failedStatus) {
         boolean copySuccessful = false;
         try {
-            if (armExternalObjectDirectory.getStatus().equals(FAILURE_ARM_RAW_DATA_FAILED)) {
+            if (failedStatus == null || failedStatus.equals(FAILURE_ARM_RAW_DATA_FAILED)) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
 
