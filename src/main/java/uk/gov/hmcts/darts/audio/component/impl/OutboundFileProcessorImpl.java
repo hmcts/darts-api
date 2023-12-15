@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
-import uk.gov.hmcts.darts.audio.helper.AudioSessionHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -33,8 +32,6 @@ import java.util.stream.Collectors;
 public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private final AudioOperationService audioOperationService;
-
-    private final AudioSessionHelper audioSessionHelper;
 
     @Value("${darts.audio.audio_gap_seconds:1}")
     private int acceptableAudioGapSecs;
@@ -84,7 +81,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
         List<AudioFileInfo> concatenatedAndMergedAudiFileInfos = new ArrayList<>();
         List<List<AudioFileInfo>> concatenatedAudios = concatenateByChannel(audioFileInfos);
-        List<List<AudioFileInfo>> concatenationsList = audioSessionHelper.convertChannelsListToConcatenationsList(concatenatedAudios);
+        List<List<AudioFileInfo>> concatenationsList = convertChannelsListToConcatenationsList(concatenatedAudios);
 
         for (List<AudioFileInfo> audioFileInfoList :  concatenationsList) {
             AudioFileInfo mergedAudio = merge(audioFileInfoList);
@@ -149,33 +146,6 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return !timeToCheck.isBefore(audioFileInfo.getStartTime())//is on or after start time
             && !timeToCheck.isAfter(audioFileInfo.getEndTime()); //is on or before end time
     }
-//
-//    private List<AudioFileInfo> concatenateByChannel(List<AudioFileInfo> audioFileInfos)
-//        throws ExecutionException, InterruptedException, IOException {
-//        Map<Integer, List<AudioFileInfo>> audioFileInfosByChannel = audioFileInfos.stream()
-//            .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
-//
-//        List<AudioFileInfo> processedAudios = new ArrayList<>();
-//
-//        for (List<AudioFileInfo> audioFileInfosForChannel : audioFileInfosByChannel.values()) {
-//            if (audioFileInfosForChannel.size() == 1) {
-//                // If there is only one file then there is nothing to concatenate
-//                processedAudios.add(audioFileInfosForChannel.get(0));
-//                continue;
-//            }
-//
-//            // Sort to be sure concatenation occurs in chronological order
-//            audioFileInfosForChannel.sort(Comparator.comparing(AudioFileInfo::getStartTime));
-//            List<AudioFileInfo> concatenatedAudio = audioOperationService.concatenate(
-//                StringUtils.EMPTY,
-//                audioFileInfosForChannel,
-//                acceptableAudioGapSecs
-//            );
-//            processedAudios.add(concatenatedAudio.get(0));
-//        }
-//
-//        return processedAudios;
-//    }
 
     private List<List<AudioFileInfo>> concatenateByChannel(List<AudioFileInfo> audioFileInfos)
         throws ExecutionException, InterruptedException, IOException {
@@ -249,4 +219,17 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return audioOperationService.reEncode(StringUtils.EMPTY, audioFileInfo);
     }
 
+    public static List<List<AudioFileInfo>> convertChannelsListToConcatenationsList(List<List<AudioFileInfo>> channelsList) {
+        List<List<AudioFileInfo>> concatenationsList = new ArrayList<>();
+        int numChannels = channelsList.size();
+        int numConcatenations = channelsList.get(0).size();
+        for (int i = 0; i < numConcatenations; i++) {
+            List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
+            for (int j = 0; j < numChannels; j++) {
+                audioFileInfoList.add(channelsList.get(j).get(i));
+            }
+            concatenationsList.add(audioFileInfoList);
+        }
+        return concatenationsList;
+    }
 }

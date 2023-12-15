@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.audio.helper.AudioSessionHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.util.AudioConstants;
@@ -20,7 +19,9 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +33,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SystemCommandExecutor systemCommandExecutor;
-    private final AudioSessionHelper audioSessionHelper;
+    private static final int CONVERT_TO_SEC = 1000;
 
     CommandLine generateConcatenateCommand(final List<AudioFileInfo> audioFileInfos,
                                            final Path outputPath) {
@@ -56,37 +57,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return CommandLine.parse(command.toString());
     }
 
-//    @Override
-//    public AudioFileInfo concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos)
-//        throws ExecutionException, InterruptedException, IOException {
-//
-//        Path basePath = Path.of(audioConfigurationProperties.getConcatWorkspace(), workspaceDir);
-//
-//        Integer channel = getFirstChannel(audioFileInfos);
-//
-//        Path outputPath = generateOutputPath(basePath,
-//                                             AudioOperationTypes.CONCATENATE,
-//                                             channel,
-//                                             AudioConstants.AudioFileFormats.MP2
-//        );
-//
-//        CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
-//        systemCommandExecutor.execute(command);
-//
-//        return new AudioFileInfo(
-//            getEarliestStartTime(audioFileInfos),
-//            getLatestEndTime(audioFileInfos),
-//            outputPath.toString(),
-//            channel,
-//            outputPath
-//        );
-//    }
-
     @Override
     public List<AudioFileInfo> concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos, int acceptableAudioGapSecs)
         throws ExecutionException, InterruptedException, IOException {
 
-        List<List<AudioFileInfo>> seperatedAudioFileInfos = audioSessionHelper.getSeparatedAudioFileInfo(audioFileInfos, acceptableAudioGapSecs);
+        List<List<AudioFileInfo>> seperatedAudioFileInfos = getSeparatedAudioFileInfo(audioFileInfos, acceptableAudioGapSecs);
 
         Path basePath = Path.of(audioConfigurationProperties.getConcatWorkspace(), workspaceDir);
 
@@ -263,6 +238,61 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         String filename = generateOutputFilename(operationType, channel, outputFileFormat);
 
         return basePath.resolve(filename);
+    }
+
+    private List<List<AudioFileInfo>> getSeparatedAudioFileInfo(List<AudioFileInfo> audioFileInfoList, int acceptableAudioGapSecs) {
+
+        List<List<AudioFileInfo>> seperatedAudioFileInfoList = new ArrayList<>();
+
+        Iterator<AudioFileInfo> firstAudioFileInfoIterator = audioFileInfoList.iterator();
+        Iterator<AudioFileInfo> secondAudioFileInfoIterator = audioFileInfoList.iterator();
+
+        AudioFileInfo firstAudioFileInfo;
+        AudioFileInfo secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
+
+        while (firstAudioFileInfoIterator.hasNext()) {
+            firstAudioFileInfo = firstAudioFileInfoIterator.next();
+            secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
+
+
+            List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Collections.singletonList(firstAudioFileInfo));
+
+            boolean gapBetweenAudios = hasGapBetweenAudios(firstAudioFileInfo, secondAudioFileInfo, acceptableAudioGapSecs);
+            while (!gapBetweenAudios) {
+                concatenatedAudioFileInfoList.add(secondAudioFileInfo);
+                firstAudioFileInfo = getNextAudioFileInfo(firstAudioFileInfoIterator);
+                secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
+                gapBetweenAudios = hasGapBetweenAudios(firstAudioFileInfo, secondAudioFileInfo, acceptableAudioGapSecs);
+            }
+            seperatedAudioFileInfoList.add(concatenatedAudioFileInfoList);
+        }
+
+        return seperatedAudioFileInfoList;
+    }
+
+
+
+    private AudioFileInfo getNextAudioFileInfo(Iterator<AudioFileInfo> audioFileInfoIterator) {
+        if (audioFileInfoIterator.hasNext()) {
+            return audioFileInfoIterator.next();
+        } else {
+            return null;
+        }
+    }
+
+    private boolean hasGapBetweenAudios(AudioFileInfo audioFileInfoFirst, AudioFileInfo audioFileInfoNext,int acceptableAudioGapSecs) {
+        boolean ret = false;
+        if (audioFileInfoFirst == null || audioFileInfoNext == null) {
+            ret = true;
+        } else {
+            long msEnd = audioFileInfoFirst.getEndTime().toEpochMilli();
+            long msStart = audioFileInfoNext.getStartTime().toEpochMilli();
+            long calcGap = (msStart - msEnd) / CONVERT_TO_SEC;
+            if (calcGap > acceptableAudioGapSecs) {
+                ret = true;
+            }
+        }
+        return ret;
     }
 
 }

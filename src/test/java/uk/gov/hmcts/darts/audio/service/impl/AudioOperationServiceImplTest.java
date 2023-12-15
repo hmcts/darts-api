@@ -7,10 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.component.impl.SystemCommandExecutorImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
-import uk.gov.hmcts.darts.audio.helper.AudioSessionHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 
 import java.io.IOException;
@@ -18,8 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -48,9 +44,6 @@ class AudioOperationServiceImplTest {
     private AudioOperationServiceImpl audioOperationService;
 
     @Mock
-    private AudioSessionHelper audioSessionHelper;
-
-    @Mock
     private AudioConfigurationProperties audioConfigurationProperties;
 
     @Mock
@@ -75,7 +68,6 @@ class AudioOperationServiceImplTest {
             )
         );
 
-        audioOperationService = new AudioOperationServiceImpl(audioConfigurationProperties, systemCommandExecutor, audioSessionHelper);
     }
 
     @Test
@@ -115,9 +107,6 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
-
-        List<List<AudioFileInfo>> audioFileInfos = new ArrayList<>(Arrays.asList(inputAudioFileInfos));
-        when(audioSessionHelper.getSeparatedAudioFileInfo(inputAudioFileInfos,1)).thenReturn(audioFileInfos);
 
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenate(
             WORKSPACE_DIR,
