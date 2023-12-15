@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.SystemCommandExecutor;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.audio.helper.AudioSessionHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.util.AudioConstants;
@@ -18,6 +19,7 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +32,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SystemCommandExecutor systemCommandExecutor;
+    private final AudioSessionHelper audioSessionHelper;
 
     CommandLine generateConcatenateCommand(final List<AudioFileInfo> audioFileInfos,
                                            final Path outputPath) {
@@ -53,29 +56,63 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return CommandLine.parse(command.toString());
     }
 
+//    @Override
+//    public AudioFileInfo concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos)
+//        throws ExecutionException, InterruptedException, IOException {
+//
+//        Path basePath = Path.of(audioConfigurationProperties.getConcatWorkspace(), workspaceDir);
+//
+//        Integer channel = getFirstChannel(audioFileInfos);
+//
+//        Path outputPath = generateOutputPath(basePath,
+//                                             AudioOperationTypes.CONCATENATE,
+//                                             channel,
+//                                             AudioConstants.AudioFileFormats.MP2
+//        );
+//
+//        CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
+//        systemCommandExecutor.execute(command);
+//
+//        return new AudioFileInfo(
+//            getEarliestStartTime(audioFileInfos),
+//            getLatestEndTime(audioFileInfos),
+//            outputPath.toString(),
+//            channel,
+//            outputPath
+//        );
+//    }
+
     @Override
-    public AudioFileInfo concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos)
+    public List<AudioFileInfo> concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos, int acceptableAudioGapSecs)
         throws ExecutionException, InterruptedException, IOException {
+
+        List<List<AudioFileInfo>> seperatedAudioFileInfos = audioSessionHelper.getSeparatedAudioFileInfo(audioFileInfos, acceptableAudioGapSecs);
 
         Path basePath = Path.of(audioConfigurationProperties.getConcatWorkspace(), workspaceDir);
 
         Integer channel = getFirstChannel(audioFileInfos);
 
-        Path outputPath = generateOutputPath(basePath,
-                                             AudioOperationTypes.CONCATENATE,
-                                             channel,
-                                             AudioConstants.AudioFileFormats.MP2
-        );
+        List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
+        for (List<AudioFileInfo> seperatedAudioFileInfo : seperatedAudioFileInfos) {
+            Path outputPath = generateOutputPath(basePath,
+                                                 AudioOperationTypes.CONCATENATE,
+                                                 channel,
+                                                 AudioConstants.AudioFileFormats.MP2
+            );
 
-        CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
-        systemCommandExecutor.execute(command);
+            CommandLine command = generateConcatenateCommand(seperatedAudioFileInfo, outputPath);
+            systemCommandExecutor.execute(command);
 
-        return new AudioFileInfo(
-            getEarliestStartTime(audioFileInfos),
-            getLatestEndTime(audioFileInfos),
-            outputPath.toString(),
-            channel
-        );
+            AudioFileInfo audioFileInfo = new AudioFileInfo(
+                getEarliestStartTime(seperatedAudioFileInfo),
+                getLatestEndTime(seperatedAudioFileInfo),
+                outputPath.toString(),
+                channel,
+                outputPath
+            );
+            audioFileInfoList.add(audioFileInfo);
+        }
+        return audioFileInfoList;
     }
 
     @Override
@@ -106,7 +143,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             getEarliestStartTime(audioFilesInfo),
             getLatestEndTime(audioFilesInfo),
             outputPath.toString(),
-            0
+            0,
+            outputPath
         );
     }
 
@@ -134,7 +172,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             adjustTimeDuration(audioFileInfo.getStartTime(), startDuration),
             adjustTimeDuration(audioFileInfo.getStartTime(), endDuration),
             outputPath.toString(),
-            audioFileInfo.getChannel()
+            audioFileInfo.getChannel(),
+            outputPath
         );
     }
 
@@ -169,7 +208,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             audioFileInfo.getStartTime(),
             audioFileInfo.getEndTime(),
             outputPath.toString(),
-            audioFileInfo.getChannel()
+            audioFileInfo.getChannel(),
+            outputPath
         );
     }
 

@@ -114,7 +114,7 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
                     EUROPE_LONDON_ZONE
                 );
                 Path path = generateZipPath(i, audioFileInfo);
-                sourceToDestinationPaths.put(Path.of(audioFileInfo.getFileName()), path);
+                sourceToDestinationPaths.put(audioFileInfo.getPath(), path);
 
                 String parentPathString = path.getParent().toString();
                 playlistInfos.add(PlaylistInfo.builder()

@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
@@ -13,6 +14,8 @@ import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -27,9 +30,11 @@ public class TransformedMediaHelper {
     private final TransformedMediaRepository transformedMediaRepository;
     private final DataManagementApi dataManagementApi;
 
-
     @Transactional
-    public UUID saveToStorage(MediaRequestEntity mediaRequest, BinaryData binaryData, String filename) {
+    public UUID saveToStorage(MediaRequestEntity mediaRequest, BinaryData binaryData, String filename, AudioFileInfo audioFileInfo) {
+
+        OffsetDateTime startTime = audioFileInfo.getStartTime().atOffset(ZoneOffset.UTC);
+        OffsetDateTime endTime = audioFileInfo.getStartTime().atOffset(ZoneOffset.UTC);
 
         //save in outbound datastore
         Map<String, String> metadata = new HashMap<>();
@@ -37,27 +42,27 @@ public class TransformedMediaHelper {
         BlobClient blobClient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.OUTBOUND, metadata);
 
         //save in database
-        TransformedMediaEntity transformedMediaEntity = createTransformedMediaEntity(mediaRequest, filename);
+        TransformedMediaEntity transformedMediaEntity = createTransformedMediaEntity(mediaRequest, filename, startTime, endTime);
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobClient
-                                                                                                                                          );
+        );
 
         dataManagementApi.addMetadata(blobClient, TRANSFORMED_MEDIA_ID, String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
         return UUID.fromString(blobClient.getBlobName());
     }
 
     @Transactional
-    public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename) {
+    public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename,
+                                                               OffsetDateTime startTime, OffsetDateTime endTime) {
         TransformedMediaEntity entity = new TransformedMediaEntity();
         entity.setMediaRequest(mediaRequest);
         entity.setOutputFilename(filename);
-        entity.setStartTime(mediaRequest.getStartTime());
-        entity.setEndTime(mediaRequest.getEndTime());
+        entity.setStartTime(startTime);
+        entity.setEndTime(endTime);
         entity.setCreatedBy(mediaRequest.getCreatedBy());
         entity.setLastModifiedBy(mediaRequest.getCreatedBy());
         transformedMediaRepository.save(entity);
         return entity;
     }
-
 }

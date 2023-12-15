@@ -17,8 +17,9 @@ public interface OutboundFileProcessor {
                                                       OffsetDateTime overallEndTime)
         throws ExecutionException, InterruptedException, IOException;
 
-    AudioFileInfo processAudioForPlayback(Map<MediaEntity, Path> mediaEntityToDownloadLocation, OffsetDateTime startTime,
+    List<AudioFileInfo> processAudioForPlaybacks(Map<MediaEntity, Path> mediaEntityToDownloadLocation, OffsetDateTime startTime,
                                           OffsetDateTime endTime)
         throws ExecutionException, InterruptedException, IOException;
+
 
 }

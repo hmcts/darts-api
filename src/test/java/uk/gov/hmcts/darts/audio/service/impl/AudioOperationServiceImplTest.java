@@ -7,8 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.audio.component.impl.SystemCommandExecutorImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
+import uk.gov.hmcts.darts.audio.helper.AudioSessionHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 
 import java.io.IOException;
@@ -16,6 +18,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -44,6 +48,9 @@ class AudioOperationServiceImplTest {
     private AudioOperationServiceImpl audioOperationService;
 
     @Mock
+    private AudioSessionHelper audioSessionHelper;
+
+    @Mock
     private AudioConfigurationProperties audioConfigurationProperties;
 
     @Mock
@@ -58,15 +65,17 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 createFile(tempDirectory, "original0.mp3").toString(),
-                1
+                1,null
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z),
                 Instant.parse(T_11_00_00_Z),
                 createFile(tempDirectory, "original1.mp3").toString(),
-                1
+                1,null
             )
         );
+
+        audioOperationService = new AudioOperationServiceImpl(audioConfigurationProperties, systemCommandExecutor, audioSessionHelper);
     }
 
     @Test
@@ -78,13 +87,13 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 "/path/to/audio/original0.mp3",
-                1
+                1,null
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z),
                 Instant.parse(T_11_00_00_Z),
                 "/path/to/audio/original1.mp3",
-                1
+                1,null
             )
         );
 
@@ -107,15 +116,19 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
-        AudioFileInfo audioFileInfo = audioOperationService.concatenate(
+        List<List<AudioFileInfo>> audioFileInfos = new ArrayList<>(Arrays.asList(inputAudioFileInfos));
+        when(audioSessionHelper.getSeparatedAudioFileInfo(inputAudioFileInfos,1)).thenReturn(audioFileInfos);
+
+        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenate(
             WORKSPACE_DIR,
-            inputAudioFileInfos
+            inputAudioFileInfos,
+            1
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
-        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
+        assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.get(0).getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
+        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(0).getEndTime());
     }
 
     @Test
@@ -152,7 +165,7 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 file.toString(),
-                1
+                1,null
             ),
             Duration.of(45, MINUTES),
             Duration.of(75, MINUTES)

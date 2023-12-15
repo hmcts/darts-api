@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestStatus;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
+import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -21,6 +22,7 @@ import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,9 +152,14 @@ class AudioTransformationServiceImplTest {
         when(mockTransientObjectDirectoryEntity.getTransformedMedia(
         )).thenReturn(transformedMediaEntity);
 
+        AudioFileInfo audioFileInfo = new AudioFileInfo();
+        audioFileInfo.setStartTime(Instant.now());
+        audioFileInfo.setEndTime(Instant.now());
+
         transformedMediaHelper.saveToStorage(
             mediaRequestEntity,
-            BINARY_DATA, "filename"
+            BINARY_DATA, "filename",
+            audioFileInfo
         );
 
         verify(mockDataManagementApi).saveBlobDataToContainer(eq(BINARY_DATA), eq(DatastoreContainerType.OUTBOUND), anyMap());
