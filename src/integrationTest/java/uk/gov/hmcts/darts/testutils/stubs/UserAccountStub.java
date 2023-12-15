@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -220,6 +221,16 @@ public class UserAccountStub {
         testUser.setAccountGuid(guid);
         testUser = userAccountRepository.saveAndFlush(testUser);
         return testUser;
+    }
+
+    public UserAccountEntity createAdminUser() {
+        var adminGroup = securityGroupRepository.findByGroupName("ADMIN")
+            .orElseThrow();
+
+        var user = getIntegrationTestUserAccountEntity();
+        user.setSecurityGroupEntities(Collections.singleton(adminGroup));
+
+        return userAccountRepository.saveAndFlush(user);
     }
 
 }

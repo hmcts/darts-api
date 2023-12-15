@@ -5,13 +5,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,8 +38,13 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
 
-    private TransactionTemplate transactionTemplate;
+    @Autowired
+    private AdminUserStub adminUserStub;
 
+    @MockBean
+    private UserIdentity userIdentity;
+
+    private TransactionTemplate transactionTemplate;
 
     @BeforeEach
     void setUp() {
@@ -45,6 +53,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldSucceedWhenProvidedWithValidValuesForMinRequiredFields() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
                          {
@@ -84,6 +94,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldSucceedWhenProvidedWithValidValuesForAllFields() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
                          {
@@ -124,6 +136,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldFailWhenRequiredFieldsAreMissing() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest()
             .content("""
                          {
@@ -137,6 +151,8 @@ class PostSecurityGroupIntTest extends IntegrationBase {
 
     @Test
     void createSecurityGroupShouldFailWhenAttemptingToCreateGroupThatAlreadyExists() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder requestForInitialGroup = buildRequest()
             .content("""
                          {
@@ -161,6 +177,21 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_110"))
             .andExpect(jsonPath("$.existing_group_id").value(initialSecurityGroup.get("id")));
+    }
+
+    @Test
+    void createSecurityGroupShouldFailIfUserIsNotAuthorised() throws Exception {
+        adminUserStub.givenUserIsNotAuthorised(userIdentity);
+
+        MockHttpServletRequestBuilder request = buildRequest()
+            .content("""
+                         {
+                           "name": "ACME",
+                           "display_name": "ACME Transcription Services"
+                         }
+                           """);
+        mockMvc.perform(request)
+            .andExpect(status().isForbidden());
     }
 
     private MockHttpServletRequestBuilder buildRequest() {
