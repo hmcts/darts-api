@@ -30,10 +30,10 @@ import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSCRIPTION
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.BAD_REQUEST_TRANSCRIPTION_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptionIdControllerAuthorisationImplTest {
@@ -57,7 +57,7 @@ class TranscriptionIdControllerAuthorisationImplTest {
             REQUESTER,
             APPROVER,
             TRANSCRIBER,
-            LANGUAGE_SHOP_USER,
+            TRANSLATION_QA,
             RCJ_APPEALS
         );
         controllerAuthorisation = new TranscriptionIdControllerAuthorisationImpl(authorisation);

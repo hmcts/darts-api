@@ -11,7 +11,7 @@ public enum SecurityRoleEnum {
     REQUESTER(2),
     JUDGE(3),
     TRANSCRIBER(4),
-    LANGUAGE_SHOP_USER(5),
+    TRANSLATION_QA(5),
     RCJ_APPEALS(6),
     XHIBIT(7),
     CPP(8),
