@@ -31,10 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @AutoConfigureMockMvc
 @Slf4j
@@ -62,7 +62,7 @@ class AudioRequestsControllerTransMediaUpdateLastAccessedTest extends Integratio
     void updateTransformedNMediaLastAccessedTimestampReturnSuccess() throws Exception {
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
         MockHttpServletRequestBuilder requestBuilder = patch(URI.create(
             String.format("/audio-requests/transformed_media/%d", transformedMediaEntity.getId())));
@@ -77,7 +77,7 @@ class AudioRequestsControllerTransMediaUpdateLastAccessedTest extends Integratio
     void updateAudioRequestLastAccessedTimestampWhenRequestorDifferentUserThrowsNotFoundError() throws Exception {
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
         MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadOpenMediaRequestEntity(
