@@ -172,7 +172,6 @@ class UnstructuredToArmProcessorImplTest {
                                                                                          externalLocationTypeArm)).thenReturn(pendingUnstructuredStorageItems);
 
 
-        //when(objectRecordStatusRepository.getReferenceById(FAILURE_ARM_INGESTION_FAILED.getId())).thenReturn(objectRecordStatusEntityRawDataFailed);
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
         List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityArm));
         when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(objectRecordStatusEntityArmDropZone,
