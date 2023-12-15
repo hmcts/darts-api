@@ -171,10 +171,13 @@ class UnstructuredToArmProcessorImplTest {
                                                                                          externalLocationTypeUnstructured,
                                                                                          externalLocationTypeArm)).thenReturn(pendingUnstructuredStorageItems);
 
+        List<ObjectRecordStatusEntity> failedStatusesList = new ArrayList<>();
+        failedStatusesList.add(objectRecordStatusEntityRawDataFailed);
+        failedStatusesList.add(objectRecordStatusEntityManifestFailed);
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
         List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityArm));
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(objectRecordStatusEntityArmDropZone,
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(failedStatusesList,
                                                                                                    externalLocationTypeRepository.getReferenceById(3),
                                                                                                    armDataManagementConfiguration.getMaxRetryAttempts()))
             .thenReturn(pendingFailureList);
@@ -217,8 +220,13 @@ class UnstructuredToArmProcessorImplTest {
 
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
+
+        List<ObjectRecordStatusEntity> failedStatusesList = new ArrayList<>();
+        failedStatusesList.add(objectRecordStatusEntityRawDataFailed);
+        failedStatusesList.add(objectRecordStatusEntityManifestFailed);
+
         List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityArm));
-        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(objectRecordStatusEntityArmDropZone,
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(failedStatusesList,
                                                                                                    externalLocationTypeRepository.getReferenceById(3),
                                                                                                    armDataManagementConfiguration.getMaxRetryAttempts()))
             .thenReturn(pendingFailureList);

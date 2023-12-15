@@ -25,6 +25,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
@@ -178,6 +179,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,
                                                                                    ExternalLocationTypeEntity armLocation) {
 
+        List<ObjectRecordStatusEntity> failedArmStatuses = new ArrayList<>();
+        failedArmStatuses.add(armStatuses.get(FAILURE_ARM_RAW_DATA_FAILED));
+        failedArmStatuses.add(armStatuses.get(FAILURE_ARM_MANIFEST_FILE_FAILED));
 
         var pendingUnstructuredExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
             armStatuses.get(STORED),
@@ -186,7 +190,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         );
 
         var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
-            armStatuses.get(ARM_DROP_ZONE),
+            failedArmStatuses,
             armLocation,
             armDataManagementConfiguration.getMaxRetryAttempts());
 
