@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.component;
 
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;

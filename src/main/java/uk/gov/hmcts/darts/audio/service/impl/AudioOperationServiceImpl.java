@@ -58,7 +58,33 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     }
 
     @Override
-    public List<AudioFileInfo> concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos, int acceptableAudioGapSecs)
+    public AudioFileInfo concatenate(final String workspaceDir, final List<AudioFileInfo> audioFileInfos)
+        throws ExecutionException, InterruptedException, IOException {
+
+        Path basePath = Path.of(audioConfigurationProperties.getConcatWorkspace(), workspaceDir);
+
+        Integer channel = getFirstChannel(audioFileInfos);
+
+        Path outputPath = generateOutputPath(basePath,
+                                             AudioOperationTypes.CONCATENATE,
+                                             channel,
+                                             AudioConstants.AudioFileFormats.MP2
+        );
+
+        CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
+        systemCommandExecutor.execute(command);
+
+        return new AudioFileInfo(
+            getEarliestStartTime(audioFileInfos),
+            getLatestEndTime(audioFileInfos),
+            outputPath.toString(),
+            channel,
+            outputPath
+        );
+    }
+
+    @Override
+    public List<AudioFileInfo> concatenateWithGaps(final String workspaceDir, final List<AudioFileInfo> audioFileInfos, int acceptableAudioGapSecs)
         throws ExecutionException, InterruptedException, IOException {
 
         List<List<AudioFileInfo>> seperatedAudioFileInfos = getSeparatedAudioFileInfo(audioFileInfos, acceptableAudioGapSecs);
@@ -253,8 +279,6 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         while (firstAudioFileInfoIterator.hasNext()) {
             firstAudioFileInfo = firstAudioFileInfoIterator.next();
             secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
-
-
             List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Collections.singletonList(firstAudioFileInfo));
 
             boolean gapBetweenAudios = hasGapBetweenAudios(firstAudioFileInfo, secondAudioFileInfo, acceptableAudioGapSecs);
@@ -285,11 +309,15 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         if (audioFileInfoFirst == null || audioFileInfoNext == null) {
             ret = true;
         } else {
-            long msEnd = audioFileInfoFirst.getEndTime().toEpochMilli();
-            long msStart = audioFileInfoNext.getStartTime().toEpochMilli();
-            long calcGap = (msStart - msEnd) / CONVERT_TO_SEC;
-            if (calcGap > acceptableAudioGapSecs) {
-                ret = true;
+            if(acceptableAudioGapSecs<0) {
+                ret = false;
+            } else {
+                long msEnd = audioFileInfoFirst.getEndTime().toEpochMilli();
+                long msStart = audioFileInfoNext.getStartTime().toEpochMilli();
+                long calcGap = (msStart - msEnd) / CONVERT_TO_SEC;
+                if (calcGap > acceptableAudioGapSecs) {
+                    ret = true;
+                }
             }
         }
         return ret;

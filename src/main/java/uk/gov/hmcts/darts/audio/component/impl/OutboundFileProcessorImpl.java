@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;
@@ -24,6 +25,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 
 @Component
 @RequiredArgsConstructor
@@ -44,7 +48,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
      * @param overallStartTime              The time at which the audio start should be trimmed to.
      * @param overallEndTime                The time at which the audio end should be trimmed to.
      * @return A grouping of trimmed and concatenated multichannel audio files, whereby each group is a collection of audio files
-     *     that belong to a continuous recording session.
+     * that belong to a continuous recording session.
      */
     @Override
     public List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
@@ -60,9 +64,9 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
         List<List<AudioFileInfo>> finalisedAudioSessions = new ArrayList<>();
         for (List<AudioFileInfo> audioSession : groupedAudioSessions) {
-            List<List<AudioFileInfo>> concatenatedAudios = concatenateByChannel(audioSession);
+            List<AudioFileInfo> concatenatedAudios = concatenateByChannel(audioSession);
             List<AudioFileInfo> trimmedAudios = trimAllToPeriod(
-                concatenatedAudios.get(0),
+                concatenatedAudios,
                 overallStartTime,
                 overallEndTime
             );
@@ -80,7 +84,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
         List<AudioFileInfo> concatenatedAndMergedAudiFileInfos = new ArrayList<>();
-        List<List<AudioFileInfo>> concatenatedAudios = concatenateByChannel(audioFileInfos);
+        List<List<AudioFileInfo>> concatenatedAudios = concatenateByChannel(audioFileInfos, PLAYBACK);
         List<List<AudioFileInfo>> concatenationsList = convertChannelsListToConcatenationsList(concatenatedAudios);
 
         for (List<AudioFileInfo> audioFileInfoList :  concatenationsList) {
@@ -147,7 +151,33 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             && !timeToCheck.isAfter(audioFileInfo.getEndTime()); //is on or before end time
     }
 
-    private List<List<AudioFileInfo>> concatenateByChannel(List<AudioFileInfo> audioFileInfos)
+    private List<AudioFileInfo> concatenateByChannel(List<AudioFileInfo> audioFileInfos)
+        throws ExecutionException, InterruptedException, IOException {
+        Map<Integer, List<AudioFileInfo>> audioFileInfosByChannel = audioFileInfos.stream()
+            .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
+
+        List<AudioFileInfo> processedAudios = new ArrayList<>();
+
+        for (List<AudioFileInfo> audioFileInfosForChannel : audioFileInfosByChannel.values()) {
+            if (audioFileInfosForChannel.size() == 1) {
+                // If there is only one file then there is nothing to concatenate
+                processedAudios.add(audioFileInfosForChannel.get(0));
+                continue;
+            }
+
+            // Sort to be sure concatenation occurs in chronological order
+            audioFileInfosForChannel.sort(Comparator.comparing(AudioFileInfo::getStartTime));
+            AudioFileInfo concatenatedAudio = audioOperationService.concatenate(
+                StringUtils.EMPTY,
+                audioFileInfosForChannel
+            );
+            processedAudios.add(concatenatedAudio);
+        }
+
+        return processedAudios;
+    }
+
+    private List<List<AudioFileInfo>> concatenateByChannel(List<AudioFileInfo> audioFileInfos, AudioRequestType requestType)
         throws ExecutionException, InterruptedException, IOException {
         Map<Integer, List<AudioFileInfo>> audioFileInfosByChannel = audioFileInfos.stream()
             .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
@@ -163,12 +193,14 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                 continue;
             }
 
+            int gapTime = DOWNLOAD.equals(requestType)?-1:acceptableAudioGapSecs;
+
             // Sort to be sure concatenation occurs in chronological order
             audioFileInfosForChannel.sort(Comparator.comparing(AudioFileInfo::getStartTime));
-            List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenate(
+            List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenateWithGaps(
                 StringUtils.EMPTY,
                 audioFileInfosForChannel,
-                acceptableAudioGapSecs
+                gapTime
             );
             concatenateByChannelWithGaps.add(concatenatedAudios);
         }
