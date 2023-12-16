@@ -309,15 +309,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         if (audioFileInfoFirst == null || audioFileInfoNext == null) {
             ret = true;
         } else {
-            if(acceptableAudioGapSecs<0) {
-                ret = false;
-            } else {
-                long msEnd = audioFileInfoFirst.getEndTime().toEpochMilli();
-                long msStart = audioFileInfoNext.getStartTime().toEpochMilli();
-                long calcGap = (msStart - msEnd) / CONVERT_TO_SEC;
-                if (calcGap > acceptableAudioGapSecs) {
-                    ret = true;
-                }
+            long msEnd = audioFileInfoFirst.getEndTime().toEpochMilli();
+            long msStart = audioFileInfoNext.getStartTime().toEpochMilli();
+            long calcGap = (msStart - msEnd) / CONVERT_TO_SEC;
+            if (calcGap > acceptableAudioGapSecs) {
+                ret = true;
             }
         }
         return ret;

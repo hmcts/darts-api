@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
-import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;
@@ -25,9 +24,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
-import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
-import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 
 @Component
 @RequiredArgsConstructor
@@ -48,7 +44,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
      * @param overallStartTime              The time at which the audio start should be trimmed to.
      * @param overallEndTime                The time at which the audio end should be trimmed to.
      * @return A grouping of trimmed and concatenated multichannel audio files, whereby each group is a collection of audio files
-     * that belong to a continuous recording session.
+     *     that belong to a continuous recording session.
      */
     @Override
     public List<List<AudioFileInfo>> processAudioForDownload(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
@@ -84,7 +80,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
         List<AudioFileInfo> concatenatedAndMergedAudiFileInfos = new ArrayList<>();
-        List<List<AudioFileInfo>> concatenatedAudios = concatenateByChannel(audioFileInfos, PLAYBACK);
+        List<List<AudioFileInfo>> concatenatedAudios = concatenateByChannelWithGaps(audioFileInfos);
         List<List<AudioFileInfo>> concatenationsList = convertChannelsListToConcatenationsList(concatenatedAudios);
 
         for (List<AudioFileInfo> audioFileInfoList :  concatenationsList) {
@@ -177,7 +173,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return processedAudios;
     }
 
-    private List<List<AudioFileInfo>> concatenateByChannel(List<AudioFileInfo> audioFileInfos, AudioRequestType requestType)
+    private List<List<AudioFileInfo>> concatenateByChannelWithGaps(List<AudioFileInfo> audioFileInfos)
         throws ExecutionException, InterruptedException, IOException {
         Map<Integer, List<AudioFileInfo>> audioFileInfosByChannel = audioFileInfos.stream()
             .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
@@ -193,14 +189,12 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
                 continue;
             }
 
-            int gapTime = DOWNLOAD.equals(requestType)?-1:acceptableAudioGapSecs;
-
             // Sort to be sure concatenation occurs in chronological order
             audioFileInfosForChannel.sort(Comparator.comparing(AudioFileInfo::getStartTime));
             List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenateWithGaps(
                 StringUtils.EMPTY,
                 audioFileInfosForChannel,
-                gapTime
+                acceptableAudioGapSecs
             );
             concatenateByChannelWithGaps.add(concatenatedAudios);
         }

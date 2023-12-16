@@ -124,16 +124,15 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
-        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenate(
+        AudioFileInfo audioFileInfo = audioOperationService.concatenate(
             WORKSPACE_DIR,
-            inputAudioFileInfos,
-            1
+            inputAudioFileInfos
         );
 
-        assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
-        assertEquals(1, audioFileInfo.get(0).getChannel());
-        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
-        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(0).getEndTime());
+        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
+        assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
     }
 
     @Test
@@ -256,7 +255,7 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
-        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenate(
+        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
             inputAudioFileInfosWithGaps,
             1
@@ -276,7 +275,7 @@ class AudioOperationServiceImplTest {
         when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
         when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
 
-        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenate(
+        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
             inputAudioFileInfos,
             1
