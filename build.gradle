@@ -129,8 +129,6 @@ task smoke(type: Test) {
 
 checkstyle {
   maxWarnings = 0
-  toolVersion = '10.12.6'
-  getConfigDirectory().set(new File(rootDir, 'config/checkstyle'))
 }
 
 var sourceSetsCopy = sourceSets
@@ -261,7 +259,6 @@ dependencyCheck {
     assemblyEnabled = false
   }
   skipConfigurations = [
-    "checkstyle",
     "compileOnly",
     "pmd",
     "integrationTest",
@@ -383,7 +380,7 @@ dependencies {
 
   implementation 'org.mapstruct:mapstruct:1.5.5.Final'
   annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.0.Final')
+  annotationProcessor('org.hibernate.orm:hibernate-jpamodelgen:6.4.1.Final')
 
   testImplementation 'com.h2database:h2:2.2.224'
   testImplementation group: 'org.postgresql', name: 'postgresql', version: '42.7.1'
@@ -407,7 +404,7 @@ dependencies {
 dependencyManagement {
   dependencies {
     // Resolves CVE-2023-44487 - remove this block once azure-storage-blob pulls in latest version of netty
-    dependencySet(group: 'io.netty', version: '4.1.103.Final') {
+    dependencySet(group: 'io.netty', version: '4.1.104.Final') {
       entry 'netty-buffer'
       entry 'netty-codec'
       entry 'netty-codec-dns'
@@ -433,11 +430,6 @@ dependencyManagement {
       entry 'reactor-netty-http'
       entry 'reactor-netty-core'
     }
-    // Fix for checkstyle trying to bring in 2 incompatible version of guava. Look at removing this at some point
-    dependencySet(group: 'com.google.guava', version: '32.0.1-jre') {
-      entry 'guava'
-    }
-
   }
 }
 
