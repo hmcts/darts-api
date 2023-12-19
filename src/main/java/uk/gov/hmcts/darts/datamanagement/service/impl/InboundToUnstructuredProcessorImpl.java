@@ -137,7 +137,10 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             } catch (Exception e) {
-                log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}", inboundExternalObjectDirectory.getId(), e.getMessage());
+                log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}",
+                          inboundExternalObjectDirectory.getId(), e.getMessage(), e);
+                unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
+                setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             } finally {
                 externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
             }
