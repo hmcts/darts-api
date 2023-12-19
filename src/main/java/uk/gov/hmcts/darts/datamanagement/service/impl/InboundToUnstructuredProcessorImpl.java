@@ -93,13 +93,20 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             getType(UNSTRUCTURED)
         );
 
-        for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
+        log.info("processAllStoredInboundExternalObjects::inboundList {}", inboundList.stream().map(ExternalObjectDirectoryEntity::getId).toList());
+        log.info("processAllStoredInboundExternalObjects::unstructuredStoredList {}",
+                 unstructuredStoredList.stream().map(ExternalObjectDirectoryEntity::getId).toList());
+        log.info("processAllStoredInboundExternalObjects::unstructuredFailedList {}",
+                 unstructuredFailedList.stream().map(ExternalObjectDirectoryEntity::getId).toList());
 
+        for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
+            log.info("processStoredInboundExternalObject::EOD ID: {}", inboundExternalObjectDirectory.getId());
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
             ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
             if (unstructuredStatus == null
                 || unstructuredStatus.getId().equals(STORED.getId())
                 || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
+                log.info("processStoredInboundExternalObject::EOD ID: {} being skipped", inboundExternalObjectDirectory.getId());
                 continue;
             }
 
@@ -107,12 +114,16 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
             unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
 
+            log.info("processStoredInboundExternalObject::EOD ID: {} status set to AWAITING_VERIFICATION", inboundExternalObjectDirectory.getId());
+
             try {
+                log.info("processStoredInboundExternalObject::EOD ID: {} trying to move to unstructured", inboundExternalObjectDirectory.getId());
                 BinaryData inboundFile = dataManagementService.getBlobData(getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
                 final String calculatedChecksum = new String(encodeBase64(md5(inboundFile.toBytes())));
                 validate(calculatedChecksum, inboundExternalObjectDirectory, unstructuredExternalObjectDirectoryEntity);
 
                 if (unstructuredExternalObjectDirectoryEntity.getStatus().equals(getStatus(AWAITING_VERIFICATION))) {
+                    log.info("processStoredInboundExternalObject::EOD ID: {} passed validation", inboundExternalObjectDirectory.getId());
                     // upload file
                     UUID uuid = dataManagementService.saveBlobData(getUnstructuredContainerName(), inboundFile);
                     unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
@@ -124,6 +135,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             }
+            log.info("processStoredInboundExternalObject::EOD ID: {} transfer complete", inboundExternalObjectDirectory.getId());
             externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
 
         }
