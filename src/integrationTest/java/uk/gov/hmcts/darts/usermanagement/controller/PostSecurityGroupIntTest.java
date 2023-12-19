@@ -195,7 +195,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
     }
 
     private MockHttpServletRequestBuilder buildRequest() {
-        return post("/security-groups")
+        return post("/admin/security-groups")
             .header("Content-Type", "application/json");
     }
 

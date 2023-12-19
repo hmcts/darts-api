@@ -397,7 +397,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     private MockHttpServletRequestBuilder buildRequest(int userId) {
-        return patch("/users/" + userId)
+        return patch("/admin/users/" + userId)
             .header("Content-Type", "application/json");
     }
 
