@@ -34,8 +34,7 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
             String uploadNewFileRecord = objectMapper.writeValueAsString(archiveRecord.getUploadNewFileRecord());
             log.debug("About to write {}{} to file {}", archiveRecordOperation, uploadNewFileRecord, archiveRecordFile.getAbsolutePath());
             try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
-                // Print all on 1 line
-                printWriter.print(archiveRecordOperation);
+                printWriter.println(archiveRecordOperation);
                 printWriter.println(uploadNewFileRecord);
                 generatedArchiveRecord = true;
             }

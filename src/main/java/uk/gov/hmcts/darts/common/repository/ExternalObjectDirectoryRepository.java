@@ -69,7 +69,7 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
         "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
             "WHERE eod.status in :failedStatuses " +
             "AND eod.externalLocationType = :type " +
-            "AND eod.transferAttempts < :transferAttempts"
+            "AND eod.transferAttempts <= :transferAttempts"
     )
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                             ExternalLocationTypeEntity type,
