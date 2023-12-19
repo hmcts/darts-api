@@ -129,15 +129,18 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                     unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                     unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
                     unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
+                    externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+                    log.info("processStoredInboundExternalObject::EOD ID: {} transfer complete", inboundExternalObjectDirectory.getId());
                 }
             } catch (BlobStorageException e) {
                 log.error("Failed to get BLOB from datastore {} for file {}", getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            } catch (Exception e) {
+                log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}", inboundExternalObjectDirectory.getId(), e.getMessage());
+            } finally {
+                externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
             }
-            log.info("processStoredInboundExternalObject::EOD ID: {} transfer complete", inboundExternalObjectDirectory.getId());
-            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-
         }
     }
 
