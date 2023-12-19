@@ -141,7 +141,7 @@ class ArchiveRecordServiceImplTest {
         expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
         expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
         log.info("eResponse {}", expectedResponse);
-        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     @Test
