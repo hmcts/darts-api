@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
@@ -153,26 +151,64 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenTranscription_WhenGenerateArchiveRecord_ReturnNotImplemented() {
+    void givenTranscription_WhenGenerateArchiveRecord_ReturnNotImplemented() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        when(transcriptionDocumentEntity.getId()).thenReturn(1);
+
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
 
-        assertThrows(NotImplementedException.class, () ->
-            archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 2));
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateTranscriptionArchiveRecord/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
     }
 
     @Test
-    void givenAnnotation_WhenGenerateArchiveRecord_ReturnNotImplemented() {
+    void givenAnnotation_WhenGenerateArchiveRecord_ReturnNotImplemented() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        when(annotationDocumentEntity.getId()).thenReturn(1);
+
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
 
-        assertThrows(NotImplementedException.class, () ->
-            archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 3));
+        when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+
+        log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
+
+        String actualResponse = getFileContents(archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
+        log.info("aResponse {}", actualResponse);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
+        String expectedResponse = getContentsFromFile("Tests/arm/service/testGenerateAnnotationArchiveRecord/expectedResponse.a360");
+        expectedResponse = expectedResponse.replaceAll("<START_DATE>", startedAt.format(formatter));
+        expectedResponse = expectedResponse.replaceAll("<END_DATE>", endedAt.format(formatter));
+        log.info("eResponse {}", expectedResponse);
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
 
     private static String getFileContents(File archiveFile) throws IOException {
