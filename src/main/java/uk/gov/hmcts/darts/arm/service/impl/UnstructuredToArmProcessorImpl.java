@@ -172,6 +172,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             } catch (BlobStorageException e) {
                 log.error("Failed to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
                 updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_MANIFEST_FILE_FAILED);
+            } catch (Exception e) {
+                log.error("Unable to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
+                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_MANIFEST_FILE_FAILED);
             }
         } else {
             log.error("Failed to generate metadata file {}", archiveRecordFile.getAbsolutePath());
@@ -225,7 +228,14 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                       e.getMessage());
 
             updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
+        } catch (Exception e) {
+            log.error("Error moving BLOB data for file {} due to {}",
+                      unstructuredExternalObjectDirectory.getExternalLocation(),
+                      e.getMessage());
+
+            updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
         }
+
         return copySuccessful;
     }
 
