@@ -1,11 +1,9 @@
 package uk.gov.hmcts.darts.cases.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -19,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 
@@ -35,23 +34,23 @@ import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createDefendantL
 import static uk.gov.hmcts.darts.common.util.CommonTestDataUtil.createProsecutorList;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class CasesMapperTest {
     public static final String SWANSEA = "SWANSEA";
     public static final String CASE_NUMBER = "casenumber1";
-    ObjectMapper objectMapper;
-    @Mock
-    RetrieveCoreObjectService retrieveCoreObjectService;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapperConfig().objectMapper();
 
-    @InjectMocks
+    @Mock
+    private RetrieveCoreObjectService retrieveCoreObjectService;
+    @Mock
+    private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
+
     private CasesMapper caseMapper;
 
-    @BeforeAll
-    void beforeAll() {
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
+    @BeforeEach
+    void setUp() {
+        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository);
     }
 
     @Test
@@ -60,7 +59,7 @@ class CasesMapperTest {
 
         List<ScheduledCase> scheduledCases = caseMapper.mapToScheduledCases(hearings);
 
-        String actualResponse = objectMapper.writeValueAsString(scheduledCases);
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile("Tests/cases/CasesMapperTest/testOk/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
 
@@ -80,7 +79,7 @@ class CasesMapperTest {
 
         ScheduledCase scheduledCases = caseMapper.mapToScheduledCase(hearing);
 
-        String actualResponse = objectMapper.writeValueAsString(scheduledCases);
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testOk/expectedResponseWithCase.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -154,7 +153,7 @@ class CasesMapperTest {
 
         List<ScheduledCase> scheduledCases = caseMapper.mapToScheduledCases(hearingList);
 
-        String actualResponse = objectMapper.writeValueAsString(scheduledCases);
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testOrderedByTime/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
@@ -168,7 +167,7 @@ class CasesMapperTest {
 
         SingleCase singleCase = caseMapper.mapToSingleCase(caseEntity);
 
-        String actualResponse = objectMapper.writeValueAsString(singleCase);
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(singleCase);
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testMapToSingleCase/expectedResponse.json");
@@ -184,7 +183,7 @@ class CasesMapperTest {
         caseEntity.setReportingRestrictions(reportingRestriction);
         SingleCase singleCase = caseMapper.mapToSingleCase(caseEntity);
 
-        String actualResponse = objectMapper.writeValueAsString(singleCase);
+        String actualResponse = OBJECT_MAPPER.writeValueAsString(singleCase);
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");

@@ -95,7 +95,7 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @OneToMany(mappedBy = COURT_CASE)
     private List<AnnotationEntity> annotations;
 
-    @OneToMany(mappedBy = COURT_CASE)
+    @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -112,12 +112,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = RETAIN_UNTIL_TS)
     private OffsetDateTime retainUntilTs;
-
-    public void addHearing(HearingEntity hearing) {
-        if (hearings.stream().noneMatch(hearingEntity -> hearingEntity.getId().equals(hearing.getId()))) {
-            this.hearings.add(hearing);
-        }
-    }
 
     public void addDefence(DefenceEntity defence) {
         if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(defence.getName()))) {

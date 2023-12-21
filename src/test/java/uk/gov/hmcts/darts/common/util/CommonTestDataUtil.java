@@ -427,10 +427,4 @@ public class CommonTestDataUtil {
         return transcriptionUrgencyEntity;
     }
 
-    public TranscriptionStatusEntity createTranscriptionStatusEntityFromEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
-        TranscriptionStatusEntity transcriptionStatusEntity = new TranscriptionStatusEntity();
-        transcriptionStatusEntity.setId(transcriptionStatusEnum.getId());
-        transcriptionStatusEntity.setStatusType(transcriptionStatusEnum.name());
-        return transcriptionStatusEntity;
-    }
 }
