@@ -224,7 +224,6 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     }
 
     private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
-
         MediaEntity mediaEntity = inbound.getMedia();
         if (mediaEntity != null) {
             performValidation(
@@ -271,7 +270,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         String incomingChecksum, String calculatedChecksum,
         List<String> allowedExtensions, String extension,
         Integer maxFileSize, Long fileSize) {
-        if (calculatedChecksum.compareTo(incomingChecksum) != 0) {
+        if (incomingChecksum == null || calculatedChecksum.compareTo(incomingChecksum) != 0) {
+            log.error("Checksum comparison failed, incoming \"{}\" not equal to calculated \"{}\", for unstructured EOD: {}",
+                      incomingChecksum, calculatedChecksum, unstructured.getId());
             unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
         }
         if (!allowedExtensions.contains(extension)) {
