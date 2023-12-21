@@ -126,7 +126,7 @@ public class CasesMapper {
             .collect(toList());
     }
 
-    public static ReportingRestriction reportingRestrictionWithName(String name) {
+    private static ReportingRestriction reportingRestrictionWithName(String name) {
         var reportingRestriction = new ReportingRestriction();
         reportingRestriction.setEventName(name);
         return reportingRestriction;

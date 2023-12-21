@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
 @SuppressWarnings({"PMD.DoNotUseThreads"})
-class StandardEventHandlerTest extends IntegrationBase {
+class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
 
     public static final String UNKNOWN_COURTROOM = "unknown-courtroom";
     public static final String UNKNOWN_COURTHOUSE = "unknown-courthouse";

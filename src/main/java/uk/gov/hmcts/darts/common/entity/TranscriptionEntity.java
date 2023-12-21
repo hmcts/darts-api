@@ -55,7 +55,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private HearingEntity hearing;
 
     @ManyToOne
-    @JoinColumn(name = "trs_id", nullable = false)
+    @JoinColumn(name = "trs_id")
     private TranscriptionStatusEntity transcriptionStatus;
 
     @Column(name = "transcription_object_id", length = 16)

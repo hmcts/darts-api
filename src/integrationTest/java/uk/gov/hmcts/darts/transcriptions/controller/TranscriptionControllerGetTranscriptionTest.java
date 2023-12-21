@@ -106,6 +106,15 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         JSONAssert.assertEquals(expected, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
+    @Test
+    void getTranscriptionNotFound() throws Exception {
+        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, -999);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
+        String actualResponse = response.getResponse().getContentAsString();
+        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
     private void addCommentToWorkflow(TranscriptionWorkflowEntity workflowEntity, String comment, UserAccountEntity userAccount) {
         TranscriptionCommentEntity commentEntity = new TranscriptionCommentEntity();
         commentEntity.setTranscription(workflowEntity.getTranscription());
@@ -114,14 +123,5 @@ class TranscriptionControllerGetTranscriptionTest extends IntegrationBase {
         commentEntity.setLastModifiedBy(userAccount);
         commentEntity.setCreatedBy(userAccount);
         dartsDatabase.save(commentEntity);
-    }
-
-    @Test
-    void getTranscriptionNotFound() throws Exception {
-        MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT_URL_TRANSCRIPTION, -999);
-        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isNotFound()).andReturn();
-        String actualResponse = response.getResponse().getContentAsString();
-        String expectedResponse = getContentsFromFile("tests/transcriptions/transcription/expectedResponseNotFound.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }

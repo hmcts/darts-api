@@ -12,6 +12,7 @@ import java.util.List;
 
 @Repository
 public interface TranscriptionRepository extends JpaRepository<TranscriptionEntity, Integer> {
+
     @Query("""
         SELECT t
         FROM TranscriptionEntity t, CourtCaseEntity case
