@@ -23,7 +23,7 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
     @Test
     void shouldCreateSecurityGroup() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/security-groups"))
+            .baseUri(getUri("/admin/security-groups"))
             .contentType(ContentType.JSON)
             .body("""
                     {

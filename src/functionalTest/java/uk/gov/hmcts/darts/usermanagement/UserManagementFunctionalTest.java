@@ -51,7 +51,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
             .getInt("id");
 
         Response modifyUserResponse = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/users/" + userId))
+            .baseUri(getUri("/admin/users/" + userId))
             .contentType(ContentType.JSON)
             .body("""
                       {
@@ -82,7 +82,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
     private Response createUser() {
         Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri("/users"))
+            .baseUri(getUri("/admin/users"))
             .contentType(ContentType.JSON)
             .body("""
                       {
