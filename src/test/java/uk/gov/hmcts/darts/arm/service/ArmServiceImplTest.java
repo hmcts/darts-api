@@ -44,7 +44,7 @@ class ArmServiceImplTest {
 
     @Test
     void testSaveBlobData() {
-        when(armDataManagementConfiguration.getArmSubmissionDropZone()).thenReturn(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFoldersSubmission()).thenReturn(TEST_DROP_ZONE);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
         String blobName = armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, BLOB_FILENAME, BINARY_DATA);
