@@ -40,7 +40,7 @@ services:
       - DARTS_GATEWAY_URL=http://darts-gateway:8070
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME
       - AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
-      - ARM_STORAGE_CONNECTION_STRING
+      - ARM_SAS_ENDPOINT
     build:
       context: .
       dockerfile: Dockerfile
