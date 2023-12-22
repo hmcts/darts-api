@@ -20,6 +20,6 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     private String getArmContainerName() {
-        return armDataManagementConfiguration.getArmContainerName();
+        return armDataManagementConfiguration.getContainerName();
     }
 }

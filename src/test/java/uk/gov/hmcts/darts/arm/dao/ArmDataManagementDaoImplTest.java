@@ -38,7 +38,7 @@ class ArmDataManagementDaoImplTest {
 
     @Test
     void testGetBlobContainerClient() {
-        Mockito.when(armDataManagementConfiguration.getArmStorageAccountConnectionString()).thenReturn(CONNECTION_STRING);
+        Mockito.when(armDataManagementConfiguration.getConnectionString()).thenReturn(CONNECTION_STRING);
         BlobContainerClient blobContainerClient = armDataManagementDao.getBlobContainerClient(BLOB_CONTAINER_NAME);
         assertNotNull(blobContainerClient);
     }
