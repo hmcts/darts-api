@@ -35,7 +35,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 @AutoConfigureMockMvc
 class UserControllerSearchIntTest extends IntegrationBase {
 
-    private static final String ENDPOINT_URL = "/users/search";
+    private static final String ENDPOINT_URL = "/admin/users/search";
 
     @Autowired
     private MockMvc mockMvc;

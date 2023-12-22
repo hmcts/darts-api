@@ -11,7 +11,7 @@ info:
 ########################################################################################################################
 
 paths:
-  /users:
+  /admin/users:
     get:
       tags:
         - User
@@ -37,7 +37,7 @@ paths:
           $ref: '#/components/responses/UserSuccessResponseWithId'
         '400':
           $ref: '#/components/responses/BadUserRequest'
-  /users/{id}:
+  /admin/users/{id}:
     patch:
       summary: Modify user by id
       tags:
@@ -55,7 +55,7 @@ paths:
         '404':
           $ref: '#/components/responses/UserNotFound'
 
-  /users/search:
+  /admin/users/search:
     post:
       summary: Get users by search criteria
       tags:
@@ -99,7 +99,7 @@ paths:
                 title: Failed to check authorisation
                 status: 403
 
-  /security-groups:
+  /admin/security-groups:
     get:
       summary: Get security groups
       parameters:

@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 @AutoConfigureMockMvc
 class UserControllerGetUsersIntTest extends IntegrationBase {
 
-    private static final String ENDPOINT_URL = "/users";
+    private static final String ENDPOINT_URL = "/admin/users";
 
     @Autowired
     private MockMvc mockMvc;
