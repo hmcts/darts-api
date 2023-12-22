@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.hearings.mapper;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
@@ -18,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @SuppressWarnings({"PMD.TooManyMethods"})
 public class GetHearingResponseMapper {
-    @Autowired
+
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
     @Transactional

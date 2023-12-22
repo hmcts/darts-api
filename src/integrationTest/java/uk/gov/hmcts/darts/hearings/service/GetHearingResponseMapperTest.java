@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -19,6 +20,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
@@ -89,7 +91,17 @@ class GetHearingResponseMapperTest extends IntegrationBase {
         });
     }
 
+    @Test
+    void includesMigratedCaseWithRestrictionPersistedOnCaseTable() {
+        var caseWithReportingRestrictions = dartsDatabase.addHandlerToCase(createSomeMinimalCase(), someReportingRestrictionId());
 
+        var hearing = dartsDatabase.createHearing("some-courthouse", "some-courtroom",
+                                    caseWithReportingRestrictions.getCaseNumber(), LocalDate.now());
+
+        GetHearingResponse getHearingResponse = getHearingResponseMapper.map(hearing);
+
+        assertEquals(1, getHearingResponse.getReportingRestrictions().size());
+    }
 
 
 
