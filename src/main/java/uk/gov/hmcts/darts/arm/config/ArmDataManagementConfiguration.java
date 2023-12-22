@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class ArmDataManagementConfiguration {
 
-    private String connectionString;
+    private String sasEndpoint;
     private String containerName;
     private String foldersSubmission;
     private Integer maxRetryAttempts;
