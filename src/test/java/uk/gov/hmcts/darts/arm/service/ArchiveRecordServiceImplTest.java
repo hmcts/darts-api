@@ -87,11 +87,12 @@ class ArchiveRecordServiceImplTest {
         TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(armDataManagementConfiguration);
         AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
 
-        archiveRecordService = new ArchiveRecordServiceImpl(armDataManagementConfiguration,
-                                                            archiveRecordFileGenerator,
-                                                            mediaArchiveRecordMapper,
-                                                            transcriptionArchiveRecordMapper,
-                                                            annotationArchiveRecordMapper
+        archiveRecordService = new ArchiveRecordServiceImpl(
+            armDataManagementConfiguration,
+            archiveRecordFileGenerator,
+            mediaArchiveRecordMapper,
+            transcriptionArchiveRecordMapper,
+            annotationArchiveRecordMapper
         );
 
     }
@@ -121,7 +122,7 @@ class ArchiveRecordServiceImplTest {
         when(mediaEntity.getStart()).thenReturn(startedAt);
         when(mediaEntity.getEnd()).thenReturn(endedAt);
         when(mediaEntity.getCreatedDateTime()).thenReturn(startedAt);
-        when(mediaEntity.getCaseIdList()).thenReturn(List.of("Case1", "Case2", "Case3"));
+        when(mediaEntity.getCaseNumberList()).thenReturn(List.of("Case1", "Case2", "Case3"));
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
