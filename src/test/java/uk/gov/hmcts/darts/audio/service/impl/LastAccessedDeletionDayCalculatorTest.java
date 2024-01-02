@@ -38,18 +38,18 @@ class LastAccessedDeletionDayCalculatorTest {
     @BeforeEach
     void setUp() {
         //setting clock to 2023-10-27
-        when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.of(2023, 10, 27));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
     }
 
     @Test
     void whereLastAccessedDoesNotIncludesNonBusinessDays() {
-        //setting clock to 2023-10-23 on a monday
-        when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.of(2023, 10, 23));
+        //setting clock to 2023-10-23 on a monday.
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(Collections.emptyList());
         //when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.of(2024, 1, 1));
 
         assertEquals(
-            OffsetDateTime.of(2023, 10, 19, 0, 0, 0, 0, ZoneOffset.UTC),
+            OffsetDateTime.of(2023, 10, 19, 22, 0, 0, 0, ZoneOffset.UTC),
             lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
         );
     }
@@ -64,7 +64,7 @@ class LastAccessedDeletionDayCalculatorTest {
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
 
         assertEquals(
-            OffsetDateTime.of(2023, 10, 20, 0, 0, 0, 0, ZoneOffset.UTC),
+            OffsetDateTime.of(2023, 10, 20, 22, 0, 0, 0, ZoneOffset.UTC),
             lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
         );
 
@@ -73,10 +73,62 @@ class LastAccessedDeletionDayCalculatorTest {
     @Test
     void getStartDateWithChangedDefault() {
         assertEquals(
-            OffsetDateTime.of(2023, 10, 23, 0, 0, 0, 0, ZoneOffset.UTC),
+            OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC),
             this.lastAccessedDeletionDayCalculator.getStartDateForDeletion(4)
         );
     }
+
+    @Test
+    void whereLastAccessedDoesIncludesNonBusinessDaysAndChristmas() {
+        /*
+        setting clock to 2023-12-28
+        2023-12-27 - normal day
+        2023-12-26 - holiday
+        2023-12-25 - holiday
+        2023-12-24 - weekend
+        2023-12-23 - weekend
+        2023-12-22 - normal day
+         */
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 12, 28, 22, 0, 0, 0, ZoneOffset.UTC));
+
+        List<LocalDate> holidays = new ArrayList<>();
+        holidays.add(LocalDate.of(2023, Month.DECEMBER, 26));
+        holidays.add(LocalDate.of(2023, Month.DECEMBER, 25));
+
+        when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
+
+        assertEquals(
+            OffsetDateTime.of(2023, 12, 22, 22, 0, 0, 0, ZoneOffset.UTC),
+            lastAccessedDeletionDayCalculator.getStartDateForDeletion(2)
+        );
+    }
+
+    @Test
+    void whereLastAccessedOverChristmasNewYears() {
+        /*
+        setting clock to 2023-12-28
+        2023-12-27 - normal day
+        2023-12-26 - holiday
+        2023-12-25 - holiday
+        2023-12-24 - weekend
+        2023-12-23 - weekend
+        2023-12-22 - normal day
+         */
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2024, 1, 2, 22, 0, 0, 0, ZoneOffset.UTC));
+
+        List<LocalDate> holidays = new ArrayList<>();
+        holidays.add(LocalDate.of(2024, Month.JANUARY, 1));
+        holidays.add(LocalDate.of(2023, Month.DECEMBER, 26));
+        holidays.add(LocalDate.of(2023, Month.DECEMBER, 25));
+
+        when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
+
+        assertEquals(
+            OffsetDateTime.of(2023, 12, 14, 22, 0, 0, 0, ZoneOffset.UTC),
+            lastAccessedDeletionDayCalculator.getStartDateForDeletion(10)
+        );
+    }
+
 
 }
 
