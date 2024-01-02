@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -24,8 +23,8 @@ public class LastAccessedDeletionDayCalculator {
 
     public OffsetDateTime getStartDateForDeletion(long numOfWorkingDaysToKeep) {
         List<LocalDate> bankHolidays = bankHolidaysService.getBankHolidaysLocalDateList();
-        LocalDate deletionDate = getDeletionDate(bankHolidays, numOfWorkingDaysToKeep);
-        return deletionDate.atStartOfDay().atOffset(ZoneOffset.UTC);
+        OffsetDateTime deletionDate = subtractNumOfDaysFromDate(bankHolidays, numOfWorkingDaysToKeep);
+        return deletionDate;
     }
 
     private boolean isBankHoliday(LocalDate date, List<LocalDate> bankHolidays) {
@@ -40,9 +39,9 @@ public class LastAccessedDeletionDayCalculator {
         return isWeekend(date) || isBankHoliday(date, bankHolidays);
     }
 
-    private LocalDate getPreviousDay(LocalDate date, List<LocalDate> bankHolidays) {
-        LocalDate newDate = date.minusDays(1);
-        if (isBankHolidayOrWeekend(newDate, bankHolidays)) {
+    private OffsetDateTime getPreviousDay(OffsetDateTime date, List<LocalDate> bankHolidays) {
+        OffsetDateTime newDate = date.minusDays(1);
+        if (isBankHolidayOrWeekend(newDate.toLocalDate(), bankHolidays)) {
             //ignore and get previous day
             return getPreviousDay(newDate, bankHolidays);
         } else {
@@ -50,8 +49,8 @@ public class LastAccessedDeletionDayCalculator {
         }
     }
 
-    private LocalDate getDeletionDate(List<LocalDate> bankHolidays, long numOfDays) {
-        LocalDate newDate = currentTimeHelper.currentLocalDate();
+    private OffsetDateTime subtractNumOfDaysFromDate(List<LocalDate> bankHolidays, long numOfDays) {
+        OffsetDateTime newDate = currentTimeHelper.currentOffsetDateTime();
         for (int counter = 1; counter <= numOfDays; counter++) {
             newDate = getPreviousDay(newDate, bankHolidays);
         }
