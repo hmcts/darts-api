@@ -52,7 +52,7 @@ public class HearingsController implements HearingsApi {
     @Authorisation(contextId = HEARING_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
         globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<List<Transcript>> hearingsHearingIdTranscriptsGet(Integer caseId) {
-        return new ResponseEntity<>(hearingsService.getTranscriptsById(caseId), HttpStatus.OK);
+    public ResponseEntity<List<Transcript>> hearingsHearingIdTranscriptsGet(Integer hearingId) {
+        return new ResponseEntity<>(hearingsService.getTranscriptsByHearingId(hearingId), HttpStatus.OK);
     }
 }
