@@ -19,9 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -268,41 +266,29 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
     private List<List<AudioFileInfo>> getSeparatedAudioFileInfo(List<AudioFileInfo> audioFileInfoList, int acceptableAudioGapSecs) {
 
-        List<List<AudioFileInfo>> seperatedAudioFileInfoList = new ArrayList<>();
+        if (audioFileInfoList.isEmpty()) {
+            return new ArrayList<>();
+        }
 
-        Iterator<AudioFileInfo> firstAudioFileInfoIterator = audioFileInfoList.iterator();
-        Iterator<AudioFileInfo> secondAudioFileInfoIterator = audioFileInfoList.iterator();
+        List<List<AudioFileInfo>> audioFileInfoBySessionList = new ArrayList<>();
+        List<AudioFileInfo> sessionAudio = new ArrayList<>();
+        AudioFileInfo previousAudio;
+        AudioFileInfo thisAudio;
+        sessionAudio.add(audioFileInfoList.get(0));
 
-        AudioFileInfo firstAudioFileInfo;
-        // initialized here to advance iterator
-        AudioFileInfo secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
-
-        while (firstAudioFileInfoIterator.hasNext()) {
-            firstAudioFileInfo = firstAudioFileInfoIterator.next();
-            secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
-            List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Collections.singletonList(firstAudioFileInfo));
-
-            boolean gapBetweenAudios = hasGapBetweenAudios(firstAudioFileInfo, secondAudioFileInfo, acceptableAudioGapSecs);
-            while (!gapBetweenAudios) {
-                concatenatedAudioFileInfoList.add(secondAudioFileInfo);
-                firstAudioFileInfo = getNextAudioFileInfo(firstAudioFileInfoIterator);
-                secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
-                gapBetweenAudios = hasGapBetweenAudios(firstAudioFileInfo, secondAudioFileInfo, acceptableAudioGapSecs);
+        for (int counter = 1; counter < audioFileInfoList.size(); counter++) {
+            previousAudio = audioFileInfoList.get(counter - 1);
+            thisAudio = audioFileInfoList.get(counter);
+            if (hasGapBetweenAudios(previousAudio, thisAudio, acceptableAudioGapSecs)) {
+                //create new session
+                audioFileInfoBySessionList.add(sessionAudio);
+                sessionAudio = new ArrayList<>();
             }
-            seperatedAudioFileInfoList.add(concatenatedAudioFileInfoList);
+            sessionAudio.add(thisAudio);
         }
+        audioFileInfoBySessionList.add(sessionAudio);
+        return audioFileInfoBySessionList;
 
-        return seperatedAudioFileInfoList;
-    }
-
-
-
-    private AudioFileInfo getNextAudioFileInfo(Iterator<AudioFileInfo> audioFileInfoIterator) {
-        if (audioFileInfoIterator.hasNext()) {
-            return audioFileInfoIterator.next();
-        } else {
-            return null;
-        }
     }
 
     private boolean hasGapBetweenAudios(AudioFileInfo audioFileInfoFirst, AudioFileInfo audioFileInfoNext,int acceptableAudioGapSecs) {

@@ -34,7 +34,7 @@ public class TransformedMediaHelper {
     public UUID saveToStorage(MediaRequestEntity mediaRequest, BinaryData binaryData, String filename, AudioFileInfo audioFileInfo) {
 
         OffsetDateTime startTime = audioFileInfo.getStartTime().atOffset(ZoneOffset.UTC);
-        OffsetDateTime endTime = audioFileInfo.getStartTime().atOffset(ZoneOffset.UTC);
+        OffsetDateTime endTime = audioFileInfo.getEndTime().atOffset(ZoneOffset.UTC);
 
         //save in outbound datastore
         Map<String, String> metadata = new HashMap<>();
