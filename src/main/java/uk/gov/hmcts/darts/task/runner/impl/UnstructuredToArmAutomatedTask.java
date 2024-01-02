@@ -32,6 +32,7 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
         unstructuredToArmProcessor.processUnstructuredToArm();
     }
 
+    @SuppressWarnings("java:S4507")
     @Override
     protected void handleException(Exception exception) {
         if (exception instanceof NullPointerException npe) {
