@@ -96,6 +96,7 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.REJECTION_REASON;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.REQUEST_TO_TRANSCRIBER;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_APPROVED;
 import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_REQUEST_REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
@@ -261,7 +262,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                 auditApi.recordAudit(REJECT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
             }
             case WITH_TRANSCRIBER -> auditApi.recordAudit(ACCEPT_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
-            case COMPLETE -> auditApi.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            case COMPLETE -> {
+                if (transcriptionEntity.getIsManualTranscription()) {
+                    notifyRequestor(transcriptionEntity, TRANSCRIPTION_AVAILABLE.toString());
+                }
+                auditApi.recordAudit(COMPLETE_TRANSCRIPTION, userAccountEntity, courtCaseEntity);
+            }
         }
     }
 
