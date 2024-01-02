@@ -10,6 +10,7 @@ import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.openid.connect.sdk.OIDCScopeValue;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.authentication.client.OAuthClient;
@@ -33,6 +34,9 @@ public class OAuthClientImpl implements OAuthClient {
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callback);
         Scope authScope = new Scope();
         authScope.add(scope);
+        authScope.add(OIDCScopeValue.PROFILE);
+        authScope.add(OIDCScopeValue.EMAIL);
+        authScope.add(OIDCScopeValue.OFFLINE_ACCESS);
 
         ClientID clientID = new ClientID(clientId);
         Secret clientSecret = new Secret(authClientSecret);

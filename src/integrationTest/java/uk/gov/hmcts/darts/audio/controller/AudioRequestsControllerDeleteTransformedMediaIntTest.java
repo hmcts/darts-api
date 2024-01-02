@@ -90,13 +90,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
                 objectDirectoryStatusEntity,
                 blobId
             ));
-        //create extra one
-        TransientObjectDirectoryEntity extraTransientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectDirectoryStatusEntity,
-                blobId
-            ));
+
 
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
@@ -111,6 +105,14 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().is2xxSuccessful());
+
+        //create extra one
+        TransientObjectDirectoryEntity extraTransientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
+            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                mediaRequestEntity,
+                objectDirectoryStatusEntity,
+                blobId
+            ));
 
         assertTrue(dartsDatabase.getTransformedMediaRepository().findById(extraTransientObjectDirectoryEntity.getId()).isPresent());
     }

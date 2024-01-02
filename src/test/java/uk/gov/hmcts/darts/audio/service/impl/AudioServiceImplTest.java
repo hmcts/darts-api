@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -61,8 +62,6 @@ class AudioServiceImplTest {
 
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
-    @Mock
-    AddAudioRequestMapper mapper;
 
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
@@ -96,8 +95,7 @@ class AudioServiceImplTest {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private DataManagementApi dataManagementApi;
-    @Mock
-    private FileContentChecksum fileContentChecksum;
+
     private AudioService audioService;
 
     @Mock
@@ -105,6 +103,8 @@ class AudioServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        AddAudioRequestMapper mapper = new AddAudioRequestMapperImpl(retrieveCoreObjectService);
+        FileContentChecksum fileContentChecksum = new FileContentChecksum();
         audioService = new AudioServiceImpl(
             audioTransformationService,
             externalObjectDirectoryRepository,
@@ -172,10 +172,6 @@ class AudioServiceImplTest {
 
     @Test
     void addAudio() throws IOException {
-        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
-        OffsetDateTime endedAt = OffsetDateTime.now();
-
-        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
         HearingEntity hearingEntity = new HearingEntity();
         when(retrieveCoreObjectService.retrieveOrCreateHearing(
             anyString(),
@@ -183,7 +179,18 @@ class AudioServiceImplTest {
             anyString(),
             any()
         )).thenReturn(hearingEntity);
+
+        CourthouseEntity courthouse = new CourthouseEntity();
+        courthouse.setCourthouseName("SWANSEA");
+        CourtroomEntity courtroomEntity = new CourtroomEntity(1, "1", courthouse);
+        when(retrieveCoreObjectService.retrieveOrCreateCourtroom("SWANSEA", "1"))
+            .thenReturn(courtroomEntity);
+
+        OffsetDateTime startedAt = OffsetDateTime.now().minusHours(1);
+        OffsetDateTime endedAt = OffsetDateTime.now();
+
         MediaEntity mediaEntity = createMediaEntity(startedAt, endedAt);
+        when(mediaRepository.save(any(MediaEntity.class))).thenReturn(mediaEntity);
 
         MockMultipartFile audioFile = new MockMultipartFile(
             "addAudio",
@@ -191,8 +198,8 @@ class AudioServiceImplTest {
             "audio/mpeg",
             DUMMY_FILE_CONTENT.getBytes()
         );
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(startedAt, endedAt);
 
-        when(mapper.mapToMedia(any())).thenReturn(mediaEntity);
         audioService.addAudio(audioFile, addAudioMetadataRequest);
 
         verify(dataManagementApi).saveBlobDataToInboundContainer(inboundBlobStorageArgumentCaptor.capture());
@@ -209,7 +216,6 @@ class AudioServiceImplTest {
         assertEquals(2, savedMedia.getTotalChannels());
         assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
         assertEquals("1", savedMedia.getCourtroom().getName());
-
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {

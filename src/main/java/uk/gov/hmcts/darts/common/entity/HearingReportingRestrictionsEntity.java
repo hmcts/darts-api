@@ -10,7 +10,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Entity(name = HearingReportingRestrictionsEntity.VIEW_NAME)
 @Immutable
 @Getter
@@ -18,6 +17,9 @@ public class HearingReportingRestrictionsEntity {
     public static final String VIEW_NAME = "hearing_reporting_restrictions";
 
     @Id
+    @Column(name = "id")
+    Long id;
+
     @Column(name = "cas_id")
     Integer caseId;
 

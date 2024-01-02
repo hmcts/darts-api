@@ -240,7 +240,7 @@ class PostUserIntTest extends IntegrationBase {
     }
 
     private MockHttpServletRequestBuilder buildRequest() {
-        return post("/users")
+        return post("/admin/users")
             .header("Content-Type", "application/json");
     }
 

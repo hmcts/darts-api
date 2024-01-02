@@ -18,7 +18,10 @@ public enum ObjectRecordStatusEnum {
     AWAITING_VERIFICATION(9),
     MARKED_FOR_DELETION(10),
     DELETED(11),
-    ARM_INGESTION(12);
+    ARM_INGESTION(12),
+    ARM_DROP_ZONE(13),
+    FAILURE_ARM_RAW_DATA_FAILED(14),
+    FAILURE_ARM_MANIFEST_FILE_FAILED(15);
 
     private final Integer id;
 

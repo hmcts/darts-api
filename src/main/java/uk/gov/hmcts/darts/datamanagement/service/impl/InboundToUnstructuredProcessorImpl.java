@@ -94,12 +94,12 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         );
 
         for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
-
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
             ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
             if (unstructuredStatus == null
                 || unstructuredStatus.getId().equals(STORED.getId())
                 || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
+                log.info("Skipping transfer for EOD ID: {}", inboundExternalObjectDirectory.getId());
                 continue;
             }
 
@@ -118,14 +118,22 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                     unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                     unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
                     unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
+                    externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+                    log.info("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
                 }
             } catch (BlobStorageException e) {
-                log.error("Failed to get BLOB from datastore {} for file {}", getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
+                log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
+                          getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId());
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            } catch (Exception e) {
+                log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}",
+                          inboundExternalObjectDirectory.getId(), e.getMessage(), e);
+                unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
+                setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            } finally {
+                externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
             }
-            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-
         }
     }
 
@@ -206,7 +214,6 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     }
 
     private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
-
         MediaEntity mediaEntity = inbound.getMedia();
         if (mediaEntity != null) {
             performValidation(
@@ -253,7 +260,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         String incomingChecksum, String calculatedChecksum,
         List<String> allowedExtensions, String extension,
         Integer maxFileSize, Long fileSize) {
-        if (calculatedChecksum.compareTo(incomingChecksum) != 0) {
+        if (incomingChecksum == null || calculatedChecksum.compareTo(incomingChecksum) != 0) {
+            log.error("Checksum comparison failed, incoming \"{}\" not equal to calculated \"{}\", for unstructured EOD: {}",
+                      incomingChecksum, calculatedChecksum, unstructured.getId());
             unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
         }
         if (!allowedExtensions.contains(extension)) {

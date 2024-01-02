@@ -39,13 +39,13 @@ spring:
           internal-azure-ad:
             client-id: ${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}
             client-secret: ${AAD_CLIENT_SECRET:}
-            scope: api://${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}/dartsinternaluser
+            scope: openid
             redirect-uri: ${darts.portal.url}/auth/internal/callback
             logout-redirect-uri: ${darts.portal.url}/auth/internal/logout-callback
             authorization-grant-type: authorization_code
             response-type: code
             response-mode: form_post
-            prompt: login
+            prompt:
             issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0
             claims: preferred_username
             provider: internal-azure-ad-provider
@@ -158,6 +158,14 @@ darts:
       folders:
         submission: dropzone/DARTS/submission/
       max-retry-attempts: 3
+      publisher: DARTS
+      region: GBR
+      media_record_class: DARTSMedia
+      transcription_record_class: DARTSTranscription
+      annotation_record_class: DARTSAnnotation
+      temp-blob-workspace: ${user.home}/arm/tempworkspace
+      date_time_format: yyyy-MM-dd'T'HH:mm:ss
+      file_extension: a360
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

@@ -11,14 +11,30 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createCaseWithCaseNumber;
+import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.createCourtRoomWithNameAtCourthouse;
+import static uk.gov.hmcts.darts.testutils.data.CourtroomTestData.someMinimalCourtRoom;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class HearingTestData {
 
-    public static HearingEntity someMinimalHearing() {
+    public static HearingEntity createSomeMinimalHearing() {
+        var minimalCase = createSomeMinimalCase();
+        var minimalCourtRoom = someMinimalCourtRoom();
+        minimalCourtRoom.setCourthouse(minimalCase.getCourthouse());
 
+        var hearingEntity = new HearingEntity();
+        hearingEntity.setCourtCase(minimalCase);
+        hearingEntity.setCourtroom(minimalCourtRoom);
+        hearingEntity.setHearingIsActual(true);
+        hearingEntity.setHearingDate(LocalDate.now().plusWeeks(1));
+        return hearingEntity;
+    }
+
+    // Refactor, this isn't a minimal hearing
+    public static HearingEntity someMinimalHearing() {
         return createHearingWithDefaults(null, null, null, null);
     }
 
@@ -29,7 +45,7 @@ public class HearingTestData {
     public static HearingEntity createHearingWith(String caseNumber, LocalTime scheduledStartTime) {
         HearingEntity hearing1 = createHearingWithDefaults(
             createCaseWithCaseNumber(caseNumber),
-            CourtroomTestData.createCourtRoomWithNameAtCourthouse(
+            createCourtRoomWithNameAtCourthouse(
                 createCourthouse("NEWCASTLE"),
                 "1"
             ),

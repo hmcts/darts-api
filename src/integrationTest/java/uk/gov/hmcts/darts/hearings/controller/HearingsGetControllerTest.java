@@ -84,7 +84,8 @@ class HearingsGetControllerTest extends IntegrationBase {
                "judges": [
                  "1judge1"
                ],
-               "transcription_count": 0
+               "transcription_count": 0,
+               "reporting_restrictions":[]
              }
             """;
         log.info(actualJson);
