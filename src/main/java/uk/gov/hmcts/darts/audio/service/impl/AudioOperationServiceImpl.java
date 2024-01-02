@@ -87,14 +87,14 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     public List<AudioFileInfo> concatenateWithGaps(final String workspaceDir, final List<AudioFileInfo> audioFileInfos, int acceptableAudioGapSecs)
         throws ExecutionException, InterruptedException, IOException {
 
-        List<List<AudioFileInfo>> seperatedAudioFileInfos = getSeparatedAudioFileInfo(audioFileInfos, acceptableAudioGapSecs);
+        List<List<AudioFileInfo>> separatedAudioFileInfos = getSeparatedAudioFileInfo(audioFileInfos, acceptableAudioGapSecs);
 
         Path basePath = Path.of(audioConfigurationProperties.getConcatWorkspace(), workspaceDir);
 
         Integer channel = getFirstChannel(audioFileInfos);
 
         List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
-        for (List<AudioFileInfo> seperatedAudioFileInfo : seperatedAudioFileInfos) {
+        for (List<AudioFileInfo> seperatedAudioFileInfo : separatedAudioFileInfos) {
             Path outputPath = generateOutputPath(basePath,
                                                  AudioOperationTypes.CONCATENATE,
                                                  channel,
@@ -274,6 +274,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         Iterator<AudioFileInfo> secondAudioFileInfoIterator = audioFileInfoList.iterator();
 
         AudioFileInfo firstAudioFileInfo;
+        // initialized here to advance iterator
         AudioFileInfo secondAudioFileInfo = getNextAudioFileInfo(secondAudioFileInfoIterator);
 
         while (firstAudioFileInfoIterator.hasNext()) {

@@ -79,7 +79,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
-        List<AudioFileInfo> concatenatedAndMergedAudiFileInfos = new ArrayList<>();
+        List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         List<List<AudioFileInfo>> concatenatedAudios = concatenateByChannelWithGaps(audioFileInfos);
         List<List<AudioFileInfo>> concatenationsList = convertChannelsListToConcatenationsList(concatenatedAudios);
 
@@ -87,11 +87,11 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             AudioFileInfo mergedAudio = merge(audioFileInfoList);
             AudioFileInfo trimmedAudio = trimToPeriod(mergedAudio, mergedAudio.getStartTime().atOffset(ZoneOffset.UTC),
                                                       mergedAudio.getEndTime().atOffset(ZoneOffset.UTC));
-            concatenatedAndMergedAudiFileInfos.add(reEncode((trimmedAudio)));
+            concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
 
         }
 
-        return concatenatedAndMergedAudiFileInfos;
+        return concatenatedAndMergedAudioFileInfos;
     }
 
     private List<AudioFileInfo> mapToAudioFileInfos(Map<MediaEntity, Path> mediaEntityPathMap) {
