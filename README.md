@@ -21,33 +21,34 @@
 To run the functional tests locally, you must set the following environment variables on your machine.
 The required value of each variable is stored in Azure Key Vault as a Secret.
 
-| Environment Variable Name        | Corresponding Azure Key Vault Secret Name |
-|----------------------------------|-------------------------------------------|
-| GOVUK_NOTIFY_API_KEY             | GovukNotifyTestApiKey                     |
-| FUNC_TEST_ROPC_USERNAME          | AzureAdB2CFuncTestROPCUsername            |
-| FUNC_TEST_ROPC_PASSWORD          | AzureAdB2CFuncTestROPCPassword            |
-| AAD_B2C_TENANT_ID_KEY            | AzureAdB2CTenantId                        |
-| AAD_B2C_CLIENT_ID_KEY            | AzureAdB2CClientId                        |
-| AAD_B2C_CLIENT_SECRET_KEY        | AzureAdB2CClientSecret                    |
-| AAD_B2C_ROPC_CLIENT_ID_KEY       | AzureAdB2CFuncTestROPCClientId            |
-| AAD_B2C_ROPC_CLIENT_SECRET_KEY   | AzureAdB2CFuncTestROPCClientSecret        |
-| AZURE_STORAGE_CONNECTION_STRING  | AzureStorageConnectionString              |
-| AAD_TENANT_ID                    | AzureADTenantId                           |
-| AAD_CLIENT_ID                    | AzureADClientId                           |
-| AAD_CLIENT_SECRET                | AzureADClientSecret                       |
-| XHIBIT_USER_NAME                 | XhibitUserName                            |
-| XHIBIT_PASSWORD                  | XhibitPassword                            |
-| CPP_USER_NAME                    | CppUserName                               |
-| CPP_PASSWORD                     | CppPassword                               |
-| DARPC_USER_NAME                  | DarPcUserName                             |
-| DARPC_PASSWORD                   | DarPcPassword                             |
-| SYSTEM_USER_EMAIL                | DartsSystemUserEmail                      |
-| DAR_MIDTIER_USER_NAME            | DarMidTierUserName                        |
-| DAR_MIDTIER_PASSWORD             | DarMidTierPassword                        |
-| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME  | AzureAdB2CFuncTestROPCGlobalUsername      |
-| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD  | AzureAdB2CFuncTestROPCGlobalPassword      |
-| AZURE_AD_FUNCTIONAL_TEST_USERNAME  | AzureADFunctionalTestUsername             |
-| AZURE_AD_FUNCTIONAL_TEST_PASSWORD  | AzureADFunctionalTestPassword             |
+| Environment Variable Name                | Corresponding Azure Key Vault Secret Name |
+|------------------------------------------|-------------------------------------------|
+| GOVUK_NOTIFY_API_KEY                     | GovukNotifyTestApiKey                     |
+| FUNC_TEST_ROPC_USERNAME                  | AzureAdB2CFuncTestROPCUsername            |
+| FUNC_TEST_ROPC_PASSWORD                  | AzureAdB2CFuncTestROPCPassword            |
+| AAD_B2C_TENANT_ID_KEY                    | AzureAdB2CTenantId                        |
+| AAD_B2C_CLIENT_ID_KEY                    | AzureAdB2CClientId                        |
+| AAD_B2C_CLIENT_SECRET_KEY                | AzureAdB2CClientSecret                    |
+| AAD_B2C_ROPC_CLIENT_ID_KEY               | AzureAdB2CFuncTestROPCClientId            |
+| AAD_B2C_ROPC_CLIENT_SECRET_KEY           | AzureAdB2CFuncTestROPCClientSecret        |
+| AZURE_STORAGE_CONNECTION_STRING          | AzureStorageConnectionString              |
+| AAD_TENANT_ID                            | AzureADTenantId                           |
+| AAD_CLIENT_ID                            | AzureADClientId                           |
+| AAD_CLIENT_SECRET                        | AzureADClientSecret                       |
+| XHIBIT_USER_NAME                         | XhibitUserName                            |
+| XHIBIT_PASSWORD                          | XhibitPassword                            |
+| CPP_USER_NAME                            | CppUserName                               |
+| CPP_PASSWORD                             | CppPassword                               |
+| DARPC_USER_NAME                          | DarPcUserName                             |
+| DARPC_PASSWORD                           | DarPcPassword                             |
+| SYSTEM_USER_EMAIL                        | DartsSystemUserEmail                      |
+| DAR_MIDTIER_USER_NAME                    | DarMidTierUserName                        |
+| DAR_MIDTIER_PASSWORD                     | DarMidTierPassword                        |
+| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME | AzureAdB2CFuncTestROPCGlobalUsername      |
+| AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD | AzureAdB2CFuncTestROPCGlobalPassword      |
+| AZURE_AD_FUNCTIONAL_TEST_USERNAME        | AzureADFunctionalTestUsername             |
+| AZURE_AD_FUNCTIONAL_TEST_PASSWORD        | AzureADFunctionalTestPassword             |
+| ARM_STORAGE_CONNECTION_STRING            | ARMConnectionString                       |
 
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
@@ -99,6 +100,7 @@ export AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD=
 export AZURE_AD_FUNCTIONAL_TEST_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_PASSWORD=
+export ARM_STORAGE_CONNECTION_STRING=
 ```
 
 ### Storage Account
