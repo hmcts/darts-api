@@ -26,14 +26,14 @@ public class SecurityGroupController implements SecurityGroupApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<List<SecurityGroupWithIdAndRole>> securityGroupsGet(Integer courthouse) {
-        return SecurityGroupApi.super.securityGroupsGet(courthouse);
+    public ResponseEntity<List<SecurityGroupWithIdAndRole>> adminSecurityGroupsGet(Integer courthouse) {
+        return SecurityGroupApi.super.adminSecurityGroupsGet(courthouse);
     }
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<SecurityGroupWithIdAndRole> securityGroupsPost(SecurityGroup securityGroup) {
+    public ResponseEntity<SecurityGroupWithIdAndRole> adminSecurityGroupsPost(SecurityGroup securityGroup) {
         SecurityGroupWithIdAndRole response = securityGroupService.createSecurityGroup(securityGroup);
 
         return ResponseEntity.status(HttpStatus.CREATED)

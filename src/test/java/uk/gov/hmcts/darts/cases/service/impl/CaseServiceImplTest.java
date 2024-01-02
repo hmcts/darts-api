@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -56,7 +56,6 @@ class CaseServiceImplTest {
 
     public static final String SWANSEA = "SWANSEA";
     public static final String TEST_COURT_CASE = "case_courthouse";
-    private static final LocalDate HEARING_DATE = LocalDate.of(1990, Month.FEBRUARY, 19);
 
     CaseServiceImpl service;
 
@@ -67,7 +66,7 @@ class CaseServiceImplTest {
     HearingRepository hearingRepository;
 
     @Mock
-    EventRepository eventRepository;
+    HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
     CasesMapper mapper;
 
@@ -85,17 +84,13 @@ class CaseServiceImplTest {
 
     private ObjectMapper objectMapper;
 
-    @Captor
-    private ArgumentCaptor<HearingEntity> hearingEntityCaptor;
-
     @BeforeEach
     void setUp() {
-        mapper = new CasesMapper(retrieveCoreObjectService);
+        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository);
         service = new CaseServiceImpl(
             mapper,
             hearingRepository,
             caseRepository,
-            eventRepository,
             retrieveCoreObjectService,
             advancedSearchRequestHelper,
             transcriptionRepository

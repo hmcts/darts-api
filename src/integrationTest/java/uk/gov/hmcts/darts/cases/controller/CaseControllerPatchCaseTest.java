@@ -83,7 +83,8 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
               "defendants": [],
               "judges": [],
               "prosecutors": [],
-              "defenders": []
+              "defenders": [],
+              "reporting_restrictions": []
             }
             """;
         expectedResponse = expectedResponse.replace("<<case_id>>", createdCase.getId().toString());

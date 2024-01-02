@@ -13,6 +13,16 @@ import static uk.gov.hmcts.darts.testutils.data.ProsecutorTestData.createProsecu
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class CaseTestData {
 
+    public static CourtCaseEntity createSomeMinimalCase() {
+        var courtCaseEntity = new CourtCaseEntity();
+        courtCaseEntity.setCourthouse(someMinimalCourthouse());
+        courtCaseEntity.setCaseNumber("case-1");
+        courtCaseEntity.setClosed(false);
+        courtCaseEntity.setInterpreterUsed(false);
+        return courtCaseEntity;
+    }
+
+    // Not a minimal case. refactor
     public static CourtCaseEntity someMinimalCase() {
         var courtCaseEntity = new CourtCaseEntity();
         courtCaseEntity.setCaseNumber("case-1");

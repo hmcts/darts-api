@@ -7,6 +7,6 @@ import org.zalando.problem.spring.web.advice.ProblemHandling;
 
 @ControllerAdvice
 @EnableAutoConfiguration(exclude = ErrorMvcAutoConfiguration.class)
-public class ExceptionHandler implements ProblemHandling, DartsApiTrait {
+public class ExceptionHandler implements ProblemHandling, DartsApiTrait, ErrorResponseAdviceTrait {
 
 }

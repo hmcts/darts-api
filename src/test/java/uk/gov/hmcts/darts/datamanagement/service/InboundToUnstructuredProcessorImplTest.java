@@ -147,7 +147,7 @@ class InboundToUnstructuredProcessorImplTest {
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
         ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
@@ -260,7 +260,7 @@ class InboundToUnstructuredProcessorImplTest {
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
         ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
@@ -292,7 +292,7 @@ class InboundToUnstructuredProcessorImplTest {
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntityActual = externalObjectDirectoryEntityCaptor.getValue();
         ObjectRecordStatusEntity savedStatus = externalObjectDirectoryEntityActual.getStatus();
@@ -437,7 +437,7 @@ class InboundToUnstructuredProcessorImplTest {
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();
 
-        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
         ExternalObjectDirectoryEntity saved = externalObjectDirectoryEntityCaptor.getValue();
 

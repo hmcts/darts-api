@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -126,6 +127,8 @@ public class DartsDatabaseStub {
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
 
+    private final EntityManager entityManager;
+
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
@@ -207,7 +210,7 @@ public class DartsDatabaseStub {
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
-        return hearingRepository.saveAndFlush(hearing);
+        return hearingRepository.save(hearing);
     }
 
     @Transactional
@@ -392,6 +395,18 @@ public class DartsDatabaseStub {
         return mediaEntity;
     }
 
+    @Transactional
+    public void saveEventsForHearing(HearingEntity hearing, EventEntity... eventEntities) {
+        hearingRepository.save(hearing);
+        stream(eventEntities).forEach(event -> saveSingleEventForHearing(hearing, event));
+    }
+
+    @Transactional
+    public void saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
+        hearingRepository.save(hearing);
+        eventEntities.forEach(event -> saveSingleEventForHearing(hearing, event));
+    }
+
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
         return externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
     }
@@ -482,5 +497,23 @@ public class DartsDatabaseStub {
             testUser.setActive(true);
             userAccountRepository.saveAndFlush(testUser);
         }
+    }
+
+    private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
+        event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+        eventRepository.save(event);
+    }
+
+    public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
+        var handler = eventHandlerRepository.getReferenceById(handlerId);
+        event.setEventType(handler);
+        return eventRepository.save(event);
+    }
+
+    @Transactional
+    public CourtCaseEntity addHandlerToCase(CourtCaseEntity caseEntity, int handlerId) {
+        var handler = eventHandlerRepository.findById(handlerId).orElseThrow();
+        caseEntity.setReportingRestrictions(handler);
+        return caseRepository.save(caseEntity);
     }
 }

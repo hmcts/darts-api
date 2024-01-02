@@ -19,7 +19,7 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
         SELECT count(distinct(tm.id)) FROM MediaRequestEntity mr, TransformedMediaEntity tm
         WHERE tm.mediaRequest = mr
         AND mr.requestor.id = :userId
-        AND tm.lastAccessed = null
+        AND tm.lastAccessed is null
         AND mr.status = :status
         """)
     long countTransformedEntitiesByRequestorIdAndStatusNotAccessed(Integer userId, MediaRequestStatus status);

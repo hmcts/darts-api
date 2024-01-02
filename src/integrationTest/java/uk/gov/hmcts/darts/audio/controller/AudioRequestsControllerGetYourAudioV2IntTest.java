@@ -64,7 +64,7 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
             );
 
             OffsetDateTime time = OffsetDateTime.of(3020, 6, 20, 15, 30, 0, 0, ZoneOffset.UTC);
-            transformedMediaStub.createTransformedMediaEntity(completedMediaRequest, "file1", time, time);
+            transformedMediaStub.createTransformedMediaEntity(completedMediaRequest, "file1", null, time);
             transformedMediaStub.createTransformedMediaEntity(completedMediaRequest, "file2", time, time);
             transformedMediaStub.createTransformedMediaEntity(someoneElsesCompletedMediaRequest, "file20", time, time);
         }
@@ -155,7 +155,6 @@ class AudioRequestsControllerGetYourAudioV2IntTest extends IntegrationBase {
                   "hearing_date": "2023-06-10",
                   "start_ts": "2023-06-26T13:00:00Z",
                   "end_ts": "2023-06-26T13:45:00Z",
-                  "transformed_media_expiry_ts": "3020-06-20T15:30:00Z",
                   "media_request_status": "COMPLETED",
                   "transformed_media_filename": "file1",
                   "transformed_media_format": "ZIP",
