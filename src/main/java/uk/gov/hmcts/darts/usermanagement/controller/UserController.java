@@ -29,8 +29,8 @@ public class UserController implements UserApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<List<UserWithIdAndLastLogin>> getUsers(Integer courthouse) {
-        return UserApi.super.getUsers(courthouse);
+    public ResponseEntity<List<UserWithIdAndLastLogin>> getUsers(Integer courthouse, String emailAddress) {
+        return UserApi.super.getUsers(courthouse, emailAddress);
     }
 
     @Override

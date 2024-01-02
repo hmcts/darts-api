@@ -19,12 +19,20 @@ paths:
       parameters:
         - in: query
           name: courthouse
-          required: true
+          required: false
           schema:
             $ref: "#/components/schemas/CourthouseId"
+        - in: header
+          name: Email-Address
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserEmailAddress'
       responses:
         '200':
           $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+
     post:
       summary: Create new user
       tags:
@@ -124,6 +132,14 @@ paths:
         '400':
           $ref: '#/components/responses/SecurityGroupBadRequest'
 
+  /admin/roles:
+    get:
+      summary: Get roles
+      tags:
+        - Roles
+      responses:
+        '200':
+          $ref: '#/components/responses/RoleArraySuccessResponse'
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -185,6 +201,15 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
+    RoleArraySuccessResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Role'
+
     UserTransferSuccess:
       description: 'Success'
     SecurityGroupSuccessResponse:
@@ -297,11 +322,18 @@ components:
       type: string
       minLength: 1
       maxLength: 256
-    SecurityGroupRoleId:
-      type: integer
     SecurityGroupGlobalAccess:
       type: boolean
     SecurityGroupDisplayState:
+      type: boolean
+
+    RoleId:
+      type: integer
+    RoleDisplayName:
+      type: string
+      minLength: 1
+      maxLength: 256
+    RoleDisplayState:
       type: boolean
 
     CourthouseId:
@@ -377,11 +409,15 @@ components:
         id:
           $ref: '#/components/schemas/SecurityGroupId'
         role_id:
-          $ref: '#/components/schemas/SecurityGroupRoleId'
+          $ref: '#/components/schemas/RoleId'
         global_access:
           $ref: '#/components/schemas/SecurityGroupGlobalAccess'
         display_state:
           $ref: '#/components/schemas/SecurityGroupDisplayState'
+        courthouse_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourthouseId'
       allOf:
         - $ref: '#/components/schemas/SecurityGroup'
     SecurityGroup:
@@ -396,3 +432,13 @@ components:
       required:
         - name
         - display_name
+
+    Role:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/RoleId'
+        display_name:
+          $ref: '#/components/schemas/RoleDisplayName'
+        display_state:
+          $ref: '#/components/schemas/RoleDisplayState'
