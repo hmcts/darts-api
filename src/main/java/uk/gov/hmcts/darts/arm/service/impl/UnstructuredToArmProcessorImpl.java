@@ -14,11 +14,11 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
@@ -34,18 +34,18 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.ARM;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.ARM_INGESTION;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_MANIFEST_FILE_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_RAW_DATA_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_INGESTION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_MANIFEST_FILE_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RAW_DATA_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @Slf4j
 public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcessor {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final DataManagementApi dataManagementApi;
     private final ArmDataManagementApi armDataManagementApi;
@@ -55,17 +55,17 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final FileOperationService fileOperationService;
     private final ArchiveRecordService archiveRecordService;
 
-    private final EnumMap<ObjectDirectoryStatusEnum, ObjectRecordStatusEntity> armStatuses =
-        new EnumMap<>(ObjectDirectoryStatusEnum.class);
+    private final EnumMap<ObjectRecordStatusEnum, ObjectRecordStatusEntity> armStatuses =
+        new EnumMap<>(ObjectRecordStatusEnum.class);
 
     public UnstructuredToArmProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
-                                          ObjectDirectoryStatusRepository objectDirectoryStatusRepository,
+                                          ObjectRecordStatusRepository objectRecordStatusRepository,
                                           ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
                                           ArmDataManagementApi armDataManagementApi, UserAccountRepository userAccountRepository,
                                           ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
                                           ArchiveRecordService archiveRecordService) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
-        this.objectDirectoryStatusRepository = objectDirectoryStatusRepository;
+        this.objectRecordStatusRepository = objectRecordStatusRepository;
         this.externalLocationTypeRepository = externalLocationTypeRepository;
         this.dataManagementApi = dataManagementApi;
         this.armDataManagementApi = armDataManagementApi;
@@ -77,26 +77,26 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     }
 
-    private void preloadObjectRecordStatuses(ObjectDirectoryStatusRepository objectDirectoryStatusRepository) {
+    private void preloadObjectRecordStatuses(ObjectRecordStatusRepository objectRecordStatusRepository) {
         if (!armStatuses.containsKey(STORED)) {
-            ObjectRecordStatusEntity storedStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
+            ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
             armStatuses.put(STORED, storedStatus);
         }
         if (!armStatuses.containsKey(FAILURE_ARM_RAW_DATA_FAILED)) {
-            ObjectRecordStatusEntity failedArmRawDataStatus = objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId());
+            ObjectRecordStatusEntity failedArmRawDataStatus = objectRecordStatusRepository.getReferenceById(FAILURE_ARM_RAW_DATA_FAILED.getId());
             armStatuses.put(FAILURE_ARM_RAW_DATA_FAILED, failedArmRawDataStatus);
         }
         if (!armStatuses.containsKey(FAILURE_ARM_MANIFEST_FILE_FAILED)) {
             ObjectRecordStatusEntity failedArmManifestFileStatus =
-                objectDirectoryStatusRepository.getReferenceById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId());
+                objectRecordStatusRepository.getReferenceById(FAILURE_ARM_MANIFEST_FILE_FAILED.getId());
             armStatuses.put(FAILURE_ARM_MANIFEST_FILE_FAILED, failedArmManifestFileStatus);
         }
         if (!armStatuses.containsKey(ARM_INGESTION)) {
-            ObjectRecordStatusEntity armIngestionStatus = objectDirectoryStatusRepository.getReferenceById(ARM_INGESTION.getId());
+            ObjectRecordStatusEntity armIngestionStatus = objectRecordStatusRepository.getReferenceById(ARM_INGESTION.getId());
             armStatuses.put(ARM_INGESTION, armIngestionStatus);
         }
         if (!armStatuses.containsKey(ARM_DROP_ZONE)) {
-            ObjectRecordStatusEntity armDropZoneStatus = objectDirectoryStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
+            ObjectRecordStatusEntity armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
             armStatuses.put(ARM_DROP_ZONE, armDropZoneStatus);
         }
     }
@@ -108,7 +108,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private void processPendingUnstructured() {
-        preloadObjectRecordStatuses(objectDirectoryStatusRepository);
+        preloadObjectRecordStatuses(objectRecordStatusRepository);
 
         ExternalLocationTypeEntity inboundLocation = externalLocationTypeRepository.getReferenceById(
             ExternalLocationTypeEnum.UNSTRUCTURED.getId());
@@ -147,7 +147,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             String filename = generateFilename(armExternalObjectDirectory);
 
             boolean copyRawDataToArmSuccessful = copyRawDataToArm(unstructuredExternalObjectDirectory, armExternalObjectDirectory,
-                                                                  filename, failedStatus);
+                                                                  filename, failedStatus
+            );
             if (copyRawDataToArmSuccessful) {
                 generateAndCopyMetadataToArm(armExternalObjectDirectory);
             }
@@ -157,8 +158,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private void generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory) {
 
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(
-                armExternalObjectDirectory,
-                armExternalObjectDirectory.getTransferAttempts());
+            armExternalObjectDirectory,
+            armExternalObjectDirectory.getTransferAttempts()
+        );
 
 
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
@@ -183,7 +185,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,
-                                                                                   ExternalLocationTypeEntity armLocation) {
+                                                                                      ExternalLocationTypeEntity armLocation) {
 
         List<ObjectRecordStatusEntity> failedArmStatuses = new ArrayList<>();
         failedArmStatuses.add(armStatuses.get(FAILURE_ARM_RAW_DATA_FAILED));
@@ -198,7 +200,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         var failedArmExternalObjectDirectoryEntities = externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
             failedArmStatuses,
             armLocation,
-            armDataManagementConfiguration.getMaxRetryAttempts());
+            armDataManagementConfiguration.getMaxRetryAttempts()
+        );
 
         List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities =
             Stream.concat(pendingUnstructuredExternalObjectDirectoryEntities.stream(), failedArmExternalObjectDirectoryEntities.stream())
@@ -223,15 +226,19 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             }
             copySuccessful = true;
         } catch (BlobStorageException e) {
-            log.error("Failed to move BLOB data for file {} due to {}",
-                      unstructuredExternalObjectDirectory.getExternalLocation(),
-                      e.getMessage());
+            log.error(
+                "Failed to move BLOB data for file {} due to {}",
+                unstructuredExternalObjectDirectory.getExternalLocation(),
+                e.getMessage()
+            );
 
             updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
         } catch (Exception e) {
-            log.error("Error moving BLOB data for file {} due to {}",
-                      unstructuredExternalObjectDirectory.getExternalLocation(),
-                      e.getMessage());
+            log.error(
+                "Error moving BLOB data for file {} due to {}",
+                unstructuredExternalObjectDirectory.getExternalLocation(),
+                e.getMessage()
+            );
 
             updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
         }
@@ -240,8 +247,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
-                                                             ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
-        armExternalObjectDirectory.setStatus(armStatuses.get(objectDirectoryStatusEnum));
+                                                             ObjectRecordStatusEnum objectRecordStatusEnum) {
+        armExternalObjectDirectory.setStatus(armStatuses.get(objectRecordStatusEnum));
         updateTransferAttempts(armExternalObjectDirectory);
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
@@ -253,12 +260,13 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()),
             externalObjectDirectoryEntity.getMedia(),
             externalObjectDirectoryEntity.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntity.getAnnotationDocumentEntity());
+            externalObjectDirectoryEntity.getAnnotationDocumentEntity()
+        );
     }
 
     private ExternalObjectDirectoryEntity createArmExternalObjectDirectoryEntity(ExternalObjectDirectoryEntity externalObjectDirectory) {
 
-        ExternalObjectDirectoryEntity  armExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
+        ExternalObjectDirectoryEntity armExternalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         armExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(ARM.getId()));
         armExternalObjectDirectoryEntity.setStatus(armStatuses.get(ARM_INGESTION));
         armExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());

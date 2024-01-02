@@ -10,11 +10,11 @@ import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.entity.ObjectDirectory;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements ExternalDataStoreDeleter<T> {
 
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final UserAccountRepository userAccountRepository;
     private final JpaRepository<T, Integer> repository;
     private final ObjectDirectoryDeletedFinder<T> finder;
@@ -71,6 +71,6 @@ public class ExternalDataStoreDeleterImpl<T extends ObjectDirectory> implements 
 
 
     private ObjectRecordStatusEntity getDeletedStatus() {
-        return objectDirectoryStatusRepository.getReferenceById(ObjectDirectoryStatusEnum.DELETED.getId());
+        return objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId());
     }
 }

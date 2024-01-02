@@ -28,7 +28,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
@@ -60,7 +60,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.FAILED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_END_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.AUDIO_START_TIME;
 import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMapValues.COURTHOUSE;
@@ -84,7 +84,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final FileOperationService fileOperationService;
 
     private final MediaRepository mediaRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
 
@@ -118,7 +118,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public Optional<UUID> getMediaLocation(MediaEntity media) {
         Optional<UUID> externalLocation = Optional.empty();
 
-        ObjectRecordStatusEntity objectDirectoryStatus = objectDirectoryStatusRepository.getReferenceById(STORED.getId());
+        ObjectRecordStatusEntity objectDirectoryStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
             media, objectDirectoryStatus, externalLocationType

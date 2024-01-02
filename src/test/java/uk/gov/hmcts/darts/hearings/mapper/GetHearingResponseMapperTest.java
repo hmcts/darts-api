@@ -1,23 +1,44 @@
 package uk.gov.hmcts.darts.hearings.mapper;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 class GetHearingResponseMapperTest {
+
+    @Autowired
+    GetHearingResponseMapper getHearingResponseMapper;
+
+    @Mock
+    HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
+
+    @BeforeEach
+    void beforeAll() {
+        getHearingResponseMapper = new GetHearingResponseMapper(hearingReportingRestrictionsRepository);
+        Mockito.when(hearingReportingRestrictionsRepository.findAllByCaseId(101)).thenReturn(Collections.emptyList());
+    }
 
     @Test
     void okMapper() {
         HearingEntity hearing = CommonTestDataUtil.createHearing("TestCase", LocalTime.of(10, 0, 0));
 
-        GetHearingResponse response = GetHearingResponseMapper.map(hearing);
+        GetHearingResponse response = getHearingResponseMapper.map(hearing);
         assertEquals(response.getHearingId(), 102);
         assertEquals(response.getCourthouse(), "SWANSEA");
         assertEquals(response.getCourtroom(), "1");
@@ -26,5 +47,6 @@ class GetHearingResponseMapperTest {
         assertEquals(response.getCaseId(), 101);
         assertEquals(response.getJudges(), List.of("Judge_1", "Judge_2"));
         assertEquals(response.getTranscriptionCount(), 1);
+        assertEquals(0, response.getReportingRestrictions().size());
     }
 }

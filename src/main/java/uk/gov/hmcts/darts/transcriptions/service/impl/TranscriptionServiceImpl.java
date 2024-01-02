@@ -23,13 +23,13 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.PartialFailureException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -129,7 +129,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final UserAccountRepository userAccountRepository;
 
@@ -205,7 +205,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
-        return updateTranscription(transcriptionId,updateTranscription,false);
+        return updateTranscription(transcriptionId, updateTranscription, false);
     }
 
     @Override
@@ -589,8 +589,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                                                                       TranscriptionDocumentEntity transcriptionDocumentEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
-        externalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(
-            ObjectDirectoryStatusEnum.STORED.getId()));
+        externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
+            ObjectRecordStatusEnum.STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);

@@ -18,13 +18,13 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
@@ -46,7 +46,7 @@ public class AudioServiceImpl implements AudioService {
 
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final MediaRepository mediaRepository;
     private final AudioOperationService audioOperationService;
@@ -110,12 +110,15 @@ public class AudioServiceImpl implements AudioService {
         }
 
         MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
+        savedMedia.setChecksum(checksum);
         linkAudioAndHearing(addAudioMetadataRequest, savedMedia);
 
-        saveExternalObjectDirectory(externalLocation,
-                                    checksum,
-                                    userIdentity.getUserAccount(),
-                                    savedMedia);
+        saveExternalObjectDirectory(
+            externalLocation,
+            checksum,
+            userIdentity.getUserAccount(),
+            savedMedia
+        );
     }
 
     @Override
@@ -138,8 +141,8 @@ public class AudioServiceImpl implements AudioService {
                                                                       MediaEntity mediaEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setMedia(mediaEntity);
-        externalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(
-            ObjectDirectoryStatusEnum.STORED.getId()));
+        externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
+            ObjectRecordStatusEnum.STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);

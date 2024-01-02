@@ -44,7 +44,7 @@ import static org.springframework.util.unit.DataSize.ofMegabytes;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;

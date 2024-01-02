@@ -6,21 +6,21 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 
 import java.util.UUID;
 
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
 @RequiredArgsConstructor
 public class TransientObjectDirectoryServiceImpl implements TransientObjectDirectoryService {
 
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final UserAccountRepository userAccountRepository;
 
     @Override
@@ -29,7 +29,7 @@ public class TransientObjectDirectoryServiceImpl implements TransientObjectDirec
 
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = new TransientObjectDirectoryEntity();
         transientObjectDirectoryEntity.setTransformedMedia(transformedMediaEntity);
-        transientObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(STORED.getId()));
+        transientObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(STORED.getId()));
         transientObjectDirectoryEntity.setExternalLocation(UUID.fromString(blobClient.getBlobName()));
         transientObjectDirectoryEntity.setTransferAttempts(null);
         var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());

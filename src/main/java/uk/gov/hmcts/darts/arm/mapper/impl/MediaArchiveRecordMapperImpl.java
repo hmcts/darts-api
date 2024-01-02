@@ -26,8 +26,10 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
 
     public MediaArchiveRecord mapToMediaArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         MediaEntity media = externalObjectDirectory.getMedia();
-        MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory,
-                                                                                                           externalObjectDirectory.getId());
+        MediaCreateArchiveRecordOperation mediaCreateArchiveRecordOperation = createArchiveRecordOperation(
+            externalObjectDirectory,
+            externalObjectDirectory.getId()
+        );
         UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(media, externalObjectDirectory.getId());
         return createMediaArchiveRecord(mediaCreateArchiveRecordOperation, uploadNewFileRecord);
     }
@@ -68,7 +70,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             .startDateTime(media.getStart().format(formatter))
             .endDateTime(media.getEnd().format(formatter))
             .createdDateTime(media.getCreatedDateTime().format(formatter))
-            .caseNumbers(caseListToString(media.getCaseIdList()))
+            .caseNumbers(caseListToString(media.getCaseNumberList()))
             .build();
     }
 
