@@ -77,7 +77,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     void setUp() {
         requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         //setting clock to 2023-10-27
-        when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.of(2023, 10, 27));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");
         UserAccountEntity systemUser = new UserAccountEntity();
         systemUser.setId(0);
@@ -179,7 +179,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
         //setting clock to 2023-10-23 on a monday
-        when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.of(2023, 10, 23));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
         outboundAudioDeleterProcessor.markForDeletion();
 
         assertEntityStateNotChanged(currentMediaRequest);
@@ -274,7 +274,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
         //setting clock to Tuesday, 24 October 2023
-        when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.of(2023, 10, 24));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 24, 22, 0, 0, 0, ZoneOffset.UTC));
 
         assertEntityStateChanged(outboundAudioDeleterProcessor.markForDeletion());
 
