@@ -151,7 +151,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenTranscription_WhenGenerateArchiveRecord_ReturnNotImplemented() throws IOException {
+    void givenTranscription_WhenGenerateArchiveRecord_ReturnTranscriptionFile() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
 
@@ -182,7 +182,7 @@ class ArchiveRecordServiceImplTest {
     }
 
     @Test
-    void givenAnnotation_WhenGenerateArchiveRecord_ReturnNotImplemented() throws IOException {
+    void givenAnnotation_WhenGenerateArchiveRecord_ReturnAnnotationFile() throws IOException {
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
 
