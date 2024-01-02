@@ -125,7 +125,7 @@ class TestSupportControllerTest extends IntegrationBase {
         List<Event> events = new ArrayList<>();
         events.add(event);
 
-        when(mockBankHolidaysService.getBankHolidaysFor(2023)).thenReturn(events);
+        when(mockBankHolidaysService.getBankHolidays()).thenReturn(events);
 
         MvcResult response = mockMvc.perform(get(ENDPOINT_URL + "/bank-holidays/2023"))
             .andExpect(status().isOk())
