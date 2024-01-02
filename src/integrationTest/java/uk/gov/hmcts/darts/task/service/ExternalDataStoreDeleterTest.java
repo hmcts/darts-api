@@ -27,7 +27,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersAccountUUIDEnum;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.datamanagement.dao.DataManagementDao;
@@ -47,9 +47,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.DELETED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.MARKED_FOR_DELETION;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.DELETED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
 @Transactional
@@ -107,7 +107,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
 
         externalInboundDataStoreDeleter = new ExternalInboundDataStoreDeleter(
-            dartsDatabase.getObjectDirectoryStatusRepository(),
+            dartsDatabase.getObjectRecordStatusRepository(),
             dartsDatabase.getUserAccountRepository(),
             dartsDatabase.getExternalObjectDirectoryRepository(),
             inboundExternalObjectDirectoryDeletedFinder,
@@ -116,7 +116,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         );
 
         externalUnstructuredDataStoreDeleter = new ExternalUnstructuredDataStoreDeleter(
-            dartsDatabase.getObjectDirectoryStatusRepository(),
+            dartsDatabase.getObjectRecordStatusRepository(),
             dartsDatabase.getUserAccountRepository(),
             dartsDatabase.getExternalObjectDirectoryRepository(),
             unstructuredExternalObjectDirectoryDeletedFinder,
@@ -125,7 +125,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         );
 
         externalOutboundDataStoreDeleter =
-            new ExternalOutboundDataStoreDeleter(dartsDatabase.getObjectDirectoryStatusRepository(),
+            new ExternalOutboundDataStoreDeleter(dartsDatabase.getObjectRecordStatusRepository(),
                                                  dartsDatabase.getUserAccountRepository(),
                                                  dartsDatabase.getTransientObjectDirectoryRepository(),
                                                  outboundExternalObjectDirectoryDeletedFinder,
@@ -294,7 +294,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
 
     }
 
-    private ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity, Integer dataStoreId, ObjectDirectoryStatusEnum status) {
+    private ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity, Integer dataStoreId, ObjectRecordStatusEnum status) {
         var externalObjectDirectoryEntity = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             mediaEntity,
             dartsDatabase.getObjectDirectoryStatusEntity(status),
@@ -305,7 +305,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         return dartsDatabase.save(externalObjectDirectoryEntity);
     }
 
-    private TransientObjectDirectoryEntity createTransientDirectoryAndObjectStatus(MediaRequestEntity currentMediaRequest, ObjectDirectoryStatusEnum status) {
+    private TransientObjectDirectoryEntity createTransientDirectoryAndObjectStatus(MediaRequestEntity currentMediaRequest, ObjectRecordStatusEnum status) {
         var blobId = UUID.randomUUID();
 
 

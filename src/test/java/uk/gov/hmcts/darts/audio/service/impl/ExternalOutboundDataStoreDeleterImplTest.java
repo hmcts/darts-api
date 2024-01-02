@@ -11,10 +11,10 @@ import uk.gov.hmcts.darts.audio.deleter.impl.outbound.OutboundExternalObjectDire
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 class ExternalOutboundDataStoreDeleterImplTest {
 
     @Mock
-    ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     UserAccountRepository userAccountRepository;
     @Mock
@@ -58,7 +58,7 @@ class ExternalOutboundDataStoreDeleterImplTest {
     @BeforeEach
     void setUp() {
         this.deleter = new ExternalOutboundDataStoreDeleter(
-            objectDirectoryStatusRepository,
+            objectRecordStatusRepository,
             userAccountRepository,
             transientObjectDirectoryRepository,
             finder,
@@ -68,8 +68,8 @@ class ExternalOutboundDataStoreDeleterImplTest {
 
     private void mockStatus() {
         this.markedForDeletionStatus = new ObjectRecordStatusEntity();
-        markedForDeletionStatus.setId(ObjectDirectoryStatusEnum.DELETED.getId());
-        when(objectDirectoryStatusRepository.getReferenceById(ObjectDirectoryStatusEnum.DELETED.getId())).thenReturn(
+        markedForDeletionStatus.setId(ObjectRecordStatusEnum.DELETED.getId());
+        when(objectRecordStatusRepository.getReferenceById(ObjectRecordStatusEnum.DELETED.getId())).thenReturn(
             markedForDeletionStatus);
     }
 

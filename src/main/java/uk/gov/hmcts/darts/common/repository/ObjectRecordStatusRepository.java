@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 
 @Repository
-public interface ObjectDirectoryStatusRepository extends JpaRepository<ObjectRecordStatusEntity, Integer> {
+public interface ObjectRecordStatusRepository extends JpaRepository<ObjectRecordStatusEntity, Integer> {
 
 }

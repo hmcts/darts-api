@@ -94,14 +94,12 @@ spring:
           envers:
             audit_table_suffix: _audit
             store_data_at_delete: true
-    flyway:
-      out-of-order: true
-      ignore-missing-migrations: true
   flyway:
     enabled: ${ENABLE_DB_MIGRATE:true}
     locations: classpath:db/migration/common,db/migration/postgres
     default-schema: ${spring.datasource.schema}
     mixed: true
+    out-of-order: true
 
 darts:
   audio:

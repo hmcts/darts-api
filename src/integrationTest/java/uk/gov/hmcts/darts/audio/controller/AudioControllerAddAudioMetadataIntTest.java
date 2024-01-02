@@ -73,13 +73,14 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "metadata",
             null,
             "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes());
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
 
 
         mockMvc.perform(
-            multipart(ENDPOINT)
-                .file(audioFile)
-                .file(metadataJson))
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -100,7 +101,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(ENDED_AT, media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
-            assertEquals(3, media.getCaseIdList().size());
+            assertEquals(3, media.getCaseNumberList().size());
             assertEquals("1", media.getCourtroom().getName());
         }
     }
@@ -120,7 +121,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "metadata",
             null,
             "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes());
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
 
         MvcResult mvcResult = mockMvc.perform(
                 multipart(ENDPOINT)
