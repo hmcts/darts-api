@@ -13,9 +13,11 @@ import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.hearings.mapper.GetHearingResponseMapper;
 import uk.gov.hmcts.darts.hearings.model.EventResponse;
 
 import java.time.LocalDate;
@@ -32,6 +34,8 @@ class HearingsServiceImplTest {
     HearingRepository hearingRepository;
     @Mock
     EventRepository eventRepository;
+    @Mock
+    HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
 
     @Mock
@@ -39,10 +43,12 @@ class HearingsServiceImplTest {
 
     HearingsServiceImpl service;
 
+    GetHearingResponseMapper getHearingResponseMapper;
 
     @BeforeEach
     void setUp() {
         service = new HearingsServiceImpl(
+            getHearingResponseMapper,
             hearingRepository,
             transcriptionRepository,
             eventRepository

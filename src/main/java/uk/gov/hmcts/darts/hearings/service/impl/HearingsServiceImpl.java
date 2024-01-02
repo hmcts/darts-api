@@ -27,6 +27,7 @@ import java.util.Optional;
 @Slf4j
 public class HearingsServiceImpl implements HearingsService {
 
+    private final GetHearingResponseMapper getHearingResponseMapper;
     private final HearingRepository hearingRepository;
     private final TranscriptionRepository transcriptionRepository;
     private final EventRepository eventRepository;
@@ -34,7 +35,7 @@ public class HearingsServiceImpl implements HearingsService {
     @Override
     public GetHearingResponse getHearings(Integer hearingId) {
         HearingEntity foundHearing = getHearingById(hearingId);
-        return GetHearingResponseMapper.map(foundHearing);
+        return getHearingResponseMapper.map(foundHearing);
     }
 
     public HearingEntity getHearingById(Integer hearingId) {

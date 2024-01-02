@@ -1,13 +1,26 @@
 package uk.gov.hmcts.darts.hearings.mapper;
 
-import lombok.experimental.UtilityClass;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.hearings.model.GetHearingResponse;
+import uk.gov.hmcts.darts.hearings.model.ReportingRestriction;
 
-@UtilityClass
+import java.util.Comparator;
+import java.util.List;
+
+
+@Component
+@RequiredArgsConstructor
 @SuppressWarnings({"PMD.TooManyMethods"})
 public class GetHearingResponseMapper {
 
+    private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
+
+    @Transactional
     public GetHearingResponse map(HearingEntity hearing) {
         GetHearingResponse getHearingResponse = new GetHearingResponse();
         getHearingResponse.setHearingId(hearing.getId());
@@ -18,7 +31,34 @@ public class GetHearingResponseMapper {
         getHearingResponse.setHearingDate(hearing.getHearingDate());
         getHearingResponse.setJudges(hearing.getJudgesStringList());
         getHearingResponse.setTranscriptionCount(hearing.getTranscriptions().size());
+        List<HearingReportingRestrictionsEntity> restrictions
+            = hearingReportingRestrictionsRepository.findAllByCaseId(hearing.getCourtCase().getId());
+
+        restrictions.sort(Comparator.comparing(HearingReportingRestrictionsEntity::getEventDateTime));
+        restrictions.forEach(repRes -> getHearingResponse.addReportingRestrictionsItem(buildReportingRestrictionFrom(repRes)));
+
+        if (hearing.getCourtCase().getReportingRestrictions() != null && restrictions.isEmpty()) {
+            getHearingResponse.addReportingRestrictionsItem(
+                    reportingRestrictionWithName(hearing.getCourtCase().getReportingRestrictions().getEventName()));
+        }
+
         return getHearingResponse;
+    }
+
+    private ReportingRestriction buildReportingRestrictionFrom(HearingReportingRestrictionsEntity restrictionsEntity) {
+        var reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setEventId(restrictionsEntity.getEventId());
+        reportingRestriction.setEventName(restrictionsEntity.getEventName());
+        reportingRestriction.setEventText(restrictionsEntity.getEventText());
+        reportingRestriction.setHearingId(restrictionsEntity.getHearingId());
+        reportingRestriction.setEventTs(restrictionsEntity.getEventDateTime());
+        return reportingRestriction;
+    }
+
+    public static ReportingRestriction reportingRestrictionWithName(String name) {
+        var reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setEventName(name);
+        return reportingRestriction;
     }
 
 }
