@@ -39,11 +39,10 @@ public class DataManagementServiceImpl implements DataManagementService {
             log.error("Blob {} does not exist in {} container", blobId, containerName);
         }
 
-        log.debug("Start downloading guid {}", blobId);
         Date downloadStartDate = new Date();
         BinaryData binaryData = blobClient.downloadContent();
         Date downloadEndDate = new Date();
-        log.debug("**Finished downloading guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+        log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
 
         return binaryData;
     }

@@ -169,11 +169,10 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         command.addArgument(outputPath.toString());
 
-        log.debug("Starting encoding of audio file with command {}", command);
         Date encodeStartDate = new Date();
         systemCommandExecutor.execute(command);
         Date encodeEndDate = new Date();
-        log.debug("**Finished encoding of audio file with command {} in {}ms", command, encodeEndDate.getTime() - encodeStartDate.getTime());
+        log.debug("**Encoding of audio file with command {} took {}ms", command, encodeEndDate.getTime() - encodeStartDate.getTime());
 
         return new AudioFileInfo(
             audioFileInfo.getStartTime(),
