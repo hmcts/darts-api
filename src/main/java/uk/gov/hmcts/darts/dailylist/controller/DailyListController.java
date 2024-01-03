@@ -145,9 +145,9 @@ public class DailyListController implements DailyListsApi {
             in = ParameterIn.HEADER) @RequestHeader(value = "json_string", required = false) String jsonString
     ) {
         DailyListJsonObject jsonDocument = null;
-        Optional<String> json_doc = Optional.ofNullable(jsonString);
-        if(json_doc.isPresent()) {
-            jsonDocument = objectMapper.readValue(json_doc.get(), DailyListJsonObject.class);
+        Optional<String> jsonDoc = Optional.ofNullable(jsonString);
+        if(jsonDoc.isPresent()) {
+            jsonDocument = objectMapper.readValue(jsonDoc.get(), DailyListJsonObject.class);
         }
 
         DailyListPostRequest postRequest = new DailyListPostRequest();
