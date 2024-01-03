@@ -179,18 +179,16 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             .collect(Collectors.groupingBy(AudioFileInfo::getChannel));
 
         List<List<AudioFileInfo>> concatenateByChannelWithGaps = new ArrayList<>();
-        List<AudioFileInfo> processedAudios = new ArrayList<>();
 
         for (List<AudioFileInfo> audioFileInfosForChannel : audioFileInfosByChannel.values()) {
             if (audioFileInfosForChannel.size() == 1) {
                 // If there is only one file then there is nothing to concatenate
+                List<AudioFileInfo> processedAudios = new ArrayList<>();
                 processedAudios.add(audioFileInfosForChannel.get(0));
                 concatenateByChannelWithGaps.add(processedAudios);
                 continue;
             }
 
-            // Sort to be sure concatenation occurs in chronological order
-            audioFileInfosForChannel.sort(Comparator.comparing(AudioFileInfo::getStartTime));
             List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenateWithGaps(
                 StringUtils.EMPTY,
                 audioFileInfosForChannel,

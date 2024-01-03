@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -84,6 +85,9 @@ public class AudioOperationServiceImpl implements AudioOperationService {
     @Override
     public List<AudioFileInfo> concatenateWithGaps(final String workspaceDir, final List<AudioFileInfo> audioFileInfos, int acceptableAudioGapSecs)
         throws ExecutionException, InterruptedException, IOException {
+
+        // Sort to be sure concatenation occurs in chronological order
+        audioFileInfos.sort(Comparator.comparing(AudioFileInfo::getStartTime));
 
         List<List<AudioFileInfo>> separatedAudioFileInfos = getSeparatedAudioFileInfo(audioFileInfos, acceptableAudioGapSecs);
 
