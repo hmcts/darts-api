@@ -75,8 +75,6 @@ public class DailyListController implements DailyListsApi {
             "addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.",
             required = true, in = ParameterIn.HEADER)
         @RequestHeader(value = "json_string", required = true) String jsonString
-
-
     ) {
         DailyListJsonObject jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
 
