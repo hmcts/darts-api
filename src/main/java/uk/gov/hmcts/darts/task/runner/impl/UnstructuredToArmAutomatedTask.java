@@ -37,7 +37,8 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
     protected void handleException(Exception exception) {
         if (exception instanceof NullPointerException npe) {
             log.error("Exception with null: {}", npe.getMessage(), npe);
+        } else {
+            log.error("Exception: {}", exception.getMessage());
         }
-        log.error("Exception: {}", exception.getMessage());
     }
 }
