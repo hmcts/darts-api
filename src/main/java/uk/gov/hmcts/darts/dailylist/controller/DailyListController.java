@@ -68,13 +68,6 @@ public class DailyListController implements DailyListsApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPatch(
-//        @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY)
-//        @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
-//        @jakarta.validation.constraints.NotNull @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the " +
-//            "addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.",
-//            required = true, in = ParameterIn.HEADER)
-//        @RequestHeader(value = "json_string", required = true) String jsonString
-
         @javax.validation.constraints.NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.",
             required = true, in = ParameterIn.QUERY)
         @javax.validation.Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
@@ -146,7 +139,7 @@ public class DailyListController implements DailyListsApi {
     ) {
         DailyListJsonObject jsonDocument = null;
         Optional<String> jsonDoc = Optional.ofNullable(jsonString);
-        if(jsonDoc.isPresent()) {
+        if (jsonDoc.isPresent()) {
             jsonDocument = objectMapper.readValue(jsonDoc.get(), DailyListJsonObject.class);
         }
 
