@@ -6,12 +6,15 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.AuditActivityRepository;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -23,6 +26,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -48,6 +52,8 @@ class TestSupportControllerTest extends IntegrationBase {
     private SecurityGroupEntity mockSecurityGroupEntity;
     @MockBean
     private CourthouseEntity courthouseEntity;
+    @SpyBean
+    private AuditActivityRepository auditActivityRepository;
 
     @BeforeEach
     void beforeEach() {
@@ -96,6 +102,20 @@ class TestSupportControllerTest extends IntegrationBase {
 
         assertEquals(1, dartsDatabase.getAuditRepository().findAll().size());
 
+    }
+
+    @Test
+    void createsNoAuditAndNoCourtCaseOnBadRequest() throws Exception {
+        when(auditActivityRepository.getReferenceById(anyInt())).thenThrow(DataIntegrityViolationException.class);
+
+        mockMvc.perform(post(ENDPOINT_URL + "/courthouse/func-swansea/courtroom/cr1"))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(post(ENDPOINT_URL + "/audit/REQUEST_AUDIO/courthouse/func-swansea"))
+            .andExpect(status().isBadRequest());
+
+        assertEquals(0, dartsDatabase.getCaseRepository().findAll().size());
+        assertEquals(0, dartsDatabase.getAuditRepository().findAll().size());
     }
 
     @Test

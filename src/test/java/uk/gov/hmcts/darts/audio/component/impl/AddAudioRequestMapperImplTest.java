@@ -48,7 +48,7 @@ class AddAudioRequestMapperImplTest {
         media.setChannel(1);
         media.setTotalChannels(2);
         media.setCourtroom(courtroomEntity);
-        media.setCaseIdList(List.of("case1", "case2"));
+        media.setCaseNumberList(List.of("case1", "case2"));
 
         MediaEntity result = addAudioRequestMapperImpl.mapToMedia(
             new AddAudioMetadataRequest(
@@ -68,7 +68,7 @@ class AddAudioRequestMapperImplTest {
         Assertions.assertEquals(media.getChannel(), result.getChannel());
         Assertions.assertEquals(media.getTotalChannels(), result.getTotalChannels());
         Assertions.assertEquals(media.getCourtroom().getName(), result.getCourtroom().getName());
-        Assertions.assertEquals(media.getCaseIdList().size(), result.getCaseIdList().size());
+        Assertions.assertEquals(media.getCaseNumberList().size(), result.getCaseNumberList().size());
     }
 }
 

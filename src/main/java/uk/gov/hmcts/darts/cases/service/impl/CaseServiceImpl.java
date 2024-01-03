@@ -27,7 +27,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
-import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
@@ -47,7 +46,6 @@ public class CaseServiceImpl implements CaseService {
 
     private final HearingRepository hearingRepository;
     private final CaseRepository caseRepository;
-    private final EventRepository eventRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final AdvancedSearchRequestHelper advancedSearchRequestHelper;
     private final TranscriptionRepository transcriptionRepository;
@@ -80,6 +78,7 @@ public class CaseServiceImpl implements CaseService {
     }
 
     @Override
+    @Transactional
     public SingleCase getCasesById(Integer caseId) {
         CourtCaseEntity caseEntity = getCourtCaseById(caseId);
         return casesMapper.mapToSingleCase(caseEntity);

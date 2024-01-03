@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AudioTransformationServiceTest extends IntegrationBase {
@@ -196,7 +196,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
         ExternalLocationTypeEntity externalLocationTypeEntity =
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
         ObjectRecordStatusEntity objectDirectoryStatus =
-            dartsDatabase.getObjectDirectoryStatusRepository().getReferenceById(STORED.getId());
+            dartsDatabase.getObjectRecordStatusRepository().getReferenceById(STORED.getId());
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();
         ExternalObjectDirectoryEntity externalObjectDirectory1 = externalObjectDirectoryStub.createExternalObjectDirectory(

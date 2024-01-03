@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.transcriptions.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,9 +47,6 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
     @Autowired
     private AuthorisationStub authorisationStub;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private MockMvc mockMvc;

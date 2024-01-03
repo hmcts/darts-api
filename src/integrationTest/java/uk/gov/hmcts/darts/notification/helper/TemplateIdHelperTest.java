@@ -3,15 +3,12 @@ package uk.gov.hmcts.darts.notification.helper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.notification.exception.TemplateNotFoundException;
+import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
-class TemplateIdHelperTest {
+class TemplateIdHelperTest extends IntegrationBase {
 
     @Autowired
     TemplateIdHelper templateIdHelper;

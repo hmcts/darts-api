@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -43,7 +44,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
@@ -100,7 +101,7 @@ public class DartsDatabaseStub {
     private final MediaRepository mediaRepository;
     private final MediaRequestRepository mediaRequestRepository;
     private final NotificationRepository notificationRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ProsecutorRepository prosecutorRepository;
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final TranscriptionRepository transcriptionRepository;
@@ -125,6 +126,8 @@ public class DartsDatabaseStub {
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
+
+    private final EntityManager entityManager;
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
@@ -207,7 +210,7 @@ public class DartsDatabaseStub {
         );
         hearing.setHearingIsActual(true);
         hearing.addJudge(createSimpleJudge(caseNumber + "judge1"));
-        return hearingRepository.saveAndFlush(hearing);
+        return hearingRepository.save(hearing);
     }
 
     @Transactional
@@ -317,8 +320,8 @@ public class DartsDatabaseStub {
     }
 
     public ObjectRecordStatusEntity getObjectDirectoryStatusEntity(
-        ObjectDirectoryStatusEnum objectDirectoryStatusEnum) {
-        return objectDirectoryStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
+        ObjectRecordStatusEnum objectDirectoryStatusEnum) {
+        return objectRecordStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
     }
 
     @Transactional
@@ -390,6 +393,18 @@ public class DartsDatabaseStub {
         hearing.addMedia(mediaEntity);
         hearingRepository.save(hearing);
         return mediaEntity;
+    }
+
+    @Transactional
+    public void saveEventsForHearing(HearingEntity hearing, EventEntity... eventEntities) {
+        hearingRepository.save(hearing);
+        stream(eventEntities).forEach(event -> saveSingleEventForHearing(hearing, event));
+    }
+
+    @Transactional
+    public void saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
+        hearingRepository.save(hearing);
+        eventEntities.forEach(event -> saveSingleEventForHearing(hearing, event));
     }
 
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
@@ -482,5 +497,23 @@ public class DartsDatabaseStub {
             testUser.setActive(true);
             userAccountRepository.saveAndFlush(testUser);
         }
+    }
+
+    private void saveSingleEventForHearing(HearingEntity hearing, EventEntity event) {
+        event.setHearingEntities(List.of(hearingRepository.getReferenceById(hearing.getId())));
+        eventRepository.save(event);
+    }
+
+    public EventEntity addHandlerToEvent(EventEntity event, int handlerId) {
+        var handler = eventHandlerRepository.getReferenceById(handlerId);
+        event.setEventType(handler);
+        return eventRepository.save(event);
+    }
+
+    @Transactional
+    public CourtCaseEntity addHandlerToCase(CourtCaseEntity caseEntity, int handlerId) {
+        var handler = eventHandlerRepository.findById(handlerId).orElseThrow();
+        caseEntity.setReportingRestrictions(handler);
+        return caseRepository.save(caseEntity);
     }
 }

@@ -7,10 +7,14 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Random;
 
 @UtilityClass
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class EventTestData {
+
+    public static final int REPORTING_RESTRICTIONS_LIFTED_DB_ID = 192;
+    public static final List<Integer> REPORTING_RESTRICTIONS_DB_IDS = List.of(54, 183, 184, 185, 186, 187, 188, 189, 190, 191);
 
     public static EventEntity someMinimalEvent() {
         return new EventEntity();
@@ -36,5 +40,18 @@ public class EventTestData {
         event.setTimestamp(eventTime);
         event.setEventType(eventHandlerEntity);
         return event;
+    }
+
+    public static EventEntity createEventWithDefaults() {
+        var event = someMinimalEvent();
+        event.setEventName("some-event-name");
+        event.setEventText("some-event-text");
+        event.setMessageId("some-message-id");
+        return event;
+    }
+
+    public static int someReportingRestrictionId() {
+        return REPORTING_RESTRICTIONS_DB_IDS.get(
+            new Random().nextInt(REPORTING_RESTRICTIONS_DB_IDS.size()));
     }
 }

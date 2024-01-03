@@ -19,10 +19,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
         return armService.saveBlobData(getArmContainerName(), filename, binaryData);
     }
 
-
     private String getArmContainerName() {
         return armDataManagementConfiguration.getArmContainerName();
     }
-
-
 }

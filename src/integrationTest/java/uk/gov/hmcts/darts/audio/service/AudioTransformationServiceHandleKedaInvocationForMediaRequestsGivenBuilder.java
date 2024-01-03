@@ -19,7 +19,7 @@ import java.util.UUID;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Transactional
 @Service

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,10 +7,8 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -21,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
-import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
@@ -33,8 +29,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @Transactional
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
@@ -45,11 +39,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
     private AuthorisationStub authorisationStub;
-    @Autowired
-    private DartsDatabaseStub dartsDatabaseStub;
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -65,7 +55,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     void addAudioMetadata() throws Exception {
 
         UserAccountEntity testUser = authorisationStub.getSystemUser();
-        dartsDatabaseStub.getUserAccountRepository().save(testUser);
+        dartsDatabase.getUserAccountRepository().save(testUser);
 
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
@@ -83,13 +73,14 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "metadata",
             null,
             "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes());
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
 
 
         mockMvc.perform(
-            multipart(ENDPOINT)
-                .file(audioFile)
-                .file(metadataJson))
+                multipart(ENDPOINT)
+                    .file(audioFile)
+                    .file(metadataJson))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -110,7 +101,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             assertEquals(ENDED_AT, media.getEnd());
             assertEquals(1, media.getChannel());
             assertEquals(2, media.getTotalChannels());
-            assertEquals(3, media.getCaseIdList().size());
+            assertEquals(3, media.getCaseNumberList().size());
             assertEquals("1", media.getCourtroom().getName());
         }
     }
@@ -130,7 +121,8 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
             "metadata",
             null,
             "application/json",
-            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes());
+            objectMapper.writeValueAsString(addAudioMetadataRequest).getBytes()
+        );
 
         MvcResult mvcResult = mockMvc.perform(
                 multipart(ENDPOINT)

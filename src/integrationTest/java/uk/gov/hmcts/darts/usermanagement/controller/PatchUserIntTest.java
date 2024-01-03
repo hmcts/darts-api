@@ -4,7 +4,6 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,10 +11,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -50,20 +50,17 @@ class PatchUserIntTest extends IntegrationBase {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    private AdminUserStub adminUserStub;
+
     @MockBean
-    private AuthorisationApi authorisationApi;
+    private UserIdentity userIdentity;
 
     private TransactionTemplate transactionTemplate;
-    private UserAccountEntity integrationTestUser;
 
     @BeforeEach
     void setUp() {
         transactionTemplate = new TransactionTemplate(transactionManager);
-
-        integrationTestUser = dartsDatabase.getUserAccountStub()
-            .getIntegrationTestUserAccountEntity();
-        Mockito.when(authorisationApi.getCurrentUser())
-            .thenReturn(integrationTestUser);
     }
 
     @AfterEach
@@ -73,7 +70,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenProvidedWithValidValueForSubsetOfAllowableFields() throws Exception {
-        UserAccountEntity existingAccount = createEnabledUserAccountEntity();
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -111,8 +110,8 @@ class PatchUserIntTest extends IntegrationBase {
             assertEquals(existingAccount.getCreatedDateTime(), latestUserAccountEntity.getCreatedDateTime());
             assertThat(latestUserAccountEntity.getLastModifiedDateTime(), greaterThan(existingAccount.getLastModifiedDateTime()));
             assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
-            assertEquals(integrationTestUser.getId(), latestUserAccountEntity.getLastModifiedBy().getId());
-            assertEquals(integrationTestUser.getId(), latestUserAccountEntity.getCreatedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getLastModifiedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getCreatedBy().getId());
 
             return null;
         });
@@ -120,7 +119,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenProvidedWithValidValuesForAllAllowableFields() throws Exception {
-        UserAccountEntity existingAccount = createEnabledUserAccountEntity();
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -156,8 +157,8 @@ class PatchUserIntTest extends IntegrationBase {
             assertEquals(existingAccount.getCreatedDateTime(), latestUserAccountEntity.getCreatedDateTime());
             assertThat(latestUserAccountEntity.getLastModifiedDateTime(), greaterThan(existingAccount.getLastModifiedDateTime()));
             assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
-            assertEquals(integrationTestUser.getId(), latestUserAccountEntity.getLastModifiedBy().getId());
-            assertEquals(integrationTestUser.getId(), latestUserAccountEntity.getCreatedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getLastModifiedBy().getId());
+            assertEquals(user.getId(), latestUserAccountEntity.getCreatedBy().getId());
 
             return null;
         });
@@ -165,7 +166,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfChangeWithInvalidDataIsAttempted() throws Exception {
-        UserAccountEntity existingAccount = createEnabledUserAccountEntity();
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -183,6 +186,8 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfProvidedUserIdDoesNotExistInDB() throws Exception {
+        adminUserStub.givenUserIsAuthorised(userIdentity);
+
         MockHttpServletRequestBuilder request = buildRequest(818_231)
             .content("""
                          {
@@ -196,7 +201,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedAndClearSecurityGroupsWhenAccountGetsDisabledAndNoSecurityGroupsAreExplicitlyProvided() throws Exception {
-        UserAccountEntity existingAccount = createEnabledUserAccountEntity();
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -228,7 +235,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenAccountGetsEnabled() throws Exception {
-        UserAccountEntity existingAccount = createDisabledUserAccountEntity();
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createDisabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -260,7 +269,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldSucceedWhenSecurityGroupsAreUpdated() throws Exception {
-        UserAccountEntity existingAccount = createEnabledUserAccountEntity();
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -302,7 +313,9 @@ class PatchUserIntTest extends IntegrationBase {
 
     @Test
     void patchUserShouldFailIfEmailAddressChangeIsAttemptedAndDataShouldRemainUnchanged() throws Exception {
-        UserAccountEntity existingAccount = createEnabledUserAccountEntity();
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
         Integer userId = existingAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -326,7 +339,24 @@ class PatchUserIntTest extends IntegrationBase {
         assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
     }
 
-    private UserAccountEntity createEnabledUserAccountEntity() {
+    @Test
+    void patchUserShouldFailIfUserIsNotAuthorised() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsNotAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
+        Integer userId = existingAccount.getId();
+
+        MockHttpServletRequestBuilder request = buildRequest(userId)
+            .content("""
+                         {
+                           "full_name": "Jimmy Smith"
+                         }
+                         """);
+        mockMvc.perform(request)
+            .andExpect(status().isForbidden());
+    }
+
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
@@ -335,8 +365,8 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
 
         userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
-        userAccountEntity.setCreatedBy(integrationTestUser);
-        userAccountEntity.setLastModifiedBy(integrationTestUser);
+        userAccountEntity.setCreatedBy(user);
+        userAccountEntity.setLastModifiedBy(user);
 
         SecurityGroupEntity securityGroupEntity1 = dartsDatabase.getSecurityGroupRepository()
             .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_1);
@@ -348,7 +378,7 @@ class PatchUserIntTest extends IntegrationBase {
             .save(userAccountEntity);
     }
 
-    private UserAccountEntity createDisabledUserAccountEntity() {
+    private UserAccountEntity createDisabledUserAccountEntity(UserAccountEntity user) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
@@ -357,8 +387,8 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
 
         userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
-        userAccountEntity.setCreatedBy(integrationTestUser);
-        userAccountEntity.setLastModifiedBy(integrationTestUser);
+        userAccountEntity.setCreatedBy(user);
+        userAccountEntity.setLastModifiedBy(user);
 
         userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
 
@@ -367,7 +397,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     private MockHttpServletRequestBuilder buildRequest(int userId) {
-        return patch("/users/" + userId)
+        return patch("/admin/users/" + userId)
             .header("Content-Type", "application/json");
     }
 

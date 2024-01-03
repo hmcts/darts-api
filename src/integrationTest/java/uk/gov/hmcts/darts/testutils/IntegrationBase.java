@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.testutils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +18,8 @@ public class IntegrationBase {
 
     @Autowired
     protected DartsDatabaseStub dartsDatabase;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     @BeforeEach
     void clearDbAndStubs() {

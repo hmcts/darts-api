@@ -85,7 +85,8 @@ public class DailyListController implements DailyListsApi {
     @Override
     @Operation(
         operationId = "dailylistsPost",
-        summary = "XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day within the courthouse for all of its courtrooms.",
+        summary = "XHIBIT/CPP send daily case lists to the DAR PC via DARTS. These daily case lists inform the DAR PC which cases are being heard that day " +
+            "within the courthouse for all of its courtrooms.",
         description = "description",
         tags = {"DailyLists"},
         responses = {

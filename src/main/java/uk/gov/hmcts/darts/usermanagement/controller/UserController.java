@@ -35,6 +35,7 @@ public class UserController implements UserApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
     public ResponseEntity<UserWithId> createUser(User user) {
         UserWithId createdUser = userManagementService.createUser(user);
 
@@ -44,6 +45,7 @@ public class UserController implements UserApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
     public ResponseEntity<UserWithIdAndLastLogin> modifyUser(Integer userId, UserPatch userPatch) {
         UserWithIdAndLastLogin updatedUser = userManagementService.modifyUser(userId, userPatch);
 

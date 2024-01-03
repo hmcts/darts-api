@@ -5,5 +5,6 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 public interface AddAudioRequestMapper {
 
-    MediaEntity mapToMedia(AddAudioMetadataRequest addAudioRequest);
+    MediaEntity mapToMedia(AddAudioMetadataRequest addAudioMetadataRequest);
+
 }

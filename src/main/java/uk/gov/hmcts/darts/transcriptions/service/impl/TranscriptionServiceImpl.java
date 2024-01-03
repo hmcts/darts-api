@@ -23,13 +23,13 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.exception.PartialFailureException;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
@@ -104,6 +104,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.CO
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REJECTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
+import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
@@ -128,7 +129,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriptionWorkflowRepository transcriptionWorkflowRepository;
     private final TranscriptionCommentRepository transcriptionCommentRepository;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final UserAccountRepository userAccountRepository;
 
@@ -161,7 +162,6 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
         duplicateRequestDetector.checkForDuplicate(transcriptionRequestDetails, isManual);
 
-        // todo: change getUrgencyId to getTranscriptionUrgencyId
         TranscriptionEntity transcription = saveTranscription(
             userAccount,
             transcriptionRequestDetails,
@@ -205,11 +205,19 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     @SuppressWarnings("checkstyle:MissingSwitchDefault")
     public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
                                                            UpdateTranscription updateTranscription) {
+        return updateTranscription(transcriptionId, updateTranscription, false);
+    }
+
+    @Override
+    @Transactional
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
+    public UpdateTranscriptionResponse updateTranscription(Integer transcriptionId,
+                                                           UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
         final var userAccountEntity = getUserAccount();
         final var transcriptionEntity = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
 
-        validateUpdateTranscription(transcriptionEntity, updateTranscription);
+        validateUpdateTranscription(transcriptionEntity, updateTranscription, allowSelfApprovalOrRejection);
 
         final var transcriptionStatusEntity = getTranscriptionStatusById(updateTranscription.getTranscriptionStatusId());
         transcriptionEntity.setTranscriptionStatus(transcriptionStatusEntity);
@@ -258,9 +266,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private void validateUpdateTranscription(TranscriptionEntity transcription,
-                                             UpdateTranscription updateTranscription) {
+                                             UpdateTranscription updateTranscription, Boolean allowSelfApprovalOrRejection) {
 
         TranscriptionStatusEnum desiredTargetTranscriptionStatus = TranscriptionStatusEnum.fromId(updateTranscription.getTranscriptionStatusId());
+
+        if (!allowSelfApprovalOrRejection && getUserAccount().getUserName().equals(transcription.getCreatedBy().getUserName())
+            && (desiredTargetTranscriptionStatus.equals(REJECTED) || desiredTargetTranscriptionStatus.equals(APPROVED))) {
+            throw new DartsApiException(BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER);
+        }
 
         if (!workflowValidator.validateChangeToWorkflowStatus(
             transcription.getIsManualTranscription(),
@@ -548,14 +561,14 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     public TranscriptionTranscriberCountsResponse getTranscriptionTranscriberCounts(Integer userId) {
 
         Optional<UserAccountEntity> user = userAccountRepository.findByRoleAndUserId(TRANSCRIBER.getId(), userId);
-        if (!user.isPresent()) {
+        if (user.isEmpty()) {
             throw new DartsApiException(USER_NOT_TRANSCRIBER);
         }
 
         List<Integer> courthouseIds = transcriberTranscriptsQuery.getAuthorisedCourthouses(userId, TRANSCRIBER.getId());
 
         Integer numUnassigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, APPROVED.getId(), userId);
-        Integer numAssigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, WITH_TRANSCRIBER.getId(),userId);
+        Integer numAssigned = transcriberTranscriptsQuery.getTranscriptionsCountForCourthouses(courthouseIds, WITH_TRANSCRIBER.getId(), userId);
 
         final var getTranscriptionTranscriberCounts = new TranscriptionTranscriberCountsResponse();
         getTranscriptionTranscriberCounts.setAssigned(numAssigned);
@@ -576,8 +589,8 @@ public class TranscriptionServiceImpl implements TranscriptionService {
                                                                       TranscriptionDocumentEntity transcriptionDocumentEntity) {
         var externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);
-        externalObjectDirectoryEntity.setStatus(objectDirectoryStatusRepository.getReferenceById(
-            ObjectDirectoryStatusEnum.STORED.getId()));
+        externalObjectDirectoryEntity.setStatus(objectRecordStatusRepository.getReferenceById(
+            ObjectRecordStatusEnum.STORED.getId()));
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
@@ -639,9 +652,10 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         }
 
         if (!validated.isEmpty()) {
-            validated.stream().forEach(entity -> {
-                UpdateTranscriptionEntityHelper.updateTranscriptionEntity(entity, getTranscriptionsItemForId(entity.getId(), request).get());
-            });
+            validated.forEach(entity -> UpdateTranscriptionEntityHelper.updateTranscriptionEntity(
+                entity,
+                getTranscriptionsItemForId(entity.getId(), request).get()
+            ));
 
             transcriptionRepository.saveAll(validated);
         }
@@ -653,7 +667,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     private List<Integer> getTranscriptionIdsForEntities(List<TranscriptionEntity> transcriptionEntities) {
-        return transcriptionEntities.stream().map(e -> e.getId()).collect(Collectors.toList());
+        return transcriptionEntities.stream().map(TranscriptionEntity::getId).collect(Collectors.toList());
     }
 
     private List<UpdateTranscriptionsItem> getTranscriptionForIds(List<Integer> transcriptionIds, List<UpdateTranscriptionsItem> updateTranscriptionsItems) {

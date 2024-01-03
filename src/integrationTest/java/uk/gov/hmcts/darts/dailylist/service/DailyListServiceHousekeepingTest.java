@@ -5,11 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
@@ -17,18 +13,13 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DailyListStub;
 import uk.gov.hmcts.darts.testutils.stubs.DartsDatabaseStub;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
-@ExtendWith(MockitoExtension.class)
 class DailyListServiceHousekeepingTest extends IntegrationBase {
 
-    static final String CPP = "CPP";
     static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Autowired
@@ -50,7 +41,7 @@ class DailyListServiceHousekeepingTest extends IntegrationBase {
     }
 
     @Test
-    void housekeepingOk() throws IOException {
+    void housekeepingOk() {
 
         CourthouseEntity courthouse = dartsDatabaseStub.createCourthouseUnlessExists("courthouse1");
         createEmptyDailyLists(50, LocalDate.now(), courthouse);

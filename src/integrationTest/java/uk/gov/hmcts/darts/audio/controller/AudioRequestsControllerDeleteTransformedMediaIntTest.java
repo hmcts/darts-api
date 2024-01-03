@@ -3,9 +3,7 @@ package uk.gov.hmcts.darts.audio.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -24,16 +22,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
-import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.LANGUAGE_SHOP_USER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
+import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
-@SpringBootTest
-@ActiveProfiles({"intTest", "h2db"})
 @AutoConfigureMockMvc
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance"})
 class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBase {
@@ -63,7 +59,7 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
 
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
         MockHttpServletRequestBuilder requestBuilder = delete(URI.create(
@@ -94,17 +90,11 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
                 objectDirectoryStatusEntity,
                 blobId
             ));
-        //create extra one
-        TransientObjectDirectoryEntity extraTransientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
-            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
-                mediaRequestEntity,
-                objectDirectoryStatusEntity,
-                blobId
-            ));
+
 
         doNothing().when(authorisation).authoriseByMediaRequestId(
             mediaRequestEntity.getId(),
-            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, LANGUAGE_SHOP_USER, RCJ_APPEALS)
+            Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
         MockHttpServletRequestBuilder requestBuilder = delete(URI.create(
@@ -115,6 +105,14 @@ class AudioRequestsControllerDeleteTransformedMediaIntTest extends IntegrationBa
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().is2xxSuccessful());
+
+        //create extra one
+        TransientObjectDirectoryEntity extraTransientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
+            .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
+                mediaRequestEntity,
+                objectDirectoryStatusEntity,
+                blobId
+            ));
 
         assertTrue(dartsDatabase.getTransformedMediaRepository().findById(extraTransientObjectDirectoryEntity.getId()).isPresent());
     }

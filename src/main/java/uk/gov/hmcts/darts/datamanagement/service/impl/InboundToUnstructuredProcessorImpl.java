@@ -15,11 +15,11 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
-import uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum;
+import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
-import uk.gov.hmcts.darts.common.repository.ObjectDirectoryStatusRepository;
+import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
 import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
@@ -36,14 +36,14 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.AWAITING_VERIFICATION;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_ARM_INGESTION_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_CHECKSUM_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_FILE_NOT_FOUND;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
-import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.AWAITING_VERIFICATION;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_INGESTION_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_NOT_FOUND;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_SIZE_CHECK_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_FILE_TYPE_CHECK_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 
 @Service
@@ -52,7 +52,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectDirectoryStatusEnum.STORED;
 public class InboundToUnstructuredProcessorImpl implements InboundToUnstructuredProcessor {
 
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
-    private final ObjectDirectoryStatusRepository objectDirectoryStatusRepository;
+    private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final DataManagementService dataManagementService;
     private final DataManagementConfiguration dataManagementConfiguration;
@@ -94,12 +94,12 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         );
 
         for (ExternalObjectDirectoryEntity inboundExternalObjectDirectory : inboundList) {
-
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectoryEntity = getNewOrExistingExternalObjectDirectory(inboundExternalObjectDirectory);
             ObjectRecordStatusEntity unstructuredStatus = unstructuredExternalObjectDirectoryEntity.getStatus();
             if (unstructuredStatus == null
                 || unstructuredStatus.getId().equals(STORED.getId())
                 || attemptsExceeded(unstructuredStatus, unstructuredExternalObjectDirectoryEntity)) {
+                log.info("Skipping transfer for EOD ID: {}", inboundExternalObjectDirectory.getId());
                 continue;
             }
 
@@ -118,14 +118,22 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                     unstructuredExternalObjectDirectoryEntity.setChecksum(inboundExternalObjectDirectory.getChecksum());
                     unstructuredExternalObjectDirectoryEntity.setExternalLocation(uuid);
                     unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(STORED));
+                    externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
+                    log.info("Transfer complete for EOD ID: {}", inboundExternalObjectDirectory.getId());
                 }
             } catch (BlobStorageException e) {
-                log.error("Failed to get BLOB from datastore {} for file {}", getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation());
+                log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
+                          getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId());
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            } catch (Exception e) {
+                log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}",
+                          inboundExternalObjectDirectory.getId(), e.getMessage(), e);
+                unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
+                setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
+            } finally {
+                externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
             }
-            externalObjectDirectoryRepository.saveAndFlush(unstructuredExternalObjectDirectoryEntity);
-
         }
     }
 
@@ -206,7 +214,6 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     }
 
     private void validate(String checksum, ExternalObjectDirectoryEntity inbound, ExternalObjectDirectoryEntity unstructured) {
-
         MediaEntity mediaEntity = inbound.getMedia();
         if (mediaEntity != null) {
             performValidation(
@@ -253,7 +260,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         String incomingChecksum, String calculatedChecksum,
         List<String> allowedExtensions, String extension,
         Integer maxFileSize, Long fileSize) {
-        if (calculatedChecksum.compareTo(incomingChecksum) != 0) {
+        if (incomingChecksum == null || calculatedChecksum.compareTo(incomingChecksum) != 0) {
+            log.error("Checksum comparison failed, incoming \"{}\" not equal to calculated \"{}\", for unstructured EOD: {}",
+                      incomingChecksum, calculatedChecksum, unstructured.getId());
             unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
         }
         if (!allowedExtensions.contains(extension)) {
@@ -312,9 +321,9 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         return dataManagementConfiguration.getUnstructuredContainerName();
     }
 
-    private ObjectRecordStatusEntity getStatus(ObjectDirectoryStatusEnum status) {
-        if (objectDirectoryStatusRepository != null) {
-            return objectDirectoryStatusRepository.getReferenceById(status.getId());
+    private ObjectRecordStatusEntity getStatus(ObjectRecordStatusEnum status) {
+        if (objectRecordStatusRepository != null) {
+            return objectRecordStatusRepository.getReferenceById(status.getId());
         }
         return null;
     }
