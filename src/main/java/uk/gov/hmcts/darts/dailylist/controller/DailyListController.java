@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.dailylist.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -55,14 +58,22 @@ public class DailyListController implements DailyListsApi {
     private final DailyListService dailyListService;
     private final DailyListProcessor processor;
 
+    ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
+    ObjectMapper objectMapper = objectMapperConfig.objectMapper();
+
+
+    @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPatch(
         @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
-        @NotNull @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = true) DailyListJsonObject jsonDocument
+        //@NotNull @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = true) DailyListJsonObject jsonDocument
+        @jakarta.validation.constraints.NotNull @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "json_string", required = true) String jsonString
     ) {
+        DailyListJsonObject jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
+
         DailyListPatchRequest dailyListPatchRequest = new DailyListPatchRequest();
         dailyListPatchRequest.setDailyListId(dalId);
         dailyListPatchRequest.setDailyListJson(jsonDocument);
@@ -71,6 +82,7 @@ public class DailyListController implements DailyListsApi {
 
     }
 
+    @SneakyThrows
     @Override
     @Operation(
         operationId = "dailylistsPost",
@@ -103,8 +115,11 @@ public class DailyListController implements DailyListsApi {
         @Parameter(name = "unique_id", description = "The uniqueId. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "unique_id", required = false) String uniqueId,
         @Parameter(name = "published_ts", description = "The date that the dailyList was published. <p> **Conditional mandatory**, required if json_document not provided", in = ParameterIn.QUERY) @Valid @RequestParam(value = "published_ts", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime publishedTs,
         @Parameter(name = "xml_document", description = "XML representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just stored in the database as a string", in = ParameterIn.HEADER) @RequestHeader(value = "xml_document", required = false) String xmlDocument,
-        @Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = false) DailyListJsonObject jsonDocument
+        //@Parameter(name = "json_document", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", in = ParameterIn.HEADER) @RequestHeader(value = "json_document", required = false) DailyListJsonObject jsonDocument
+        @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.", in = ParameterIn.HEADER) @RequestHeader(value = "json_string", required = false) String jsonString
     ) {
+        DailyListJsonObject jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
+
         DailyListPostRequest postRequest = new DailyListPostRequest();
         postRequest.setSourceSystem(sourceSystem);
         postRequest.setCourthouse(courthouse);
