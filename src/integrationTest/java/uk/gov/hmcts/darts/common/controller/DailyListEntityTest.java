@@ -31,7 +31,7 @@ class DailyListEntityTest extends IntegrationBase {
         MockHttpServletRequestBuilder requestBuilder = post("/dailylists")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .queryParam("source_system", "CPP")
-            .header("json_document", jsonDocument);
+            .header("json_string", jsonDocument);
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         assertThat(response.getResponse().getContentAsString()).contains("dal_id");

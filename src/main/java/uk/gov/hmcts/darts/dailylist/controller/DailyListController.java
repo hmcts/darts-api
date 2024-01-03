@@ -68,12 +68,22 @@ public class DailyListController implements DailyListsApi {
     @Authorisation(contextId = ANY_ENTITY_ID,
         globalAccessSecurityRoles = {XHIBIT, CPP})
     public ResponseEntity<PostDailyListResponse> dailylistsPatch(
-        @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY)
-        @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
-        @jakarta.validation.constraints.NotNull @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the " +
+//        @NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.", required = true, in = ParameterIn.QUERY)
+//        @Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
+//        @jakarta.validation.constraints.NotNull @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the " +
+//            "addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.",
+//            required = true, in = ParameterIn.HEADER)
+//        @RequestHeader(value = "json_string", required = true) String jsonString
+
+        @javax.validation.constraints.NotNull @Parameter(name = "dal_id", description = "ID of the DailyList in the database.",
+            required = true, in = ParameterIn.QUERY)
+        @javax.validation.Valid @RequestParam(value = "dal_id", required = true) Integer dalId,
+        @javax.validation.constraints.NotNull @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the " +
             "addDocument request.<p> **Conditional mandatory** either this or xml_document needs to be provided, or both.",
             required = true, in = ParameterIn.HEADER)
         @RequestHeader(value = "json_string", required = true) String jsonString
+
+
     ) {
         DailyListJsonObject jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
 
@@ -130,11 +140,15 @@ public class DailyListController implements DailyListsApi {
         @Parameter(name = "xml_document", description = "XML representation of the 'document' received in the addDocument request.<p> " +
             "**Conditional mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just " +
             "stored in the database as a string", in = ParameterIn.HEADER) @RequestHeader(value = "xml_document", required = false) String xmlDocument,
-        @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the addDocument request.<p>"
-            + "**Conditional mandatory** either this or xml_document needs to be provided, or both.",
+        @Parameter(name = "json_string", description = "JSON representation of the 'document' received in the addDocument request.<p>" +
+            "**Conditional mandatory** either this or xml_document needs to be provided, or both.",
             in = ParameterIn.HEADER) @RequestHeader(value = "json_string", required = false) String jsonString
     ) {
-        DailyListJsonObject jsonDocument = objectMapper.readValue(jsonString, DailyListJsonObject.class);
+        DailyListJsonObject jsonDocument = null;
+        Optional<String> json_doc = Optional.ofNullable(jsonString);
+        if(json_doc.isPresent()) {
+            jsonDocument = objectMapper.readValue(json_doc.get(), DailyListJsonObject.class);
+        }
 
         DailyListPostRequest postRequest = new DailyListPostRequest();
         postRequest.setSourceSystem(sourceSystem);
