@@ -44,6 +44,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Slf4j
 public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcessor {
 
+    public static final int BLOB_ALREADY_EXISTS_STATUS_CODE = 409;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
@@ -146,17 +147,22 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             String filename = generateFilename(armExternalObjectDirectory);
 
-            boolean copyRawDataToArmSuccessful = copyRawDataToArm(unstructuredExternalObjectDirectory, armExternalObjectDirectory,
-                                                                  filename, failedStatus
+            boolean copyRawDataToArmSuccessful = copyRawDataToArm(unstructuredExternalObjectDirectory,
+                                                                  armExternalObjectDirectory,
+                                                                  filename,
+                                                                  failedStatus
             );
             if (copyRawDataToArmSuccessful) {
-                generateAndCopyMetadataToArm(armExternalObjectDirectory);
+                if (generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
+                    armExternalObjectDirectory.setStatus(armStatuses.get(ARM_DROP_ZONE));
+                    externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+                }
             }
         }
     }
 
-    private void generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory) {
-
+    private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory) {
+        boolean copiedManifestToArm = false;
         ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(
             armExternalObjectDirectory,
             armExternalObjectDirectory.getTransferAttempts()
@@ -167,12 +173,15 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             try {
                 BinaryData metadataFileBinary = fileOperationService.saveFileToBinaryData(archiveRecordFile.getAbsolutePath());
                 armDataManagementApi.saveBlobDataToArm(archiveRecordFileInfo.getArchiveRecordFile().getName(), metadataFileBinary);
-                armExternalObjectDirectory.setStatus(armStatuses.get(ARM_DROP_ZONE));
-                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
-
+                copiedManifestToArm = true;
             } catch (BlobStorageException e) {
-                log.error("Failed to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
-                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_MANIFEST_FILE_FAILED);
+                if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
+                    log.info("Blob already exists {}", e.getMessage());
+                    copiedManifestToArm = true;
+                } else {
+                    log.error("Failed to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
+                    updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_MANIFEST_FILE_FAILED);
+                }
             } catch (Exception e) {
                 log.error("Unable to move BLOB metadata for file {} due to {}", archiveRecordFile.getAbsolutePath(), e.getMessage());
                 updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_MANIFEST_FILE_FAILED);
@@ -181,6 +190,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             log.error("Failed to generate metadata file {}", archiveRecordFile.getAbsolutePath());
             updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_MANIFEST_FILE_FAILED);
         }
+        return copiedManifestToArm;
     }
 
     private List<ExternalObjectDirectoryEntity> getArmExternalObjectDirectoryEntities(ExternalLocationTypeEntity inboundLocation,
@@ -225,13 +235,14 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             }
             copySuccessful = true;
         } catch (BlobStorageException e) {
-            log.error(
-                "Failed to move BLOB data for file {} due to {}",
-                unstructuredExternalObjectDirectory.getExternalLocation(),
-                e.getMessage()
-            );
-
-            updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
+            if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
+                log.info("Blob already exists {}", e.getMessage());
+                copySuccessful = true;
+            } else {
+                log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
+                          e.getMessage());
+                updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
+            }
         } catch (Exception e) {
             log.error(
                 "Error moving BLOB data for file {} due to {}",
