@@ -152,11 +152,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                                                                   filename,
                                                                   failedStatus
             );
-            if (copyRawDataToArmSuccessful) {
-                if (generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
-                    armExternalObjectDirectory.setStatus(armStatuses.get(ARM_DROP_ZONE));
-                    externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
-                }
+            if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
+                armExternalObjectDirectory.setStatus(armStatuses.get(ARM_DROP_ZONE));
+                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
             }
         }
     }
