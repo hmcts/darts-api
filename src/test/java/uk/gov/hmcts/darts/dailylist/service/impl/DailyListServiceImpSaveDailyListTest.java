@@ -81,7 +81,7 @@ class DailyListServiceImpSaveDailyListTest {
             "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListJson, DailyListJsonObject.class);
 
-        String strDailyList = dailyList.toString();
+        //String strDailyList = dailyList.toString();
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
         service.saveDailyListToDatabase(request);
