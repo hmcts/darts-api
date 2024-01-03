@@ -65,14 +65,15 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        String objectTypeId = "";
         if (nonNull(externalObjectDirectory.getMedia())) {
-            return externalObjectDirectory.getMedia().getId().toString();
+            objectTypeId = externalObjectDirectory.getMedia().getId().toString();
         } else if (nonNull(externalObjectDirectory.getTranscriptionDocumentEntity())) {
-            return externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
-        } else if(nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
-            return externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
+            objectTypeId = externalObjectDirectory.getTranscriptionDocumentEntity().getId().toString();
+        } else if (nonNull(externalObjectDirectory.getAnnotationDocumentEntity())) {
+            objectTypeId = externalObjectDirectory.getAnnotationDocumentEntity().getId().toString();
         }
-        return null;
+        return objectTypeId;
     }
 
 

@@ -25,6 +25,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ArmServiceImpl implements ArmService {
 
+    public static final String FILE_PATH_DELIMITER = "/";
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
@@ -56,18 +57,28 @@ public class ArmServiceImpl implements ArmService {
 
 
     public Map<String, BlobItem> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
-        String delimiter = "/";
         Map<String, BlobItem> blobs = new HashMap<>();
-        listBlobsHierarchicalListing(blobContainerClient, delimiter, prefix).forEach(blob -> {
+        listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, prefix).forEach(blob -> {
             if (blob.isPrefix()) {
-                log.info("Virtual directory prefix: {}}", delimiter + blob.getName());
-                listBlobsHierarchicalListing(blobContainerClient, delimiter, blob.getName());
+                log.info("Virtual directory prefix: {}}", FILE_PATH_DELIMITER + blob.getName());
+                listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, blob.getName());
             } else {
                 log.info("Blob name: {}}", blob.getName());
                 blobs.put(blob.getName(), blob);
             }
         });
         return blobs;
+    }
+
+    public Iterable<PagedResponse<BlobItem>> listBlobs(BlobContainerClient blobContainerClient,
+                                                       boolean retrieveDeletedBlobs,
+                                                       int maxResultsPerPage) {
+        ListBlobsOptions options = new ListBlobsOptions()
+            .setMaxResultsPerPage(maxResultsPerPage)
+            .setDetails(new BlobListDetails()
+                            .setRetrieveDeletedBlobs(retrieveDeletedBlobs));
+
+        return blobContainerClient.listBlobs(options, null).iterableByPage();
     }
 
     public PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,
@@ -85,14 +96,5 @@ public class ArmServiceImpl implements ArmService {
         return listBlobs(containerClient, false, 3);
     }
 
-    public Iterable<PagedResponse<BlobItem>> listBlobs(BlobContainerClient blobContainerClient,
-                                                       boolean retrieveDeletedBlobs,
-                                                       int maxResultsPerPage) {
-        ListBlobsOptions options = new ListBlobsOptions()
-            .setMaxResultsPerPage(maxResultsPerPage)
-            .setDetails(new BlobListDetails()
-                            .setRetrieveDeletedBlobs(retrieveDeletedBlobs));
 
-        return blobContainerClient.listBlobs(options, null).iterableByPage();
-    }
 }
