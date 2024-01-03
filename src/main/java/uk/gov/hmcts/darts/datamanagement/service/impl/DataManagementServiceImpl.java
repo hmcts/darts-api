@@ -16,6 +16,7 @@ import uk.gov.hmcts.darts.datamanagement.service.DataManagementService;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,7 +38,14 @@ public class DataManagementServiceImpl implements DataManagementService {
         if (!blobClient.exists()) {
             log.error("Blob {} does not exist in {} container", blobId, containerName);
         }
-        return blobClient.downloadContent();
+
+        log.debug("Start downloading guid {}", blobId);
+        Date downloadStartDate = new Date();
+        BinaryData binaryData = blobClient.downloadContent();
+        Date downloadEndDate = new Date();
+        log.debug("**Finished downloading guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+
+        return binaryData;
     }
 
     @Override
