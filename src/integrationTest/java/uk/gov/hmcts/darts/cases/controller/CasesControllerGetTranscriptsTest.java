@@ -112,27 +112,27 @@ class CasesControllerGetTranscriptsTest extends IntegrationBase {
 
         //modernised manual transcription
         TranscriptionEntity transcription = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 1, 0, 0, ZoneOffset.UTC));
         transcription.setIsManualTranscription(true);
         dartsDatabase.save(transcription);
 
         //modernised automatic transcription
         TranscriptionEntity transcription2 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription2.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 2, 0, 0, ZoneOffset.UTC));
         transcription2.setIsManualTranscription(false);
         dartsDatabase.save(transcription2);
 
         //legacy manual transcription
         TranscriptionEntity transcription3 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription3.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
+        transcription3.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 3, 0, 0, ZoneOffset.UTC));
         transcription3.setIsManualTranscription(true);
         transcription3.setLegacyObjectId("Something");
         dartsDatabase.save(transcription3);
 
-        //legacy manual transcription
+        //legacy automatic transcription
         TranscriptionEntity transcription4 = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
-        transcription4.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        transcription4.setIsManualTranscription(true);
+        transcription4.setCreatedDateTime(OffsetDateTime.of(2023, 6, 20, 10, 4, 0, 0, ZoneOffset.UTC));
+        transcription4.setIsManualTranscription(false);
         transcription4.setLegacyObjectId("Something");
         dartsDatabase.save(transcription4);
 
