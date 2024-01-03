@@ -88,7 +88,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_groups", Matchers.containsInAnyOrder(
+            .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
                 ORIGINAL_SECURITY_GROUP_ID_2
             )));
@@ -130,7 +130,7 @@ class PatchUserIntTest extends IntegrationBase {
                            "full_name": "Jimmy Smith",
                            "description": "An updated description",
                            "active": false,
-                           "security_groups": [ ]
+                           "security_group_ids": [ ]
                          }
                          """);
         mockMvc.perform(request)
@@ -140,7 +140,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").value("An updated description"))
             .andExpect(jsonPath("$.active").value(false))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_groups").isEmpty());
+            .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
@@ -219,7 +219,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(false))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_groups").isEmpty());
+            .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
@@ -253,7 +253,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_groups").isEmpty());
+            .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
@@ -277,7 +277,7 @@ class PatchUserIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest(userId)
             .content("""
                          {
-                           "security_groups": [ -3, -4 ]
+                           "security_group_ids": [ -3, -4 ]
                          }
                          """);
         mockMvc.perform(request)
@@ -287,11 +287,11 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
-            .andExpect(jsonPath("$.security_groups", not(Matchers.containsInAnyOrder(
+            .andExpect(jsonPath("$.security_group_ids", not(Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
                 ORIGINAL_SECURITY_GROUP_ID_2
             ))))
-            .andExpect(jsonPath("$.security_groups", Matchers.containsInAnyOrder(-3, -4)));
+            .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(-3, -4)));
 
         transactionTemplate.execute(status -> {
             UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()

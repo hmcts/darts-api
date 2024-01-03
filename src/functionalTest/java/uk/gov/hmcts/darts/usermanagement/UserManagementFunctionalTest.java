@@ -33,7 +33,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "email_address": "james.smith@hmcts.net",
                     "description": "A temporary user created by functional test",
                     "active": true,
-                    "security_groups": [ ]
+                    "security_group_ids": [ ]
                 }
                 """,
             response.asString(),
@@ -69,7 +69,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "email_address": "james.smith@hmcts.net",
                     "description": "A temporary user created by functional test",
                     "active": true,
-                    "security_groups": [ ]
+                    "security_group_ids": [ ]
                 }
                 """,
             modifyUserResponse.asString(),

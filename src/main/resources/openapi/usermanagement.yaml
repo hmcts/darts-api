@@ -350,7 +350,7 @@ components:
           $ref: '#/components/schemas/UserDescription'
         active:
           $ref: '#/components/schemas/UserActive'
-        security_groups:
+        security_group_ids:
           type: array
           items:
             $ref: '#/components/schemas/SecurityGroupId'
@@ -367,7 +367,7 @@ components:
           $ref: '#/components/schemas/UserDescription'
         active:
           $ref: '#/components/schemas/UserActive'
-        security_groups:
+        security_group_ids:
           type: array
           items:
             $ref: '#/components/schemas/SecurityGroupId'
