@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -55,7 +57,7 @@ class AudioOperationServiceImplTest {
     void beforeEach() throws IOException {
         tempDirectory = Files.createTempDirectory("darts_api_unit_test");
 
-        inputAudioFileInfos = List.of(
+        inputAudioFileInfos = new ArrayList<>(Arrays.asList(
             new AudioFileInfo(
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
@@ -67,10 +69,10 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_11_00_00_Z),
                 createFile(tempDirectory, "original1.mp3").toString(),
                 1,null
-            )
+            ))
         );
 
-        inputAudioFileInfosWithGaps = List.of(
+        inputAudioFileInfosWithGaps = new ArrayList<>(Arrays.asList(
             new AudioFileInfo(
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
@@ -82,7 +84,7 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_11_30_00_Z),
                 createFile(tempDirectory, "original3.mp3").toString(),
                 1,null
-            )
+            ))
         );
     }
 
