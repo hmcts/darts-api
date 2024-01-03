@@ -18,6 +18,8 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 @Component
 @RequiredArgsConstructor
 public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
@@ -54,7 +56,7 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
         MediaEntity media = externalObjectDirectory.getMedia();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
 
-        return MediaCreateArchiveRecordMetadata.builder()
+        MediaCreateArchiveRecordMetadata metadata = MediaCreateArchiveRecordMetadata.builder()
             .publisher(armDataManagementConfiguration.getPublisher())
             .recordClass(armDataManagementConfiguration.getMediaRecordClass())
             .recordDate(OffsetDateTime.now().format(formatter))
@@ -69,15 +71,18 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             .fileFormat(media.getMediaFormat())
             .startDateTime(media.getStart().format(formatter))
             .endDateTime(media.getEnd().format(formatter))
-            .createdDateTime(media.getCreatedDateTime().format(formatter))
             .caseNumbers(caseListToString(media.getCaseNumberList()))
             .build();
+
+        if (nonNull(media.getCreatedDateTime())) {
+            metadata.setCreatedDateTime(media.getCreatedDateTime().format(formatter));
+        }
+        return metadata;
     }
 
     private String caseListToString(List<String> caseIdList) {
         return String.join("|", caseIdList);
     }
-
 
     private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {
         return UploadNewFileRecord.builder()
