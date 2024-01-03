@@ -137,6 +137,6 @@ public class CaseController implements CasesApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<List<Transcript>> casesCaseIdTranscriptsGet(Integer caseId) {
-        return new ResponseEntity<>(caseService.getTranscriptsById(caseId), HttpStatus.OK);
+        return new ResponseEntity<>(caseService.getTranscriptsByCaseId(caseId), HttpStatus.OK);
     }
 }
