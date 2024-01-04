@@ -72,8 +72,6 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     @Autowired
     private AuthorisationStub authorisationStub;
-    @Autowired
-    private TranscriptionStub transcriptionStub;
 
 
     @BeforeEach
@@ -147,7 +145,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
         AnnotationDocumentEntity annotationDocument =
-            dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize, uploadedBy, uploadedDateTime, checksum);
+            dartsDatabase.getAnnotationStub()
+                .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize, uploadedBy, uploadedDateTime, checksum);
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
