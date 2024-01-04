@@ -85,7 +85,7 @@ class AudioOperationServiceImplTest {
             ),
             new AudioFileInfo(
                 Instant.parse(T_11_00_00_Z),
-                Instant.parse(T_11_00_00_Z),
+                Instant.parse(T_11_30_00_Z),
                 createFile(tempDirectory, "original3.mp3").toString(),
                 1,null
             ))
