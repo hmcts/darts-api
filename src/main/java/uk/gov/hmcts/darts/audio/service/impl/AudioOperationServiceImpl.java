@@ -64,10 +64,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         Integer channel = getFirstChannel(audioFileInfos);
 
-        Path outputPath = generateOutputPath(basePath,
-                                             AudioOperationTypes.CONCATENATE,
-                                             channel,
-                                             AudioConstants.AudioFileFormats.MP2
+        Path outputPath = generateOutputPath(
+            basePath,
+            AudioOperationTypes.CONCATENATE,
+            channel,
+            AudioConstants.AudioFileFormats.MP2
         );
 
         CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
@@ -124,10 +125,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         Path basePath = Path.of(audioConfigurationProperties.getMergeWorkspace(), workspaceDir);
 
-        Path outputPath = generateOutputPath(basePath,
-                                             AudioOperationTypes.MERGE,
-                                             0,
-                                             AudioConstants.AudioFileFormats.MP2
+        Path outputPath = generateOutputPath(
+            basePath,
+            AudioOperationTypes.MERGE,
+            0,
+            AudioConstants.AudioFileFormats.MP2
         );
 
         Integer numberOfChannels = audioFilesInfo.size();
@@ -157,10 +159,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         Path basePath = Path.of(audioConfigurationProperties.getTrimWorkspace(), workspaceDir);
 
-        Path outputPath = generateOutputPath(basePath,
-                                             AudioOperationTypes.TRIM,
-                                             audioFileInfo.getChannel(),
-                                             AudioConstants.AudioFileFormats.MP2
+        Path outputPath = generateOutputPath(
+            basePath,
+            AudioOperationTypes.TRIM,
+            audioFileInfo.getChannel(),
+            AudioConstants.AudioFileFormats.MP2
         );
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
@@ -182,11 +185,13 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
     private String toTimeString(Duration duration) {
         // Format per http://ffmpeg.org/ffmpeg-utils.html#Time-duration
-        return String.format("%s%02d:%02d:%02d",
-                             duration.isNegative() ? "-" : StringUtils.EMPTY,
-                             Math.abs(duration.toHours()),
-                             Math.abs(duration.toMinutesPart()),
-                             Math.abs(duration.toSecondsPart()));
+        return String.format(
+            "%s%02d:%02d:%02d",
+            duration.isNegative() ? "-" : StringUtils.EMPTY,
+            Math.abs(duration.toHours()),
+            Math.abs(duration.toMinutesPart()),
+            Math.abs(duration.toSecondsPart())
+        );
     }
 
     @Override
@@ -195,17 +200,21 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         Path basePath = Path.of(audioConfigurationProperties.getReEncodeWorkspace(), workspaceDir);
 
-        Path outputPath = generateOutputPath(basePath,
-                                             AudioOperationTypes.ENCODE,
-                                             audioFileInfo.getChannel(),
-                                             AudioConstants.AudioFileFormats.MP3
+        Path outputPath = generateOutputPath(
+            basePath,
+            AudioOperationTypes.ENCODE,
+            audioFileInfo.getChannel(),
+            AudioConstants.AudioFileFormats.MP3
         );
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
         command.addArgument(outputPath.toString());
 
+        Date encodeStartDate = new Date();
         systemCommandExecutor.execute(command);
+        Date encodeEndDate = new Date();
+        log.debug("**Encoding of audio file with command {} took {}ms", command, encodeEndDate.getTime() - encodeStartDate.getTime());
 
         return new AudioFileInfo(
             audioFileInfo.getStartTime(),
