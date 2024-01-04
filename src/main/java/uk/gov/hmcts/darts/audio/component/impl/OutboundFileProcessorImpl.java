@@ -136,8 +136,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             && groupedAudioFileInfo.getEndTime().equals(ungroupedAudioFileInfo.getEndTime());
 
         boolean hasContinuity = ungroupedAudioFileInfo.getChannel().equals(groupedAudioFileInfo.getChannel())
-            && (timeOverlaps(ungroupedAudioFileInfo, groupedAudioFileInfo.getEndTime().plusSeconds(allowableAudioGap.toSeconds()))
-            || timeOverlaps(groupedAudioFileInfo, ungroupedAudioFileInfo.getEndTime().plusSeconds(allowableAudioGap.toSeconds())));
+            && (timeOverlaps(ungroupedAudioFileInfo, groupedAudioFileInfo.getEndTime().plus(allowableAudioGap))
+            || timeOverlaps(groupedAudioFileInfo, ungroupedAudioFileInfo.getEndTime().plus(allowableAudioGap)));
 
         return hasEqualTimestamps || hasContinuity;
     }
