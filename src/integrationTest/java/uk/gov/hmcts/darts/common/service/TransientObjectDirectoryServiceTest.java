@@ -41,7 +41,11 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
         blobClientBuilder.blobName(blodId);
         blobClientBuilder.endpoint("http://127.0.0.1:10000/devstoreaccount1");
 
-        TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(mediaRequestEntity, "aFilename");
+        TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(
+            mediaRequestEntity,
+            "aFilename",
+            mediaRequestEntity.getStartTime(),
+            mediaRequestEntity.getEndTime());
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobClientBuilder.buildClient()

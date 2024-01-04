@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.impl.AudioOperationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -13,12 +14,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +48,7 @@ class OutboundFileProcessorImplTest {
     @BeforeEach
     void setUp() {
         outboundFileProcessor = new OutboundFileProcessorImpl(audioOperationService);
+        ReflectionTestUtils.setField(outboundFileProcessor, "allowableAudioGap", Duration.ofSeconds(1));
     }
 
     @Test
@@ -85,8 +88,8 @@ class OutboundFileProcessorImplTest {
 
         var concatenatedAudioFileInfo = new AudioFileInfo(TIME_12_00.toInstant(),
                                                           TIME_12_20.toInstant(),
-                                                          "",
-                                                          null);
+                                                          null,
+                                                          null,null);
         when(audioOperationService.concatenate(any(), any()))
             .thenReturn(concatenatedAudioFileInfo);
 
@@ -212,14 +215,15 @@ class OutboundFileProcessorImplTest {
     @Test
     void processAudioForPlaybackShouldPerformExpectedAudioOperations()
         throws ExecutionException, InterruptedException, IOException {
-        var concatenatedAudioFileInfo = new AudioFileInfo();
-        when(audioOperationService.concatenate(any(), any()))
-            .thenReturn(concatenatedAudioFileInfo);
+        AudioFileInfo concatenatedAudioFileInfo = new AudioFileInfo();
+        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(concatenatedAudioFileInfo));
+        when(audioOperationService.concatenateWithGaps(any(), any(), any()))
+            .thenReturn(concatenatedAudioFileInfoList);
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
                                                           TIME_12_20.toInstant(),
-                                                          "",
-                                                          1);
+                                                          null,
+                                                          1,null);
         when(audioOperationService.merge(any(), any()))
             .thenReturn(mergedAudioFile);
 
@@ -245,9 +249,10 @@ class OutboundFileProcessorImplTest {
                                                    mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
-        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+        outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
 
-        verify(audioOperationService, times(1)).concatenate(
+        verify(audioOperationService, times(1)).concatenateWithGaps(
+            any(),
             any(),
             any()
         );
@@ -255,11 +260,13 @@ class OutboundFileProcessorImplTest {
             eq(Collections.singletonList(concatenatedAudioFileInfo)),
             any()
         );
+        // now that we have potentially multiple playback files - actual start/end of each segment is used
+        // and there are no negative durations
         verify(audioOperationService, times(1)).trim(
             any(),
             eq(mergedAudioFile),
             eq(Duration.of(0, MINUTES)),
-            eq(Duration.of(1, HOURS))
+            eq(Duration.of(20, MINUTES))
         );
         verify(audioOperationService, times(1)).reEncode(
             any(),
@@ -270,14 +277,15 @@ class OutboundFileProcessorImplTest {
     @Test
     void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationsIsPositive()
         throws ExecutionException, InterruptedException, IOException {
-        var concatenatedAudioFileInfo = new AudioFileInfo();
-        when(audioOperationService.concatenate(any(), any()))
-            .thenReturn(concatenatedAudioFileInfo);
+        AudioFileInfo concatenatedAudioFileInfo = new AudioFileInfo();
+        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(concatenatedAudioFileInfo));
+        when(audioOperationService.concatenateWithGaps(any(), any(), any()))
+            .thenReturn(concatenatedAudioFileInfoList);
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
                                                           TIME_12_20.toInstant(),
-                                                          "",
-                                                          1);
+                                                          null,
+                                                          1,null);
         when(audioOperationService.merge(any(), any()))
             .thenReturn(mergedAudioFile);
 
@@ -295,51 +303,15 @@ class OutboundFileProcessorImplTest {
                                                    mediaEntity2, SOME_DOWNLOAD_PATH
         );
 
-        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+        outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
 
+        // now that we have potentially multiple playback files - actual start/end of each segment is used
+        // and there are no negative durations
         verify(audioOperationService, times(1)).trim(
             any(),
             eq(mergedAudioFile),
             eq(Duration.of(0, MINUTES)),
-            eq(Duration.of(1, HOURS))
-        );
-    }
-
-    @Test
-    void processAudioShouldCallTrimWithExpectedArgumentsWhenDurationIsNegative()
-        throws ExecutionException, InterruptedException, IOException {
-        var concatenatedAudioFileInfo = new AudioFileInfo();
-        when(audioOperationService.concatenate(any(), any()))
-            .thenReturn(concatenatedAudioFileInfo);
-
-        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_10.toInstant(),
-                                                          TIME_12_20.toInstant(),
-                                                          "",
-                                                          1);
-        when(audioOperationService.merge(any(), any()))
-            .thenReturn(mergedAudioFile);
-
-        var mediaEntity1 = createMediaEntity(
-            TIME_12_00,
-            TIME_12_10,
-            1
-        );
-        var mediaEntity2 = createMediaEntity(
-            TIME_12_10,
-            TIME_12_20,
-            1
-        );
-        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
-                                                   mediaEntity2, SOME_DOWNLOAD_PATH
-        );
-
-        outboundFileProcessor.processAudioForPlayback(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
-
-        verify(audioOperationService, times(1)).trim(
-            any(),
-            eq(mergedAudioFile),
-            eq(Duration.of(-10, MINUTES)),
-            eq(Duration.of(50, MINUTES))
+            eq(Duration.of(20, MINUTES))
         );
     }
 

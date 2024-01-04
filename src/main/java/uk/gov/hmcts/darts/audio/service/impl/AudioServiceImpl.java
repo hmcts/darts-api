@@ -63,7 +63,8 @@ public class AudioServiceImpl implements AudioService {
             mediaEntity.getStart().toInstant(),
             mediaEntity.getEnd().toInstant(),
             downloadPath.toFile().getAbsolutePath(),
-            mediaEntity.getChannel()
+            mediaEntity.getChannel(),
+            downloadPath
         );
     }
 

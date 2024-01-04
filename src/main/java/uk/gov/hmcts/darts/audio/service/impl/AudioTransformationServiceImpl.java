@@ -45,6 +45,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -194,32 +195,35 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
-            Path generatedFilePath;
+            List<AudioFileInfo> generatedAudioFiles;
             try {
-                generatedFilePath = generateFileForRequestType(mediaRequestEntity, downloadedMedias);
+                generatedAudioFiles = generateFilesForRequestType(mediaRequestEntity, downloadedMedias);
             } catch (ExecutionException | InterruptedException e) {
                 // For Sonar rule S2142
                 throw e;
             }
 
+            int index = 1;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
-            final String fileName = hearingEntity.getCourtCase().getCaseNumber() + "_" + hearingEntity.getHearingDate().format(formatter) + "_1";
+            for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
+                final String fileName = hearingEntity.getCourtCase().getCaseNumber() + "_" + hearingEntity.getHearingDate().format(formatter) + "_"
+                    + index++ + ".mp3";
 
-            try (InputStream inputStream = Files.newInputStream(generatedFilePath)) {
-                blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, BinaryData.fromStream(inputStream), fileName);
-            } catch (NoSuchFileException nsfe) {
-                log.error("No file found when trying to save to storage. {}", generatedFilePath);
-                throw nsfe;
+                try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
+                    blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, BinaryData.fromStream(inputStream), fileName, generatedAudioFile);
+                } catch (NoSuchFileException nsfe) {
+                    log.error("No file found when trying to save to storage. {}", generatedAudioFile.getPath());
+                    throw nsfe;
+                }
+
+                mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity, fileName, audioRequestOutputFormat);
+                log.debug(
+                    "Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
+                    requestId,
+                    fileName,
+                    blobId
+                );
             }
-
-            mediaRequestService.updateAudioRequestCompleted(mediaRequestEntity, fileName, audioRequestOutputFormat);
-            log.debug(
-                "Completed upload of file to storage for mediaRequestId {}. File ''{}'' successfully uploaded with blobId: {}",
-                requestId,
-                fileName,
-                blobId
-            );
-
 
             log.debug("Completed processing for requestId {}.", requestId);
 
@@ -278,23 +282,23 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")
-    private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
+    private List<AudioFileInfo> generateFilesForRequestType(MediaRequestEntity mediaRequestEntity,
                                             Map<MediaEntity, Path> downloadedMedias)
         throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
 
         if (DOWNLOAD.equals(requestType)) {
-            return handleDownload(downloadedMedias, mediaRequestEntity);
+            return handleDownloads(downloadedMedias, mediaRequestEntity);
         } else if (AudioRequestType.PLAYBACK.equals(requestType)) {
-            return handlePlayback(downloadedMedias, mediaRequestEntity);
+            return handlePlaybacks(downloadedMedias, mediaRequestEntity);
         } else {
             throw new NotImplementedException(
                 String.format("No handler exists for request type %s", requestType));
         }
     }
 
-    private Path handleDownload(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
+    private List<AudioFileInfo> handleDownloads(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
         throws ExecutionException, InterruptedException, IOException {
 
         List<List<AudioFileInfo>> processedAudio = outboundFileProcessor.processAudioForDownload(
@@ -303,25 +307,31 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity.getEndTime()
         );
 
-        return outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity);
+        AudioFileInfo zipAudioZileInfo = new AudioFileInfo();
+        zipAudioZileInfo.setStartTime(mediaRequestEntity.getStartTime().toInstant());
+        zipAudioZileInfo.setEndTime(mediaRequestEntity.getEndTime().toInstant());
+        zipAudioZileInfo.setPath(outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity));
+        List<AudioFileInfo> zipPaths = new ArrayList<>();
+        zipPaths.add(zipAudioZileInfo);
+        return zipPaths;
     }
 
-    public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
+    private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
+        throws ExecutionException, InterruptedException, IOException {
+        return handlePlaybacks(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
+    }
+
+    public List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
                                OffsetDateTime endTime)
         throws ExecutionException, InterruptedException, IOException {
 
-        AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(
+        List<AudioFileInfo> audioFileInfos = outboundFileProcessor.processAudioForPlaybacks(
             downloadedMedias,
             startTime,
             endTime
         );
 
-        return Path.of(audioFileInfo.getFileName());
-    }
-
-    private Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
-        throws ExecutionException, InterruptedException, IOException {
-        return handlePlayback(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
+        return audioFileInfos;
     }
 
     public void notifyUser(MediaRequestEntity mediaRequestEntity,
