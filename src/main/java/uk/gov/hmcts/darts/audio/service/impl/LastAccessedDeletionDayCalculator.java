@@ -1,68 +1,59 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
-import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 
-import java.time.Clock;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class LastAccessedDeletionDayCalculator {
 
     private final BankHolidaysService bankHolidaysService;
-    private final Clock clock;
 
-    private final long deletionDays;
 
-    public LastAccessedDeletionDayCalculator(BankHolidaysService bankHolidaysService,
-                                             Clock clock, @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}") long deletionDays) {
-        this.bankHolidaysService = bankHolidaysService;
-        this.clock = clock;
-        this.deletionDays = deletionDays;
+    private final CurrentTimeHelper currentTimeHelper;
+
+    private List<DayOfWeek> weekendDays = List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+
+    public OffsetDateTime getStartDateForDeletion(int numOfWorkingDaysToKeep) {
+        List<LocalDate> bankHolidays = bankHolidaysService.getBankHolidaysLocalDateList();
+        OffsetDateTime deletionDate = subtractNumOfDaysFromDate(bankHolidays, numOfWorkingDaysToKeep);
+        return deletionDate;
     }
 
-    private static long calculateWeekendDays(LocalDate fromDate, LocalDate toDate) {
-        Set<DayOfWeek> weekend = EnumSet.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
-
-        return fromDate.datesUntil(toDate)
-            .filter(d -> weekend.contains(d.getDayOfWeek()))
-            .count();
+    private boolean isBankHoliday(LocalDate date, List<LocalDate> bankHolidays) {
+        return bankHolidays.contains(date);
     }
 
-    private static boolean isBankHolidayBetweenDates(Event bankHoliday, LocalDate cutOff, LocalDate today) {
-        return !bankHoliday.getDate().isBefore(cutOff) && !bankHoliday.getDate().isAfter(today);
+    private boolean isWeekend(LocalDate date) {
+        return weekendDays.contains(date.getDayOfWeek());
     }
 
-    public OffsetDateTime getStartDateForDeletion() {
-        return OffsetDateTime.now(clock)
-            .truncatedTo(ChronoUnit.DAYS)
-            .minusDays(calculate(this.deletionDays));
+    private boolean isBankHolidayOrWeekend(LocalDate date, List<LocalDate> bankHolidays) {
+        return isWeekend(date) || isBankHoliday(date, bankHolidays);
     }
 
-    public long calculate(long lastAccessedDeletionDays) {
-        return lastAccessedDeletionDays + howManyOfPreviousDaysAreBankHolidaysOrWeekends(lastAccessedDeletionDays);
-    }
-
-    private long howManyOfPreviousDaysAreBankHolidaysOrWeekends(long lastAccessedDeletionDays) {
-        long bankHolidayOrWeekendCount = 0;
-        LocalDate today = LocalDate.now(clock);
-        LocalDate cutOff = LocalDate.now(clock).minusDays(lastAccessedDeletionDays);
-        List<Event> bankHolidays = bankHolidaysService.getBankHolidaysFor(OffsetDateTime.now().getYear());
-
-        for (Event bankHoliday : bankHolidays) {
-            if (isBankHolidayBetweenDates(bankHoliday, cutOff, today)) {
-                bankHolidayOrWeekendCount++;
-            }
+    private OffsetDateTime getPreviousDay(OffsetDateTime date, List<LocalDate> bankHolidays) {
+        OffsetDateTime newDate = date.minusDays(1);
+        if (isBankHolidayOrWeekend(newDate.toLocalDate(), bankHolidays)) {
+            //ignore and get previous day
+            return getPreviousDay(newDate, bankHolidays);
+        } else {
+            return newDate;
         }
-        bankHolidayOrWeekendCount += calculateWeekendDays(cutOff, today);
-        return bankHolidayOrWeekendCount;
+    }
+
+    private OffsetDateTime subtractNumOfDaysFromDate(List<LocalDate> bankHolidays, int numOfDays) {
+        OffsetDateTime newDate = currentTimeHelper.currentOffsetDateTime();
+        for (int counter = 1; counter <= numOfDays; counter++) {
+            newDate = getPreviousDay(newDate, bankHolidays);
+        }
+        return newDate;
     }
 }

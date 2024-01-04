@@ -105,10 +105,10 @@ public class TestSupportController {
         session.close();
     }
 
-    private void removeUserCourthousePermissions(Session session,List<Integer> cthIds) {
+    private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
         session.createNativeQuery("""
-                                             delete from darts.security_group_courthouse_ae where cth_id in (?)
-                                             """, Integer.class)
+                                      delete from darts.security_group_courthouse_ae where cth_id in (?)
+                                      """, Integer.class)
             .setParameter(1, cthIds)
             .executeUpdate();
     }
@@ -327,22 +327,22 @@ public class TestSupportController {
 
     private void removeUsers(Session session) {
         session.createNativeQuery("""
-                delete from darts.user_account where description = 'A temporary user created by functional test'
-                """, Integer.class)
+                                      delete from darts.user_account where description = 'A temporary user created by functional test'
+                                      """, Integer.class)
             .executeUpdate();
     }
 
     private void removeSecurityGroups(Session session) {
         session.createNativeQuery("""
-                delete from darts.security_group where description = 'A temporary group created by functional test'
-                """, Integer.class)
+                                      delete from darts.security_group where description = 'A temporary group created by functional test'
+                                      """, Integer.class)
             .executeUpdate();
     }
 
 
     @GetMapping(value = "/bank-holidays/{year}")
     public ResponseEntity<List<Event>> getBankHolidaysForYear(@PathVariable(name = "year") String year) {
-        var bankHolidays = bankHolidaysService.getBankHolidaysFor(parseInt(year));
+        var bankHolidays = bankHolidaysService.getBankHolidays(parseInt(year));
         return new ResponseEntity<>(bankHolidays, OK);
     }
 }

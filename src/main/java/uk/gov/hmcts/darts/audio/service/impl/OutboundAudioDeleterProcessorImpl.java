@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
@@ -23,6 +25,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 
 @Service
+@RequiredArgsConstructor
 public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterProcessor {
     private final MediaRequestRepository mediaRequestRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
@@ -31,25 +34,13 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     private final LastAccessedDeletionDayCalculator deletionDayCalculator;
     private final SystemUserHelper systemUserHelper;
 
-    public OutboundAudioDeleterProcessorImpl(MediaRequestRepository mediaRequestRepository,
-                                             TransientObjectDirectoryRepository transientObjectDirectoryRepository,
-                                             UserAccountRepository userAccountRepository,
-                                             ObjectRecordStatusRepository objectRecordStatusRepository,
-                                             LastAccessedDeletionDayCalculator deletionDayCalculator,
-                                             SystemUserHelper systemUserHelper) {
-        this.mediaRequestRepository = mediaRequestRepository;
-        this.transientObjectDirectoryRepository = transientObjectDirectoryRepository;
-        this.userAccountRepository = userAccountRepository;
-        this.objectRecordStatusRepository = objectRecordStatusRepository;
-        this.deletionDayCalculator = deletionDayCalculator;
-        this.systemUserHelper = systemUserHelper;
-    }
-
+    @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}")
+    private int deletionDays;
 
     @Transactional
     public List<MediaRequestEntity> markForDeletion() {
         List<MediaRequestEntity> deletedValues = new ArrayList<>();
-        OffsetDateTime deletionStartDateTime = this.deletionDayCalculator.getStartDateForDeletion();
+        OffsetDateTime deletionStartDateTime = deletionDayCalculator.getStartDateForDeletion(deletionDays);
 
         List<Integer> mediaRequests = mediaRequestRepository.findAllIdsByLastAccessedTimeBeforeAndStatus(
             deletionStartDateTime,
