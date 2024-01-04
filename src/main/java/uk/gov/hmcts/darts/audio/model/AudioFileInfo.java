@@ -5,13 +5,16 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
+import java.nio.file.Path;
 import java.time.Instant;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @ToString
 public class AudioFileInfo {
 
@@ -23,5 +26,7 @@ public class AudioFileInfo {
     private String fileName;
     @NotNull
     private Integer channel;
+    @NotNull
+    private Path path;
 
 }

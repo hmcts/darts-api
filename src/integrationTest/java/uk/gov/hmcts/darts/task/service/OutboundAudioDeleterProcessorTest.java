@@ -5,29 +5,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
+import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.audio.service.impl.LastAccessedDeletionDayCalculator;
-import uk.gov.hmcts.darts.audio.service.impl.OutboundAudioDeleterProcessorImpl;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
-import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.stubs.TransientObjectDirectoryStub;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +32,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
@@ -56,12 +52,20 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
-    private UserAccountEntity requestor;
-    private OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl;
-    private Clock clock;
+    @Autowired
+    LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
 
-    @Mock
+    @MockBean
     private BankHolidaysService bankHolidaysService;
+
+    @MockBean
+    private CurrentTimeHelper currentTimeHelper;
+
+
+    private UserAccountEntity requestor;
+
+    @Autowired
+    private OutboundAudioDeleterProcessor outboundAudioDeleterProcessor;
 
     @Mock
     private SystemUserHelper systemUserHelper;
@@ -72,30 +76,13 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @BeforeEach
     void setUp() {
         requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
-        //setting clock to 2023-10-27 13:56:17 with local offset on a friday
-        clock = Clock.fixed(Instant.ofEpochSecond(1_698_414_977L), ZoneId.of("Europe/London"));
-        outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 2);
+        //setting clock to 2023-10-27
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");
         UserAccountEntity systemUser = new UserAccountEntity();
         systemUser.setId(0);
         when(userAccountRepository.findSystemUser(anyString())).thenReturn(systemUser);
     }
-
-    private OutboundAudioDeleterProcessorImpl createOutboundDeleterService(Clock clock, int lastAccessedDeletionDays) {
-        LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator = new LastAccessedDeletionDayCalculator(
-            bankHolidaysService,
-            clock,
-            lastAccessedDeletionDays
-        );
-        return new OutboundAudioDeleterProcessorImpl(
-            dartsDatabase.getMediaRequestRepository(),
-            dartsDatabase.getTransientObjectDirectoryRepository(),
-            userAccountRepository,
-            dartsDatabase.getObjectRecordStatusRepository(), lastAccessedDeletionDayCalculator,
-            systemUserHelper
-        );
-    }
-
 
     @Test
     void whereLastAccessed2DaysAgoAndStatusIsCompleted() {
@@ -131,7 +118,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
+        assertEntityStateChanged(outboundAudioDeleterProcessor.markForDeletion());
 
 
     }
@@ -162,7 +149,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        outboundAudioDeleterProcessorImpl.markForDeletion();
+        outboundAudioDeleterProcessor.markForDeletion();
 
 
         assertEntityStateNotChanged(currentMediaRequest);
@@ -192,10 +179,8 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
         //setting clock to 2023-10-23 on a monday
-        Clock clock = Clock.fixed(Instant.ofEpochSecond(1_698_019_200L), ZoneId.of("Europe/London"));
-        outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 2);
-
-        outboundAudioDeleterProcessorImpl.markForDeletion();
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
+        outboundAudioDeleterProcessor.markForDeletion();
 
         assertEntityStateNotChanged(currentMediaRequest);
     }
@@ -225,24 +210,14 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
-        Event bankHoliday1 = new Event();
-        bankHoliday1.setDate(DATE_27TH_OCTOBER.minusDays(1));
+        List<LocalDate> holidays = new ArrayList<>();
+        holidays.add(LocalDate.of(2023, Month.OCTOBER, 26));
+        holidays.add(LocalDate.of(2023, Month.OCTOBER, 25));
+        holidays.add(LocalDate.of(2023, Month.OCTOBER, 24));
 
-        Event bankHoliday2 = new Event();
-        bankHoliday2.setDate(DATE_27TH_OCTOBER.minusDays(2));
+        when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
 
-        Event bankHoliday3 = new Event();
-        bankHoliday3.setDate(DATE_27TH_OCTOBER.minusDays(10));
-
-        when(bankHolidaysService.getBankHolidaysFor(anyInt())).thenReturn(List.of(
-            bankHoliday1,
-            bankHoliday2,
-            bankHoliday3
-        ));
-
-
-        OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 10);
-        outboundAudioDeleterProcessorImpl.markForDeletion();
+        outboundAudioDeleterProcessor.markForDeletion();
 
         assertEntityStateNotChanged(currentMediaRequest);
     }
@@ -271,8 +246,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl = createOutboundDeleterService(clock, 4);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
+        assertEntityStateChanged(outboundAudioDeleterProcessor.markForDeletion());
     }
 
     @Test
@@ -299,11 +273,10 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        //setting clock to Tuesday, 24 October 2023 10:10:50
-        clock = Clock.fixed(Instant.ofEpochSecond(1_698_142_250L), ZoneId.of("Europe/London"));
-        OutboundAudioDeleterProcessorImpl outboundAudioDeleterProcessorImpl =
-            createOutboundDeleterService(clock, 2);
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
+        //setting clock to Tuesday, 24 October 2023
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 24, 22, 0, 0, 0, ZoneOffset.UTC));
+
+        assertEntityStateChanged(outboundAudioDeleterProcessor.markForDeletion());
 
 
         //last accessed saturday
@@ -321,7 +294,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         createTransientDirectoryAndObjectStatus(currentMediaRequest);
 
-        assertEntityStateChanged(outboundAudioDeleterProcessorImpl.markForDeletion());
+        assertEntityStateChanged(outboundAudioDeleterProcessor.markForDeletion());
 
     }
 
@@ -330,7 +303,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     void whereLastAccessedIsNullUseCreatedAndInProgressStatus() {
         MediaRequestEntity matchingMediaRequest = createMediaRequestsWithHearingWithLastAccessedTimeIsNull();
 
-        List<MediaRequestEntity> markedForDeletion = outboundAudioDeleterProcessorImpl.markForDeletion();
+        List<MediaRequestEntity> markedForDeletion = outboundAudioDeleterProcessor.markForDeletion();
 
         MediaRequestEntity expiredMediaRequest = dartsDatabase.getMediaRequestRepository().findById(markedForDeletion.get(
             0).getId()).get();
@@ -392,7 +365,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         savedValue = dartsDatabase.save(
             currentMediaRequest3);
 
-        savedValue.setCreatedDateTime(OffsetDateTime.now(clock));
+        savedValue.setCreatedDateTime(OffsetDateTime.now());
 
         createdMediaRequests.add(dartsDatabase.save(savedValue));
 
@@ -423,8 +396,8 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
 
         assertEquals(
-            SystemUsersEnum.DEFAULT.getId(),
-            transientObjectDirectoryEntity.getLastModifiedBy().getId()
+            "system_housekeeping",
+            transientObjectDirectoryEntity.getLastModifiedBy().getUserName()
         );
     }
 
