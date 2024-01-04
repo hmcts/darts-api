@@ -52,7 +52,7 @@ class BankHolidayServiceTest extends IntegrationBase {
     void returnsBankHolidays() {
         bankHolidayApiStub.returns(VALID_BANK_HOLIDAY_JSON);
 
-        var bankHolidays1 = bankHolidaysService.getBankHolidaysFor(2020);
+        var bankHolidays1 = bankHolidaysService.getBankHolidays(2020);
 
         assertThat(bankHolidays1.size()).isEqualTo(1);
     }
@@ -61,7 +61,7 @@ class BankHolidayServiceTest extends IntegrationBase {
     void returnEmptyListForNotFoundYear() {
         bankHolidayApiStub.returns(VALID_BANK_HOLIDAY_JSON);
 
-        var bankHolidays1 = bankHolidaysService.getBankHolidaysFor(1980);
+        var bankHolidays1 = bankHolidaysService.getBankHolidays(1980);
 
         assertThat(bankHolidays1.size()).isEqualTo(0);
     }
