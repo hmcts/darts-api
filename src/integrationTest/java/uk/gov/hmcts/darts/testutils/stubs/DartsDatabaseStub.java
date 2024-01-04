@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -26,6 +27,8 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
+import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
@@ -114,6 +117,8 @@ public class DartsDatabaseStub {
     private final SecurityRoleRepository securityRoleRepository;
     private final NodeRegistrationRepository nodeRegistrationRepository;
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
+    private final AnnotationDocumentRepository annotationDocumentRepository;
+    private final AnnotationRepository annotationRepository;
 
     private final AuditStub auditStub;
     private final CourthouseStub courthouseStub;
@@ -123,6 +128,7 @@ public class DartsDatabaseStub {
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
+    private final AnnotationStub annotationStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
@@ -131,10 +137,12 @@ public class DartsDatabaseStub {
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
+        externalObjectDirectoryRepository.deleteAll();
+        annotationDocumentRepository.deleteAll();
+        annotationRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
         transcriptionRepository.deleteAll();
-        externalObjectDirectoryRepository.deleteAll();
         transientObjectDirectoryRepository.deleteAll();
         transformedMediaRepository.deleteAll();
         mediaRequestRepository.deleteAll();
@@ -446,6 +454,10 @@ public class DartsDatabaseStub {
 
     public TranscriptionWorkflowEntity save(TranscriptionWorkflowEntity transcriptionWorkflowEntity) {
         return transcriptionWorkflowRepository.saveAndFlush(transcriptionWorkflowEntity);
+    }
+
+    public AnnotationDocumentEntity save(AnnotationDocumentEntity annotationDocumentEntity) {
+        return annotationDocumentRepository.save(annotationDocumentEntity);
     }
 
     public void save(TranscriptionWorkflowEntity... transcriptionWorkflowEntity) {

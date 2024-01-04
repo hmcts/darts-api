@@ -12,9 +12,14 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -24,6 +29,8 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -42,7 +49,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 class UnstructuredToArmProcessorTest extends IntegrationBase {
 
     public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
-    UnstructuredToArmProcessor unstructuredToArmProcessor;
+    private UnstructuredToArmProcessor unstructuredToArmProcessor;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
 
@@ -63,6 +70,12 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     @Autowired
     private ArchiveRecordService archiveRecordService;
 
+    @Autowired
+    private AuthorisationStub authorisationStub;
+    @Autowired
+    private TranscriptionStub transcriptionStub;
+
+
     @BeforeEach
     void setupData() {
         unstructuredToArmProcessor = new UnstructuredToArmProcessorImpl(
@@ -79,7 +92,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
     }
 
     @Test
-    void movePendingDataFromUnstructuredToArmStorage() {
+    void movePendingMediaDataFromUnstructuredToArmStorage() {
 
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
@@ -112,6 +125,82 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+    }
+
+    @Test
+    void movePendingAnnotationDataFromUnstructuredToArmStorage() {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+        UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        String testAnnotation = "TestAnnotation";
+
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(hearing, uploadedBy, testAnnotation);
+
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
+
+        AnnotationDocumentEntity annotationDocument =
+            dartsDatabase.getAnnotationStub().createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize, uploadedBy, uploadedDateTime, checksum);
+
+        ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocument,
+            dartsDatabase.getObjectDirectoryStatusEntity(STORED),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+            UUID.randomUUID()
+        );
+        dartsDatabase.save(unstructuredEod);
+
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        List<ExternalObjectDirectoryEntity> foundList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByStatusAndType(dartsDatabase.getObjectDirectoryStatusEntity(ARM_DROP_ZONE),
+                dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+
+        assertEquals(1, foundList.size());
+        ExternalObjectDirectoryEntity objectDirectory = foundList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), objectDirectory.getStatus().getId());
+    }
+
+    @Test
+    void movePendingTranscriptionDataFromUnstructuredToArmStorage() {
+
+        authorisationStub.givenTestSchema();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+
+        final String fileName = "Test Document.docx";
+        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        final int fileSize = 11_937;
+        UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+            transcriptionEntity, fileName, fileType, fileSize, uploadedBy, checksum);
+
+
+        ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            transcriptionDocumentEntity,
+            dartsDatabase.getObjectDirectoryStatusEntity(STORED),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.UNSTRUCTURED),
+            UUID.randomUUID()
+        );
+        dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(unstructuredEod);
+
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        List<ExternalObjectDirectoryEntity> foundList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByStatusAndType(dartsDatabase.getObjectDirectoryStatusEntity(ARM_DROP_ZONE),
+                                 dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+
+        assertEquals(1, foundList.size());
+        ExternalObjectDirectoryEntity objectDirectory = foundList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), objectDirectory.getStatus().getId());
     }
 
     @Test
