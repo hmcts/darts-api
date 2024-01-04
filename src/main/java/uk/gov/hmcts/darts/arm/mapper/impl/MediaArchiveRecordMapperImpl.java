@@ -71,11 +71,13 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
             .fileFormat(media.getMediaFormat())
             .startDateTime(media.getStart().format(formatter))
             .endDateTime(media.getEnd().format(formatter))
-            .caseNumbers(caseListToString(media.getCaseNumberList()))
             .build();
 
         if (nonNull(media.getCreatedDateTime())) {
             metadata.setCreatedDateTime(media.getCreatedDateTime().format(formatter));
+        }
+        if (nonNull(media.getCaseNumberList())) {
+            metadata.setCaseNumbers(caseListToString(media.getCaseNumberList()));
         }
         return metadata;
     }

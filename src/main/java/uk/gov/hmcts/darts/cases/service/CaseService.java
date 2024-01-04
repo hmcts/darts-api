@@ -30,5 +30,5 @@ public interface CaseService {
 
     CourtCaseEntity getCourtCaseById(Integer caseId);
 
-    List<Transcript> getTranscriptsById(Integer caseId);
+    List<Transcript> getTranscriptsByCaseId(Integer caseId);
 }

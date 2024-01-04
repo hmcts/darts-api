@@ -15,5 +15,5 @@ public interface HearingsService {
 
     List<EventResponse> getEvents(Integer hearingId);
 
-    List<Transcript> getTranscriptsById(Integer hearingId);
+    List<Transcript> getTranscriptsByHearingId(Integer hearingId);
 }

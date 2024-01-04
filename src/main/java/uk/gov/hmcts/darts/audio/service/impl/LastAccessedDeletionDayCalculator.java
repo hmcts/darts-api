@@ -22,7 +22,6 @@ public class LastAccessedDeletionDayCalculator {
 
     private final long deletionDays;
 
-
     public LastAccessedDeletionDayCalculator(BankHolidaysService bankHolidaysService,
                                              Clock clock, @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}") long deletionDays) {
         this.bankHolidaysService = bankHolidaysService;

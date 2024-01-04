@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
+import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
@@ -45,6 +46,7 @@ import static uk.gov.hmcts.darts.audit.api.AuditActivity.COMPLETE_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.TRANSCRIPTION_AVAILABLE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.COMPLETE;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WITH_TRANSCRIBER;
@@ -280,6 +282,10 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
         assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
 
+        List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
+        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        assertTrue(templateList.contains(TRANSCRIPTION_AVAILABLE.toString()));
+
         verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
         verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
     }
@@ -340,6 +346,10 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         assertEquals(INBOUND.getId(), externalObjectDirectoryEntity.getExternalLocationType().getId());
         assertNotNull(externalObjectDirectoryEntity.getExternalLocation());
         assertEquals(transcriptionDocumentEntity.getChecksum(), externalObjectDirectoryEntity.getChecksum());
+
+        List<NotificationEntity> notificationEntities = dartsDatabase.getNotificationRepository().findAll();
+        List<String> templateList = notificationEntities.stream().map(NotificationEntity::getEventId).toList();
+        assertTrue(templateList.contains(TRANSCRIPTION_AVAILABLE.toString()));
 
         verify(mockAuditApi).recordAudit(COMPLETE_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());
         verify(mockAuditApi).recordAudit(IMPORT_TRANSCRIPTION, authorisationStub.getSeparateIntegrationUser(), transcriptionEntity.getCourtCase());

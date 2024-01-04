@@ -35,7 +35,6 @@ import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.hearings.service.HearingsService;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
-import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
@@ -56,7 +55,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
-import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.COURT_MANAGER_APPROVE_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 
@@ -101,6 +99,8 @@ class TranscriptionServiceImplTest {
     private AuthorisationApi authorisationApi;
     @Mock
     private NotificationApi notificationApi;
+    @Mock
+    private TranscriptionNotifications transcriptionNotifications;
 
     private HearingEntity mockHearing;
     private CourtCaseEntity mockCourtCase;
@@ -109,7 +109,6 @@ class TranscriptionServiceImplTest {
     private TranscriptionStatusEntity requestedTranscriptionStatus;
     private TranscriptionStatusEntity awaitingAuthorisationTranscriptionStatus;
     private UserAccountEntity testUser;
-    private List<UserAccountEntity> approvers;
 
     @Mock
     private TranscriptionEntity mockTranscription;
@@ -148,7 +147,7 @@ class TranscriptionServiceImplTest {
         awaitingAuthorisationTranscriptionStatus = new TranscriptionStatusEntity();
         awaitingAuthorisationTranscriptionStatus.setId(AWAITING_AUTHORISATION.getId());
 
-        approvers = new ArrayList<>();
+        List<UserAccountEntity> approvers = new ArrayList<>();
         UserAccountEntity approver1 = new UserAccountEntity();
         UserAccountEntity approver2 = new UserAccountEntity();
         approver1.setEmailAddress("approver1@example.com");
@@ -562,11 +561,7 @@ class TranscriptionServiceImplTest {
     }
 
     private void verifyNotification() {
-        var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId(COURT_MANAGER_APPROVE_TRANSCRIPT.toString())
-            .userAccountsToEmail(approvers)
-            .build();
-        verify(notificationApi).scheduleNotification(saveNotificationToDbRequest);
+        verify(transcriptionNotifications, times(1)).notifyApprovers(any(TranscriptionEntity.class));
     }
 
 }
