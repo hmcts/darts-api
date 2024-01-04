@@ -136,7 +136,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
 
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(hearing, uploadedBy, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub()
+            .createAndSaveAnnotationEntityWith(hearing, uploadedBy, testAnnotation);
 
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
@@ -285,10 +286,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
-        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
-        );
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
@@ -333,10 +332,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
-        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
-        );
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
