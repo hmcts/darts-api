@@ -4,16 +4,22 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.DailyListRepository;
+import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,6 +28,18 @@ class DailyListEntityTest extends IntegrationBase {
 
     @Autowired
     private transient MockMvc mockMvc;
+
+    @Autowired
+    DailyListRepository dailyListRepository;
+
+    @Autowired
+    DailyListService service;
+
+    @MockBean
+    UserIdentity mockUserIdentity;
+
+    @MockBean
+    UserAccountEntity mockUserAccountEntity;
 
     @Test
     void dailyListAddDailyListEndpoint() throws Exception {
@@ -42,4 +60,5 @@ class DailyListEntityTest extends IntegrationBase {
         File file = new File(classLoader.getResource(filelocation).getFile());
         return FileUtils.readFileToString(file, "UTF-8");
     }
+
 }
