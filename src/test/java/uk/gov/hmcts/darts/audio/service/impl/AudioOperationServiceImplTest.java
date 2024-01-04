@@ -38,10 +38,14 @@ class AudioOperationServiceImplTest {
     private static final String T_10_30_00_Z = "2023-04-28T10:30:00Z";
     private static final String T_11_00_00_Z = "2023-04-28T11:00:00Z";
     private static final String T_11_30_00_Z = "2023-04-28T11:30:00Z";
+    private static final String T_10_30_00_Z_MS_1200 = "2023-04-28T10:30:12Z";
     private static final String FFMPEG = "/usr/bin/ffmpeg";
+    private static final Duration ALLOWABLE_GAP = Duration.ofSeconds(1);
+    private static final Duration ALLOWABLE_GAP_MS = Duration.ofMillis(1200);
 
     private List<AudioFileInfo> inputAudioFileInfos;
     private List<AudioFileInfo> inputAudioFileInfosWithGaps;
+    private List<AudioFileInfo> inputAudioFileInfosWithMillisecondGaps;
     private Path tempDirectory;
 
     @InjectMocks
@@ -81,8 +85,23 @@ class AudioOperationServiceImplTest {
             ),
             new AudioFileInfo(
                 Instant.parse(T_11_00_00_Z),
-                Instant.parse(T_11_30_00_Z),
+                Instant.parse(T_11_00_00_Z),
                 createFile(tempDirectory, "original3.mp3").toString(),
+                1,null
+            ))
+        );
+
+        inputAudioFileInfosWithMillisecondGaps = new ArrayList<>(Arrays.asList(
+            new AudioFileInfo(
+                Instant.parse(T_09_00_00_Z),
+                Instant.parse(T_10_30_00_Z),
+                createFile(tempDirectory, "original4.mp3").toString(),
+                1,null
+            ),
+            new AudioFileInfo(
+                Instant.parse(T_10_30_00_Z_MS_1200),
+                Instant.parse(T_11_30_00_Z),
+                createFile(tempDirectory, "original5.mp3").toString(),
                 1,null
             ))
         );
@@ -260,7 +279,7 @@ class AudioOperationServiceImplTest {
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
             inputAudioFileInfosWithGaps,
-            1
+            ALLOWABLE_GAP
         );
 
         assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
@@ -268,6 +287,26 @@ class AudioOperationServiceImplTest {
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(1).getStartTime());
+        assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
+    }
+
+    @Test
+    void shouldReturnConcatenatedAudioFileListInfoWhenValidInputAudioFilesHaveGapWithMilliseconds() throws Exception {
+        when(audioConfigurationProperties.getFfmpegExecutable()).thenReturn(FFMPEG);
+        when(audioConfigurationProperties.getConcatWorkspace()).thenReturn(tempDirectory.toString());
+        when(systemCommandExecutor.execute(any())).thenReturn(Boolean.TRUE);
+
+        List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
+            WORKSPACE_DIR,
+            inputAudioFileInfosWithMillisecondGaps,
+            ALLOWABLE_GAP_MS
+        );
+
+        assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertEquals(1, audioFileInfo.get(0).getChannel());
+        assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
+        assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
+        assertEquals(Instant.parse(T_10_30_00_Z_MS_1200), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
     }
 
@@ -280,7 +319,7 @@ class AudioOperationServiceImplTest {
         List<AudioFileInfo> audioFileInfo = audioOperationService.concatenateWithGaps(
             WORKSPACE_DIR,
             inputAudioFileInfos,
-            1
+            ALLOWABLE_GAP
         );
 
         assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));

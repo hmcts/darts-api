@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.impl.AudioOperationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -23,7 +24,6 @@ import java.util.concurrent.ExecutionException;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -48,6 +48,7 @@ class OutboundFileProcessorImplTest {
     @BeforeEach
     void setUp() {
         outboundFileProcessor = new OutboundFileProcessorImpl(audioOperationService);
+        ReflectionTestUtils.setField(outboundFileProcessor, "allowableAudioGap", Duration.ofSeconds(1));
     }
 
     @Test
@@ -216,7 +217,7 @@ class OutboundFileProcessorImplTest {
         throws ExecutionException, InterruptedException, IOException {
         AudioFileInfo concatenatedAudioFileInfo = new AudioFileInfo();
         List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(concatenatedAudioFileInfo));
-        when(audioOperationService.concatenateWithGaps(any(), any(), anyInt()))
+        when(audioOperationService.concatenateWithGaps(any(), any(), any()))
             .thenReturn(concatenatedAudioFileInfoList);
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
@@ -253,7 +254,7 @@ class OutboundFileProcessorImplTest {
         verify(audioOperationService, times(1)).concatenateWithGaps(
             any(),
             any(),
-            anyInt()
+            any()
         );
         verify(audioOperationService, times(1)).merge(
             eq(Collections.singletonList(concatenatedAudioFileInfo)),
@@ -278,7 +279,7 @@ class OutboundFileProcessorImplTest {
         throws ExecutionException, InterruptedException, IOException {
         AudioFileInfo concatenatedAudioFileInfo = new AudioFileInfo();
         List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(concatenatedAudioFileInfo));
-        when(audioOperationService.concatenateWithGaps(any(), any(), anyInt()))
+        when(audioOperationService.concatenateWithGaps(any(), any(), any()))
             .thenReturn(concatenatedAudioFileInfoList);
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),

@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 
 public interface AudioOperationService {
 
-    List<AudioFileInfo> concatenateWithGaps(String workspaceDir, List<AudioFileInfo> audioFileInfos, int acceptableAudioGapSecs)
+    List<AudioFileInfo> concatenateWithGaps(String workspaceDir, List<AudioFileInfo> audioFileInfos, Duration allowableAudioGap)
         throws ExecutionException, InterruptedException, IOException;
 
     AudioFileInfo concatenate(String workspaceDir, List<AudioFileInfo> audioFileInfos)

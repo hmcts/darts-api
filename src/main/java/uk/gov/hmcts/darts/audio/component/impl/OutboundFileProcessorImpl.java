@@ -33,8 +33,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private final AudioOperationService audioOperationService;
 
-    @Value("${darts.audio.audio_gap_seconds:1}")
-    private int acceptableAudioGapSecs;
+    @Value("${darts.audio.allowable_audio_gap_duration}")
+    private Duration allowableAudioGap;
 
     /**
      * Group the provided media/audio into logical groups in preparation for zipping with OutboundFileZipGenerator.
@@ -136,8 +136,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             && groupedAudioFileInfo.getEndTime().equals(ungroupedAudioFileInfo.getEndTime());
 
         boolean hasContinuity = ungroupedAudioFileInfo.getChannel().equals(groupedAudioFileInfo.getChannel())
-            && (timeOverlaps(ungroupedAudioFileInfo, groupedAudioFileInfo.getEndTime().plusSeconds(acceptableAudioGapSecs))
-            || timeOverlaps(groupedAudioFileInfo, ungroupedAudioFileInfo.getEndTime().plusSeconds(acceptableAudioGapSecs)));
+            && (timeOverlaps(ungroupedAudioFileInfo, groupedAudioFileInfo.getEndTime().plusSeconds(allowableAudioGap.toSeconds()))
+            || timeOverlaps(groupedAudioFileInfo, ungroupedAudioFileInfo.getEndTime().plusSeconds(allowableAudioGap.toSeconds())));
 
         return hasEqualTimestamps || hasContinuity;
     }
@@ -192,7 +192,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenateWithGaps(
                 StringUtils.EMPTY,
                 audioFileInfosForChannel,
-                acceptableAudioGapSecs
+                allowableAudioGap
             );
             concatenateByChannelWithGaps.add(concatenatedAudios);
         }
