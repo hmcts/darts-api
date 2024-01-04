@@ -125,6 +125,10 @@ public class DailyListProcessorImpl implements DailyListProcessor {
                         );
 
                         CourtCaseEntity courtCase = hearing.getCourtCase();
+                        if (courtCase.getClosed()) {
+                            courtCase.setClosed(false);
+                            courtCase.setCaseClosedTimestamp(null);
+                        }
                         addJudges(sitting, hearing);
                         addDefendants(courtCase, dailyListHearing.getDefendants());
                         addProsecution(courtCase, dailyListHearing);
