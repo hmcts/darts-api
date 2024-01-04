@@ -35,7 +35,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     private final SystemUserHelper systemUserHelper;
 
     @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}")
-    private long deletionDays;
+    private int deletionDays;
 
     @Transactional
     public List<MediaRequestEntity> markForDeletion() {

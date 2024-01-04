@@ -21,7 +21,7 @@ public class LastAccessedDeletionDayCalculator {
 
     private List<DayOfWeek> weekendDays = List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
-    public OffsetDateTime getStartDateForDeletion(long numOfWorkingDaysToKeep) {
+    public OffsetDateTime getStartDateForDeletion(int numOfWorkingDaysToKeep) {
         List<LocalDate> bankHolidays = bankHolidaysService.getBankHolidaysLocalDateList();
         OffsetDateTime deletionDate = subtractNumOfDaysFromDate(bankHolidays, numOfWorkingDaysToKeep);
         return deletionDate;
@@ -49,7 +49,7 @@ public class LastAccessedDeletionDayCalculator {
         }
     }
 
-    private OffsetDateTime subtractNumOfDaysFromDate(List<LocalDate> bankHolidays, long numOfDays) {
+    private OffsetDateTime subtractNumOfDaysFromDate(List<LocalDate> bankHolidays, int numOfDays) {
         OffsetDateTime newDate = currentTimeHelper.currentOffsetDateTime();
         for (int counter = 1; counter <= numOfDays; counter++) {
             newDate = getPreviousDay(newDate, bankHolidays);

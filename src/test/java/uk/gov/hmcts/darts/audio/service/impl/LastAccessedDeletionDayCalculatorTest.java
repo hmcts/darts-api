@@ -46,7 +46,6 @@ class LastAccessedDeletionDayCalculatorTest {
         //setting clock to 2023-10-23 on a monday.
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
         when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(Collections.emptyList());
-        //when(currentTimeHelper.currentLocalDate()).thenReturn(LocalDate.of(2024, 1, 1));
 
         assertEquals(
             OffsetDateTime.of(2023, 10, 19, 22, 0, 0, 0, ZoneOffset.UTC),
@@ -106,7 +105,13 @@ class LastAccessedDeletionDayCalculatorTest {
     @Test
     void whereLastAccessedOverChristmasNewYears() {
         /*
-        setting clock to 2023-12-28
+        setting clock to 2024-01-02
+        2024-01-02 - normal day
+        2024-01-01 - holiday
+        2023-12-31 - weekend
+        2023-12-30 - weekend
+        2023-12-29 - normal day
+        2023-12-28 - normal day
         2023-12-27 - normal day
         2023-12-26 - holiday
         2023-12-25 - holiday
