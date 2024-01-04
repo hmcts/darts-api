@@ -59,7 +59,8 @@ public class AudioController implements AudioApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
-        InputStream audioMediaFile = audioService.preview(mediaId);
+
+        InputStream audioMediaFile = audioService.preview(mediaId, httpRangeList);
         return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList);
     }
 

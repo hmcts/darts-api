@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobRange;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -68,12 +70,15 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public InputStream preview(Integer mediaId) {
+    public InputStream preview(Integer mediaId, String httpRangeList) {
+
+        BlobRange blobRange = StreamingResponseEntityUtil.getBlobRangeFromHeader(httpRangeList);
+
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
         try {
-            Path downloadPath = audioTransformationService.saveMediaToWorkspace(mediaEntity);
+            Path downloadPath = audioTransformationService.retrieveFromStorageAndSaveMediaToWorkspace(mediaEntity, blobRange);
 
             AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
 

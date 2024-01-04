@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobRange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
+import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -255,7 +257,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         throws IOException {
         Map<MediaEntity, Path> downloadedMedias = new HashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
-            Path downloadPath = saveMediaToWorkspace(mediaEntity);
+            Path downloadPath = retrieveFromStorageAndSaveMediaToWorkspace(mediaEntity);
 
             downloadedMedias.put(mediaEntity, downloadPath);
         }
@@ -263,7 +265,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
+    public Path retrieveFromStorageAndSaveMediaToWorkspace(MediaEntity mediaEntity) throws IOException {
         UUID id = getMediaLocation(mediaEntity).orElseThrow(
             () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
             )));
@@ -277,9 +279,25 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         return downloadPath;
     }
 
+    @Override
+    public Path retrieveFromStorageAndSaveMediaToWorkspace(MediaEntity mediaEntity, BlobRange range) throws IOException {
+        UUID id = getMediaLocation(mediaEntity).orElseThrow(
+            () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
+            )));
+        String filename = id.toString();
+        Path downloadPath = fileOperationService.generateTempWorkspacePath(filename);
+
+        log.debug("Downloading audio blob for {} from unstructured datastore", id);
+        dataManagementApi.getBlobDataByRangeFromContainer(id, DatastoreContainerType.UNSTRUCTURED, range, downloadPath.toFile().getAbsolutePath());
+        log.debug("Download audio blob complete for {}", id);
+
+        log.debug("Saved audio blob {} to {}", id, downloadPath);
+        return downloadPath;
+    }
+
     @SuppressWarnings("PMD.LawOfDemeter")
     private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
-                                            Map<MediaEntity, Path> downloadedMedias)
+                                                            Map<MediaEntity, Path> downloadedMedias)
         throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
@@ -307,7 +325,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
-                               OffsetDateTime endTime)
+                                               OffsetDateTime endTime)
         throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(

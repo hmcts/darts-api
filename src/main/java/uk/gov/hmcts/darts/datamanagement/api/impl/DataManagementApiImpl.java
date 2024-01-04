@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.datamanagement.api.impl;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.models.BlobRange;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
@@ -40,6 +41,12 @@ public class DataManagementApiImpl implements DataManagementApi {
     public BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata) {
         String containerName = getContainerName(container);
         return dataManagementService.saveBlobData(containerName, binaryData, metadata);
+    }
+
+    @Override
+    public void getBlobDataByRangeFromContainer(UUID uuid, DatastoreContainerType container, BlobRange blobRange, String localFilePath) {
+        String containerName = getContainerName(container);
+        dataManagementService.getBlobDataPortion(containerName, uuid, blobRange, localFilePath);
     }
 
     @Override

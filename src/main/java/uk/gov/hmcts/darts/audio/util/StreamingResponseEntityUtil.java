@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.util;
 
+import com.azure.storage.blob.models.BlobRange;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,8 @@ import java.io.InputStream;
 
 @UtilityClass
 public class StreamingResponseEntityUtil {
+
+    public static final Long MAX_FILE_SIZE_IN_RANGE = 500_000_000L;
 
     public ResponseEntity<byte[]> createResponseEntity(InputStream inputStream, String httpRangeList) throws IOException {
         byte[] bytes = IOUtils.toByteArray(inputStream);
@@ -64,5 +67,20 @@ public class StreamingResponseEntityUtil {
         byte[] result = new byte[(int) (end - start) + 1];
         System.arraycopy(wholeFile, srcPos, result, 0, result.length);
         return result;
+    }
+
+
+    public BlobRange getBlobRangeFromHeader(String httpRangeList) {
+        if (StringUtils.isNotBlank(httpRangeList)) {
+            httpRangeList = StringUtils.trim(httpRangeList);
+            String rangeListValue = StringUtils.substringAfter(httpRangeList, "=");
+            String[] ranges = rangeListValue.split("-");
+            long rangeStart = Long.parseLong(ranges[0]);
+            long rangeEnd = Long.parseLong(ranges[1]);
+            return new BlobRange(rangeStart, rangeEnd);
+        } else {
+            return new BlobRange(0, MAX_FILE_SIZE_IN_RANGE);
+        }
+
     }
 }

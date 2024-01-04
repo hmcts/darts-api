@@ -133,7 +133,7 @@ class AudioServiceImplTest {
 
         Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
-        when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
+        when(audioTransformationService.retrieveFromStorageAndSaveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
 
         AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), "test", 1);
         when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);

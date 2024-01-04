@@ -4,7 +4,12 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.models.BlobRange;
 import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
+import com.azure.storage.blob.models.DownloadRetryOptions;
+import com.azure.storage.blob.models.ParallelTransferOptions;
+import com.azure.storage.blob.specialized.BlockBlobClient;
+import com.azure.storage.common.implementation.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -45,6 +50,29 @@ public class DataManagementServiceImpl implements DataManagementService {
         log.debug("**Downloading of guid {}, took {}ms", blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
 
         return binaryData;
+    }
+
+    @Override
+    public void getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath) {
+
+        BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
+        BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
+        if (!blobClient.exists()) {
+            log.error("Blob {} does not exist in {} container", blobId, containerName);
+        }
+        BlockBlobClient blockBlobClient = blobClient.getBlockBlobClient();
+
+
+        DownloadRetryOptions options = new DownloadRetryOptions().setMaxRetryRequests(5);
+
+        log.debug("Start downloading range {} of guid {}", blobRange, blobId);
+        Date downloadStartDate = new Date();
+        blockBlobClient.downloadToFileWithResponse(saveFilePath, blobRange, new ParallelTransferOptions().setBlockSizeLong(4L * Constants.MB),
+                                                   options, null, false, Duration.ofMinutes(20), null
+        );
+        Date downloadEndDate = new Date();
+        log.debug("**Finished downloading range {} of guid {}, took {}ms", blobRange, blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
+
     }
 
     @Override

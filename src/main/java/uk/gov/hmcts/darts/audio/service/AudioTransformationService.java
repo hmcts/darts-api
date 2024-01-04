@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobRange;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.IOException;
@@ -23,8 +24,9 @@ public interface AudioTransformationService {
 
     Path saveBlobDataToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
 
-    Path saveMediaToWorkspace(MediaEntity mediaEntity) throws IOException;
+    Path retrieveFromStorageAndSaveMediaToWorkspace(MediaEntity mediaEntity) throws IOException;
 
     void handleKedaInvocationForMediaRequests();
 
+    Path retrieveFromStorageAndSaveMediaToWorkspace(MediaEntity mediaEntity, BlobRange range) throws IOException;
 }

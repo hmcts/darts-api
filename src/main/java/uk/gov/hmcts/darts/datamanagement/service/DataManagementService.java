@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.datamanagement.service;
 import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.models.BlobRange;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
 import java.util.Map;
@@ -10,6 +11,8 @@ import java.util.UUID;
 
 public interface DataManagementService {
     BinaryData getBlobData(String containerName, UUID blobId);
+
+    void getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath);
 
     UUID saveBlobData(String containerName, BinaryData binaryData);
 

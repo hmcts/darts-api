@@ -4,6 +4,7 @@ import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
+import com.azure.storage.blob.models.BlobRange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -29,6 +30,11 @@ public class DataManagementServiceStubImpl implements DataManagementService {
 
         log.warn("Returning dummy file to mimic Blob storage download");
         return BinaryData.fromBytes(new byte[1024]);
+    }
+
+    @Override
+    public void getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath) {
+
     }
 
     @Override

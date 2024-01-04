@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.datamanagement.api;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.models.BlobRange;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 import uk.gov.hmcts.darts.datamanagement.enums.DatastoreContainerType;
 
@@ -17,6 +18,8 @@ public interface DataManagementApi {
     UUID saveBlobDataToOutboundContainer(BinaryData binaryData);
 
     BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata);
+
+    void getBlobDataByRangeFromContainer(UUID uuid, DatastoreContainerType container, BlobRange blobRange, String localFilePath);
 
     void addMetadata(BlobClient client, Map<String, String> metadata);
 

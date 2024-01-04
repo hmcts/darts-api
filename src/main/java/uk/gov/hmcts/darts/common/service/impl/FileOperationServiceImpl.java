@@ -23,13 +23,9 @@ public class FileOperationServiceImpl implements FileOperationService {
 
     @Override
     public Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException {
-
-        Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace())
-            .resolve(UUID.randomUUID().toString());
-        Path targetTempFile = targetTempDirectory.resolve(fileName);
+        Path targetTempFile = generateTempWorkspacePath(fileName);
 
         try (InputStream audioInputStream = mediaFile.toStream()) {
-            Files.createDirectories(targetTempDirectory);
             Path tempFilePath = Files.createFile(targetTempFile);
             Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
@@ -39,6 +35,20 @@ public class FileOperationServiceImpl implements FileOperationService {
         }
 
         return targetTempFile;
+    }
+
+    @Override
+    public Path generateTempWorkspacePath(String fileName) throws IOException {
+        Path targetTempDirectory = Path.of(audioConfigurationProperties.getTempBlobWorkspace())
+            .resolve(UUID.randomUUID().toString());
+        try {
+            Files.createDirectories(targetTempDirectory);
+        } catch (IOException e) {
+            log.error("IOException. Unable to create temporary directory for {}", fileName);
+            throw new IOException(e);
+        }
+        return targetTempDirectory.resolve(fileName);
+
     }
 
     public BinaryData saveFileToBinaryData(String fileName) {
