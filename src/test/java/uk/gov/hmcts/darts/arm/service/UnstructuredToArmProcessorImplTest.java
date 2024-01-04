@@ -155,6 +155,7 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processMovingDataFromUnstructuredStorageToArmWhereBlobExists() {
+        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
@@ -188,8 +189,9 @@ class UnstructuredToArmProcessorImplTest {
         BlobStorageException blobStorageException = mock(BlobStorageException.class);
         when(blobStorageException.getStatusCode()).thenReturn(409);
         when(blobStorageException.getMessage()).thenReturn("The specified blob already exists");
+        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
 
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenThrow(blobStorageException);
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenThrow(blobStorageException);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
