@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobStorageException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -149,6 +151,49 @@ class UnstructuredToArmProcessorImplTest {
 
         verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
+    }
+
+    @Test
+    void processMovingDataFromUnstructuredStorageToArmWhereBlobExists() {
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
+            .fileGenerationSuccessful(true)
+            .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
+            .build();
+        when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
+
+        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
+        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
+        when(objectRecordStatusRepository.getReferenceById(14)).thenReturn(objectRecordStatusEntityRawDataFailed);
+        when(objectRecordStatusRepository.getReferenceById(15)).thenReturn(objectRecordStatusEntityManifestFailed);
+        when(objectRecordStatusRepository.getReferenceById(13)).thenReturn(objectRecordStatusEntityArmDropZone);
+
+        List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityUnstructured));
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
+            objectRecordStatusEntityStored,
+            externalLocationTypeUnstructured,
+            externalLocationTypeArm
+        )).thenReturn(inboundList);
+
+        when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
+        when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
+        when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
+
+        // Example: Failed to move BLOB metadata for file /opt/app/arm/tempworkspace/5728_1794_1.a360 due to Status code 409,
+        // "﻿<?xml version="1.0" encoding="utf-8"?><Error><Code>BlobAlreadyExists</Code><Message>The specified blob already exists
+        BlobStorageException blobStorageException = mock(BlobStorageException.class);
+        when(blobStorageException.getStatusCode()).thenReturn(409);
+        when(blobStorageException.getMessage()).thenReturn("The specified blob already exists");
+
+        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenThrow(blobStorageException);
+
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
     }
 
     @Test
