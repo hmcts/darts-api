@@ -144,9 +144,9 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
-        AnnotationDocumentEntity annotationDocument =
-            dartsDatabase.getAnnotationStub()
-                .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize, uploadedBy, uploadedDateTime, checksum);
+        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
+                .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                           uploadedBy, uploadedDateTime, checksum);
 
         ExternalObjectDirectoryEntity unstructuredEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             annotationDocument,
@@ -239,10 +239,8 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
-        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository().findByMediaAndExternalLocationType(
-            savedMedia,
-            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM)
-        );
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
