@@ -30,8 +30,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
-        '404':
-          $ref: '#/components/responses/UserNotFound'
 
     post:
       summary: Create new user
@@ -46,6 +44,18 @@ paths:
         '400':
           $ref: '#/components/responses/BadUserRequest'
   /admin/users/{id}:
+    get:
+      tags:
+        - User
+      operationId: getUsersById
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserSuccessResponseWithIdAndLastLogin'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+
     patch:
       summary: Modify user by id
       tags:
