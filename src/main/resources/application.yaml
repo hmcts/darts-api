@@ -114,6 +114,7 @@ darts:
       last-accessed-deletion-day: 2
     allowed-extensions:
       - "mp2"
+      - "mpeg2"
     max-file-size: 524288000
   azure:
     active-directory-b2c-base-uri: https://hmctsstgextid.b2clogin.com

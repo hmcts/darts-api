@@ -123,11 +123,11 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public void linkAudioAndHearing(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
-        for (String caseId : addAudioMetadataRequest.getCases()) {
+        for (String caseNumber : addAudioMetadataRequest.getCases()) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                 addAudioMetadataRequest.getCourthouse(),
                 addAudioMetadataRequest.getCourtroom(),
-                caseId,
+                caseNumber,
                 addAudioMetadataRequest.getStartedAt().toLocalDate()
             );
             hearing.addMedia(savedMedia);
