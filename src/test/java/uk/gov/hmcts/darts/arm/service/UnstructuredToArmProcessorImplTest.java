@@ -29,6 +29,7 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -269,13 +270,15 @@ class UnstructuredToArmProcessorImplTest {
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArmThrowsBlobExceptionWhenSendingManifestFile() {
+    void processMovingDataFromUnstructuredStorageToArmThrowsBlobExceptionWhenSendingManifestFile() throws IOException {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         String fileLocation = tempDirectory.getAbsolutePath();
+        File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
+        archiveRecordFile.createNewFile();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(true)
-            .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
+            .archiveRecordFile(archiveRecordFile)
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
 
