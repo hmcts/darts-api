@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,6 +54,34 @@ class DailyListEntityTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         assertThat(response.getResponse().getContentAsString()).contains(DAL_ID);
+    }
+
+    @Test
+    void dailyListAddEmptyDailyListEndpoint() throws Exception {
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
+
+        String jsonDocument = "";
+        MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam(SOURCE_SYSTEM, "CPP")
+            .header(JSON_STRING, jsonDocument);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is5xxServerError()).andReturn();
+
+        assertEquals(500, response.getResponse().getStatus());
+    }
+
+    @Test
+    void dailyListAddXmlDailyListEndpoint() throws Exception {
+        dartsDatabase.createCourthouseWithNameAndCode("SWANSEA", 457, "Swansea");
+
+        String xmlString = "<?xml version=\"1.0\"?><dummy></dummy>";
+        MockHttpServletRequestBuilder requestBuilder = post(DAILYLISTS)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .queryParam(SOURCE_SYSTEM, "CPP")
+            .header("xml_document", xmlString);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().is4xxClientError()).andReturn();
+
+        assertEquals(400, response.getResponse().getStatus());
     }
 
     private String getContentsFromFile(String filelocation) throws IOException {
