@@ -141,13 +141,12 @@ public class DailyListController implements DailyListsApi {
     }
 
     @Override
-    public ResponseEntity<Void> dailylistsRunPost(Integer courthouseId) {
+    public ResponseEntity<Void> dailylistsRunPost(String listingCourthouse) {
 
-        if (courthouseId == null) {
+        if (listingCourthouse == null) {
             CompletableFuture.runAsync(() -> processor.processAllDailyLists(LocalDate.now()));
         } else {
-            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findById(
-                courthouseId);
+            Optional<CourthouseEntity> foundCourthouse = courthouseRepository.findByCourthouseNameIgnoreCase(listingCourthouse);
             foundCourthouse.ifPresentOrElse(
                 courthouse -> CompletableFuture.runAsync(() -> processor.processAllDailyListForCourthouse(courthouse)),
                 () -> {

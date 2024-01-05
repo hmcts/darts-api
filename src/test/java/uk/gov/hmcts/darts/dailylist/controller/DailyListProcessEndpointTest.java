@@ -19,7 +19,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @ExtendWith(MockitoExtension.class)
 class DailyListProcessEndpointTest {
@@ -43,14 +43,15 @@ class DailyListProcessEndpointTest {
     @Test
     void dailyListRunWithCourthouse() {
         CourthouseEntity courthouse = Mockito.mock(CourthouseEntity.class);
-        Mockito.when(courthouseRepository.findById(anyInt())).thenReturn(Optional.of(courthouse));
-        ResponseEntity<Void> response = controller.dailylistsRunPost(1);
+        Mockito.when(courthouseRepository.findByCourthouseNameIgnoreCase(anyString())).thenReturn(Optional.of(courthouse));
+
+        ResponseEntity<Void> response = controller.dailylistsRunPost("Swansea");
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
-        Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyListForCourthouse(any());
+        Mockito.verify(processor, Mockito.timeout(100).times(1)).processAllDailyListForCourthouse(courthouse);
     }
 
     @Test
     void dailyListRunWithCourthouseDoesNotExist() {
-        assertThrows(DartsApiException.class, () -> controller.dailylistsRunPost(1));
+        assertThrows(DartsApiException.class, () -> controller.dailylistsRunPost("non_exists"));
     }
 }
