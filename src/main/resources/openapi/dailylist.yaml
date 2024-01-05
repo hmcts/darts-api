@@ -60,9 +60,10 @@ paths:
           description: "XML representation of the 'document' received in the addDocument request.<p>
             **Conditional mandatory** either this or json_document needs to be provided, or both. This will not be parsed but just stored in the database as a string"
         - in: header
-          name: json_document
+          name: json_string #json_document
           schema:
-            $ref: '#/components/schemas/PostDailyListJson'
+            type: string
+            #$ref: '#/components/schemas/PostDailyListJson'
           description: "JSON representation of the 'document' received in the addDocument request.<p>
             **Conditional mandatory** either this or xml_document needs to be provided, or both."
 
@@ -109,9 +110,10 @@ paths:
           description: "ID of the DailyList in the database."
           required: true
         - in: header
-          name: json_document
+          name: json_string #json_document
           schema:
-            $ref: '#/components/schemas/PostDailyListJson'
+            type: string
+            #$ref: '#/components/schemas/PostDailyListJson'
           description: "JSON representation of the 'document' received in the addDocument request.<p>
             **Conditional mandatory** either this or xml_document needs to be provided, or both."
           required: true
