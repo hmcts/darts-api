@@ -165,7 +165,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
      *
      * @param requestId The id of the AudioRequest to be processed.
      */
-    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidRethrowingException"})
+    @SuppressWarnings("PMD.AvoidRethrowingException")
     private void processAudioRequest(Integer requestId) {
 
         log.info("Starting processing for audio request id: {}", requestId);
@@ -207,9 +207,18 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             int index = 1;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
+            final String fileNamePrefix = String.format(
+                "%s_%s_",
+                hearingEntity.getCourtCase().getCaseNumber(),
+                hearingEntity.getHearingDate().format(formatter)
+            );
             for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
-                final String fileName = hearingEntity.getCourtCase().getCaseNumber() + "_" + hearingEntity.getHearingDate().format(formatter) + "_"
-                    + index++ + ".mp3";
+                final String fileName = String.format(
+                    "%s%d%s",
+                    fileNamePrefix,
+                    index++,
+                    (audioRequestOutputFormat.equals(AudioRequestOutputFormat.MP3) ? ".mp3" : ".zip")
+                );
 
                 try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
                     blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, BinaryData.fromStream(inputStream), fileName, generatedAudioFile);
