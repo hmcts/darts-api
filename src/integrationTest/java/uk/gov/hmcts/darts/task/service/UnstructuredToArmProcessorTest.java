@@ -142,7 +142,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         final String fileName = "judges-notes.txt";
         final String fileType = "text/plain";
         final int fileSize = 123;
-        OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
         AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
@@ -177,7 +177,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
-        UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        final UserAccountEntity uploadedBy = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         final String checksum = "xi/XkzD2HuqTUzDafW8Cgw==";
 
         TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
