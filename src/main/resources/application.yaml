@@ -112,9 +112,9 @@ darts:
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
     outbounddeleter:
       last-accessed-deletion-day: 2
-    allowed-extensions:
-      - "mp2"
+    allowed-media-formats:
       - "mpeg2"
+      - "mp2"
     max-file-size: 524288000
   azure:
     active-directory-b2c-base-uri: https://hmctsstgextid.b2clogin.com

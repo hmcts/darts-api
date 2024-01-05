@@ -30,6 +30,7 @@ public class AudioConfigurationProperties {
     @NotEmpty
     private String tempBlobWorkspace;
 
+    private List<String> allowedMediaFormats = new ArrayList<>();
     private Integer maxFileSize;
-    private List<String> allowedExtensions = new ArrayList<>();
+
 }
