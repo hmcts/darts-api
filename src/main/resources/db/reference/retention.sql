@@ -10,6 +10,8 @@
 -- v5 add is_manual_override to case_retention
 --    add event_ts to case_management_retention
 --    amend eve_id on case_managment_retention to be nullable
+-- v6 change submitted_ts to submitted_by on case_retention and FK for same, and missing one on created_by
+--    add last_modified* to case_retention and FK 
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -40,10 +42,12 @@ CREATE TABLE case_retention
 ,current_state               CHARACTER VARYING             NOT NULL  -- can we agree on single chars, eg P-pending, E-expired, A-active
 ,comments                    CHARACTER VARYING 
 ,retention_object_id         CHARACTER VARYING                       -- PK of legacy source migration table 
-,submitted_ts                TIMESTAMP WITH TIME ZONE      NOT NULL
+,submitted_by                INTEGER                       NOT NULL
 ,is_manual_override          BOOLEAN                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
+,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
+,last_modified_by            INTEGER                       NOT NULL
 ) TABLESPACE darts_tables;
 
 CREATE TABLE retention_policy_type
@@ -77,13 +81,29 @@ ALTER TABLE case_retention
 ADD CONSTRAINT case_retention_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
-ALTER TABLE case_management_retention            
-ADD CONSTRAINT case_management_retention_court_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
-
 ALTER TABLE case_retention           
 ADD CONSTRAINT case_retention_retention_policy_type_fk
 FOREIGN KEY (rpt_id) REFERENCES retention_policy_type(rpt_id);
+
+ALTER TABLE case_retention             
+ADD CONSTRAINT case_retention_created_by_fk
+FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE case_retention             
+ADD CONSTRAINT case_retention_last_modified_by_fk
+FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE case_retention             
+ADD CONSTRAINT case_retention_submitted_by_fk
+FOREIGN KEY (submitted_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE case_retention            
+ADD CONSTRAINT case_retention_case_management_retention_fk
+FOREIGN KEY (cmr_id) REFERENCES case_management_retention(cmr_id);
+
+ALTER TABLE case_management_retention            
+ADD CONSTRAINT case_management_retention_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE case_management_retention            
 ADD CONSTRAINT case_management_retention_retention_policy_type_fk
@@ -101,9 +121,7 @@ ALTER TABLE retention_policy_type
 ADD CONSTRAINT retention_policy_type_last_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
-ALTER TABLE case_retention            
-ADD CONSTRAINT case_retention_case_management_retention_fk
-FOREIGN KEY (cmr_id) REFERENCES case_management_retention(cmr_id);
+
 
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_management_retention TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_retention TO darts_user;
