@@ -4,8 +4,11 @@ import com.azure.core.util.BinaryData;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -13,6 +16,7 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -152,4 +156,30 @@ public class AudioServiceImpl implements AudioService {
         return externalObjectDirectoryEntity;
     }
 
+    @Async
+    @Override
+    public void emitterHeartBeat(SseEmitter emitter) {
+        try {
+            do {
+                emitter.send("beat");
+                Thread.sleep(5000);
+            } while (true);
+        } catch (Exception e) {
+            log.debug("exception during emitter: {}", e.getMessage());
+        }
+    }
+
+    @Async
+    @Override
+    public void pause10(SseEmitter emitter, Integer mediaId, String range) throws IOException {
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        InputStream audioMediaFile = preview(mediaId);
+        ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
+        emitter.send(response);
+        emitter.complete();
+    }
 }

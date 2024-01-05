@@ -1,13 +1,20 @@
 package uk.gov.hmcts.darts.audio.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -61,6 +68,24 @@ public class AudioController implements AudioApi {
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
         InputStream audioMediaFile = audioService.preview(mediaId);
         return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList);
+    }
+
+    @SneakyThrows
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/audio/preview2/{media_id}",
+        produces = {"audio/mpeg", "application/json+problem"}
+    )
+    public SseEmitter preview2(
+        @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
+        @PathVariable("media_id") Integer mediaId,
+        @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
+        @RequestHeader(value = "range", required = false) String range
+    ) {
+        SseEmitter emitter = new SseEmitter(1_800_000L);//30m
+        audioService.emitterHeartBeat(emitter);
+        audioService.pause10(emitter, mediaId, range);
+        return emitter;
     }
 
     @Override
