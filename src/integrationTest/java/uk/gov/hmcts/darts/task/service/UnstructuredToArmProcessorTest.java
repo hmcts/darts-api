@@ -48,7 +48,7 @@ import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 @Transactional
 class UnstructuredToArmProcessorTest extends IntegrationBase {
 
-    public static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
+    private static final LocalDate HEARING_DATE = LocalDate.of(2023, 6, 10);
     private UnstructuredToArmProcessor unstructuredToArmProcessor;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
