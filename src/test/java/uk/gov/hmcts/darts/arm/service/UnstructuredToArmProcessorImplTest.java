@@ -271,7 +271,6 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processMovingDataFromUnstructuredStorageToArmThrowsBlobExceptionWhenSendingManifestFile() throws IOException {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
@@ -302,6 +301,7 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
 
+        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
         when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
 
         BlobStorageException blobStorageException = mock(BlobStorageException.class);
@@ -313,13 +313,14 @@ class UnstructuredToArmProcessorImplTest {
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArmThrowsGenericExceptionWhenSendingManifestFile() {
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
+    void processMovingDataFromUnstructuredStorageToArmThrowsGenericExceptionWhenSendingManifestFile() throws IOException {
 
         String fileLocation = tempDirectory.getAbsolutePath();
+        File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
+        archiveRecordFile.createNewFile();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(true)
-            .archiveRecordFile(new File(fileLocation, "1_1_1.a360"))
+            .archiveRecordFile(archiveRecordFile)
             .build();
         when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
 
@@ -343,6 +344,7 @@ class UnstructuredToArmProcessorImplTest {
         when(externalLocationTypeUnstructured.getId()).thenReturn(ExternalLocationTypeEnum.UNSTRUCTURED.getId());
         when(externalObjectDirectoryEntityUnstructured.getExternalLocationType()).thenReturn(externalLocationTypeUnstructured);
 
+        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
         when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
 
         NullPointerException genericException = new NullPointerException();
