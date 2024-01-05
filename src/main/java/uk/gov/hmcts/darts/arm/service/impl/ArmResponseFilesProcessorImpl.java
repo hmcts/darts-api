@@ -48,9 +48,24 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         for (ExternalObjectDirectoryEntity externalObjectDirectory: dataSentToArm) {
             // Using Azure Blob Storage List operation, fetch the filename from
             // dropzone/DARTS/collected using prefix EODID_MEDID_ATTEMPTS for Media of manifest file from Response folder.
+            /* IU - Input Upload - This is the manifest file which gets renamed by ARM.
+               CR - Create Record - This is the create record file which represents record creation in ARM.
+               UF - Upload File - This is the Upload file which represents the File which is ingested by ARM.
+               -- EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
+               -- 6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp
+               -- 6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp */
             String prefix = getPrefix(externalObjectDirectory);
+            log.debug("Looking for files containing name {}", prefix);
             Map<String, BlobItem> collectedBlobs = armDataManagementApi.listCollectedBlobs(prefix);
-
+            if (nonNull(collectedBlobs) && !collectedBlobs.isEmpty()) {
+                String inputUploadFilename = collectedBlobs.keySet().stream().findFirst().get();
+                log.debug("Found Input upload file {}", inputUploadFilename);
+                if (inputUploadFilename.contains(prefix+ARM_FILENAME_SEPARATOR)) {
+                    String inputUploadFilenameMinusPrefix = inputUploadFilename.substring(inputUploadFilename.indexOf(prefix+ARM_FILENAME_SEPARATOR));
+                    log.debug("Stripped input upload file {}", inputUploadFilenameMinusPrefix);
+                    
+                }
+            }
         }
     }
 
