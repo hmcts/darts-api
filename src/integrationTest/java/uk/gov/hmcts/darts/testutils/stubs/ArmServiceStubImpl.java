@@ -32,6 +32,11 @@ public class ArmServiceStubImpl implements ArmService {
         return null;
     }
 
+    @Override
+    public BinaryData getBlobData(String containerName, String blobName) {
+        return BinaryData.fromBytes(new byte[1024]);
+    }
+
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"

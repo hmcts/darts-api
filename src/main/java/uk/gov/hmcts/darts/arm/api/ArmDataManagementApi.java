@@ -12,4 +12,6 @@ public interface ArmDataManagementApi {
     Map<String, BlobItem> listCollectedBlobs(String prefix);
 
     Map<String, BlobItem> listResponseBlobs(String prefix);
+
+    BinaryData getResponseBlobData(String blobName);
 }

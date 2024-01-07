@@ -21,7 +21,8 @@ public enum ObjectRecordStatusEnum {
     ARM_INGESTION(12),
     ARM_DROP_ZONE(13),
     FAILURE_ARM_RAW_DATA_FAILED(14),
-    FAILURE_ARM_MANIFEST_FILE_FAILED(15);
+    FAILURE_ARM_MANIFEST_FILE_FAILED(15),
+    ARM_PROCESSING_RESPONSE_FILES(16);
 
     private final Integer id;
 
