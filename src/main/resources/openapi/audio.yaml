@@ -252,4 +252,9 @@ components:
           description: 'List of associated case numbers'
           minItems: 1
           maxLength: 255
+    AddAudioErrorCode:
+      type: string
+      enum:
+        - "COMMON_100"
+      x-enum-varnames: [ ADD_AUDIO_COURT_HOUSE_NOT_FOUND ]
 
