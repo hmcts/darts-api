@@ -126,7 +126,6 @@ public class CommonTestDataUtil {
         courtCase.setDefenceList(createDefenceList(courtCase));
         courtCase.setDefendantList(createDefendantList(courtCase));
         courtCase.setProsecutorList(createProsecutorList(courtCase));
-        courtCase.setClosed(false);
         return courtCase;
     }
 
