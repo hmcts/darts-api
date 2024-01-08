@@ -157,10 +157,10 @@ paths:
       summary: Runs dailylist processing task asynchronously.
       parameters:
         - in: query
-          name: courthouse_id
+          name: listing_courthouse
           schema:
-            type: integer
-          description: "Internal courthouse id"
+            type: string
+          description: "Courthouse name"
           required: false
       description: |-
         Asynchronously start processing dailylists for all courthouses.
