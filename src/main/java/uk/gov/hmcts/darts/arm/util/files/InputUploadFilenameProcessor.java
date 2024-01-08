@@ -36,7 +36,7 @@ public class InputUploadFilenameProcessor {
             status = tokens.get(4);
         } else {
             log.error("Expected {} tokens in filename {} but found {}", NUMBER_OF_TOKENS, inputUploadFilename, tokens.size());
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invalid filename " + inputUploadFilename);
         }
 
     }

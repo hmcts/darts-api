@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -23,13 +24,20 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
+    public String saveBlobData(String containerName, BinaryData binaryData, String blobPathAndName) {
+        logStubUsageWarning();
+        log.warn("Returning filename to mimic successful upload: {}", blobPathAndName);
+        return blobPathAndName;
+    }
+
+    @Override
     public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
-        return null;
+        return new HashMap<>();
     }
 
     @Override
     public Map<String, BlobItem> listResponseBlobs(String containerName, String filename) {
-        return null;
+        return new HashMap<>();
     }
 
     @Override

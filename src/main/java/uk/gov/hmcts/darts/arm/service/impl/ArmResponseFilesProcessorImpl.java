@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
+import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
@@ -90,13 +90,13 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 log.debug("Response files hashcode {}", responseFilesHashcode);
                 Map<String, BlobItem> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
                 if (nonNull(responseBlobs) && !responseBlobs.isEmpty()) {
-                    processResponseFiles(responseBlobs);
+                    processResponseBlobs(responseBlobs);
                 }
             }
         }
     }
 
-    private void processResponseFiles(Map<String, BlobItem> responseBlobs) {
+    private void processResponseBlobs(Map<String, BlobItem> responseBlobs) {
         String inputUploadFilename = null;
         String createRecordFilename = null;
         String uploadFilename = null;

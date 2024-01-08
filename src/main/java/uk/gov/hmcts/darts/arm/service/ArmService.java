@@ -8,6 +8,8 @@ import java.util.Map;
 public interface ArmService {
     String saveBlobData(String containerName, String filename, BinaryData binaryData);
 
+    String saveBlobData(String containerName, BinaryData binaryData, String blobPathAndName);
+
     Map<String, BlobItem> listCollectedBlobs(String containerName, String filename);
 
     Map<String, BlobItem> listResponseBlobs(String containerName, String filename);

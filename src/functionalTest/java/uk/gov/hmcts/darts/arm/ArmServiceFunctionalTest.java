@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.models.BlobItem;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,10 @@ import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
@@ -35,6 +38,9 @@ class ArmServiceFunctionalTest {
     @Value("${darts.storage.arm.folders.submission}")
     private String armSubmissionDropZone;
 
+    @Value("${darts.storage.arm.folders.collected}")
+    private String armCollectedDropZone;
+
     @Autowired
     private ArmService armService;
 
@@ -43,6 +49,9 @@ class ArmServiceFunctionalTest {
 
     private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
 
+    private final List<String> armCollectedBlobsToBeDeleted = new ArrayList<>();
+
+
     @Test
     void saveBlobData() {
 
@@ -50,9 +59,28 @@ class ArmServiceFunctionalTest {
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String filename = String.format("%s_functional_test", UUID.randomUUID().toString());
         String actualResult = armService.saveBlobData(armContainerName, filename, data);
+        armSubmissionBlobsToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
         log.info("Blob filename {}", actualResult);
-        armSubmissionBlobsToBeDeleted.add(actualResult);
+
+    }
+
+    @Test
+    void listCollectedBlobs() {
+
+        byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+        String filename = String.format("functional_test_%s", UUID.randomUUID().toString());
+        String blobPathAndName = armCollectedDropZone + filename;
+        String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
+        armCollectedBlobsToBeDeleted.add(actualResult);
+        assertNotNull(actualResult);
+        log.info("Blob filename {}", actualResult);
+
+        Map<String, BlobItem> collectedBlobs = armService.listCollectedBlobs(armContainerName, armCollectedDropZone + "functional_test");
+        assertEquals(1, collectedBlobs.size());
+        assertEquals(filename, collectedBlobs.keySet().stream().findFirst().get());
+
     }
 
     @AfterEach
@@ -63,5 +91,10 @@ class ArmServiceFunctionalTest {
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
         }
         armSubmissionBlobsToBeDeleted.clear();
+
+        for (String blobPathAndName : armCollectedBlobsToBeDeleted) {
+            armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
+        }
+        armCollectedBlobsToBeDeleted.clear();
     }
 }
