@@ -20,6 +20,10 @@ public class ChannelAudio {
         this.channel = channel;
     }
 
+    public ChannelAudio(List<AudioFileInfo> audioFiles) {
+        this.audioFiles = audioFiles;
+    }
+
     public void addAudioFile(AudioFileInfo audioFileInfo) {
         if (audioFiles == null) {
             audioFiles = new ArrayList<>();
