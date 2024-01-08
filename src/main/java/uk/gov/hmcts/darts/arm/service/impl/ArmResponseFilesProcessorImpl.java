@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,9 @@ import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +60,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             try {
                 updateExternalDirectoryObjectStatus(armProcessingResponseFilesStatus, externalObjectDirectory);
                 processCollectedFile(externalObjectDirectory);
+                updateExternalDirectoryObjectStatus(armDropZoneStatus, externalObjectDirectory);
             } catch (Exception e) {
                 updateExternalDirectoryObjectStatus(armDropZoneStatus, externalObjectDirectory);
                 log.error("Unable to process response files for external object directory {}", e.getMessage());
@@ -111,7 +116,15 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         if (nonNull(inputUploadFilename) && nonNull(createRecordFilename) && nonNull(uploadFilename)) {
             UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFilename);
             if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
-                armDataManagementApi.getResponseBlobData(uploadFilename);
+                BinaryData uploadFileBinary = armDataManagementApi.getResponseBlobData(uploadFilename);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(uploadFileBinary.toStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        log.info("Upload file - reading line {}", line);
+                    }
+                } catch (IOException e) {
+                    log.error("Unable to read upload file {}", e.getMessage());
+                }
             }
         }
     }
@@ -121,13 +134,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private static String getPrefix(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        StringBuilder prefix = new StringBuilder(externalObjectDirectory.getId().toString())
+        return new StringBuilder(externalObjectDirectory.getId().toString())
             .append(ARM_FILENAME_SEPARATOR)
             .append(getObjectTypeId(externalObjectDirectory))
             .append(ARM_FILENAME_SEPARATOR)
-            .append(externalObjectDirectory.getTransferAttempts());
-
-        return prefix.toString();
+            .append(externalObjectDirectory.getTransferAttempts()).toString();
     }
 
     private static String getObjectTypeId(ExternalObjectDirectoryEntity externalObjectDirectory) {
