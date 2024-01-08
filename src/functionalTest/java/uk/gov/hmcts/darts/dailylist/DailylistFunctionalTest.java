@@ -66,7 +66,7 @@ class DailylistFunctionalTest extends FunctionalTest {
         response = buildRequestWithExternalGlobalAccessAuth()
             .contentType(ContentType.JSON)
             .queryParam("dal_id", dalId)
-            .header("json_document", jsonDocument)
+            .header("json_string", jsonDocument)
             .when()
             .baseUri(getUri(POST_DAILYLIST_URL))
             .redirects().follow(false)
