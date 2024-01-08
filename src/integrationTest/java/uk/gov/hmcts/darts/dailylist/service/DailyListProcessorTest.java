@@ -22,10 +22,15 @@ import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 class DailyListProcessorTest extends IntegrationBase {
@@ -158,6 +163,36 @@ class DailyListProcessorTest extends IntegrationBase {
 
         }
 
+    }
+
+    @Test
+    void dailyListReopenCaseWithNewHearing() throws IOException {
+        CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
+
+        dartsDatabase.createDailyLists(swanseaCourtEntity);
+        dailyListProcessor.processAllDailyLists(LocalDate.now());
+
+        CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, newCase1.getCaseNumber());
+        assertFalse(newCase1.getClosed());
+        assertNull(newCase1.getCaseClosedTimestamp());
+
+        newCase1.setClosed(true);
+        newCase1.setCaseClosedTimestamp(OffsetDateTime.now());
+        caseRepository.save(newCase1);
+
+        CourtCaseEntity closedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, closedCase.getCaseNumber());
+        assertTrue(closedCase.getClosed());
+        assertNotNull(closedCase.getCaseClosedTimestamp());
+
+        dartsDatabase.createDailyLists(swanseaCourtEntity);
+        dailyListProcessor.processAllDailyLists(LocalDate.now());
+
+        CourtCaseEntity updatedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
+        assertEquals(URN_1, updatedCase.getCaseNumber());
+        assertFalse(updatedCase.getClosed());
+        assertNull(updatedCase.getCaseClosedTimestamp());
     }
 
 
