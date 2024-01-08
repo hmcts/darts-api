@@ -162,14 +162,11 @@ public class TranscriptionStub {
                                                                ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                UUID externalLocation,
                                                                String checksum) {
-        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
-        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
-        transcriptionDocumentEntity.setFileName(fileName);
-        transcriptionDocumentEntity.setFileType(fileType);
-        transcriptionDocumentEntity.setFileSize(fileSize);
-        transcriptionDocumentEntity.setUploadedBy(testUser);
-        transcriptionDocumentEntity.setUploadedDateTime(now(UTC));
-        transcriptionDocumentEntity.setChecksum(checksum);
+
+        TranscriptionDocumentEntity transcriptionDocumentEntity = createTranscriptionDocumentEntity(transcriptionEntity, fileName,
+                                                                                                    fileType, fileSize, testUser,
+                                                                                                    checksum
+        );
 
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = new ExternalObjectDirectoryEntity();
         externalObjectDirectoryEntity.setStatus(objectRecordStatusEntity);
@@ -186,6 +183,19 @@ public class TranscriptionStub {
 
         transcriptionEntity.getTranscriptionDocumentEntities().add(transcriptionDocumentEntity);
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
+                                                                                 int fileSize, UserAccountEntity testUser, String checksum) {
+        TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
+        transcriptionDocumentEntity.setTranscription(transcriptionEntity);
+        transcriptionDocumentEntity.setFileName(fileName);
+        transcriptionDocumentEntity.setFileType(fileType);
+        transcriptionDocumentEntity.setFileSize(fileSize);
+        transcriptionDocumentEntity.setUploadedBy(testUser);
+        transcriptionDocumentEntity.setUploadedDateTime(now(UTC));
+        transcriptionDocumentEntity.setChecksum(checksum);
+        return transcriptionDocumentEntity;
     }
 
     public TranscriptionStatusEntity getTranscriptionStatusByEnum(TranscriptionStatusEnum transcriptionStatusEnum) {
