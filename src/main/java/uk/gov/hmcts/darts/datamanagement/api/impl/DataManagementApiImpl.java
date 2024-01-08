@@ -44,9 +44,9 @@ public class DataManagementApiImpl implements DataManagementApi {
     }
 
     @Override
-    public void getBlobDataByRangeFromContainer(UUID uuid, DatastoreContainerType container, BlobRange blobRange, String localFilePath) {
+    public BlobClient getBlobDataByRangeFromContainer(UUID uuid, DatastoreContainerType container, BlobRange blobRange, String localFilePath) {
         String containerName = getContainerName(container);
-        dataManagementService.getBlobDataPortion(containerName, uuid, blobRange, localFilePath);
+        return dataManagementService.getBlobDataPortion(containerName, uuid, blobRange, localFilePath);
     }
 
     @Override

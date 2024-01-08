@@ -5,12 +5,16 @@ import com.azure.storage.blob.models.BlobRange;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.helper.BlobRangeHelper;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.PreviewRange;
+import uk.gov.hmcts.darts.audio.model.SavedAudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
@@ -33,7 +37,6 @@ import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -59,6 +62,7 @@ public class AudioServiceImpl implements AudioService {
     private final DataManagementApi dataManagementApi;
     private final UserIdentity userIdentity;
     private final FileContentChecksum fileContentChecksum;
+    private final BlobRangeHelper blobRangeHelper;
 
     private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return new AudioFileInfo(
@@ -70,33 +74,34 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public InputStream preview(Integer mediaId, String httpRangeList) {
-
-        BlobRange blobRange = StreamingResponseEntityUtil.getBlobRangeFromHeader(httpRangeList);
+    public ResponseEntity<byte[]> preview(Integer mediaId, PreviewRange previewRange) throws IOException {
 
         MediaEntity mediaEntity = mediaRepository.findById(mediaId).orElseThrow(
             () -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
         BinaryData mediaBinaryData;
+        SavedAudioFileInfo mp2FileInfo;
         try {
-            Path downloadPath = audioTransformationService.retrieveFromStorageAndSaveMediaToWorkspace(mediaEntity, blobRange);
+            BlobRange range = new BlobRange(0, previewRange.getEndRange());
+            mp2FileInfo = audioTransformationService.retrieveFromStorageAndSaveMediaToWorkspace(mediaEntity, range);
 
-            AudioFileInfo audioFileInfo = createAudioFileInfo(mediaEntity, downloadPath);
+            AudioFileInfo mp2AudioFileInfo = createAudioFileInfo(mediaEntity, mp2FileInfo.getPath());
 
-            AudioFileInfo encodedAudioFileInfo;
+            AudioFileInfo mp3AudioFileInfo;
             try {
-                encodedAudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), audioFileInfo);
+                mp3AudioFileInfo = audioOperationService.reEncode(UUID.randomUUID().toString(), mp2AudioFileInfo);
             } catch (ExecutionException | InterruptedException e) {
                 // For Sonar rule S2142
                 throw e;
             }
-            Path encodedAudioPath = Path.of(encodedAudioFileInfo.getFileName());
+            Path encodedAudioPath = Path.of(mp3AudioFileInfo.getFileName());
 
             mediaBinaryData = fileOperationService.saveFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
+            previewRange.setContentLength(mp2FileInfo.getBlobClient().getProperties().getBlobSize());
         } catch (Exception exception) {
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
 
-        return mediaBinaryData.toStream();
+        return StreamingResponseEntityUtil.createResponseEntity(mediaBinaryData.toStream(), previewRange);
     }
 
     @Override

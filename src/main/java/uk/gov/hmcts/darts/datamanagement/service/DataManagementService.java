@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface DataManagementService {
     BinaryData getBlobData(String containerName, UUID blobId);
 
-    void getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath);
+    BlobClient getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath);
 
     UUID saveBlobData(String containerName, BinaryData binaryData);
 

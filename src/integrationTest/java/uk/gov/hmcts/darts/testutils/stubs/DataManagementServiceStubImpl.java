@@ -33,8 +33,9 @@ public class DataManagementServiceStubImpl implements DataManagementService {
     }
 
     @Override
-    public void getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath) {
+    public BlobClient getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath) {
 
+        return null;
     }
 
     @Override

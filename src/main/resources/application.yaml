@@ -115,6 +115,8 @@ darts:
     allowed-extensions:
       - "mp2"
     max-file-size: 524288000
+    preview:
+      max-preview-fetch-size: 1000000
   azure:
     active-directory-b2c-base-uri: https://hmctsstgextid.b2clogin.com
     active-directory-b2c-auth-uri: ${darts.azure.active-directory-b2c-base-uri}/hmctsstgextid.onmicrosoft.com

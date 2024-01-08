@@ -53,7 +53,7 @@ public class DataManagementServiceImpl implements DataManagementService {
     }
 
     @Override
-    public void getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath) {
+    public BlobClient getBlobDataPortion(String containerName, UUID blobId, BlobRange blobRange, String saveFilePath) {
 
         BlobContainerClient containerClient = dataManagementDao.getBlobContainerClient(containerName);
         BlobClient blobClient = dataManagementDao.getBlobClient(containerClient, blobId);
@@ -72,7 +72,7 @@ public class DataManagementServiceImpl implements DataManagementService {
         );
         Date downloadEndDate = new Date();
         log.debug("**Finished downloading range {} of guid {}, took {}ms", blobRange, blobId, downloadEndDate.getTime() - downloadStartDate.getTime());
-
+        return blobClient;
     }
 
     @Override

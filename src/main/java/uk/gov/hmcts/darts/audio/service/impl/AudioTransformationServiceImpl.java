@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
+import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobRange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audio.model.SavedAudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
@@ -280,7 +282,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     @Override
-    public Path retrieveFromStorageAndSaveMediaToWorkspace(MediaEntity mediaEntity, BlobRange range) throws IOException {
+    public SavedAudioFileInfo retrieveFromStorageAndSaveMediaToWorkspace(MediaEntity mediaEntity, BlobRange range) throws IOException {
         UUID id = getMediaLocation(mediaEntity).orElseThrow(
             () -> new RuntimeException(String.format("Could not locate UUID for media: %s", mediaEntity.getId()
             )));
@@ -288,16 +290,22 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         Path downloadPath = fileOperationService.generateTempWorkspacePath(filename);
 
         log.debug("Downloading audio blob for {} from unstructured datastore", id);
-        dataManagementApi.getBlobDataByRangeFromContainer(id, DatastoreContainerType.UNSTRUCTURED, range, downloadPath.toFile().getAbsolutePath());
+        BlobClient blobClient = dataManagementApi.getBlobDataByRangeFromContainer(
+            id,
+            DatastoreContainerType.UNSTRUCTURED,
+            range,
+            downloadPath.toFile().getAbsolutePath()
+        );
+
         log.debug("Download audio blob complete for {}", id);
 
         log.debug("Saved audio blob {} to {}", id, downloadPath);
-        return downloadPath;
+        return new SavedAudioFileInfo(downloadPath, blobClient);
     }
 
     @SuppressWarnings("PMD.LawOfDemeter")
     private Path generateFileForRequestType(MediaRequestEntity mediaRequestEntity,
-                                                            Map<MediaEntity, Path> downloadedMedias)
+                                            Map<MediaEntity, Path> downloadedMedias)
         throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
@@ -325,7 +333,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     public Path handlePlayback(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
-                                               OffsetDateTime endTime)
+                               OffsetDateTime endTime)
         throws ExecutionException, InterruptedException, IOException {
 
         AudioFileInfo audioFileInfo = outboundFileProcessor.processAudioForPlayback(

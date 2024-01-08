@@ -9,16 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
+import uk.gov.hmcts.darts.audio.helper.BlobRangeHelper;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
+import uk.gov.hmcts.darts.audio.model.PreviewRange;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
-import java.io.InputStream;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -39,6 +39,7 @@ public class AudioController implements AudioApi {
     private final AudioService audioService;
     private final AudioTransformationService audioTransformationService;
     private final AudioResponseMapper audioResponseMapper;
+    private final BlobRangeHelper blobRangeHelper;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -59,9 +60,8 @@ public class AudioController implements AudioApi {
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<byte[]> preview(Integer mediaId, String httpRangeList) {
-
-        InputStream audioMediaFile = audioService.preview(mediaId, httpRangeList);
-        return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, httpRangeList);
+        PreviewRange previewRange = blobRangeHelper.getBlobRangeFromHeader(httpRangeList);
+        return audioService.preview(mediaId, previewRange);
     }
 
     @Override

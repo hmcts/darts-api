@@ -19,7 +19,7 @@ public interface DataManagementApi {
 
     BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata);
 
-    void getBlobDataByRangeFromContainer(UUID uuid, DatastoreContainerType container, BlobRange blobRange, String localFilePath);
+    BlobClient getBlobDataByRangeFromContainer(UUID uuid, DatastoreContainerType container, BlobRange blobRange, String localFilePath);
 
     void addMetadata(BlobClient client, Map<String, String> metadata);
 

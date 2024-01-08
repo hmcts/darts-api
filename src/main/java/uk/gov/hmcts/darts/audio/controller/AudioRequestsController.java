@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.component.AudioRequestResponseMapper;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.helper.BlobRangeHelper;
+import uk.gov.hmcts.darts.audio.model.PreviewRange;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audiorequests.http.api.AudioRequestsApi;
@@ -42,6 +44,7 @@ public class AudioRequestsController implements AudioRequestsApi {
     private final MediaRequestService mediaRequestService;
 
     private final AudioRequestResponseMapper audioRequestResponseMapper;
+    private final BlobRangeHelper blobRangeHelper;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -118,8 +121,8 @@ public class AudioRequestsController implements AudioRequestsApi {
         globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<byte[]> playback(Integer mediaRequestId, String httpRangeList) {
         InputStream audioFileStream = mediaRequestService.playback(mediaRequestId);
-
-        return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, httpRangeList);
+        PreviewRange previewRange = blobRangeHelper.getBlobRangeFromHeader(httpRangeList);
+        return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, previewRange);
     }
 
 

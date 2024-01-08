@@ -167,6 +167,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
+        command.addArgument("-b:a").addArgument("32k");
         command.addArgument(outputPath.toString());
 
         log.debug("Starting encoding of audio file with command {}", command);
