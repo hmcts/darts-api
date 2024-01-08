@@ -74,7 +74,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.fileOperationService = fileOperationService;
         this.archiveRecordService = archiveRecordService;
-        
+
     }
 
     private void preloadObjectRecordStatuses(ObjectRecordStatusRepository objectRecordStatusRepository) {
@@ -220,9 +220,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                                      String filename,
                                      ObjectRecordStatusEntity failedStatus) {
         try {
-            if (failedStatus == null ||
-                failedStatus.getId().equals(FAILURE_ARM_RAW_DATA_FAILED.getId()) ||
-                failedStatus.getId().equals(ARM_INGESTION)) {
+            if (failedStatus == null
+                || failedStatus.getId().equals(FAILURE_ARM_RAW_DATA_FAILED.getId())
+                || failedStatus.getId().equals(ARM_INGESTION)) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
 
