@@ -112,7 +112,8 @@ darts:
     temp-blob-workspace: ${user.home}/audiotransform/tempworkspace
     outbounddeleter:
       last-accessed-deletion-day: 2
-    allowed-extensions:
+    allowed-media-formats:
+      - "mpeg2"
       - "mp2"
     max-file-size: 524288000
   azure:
