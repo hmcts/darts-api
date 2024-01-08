@@ -281,7 +281,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
             UUID.randomUUID()
         );
 
-        armEod.setTransferAttempts(3);
+        armEod.setTransferAttempts(2);
         dartsDatabase.save(armEod);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
@@ -292,7 +292,7 @@ class UnstructuredToArmProcessorTest extends IntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
-        assertEquals(3, foundMedia.getTransferAttempts());
+        assertEquals(2, foundMedia.getTransferAttempts());
     }
 
     @Test

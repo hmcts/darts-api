@@ -75,7 +75,6 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         this.fileOperationService = fileOperationService;
         this.archiveRecordService = archiveRecordService;
 
-
     }
 
     private void preloadObjectRecordStatuses(ObjectRecordStatusRepository objectRecordStatusRepository) {
@@ -121,13 +120,13 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
         for (var currentExternalObjectDirectory : allPendingUnstructuredToArmEntities) {
 
-            ObjectRecordStatusEntity failedStatus = null;
+            ObjectRecordStatusEntity previousStatus = null;
             ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory;
             ExternalObjectDirectoryEntity armExternalObjectDirectory;
 
             if (currentExternalObjectDirectory.getExternalLocationType().getId().equals(armLocation.getId())) {
                 armExternalObjectDirectory = currentExternalObjectDirectory;
-                failedStatus = armExternalObjectDirectory.getStatus();
+                previousStatus = armExternalObjectDirectory.getStatus();
                 var matchingEntity = getUnstructuredExternalObjectDirectoryEntity(armExternalObjectDirectory);
                 if (matchingEntity.isPresent()) {
                     unstructuredExternalObjectDirectory = matchingEntity.get();
@@ -150,7 +149,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             boolean copyRawDataToArmSuccessful = copyRawDataToArm(unstructuredExternalObjectDirectory,
                                                                   armExternalObjectDirectory,
                                                                   filename,
-                                                                  failedStatus
+                                                                  previousStatus
             );
             if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
                 armExternalObjectDirectory.setStatus(armStatuses.get(ARM_DROP_ZONE));
@@ -210,18 +209,18 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             armDataManagementConfiguration.getMaxRetryAttempts()
         );
 
-        List<ExternalObjectDirectoryEntity> allPendingUnstructuredToArmEntities =
-            Stream.concat(pendingUnstructuredExternalObjectDirectoryEntities.stream(), failedArmExternalObjectDirectoryEntities.stream())
-                .toList();
-        return allPendingUnstructuredToArmEntities;
+        return Stream.concat(pendingUnstructuredExternalObjectDirectoryEntities.stream(), failedArmExternalObjectDirectoryEntities.stream()).toList();
+
     }
 
     private boolean copyRawDataToArm(ExternalObjectDirectoryEntity unstructuredExternalObjectDirectory,
                                      ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                      String filename,
-                                     ObjectRecordStatusEntity failedStatus) {
+                                     ObjectRecordStatusEntity previousStatus) {
         try {
-            if (failedStatus == null || failedStatus.getId().equals(FAILURE_ARM_RAW_DATA_FAILED.getId())) {
+            if (previousStatus == null
+                || FAILURE_ARM_RAW_DATA_FAILED.getId().equals(previousStatus.getId())
+                || ARM_INGESTION.getId().equals(previousStatus.getId())) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
 
