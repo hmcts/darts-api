@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
@@ -78,7 +79,7 @@ public class TranscriptionResponseMapper {
         transcriptionResponse.setJudges(courtCase.getJudgeStringList());
 
         TranscriptionStatusEntity transcriptionStatusEntity = transcriptionEntity.getTranscriptionStatus();
-        if (isNull(transcriptionEntity.getTranscriptionStatus())) {
+        if (nonNull(transcriptionEntity.getTranscriptionStatus())) {
             transcriptionResponse.setStatus(transcriptionStatusEntity.getDisplayName());
         }
 
@@ -96,13 +97,13 @@ public class TranscriptionResponseMapper {
         latestTranscriptionDocumentEntity.ifPresent(
             transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
-        if (isNull(transcriptionEntity.getHearing())) {
+        if (nonNull(transcriptionEntity.getHearing())) {
             transcriptionResponse.setHearingId(transcriptionEntity.getHearing().getId());
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
         } else {
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearingDate());
         }
-        if (isNull(transcriptionEntity.getTranscriptionUrgency())) {
+        if (nonNull(transcriptionEntity.getTranscriptionUrgency())) {
             transcriptionResponse.setUrgency(transcriptionEntity.getTranscriptionUrgency().getDescription());
         }
         transcriptionResponse.setRequestType(transcriptionEntity.getTranscriptionType().getDescription());
@@ -114,7 +115,7 @@ public class TranscriptionResponseMapper {
 
         // To be removed when FE updated
         EventHandlerEntity reportingRestriction = courtCase.getReportingRestrictions();
-        if (isNull(reportingRestriction)) {
+        if (nonNull(reportingRestriction)) {
             transcriptionResponse.setReportingRestriction(reportingRestriction.getEventName());
         }
 
