@@ -123,12 +123,14 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 }
             } catch (BlobStorageException e) {
                 log.error("Failed to get BLOB from datastore {} for file {} for EOD ID: {}",
-                          getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId());
+                          getInboundContainerName(), inboundExternalObjectDirectory.getExternalLocation(), inboundExternalObjectDirectory.getId()
+                );
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE_FILE_NOT_FOUND));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             } catch (Exception e) {
                 log.error("Failed to move from inbound to unstructured for EOD ID: {}, with error: {}",
-                          inboundExternalObjectDirectory.getId(), e.getMessage(), e);
+                          inboundExternalObjectDirectory.getId(), e.getMessage(), e
+                );
                 unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(FAILURE));
                 setNumTransferAttempts(unstructuredExternalObjectDirectoryEntity);
             } finally {
@@ -220,7 +222,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
                 unstructured,
                 mediaEntity.getChecksum(),
                 checksum,
-                audioConfigurationProperties.getAllowedExtensions(),
+                audioConfigurationProperties.getAllowedMediaFormats(),
                 mediaEntity.getMediaFormat().toLowerCase(),
                 audioConfigurationProperties.getMaxFileSize(),
                 mediaEntity.getFileSize()
@@ -258,14 +260,15 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
     private void performValidation(
         ExternalObjectDirectoryEntity unstructured,
         String incomingChecksum, String calculatedChecksum,
-        List<String> allowedExtensions, String extension,
+        List<String> allowedMediaFormats, String mediaFormat,
         Integer maxFileSize, Long fileSize) {
         if (incomingChecksum == null || calculatedChecksum.compareTo(incomingChecksum) != 0) {
             log.error("Checksum comparison failed, incoming \"{}\" not equal to calculated \"{}\", for unstructured EOD: {}",
-                      incomingChecksum, calculatedChecksum, unstructured.getId());
+                      incomingChecksum, calculatedChecksum, unstructured.getId()
+            );
             unstructured.setStatus(getStatus(FAILURE_CHECKSUM_FAILED));
         }
-        if (!allowedExtensions.contains(extension)) {
+        if (!allowedMediaFormats.contains(mediaFormat)) {
             unstructured.setStatus(getStatus(FAILURE_FILE_TYPE_CHECK_FAILED));
         }
         if (fileSize > maxFileSize) {

@@ -122,7 +122,6 @@ public class AudioRequestsController implements AudioRequestsApi {
         return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, httpRangeList);
     }
 
-
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<Void> updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
@@ -138,7 +137,9 @@ public class AudioRequestsController implements AudioRequestsApi {
     }
 
     @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<GetAudioRequestResponse> getYourAudio(Integer userId, Boolean expired) {
         return new ResponseEntity<>(mediaRequestService.getAudioRequests(userId, expired), HttpStatus.OK);
     }
+
 }

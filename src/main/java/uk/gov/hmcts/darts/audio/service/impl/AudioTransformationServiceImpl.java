@@ -45,8 +45,10 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -93,6 +95,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private final UserAccountRepository userAccountRepository;
 
     private final TransformedMediaHelper transformedMediaHelper;
+
+    private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
+        if (media1.getStart().equals(media2.getStart())) {
+            return media1.getChannel().compareTo(media2.getChannel());
+        } else {
+            return media1.getStart().compareTo(media2.getStart());
+        }
+    };
 
     @Override
     public BinaryData getUnstructuredAudioBlob(UUID location) {
@@ -163,7 +173,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
      *
      * @param requestId The id of the AudioRequest to be processed.
      */
-    @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AvoidRethrowingException"})
+    @SuppressWarnings("PMD.AvoidRethrowingException")
     private void processAudioRequest(Integer requestId) {
 
         log.info("Starting processing for audio request id: {}", requestId);
@@ -191,7 +201,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
             }
 
-            List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframe(mediaEntitiesForHearing, mediaRequestEntity);
+            List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+                mediaEntitiesForHearing,
+                mediaRequestEntity
+            );
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
@@ -205,9 +218,18 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
             int index = 1;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
+            final String fileNamePrefix = String.format(
+                "%s_%s_",
+                hearingEntity.getCourtCase().getCaseNumber(),
+                hearingEntity.getHearingDate().format(formatter)
+            );
             for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
-                final String fileName = hearingEntity.getCourtCase().getCaseNumber() + "_" + hearingEntity.getHearingDate().format(formatter) + "_"
-                    + index++ + ".mp3";
+                final String fileName = String.format(
+                    "%s%d%s",
+                    fileNamePrefix,
+                    index++,
+                    audioRequestOutputFormat.getExtension()
+                );
 
                 try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
                     blobId = transformedMediaHelper.saveToStorage(mediaRequestEntity, BinaryData.fromStream(inputStream), fileName, generatedAudioFile);
@@ -247,17 +269,18 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
     }
 
-    List<MediaEntity> filterMediaByMediaRequestTimeframe(List<MediaEntity> mediaEntitiesForRequest, MediaRequestEntity mediaRequestEntity) {
-        return mediaEntitiesForRequest.stream().filter(
-                media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd())
-                    && (media.getStart().isBefore(mediaRequestEntity.getEndTime())))
+    List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
+                                                                                     MediaRequestEntity mediaRequestEntity) {
+        return mediaEntitiesForRequest.stream()
+            .filter(media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd()))
+            .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
+            .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
             .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private Map<MediaEntity, Path> downloadAndSaveMediaToWorkspace(List<MediaEntity> mediaEntitiesForRequest)
         throws IOException {
-        Map<MediaEntity, Path> downloadedMedias = new HashMap<>();
+        Map<MediaEntity, Path> downloadedMedias = new LinkedHashMap<>();
         for (MediaEntity mediaEntity : mediaEntitiesForRequest) {
             Path downloadPath = saveMediaToWorkspace(mediaEntity);
 
@@ -283,7 +306,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     @SuppressWarnings("PMD.LawOfDemeter")
     private List<AudioFileInfo> generateFilesForRequestType(MediaRequestEntity mediaRequestEntity,
-                                            Map<MediaEntity, Path> downloadedMedias)
+                                                            Map<MediaEntity, Path> downloadedMedias)
         throws ExecutionException, InterruptedException, IOException {
 
         var requestType = mediaRequestEntity.getRequestType();
@@ -307,13 +330,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity.getEndTime()
         );
 
-        AudioFileInfo zipAudioZileInfo = new AudioFileInfo();
-        zipAudioZileInfo.setStartTime(mediaRequestEntity.getStartTime().toInstant());
-        zipAudioZileInfo.setEndTime(mediaRequestEntity.getEndTime().toInstant());
-        zipAudioZileInfo.setPath(outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity));
-        List<AudioFileInfo> zipPaths = new ArrayList<>();
-        zipPaths.add(zipAudioZileInfo);
-        return zipPaths;
+        AudioFileInfo zipAudioFileInfo = new AudioFileInfo();
+        zipAudioFileInfo.setStartTime(mediaRequestEntity.getStartTime().toInstant());
+        zipAudioFileInfo.setEndTime(mediaRequestEntity.getEndTime().toInstant());
+        zipAudioFileInfo.setPath(outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity));
+
+        return Collections.singletonList(zipAudioFileInfo);
     }
 
     private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
@@ -322,7 +344,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     }
 
     public List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
-                               OffsetDateTime endTime)
+                                               OffsetDateTime endTime)
         throws ExecutionException, InterruptedException, IOException {
 
         List<AudioFileInfo> audioFileInfos = outboundFileProcessor.processAudioForPlaybacks(
