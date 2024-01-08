@@ -221,8 +221,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                                      ObjectRecordStatusEntity failedStatus) {
         try {
             if (failedStatus == null
-                || failedStatus.getId().equals(FAILURE_ARM_RAW_DATA_FAILED.getId())
-                || failedStatus.getId().equals(ARM_INGESTION)) {
+                || FAILURE_ARM_RAW_DATA_FAILED.getId().equals(failedStatus.getId())
+                || ARM_INGESTION.getId().equals(failedStatus.getId())) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
 
