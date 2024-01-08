@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.component.files;
+package uk.gov.hmcts.darts.arm.service.impl;
 
 public class CreateRecordJsonFileProcessor {
 }

@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
-import uk.gov.hmcts.darts.arm.component.files.UploadFileFilenameProcessor;
+import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -57,8 +57,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
 
         for (ExternalObjectDirectoryEntity externalObjectDirectory: dataSentToArm) {
+            updateExternalDirectoryObjectStatus(armProcessingResponseFilesStatus, externalObjectDirectory);
+        }
+        for (ExternalObjectDirectoryEntity externalObjectDirectory: dataSentToArm) {
             try {
-                updateExternalDirectoryObjectStatus(armProcessingResponseFilesStatus, externalObjectDirectory);
                 processCollectedFile(externalObjectDirectory);
                 updateExternalDirectoryObjectStatus(armDropZoneStatus, externalObjectDirectory);
             } catch (Exception e) {

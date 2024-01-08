@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.component.files;
+package uk.gov.hmcts.darts.arm.util.files;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
