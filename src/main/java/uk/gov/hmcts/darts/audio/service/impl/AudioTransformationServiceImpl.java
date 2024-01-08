@@ -96,6 +96,14 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
 
     private final TransformedMediaHelper transformedMediaHelper;
 
+    private static final Comparator<MediaEntity> MEDIA_START_TIME_CHANNEL_COMPARATOR = (media1, media2) -> {
+        if (media1.getStart().equals(media2.getStart())) {
+            return media1.getChannel().compareTo(media2.getChannel());
+        } else {
+            return media1.getStart().compareTo(media2.getStart());
+        }
+    };
+
     @Override
     public BinaryData getUnstructuredAudioBlob(UUID location) {
         return dataManagementApi.getBlobDataFromUnstructuredContainer(location);
@@ -193,7 +201,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                 );
             }
 
-            List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframe(mediaEntitiesForHearing, mediaRequestEntity);
+            List<MediaEntity> filteredMediaEntities = filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(
+                mediaEntitiesForHearing,
+                mediaRequestEntity
+            );
 
             Map<MediaEntity, Path> downloadedMedias = downloadAndSaveMediaToWorkspace(filteredMediaEntities);
 
@@ -217,7 +228,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                     "%s%d%s",
                     fileNamePrefix,
                     index++,
-                    (audioRequestOutputFormat.equals(AudioRequestOutputFormat.MP3) ? ".mp3" : ".zip")
+                    audioRequestOutputFormat.getExtension()
                 );
 
                 try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {
@@ -258,18 +269,12 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
         notifyUser(mediaRequestEntity, hearingEntity.getCourtCase(), NotificationApi.NotificationTemplate.REQUESTED_AUDIO_AVAILABLE.toString());
     }
 
-    List<MediaEntity> filterMediaByMediaRequestTimeframe(List<MediaEntity> mediaEntitiesForRequest, MediaRequestEntity mediaRequestEntity) {
-        Comparator<MediaEntity> mediaStartTimeChannelComparator = (media1, media2) -> {
-            if (media1.getStart().equals(media2.getStart())) {
-                return media1.getChannel().compareTo(media2.getChannel());
-            } else {
-                return media1.getStart().compareTo(media2.getStart());
-            }
-        };
+    List<MediaEntity> filterMediaByMediaRequestTimeframeAndSortByStartTimeAndChannel(List<MediaEntity> mediaEntitiesForRequest,
+                                                                                     MediaRequestEntity mediaRequestEntity) {
         return mediaEntitiesForRequest.stream()
             .filter(media -> (mediaRequestEntity.getStartTime()).isBefore(media.getEnd()))
             .filter(media -> media.getStart().isBefore(mediaRequestEntity.getEndTime()))
-            .sorted(mediaStartTimeChannelComparator)
+            .sorted(MEDIA_START_TIME_CHANNEL_COMPARATOR)
             .collect(Collectors.toList());
     }
 
