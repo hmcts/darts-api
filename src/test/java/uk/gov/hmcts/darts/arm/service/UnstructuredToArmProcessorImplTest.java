@@ -28,8 +28,12 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -275,6 +279,75 @@ class UnstructuredToArmProcessorImplTest {
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
         archiveRecordFile.createNewFile();
+        String content = "Test data";
+        try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath());
+             PrintWriter printWriter = new PrintWriter(fileWriter)) {
+            printWriter.write(content);
+        }
+
+        ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
+            .fileGenerationSuccessful(true)
+            .archiveRecordFile(archiveRecordFile)
+            .build();
+        when(archiveRecordService.generateArchiveRecord(any(), anyInt())).thenReturn(archiveRecordFileInfo);
+
+        when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
+        when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
+        when(objectRecordStatusRepository.getReferenceById(14)).thenReturn(objectRecordStatusEntityRawDataFailed);
+        when(objectRecordStatusRepository.getReferenceById(15)).thenReturn(objectRecordStatusEntityManifestFailed);
+        when(objectRecordStatusRepository.getReferenceById(13)).thenReturn(objectRecordStatusEntityArmDropZone);
+        when(externalLocationTypeRepository.getReferenceById(2)).thenReturn(externalLocationTypeUnstructured);
+        when(externalLocationTypeRepository.getReferenceById(3)).thenReturn(externalLocationTypeArm);
+
+        List<ExternalObjectDirectoryEntity> pendingUnstructuredStorageItems = new ArrayList<>(Collections.emptyList());
+        when(externalObjectDirectoryRepository.findExternalObjectsNotIn2StorageLocations(
+            objectRecordStatusEntityStored,
+            externalLocationTypeUnstructured,
+            externalLocationTypeArm
+        )).thenReturn(pendingUnstructuredStorageItems);
+
+        List<ObjectRecordStatusEntity> failedStatusesList = new ArrayList<>();
+        failedStatusesList.add(objectRecordStatusEntityRawDataFailed);
+        failedStatusesList.add(objectRecordStatusEntityManifestFailed);
+
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(MAX_RETRY_ATTEMPTS);
+        List<ExternalObjectDirectoryEntity> pendingFailureList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityArm));
+        when(externalObjectDirectoryRepository.findNotFinishedAndNotExceededRetryInStorageLocation(
+            failedStatusesList,
+            externalLocationTypeRepository.getReferenceById(3),
+            armDataManagementConfiguration.getMaxRetryAttempts()
+        )).thenReturn(pendingFailureList);
+
+        when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
+        when(externalObjectDirectoryEntityArm.getStatus()).thenReturn(objectRecordStatusEntityManifestFailed);
+        when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
+            objectRecordStatusEntityStored,
+            externalLocationTypeUnstructured,
+            externalObjectDirectoryEntityArm.getMedia(),
+            externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
+            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()
+        )).thenReturn(Optional.ofNullable(externalObjectDirectoryEntityUnstructured));
+
+        BinaryData manifest = BinaryData.fromFile(Path.of(archiveRecordFile.getAbsolutePath()));
+        when(fileOperationService.saveFileToBinaryData(any())).thenReturn(manifest);
+        BlobStorageException blobStorageException = mock(BlobStorageException.class);
+        when(blobStorageException.getStatusCode()).thenReturn(409);
+        when(blobStorageException.getMessage()).thenReturn("Copying blob failed");
+        when(armDataManagementApi.saveBlobDataToArm("1_1_1.a360", manifest)).thenThrow(blobStorageException);
+
+        unstructuredToArmProcessor.processUnstructuredToArm();
+
+        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+    }
+
+    @Test
+    void processMovingDataFromUnstructuredStorageToArmThrowsGenericExceptionWhenSendingManifestFile() throws IOException {
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
+        archiveRecordFile.createNewFile();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
             .fileGenerationSuccessful(true)
             .archiveRecordFile(archiveRecordFile)
@@ -304,8 +377,8 @@ class UnstructuredToArmProcessorImplTest {
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
         when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
 
-        BlobStorageException blobStorageException = mock(BlobStorageException.class);
-        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenReturn("1_1_1").thenThrow(blobStorageException);
+        NullPointerException genericException = new NullPointerException();
+        when(armDataManagementApi.saveBlobDataToArm(any(), any())).thenReturn("1_1_1").thenThrow(genericException);
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
@@ -313,7 +386,7 @@ class UnstructuredToArmProcessorImplTest {
     }
 
     @Test
-    void processMovingDataFromUnstructuredStorageToArmThrowsGenericExceptionWhenSendingManifestFile() throws IOException {
+    void processMovingDataFromUnstructuredStorageToArmThrowsExceptionWhenSendingManifestFile() throws IOException {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveRecordFile = new File(fileLocation, "1_1_1.a360");
