@@ -65,14 +65,14 @@ class AudioOperationServiceImplTest {
             new AudioFileInfo(
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
-                createFile(tempDirectory, "original0.mp3").toString(),
-                1,null
+                1,
+                createFile(tempDirectory, "original0.mp3")
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z),
                 Instant.parse(T_11_00_00_Z),
-                createFile(tempDirectory, "original1.mp3").toString(),
-                1,null
+                1,
+                createFile(tempDirectory, "original1.mp3")
             ))
         );
 
@@ -80,14 +80,14 @@ class AudioOperationServiceImplTest {
             new AudioFileInfo(
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
-                createFile(tempDirectory, "original2.mp3").toString(),
-                1,null
+                1,
+                createFile(tempDirectory, "original2.mp3")
             ),
             new AudioFileInfo(
                 Instant.parse(T_11_00_00_Z),
                 Instant.parse(T_11_30_00_Z),
-                createFile(tempDirectory, "original3.mp3").toString(),
-                1,null
+                1,
+                createFile(tempDirectory, "original3.mp3")
             ))
         );
 
@@ -95,14 +95,14 @@ class AudioOperationServiceImplTest {
             new AudioFileInfo(
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
-                createFile(tempDirectory, "original4.mp3").toString(),
-                1,null
+                1,
+                createFile(tempDirectory, "original4.mp3")
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z_MS_1200),
                 Instant.parse(T_11_30_00_Z),
-                createFile(tempDirectory, "original5.mp3").toString(),
-                1,null
+                1,
+                createFile(tempDirectory, "original5.mp3")
             ))
         );
     }
@@ -115,14 +115,14 @@ class AudioOperationServiceImplTest {
             new AudioFileInfo(
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
-                "/path/to/audio/original0.mp3",
-                1,null
+                1,
+                Path.of("/path/to/audio/original0.mp3")
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z),
                 Instant.parse(T_11_00_00_Z),
-                "/path/to/audio/original1.mp3",
-                1,null
+                1,
+                Path.of("/path/to/audio/original1.mp3")
             )
         );
 
@@ -150,7 +150,7 @@ class AudioOperationServiceImplTest {
             inputAudioFileInfos
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
@@ -167,7 +167,7 @@ class AudioOperationServiceImplTest {
             WORKSPACE_DIR
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C0-merge-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C0-merge-[0-9]*.mp2"));
         assertEquals(0, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
@@ -189,14 +189,14 @@ class AudioOperationServiceImplTest {
             new AudioFileInfo(
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
-                file.toString(),
-                1,null
+                1,
+                file
             ),
             Duration.of(45, MINUTES),
             Duration.of(75, MINUTES)
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-trim-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-trim-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse("2023-04-28T09:45:00Z"), audioFileInfo.getStartTime());
         assertEquals(Instant.parse("2023-04-28T10:15:00Z"), audioFileInfo.getEndTime());
@@ -256,7 +256,7 @@ class AudioOperationServiceImplTest {
             inputAudioFileInfos.get(0)
         );
 
-        assertTrue(audioFileInfo.getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[0-4]-encode-[0-9]*.mp3"));
+        assertTrue(audioFileInfo.getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[0-4]-encode-[0-9]*.mp3"));
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.getEndTime());
@@ -282,7 +282,7 @@ class AudioOperationServiceImplTest {
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
@@ -302,7 +302,7 @@ class AudioOperationServiceImplTest {
             ALLOWABLE_GAP_MS
         );
 
-        assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
@@ -322,7 +322,7 @@ class AudioOperationServiceImplTest {
             ALLOWABLE_GAP
         );
 
-        assertTrue(audioFileInfo.get(0).getFileName().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
+        assertTrue(audioFileInfo.get(0).getPath().toString().matches(".*/44887a8c-d918-4907-b9e8-38d5b1bf9c9c/C[1-4]-concatenate-[0-9]*.mp2"));
         assertEquals(1, audioFileInfo.get(0).getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(0).getEndTime());

@@ -38,7 +38,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         StringBuilder command = new StringBuilder(audioConfigurationProperties.getFfmpegExecutable());
 
         for (final AudioFileInfo audioFileInfo : audioFileInfos) {
-            command.append(" -i ").append(audioFileInfo.getFileName());
+            command.append(" -i ").append(audioFileInfo.getPath().toString());
         }
 
         command.append(" -filter_complex ");
@@ -76,7 +76,6 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return new AudioFileInfo(
             getEarliestStartTime(audioFileInfos),
             getLatestEndTime(audioFileInfos),
-            outputPath.toString(),
             channel,
             outputPath
         );
@@ -110,7 +109,6 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             AudioFileInfo audioFileInfo = new AudioFileInfo(
                 getEarliestStartTime(seperatedAudioFileInfo),
                 getLatestEndTime(seperatedAudioFileInfo),
-                outputPath.toString(),
                 channel,
                 outputPath
             );
@@ -136,7 +134,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         for (AudioFileInfo audioFileInfo : audioFilesInfo) {
-            command.addArgument("-i").addArgument(audioFileInfo.getFileName());
+            command.addArgument("-i").addArgument(audioFileInfo.getPath().toString());
         }
         command.addArgument("-filter_complex")
             .addArgument(String.format("amix=inputs=%d:duration=longest", numberOfChannels))
@@ -147,7 +145,6 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return new AudioFileInfo(
             getEarliestStartTime(audioFilesInfo),
             getLatestEndTime(audioFilesInfo),
-            outputPath.toString(),
             0,
             outputPath
         );
@@ -167,7 +164,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         );
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
-        command.addArgument("-i").addArgument(audioFileInfo.getFileName());
+        command.addArgument("-i").addArgument(audioFileInfo.getPath().toString());
         command.addArgument("-ss").addArgument(toTimeString(startDuration));
         command.addArgument("-to").addArgument(toTimeString(endDuration));
         command.addArgument("-c").addArgument("copy").addArgument(outputPath.toString());
@@ -177,7 +174,6 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return new AudioFileInfo(
             adjustTimeDuration(audioFileInfo.getStartTime(), startDuration),
             adjustTimeDuration(audioFileInfo.getStartTime(), endDuration),
-            outputPath.toString(),
             audioFileInfo.getChannel(),
             outputPath
         );
@@ -208,7 +204,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         );
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
-        command.addArgument("-i").addArgument(audioFileInfo.getFileName());
+        command.addArgument("-i").addArgument(audioFileInfo.getPath().toString());
         command.addArgument("-b:a").addArgument("32k");
         command.addArgument(outputPath.toString());
 
@@ -220,7 +216,6 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         return new AudioFileInfo(
             audioFileInfo.getStartTime(),
             audioFileInfo.getEndTime(),
-            outputPath.toString(),
             audioFileInfo.getChannel(),
             outputPath
         );
