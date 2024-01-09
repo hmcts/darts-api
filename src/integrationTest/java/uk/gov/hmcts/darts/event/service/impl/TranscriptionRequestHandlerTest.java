@@ -45,6 +45,7 @@ class TranscriptionRequestHandlerTest extends IntegrationBase {
     @SuppressWarnings({"PMD.LawOfDemeter"})
     void successSaveToDatabase() {
         dartsDatabase.createCourthouseUnlessExists("Swansea");
+        var eventTime = OffsetDateTime.of(2023, 7, 1, 1, 0, 9, 0, ZoneOffset.UTC);
         var startTime = OffsetDateTime.of(2023, 6, 13, 8, 13, 9, 0, ZoneOffset.UTC);
         var endTime = startTime.plusHours(2);
         DartsEvent dartsEvent = new DartsEvent()
@@ -53,9 +54,9 @@ class TranscriptionRequestHandlerTest extends IntegrationBase {
             .courthouse(SWANSEA_COURTHOUSE)
             .caseNumbers(List.of(SOME_CASE_NUMBER))
             .courtroom(SOME_COURTROOM)
+            .dateTime(eventTime)
             .startTime(startTime)
             .endTime(endTime);
-
 
         eventDispatcher.receive(dartsEvent);
 
