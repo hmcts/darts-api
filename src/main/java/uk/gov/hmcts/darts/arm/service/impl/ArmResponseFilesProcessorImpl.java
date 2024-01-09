@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
+import uk.gov.hmcts.darts.arm.util.files.InputUploadFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -83,10 +84,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         log.debug("Checking ARM for files containing name {}", prefix);
         Map<String, BlobItem> collectedBlobs = armDataManagementApi.listCollectedBlobs(prefix);
         if (nonNull(collectedBlobs) && !collectedBlobs.isEmpty()) {
-            String armCollectedFilename = collectedBlobs.keySet().stream().findFirst().get();
-            log.debug("Found ARM collected file {}", armCollectedFilename);
-            if (armCollectedFilename.contains(prefix + ARM_FILENAME_SEPARATOR)) {
-                String responseFilesHashcode = armCollectedFilename.substring(armCollectedFilename.indexOf(prefix + ARM_FILENAME_SEPARATOR));
+            String armInputUploadFilename = collectedBlobs.keySet().stream().findFirst().get();
+            log.debug("Found ARM collected file {}", armInputUploadFilename);
+            if (armInputUploadFilename.contains(prefix + ARM_FILENAME_SEPARATOR)) {
+                InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
+                String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
                 log.debug("Response files hashcode {}", responseFilesHashcode);
                 Map<String, BlobItem> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
                 if (nonNull(responseBlobs) && !responseBlobs.isEmpty()) {
@@ -97,7 +99,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processResponseBlobs(Map<String, BlobItem> responseBlobs) {
-        String inputUploadFilename = null;
         String createRecordFilename = null;
         String uploadFilename = null;
         for (String responseFile : responseBlobs.keySet()) {
@@ -107,15 +108,13 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                -- 6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp
                UF - Upload File - This is the Upload file which represents the File which is ingested by ARM.
                -- 6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp */
-            if (responseFile.endsWith(generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
-                inputUploadFilename = responseFile;
-            } else if (responseFile.endsWith(generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
+            if (responseFile.endsWith(generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
                 createRecordFilename = responseFile;
             } else if (responseFile.endsWith(generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
                 uploadFilename = responseFile;
             }
         }
-        if (nonNull(inputUploadFilename) && nonNull(createRecordFilename) && nonNull(uploadFilename)) {
+        if (nonNull(createRecordFilename) && nonNull(uploadFilename)) {
             UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFilename);
             if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
                 BinaryData uploadFileBinary = armDataManagementApi.getResponseBlobData(uploadFilename);

@@ -15,9 +15,9 @@ public class UnstructuredToArmAutomatedTask extends AbstractLockableAutomatedTas
     private final UnstructuredToArmProcessor unstructuredToArmProcessor;
 
     public UnstructuredToArmAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
-                                              LockProvider lockProvider,
-                                              AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
-                                              UnstructuredToArmProcessor processor) {
+                                          LockProvider lockProvider,
+                                          AutomatedTaskConfigurationProperties automatedTaskConfigurationProperties,
+                                          UnstructuredToArmProcessor processor) {
         super(automatedTaskRepository, lockProvider, automatedTaskConfigurationProperties);
         this.unstructuredToArmProcessor = processor;
     }
