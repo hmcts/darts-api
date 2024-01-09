@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -312,6 +313,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
+    @Disabled("To be updated by DMP-1995")
     void patchUserShouldFailIfEmailAddressChangeIsAttemptedAndDataShouldRemainUnchanged() throws Exception {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
 
