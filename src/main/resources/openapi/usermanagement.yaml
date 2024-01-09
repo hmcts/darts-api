@@ -373,6 +373,8 @@ components:
       properties:
         full_name:
           $ref: '#/components/schemas/UserName'
+        email_address:
+          $ref: '#/components/schemas/UserEmailAddress'
         description:
           $ref: '#/components/schemas/UserDescription'
         active:
