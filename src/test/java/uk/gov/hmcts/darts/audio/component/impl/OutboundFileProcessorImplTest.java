@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.impl.AudioOperationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -46,11 +46,13 @@ class OutboundFileProcessorImplTest {
 
     @Mock
     private AudioOperationServiceImpl audioOperationService;
+    @Mock
+    private AudioConfigurationProperties audioConfigurationProperties;
 
     @BeforeEach
     void setUp() {
-        outboundFileProcessor = new OutboundFileProcessorImpl(audioOperationService);
-        ReflectionTestUtils.setField(outboundFileProcessor, "allowableAudioGap", Duration.ofSeconds(1));
+        audioConfigurationProperties.setAllowableAudioGapDuration(Duration.ofSeconds(1));
+        outboundFileProcessor = new OutboundFileProcessorImpl(audioOperationService, audioConfigurationProperties);
     }
 
     @Test
@@ -224,7 +226,6 @@ class OutboundFileProcessorImplTest {
         AudioFileInfo mergedAudioFile = new AudioFileInfo(
             TIME_12_00.toInstant(),
             TIME_12_20.toInstant(),
-            null,
             1,
             null
         );
@@ -289,7 +290,6 @@ class OutboundFileProcessorImplTest {
         AudioFileInfo mergedAudioFile = new AudioFileInfo(
             TIME_12_00.toInstant(),
             TIME_12_20.toInstant(),
-            null,
             1,
             null
         );
@@ -331,7 +331,6 @@ class OutboundFileProcessorImplTest {
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
                                                           TIME_12_20.toInstant(),
-                                                          null,
                                                           1,null);
 
         var reEncodedAudioFileInfo1 = new AudioFileInfo();

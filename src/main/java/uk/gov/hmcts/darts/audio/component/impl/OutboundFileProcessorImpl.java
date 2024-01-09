@@ -3,9 +3,9 @@ package uk.gov.hmcts.darts.audio.component.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileProcessor;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.ChannelAudio;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
@@ -34,9 +34,7 @@ import static java.util.Comparator.comparing;
 public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     private final AudioOperationService audioOperationService;
-
-    @Value("${darts.audio.allowable_audio_gap_duration}")
-    private Duration allowableAudioGap;
+    private final AudioConfigurationProperties audioConfigurationProperties;
 
     /**
      * Group the provided media/audio into logical groups in preparation for zipping with OutboundFileZipGenerator.
@@ -80,8 +78,6 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
-        List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
-
         List<ChannelAudio> concatenationsList;
 
         if (isWellFormedAudio(audioFileInfos)) {
@@ -91,6 +87,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             concatenationsList = convertChannelsListToFilesList(audioFileInfos);
         }
 
+        List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         for (ChannelAudio audioFileInfoList :  concatenationsList) {
             AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
             AudioFileInfo trimmedAudio = trimToPeriod(
@@ -147,7 +144,6 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return new AudioFileInfo(
             mediaEntity.getStart().toInstant(),
             mediaEntity.getEnd().toInstant(),
-            path.toString(),
             mediaEntity.getChannel(),
             path
         );
@@ -193,7 +189,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             List<AudioFileInfo> concatenatedAudios = audioOperationService.concatenateWithGaps(
                 StringUtils.EMPTY,
                 audioFileInfosForChannel,
-                allowableAudioGap
+                audioConfigurationProperties.getAllowableAudioGapDuration()
             );
             concatenateByChannelWithGaps.add(new ChannelAudio(concatenatedAudios));
         }
