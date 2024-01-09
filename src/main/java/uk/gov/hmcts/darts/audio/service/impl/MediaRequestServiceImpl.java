@@ -66,6 +66,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.DELETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -113,6 +114,21 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         mediaRequestEntity.setStatus(status);
 
         return mediaRequestRepository.saveAndFlush(mediaRequestEntity);
+    }
+
+    @Override
+    public boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails) {
+
+        var duplicateUserMediaRequests = mediaRequestRepository.findDuplicateUserMediaRequests(
+            hearingRepository.getReferenceById(audioRequestDetails.getHearingId()),
+            userAccountRepository.getReferenceById(audioRequestDetails.getRequestor()),
+            audioRequestDetails.getStartTime(),
+            audioRequestDetails.getEndTime(),
+            audioRequestDetails.getRequestType(),
+            List.of(OPEN, PROCESSING)
+        );
+
+        return duplicateUserMediaRequests.isPresent();
     }
 
     @Transactional

@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -187,6 +188,28 @@ class MediaRequestServiceTest extends IntegrationPerClassBase {
         );
 
         assertEquals(COMPLETED, mediaRequestEntity.getStatus());
+    }
+
+    @Test
+    void shouldReturnTrueWhenADuplicateAudioRequestIsFound() {
+        requestDetails.setStartTime(OffsetDateTime.parse("2023-03-25T23:30:00Z"));
+        requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T01:30:00Z"));
+
+        var request = mediaRequestService.saveAudioRequest(requestDetails);
+        MediaRequestEntity mediaRequestEntity = mediaRequestService.getMediaRequestById(request.getId());
+        assertTrue(mediaRequestEntity.getId() > 0);
+
+        var isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
+        assertTrue(isDuplicateRequest);
+    }
+
+    @Test
+    void shouldReturnFalseWhenNoDuplicateAudioRequestExists() {
+        requestDetails.setStartTime(OffsetDateTime.parse("2023-03-26T12:00:00Z"));
+        requestDetails.setEndTime(OffsetDateTime.parse("2023-03-26T12:30:00Z"));
+
+        var isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
+        assertFalse(isDuplicateRequest);
     }
 
 }

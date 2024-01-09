@@ -44,13 +44,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 
@@ -153,6 +156,61 @@ class MediaRequestServiceImplTest {
         verify(mockUserAccountRepository).getReferenceById(TEST_REQUESTER);
         verify(auditApi).recordAudit(AuditActivity.REQUEST_AUDIO, mockUserAccountEntity, mockHearingEntity.getCourtCase());
     }
+
+    @Test
+    void whenNoDuplicateAudioRequestExists() {
+        Integer hearingId = 4567;
+        mockHearingEntity.setId(hearingId);
+        mockMediaRequestEntity.setId(1);
+
+        var requestDetails = new AudioRequestDetails();
+        requestDetails.setHearingId(hearingId);
+        requestDetails.setRequestor(TEST_REQUESTER);
+        requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
+        requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
+        requestDetails.setRequestType(DOWNLOAD);
+
+        when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
+        when(mockMediaRequestRepository.findDuplicateUserMediaRequests(mockHearingEntity,
+                                                                       mockUserAccountEntity,
+                                                                       requestDetails.getStartTime(),
+                                                                       requestDetails.getEndTime(),
+                                                                       requestDetails.getRequestType(),
+                                                                       List.of(OPEN, PROCESSING))).thenReturn(Optional.empty());
+
+        boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
+
+        assertTrue(isDuplicateRequest);
+    }
+
+    @Test
+    void whenDuplicateAudioRequestIsFound() {
+        Integer hearingId = 4567;
+        mockHearingEntity.setId(hearingId);
+        mockMediaRequestEntity.setId(1);
+
+        var requestDetails = new AudioRequestDetails();
+        requestDetails.setHearingId(hearingId);
+        requestDetails.setRequestor(TEST_REQUESTER);
+        requestDetails.setStartTime(OffsetDateTime.parse(OFFSET_T_09_00_00_Z));
+        requestDetails.setEndTime(OffsetDateTime.parse(OFFSET_T_12_00_00_Z));
+        requestDetails.setRequestType(DOWNLOAD);
+
+        when(mockHearingRepository.getReferenceById(hearingId)).thenReturn(mockHearingEntity);
+        when(mockUserAccountRepository.getReferenceById(TEST_REQUESTER)).thenReturn(mockUserAccountEntity);
+        when(mockMediaRequestRepository.findDuplicateUserMediaRequests(mockHearingEntity,
+                                                                       mockUserAccountEntity,
+                                                                       requestDetails.getStartTime(),
+                                                                       requestDetails.getEndTime(),
+                                                                       requestDetails.getRequestType(),
+                                                                       List.of(OPEN, PROCESSING))).thenReturn(Optional.of(mockMediaRequestEntity));
+
+        boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
+
+        assertFalse(isDuplicateRequest);
+    }
+
 
     @SneakyThrows
     @Test
