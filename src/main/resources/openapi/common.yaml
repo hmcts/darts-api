@@ -1,0 +1,31 @@
+openapi: 3.0.1
+info:
+  title: An include file to define sortable attributes
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    reporting_restrictions:
+      type: array
+      default: []
+      items:
+        $ref: 'common.yaml#/components/schemas/reporting_restriction'
+    reporting_restriction:
+      type: object
+      properties:
+        hearing_id:
+          type: integer
+          example: 1
+        event_id:
+          type: integer
+          example: 123
+        event_name:
+          type: string
+          example: "Section 4(2) of the Contempt of Court Act 1981"
+        event_text:
+          type: string
+          example: "event text"
+        event_ts:
+          type: string
+          format: date-time
+          example: "2023-08-21T09:00:00Z"
