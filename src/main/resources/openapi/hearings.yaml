@@ -175,10 +175,7 @@ components:
           type: integer
           example: 1
         reporting_restrictions:
-          type: array
-          default: [ ]
-          items:
-            $ref: 'cases.yaml#/components/schemas/reporting_restriction'
+          $ref: './common.yaml#/components/schemas/reporting_restrictions'
 
     judge:
       type: string

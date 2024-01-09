@@ -4,45 +4,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
-import uk.gov.hmcts.darts.common.repository.TranscriptionUrgencyRepository;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionUrgencyResponse;
 
 import java.util.List;
 
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 class TranscriptionServiceGetTranscriptionUrgencyTest {
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper();
 
     @Mock
-    private TranscriptionUrgencyRepository mockTranscriptionUrgencyRepository;
+    private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
-    @InjectMocks
-    private TranscriptionServiceImpl transcriptionService;
+    private TranscriptionResponseMapper transcriptionResponseMapper;
 
     @BeforeEach
     void setUp() {
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
+        transcriptionResponseMapper = new TranscriptionResponseMapper(hearingReportingRestrictionsRepository);
     }
 
     @Test
     void getTranscriptionUrgency() throws Exception {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = CommonTestDataUtil.createTranscriptionUrgencyEntities();
 
-        when(mockTranscriptionUrgencyRepository.findAllByDisplayStateTrue()).thenReturn(transcriptionUrgencyEntities);
-
-        List<TranscriptionUrgencyResponse> transcriptionUrgencyResponses = transcriptionService.getTranscriptionUrgenciesByDisplayState();
+        List<TranscriptionUrgencyResponse> transcriptionUrgencyResponses =
+            transcriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyEntities);
         String actualResponse = objectMapper.writeValueAsString(transcriptionUrgencyResponses);
 
         String expectedResponse = getContentsFromFile(

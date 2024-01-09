@@ -6,7 +6,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
-class InterpreterUsedHandlerTest extends IntegrationBase {
+class InterpreterUsedHandlerTest extends IntegrationBaseWithGatewayStub {
 
     public static final String SOME_COURTHOUSE = "some-courthouse";
     public static final String SOME_ROOM = "some-room";

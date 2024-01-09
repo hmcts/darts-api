@@ -1,12 +1,12 @@
 package uk.gov.hmcts.darts.transcriptions.service.impl;
 
 import com.azure.core.util.BinaryData;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -134,6 +134,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final DuplicateRequestDetector duplicateRequestDetector;
     private final TranscriberTranscriptsQuery transcriberTranscriptsQuery;
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
+    private final TranscriptionResponseMapper transcriptionResponseMapper;
 
     @Override
     @Transactional
@@ -368,12 +369,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public List<TranscriptionTypeResponse> getTranscriptionTypes() {
-        return TranscriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeRepository.findAll());
+        return transcriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeRepository.findAll());
     }
 
     @Override
     public List<TranscriptionUrgencyResponse> getTranscriptionUrgenciesByDisplayState() {
-        return TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAllByDisplayStateTrue());
+        return transcriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyRepository.findAllByDisplayStateTrue());
     }
 
     @Override
@@ -513,10 +514,11 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     }
 
     @Override
+    @Transactional
     public GetTranscriptionByIdResponse getTranscription(Integer transcriptionId) {
         TranscriptionEntity transcription = transcriptionRepository.findById(transcriptionId)
             .orElseThrow(() -> new DartsApiException(TRANSCRIPTION_NOT_FOUND));
-        return TranscriptionResponseMapper.mapToTranscriptionResponse(transcription);
+        return transcriptionResponseMapper.mapToTranscriptionResponse(transcription);
     }
 
     @Override
