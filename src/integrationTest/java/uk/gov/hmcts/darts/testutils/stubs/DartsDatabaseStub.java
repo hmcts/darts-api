@@ -53,6 +53,8 @@ import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionWorkflowRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
@@ -119,6 +121,8 @@ public class DartsDatabaseStub {
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
     private final AnnotationRepository annotationRepository;
+    private final TranscriptionTypeRepository transcriptionTypeRepository;
+    private final TranscriptionStatusRepository transcriptionStatusRepository;
 
     private final AuditStub auditStub;
     private final CourthouseStub courthouseStub;
@@ -404,15 +408,15 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void saveEventsForHearing(HearingEntity hearing, EventEntity... eventEntities) {
-        hearingRepository.save(hearing);
-        stream(eventEntities).forEach(event -> saveSingleEventForHearing(hearing, event));
+    public HearingEntity saveEventsForHearing(HearingEntity hearing, EventEntity... eventEntities) {
+        return saveEventsForHearing(hearing, List.of(eventEntities));
     }
 
     @Transactional
-    public void saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
-        hearingRepository.save(hearing);
+    public HearingEntity saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
+        var hearingEntity = hearingRepository.save(hearing);
         eventEntities.forEach(event -> saveSingleEventForHearing(hearing, event));
+        return hearingEntity;
     }
 
     public ExternalObjectDirectoryEntity save(ExternalObjectDirectoryEntity externalObjectDirectoryEntity) {
@@ -443,7 +447,6 @@ public class DartsDatabaseStub {
         return judgeRepository.save(judge);
     }
 
-    @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         return hearingRepository.saveAndFlush(hearingEntity);
     }
@@ -527,5 +530,23 @@ public class DartsDatabaseStub {
         var handler = eventHandlerRepository.findById(handlerId).orElseThrow();
         caseEntity.setReportingRestrictions(handler);
         return caseRepository.save(caseEntity);
+    }
+
+    @Transactional
+    public TranscriptionEntity saveWithType(TranscriptionEntity transcriptionEntity) {
+        var courtCase = transcriptionEntity.getCourtCase();
+        entityManager.merge(courtCase);
+
+        var typeRef = transcriptionTypeRepository.getReferenceById(transcriptionEntity.getTranscriptionType().getId());
+        transcriptionEntity.setTranscriptionType(typeRef);
+
+        var statusRef = transcriptionStatusRepository.getReferenceById(transcriptionEntity.getTranscriptionStatus().getId());
+        transcriptionEntity.setTranscriptionStatus(statusRef);
+
+        var systemUserRef = userAccountRepository.getReferenceById(0);
+        transcriptionEntity.setLastModifiedBy(systemUserRef);
+        transcriptionEntity.setCreatedBy(systemUserRef);
+
+        return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 }

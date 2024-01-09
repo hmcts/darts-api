@@ -4,46 +4,43 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
-import uk.gov.hmcts.darts.common.repository.TranscriptionTypeRepository;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
+import uk.gov.hmcts.darts.transcriptions.mapper.TranscriptionResponseMapper;
 import uk.gov.hmcts.darts.transcriptions.model.TranscriptionTypeResponse;
 
 import java.util.List;
 
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
-class TranscriptionServiceGetTranscriptionTypeTest {
-    ObjectMapper objectMapper;
+class TranscriptionMapperTranscriptionTypeTest {
+    private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper();
 
     @Mock
-    private TranscriptionTypeRepository mockTranscriptionTypeRepository;
+    private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
-    @InjectMocks
-    private TranscriptionServiceImpl transcriptionService;
+    private TranscriptionResponseMapper transcriptionResponseMapper;
 
     @BeforeEach
     void setUp() {
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
+        transcriptionResponseMapper = new TranscriptionResponseMapper(hearingReportingRestrictionsRepository);
     }
 
     @Test
     void getTranscriptionTypes() throws Exception {
         List<TranscriptionTypeEntity> transcriptionTypeEntities = CommonTestDataUtil.createTranscriptionTypeEntities();
 
-        when(mockTranscriptionTypeRepository.findAll()).thenReturn(transcriptionTypeEntities);
+        List<TranscriptionTypeResponse> transcriptionTypes =
+            transcriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeEntities);
 
-        List<TranscriptionTypeResponse> transcriptionTypeResponses = transcriptionService.getTranscriptionTypes();
-        String actualResponse = objectMapper.writeValueAsString(transcriptionTypeResponses);
+        String actualResponse = objectMapper.writeValueAsString(transcriptionTypes);
 
         String expectedResponse = getContentsFromFile(
             "Tests/transcriptions/service/TranscriptionTypeResponse/expectedResponseMultipleEntities.json");

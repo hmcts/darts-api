@@ -20,5 +20,6 @@
   "hearing_date": "2023-06-20",
   "urgency": "STANDARD",
   "request_type": "SENTENCING_REMARKS",
-  "is_manual": false
+  "is_manual": false,
+  "reporting_restrictions": []
 }

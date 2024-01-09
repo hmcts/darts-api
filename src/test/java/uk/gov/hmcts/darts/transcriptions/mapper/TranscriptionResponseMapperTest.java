@@ -3,6 +3,9 @@ package uk.gov.hmcts.darts.transcriptions.mapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
@@ -11,6 +14,7 @@ import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionUrgencyEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
@@ -28,13 +32,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 
+@ExtendWith(MockitoExtension.class)
 class TranscriptionResponseMapperTest {
-    ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapperConfig().objectMapper();
+
+    private TranscriptionResponseMapper transcriptionResponseMapper;
+
+    @Mock
+    private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
 
     @BeforeEach
     void setUp() {
-        ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
-        objectMapper = objectMapperConfig.objectMapper();
+        transcriptionResponseMapper = new TranscriptionResponseMapper(hearingReportingRestrictionsRepository);
     }
 
     @Test
@@ -42,7 +51,7 @@ class TranscriptionResponseMapperTest {
         List<TranscriptionTypeEntity> transcriptionTypeEntities = CommonTestDataUtil.createTranscriptionTypeEntities();
 
         List<TranscriptionTypeResponse> transcriptionTypeResponses =
-            TranscriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeEntities);
+            transcriptionResponseMapper.mapToTranscriptionTypeResponses(transcriptionTypeEntities);
         String actualResponse = objectMapper.writeValueAsString(transcriptionTypeResponses);
 
         String expectedResponse = getContentsFromFile(
@@ -56,7 +65,7 @@ class TranscriptionResponseMapperTest {
             CommonTestDataUtil.createTranscriptionTypeEntityFromEnum(TranscriptionTypeEnum.SENTENCING_REMARKS);
 
         TranscriptionTypeResponse transcriptionTypeResponse =
-            TranscriptionResponseMapper.mapToTranscriptionTypeResponse(transcriptionTypeEntity);
+            transcriptionResponseMapper.mapToTranscriptionTypeResponse(transcriptionTypeEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionTypeResponse);
 
         String expectedResponse = getContentsFromFile(
@@ -70,7 +79,7 @@ class TranscriptionResponseMapperTest {
         List<TranscriptionUrgencyEntity> transcriptionUrgencyEntities = CommonTestDataUtil.createTranscriptionUrgencyEntities();
 
         List<TranscriptionUrgencyResponse> transcriptionUrgencyResponses =
-            TranscriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyEntities);
+            transcriptionResponseMapper.mapToTranscriptionUrgencyResponses(transcriptionUrgencyEntities);
         String actualResponse = objectMapper.writeValueAsString(transcriptionUrgencyResponses);
 
         String expectedResponse = getContentsFromFile(
@@ -84,7 +93,7 @@ class TranscriptionResponseMapperTest {
             CommonTestDataUtil.createTranscriptionUrgencyEntityFromEnum(TranscriptionUrgencyEnum.STANDARD, 999);
 
         TranscriptionUrgencyResponse transcriptionUrgencyResponse =
-            TranscriptionResponseMapper.mapToTranscriptionUrgencyResponse(transcriptionUrgencyEntity);
+            transcriptionResponseMapper.mapToTranscriptionUrgencyResponse(transcriptionUrgencyEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionUrgencyResponse);
 
         String expectedResponse = getContentsFromFile(
@@ -99,7 +108,7 @@ class TranscriptionResponseMapperTest {
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
 
         GetTranscriptionByIdResponse transcriptionResponse =
-            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
         String expectedResponse = getContentsFromFile(
@@ -116,7 +125,7 @@ class TranscriptionResponseMapperTest {
         transcriptionEntity.setHearingDate(LocalDate.of(2023, 6, 20));
 
         GetTranscriptionByIdResponse transcriptionResponse =
-            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
         String expectedResponse = getContentsFromFile(
@@ -131,7 +140,7 @@ class TranscriptionResponseMapperTest {
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
 
         GetTranscriptionByIdResponse transcriptionResponse =
-            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
         String expectedResponse = getContentsFromFile(
@@ -146,7 +155,7 @@ class TranscriptionResponseMapperTest {
         TranscriptionEntity transcriptionEntity = transcriptionList.get(0);
 
         GetTranscriptionByIdResponse transcriptionResponse =
-            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
         String expectedResponse = getContentsFromFile(
@@ -162,7 +171,7 @@ class TranscriptionResponseMapperTest {
         transcriptionEntity.setIsManualTranscription(false);
 
         GetTranscriptionByIdResponse transcriptionResponse =
-            TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
+            transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity);
         String actualResponse = objectMapper.writeValueAsString(transcriptionResponse);
 
         String expectedResponse = getContentsFromFile(
@@ -179,7 +188,7 @@ class TranscriptionResponseMapperTest {
 
         var exception = assertThrows(
             DartsApiException.class,
-            () -> TranscriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity)
+            () -> transcriptionResponseMapper.mapToTranscriptionResponse(transcriptionEntity)
         );
 
         assertEquals(TranscriptionApiError.TRANSCRIPTION_NOT_FOUND, exception.getError());

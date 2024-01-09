@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.event.model.DartsEvent;
 import uk.gov.hmcts.darts.event.service.EventDispatcher;
-import uk.gov.hmcts.darts.testutils.IntegrationBase;
+import uk.gov.hmcts.darts.testutils.IntegrationBaseWithGatewayStub;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 
-class StopAndCloseHandlerTest extends IntegrationBase {
+class StopAndCloseHandlerTest extends IntegrationBaseWithGatewayStub {
 
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_ROOM = "some-room";
