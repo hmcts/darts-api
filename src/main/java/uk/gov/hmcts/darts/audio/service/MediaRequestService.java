@@ -22,6 +22,8 @@ public interface MediaRequestService {
 
     MediaRequestEntity updateAudioRequestStatus(Integer id, MediaRequestStatus mediaRequestStatus);
 
+    boolean isUserDuplicateAudioRequest(AudioRequestDetails audioRequestDetails);
+
     MediaRequestEntity saveAudioRequest(AudioRequestDetails audioRequestDetails);
 
     void scheduleMediaRequestPendingNotification(MediaRequestEntity mediaRequest);
