@@ -181,7 +181,7 @@ class MediaRequestServiceImplTest {
 
         boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
 
-        assertTrue(isDuplicateRequest);
+        assertFalse(isDuplicateRequest);
     }
 
     @Test
@@ -208,7 +208,7 @@ class MediaRequestServiceImplTest {
 
         boolean isDuplicateRequest = mediaRequestService.isUserDuplicateAudioRequest(requestDetails);
 
-        assertFalse(isDuplicateRequest);
+        assertTrue(isDuplicateRequest);
     }
 
 
