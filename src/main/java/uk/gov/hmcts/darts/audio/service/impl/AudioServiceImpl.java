@@ -81,7 +81,7 @@ public class AudioServiceImpl implements AudioService {
         BinaryData mediaBinaryData;
         SavedAudioFileInfo mp2FileInfo;
         try {
-            BlobRange range = new BlobRange(0, previewRange.getEndRange());
+            BlobRange range = new BlobRange(previewRange.getStartRange(), previewRange.getEndRange() - previewRange.getStartRange() + 1);
             mp2FileInfo = audioTransformationService.retrieveFromStorageAndSaveMediaToWorkspace(mediaEntity, range);
 
             AudioFileInfo mp2AudioFileInfo = createAudioFileInfo(mediaEntity, mp2FileInfo.getPath());

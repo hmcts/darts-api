@@ -15,17 +15,18 @@ public class StreamingResponseEntityUtil {
 
     public ResponseEntity<byte[]> createResponseEntity(InputStream inputStream, PreviewRange previewRange) throws IOException {
         byte[] bytes = IOUtils.toByteArray(inputStream);
-        long fileSize = previewRange.getContentLength();
+        long fileSize = AudioFileSizeUtil.mp2ToMp3FileSize(previewRange.getContentLength());
         long rangeStart = previewRange.getStartRange();
         long rangeEnd = getRangeEnd(fileSize, previewRange.getEndRange());
         long requestedContentLength = (rangeEnd - rangeStart) + 1;
-        String contentLengthStr = String.valueOf(requestedContentLength);
+        //String contentLengthStr = String.valueOf(previewRange.getContentLength());
+        String contentLengthStr = String.valueOf(bytes.length);
         String contentRange = "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize;
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
             .header("Content-Type", "audio/mpeg")
-            .header("Content-Length", contentLengthStr)
+            //.header("Content-Length", contentLengthStr)
             .header("Content-Range", contentRange)
-            .body(readByteRange(bytes, rangeStart, rangeEnd));
+            .body(bytes);
 
     }
 

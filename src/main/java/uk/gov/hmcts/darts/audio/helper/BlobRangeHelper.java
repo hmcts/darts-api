@@ -23,15 +23,15 @@ public class BlobRangeHelper {
             if (ranges.length > 1) {
                 rangeEnd = Long.parseLong(ranges[1]);
             } else {
-                rangeEnd = rangeStart + maxFetchSize;
+                rangeEnd = rangeStart + maxFetchSize - 1;
             }
 
             if (rangeEnd - rangeStart > maxFetchSize) {
-                rangeEnd = rangeStart + maxFetchSize;
+                rangeEnd = rangeStart + maxFetchSize - 1;
             }
             return new PreviewRange(rangeStart, rangeEnd, 0);
         } else {
-            return new PreviewRange(0, maxFetchSize, 0);
+            return new PreviewRange(0, maxFetchSize - 1, 0);
         }
     }
 }
