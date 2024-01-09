@@ -7,8 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
@@ -28,7 +26,7 @@ import java.time.OffsetDateTime;
 public class DailyListEntity extends CreatedModifiedBaseEntity {
 
     public static final String ID = "dal_id";
-    public static final String COURTHOUSE_ID = "cth_id";
+    public static final String LISTING_COURTHOUSE = "listing_courthouse";
     public static final String DAILY_LIST_OBJECT_ID = "daily_list_object_id";
     public static final String UNIQUE_ID = "unique_id";
     public static final String JOB_STATUS = "job_status";
@@ -52,9 +50,8 @@ public class DailyListEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "dal_gen", sequenceName = "dal_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = COURTHOUSE_ID)
-    private CourthouseEntity courthouse;
+    @Column(name = LISTING_COURTHOUSE)
+    private String listingCourthouse;
 
     @Column(name = DAILY_LIST_OBJECT_ID)
     private String legacyObjectId;

@@ -88,30 +88,6 @@ class DailylistFunctionalTest extends FunctionalTest {
     }
 
     @Test
-    void postInvalidCourthouse() throws IOException {
-
-        String todayDateString = LocalDate.now().toString();
-        String tomorrowDateString = LocalDate.now().plusDays(1).toString();
-
-        String xmlDocument = getContentsFromFile("DailyList-Document.xml");
-
-        Response response = buildRequestWithExternalGlobalAccessAuth()
-            .contentType(ContentType.JSON)
-            .queryParam("source_system", "XHB")
-            .queryParam("courthouse", "doesnotexist")
-            .queryParam("hearing_date", tomorrowDateString)
-            .queryParam("unique_id", "1111111")
-            .queryParam("published_ts", todayDateString + "T23:30:52.123Z")
-            .header("xml_document", xmlDocument)
-            .when()
-            .baseUri(getUri(POST_DAILYLIST_URL))
-            .redirects().follow(false)
-            .post().then().extract().response();
-
-        assertEquals(400, response.getStatusCode());
-    }
-
-    @Test
     void postNoDocument() throws IOException {
 
         String todayDateString = LocalDate.now().toString();

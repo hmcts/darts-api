@@ -492,6 +492,10 @@ public class DartsDatabaseStub {
         userAccountRepository.saveAll(asList(testUsers));
     }
 
+    public List<DailyListEntity> saveAll(DailyListEntity... dailyListEntity) {
+        return dailyListRepository.saveAll(asList(dailyListEntity));
+    }
+
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
@@ -549,4 +553,5 @@ public class DartsDatabaseStub {
 
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
+
 }

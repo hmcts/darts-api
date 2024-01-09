@@ -9,25 +9,19 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
-import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
-import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
-import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
 import uk.gov.hmcts.darts.dailylist.exception.DailyListError;
 import uk.gov.hmcts.darts.dailylist.mapper.DailyListMapper;
-import uk.gov.hmcts.darts.dailylist.model.CourtHouse;
 import uk.gov.hmcts.darts.dailylist.model.DailyListJsonObject;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPatchRequest;
 import uk.gov.hmcts.darts.dailylist.model.DailyListPostRequest;
 import uk.gov.hmcts.darts.dailylist.model.PostDailyListResponse;
 import uk.gov.hmcts.darts.dailylist.service.DailyListService;
 
-import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -38,8 +32,6 @@ import java.util.Optional;
 public class DailyListServiceImpl implements DailyListService {
 
     private final DailyListRepository dailyListRepository;
-    private final RetrieveCoreObjectService retrieveCoreObjectService;
-    private final CourthouseApi courthouseApi;
     private final DailyListMapper dailyListMapper;
     private final ObjectMapper objectMapper;
 
@@ -60,20 +52,20 @@ public class DailyListServiceImpl implements DailyListService {
 
         DailyListJsonObject dailyList = postRequest.getDailyListJson();
 
-        CourthouseEntity courthouse = retrieveCourtHouse(dailyList);
         String uniqueId = dailyList.getDocumentId().getUniqueId();
         Optional<DailyListEntity> existingRecordOpt = dailyListRepository.findByUniqueId(uniqueId);
         DailyListEntity savedDailyListEntity;
+        String listingCourthouse = dailyList.getCrownCourt().getCourtHouseName();
         if (existingRecordOpt.isPresent()) {
             //update the record
             savedDailyListEntity = existingRecordOpt.get();
-            dailyListMapper.updateDailyListEntity(postRequest, courthouse, savedDailyListEntity);
+            dailyListMapper.updateDailyListEntity(postRequest, listingCourthouse, savedDailyListEntity);
             dailyListRepository.saveAndFlush(savedDailyListEntity);
         } else {
             //insert new record
             savedDailyListEntity = dailyListMapper.createDailyListEntity(
                 postRequest,
-                courthouse
+                listingCourthouse
             );
             dailyListRepository.saveAndFlush(savedDailyListEntity);
         }
@@ -87,8 +79,7 @@ public class DailyListServiceImpl implements DailyListService {
         DailyListEntity dailyListEntity;
         dailyListEntity = existingRecordOpt.orElseGet(DailyListEntity::new);
 
-        CourthouseEntity courthouse = retrieveCoreObjectService.retrieveCourthouse(postRequest.getCourthouse());
-        dailyListEntity.setCourthouse(courthouse);
+        dailyListEntity.setListingCourthouse(postRequest.getCourthouse());
         dailyListEntity.setXmlContent(postRequest.getDailyListXml());
         dailyListEntity.setSource(postRequest.getSourceSystem());
         dailyListEntity.setStatus(JobStatusType.NEW);
@@ -148,29 +139,4 @@ public class DailyListServiceImpl implements DailyListService {
             log.info("Finished DailyList housekeeping. Deleted {} rows.", deletedEntities.size());
         }
     }
-
-    private CourthouseEntity retrieveCourtHouse(DailyListJsonObject dailyList) {
-        CourtHouse crownCourt = dailyList.getCrownCourt();
-        Integer courthouseCode = crownCourt.getCourtHouseCode().getCode();
-        String courthouseName = crownCourt.getCourtHouseName();
-        try {
-            return courthouseApi.retrieveAndUpdateCourtHouse(courthouseCode, courthouseName);
-        } catch (CourthouseCodeNotMatchException ccnme) {
-            log.warn(
-                "Courthouse in database {} Does not match that received by dailyList, {} {}",
-                ccnme.getDatabaseCourthouse(),
-                courthouseCode,
-                courthouseName
-            );
-            return ccnme.getDatabaseCourthouse();
-        } catch (CourthouseNameNotFoundException e) {
-            String message = MessageFormat.format(
-                "DailyList with uniqueId {0} received with an invalid courthouse ''{1}''",
-                dailyList.getDocumentId().getUniqueId(),
-                crownCourt.getCourtHouseName()
-            );
-            throw new DartsApiException(DailyListError.FAILED_TO_PROCESS_DAILYLIST, message, e);
-        }
-    }
-
 }

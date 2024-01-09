@@ -7,7 +7,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.DailyListStub;
@@ -29,9 +28,7 @@ class DailyListHousekeepingControllerTest extends IntegrationBase {
 
     @Test
     void housekeepingPostEndpoint() throws Exception {
-
-        CourthouseEntity courthouse = dartsDatabase.createCourthouseUnlessExists("courthouse1");
-        createEmptyDailyLists(50, LocalDate.now(), courthouse);
+        createEmptyDailyLists(50, LocalDate.now(), "courthouse1");
 
         List<DailyListEntity> resultList = dartsDatabase.getDailyListRepository().findAll();
         Assertions.assertEquals(50, resultList.size());
@@ -44,7 +41,7 @@ class DailyListHousekeepingControllerTest extends IntegrationBase {
         Assertions.assertEquals(31, newResultList.size());
     }
 
-    private void createEmptyDailyLists(int numOfDaysInPast, LocalDate startDate, CourthouseEntity courthouse) {
+    private void createEmptyDailyLists(int numOfDaysInPast, LocalDate startDate, String courthouse) {
         for (int counter = 0; counter < numOfDaysInPast; counter++) {
             dailyListStub.createEmptyDailyList(startDate.minusDays(counter), courthouse);
         }

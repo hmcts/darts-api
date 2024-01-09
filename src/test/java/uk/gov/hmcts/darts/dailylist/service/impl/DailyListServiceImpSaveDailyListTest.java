@@ -10,10 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
-import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.courthouse.api.CourthouseApi;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseCodeNotMatchException;
 import uk.gov.hmcts.darts.courthouse.exception.CourthouseNameNotFoundException;
@@ -28,7 +26,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,16 +40,10 @@ class DailyListServiceImpSaveDailyListTest {
     DailyListServiceImpl service;
 
     @Mock
-    CourthouseApi courthouseApi;
-
-    @Mock
     DailyListRepository dailyListRepository;
 
     @Mock
     DailyListMapper dailyListMapper;
-
-    @Mock
-    RetrieveCoreObjectService retrieveCoreObjectService;
 
     @Captor
     private ArgumentCaptor<DailyListEntity> dailyListEntityArgumentCaptor;
@@ -66,39 +57,25 @@ class DailyListServiceImpSaveDailyListTest {
 
     @Test
     void ok_WhenCodeNotMatchExceptionThrown() throws IOException, CourthouseCodeNotMatchException, CourthouseNameNotFoundException {
-        CourthouseEntity entity = new CourthouseEntity();
-        entity.setCourthouseName("SWANSEA");
-        entity.setCode(457);
-        CourthouseCodeNotMatchException exception = new CourthouseCodeNotMatchException(entity, 457, "test");
-
-        when(courthouseApi.retrieveAndUpdateCourtHouse(anyInt(), anyString())).thenThrow(exception);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
         when(dailyListMapper.createDailyListEntity(
             any(DailyListPostRequest.class),
-            any(CourthouseEntity.class)
+            any(String.class)
         )).thenReturn(new DailyListEntity());
         String dailyListJson = getContentsFromFile(
             "Tests/dailylist/DailyListServiceImplTest/processIncomingDailyList/DailyListRequest.json");
         DailyListJsonObject dailyList = objectMapper.readValue(dailyListJson, DailyListJsonObject.class);
-
-        //String strDailyList = dailyList.toString();
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
         service.saveDailyListToDatabase(request);
 
         //make sure an exception is not thrown.
         verify(dailyListRepository).saveAndFlush(any(DailyListEntity.class));
-
     }
 
 
     @Test
     void ok_Xml() {
-        CourthouseEntity courthouseEntity = new CourthouseEntity();
-        courthouseEntity.setCourthouseName("SWANSEA");
-        courthouseEntity.setCode(457);
-
-        when(retrieveCoreObjectService.retrieveCourthouse(anyString())).thenReturn(courthouseEntity);
         when(dailyListRepository.findByUniqueId(anyString())).thenReturn(Optional.empty());
 
         DailyListPostRequest request = new DailyListPostRequest(CPP, "Swansea", LocalDate.now(), "Thexml",
@@ -115,7 +92,7 @@ class DailyListServiceImpSaveDailyListTest {
         assertThat(savedDailyList.getUniqueId()).isEqualTo("uniqueId");
         assertThat(savedDailyList.getStartDate()).isEqualTo(LocalDate.now());
         assertThat(savedDailyList.getSource()).isEqualTo("CPP");
-        assertThat(savedDailyList.getCourthouse()).isNotNull();
+        assertThat(savedDailyList.getListingCourthouse()).isNotNull();
         assertThat(savedDailyList.getXmlContent()).isEqualTo("Thexml");
         assertThat(savedDailyList.getContent()).isNull();
     }

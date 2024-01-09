@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
@@ -42,9 +41,7 @@ class DailyListServiceHousekeepingTest extends IntegrationBase {
 
     @Test
     void housekeepingOk() {
-
-        CourthouseEntity courthouse = dartsDatabaseStub.createCourthouseUnlessExists("courthouse1");
-        createEmptyDailyLists(50, LocalDate.now(), courthouse);
+        createEmptyDailyLists(50, LocalDate.now(), "courthouse1");
 
         List<DailyListEntity> resultList = dailyListRepository.findAll();
         assertEquals(50, resultList.size());
@@ -56,11 +53,10 @@ class DailyListServiceHousekeepingTest extends IntegrationBase {
 
     }
 
-    private void createEmptyDailyLists(int numOfDaysInPast, LocalDate startDate, CourthouseEntity courthouse) {
+    private void createEmptyDailyLists(int numOfDaysInPast, LocalDate startDate, String courthouse) {
         for (int counter = 0; counter < numOfDaysInPast; counter++) {
             dailyListStub.createEmptyDailyList(startDate.minusDays(counter), courthouse);
         }
     }
-
 
 }

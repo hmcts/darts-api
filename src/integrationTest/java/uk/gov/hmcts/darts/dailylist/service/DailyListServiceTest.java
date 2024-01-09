@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
@@ -23,7 +22,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -32,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
-@Transactional
 class DailyListServiceTest extends IntegrationBase {
 
     static final String CPP = "CPP";
@@ -136,39 +133,10 @@ class DailyListServiceTest extends IntegrationBase {
         );
     }
 
-    @Test
-    void updateCourthouseOk() throws IOException {
-        dartsDatabase.save(createCourthouse("TEMP"));
-        String requestBody = getContentsFromFile(
-            "tests/dailylist/DailyListServiceTest/update_courthouse_ok/DailyListRequest.json");
-        DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
-
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
-        service.saveDailyListToDatabase(request);
-
-        assertEquals(9999, dartsDatabase.findCourthouseWithName("TEMP").getCode());
-    }
-
-    @Test
-    void insert1InvalidCourthouse() throws IOException {
-        String requestBody = getContentsFromFile(
-            "tests/dailylist/DailyListServiceTest/insert1_invalidCourthouse/DailyListRequest.json");
-        DailyListJsonObject dailyList = MAPPER.readValue(requestBody, DailyListJsonObject.class);
-
-        DailyListPostRequest request = new DailyListPostRequest(CPP, null, null, null, null, null, dailyList);
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> service.saveDailyListToDatabase(request));
-
-        assertThat(exception.getMessage(), containsString("invalid courthouse 'test'"));
-    }
-
     private void checkExpectedResponse(DailyListEntity dailyListEntity, String expectedResponseLocation) throws IOException {
         dailyListEntity.setCreatedDateTime(null);
         dailyListEntity.setLastModifiedDateTime(null);
         dailyListEntity.setId(null);
-        dailyListEntity.getCourthouse().setCourtrooms(emptyList());
-        dailyListEntity.getCourthouse().setId(null);
-        dailyListEntity.getCourthouse().setCreatedDateTime(null);
-        dailyListEntity.getCourthouse().setLastModifiedDateTime(null);
         String actualResponse = MAPPER.writeValueAsString(dailyListEntity);
         String expectedResponse = getContentsFromFile(expectedResponseLocation);
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
@@ -193,7 +161,7 @@ class DailyListServiceTest extends IntegrationBase {
         assertThat(dailyListFromDb.getUniqueId(), equalTo("uniqueId"));
         assertThat(dailyListFromDb.getStartDate(), equalTo(LocalDate.now()));
         assertThat(dailyListFromDb.getSource(), equalTo("CPP"));
-        assertThat(dailyListFromDb.getCourthouse().getCourthouseName(), equalTo("SWANSEA"));
+        assertThat(dailyListFromDb.getListingCourthouse(), equalTo("SWANSEA"));
         assertThat(dailyListFromDb.getXmlContent(), equalTo("theXml"));
         assertThat(dailyListFromDb.getContent(), nullValue());
 
@@ -211,7 +179,7 @@ class DailyListServiceTest extends IntegrationBase {
         assertThat(dailyListFromDb.getUniqueId(), equalTo("CSDDL1613756980160"));
         assertThat(dailyListFromDb.getStartDate(), equalTo(LocalDate.of(2021, 2, 23)));
         assertThat(dailyListFromDb.getSource(), equalTo("CPP"));
-        assertThat(dailyListFromDb.getCourthouse().getCourthouseName(), equalTo("SWANSEA"));
+        assertThat(dailyListFromDb.getListingCourthouse(), equalTo("SWANSEA"));
         assertThat(dailyListFromDb.getXmlContent(), equalTo("theXml"));
         assertThat(dailyListFromDb.getContent(), containsString("DailyList_457_20210219174938.xml"));
     }

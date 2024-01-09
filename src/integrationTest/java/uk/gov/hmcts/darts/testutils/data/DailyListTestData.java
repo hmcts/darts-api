@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.testutils.data;
 
-import lombok.experimental.UtilityClass;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
@@ -14,18 +13,23 @@ import java.time.ZoneOffset;
 
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 
-@UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods", "HideUtilityClassConstructor"})
 public class DailyListTestData {
-    public DailyListEntity createDailyList(LocalTime time, String source, CourthouseEntity courthouse, String fileLocation) throws IOException {
+
+    public static DailyListEntity createDailyList(LocalTime time, String source, CourthouseEntity courthouse, String fileLocation) throws IOException {
         DailyListEntity dailyListEntity = new DailyListEntity();
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setStartDate(LocalDate.now());
         dailyListEntity.setEndDate(LocalDate.now());
-        dailyListEntity.setCourthouse(courthouse);
+        dailyListEntity.setListingCourthouse(courthouse.getCourthouseName());
         dailyListEntity.setContent(TestUtils.substituteHearingDateWithToday(getContentsFromFile(fileLocation)));
         dailyListEntity.setPublishedTimestamp(OffsetDateTime.of(LocalDate.now(), time, ZoneOffset.UTC));
         dailyListEntity.setSource(source);
+        return dailyListEntity;
+    }
+
+    public static DailyListEntity minimalDailyList() {
+        DailyListEntity dailyListEntity = new DailyListEntity();
+        dailyListEntity.setStatus(JobStatusType.NEW);
         return dailyListEntity;
     }
 }
