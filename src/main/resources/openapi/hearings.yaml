@@ -174,7 +174,7 @@ components:
         transcription_count:
           type: integer
           example: 1
-        cases_reporting_restrictions:
+        case_reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
 
     judge:

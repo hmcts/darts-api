@@ -40,7 +40,7 @@ class GetHearingResponseMapperTest extends IntegrationBase {
         var hearingEntity = dartsDatabase.save(minimalHearing);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(hearingEntity);
-        assertEquals(0, getHearingResponse.getCasesReportingRestrictions().size());
+        assertEquals(0, getHearingResponse.getCaseReportingRestrictions().size());
     }
 
     @Test
@@ -52,11 +52,11 @@ class GetHearingResponseMapperTest extends IntegrationBase {
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
-        assertEquals(1, getHearingResponse.getCasesReportingRestrictions().size());
-        assertEquals("some-event-name-1", getHearingResponse.getCasesReportingRestrictions().get(0).getEventName());
-        assertEquals("some-event-text-1", getHearingResponse.getCasesReportingRestrictions().get(0).getEventText());
-        assertEquals(minimalHearing.getId(), getHearingResponse.getCasesReportingRestrictions().get(0).getHearingId());
-        assertEquals(reportingRestrictions.get(0).getId(), getHearingResponse.getCasesReportingRestrictions().get(0).getEventId());
+        assertEquals(1, getHearingResponse.getCaseReportingRestrictions().size());
+        assertEquals("some-event-name-1", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
+        assertEquals("some-event-text-1", getHearingResponse.getCaseReportingRestrictions().get(0).getEventText());
+        assertEquals(minimalHearing.getId(), getHearingResponse.getCaseReportingRestrictions().get(0).getHearingId());
+        assertEquals(reportingRestrictions.get(0).getId(), getHearingResponse.getCaseReportingRestrictions().get(0).getEventId());
     }
 
     @Test
@@ -68,10 +68,10 @@ class GetHearingResponseMapperTest extends IntegrationBase {
         dartsDatabase.saveEventsForHearing(minimalHearing, reportingRestrictions);
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
-        assertEquals(3, getHearingResponse.getCasesReportingRestrictions().size());
-        assertEquals("some-event-name-1", getHearingResponse.getCasesReportingRestrictions().get(0).getEventName());
-        assertEquals("some-event-name-2", getHearingResponse.getCasesReportingRestrictions().get(1).getEventName());
-        assertEquals("some-event-name-3", getHearingResponse.getCasesReportingRestrictions().get(2).getEventName());
+        assertEquals(3, getHearingResponse.getCaseReportingRestrictions().size());
+        assertEquals("some-event-name-1", getHearingResponse.getCaseReportingRestrictions().get(0).getEventName());
+        assertEquals("some-event-name-2", getHearingResponse.getCaseReportingRestrictions().get(1).getEventName());
+        assertEquals("some-event-name-3", getHearingResponse.getCaseReportingRestrictions().get(2).getEventName());
     }
 
     @Test
@@ -86,7 +86,7 @@ class GetHearingResponseMapperTest extends IntegrationBase {
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(minimalHearing);
 
         rangeClosed(0, 9).forEach(index -> {
-            var mappedTsAtIndex = getHearingResponse.getCasesReportingRestrictions().get(index).getEventTs().truncatedTo(ChronoUnit.SECONDS);
+            var mappedTsAtIndex = getHearingResponse.getCaseReportingRestrictions().get(index).getEventTs().truncatedTo(ChronoUnit.SECONDS);
             assertThat(mappedTsAtIndex).isEqualTo(expectedOrderedTs.get(index).truncatedTo(ChronoUnit.SECONDS));
         });
     }
@@ -100,7 +100,7 @@ class GetHearingResponseMapperTest extends IntegrationBase {
 
         GetHearingResponse getHearingResponse = getHearingResponseMapper.map(hearing);
 
-        assertEquals(1, getHearingResponse.getCasesReportingRestrictions().size());
+        assertEquals(1, getHearingResponse.getCaseReportingRestrictions().size());
     }
 
 

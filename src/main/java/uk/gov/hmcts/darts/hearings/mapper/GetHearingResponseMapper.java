@@ -35,10 +35,10 @@ public class GetHearingResponseMapper {
             = hearingReportingRestrictionsRepository.findAllByCaseId(hearing.getCourtCase().getId());
 
         restrictions.sort(Comparator.comparing(HearingReportingRestrictionsEntity::getEventDateTime));
-        restrictions.forEach(repRes -> getHearingResponse.addCasesReportingRestrictionsItem(buildReportingRestrictionFrom(repRes)));
+        restrictions.forEach(repRes -> getHearingResponse.addCaseReportingRestrictionsItem(buildReportingRestrictionFrom(repRes)));
 
         if (hearing.getCourtCase().getReportingRestrictions() != null && restrictions.isEmpty()) {
-            getHearingResponse.addCasesReportingRestrictionsItem(
+            getHearingResponse.addCaseReportingRestrictionsItem(
                     reportingRestrictionWithName(hearing.getCourtCase().getReportingRestrictions().getEventName()));
         }
 

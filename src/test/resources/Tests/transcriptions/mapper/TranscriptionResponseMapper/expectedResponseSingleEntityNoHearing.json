@@ -20,5 +20,5 @@
   "urgency": "STANDARD",
   "request_type": "SENTENCING_REMARKS",
   "is_manual": true,
-  "cases_reporting_restrictions": []
+  "case_reporting_restrictions": []
 }
