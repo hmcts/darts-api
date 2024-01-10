@@ -132,7 +132,7 @@ public class TranscriptionResponseMapper {
                 reportingRestrictionWithName(courtCase.getReportingRestrictions().getEventName()));
         }
 
-        transcriptionResponse.setReportingRestrictions(
+        transcriptionResponse.setCaseReportingRestrictions(
             sortedByTimestamp(reportingRestrictions));
 
         populateReportingRestrictionField(courtCase, transcriptionResponse);

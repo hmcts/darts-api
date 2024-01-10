@@ -47,6 +47,6 @@ class GetHearingResponseMapperTest {
         assertEquals(response.getCaseId(), 101);
         assertEquals(response.getJudges(), List.of("Judge_1", "Judge_2"));
         assertEquals(response.getTranscriptionCount(), 1);
-        assertEquals(0, response.getReportingRestrictions().size());
+        assertEquals(0, response.getCaseReportingRestrictions().size());
     }
 }
