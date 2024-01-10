@@ -41,6 +41,30 @@ public class FileOperationServiceImpl implements FileOperationService {
         return targetTempFile;
     }
 
+    @Override
+    public Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUUIDToWorkspace)
+        throws IOException {
+
+        Path workspacePath = Path.of(workspace);
+        if (appendUUIDToWorkspace) {
+            workspacePath = workspacePath.resolve(UUID.randomUUID().toString());
+        }
+        Path targetTempFile = workspacePath.resolve(fileName);
+
+        try (InputStream audioInputStream = binaryData.toStream()) {
+            Files.createDirectories(workspacePath);
+            Path tempFilePath = Files.createFile(targetTempFile);
+            Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+        } catch (IOException e) {
+            log.error("IOException. Unable to copy binary data to workspace {}", workspace);
+            throw new IOException(e);
+        }
+
+        return targetTempFile;
+    }
+
+    @Override
     public BinaryData saveFileToBinaryData(String fileName) {
         return BinaryData.fromFile(Path.of(fileName));
     }

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.util.files.InputUploadFilenameProcessor;
 import uk.gov.hmcts.darts.arm.util.files.UploadFileFilenameProcessor;
@@ -17,10 +18,10 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -39,11 +40,14 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     public static final String ARM_CREATE_RECORD_FILENAME_KEY = "cr";
     public static final String ARM_UPLOAD_FILE_FILENAME_KEY = "uf";
     public static final String ARM_RESPONSE_SUCCESS_STATUS_CODE = "1";
+
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
 
     private final ArmDataManagementApi armDataManagementApi;
+    private final FileOperationService fileOperationService;
+    private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
 
     @Transactional
@@ -78,32 +82,40 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processCollectedFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
-        // Using Azure Blob Storage List operation, fetch the filename from
-        // dropzone/DARTS/collected using prefix EODID_MEDID_ATTEMPTS for Media of manifest file from Response folder.
+        /* Using Azure Blob Storage List operation, fetch the filename from
+           dropzone/DARTS/collected using prefix EODID_MEDID_ATTEMPTS for Media of manifest file from Response folder.
+           IU - Input Upload - This is the manifest file which gets renamed by ARM.
+           EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp */
         String prefix = getPrefix(externalObjectDirectory);
         log.debug("Checking ARM for files containing name {}", prefix);
         Map<String, BlobItem> collectedBlobs = armDataManagementApi.listCollectedBlobs(prefix);
+
         if (nonNull(collectedBlobs) && !collectedBlobs.isEmpty()) {
             String armInputUploadFilename = collectedBlobs.keySet().stream().findFirst().get();
             log.debug("Found ARM collected file {}", armInputUploadFilename);
-            if (armInputUploadFilename.contains(prefix + ARM_FILENAME_SEPARATOR)) {
-                InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
-                String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
-                log.debug("Response files hashcode {}", responseFilesHashcode);
-                Map<String, BlobItem> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
-                if (nonNull(responseBlobs) && !responseBlobs.isEmpty()) {
-                    processResponseBlobs(responseBlobs);
+            if (armInputUploadFilename.endsWith(generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
+                try {
+                    InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
+                    String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
+                    log.debug("Response files hashcode {}", responseFilesHashcode);
+                    Map<String, BlobItem> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
+                    if (nonNull(responseBlobs) && !responseBlobs.isEmpty()) {
+                        processResponseBlobs(responseBlobs);
+                    }
+                } catch (IllegalArgumentException e) {
+                    log.error("Unable to process filename: {}", e.getMessage());
+                } catch (IOException e) {
+                    log.error("Unable to read response file: {}", e.getMessage());
                 }
             }
         }
     }
 
-    private void processResponseBlobs(Map<String, BlobItem> responseBlobs) {
+    private void processResponseBlobs(Map<String, BlobItem> responseBlobs) throws IOException {
         String createRecordFilename = null;
         String uploadFilename = null;
         for (String responseFile : responseBlobs.keySet()) {
-            /* IU - Input Upload - This is the manifest file which gets renamed by ARM.
-               -- EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
+            /*
                CR - Create Record - This is the create record file which represents record creation in ARM.
                -- 6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp
                UF - Upload File - This is the Upload file which represents the File which is ingested by ARM.
@@ -118,14 +130,12 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFilename);
             if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
                 BinaryData uploadFileBinary = armDataManagementApi.getResponseBlobData(uploadFilename);
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(uploadFileBinary.toStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        log.info("Upload file - reading line {}", line);
-                    }
-                } catch (IOException e) {
-                    log.error("Unable to read upload file {}", e.getMessage());
-                }
+                boolean appendUUIDToWorkspace = true;
+                Path jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(uploadFileBinary,
+                                                                                        uploadFilename,
+                                                                                        armDataManagementConfiguration.getTempBlobWorkspace(),
+                                                                                        appendUUIDToWorkspace);
+                //Read json file
             }
         }
     }

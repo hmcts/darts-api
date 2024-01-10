@@ -236,7 +236,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             }
         } catch (BlobStorageException e) {
             if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {
-                log.info("BLOB already exists {}", e.getMessage());
+                log.info("BLOB raw data already exists {}", e.getMessage());
             } else {
                 log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
                           e.getMessage()

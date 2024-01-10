@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -17,16 +18,18 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
-import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 
@@ -47,16 +50,20 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
+    @MockBean
+    private FileOperationService fileOperationService;
+    @MockBean
+    private ArmDataManagementConfiguration armDataManagementConfiguration;
 
-    @Autowired
-    private AuthorisationStub authorisationStub;
 
     @BeforeEach
     void setupData() {
         armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(externalObjectDirectoryRepository,
                                                                       objectRecordStatusRepository,
                                                                       externalLocationTypeRepository,
-                                                                      armDataManagementApi);
+                                                                      armDataManagementApi,
+                                                                      fileOperationService,
+                                                                      armDataManagementConfiguration);
     }
 
     @Test
@@ -93,5 +100,12 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         when(armDataManagementApi.listCollectedBlobs(prefix)).thenReturn(collectedBlobs);
 
         armResponseFilesProcessor.processResponseFiles();
+
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
     }
 }
