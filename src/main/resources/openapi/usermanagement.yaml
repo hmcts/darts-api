@@ -43,7 +43,7 @@ paths:
           $ref: '#/components/responses/UserSuccessResponseWithId'
         '400':
           $ref: '#/components/responses/BadUserRequest'
-  /admin/users/{userId}:
+  /admin/users/{user_id}:
     get:
       tags:
         - User
@@ -288,7 +288,7 @@ components:
   parameters:
     UserId:
       in: path
-      name: userId
+      name: user_id
       required: true
       schema:
         type: integer
@@ -414,7 +414,7 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/SecurityGroupId'
-        role_id:
+        security_role_id:
           $ref: '#/components/schemas/RoleId'
         global_access:
           $ref: '#/components/schemas/SecurityGroupGlobalAccess'
