@@ -152,9 +152,9 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
-            .andExpect(jsonPath("$[0].security_groups").isArray())
-            .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_groups", hasItem(1)));
+            .andExpect(jsonPath("$[0].security_group_ids").isArray())
+            .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
+            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);
@@ -175,9 +175,9 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
-            .andExpect(jsonPath("$[0].security_groups").isArray())
-            .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_groups", hasItem(1)));
+            .andExpect(jsonPath("$[0].security_group_ids").isArray())
+            .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
+            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);
@@ -199,9 +199,9 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].full_name").value("IntegrationTest User"))
             .andExpect(jsonPath("$[0].email_address").value("integrationtest.user@example.com"))
             .andExpect(jsonPath("$[0].active").value(true))
-            .andExpect(jsonPath("$[0].security_groups").isArray())
-            .andExpect(jsonPath("$[0].security_groups", hasSize(1)))
-            .andExpect(jsonPath("$[0].security_groups", hasItem(1)));
+            .andExpect(jsonPath("$[0].security_group_ids").isArray())
+            .andExpect(jsonPath("$[0].security_group_ids", hasSize(1)))
+            .andExpect(jsonPath("$[0].security_group_ids", hasItem(1)));
 
         verify(userIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(userIdentity);

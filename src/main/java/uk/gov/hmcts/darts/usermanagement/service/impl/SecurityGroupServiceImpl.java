@@ -37,7 +37,7 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
         var createdSecurityGroupEntity = securityGroupRepository.save(securityGroupEntity);
 
         var securityGroupWithIdAndRole = securityGroupMapper.mapToSecurityGroupWithIdAndRole(createdSecurityGroupEntity);
-        securityGroupWithIdAndRole.setRoleId(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
+        securityGroupWithIdAndRole.setSecurityRoleId(createdSecurityGroupEntity.getSecurityRoleEntity().getId());
 
         return securityGroupWithIdAndRole;
     }

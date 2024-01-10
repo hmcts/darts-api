@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -24,6 +27,19 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
         """)
     long countTransformedEntitiesByRequestorIdAndStatusNotAccessed(Integer userId, MediaRequestStatus status);
 
+    @Query("""
+        SELECT mr
+        FROM MediaRequestEntity mr
+        WHERE mr.hearing = :hearing
+        AND mr.requestor = :userAccount
+        AND mr.startTime = :startTime
+        AND mr.endTime = :endTime
+        AND mr.requestType = :requestType
+        AND mr.status IN :requestStatuses
+        """)
+    Optional<MediaRequestEntity> findDuplicateUserMediaRequests(HearingEntity hearing, UserAccountEntity userAccount,
+                                                                OffsetDateTime startTime, OffsetDateTime endTime,
+                                                                AudioRequestType requestType, List<MediaRequestStatus> requestStatuses);
 
     @Query("""
         SELECT distinct(mr.id) FROM MediaRequestEntity mr, TransformedMediaEntity tm
@@ -41,5 +57,4 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
         AND tm.lastAccessed IS NULL
         """)
     List<Integer> findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(OffsetDateTime createdDateTime, MediaRequestStatus status);
-
 }

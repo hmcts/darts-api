@@ -1,20 +1,17 @@
 package uk.gov.hmcts.darts.audio.model;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 import java.nio.file.Path;
 import java.time.Instant;
 
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
-@Setter
 @ToString
 public class AudioFileInfo {
 
@@ -22,8 +19,6 @@ public class AudioFileInfo {
     private Instant startTime;
     @NotNull
     private Instant endTime;
-    @NotEmpty
-    private String fileName;
     @NotNull
     private Integer channel;
     @NotNull
