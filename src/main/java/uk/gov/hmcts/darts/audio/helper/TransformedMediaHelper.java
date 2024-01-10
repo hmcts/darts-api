@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.TRANSFORMED_MEDIA_ID;
@@ -69,8 +70,10 @@ public class TransformedMediaHelper {
         entity.setEndTime(endTime);
         entity.setCreatedBy(mediaRequest.getCreatedBy());
         entity.setLastModifiedBy(mediaRequest.getCreatedBy());
-        entity.setOutputFilesize(fileSize.intValue());
         entity.setOutputFormat(audioRequestOutputFormat.getExtension());
+        if (nonNull(fileSize)) {
+            entity.setOutputFilesize(fileSize.intValue());
+        }
         transformedMediaRepository.save(entity);
         return entity;
     }
