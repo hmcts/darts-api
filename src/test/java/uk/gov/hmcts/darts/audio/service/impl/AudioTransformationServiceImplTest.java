@@ -495,7 +495,7 @@ class AudioTransformationServiceImplTest {
         );
 
         assertEquals(TEST_FILE_NAME, transformedMediaEntity.getOutputFilename());
-        assertEquals(TEST_EXTENSION, transformedMediaEntity.getOutputFormat());
-        assertEquals(TEST_BINARY_STRING.length(), transformedMediaEntity.getOutputFilesize().intValue());
+        assertEquals(TEST_EXTENSION, transformedMediaEntity.getOutputFormat().getExtension());
+        assertEquals(TEST_BINARY_STRING.length(), transformedMediaEntity.getOutputFilesize());
     }
 }
