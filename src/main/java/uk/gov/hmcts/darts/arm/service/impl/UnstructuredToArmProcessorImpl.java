@@ -10,16 +10,15 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
-import uk.gov.hmcts.darts.common.enums.SystemUsersEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -50,7 +49,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     private final ExternalLocationTypeRepository externalLocationTypeRepository;
     private final DataManagementApi dataManagementApi;
     private final ArmDataManagementApi armDataManagementApi;
-    private final UserAccountRepository userAccountRepository;
+    private UserIdentity userIdentity;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
     private final FileOperationService fileOperationService;
@@ -62,7 +61,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     public UnstructuredToArmProcessorImpl(ExternalObjectDirectoryRepository externalObjectDirectoryRepository,
                                           ObjectRecordStatusRepository objectRecordStatusRepository,
                                           ExternalLocationTypeRepository externalLocationTypeRepository, DataManagementApi dataManagementApi,
-                                          ArmDataManagementApi armDataManagementApi, UserAccountRepository userAccountRepository,
+                                          ArmDataManagementApi armDataManagementApi, UserIdentity userIdentity,
                                           ArmDataManagementConfiguration armDataManagementConfiguration, FileOperationService fileOperationService,
                                           ArchiveRecordService archiveRecordService) {
         this.externalObjectDirectoryRepository = externalObjectDirectoryRepository;
@@ -70,7 +69,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         this.externalLocationTypeRepository = externalLocationTypeRepository;
         this.dataManagementApi = dataManagementApi;
         this.armDataManagementApi = armDataManagementApi;
-        this.userAccountRepository = userAccountRepository;
+        this.userIdentity = userIdentity;
         this.armDataManagementConfiguration = armDataManagementConfiguration;
         this.fileOperationService = fileOperationService;
         this.archiveRecordService = archiveRecordService;
@@ -131,9 +130,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 if (matchingEntity.isPresent()) {
                     unstructuredExternalObjectDirectory = matchingEntity.get();
                 } else {
+                    log.error("Unable to find matching external object directory for {}", armExternalObjectDirectory.getId());
                     updateTransferAttempts(armExternalObjectDirectory);
-                    externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
-                    log.error("Unable to get external object");
+                    updateExternalObjectDirctoryStatus(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
                     continue;
                 }
             } else {
@@ -141,8 +140,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 armExternalObjectDirectory = createArmExternalObjectDirectoryEntity(currentExternalObjectDirectory);
             }
 
-            armExternalObjectDirectory.setStatus(armStatuses.get(ARM_INGESTION));
-            externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+            updateExternalObjectDirctoryStatus(armExternalObjectDirectory, ARM_INGESTION);
 
             String filename = generateFilename(armExternalObjectDirectory);
 
@@ -152,10 +150,15 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                                                                   previousStatus
             );
             if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
-                armExternalObjectDirectory.setStatus(armStatuses.get(ARM_DROP_ZONE));
-                externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
+                updateExternalObjectDirctoryStatus(armExternalObjectDirectory, ARM_DROP_ZONE);
             }
         }
+    }
+
+    private void updateExternalObjectDirctoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEnum armStatus) {
+        armExternalObjectDirectory.setStatus(armStatuses.get(armStatus));
+        armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
+        externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
     private boolean generateAndCopyMetadataToArm(ExternalObjectDirectoryEntity armExternalObjectDirectory) {
@@ -227,6 +230,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
+                armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
                 externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
             }
         } catch (BlobStorageException e) {
@@ -256,6 +260,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                                                              ObjectRecordStatusEnum objectRecordStatusEnum) {
         armExternalObjectDirectory.setStatus(armStatuses.get(objectRecordStatusEnum));
         updateTransferAttempts(armExternalObjectDirectory);
+        armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
@@ -287,7 +292,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         OffsetDateTime now = OffsetDateTime.now();
         armExternalObjectDirectoryEntity.setCreatedDateTime(now);
         armExternalObjectDirectoryEntity.setLastModifiedDateTime(now);
-        var systemUser = userAccountRepository.getReferenceById(SystemUsersEnum.DEFAULT.getId());
+        var systemUser = userIdentity.getUserAccount();
         armExternalObjectDirectoryEntity.setCreatedBy(systemUser);
         armExternalObjectDirectoryEntity.setLastModifiedBy(systemUser);
         armExternalObjectDirectoryEntity.setTransferAttempts(1);

@@ -14,6 +14,7 @@ import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.UnstructuredToArmProcessorImpl;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
@@ -24,7 +25,6 @@ import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -63,7 +63,7 @@ class UnstructuredToArmProcessorImplTest {
     @Mock
     private ArmDataManagementApi armDataManagementApi;
     @Mock
-    private UserAccountRepository userAccountRepository;
+    private UserIdentity userIdentity;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @Mock
@@ -112,7 +112,7 @@ class UnstructuredToArmProcessorImplTest {
             externalLocationTypeRepository,
             dataManagementApi,
             armDataManagementApi,
-            userAccountRepository,
+            userIdentity,
             armDataManagementConfiguration,
             fileOperationService,
             archiveRecordService
