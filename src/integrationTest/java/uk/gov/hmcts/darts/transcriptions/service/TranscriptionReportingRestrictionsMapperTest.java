@@ -36,7 +36,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
-        assertThat(transcriptionResponse.getReportingRestrictions()).size().isEqualTo(0);
+        assertThat(transcriptionResponse.getCasesReportingRestrictions()).size().isEqualTo(0);
     }
 
     @Test
@@ -49,7 +49,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
-        var mappedRestrictions = transcriptionResponse.getReportingRestrictions();
+        var mappedRestrictions = transcriptionResponse.getCasesReportingRestrictions();
         assertThat(mappedRestrictions).extracting("eventName").hasSameElementsAs(eventNamesFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("eventText").hasSameElementsAs(eventTextFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("hearingId").hasSameElementsAs(hearingIdsFrom(reportingRestrictions));
@@ -67,7 +67,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
-        var mappedRestrictions = transcriptionResponse.getReportingRestrictions();
+        var mappedRestrictions = transcriptionResponse.getCasesReportingRestrictions();
         assertThat(mappedRestrictions).extracting("eventName").hasSameElementsAs(eventNamesFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("eventText").hasSameElementsAs(eventTextFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("hearingId").hasSameElementsAs(hearingIdsFrom(reportingRestrictions));
@@ -87,7 +87,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
         rangeClosed(0, 9).forEach(index -> {
-            var mappedTsAtIndex = transcriptionResponse.getReportingRestrictions().get(index).getEventTs().truncatedTo(MILLIS);
+            var mappedTsAtIndex = transcriptionResponse.getCasesReportingRestrictions().get(index).getEventTs().truncatedTo(MILLIS);
             assertThat(mappedTsAtIndex).isEqualTo(expectedOrderedTs.get(index).truncatedTo(MILLIS));
         });
     }
@@ -108,8 +108,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
-        assertThat(transcriptionResponse.getReportingRestrictions()).hasSize(2);
-        assertThat(transcriptionResponse.getReportingRestrictions()).extracting("eventName").contains("reporting-restrictions-lifted");
+        assertThat(transcriptionResponse.getCasesReportingRestrictions()).hasSize(2);
+        assertThat(transcriptionResponse.getCasesReportingRestrictions()).extracting("eventName").contains("reporting-restrictions-lifted");
     }
 
     @Test
@@ -139,8 +139,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
-        assertThat(transcriptionResponse.getReportingRestrictions()).hasSize(3);
-        assertThat(transcriptionResponse.getReportingRestrictions()).extracting("eventName")
+        assertThat(transcriptionResponse.getCasesReportingRestrictions()).hasSize(3);
+        assertThat(transcriptionResponse.getCasesReportingRestrictions()).extracting("eventName")
             .contains("reporting-restrictions-lifted", "reapplying-reporting-restrictions");
     }
 
@@ -151,8 +151,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
-        assertThat(transcriptionResponse.getReportingRestrictions()).hasSize(1);
-        assertThat(transcriptionResponse.getReportingRestrictions()).extracting("eventName")
+        assertThat(transcriptionResponse.getCasesReportingRestrictions()).hasSize(1);
+        assertThat(transcriptionResponse.getCasesReportingRestrictions()).extracting("eventName")
             .hasSameElementsAs(
                 List.of(caseWithReportingRestrictions.getReportingRestrictions().getEventName()));
     }
