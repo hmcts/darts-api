@@ -43,7 +43,7 @@ paths:
           $ref: '#/components/responses/UserSuccessResponseWithId'
         '400':
           $ref: '#/components/responses/BadUserRequest'
-  /admin/users/{id}:
+  /admin/users/{userId}:
     get:
       tags:
         - User
@@ -122,7 +122,7 @@ paths:
       summary: Get security groups
       parameters:
         - in: query
-          name: courthouse
+          name: courthouse_id
           schema:
             $ref: "#/components/schemas/CourthouseId"
       tags:
@@ -142,11 +142,11 @@ paths:
         '400':
           $ref: '#/components/responses/SecurityGroupBadRequest'
 
-  /admin/roles:
+  /admin/security-roles:
     get:
       summary: Get roles
       tags:
-        - Roles
+        - SecurityRole
       responses:
         '200':
           $ref: '#/components/responses/RoleArraySuccessResponse'
@@ -288,16 +288,10 @@ components:
   parameters:
     UserId:
       in: path
-      name: id
+      name: userId
       required: true
       schema:
         type: integer
-    CourthouseId:
-      in: query
-      name: courthouse
-      required: true
-      schema:
-        $ref: "#/components/schemas/CourthouseId"
 
   schemas:
     UserId:
