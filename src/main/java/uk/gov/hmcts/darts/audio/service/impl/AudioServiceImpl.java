@@ -62,7 +62,6 @@ public class AudioServiceImpl implements AudioService {
         return new AudioFileInfo(
             mediaEntity.getStart().toInstant(),
             mediaEntity.getEnd().toInstant(),
-            downloadPath.toFile().getAbsolutePath(),
             mediaEntity.getChannel(),
             downloadPath
         );
@@ -85,7 +84,7 @@ public class AudioServiceImpl implements AudioService {
                 // For Sonar rule S2142
                 throw e;
             }
-            Path encodedAudioPath = Path.of(encodedAudioFileInfo.getFileName());
+            Path encodedAudioPath = encodedAudioFileInfo.getPath();
 
             mediaBinaryData = fileOperationService.saveFileToBinaryData(encodedAudioPath.toFile().getAbsolutePath());
         } catch (Exception exception) {

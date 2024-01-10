@@ -51,7 +51,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             userEntity.setActive(true);
         }
         userEntity.setIsSystemUser(false);
-        mapSecurityGroupsToUserEntity(user.getSecurityGroups(), userEntity);
+        mapSecurityGroupsToUserEntity(user.getSecurityGroupIds(), userEntity);
 
         var currentUser = authorisationApi.getCurrentUser();
         userEntity.setCreatedBy(currentUser);
@@ -65,7 +65,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         UserWithId userWithId = userAccountMapper.mapToUserWithIdModel(createdUserEntity);
         List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(createdUserEntity.getSecurityGroupEntities());
-        userWithId.setSecurityGroups(securityGroupIds);
+        userWithId.setSecurityGroupIds(securityGroupIds);
 
         return userWithId;
     }
@@ -80,7 +80,7 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         UserWithIdAndLastLogin user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
         List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
-        user.setSecurityGroups(securityGroupIds);
+        user.setSecurityGroupIds(securityGroupIds);
 
         return user;
     }
@@ -92,7 +92,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
             .forEach(userAccountEntity -> {
                 UserWithIdAndLastLogin userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
-                userWithIdAndLastLogin.setSecurityGroups(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                userWithIdAndLastLogin.setSecurityGroupIds(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
                 userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
             });
 
@@ -121,7 +121,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
 
         if (BooleanUtils.isTrue(userAccountEntity.isActive())) {
-            mapSecurityGroupsToUserEntity(userPatch.getSecurityGroups(), userAccountEntity);
+            mapSecurityGroupsToUserEntity(userPatch.getSecurityGroupIds(), userAccountEntity);
         } else {
             userAccountEntity.setSecurityGroupEntities(Collections.emptySet());
         }

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.impl.AudioOperationServiceImpl;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -38,17 +38,21 @@ class OutboundFileProcessorImplTest {
     private static final OffsetDateTime TIME_12_10 = OffsetDateTime.parse("2023-01-01T12:10Z");
     private static final OffsetDateTime TIME_12_20 = OffsetDateTime.parse("2023-01-01T12:20Z");
     private static final OffsetDateTime TIME_12_30 = OffsetDateTime.parse("2023-01-01T12:30Z");
+    private static final OffsetDateTime TIME_12_40 = OffsetDateTime.parse("2023-01-01T12:40Z");
+    private static final OffsetDateTime TIME_12_50 = OffsetDateTime.parse("2023-01-01T12:50Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
 
     private OutboundFileProcessorImpl outboundFileProcessor;
 
     @Mock
     private AudioOperationServiceImpl audioOperationService;
+    @Mock
+    private AudioConfigurationProperties audioConfigurationProperties;
 
     @BeforeEach
     void setUp() {
-        outboundFileProcessor = new OutboundFileProcessorImpl(audioOperationService);
-        ReflectionTestUtils.setField(outboundFileProcessor, "allowableAudioGap", Duration.ofSeconds(1));
+        audioConfigurationProperties.setAllowableAudioGapDuration(Duration.ofSeconds(1));
+        outboundFileProcessor = new OutboundFileProcessorImpl(audioOperationService, audioConfigurationProperties);
     }
 
     @Test
@@ -222,7 +226,6 @@ class OutboundFileProcessorImplTest {
         AudioFileInfo mergedAudioFile = new AudioFileInfo(
             TIME_12_00.toInstant(),
             TIME_12_20.toInstant(),
-            null,
             1,
             null
         );
@@ -287,7 +290,6 @@ class OutboundFileProcessorImplTest {
         AudioFileInfo mergedAudioFile = new AudioFileInfo(
             TIME_12_00.toInstant(),
             TIME_12_20.toInstant(),
-            null,
             1,
             null
         );
@@ -318,6 +320,74 @@ class OutboundFileProcessorImplTest {
             eq(Duration.of(0, MINUTES)),
             eq(Duration.of(20, MINUTES))
         );
+    }
+
+    @Test
+    void processAudioForDownloadShouldReturnThreeSessionsWithDifferentNumbersOfAudioWhenProvidedAudiosWithDiscrepanciesInAudioCounts()
+        throws ExecutionException, InterruptedException, IOException {
+
+        var firstTrimmedAudioFileInfo = new AudioFileInfo();
+        var secondTrimmedAudioFileInfo = new AudioFileInfo();
+
+        AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
+                                                          TIME_12_20.toInstant(),
+                                                          1,null);
+
+        var reEncodedAudioFileInfo1 = new AudioFileInfo();
+        var reEncodedAudioFileInfo2 = new AudioFileInfo();
+        when(audioOperationService.reEncode(any(), any()))
+            .thenReturn(reEncodedAudioFileInfo1).thenReturn(reEncodedAudioFileInfo2);
+
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile);
+
+        when(audioOperationService.trim(any(), any(), any(), any()))
+            .thenReturn(firstTrimmedAudioFileInfo)
+            .thenReturn(secondTrimmedAudioFileInfo);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_12_00,
+            TIME_12_10,
+            2
+        );
+        var mediaEntity3 = createMediaEntity(
+            TIME_12_20,
+            TIME_12_30,
+            1
+        );
+        var mediaEntity4 = createMediaEntity(
+            TIME_12_20,
+            TIME_12_30,
+            2
+        );
+        var mediaEntity5 = createMediaEntity(
+            TIME_12_40,
+            TIME_12_50,
+            1
+        );
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity3, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity4, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity5, SOME_DOWNLOAD_PATH
+        );
+
+        List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_12_00, TIME_13_00);
+
+        assertEquals(3, sessions.size());
+        AudioFileInfo firstSession = sessions.get(0);
+        AudioFileInfo secondSession = sessions.get(1);
+
+        assertEquals(reEncodedAudioFileInfo1, firstSession);
+        assertEquals(reEncodedAudioFileInfo2, secondSession);
+
+        verify(audioOperationService, never()).concatenate(any(), any());
+        verify(audioOperationService, times(3)).trim(any(), any(), any(), any());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {

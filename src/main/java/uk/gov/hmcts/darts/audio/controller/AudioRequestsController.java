@@ -98,6 +98,11 @@ public class AudioRequestsController implements AudioRequestsApi {
     public ResponseEntity<AddAudioResponse> addAudioRequest(AudioRequestDetails audioRequestDetails) {
         AddAudioResponse addAudioResponse;
         MediaRequestEntity audioRequest;
+
+        if (mediaRequestService.isUserDuplicateAudioRequest(audioRequestDetails)) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
         try {
             audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
             addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);

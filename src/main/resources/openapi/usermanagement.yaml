@@ -18,13 +18,19 @@ paths:
       operationId: getUsers
       parameters:
         - in: query
-          name: courthouse
-          required: true
+          name: courthouse_id
+          required: false
           schema:
             $ref: "#/components/schemas/CourthouseId"
+        - in: header
+          name: Email-Address
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserEmailAddress'
       responses:
         '200':
           $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
+
     post:
       summary: Create new user
       tags:
@@ -37,7 +43,19 @@ paths:
           $ref: '#/components/responses/UserSuccessResponseWithId'
         '400':
           $ref: '#/components/responses/BadUserRequest'
-  /admin/users/{id}:
+  /admin/users/{user_id}:
+    get:
+      tags:
+        - User
+      operationId: getUsersById
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserSuccessResponseWithIdAndLastLogin'
+        '404':
+          $ref: '#/components/responses/UserNotFound'
+
     patch:
       summary: Modify user by id
       tags:
@@ -104,7 +122,7 @@ paths:
       summary: Get security groups
       parameters:
         - in: query
-          name: courthouse
+          name: courthouse_id
           schema:
             $ref: "#/components/schemas/CourthouseId"
       tags:
@@ -124,6 +142,14 @@ paths:
         '400':
           $ref: '#/components/responses/SecurityGroupBadRequest'
 
+  /admin/security-roles:
+    get:
+      summary: Get roles
+      tags:
+        - SecurityRole
+      responses:
+        '200':
+          $ref: '#/components/responses/RoleArraySuccessResponse'
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -185,6 +211,15 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/SecurityGroupWithIdAndRole'
+    RoleArraySuccessResponse:
+      description: 'Success'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Role'
+
     UserTransferSuccess:
       description: 'Success'
     SecurityGroupSuccessResponse:
@@ -253,16 +288,10 @@ components:
   parameters:
     UserId:
       in: path
-      name: id
+      name: user_id
       required: true
       schema:
         type: integer
-    CourthouseId:
-      in: query
-      name: courthouse
-      required: true
-      schema:
-        $ref: "#/components/schemas/CourthouseId"
 
   schemas:
     UserId:
@@ -297,11 +326,18 @@ components:
       type: string
       minLength: 1
       maxLength: 256
-    SecurityGroupRoleId:
-      type: integer
     SecurityGroupGlobalAccess:
       type: boolean
     SecurityGroupDisplayState:
+      type: boolean
+
+    RoleId:
+      type: integer
+    RoleDisplayName:
+      type: string
+      minLength: 1
+      maxLength: 256
+    RoleDisplayState:
       type: boolean
 
     CourthouseId:
@@ -318,7 +354,7 @@ components:
           $ref: '#/components/schemas/UserDescription'
         active:
           $ref: '#/components/schemas/UserActive'
-        security_groups:
+        security_group_ids:
           type: array
           items:
             $ref: '#/components/schemas/SecurityGroupId'
@@ -331,11 +367,13 @@ components:
       properties:
         full_name:
           $ref: '#/components/schemas/UserName'
+        email_address:
+          $ref: '#/components/schemas/UserEmailAddress'
         description:
           $ref: '#/components/schemas/UserDescription'
         active:
           $ref: '#/components/schemas/UserActive'
-        security_groups:
+        security_group_ids:
           type: array
           items:
             $ref: '#/components/schemas/SecurityGroupId'
@@ -376,12 +414,16 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/SecurityGroupId'
-        role_id:
-          $ref: '#/components/schemas/SecurityGroupRoleId'
+        security_role_id:
+          $ref: '#/components/schemas/RoleId'
         global_access:
           $ref: '#/components/schemas/SecurityGroupGlobalAccess'
         display_state:
           $ref: '#/components/schemas/SecurityGroupDisplayState'
+        courthouse_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/CourthouseId'
       allOf:
         - $ref: '#/components/schemas/SecurityGroup'
     SecurityGroup:
@@ -396,3 +438,13 @@ components:
       required:
         - name
         - display_name
+
+    Role:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/RoleId'
+        display_name:
+          $ref: '#/components/schemas/RoleDisplayName'
+        display_state:
+          $ref: '#/components/schemas/RoleDisplayState'

@@ -43,7 +43,6 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
@@ -330,27 +329,23 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity.getEndTime()
         );
 
-        AudioFileInfo zipAudioFileInfo = new AudioFileInfo();
-        zipAudioFileInfo.setStartTime(mediaRequestEntity.getStartTime().toInstant());
-        zipAudioFileInfo.setEndTime(mediaRequestEntity.getEndTime().toInstant());
-        zipAudioFileInfo.setPath(outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity));
+        AudioFileInfo zipAudioFileInfo = new AudioFileInfo(
+            mediaRequestEntity.getStartTime().toInstant(),
+            mediaRequestEntity.getEndTime().toInstant(),
+            0,
+            outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity)
+        );
 
         return Collections.singletonList(zipAudioFileInfo);
     }
 
     private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
         throws ExecutionException, InterruptedException, IOException {
-        return handlePlaybacks(downloadedMedias, mediaRequestEntity.getStartTime(), mediaRequestEntity.getEndTime());
-    }
-
-    public List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, OffsetDateTime startTime,
-                                               OffsetDateTime endTime)
-        throws ExecutionException, InterruptedException, IOException {
 
         List<AudioFileInfo> audioFileInfos = outboundFileProcessor.processAudioForPlaybacks(
             downloadedMedias,
-            startTime,
-            endTime
+            mediaRequestEntity.getStartTime(),
+            mediaRequestEntity.getEndTime()
         );
 
         return audioFileInfos;

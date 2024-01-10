@@ -71,7 +71,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").doesNotExist())
             .andExpect(jsonPath("$.display_state").value(true))
             .andExpect(jsonPath("$.global_access").value(false))
-            .andExpect(jsonPath("$.role_id").isNumber())
+            .andExpect(jsonPath("$.security_role_id").isNumber())
             .andReturn();
 
         var id = new JSONObject(result.getResponse().getContentAsString())
@@ -113,7 +113,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").value(DESCRIPTION))
             .andExpect(jsonPath("$.display_state").value(true))
             .andExpect(jsonPath("$.global_access").value(false))
-            .andExpect(jsonPath("$.role_id").isNumber())
+            .andExpect(jsonPath("$.security_role_id").isNumber())
             .andReturn();
 
         var id = new JSONObject(result.getResponse().getContentAsString())

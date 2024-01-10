@@ -226,6 +226,30 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
             .andReturn();
     }
 
+    @Test
+    void duplicateAddAudioRequestShouldThrowConflictError() throws Exception {
+        var requestor = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser("NEWCASTLE");
+
+        var audioRequestEntity = dartsDatabase.createAndLoadOpenMediaRequestEntity(requestor, AudioRequestType.DOWNLOAD);
+        when(mockUserIdentity.getUserAccount()).thenReturn(requestor);
+
+        var audioRequestDetails = new AudioRequestDetails();
+        audioRequestDetails.setRequestType(audioRequestEntity.getRequestType());
+        audioRequestDetails.setHearingId(audioRequestEntity.getHearing().getId());
+        audioRequestDetails.setStartTime(audioRequestEntity.getStartTime());
+        audioRequestDetails.setEndTime(audioRequestEntity.getEndTime());
+        audioRequestDetails.setRequestor(audioRequestEntity.getRequestor().getId());
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT)
+            .header("Content-Type", "application/json")
+            .content(objectMapper.writeValueAsString(audioRequestDetails));
+
+        mockMvc.perform(requestBuilder)
+            .andExpect(status().isConflict())
+            .andReturn();
+    }
+
     private AudioRequestDetails createAudioRequestDetails(HearingEntity hearingEntity, AudioRequestType audioRequestTypeDownload) {
         var audioRequestDetails = new AudioRequestDetails();
 
