@@ -70,7 +70,7 @@ public class TransformedMediaHelper {
         entity.setEndTime(endTime);
         entity.setCreatedBy(mediaRequest.getCreatedBy());
         entity.setLastModifiedBy(mediaRequest.getCreatedBy());
-        entity.setOutputFormat(audioRequestOutputFormat.getExtension());
+        entity.setOutputFormat(audioRequestOutputFormat);
         if (nonNull(fileSize)) {
             entity.setOutputFilesize(fileSize.intValue());
         }

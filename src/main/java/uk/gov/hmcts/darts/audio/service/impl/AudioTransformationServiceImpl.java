@@ -228,7 +228,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
                     "%s%d.%s",
                     fileNamePrefix,
                     index++,
-                    audioRequestOutputFormat.getExtension()
+                    audioRequestOutputFormat.getExtension().toLowerCase()
                 );
 
                 try (InputStream inputStream = Files.newInputStream(generatedAudioFile.getPath())) {

@@ -25,9 +25,9 @@ public class GetAudioRequestResponseMapper {
         response.setMediaRequestStatus(MediaRequestStatus.fromValue(enhancedMediaRequestInfo.getMediaRequestStatus().toString()));
         response.setLastAccessedTs(transformedMedia.getLastAccessed());
         response.setOutputFilename(transformedMedia.getOutputFilename());
-        String outputFilename = transformedMedia.getOutputFormat();
+        uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat outputFilename = transformedMedia.getOutputFormat();
         if (outputFilename != null) {
-            response.setOutputFormat(AudioRequestOutputFormat.fromValue(outputFilename));
+            response.setOutputFormat(AudioRequestOutputFormat.fromValue(outputFilename.getExtension()));
         }
 
         return response;
