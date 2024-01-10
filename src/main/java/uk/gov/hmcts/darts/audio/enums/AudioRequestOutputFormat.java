@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum AudioRequestOutputFormat {
 
-    MP3(".mp3"),
-    ZIP(".zip");
+    MP3("mp3"),
+    ZIP("zip");
 
     private final String extension;
 

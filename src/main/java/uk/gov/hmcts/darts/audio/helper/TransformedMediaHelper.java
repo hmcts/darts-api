@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.datamanagement.DataManagementConstants.MetaDataNames.TRANSFORMED_MEDIA_ID;
 
@@ -42,7 +44,7 @@ public class TransformedMediaHelper {
         BlobClient blobClient = dataManagementApi.saveBlobDataToContainer(binaryData, DatastoreContainerType.OUTBOUND, metadata);
 
         //save in database
-        TransformedMediaEntity transformedMediaEntity = createTransformedMediaEntity(mediaRequest, filename, startTime, endTime);
+        TransformedMediaEntity transformedMediaEntity = createTransformedMediaEntity(mediaRequest, filename, startTime, endTime, binaryData.getLength());
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobClient
@@ -54,7 +56,12 @@ public class TransformedMediaHelper {
 
     @Transactional
     public TransformedMediaEntity createTransformedMediaEntity(MediaRequestEntity mediaRequest, String filename,
-                                                               OffsetDateTime startTime, OffsetDateTime endTime) {
+                                                               OffsetDateTime startTime, OffsetDateTime endTime,
+                                                               Long fileSize) {
+        AudioRequestOutputFormat audioRequestOutputFormat = AudioRequestOutputFormat.MP3;
+        if (mediaRequest.getRequestType().equals(DOWNLOAD)) {
+            audioRequestOutputFormat = AudioRequestOutputFormat.ZIP;
+        }
         TransformedMediaEntity entity = new TransformedMediaEntity();
         entity.setMediaRequest(mediaRequest);
         entity.setOutputFilename(filename);
@@ -62,6 +69,8 @@ public class TransformedMediaHelper {
         entity.setEndTime(endTime);
         entity.setCreatedBy(mediaRequest.getCreatedBy());
         entity.setLastModifiedBy(mediaRequest.getCreatedBy());
+        entity.setOutputFilesize(fileSize.intValue());
+        entity.setOutputFormat(audioRequestOutputFormat.getExtension());
         transformedMediaRepository.save(entity);
         return entity;
     }
