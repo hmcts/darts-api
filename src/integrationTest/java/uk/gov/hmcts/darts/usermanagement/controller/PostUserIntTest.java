@@ -97,7 +97,7 @@ class PostUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").doesNotExist())
             .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").doesNotExist())
-            .andExpect(jsonPath("$.security_groups").isEmpty())
+            .andExpect(jsonPath("$.security_group_ids").isEmpty())
             .andReturn();
 
         int userId = getUserId(result);
@@ -134,7 +134,7 @@ class PostUserIntTest extends IntegrationBase {
                            "email_address": "james.smith@hmcts.net",
                            "description": "A test user",
                            "active": true,
-                           "security_groups": [
+                           "security_group_ids": [
                              -1, -2
                            ]
                          }
@@ -147,7 +147,7 @@ class PostUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.description").value(DESCRIPTION))
             .andExpect(jsonPath("$.active").value(true))
             .andExpect(jsonPath("$.last_login").doesNotExist())
-            .andExpect(jsonPath("$.security_groups", Matchers.containsInAnyOrder(
+            .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
                 SECURITY_GROUP_ID_1,
                 SECURITY_GROUP_ID_2
             )))
@@ -189,7 +189,7 @@ class PostUserIntTest extends IntegrationBase {
                          {
                            "description": "",
                            "active": true,
-                           "security_groups": [
+                           "security_group_ids": [
                              1
                            ]
                          }
@@ -230,7 +230,7 @@ class PostUserIntTest extends IntegrationBase {
                          {
                            "full_name": "James Smith",
                            "email_address": "james.smith@hmcts.net",
-                           "security_groups": [
+                           "security_group_ids": [
                              9999999
                            ]
                          }
