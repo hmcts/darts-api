@@ -23,7 +23,7 @@ public class ArmServiceImpl implements ArmService {
     @Override
     public String saveBlobData(String containerName, String filename, BinaryData binaryData) {
 
-        String blobPathAndName = armDataManagementConfiguration.getFoldersSubmission() + filename;
+        String blobPathAndName = armDataManagementConfiguration.getFolders().getSubmission() + filename;
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         BlobClient client = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
         client.upload(binaryData);

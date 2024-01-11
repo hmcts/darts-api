@@ -13,7 +13,7 @@ public class ArmDataManagementConfiguration {
 
     private String sasEndpoint;
     private String containerName;
-    private String foldersSubmission;
+    private Folders folders;
     private Integer maxRetryAttempts;
     private String publisher;
     private String region;
@@ -23,5 +23,11 @@ public class ArmDataManagementConfiguration {
     private String tempBlobWorkspace;
     private String dateTimeFormat;
     private String fileExtension;
+
+    @Getter
+    @Setter
+    public static class Folders {
+        private String submission;
+    }
 
 }
