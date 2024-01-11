@@ -1,66 +1,54 @@
 package uk.gov.hmcts.darts.common.service.bankholidays;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.wiremock.BankHolidayApiStub;
 
+import java.io.IOException;
+import java.time.LocalDate;
+
+import static java.nio.charset.Charset.defaultCharset;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 class BankHolidayServiceTest extends IntegrationBase {
 
-    public static final String VALID_BANK_HOLIDAY_JSON = """
-        {
-          "england-and-wales": {
-            "division": "england-and-wales",
-            "events": [
-              {
-                "title": "New Year’s Day",
-                "date": "2020-01-01",
-                "notes": "",
-                "bunting": true
-              },
-              {
-                "title": "Good Friday",
-                "date": "2018-03-30",
-                "notes": "",
-                "bunting": false
-              }
-            ]
-          },
-          "some-other-division": {
-            "division": "some-other-division",
-            "events": [
-              {
-                "title": "New Year’s Day",
-                "date": "2018-01-01",
-                "notes": "",
-                "bunting": true
-              }
-            ]
-          }
-        }
-        """;
-
     @Autowired
     private BankHolidaysService bankHolidaysService;
 
+    @Value("classpath:tests/bank-holidays/test-data.json")
+    private Resource bankHolidayData2018To2026;
+
     private final BankHolidayApiStub bankHolidayApiStub = new BankHolidayApiStub();
+
+    @BeforeEach
+    void setUp() throws IOException {
+        bankHolidayApiStub.returns(bankHolidayData2018To2026.getContentAsString(defaultCharset()));
+    }
+
+    @Test
+    void returnsBankHolidaysWithinDateRange() {
+        var startDate = LocalDate.of(2023, 12, 25);
+        var endDate = LocalDate.of(2024, 1, 10);
+
+        var bankHolidays = bankHolidaysService.getBankHolidaysAfterStartDateAndBeforeEndDate(startDate, endDate);
+
+        assertThat(bankHolidays.size()).isEqualTo(2);
+    }
 
     @Test
     void returnsBankHolidays() {
-        bankHolidayApiStub.returns(VALID_BANK_HOLIDAY_JSON);
+        var bankHolidays = bankHolidaysService.getBankHolidays(2020);
 
-        var bankHolidays1 = bankHolidaysService.getBankHolidays(2020);
-
-        assertThat(bankHolidays1.size()).isEqualTo(1);
+        assertThat(bankHolidays.size()).isEqualTo(8);
     }
 
     @Test
     void returnEmptyListForNotFoundYear() {
-        bankHolidayApiStub.returns(VALID_BANK_HOLIDAY_JSON);
-
         var bankHolidays1 = bankHolidaysService.getBankHolidays(1980);
 
         assertThat(bankHolidays1.size()).isEqualTo(0);

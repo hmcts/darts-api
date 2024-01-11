@@ -1,11 +1,12 @@
 package uk.gov.hmcts.darts.task.service;
 
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
@@ -40,9 +41,6 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
-//Requires transactional as the object is being created manually rather than being autowired.
-// We are doing this, so we can mock out different dates to test the service.
-@Transactional
 @SuppressWarnings("PMD.ExcessiveImports")
 class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
@@ -73,6 +71,11 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @Mock
     private UserAccountRepository userAccountRepository;
 
+    @Autowired
+    private PlatformTransactionManager transactionManager;
+    private TransactionTemplate transactionTemplate;
+
+
     @BeforeEach
     void setUp() {
         requestor = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -82,6 +85,8 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         UserAccountEntity systemUser = new UserAccountEntity();
         systemUser.setId(0);
         when(userAccountRepository.findSystemUser(anyString())).thenReturn(systemUser);
+
+        transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     @Test
@@ -305,12 +310,11 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
 
         List<MediaRequestEntity> markedForDeletion = outboundAudioDeleterProcessor.markForDeletion();
 
-        MediaRequestEntity expiredMediaRequest = dartsDatabase.getMediaRequestRepository().findById(markedForDeletion.get(
-            0).getId()).get();
+        MediaRequestEntity expiredMediaRequest =
+            dartsDatabase.getMediaRequestRepository().findById(markedForDeletion.get(0).getId()).get();
 
         assertNotEquals(PROCESSING, expiredMediaRequest.getStatus());
         assertTransientObjectDirectoryStateChanged(matchingMediaRequest);
-
     }
 
 
@@ -385,20 +389,21 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     private void assertTransientObjectDirectoryStateChanged(MediaRequestEntity expiredMediaRequest) {
-        var transientObjectDirectoryEntity
-            = dartsDatabase.getTransientObjectDirectoryRepository().findByMediaRequestId(
-            expiredMediaRequest.getId()).get();
+        transactionTemplate.execute(status -> {
+            var transientObjectDirectoryEntity = dartsDatabase.getTransientObjectDirectoryRepository()
+                .findByMediaRequestId(expiredMediaRequest.getId()).get();
 
-        assertEquals(
-            MARKED_FOR_DELETION.getId(),
-            transientObjectDirectoryEntity.getStatus().getId()
-        );
+            assertEquals(
+                MARKED_FOR_DELETION.getId(),
+                transientObjectDirectoryEntity.getStatus().getId()
+            );
 
-
-        assertEquals(
-            "system_housekeeping",
-            transientObjectDirectoryEntity.getLastModifiedBy().getUserName()
-        );
+            assertEquals(
+                "system_housekeeping",
+                transientObjectDirectoryEntity.getLastModifiedBy().getUserName()
+            );
+            return null;
+        });
     }
 
     private void assertEntityStateNotChanged(MediaRequestEntity currentMediaRequest) {

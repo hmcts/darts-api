@@ -7,6 +7,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
+
 @Service
 @RequiredArgsConstructor
 public class BankHolidaysService {
@@ -24,5 +27,16 @@ public class BankHolidaysService {
 
     public List<LocalDate> getBankHolidaysLocalDateList() {
         return getBankHolidays().stream().map(Event::getDate).toList();
+    }
+
+    public List<LocalDate> getBankHolidaysAfterStartDateAndBeforeEndDate(LocalDate startDate, LocalDate endDate) {
+        if (isNull(startDate) || isNull(endDate)) {
+            return emptyList();
+        }
+
+        return getBankHolidays().stream()
+            .map(Event::getDate)
+            .filter(date -> date.isAfter(startDate) && date.isBefore(endDate))
+            .toList();
     }
 }

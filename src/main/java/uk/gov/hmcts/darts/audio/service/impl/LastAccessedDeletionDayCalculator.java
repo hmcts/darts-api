@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import static java.time.LocalDate.now;
+
 @Service
 @RequiredArgsConstructor
 public class LastAccessedDeletionDayCalculator {
@@ -22,8 +24,11 @@ public class LastAccessedDeletionDayCalculator {
     private List<DayOfWeek> weekendDays = List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
     public OffsetDateTime getStartDateForDeletion(int numOfWorkingDaysToKeep) {
-        List<LocalDate> bankHolidays = bankHolidaysService.getBankHolidaysLocalDateList();
+        List<LocalDate> bankHolidays = bankHolidaysService.getBankHolidaysAfterStartDateAndBeforeEndDate(
+            now().minusWeeks(1),
+            now().plusWeeks(1));
         OffsetDateTime deletionDate = subtractNumOfDaysFromDate(bankHolidays, numOfWorkingDaysToKeep);
+
         return deletionDate;
     }
 

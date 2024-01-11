@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +46,7 @@ class LastAccessedDeletionDayCalculatorTest {
     void whereLastAccessedDoesNotIncludesNonBusinessDays() {
         //setting clock to 2023-10-23 on a monday.
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2023, 10, 23, 22, 0, 0, 0, ZoneOffset.UTC));
-        when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(Collections.emptyList());
+        when(bankHolidaysService.getBankHolidaysAfterStartDateAndBeforeEndDate(any(), any())).thenReturn(Collections.emptyList());
 
         assertEquals(
             OffsetDateTime.of(2023, 10, 19, 22, 0, 0, 0, ZoneOffset.UTC),
@@ -60,7 +61,7 @@ class LastAccessedDeletionDayCalculatorTest {
         holidays.add(LocalDate.of(2023, Month.OCTOBER, 25));
         holidays.add(LocalDate.of(2023, Month.OCTOBER, 24));
 
-        when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
+        when(bankHolidaysService.getBankHolidaysAfterStartDateAndBeforeEndDate(any(), any())).thenReturn(holidays);
 
         assertEquals(
             OffsetDateTime.of(2023, 10, 20, 22, 0, 0, 0, ZoneOffset.UTC),
@@ -94,7 +95,7 @@ class LastAccessedDeletionDayCalculatorTest {
         holidays.add(LocalDate.of(2023, Month.DECEMBER, 26));
         holidays.add(LocalDate.of(2023, Month.DECEMBER, 25));
 
-        when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
+        when(bankHolidaysService.getBankHolidaysAfterStartDateAndBeforeEndDate(any(), any())).thenReturn(holidays);
 
         assertEquals(
             OffsetDateTime.of(2023, 12, 22, 22, 0, 0, 0, ZoneOffset.UTC),
@@ -126,7 +127,7 @@ class LastAccessedDeletionDayCalculatorTest {
         holidays.add(LocalDate.of(2023, Month.DECEMBER, 26));
         holidays.add(LocalDate.of(2023, Month.DECEMBER, 25));
 
-        when(bankHolidaysService.getBankHolidaysLocalDateList()).thenReturn(holidays);
+        when(bankHolidaysService.getBankHolidaysAfterStartDateAndBeforeEndDate(any(), any())).thenReturn(holidays);
 
         assertEquals(
             OffsetDateTime.of(2023, 12, 14, 22, 0, 0, 0, ZoneOffset.UTC),
