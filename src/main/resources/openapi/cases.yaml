@@ -720,7 +720,7 @@ components:
         date_to:
           type: string
           format: date
-        eventTextContains:
+        event_text_contains:
           type: string
           example: 'Event text'
           maxLength: 255
