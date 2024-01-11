@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.audio.model;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 
@@ -40,7 +41,7 @@ public class TransformedMediaDetailsDto {
 
     private String transformedMediaFilename;
 
-    private String transformedMediaFormat;
+    private AudioRequestOutputFormat transformedMediaFormat;
 
     private OffsetDateTime lastAccessedTs;
 

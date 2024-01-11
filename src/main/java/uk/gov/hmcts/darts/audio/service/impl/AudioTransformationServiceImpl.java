@@ -224,7 +224,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             );
             for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
                 final String fileName = String.format(
-                    "%s%d%s",
+                    "%s%d.%s",
                     fileNamePrefix,
                     index++,
                     audioRequestOutputFormat.getExtension()
