@@ -52,7 +52,7 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
     @Query("""
         SELECT distinct(mr.id) FROM MediaRequestEntity mr, TransformedMediaEntity tm
         WHERE tm.mediaRequest = mr
-        AND mr.createdDateTime < :createdDateTime
+        AND tm.createdDateTime < :createdDateTime
         AND mr.status <> :status
         AND tm.lastAccessed IS NULL
         """)

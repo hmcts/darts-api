@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
@@ -347,7 +348,6 @@ public class DartsDatabaseStub {
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                OffsetDateTime.parse("2023-06-30T13:00:00Z"),
                 audioRequestType, OPEN
             ));
     }
@@ -413,8 +413,8 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public HearingEntity saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
-        var hearingEntity = hearingRepository.save(hearing);
+    public void saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
+        hearingRepository.save(hearing);
         eventEntities.forEach(event -> saveSingleEventForHearing(hearing, event));
         return hearingEntity;
     }
@@ -447,6 +447,11 @@ public class DartsDatabaseStub {
         return judgeRepository.save(judge);
     }
 
+    public TransformedMediaEntity save(TransformedMediaEntity transformedMediaEntity) {
+        return transformedMediaRepository.saveAndFlush(transformedMediaEntity);
+    }
+
+    @Transactional
     public HearingEntity save(HearingEntity hearingEntity) {
         return hearingRepository.saveAndFlush(hearingEntity);
     }

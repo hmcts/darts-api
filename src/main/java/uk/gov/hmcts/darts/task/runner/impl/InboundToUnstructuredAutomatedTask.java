@@ -13,7 +13,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRU
 public class InboundToUnstructuredAutomatedTask extends AbstractLockableAutomatedTask {
 
     protected String taskName = INBOUND_TO_UNSTRUCTURED_TASK_NAME.getTaskName();
-    private InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
+    private final InboundToUnstructuredProcessor inboundToUnstructuredProcessor;
 
     public InboundToUnstructuredAutomatedTask(AutomatedTaskRepository automatedTaskRepository,
                                               LockProvider lockProvider,

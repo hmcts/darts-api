@@ -145,7 +145,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
             OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-            OffsetDateTime.now(),
             AudioRequestType.DOWNLOAD,
             COMPLETED
         );
@@ -186,7 +185,6 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
             requestor,
             OffsetDateTime.parse("2023-06-26T13:00:00Z"),
             OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-            OffsetDateTime.now(),
             AudioRequestType.DOWNLOAD,
             COMPLETED
         );

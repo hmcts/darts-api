@@ -9,12 +9,14 @@ import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -33,6 +35,7 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
     private final LastAccessedDeletionDayCalculator deletionDayCalculator;
     private final SystemUserHelper systemUserHelper;
+    private final TransformedMediaRepository transformedMediaRepository;
 
     @Value("${darts.audio.outbounddeleter.last-accessed-deletion-day:2}")
     private int deletionDays;
@@ -66,15 +69,27 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
 
         for (TransientObjectDirectoryEntity entity : transientObjectDirectoryEntities) {
-            entity.getTransformedMedia().getMediaRequest().setStatus(MediaRequestStatus.EXPIRED);
             entity.getTransformedMedia().getMediaRequest().setLastModifiedBy(systemUser);
 
             entity.setLastModifiedBy(systemUser);
             entity.setStatus(deletionStatus);
-
+            entity.getTransformedMedia().setExpiryTime(OffsetDateTime.now());
             deletedValues.add(entity.getTransformedMedia().getMediaRequest());
         }
 
+        for (Integer mediaRequestId : mediaRequests) {
+            List<TransformedMediaEntity> transformedMedias = transformedMediaRepository.findByMediaRequestId(mediaRequestId);
+            MediaRequestEntity mediaRequest = mediaRequestRepository.findById(mediaRequestId).get();
+            boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
+            if (areAllTransformedMediasExpired) {
+                mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
+            }
+        }
         return deletedValues;
+    }
+
+    @Override
+    public void setDeletionDays(int deletionDays) {
+        this.deletionDays = deletionDays;
     }
 }

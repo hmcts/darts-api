@@ -7,4 +7,6 @@ import java.util.List;
 public interface OutboundAudioDeleterProcessor {
 
     List<MediaRequestEntity> markForDeletion();
+
+    void setDeletionDays(int deletionDays);
 }

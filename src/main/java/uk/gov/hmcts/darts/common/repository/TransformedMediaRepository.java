@@ -17,6 +17,13 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         """)
     List<TransformedMediaEntity> findByMediaRequestId(Integer mediaRequestId);
 
+
+    @Query("""
+        SELECT tm FROM TransformedMediaEntity tm
+        WHERE tm.mediaRequest.id IN :ids
+        """)
+    List<TransformedMediaEntity> findByIdIn(List<Integer> ids);
+
     @Query("""
         SELECT new uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto (mr.id,
         tm.id,
