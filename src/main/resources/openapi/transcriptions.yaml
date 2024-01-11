@@ -911,11 +911,8 @@ components:
           type: string
           example: "Section 4(2) of the Contempt of Court Act 1981"
           description: 'Any reporting restrictions associated with the case.'
-        reporting_restrictions:
-          type: array
-          default: []
-          items:
-            $ref: './common.yaml#/components/schemas/reporting_restriction'
+        case_reporting_restrictions:
+          $ref: './common.yaml#/components/schemas/reporting_restrictions'
         status:
           type: string
         from:

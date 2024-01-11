@@ -45,7 +45,9 @@ class TransientObjectDirectoryServiceTest extends IntegrationBase {
             mediaRequestEntity,
             "aFilename",
             mediaRequestEntity.getStartTime(),
-            mediaRequestEntity.getEndTime());
+            mediaRequestEntity.getEndTime(),
+            1000L
+        );
         TransientObjectDirectoryEntity transientObjectDirectoryEntity = transientObjectDirectoryService.saveTransientObjectDirectoryEntity(
             transformedMediaEntity,
             blobClientBuilder.buildClient()

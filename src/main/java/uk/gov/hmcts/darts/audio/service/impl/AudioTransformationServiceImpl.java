@@ -223,7 +223,7 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             );
             for (AudioFileInfo generatedAudioFile : generatedAudioFiles) {
                 final String fileName = String.format(
-                    "%s%d%s",
+                    "%s%d.%s",
                     fileNamePrefix,
                     index++,
                     audioRequestOutputFormat.getExtension()
@@ -341,13 +341,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
         throws ExecutionException, InterruptedException, IOException {
 
-        List<AudioFileInfo> audioFileInfos = outboundFileProcessor.processAudioForPlaybacks(
+        return outboundFileProcessor.processAudioForPlaybacks(
             downloadedMedias,
             mediaRequestEntity.getStartTime(),
             mediaRequestEntity.getEndTime()
         );
-
-        return audioFileInfos;
     }
 
     public void notifyUser(MediaRequestEntity mediaRequestEntity,

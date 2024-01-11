@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -16,6 +18,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
@@ -28,6 +31,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(callSuper = false)
 public class TransformedMediaEntity extends CreatedModifiedBaseEntity {
+
     @Id
     @Column(name = "trm_id")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trm_gen")
@@ -51,7 +55,8 @@ public class TransformedMediaEntity extends CreatedModifiedBaseEntity {
     private Integer outputFilesize;
 
     @Column(name = "output_format")
-    private String outputFormat;
+    @Enumerated(EnumType.STRING)
+    private AudioRequestOutputFormat outputFormat;
 
     @Column(name = "checksum")
     private String checksum;

@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
@@ -30,7 +31,7 @@ public class TransformedMediaStub {
         transformedMediaEntity.setCreatedDateTime(mediaRequestEntity.getCreatedDateTime());
         transformedMediaEntity.setOutputFilename(filename);
         if (filename != null) {
-            transformedMediaEntity.setOutputFormat("ZIP");
+            transformedMediaEntity.setOutputFormat(AudioRequestOutputFormat.ZIP);
         }
         transformedMediaEntity.setExpiryTime(expiry);
         transformedMediaEntity.setLastAccessed(lastAccessed);

@@ -11,9 +11,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
 import uk.gov.hmcts.darts.audio.helper.TransformedMediaHelper;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
@@ -82,6 +84,8 @@ class AudioTransformationServiceImplTest {
     public static final String MOCK_COURTHOUSE_NAME = "mockCourtHouse";
     public static final String MOCK_EMAIL = "mock.email@mock.com";
     public static final int MOCK_CASEID = 99;
+    public static final String TEST_EXTENSION = AudioRequestOutputFormat.MP3.getExtension();
+    public static final String TEST_FILE_NAME = "case1_23_Nov_2023" + "." + TEST_EXTENSION;
 
     @Mock
     private DataManagementApi mockDataManagementApi;
@@ -97,7 +101,6 @@ class AudioTransformationServiceImplTest {
 
     @Mock
     private TransformedMediaRepository transformedMediaRepository;
-
 
     @InjectMocks
     private AudioTransformationServiceImpl audioTransformationService;
@@ -172,6 +175,7 @@ class AudioTransformationServiceImplTest {
     @Test
     void saveProcessedDataShouldSaveBlobAndSetStatus() {
         final MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
+        mediaRequestEntity.setRequestType(DOWNLOAD);
         final MediaRequestEntity mediaRequestEntityUpdated = new MediaRequestEntity();
         mediaRequestEntityUpdated.setStatus(COMPLETED);
 
@@ -474,5 +478,24 @@ class AudioTransformationServiceImplTest {
         assertEquals("nd", AudioTransformationServiceImpl.getNthNumber(22));
         assertEquals("rd", AudioTransformationServiceImpl.getNthNumber(23));
         assertEquals("th", AudioTransformationServiceImpl.getNthNumber(24));
+    }
+
+    @Test
+    void whenCreateTransformMediaEntityIsCalled_thenFilenameFormatSizeShouldBeSet() {
+
+        MediaRequestEntity mediaRequest = new MediaRequestEntity();
+        mediaRequest.setRequestType(AudioRequestType.PLAYBACK);
+
+        TransformedMediaEntity transformedMediaEntity = transformedMediaHelper.createTransformedMediaEntity(
+            mediaRequest,
+            "case1_23_Nov_2023.mp3",
+            TIME_11_59,
+            TIME_12_00,
+            BINARY_DATA.getLength()
+        );
+
+        assertEquals(TEST_FILE_NAME, transformedMediaEntity.getOutputFilename());
+        assertEquals(TEST_EXTENSION, transformedMediaEntity.getOutputFormat().getExtension());
+        assertEquals(TEST_BINARY_STRING.length(), transformedMediaEntity.getOutputFilesize());
     }
 }

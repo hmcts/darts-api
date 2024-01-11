@@ -86,7 +86,7 @@ services:
 
   darts-redis:
     container_name: darts-redis
-    image: redis:7.2.3-alpine
+    image: redis:7.2.4-alpine
     restart: always
     ports:
       - "6379:6379"
