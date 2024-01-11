@@ -19,7 +19,7 @@ services:
       - GOVUK_NOTIFY_API_KEY
       - AAD_B2C_ROPC_CLIENT_ID_KEY
       - AAD_B2C_ROPC_CLIENT_SECRET_KEY
-      - AZURE_STORAGE_CONNECTION_STRING
+      - AZURE_STORAGE_CONNECTION_STRING=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
       - AAD_TENANT_ID
       - AAD_CLIENT_ID
       - AAD_CLIENT_SECRET
@@ -92,6 +92,16 @@ services:
       - "6379:6379"
     volumes:
       - darts-cache:/var/lib/redis/data
+    networks:
+      - darts-network
+
+  darts-blob-storage:
+    container_name: darts-blob-storage
+    image: mcr.microsoft.com/azure-storage/azurite
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
     networks:
       - darts-network
 
