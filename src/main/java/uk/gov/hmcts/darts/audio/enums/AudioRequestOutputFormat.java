@@ -11,5 +11,4 @@ public enum AudioRequestOutputFormat {
     ZIP("zip");
 
     private final String extension;
-
 }
