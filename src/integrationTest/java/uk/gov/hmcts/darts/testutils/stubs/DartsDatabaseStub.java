@@ -413,8 +413,8 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
-        hearingRepository.save(hearing);
+    public HearingEntity saveEventsForHearing(HearingEntity hearing, List<EventEntity> eventEntities) {
+        HearingEntity hearingEntity = hearingRepository.save(hearing);
         eventEntities.forEach(event -> saveSingleEventForHearing(hearing, event));
         return hearingEntity;
     }
