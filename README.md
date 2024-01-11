@@ -64,6 +64,11 @@ Alternatively, you can log into the [Azure home page](https://portal.azure.com/#
 `Key Vault -> darts-stg -> Secrets`. Note in your Portal Settings you must have the `CJS Common Platform` directory
 active for the secrets to be visible.
 
+> Note: there is also a convenient script for exporting all these secret values from the key-vault, ensure you have the Azure CLI, `az`, installed and have run `az login`.
+> ```bash
+> source bin/secrets-stg.sh
+> ```
+
 Once you have obtained the values, set the environment variables on your system. E.g. On Mac, you may run this command
 in the terminal, replacing `<<env var name>>` and `<<secret value>>` as necessary:
 
@@ -136,11 +141,8 @@ Environment Variable Name: AZURE_STORAGE_CONNECTION_STRING
 Environment Variable Value:
 
 ```
-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey={DEFAULT_ACCOUNT_KEY};BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
+DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
 ```
-
-Replace the {DEFAULT_ACCOUNT_KEY} with the value provided in the following
-link: https://github.com/Azure/Azurite#default-storage-account
 
 ## Building the application
 
@@ -216,6 +218,12 @@ If you want to run the darts-api outside of docker and run only the dependant se
 
 ```bash
 ./bin/dcup noapi
+```
+
+To stop all services, use:
+
+```bash
+./bin/dcdown
 ```
 
 ### Alternative script to run application
