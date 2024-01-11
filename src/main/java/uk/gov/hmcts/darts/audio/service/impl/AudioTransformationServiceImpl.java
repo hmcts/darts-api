@@ -126,10 +126,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public Optional<UUID> getMediaLocation(MediaEntity media) {
         Optional<UUID> externalLocation = Optional.empty();
 
-        ObjectRecordStatusEntity objectDirectoryStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        ObjectRecordStatusEntity objectRecordStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
-            media, objectDirectoryStatus, externalLocationType
+            media, objectRecordStatus, externalLocationType
         );
 
         if (!externalObjectDirectoryEntityList.isEmpty()) {
