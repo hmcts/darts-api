@@ -322,7 +322,7 @@ paths:
       description: Download audio
       parameters:
         - in: query
-          name: media_request_id
+          name: transformed_media_id
           required: true
           schema:
             type: integer
@@ -364,8 +364,8 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                type: "AUDIO_REQUESTS_100"
-                title: "The requested audio request cannot be found"
+                type: "AUDIO_REQUESTS_103"
+                title: "The requested transformed media cannot be found"
                 status: 404
         '500':
           description: The requested data cannot be located
@@ -387,7 +387,7 @@ paths:
       description: Playback audio
       parameters:
         - in: query
-          name: media_request_id
+          name: transformed_media_id
           required: true
           schema:
             type: integer
@@ -440,8 +440,8 @@ paths:
               schema:
                 $ref: './problem.yaml'
               example:
-                type: "AUDIO_REQUESTS_100"
-                title: "The requested audio request cannot be found"
+                type: "AUDIO_REQUESTS_103"
+                title: "The requested transformed media cannot be found"
                 status: 404
         '500':
           description: The requested data cannot be located

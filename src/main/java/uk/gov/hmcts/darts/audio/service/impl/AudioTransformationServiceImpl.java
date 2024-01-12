@@ -31,7 +31,6 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
-import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
@@ -75,13 +74,13 @@ import static uk.gov.hmcts.darts.notification.NotificationConstants.ParameterMap
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.TooManyMethods"}) // DMP-715 to resolve
 public class AudioTransformationServiceImpl implements AudioTransformationService {
 
-    public static final String NO_DEFENDANTS = "There are no defendants for this hearing";
-    public static final String NOT_AVAILABLE = "N/A";
+    private static final String NO_DEFENDANTS = "There are no defendants for this hearing";
+    private static final String NOT_AVAILABLE = "N/A";
+
     private final MediaRequestService mediaRequestService;
     private final OutboundFileProcessor outboundFileProcessor;
     private final OutboundFileZipGenerator outboundFileZipGenerator;
 
-    private final TransientObjectDirectoryService transientObjectDirectoryService;
     private final FileOperationService fileOperationService;
 
     private final MediaRepository mediaRepository;
@@ -127,10 +126,10 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     public Optional<UUID> getMediaLocation(MediaEntity media) {
         Optional<UUID> externalLocation = Optional.empty();
 
-        ObjectRecordStatusEntity objectDirectoryStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
+        ObjectRecordStatusEntity objectRecordStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ExternalLocationTypeEntity externalLocationType = externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId());
         List<ExternalObjectDirectoryEntity> externalObjectDirectoryEntityList = externalObjectDirectoryRepository.findByMediaStatusAndType(
-            media, objectDirectoryStatus, externalLocationType
+            media, objectRecordStatus, externalLocationType
         );
 
         if (!externalObjectDirectoryEntityList.isEmpty()) {
@@ -342,13 +341,11 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
     private List<AudioFileInfo> handlePlaybacks(Map<MediaEntity, Path> downloadedMedias, MediaRequestEntity mediaRequestEntity)
         throws ExecutionException, InterruptedException, IOException {
 
-        List<AudioFileInfo> audioFileInfos = outboundFileProcessor.processAudioForPlaybacks(
+        return outboundFileProcessor.processAudioForPlaybacks(
             downloadedMedias,
             mediaRequestEntity.getStartTime(),
             mediaRequestEntity.getEndTime()
         );
-
-        return audioFileInfos;
     }
 
     public void notifyUser(MediaRequestEntity mediaRequestEntity,
