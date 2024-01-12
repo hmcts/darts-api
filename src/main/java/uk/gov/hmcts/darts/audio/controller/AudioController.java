@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -26,6 +29,8 @@ import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -74,7 +79,7 @@ public class AudioController implements AudioApi {
     @RequestMapping(
         method = RequestMethod.GET,
         value = "/audio/preview2/{media_id}",
-        produces = {"audio/mpeg", "application/json+problem"}
+        produces = {"text/event-stream", "application/json+problem"}
     )
     public SseEmitter preview2(
         @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
@@ -84,7 +89,50 @@ public class AudioController implements AudioApi {
     ) {
         SseEmitter emitter = new SseEmitter(1_800_000L);//30m
         audioService.emitterHeartBeat(emitter);
-        audioService.pause10(emitter, mediaId, range);
+        audioService.preview2(emitter, mediaId, range);
+        return emitter;
+    }
+
+    @SneakyThrows
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/audio/preview3/{media_id}",
+        produces = MediaType.TEXT_EVENT_STREAM_VALUE
+    )
+    public Flux<String> streamFlux() {
+        return Flux.interval(Duration.ofSeconds(2))
+            .map(sequence -> "Flux - " + LocalTime.now().toString());
+    }
+
+    @SneakyThrows
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/audio/preview4/{media_id}",
+        produces = {"audio/mpeg", "application/json+problem"}
+    )
+    public Flux<ServerSentEvent<String>> streamEvents() {
+        return Flux.interval(Duration.ofSeconds(1))
+            .map(sequence -> ServerSentEvent.<String>builder()
+                .id(String.valueOf(sequence))
+                .event("heartbeat")
+                .build());
+    }
+
+    @SneakyThrows
+    @RequestMapping(
+        method = RequestMethod.GET,
+        value = "/audio/preview5/{media_id}",
+        produces = {"text/event-stream", "application/json+problem"}
+    )
+    public SseEmitter preview5(
+        @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
+        @PathVariable("media_id") Integer mediaId,
+        @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
+        @RequestHeader(value = "range", required = false) String range
+    ) {
+        SseEmitter emitter = new SseEmitter(1_800_000L);//30m
+        audioService.emitterHeartBeat2(emitter);
+        audioService.preview5(emitter, mediaId, range);
         return emitter;
     }
 

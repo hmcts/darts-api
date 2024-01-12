@@ -97,10 +97,11 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         List<AudioFileInfo> audioFileInfoList = new ArrayList<>();
         for (List<AudioFileInfo> seperatedAudioFileInfo : separatedAudioFileInfos) {
-            Path outputPath = generateOutputPath(basePath,
-                                                 AudioOperationTypes.CONCATENATE,
-                                                 channel,
-                                                 AudioConstants.AudioFileFormats.MP2
+            Path outputPath = generateOutputPath(
+                basePath,
+                AudioOperationTypes.CONCATENATE,
+                channel,
+                AudioConstants.AudioFileFormats.MP2
             );
 
             CommandLine command = generateConcatenateCommand(seperatedAudioFileInfo, outputPath);
@@ -208,6 +209,7 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         CommandLine command = new CommandLine(audioConfigurationProperties.getFfmpegExecutable());
         command.addArgument("-i").addArgument(audioFileInfo.getFileName());
+        command.addArgument("-b:a").addArgument("32k");
         command.addArgument(outputPath.toString());
 
         Date encodeStartDate = new Date();

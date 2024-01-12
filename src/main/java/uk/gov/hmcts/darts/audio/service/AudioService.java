@@ -20,5 +20,11 @@ public interface AudioService {
     void emitterHeartBeat(SseEmitter emitter);
 
     @Async
-    void pause10(SseEmitter emitter, Integer mediaId, String range) throws IOException;
+    void emitterHeartBeat2(SseEmitter emitter);
+
+    @Async
+    void preview2(SseEmitter emitter, Integer mediaId, String range) throws IOException;
+
+    @Async
+    void preview5(SseEmitter emitter, Integer mediaId, String range) throws IOException;
 }

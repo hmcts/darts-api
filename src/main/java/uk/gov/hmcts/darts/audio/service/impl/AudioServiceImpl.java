@@ -171,15 +171,41 @@ public class AudioServiceImpl implements AudioService {
 
     @Async
     @Override
-    public void pause10(SseEmitter emitter, Integer mediaId, String range) throws IOException {
+    public void emitterHeartBeat2(SseEmitter emitter) {
+        int counter = 0;
         try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            do {
+                SseEmitter.SseEventBuilder event = SseEmitter.event()
+                    .id(String.valueOf(counter++))
+                    .data("random data")
+                    .name("heartbeat");
+                emitter.send(event);
+                Thread.sleep(5000);
+            } while (true);
+        } catch (Exception e) {
+            log.debug("exception during emitter: {}", e.getMessage());
         }
+    }
+
+    @Async
+    @Override
+    public void preview2(SseEmitter emitter, Integer mediaId, String range) throws IOException {
         InputStream audioMediaFile = preview(mediaId);
         ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
         emitter.send(response);
+        emitter.complete();
+    }
+
+    @Async
+    @Override
+    public void preview5(SseEmitter emitter, Integer mediaId, String range) throws IOException {
+        InputStream audioMediaFile = preview(mediaId);
+        ResponseEntity<byte[]> response = StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
+
+        SseEmitter.SseEventBuilder event = SseEmitter.event()
+            .data(response)
+            .name("real response");
+        emitter.send(event);
         emitter.complete();
     }
 }
