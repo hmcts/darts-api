@@ -90,12 +90,12 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         for (ChannelAudio audioFileInfoList :  concatenationsList) {
             AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
-            OffsetDateTime concatStartTime = mergedAudio.getStartTime().atOffset(ZoneOffset.UTC);
-            OffsetDateTime concatEndTime = mergedAudio.getEndTime().atOffset(ZoneOffset.UTC);
+            OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(ZoneOffset.UTC);
+            OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(ZoneOffset.UTC);
             AudioFileInfo trimmedAudio = trimToPeriod(
                 mergedAudio,
-                concatStartTime.isAfter(mediaRequestStartTime) ? concatStartTime : mediaRequestStartTime,
-                concatEndTime.isBefore(mediaRequestEndTime) ? concatEndTime : mediaRequestEndTime
+                mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
+                mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
             );
             concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
         }
@@ -241,7 +241,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return audioOperationService.reEncode(StringUtils.EMPTY, audioFileInfo);
     }
 
-    public static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
+    private static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
         List<ChannelAudio> concatenationsList = new ArrayList<>();
         int numChannels = channelsList.size();
         int numConcatenations = channelsList.get(0).getAudioFiles().size();
@@ -255,7 +255,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return concatenationsList;
     }
 
-    public static List<ChannelAudio> convertChannelsListToFilesList(List<AudioFileInfo> audioFileInfosByChannel) {
+    private static List<ChannelAudio> convertChannelsListToFilesList(List<AudioFileInfo> audioFileInfosByChannel) {
 
         audioFileInfosByChannel.sort(comparing(AudioFileInfo::getStartTime));
 
