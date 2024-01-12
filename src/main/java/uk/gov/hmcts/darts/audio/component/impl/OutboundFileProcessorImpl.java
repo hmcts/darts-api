@@ -73,8 +73,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     @Override
     public List<AudioFileInfo> processAudioForPlaybacks(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
-                                                        OffsetDateTime startTime,
-                                                        OffsetDateTime endTime)
+                                                        OffsetDateTime mediaRequestStartTime,
+                                                        OffsetDateTime mediaRequestEndTime)
         throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
@@ -90,13 +90,14 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         for (ChannelAudio audioFileInfoList :  concatenationsList) {
             AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
+            OffsetDateTime concatStartTime = mergedAudio.getStartTime().atOffset(ZoneOffset.UTC);
+            OffsetDateTime concatEndTime = mergedAudio.getEndTime().atOffset(ZoneOffset.UTC);
             AudioFileInfo trimmedAudio = trimToPeriod(
                 mergedAudio,
-                mergedAudio.getStartTime().atOffset(ZoneOffset.UTC),
-                mergedAudio.getEndTime().atOffset(ZoneOffset.UTC)
+                concatStartTime.isAfter(mediaRequestStartTime) ? concatStartTime : mediaRequestStartTime,
+                concatEndTime.isBefore(mediaRequestEndTime) ? concatEndTime : mediaRequestEndTime
             );
             concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
-
         }
 
         return concatenatedAndMergedAudioFileInfos;
