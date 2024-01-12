@@ -297,7 +297,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
     private ExternalObjectDirectoryEntity createExternalObjectDirectory(MediaEntity mediaEntity, Integer dataStoreId, ObjectRecordStatusEnum status) {
         var externalObjectDirectoryEntity = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             mediaEntity,
-            dartsDatabase.getObjectDirectoryStatusEntity(status),
+            dartsDatabase.getObjectRecordStatusEntity(status),
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(dataStoreId),
             UUID.randomUUID()
         );
@@ -312,7 +312,7 @@ class ExternalDataStoreDeleterTest extends IntegrationBase {
         return dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
                 currentMediaRequest,
-                dartsDatabase.getObjectDirectoryStatusEntity(status),
+                dartsDatabase.getObjectRecordStatusEntity(status),
                 blobId
             ));
 

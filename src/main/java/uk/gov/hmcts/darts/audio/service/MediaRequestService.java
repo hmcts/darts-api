@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.audio.service;
 
 
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
 import uk.gov.hmcts.darts.audio.enums.MediaRequestStatus;
@@ -38,14 +37,14 @@ public interface MediaRequestService {
 
     GetAudioRequestResponse getAudioRequests(Integer userId, Boolean expired);
 
-    void updateTransformedMediaLastAccessedTimestamp(Integer mediaRequestId);
+    void updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId);
 
-    @Transactional
     void updateTransformedMediaLastAccessedTimestampForMediaRequestId(Integer mediaRequestId);
 
-    InputStream download(Integer mediaRequestId);
+    InputStream download(Integer transformedMediaId);
 
-    InputStream playback(Integer mediaRequestId);
+    InputStream playback(Integer transformedMediaId);
 
     MediaRequestEntity updateAudioRequestCompleted(MediaRequestEntity mediaRequestEntity, String fileName, AudioRequestOutputFormat audioRequestOutputFormat);
+
 }

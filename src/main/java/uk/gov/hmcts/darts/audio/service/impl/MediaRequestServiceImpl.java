@@ -11,7 +11,6 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
@@ -67,6 +66,7 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.DELETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -87,13 +87,11 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaRequestDetailsMapper mediaRequestDetailsMapper;
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
         return mediaRequestRepository.findTopByStatusOrderByCreatedDateTimeAsc(status);
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public AudioNonAccessedResponse countNonAccessedAudioForUser(Integer userId) {
         AudioNonAccessedResponse nonAccessedResponse = new AudioNonAccessedResponse();
         nonAccessedResponse.setCount(mediaRequestRepository.countTransformedEntitiesByRequestorIdAndStatusNotAccessed(userId, MediaRequestStatus.COMPLETED));
@@ -101,7 +99,6 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
     public MediaRequestEntity getMediaRequestById(Integer id) {
         return mediaRequestRepository.findById(id).orElseThrow(
             () -> new DartsApiException(AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND));
@@ -180,11 +177,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public void deleteTransformedMedia(Integer transformedMediaId) {
-        Optional<TransformedMediaEntity> transformedMediaOpt = transformedMediaRepository.findById(transformedMediaId);
-        if (transformedMediaOpt.isEmpty()) {
-            throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
-        }
-        TransformedMediaEntity transformedMedia = transformedMediaOpt.get();
+        TransformedMediaEntity transformedMedia = getTransformedMediaById(transformedMediaId);
         deleteTransientObjectDirectoryByTransformedMediaId(transformedMedia.getId());
         log.debug("deleting TransformedMediaEntity with id {}.", transformedMedia.getId());
         MediaRequestEntity mediaRequest = transformedMedia.getMediaRequest();
@@ -241,7 +234,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
         List<EnhancedMediaRequestInfo> enhancedMediaRequestInfoList = getEnhancedMediaRequestInfo(userId, expired);
         for (EnhancedMediaRequestInfo enhancedMediaRequestInfo : enhancedMediaRequestInfoList) {
             List<TransformedMediaEntity> transformedMediaList = transformedMediaRepository.findByMediaRequestId(enhancedMediaRequestInfo.getMediaRequestId());
-            if (transformedMediaList.size() > 0) {
+            if (!transformedMediaList.isEmpty()) {
                 TransformedMediaEntity transformedMedia = transformedMediaList.get(0);
                 GetAudioRequestResponseV1 getAudioRequestResponseItem = GetAudioRequestResponseMapper.mapToAudioRequestSummary(
                     enhancedMediaRequestInfo,
@@ -322,11 +315,7 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     @Transactional
     @Override
     public void updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
-        Optional<TransformedMediaEntity> foundEntityOpt = transformedMediaRepository.findById(transformedMediaId);
-        if (foundEntityOpt.isEmpty()) {
-            throw new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND);
-        }
-        TransformedMediaEntity foundEntity = foundEntityOpt.get();
+        TransformedMediaEntity foundEntity = getTransformedMediaById(transformedMediaId);
         foundEntity.setLastAccessed(OffsetDateTime.now());
         transformedMediaRepository.saveAndFlush(foundEntity);
     }
@@ -358,26 +347,21 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     }
 
     @Override
-    public InputStream download(Integer mediaRequestId) {
-        return downloadOrPlayback(mediaRequestId, AuditActivity.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
+    public InputStream download(Integer transformedMediaId) {
+        return downloadOrPlayback(transformedMediaId, AuditActivity.EXPORT_AUDIO, AudioRequestType.DOWNLOAD);
     }
 
     @Override
-    public InputStream playback(Integer mediaRequestId) {
-        return downloadOrPlayback(mediaRequestId, AuditActivity.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
+    public InputStream playback(Integer transformedMediaId) {
+        return downloadOrPlayback(transformedMediaId, AuditActivity.AUDIO_PLAYBACK, AudioRequestType.PLAYBACK);
     }
 
-    private InputStream downloadOrPlayback(Integer mediaRequestId, AuditActivity auditActivity, AudioRequestType expectedType) {
-        MediaRequestEntity mediaRequestEntity = getMediaRequestById(mediaRequestId);
+    private InputStream downloadOrPlayback(Integer transformedMediaId, AuditActivity auditActivity, AudioRequestType expectedType) {
+        final TransformedMediaEntity transformedMediaEntity = getTransformedMediaById(transformedMediaId);
+        MediaRequestEntity mediaRequestEntity = transformedMediaEntity.getMediaRequest();
         validateMediaRequestType(mediaRequestEntity, expectedType);
-        var transientObjectEntity = transientObjectDirectoryRepository.findByMediaRequestId(
-                mediaRequestId)
-            .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
 
-        UUID blobId = transientObjectEntity.getExternalLocation();
-        if (blobId == null) {
-            throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
-        }
+        final UUID blobId = getBlobId(transformedMediaEntity);
 
         auditApi.recordAudit(
             auditActivity,
@@ -385,6 +369,24 @@ public class MediaRequestServiceImpl implements MediaRequestService {
             mediaRequestEntity.getHearing().getCourtCase()
         );
         return dataManagementApi.getBlobDataFromOutboundContainer(blobId).toStream();
+    }
+
+    private UUID getBlobId(TransformedMediaEntity transformedMediaEntity) {
+        final List<TransientObjectDirectoryEntity> transientObjectDirectoryEntities = transformedMediaEntity.getTransientObjectDirectoryEntities();
+        if (transientObjectDirectoryEntities.isEmpty()) {
+            throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
+        }
+
+        var transientObjectEntity = transientObjectDirectoryEntities.stream()
+            .filter(transientObjectDirectoryEntity -> STORED.getId().equals(transientObjectDirectoryEntity.getStatus().getId()))
+            .findFirst()
+            .orElseThrow(() -> new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED));
+
+        UUID blobId = transientObjectEntity.getExternalLocation();
+        if (blobId == null) {
+            throw new DartsApiException(AudioApiError.REQUESTED_DATA_CANNOT_BE_LOCATED);
+        }
+        return blobId;
     }
 
     private void validateMediaRequestType(MediaRequestEntity mediaRequestEntity, AudioRequestType expectedType) {
@@ -405,4 +407,10 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private UserAccountEntity getUserAccount() {
         return userIdentity.getUserAccount();
     }
+
+    private TransformedMediaEntity getTransformedMediaById(Integer id) {
+        return transformedMediaRepository.findById(id).orElseThrow(
+            () -> new DartsApiException(AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND));
+    }
+
 }

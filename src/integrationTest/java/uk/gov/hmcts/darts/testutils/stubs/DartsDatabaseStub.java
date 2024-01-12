@@ -331,9 +331,9 @@ public class DartsDatabaseStub {
         return externalLocationTypeRepository.getReferenceById(externalLocationTypeEnum.getId());
     }
 
-    public ObjectRecordStatusEntity getObjectDirectoryStatusEntity(
-        ObjectRecordStatusEnum objectDirectoryStatusEnum) {
-        return objectRecordStatusRepository.getReferenceById(objectDirectoryStatusEnum.getId());
+    public ObjectRecordStatusEntity getObjectRecordStatusEntity(
+        ObjectRecordStatusEnum objectRecordStatusEnum) {
+        return objectRecordStatusRepository.getReferenceById(objectRecordStatusEnum.getId());
     }
 
     @Transactional
