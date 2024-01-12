@@ -50,7 +50,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
 
         var externalLocationTypeEntity = dartsDatabaseStub.getExternalLocationTypeEntity(
             ExternalLocationTypeEnum.UNSTRUCTURED);
-        var objectDirectoryStatusEntity = dartsDatabaseStub.getObjectDirectoryStatusEntity(STORED);
+        var objectRecordStatusEntity = dartsDatabaseStub.getObjectRecordStatusEntity(STORED);
 
         for (int channelNumber = 1; channelNumber <= 4; channelNumber++) {
 
@@ -87,21 +87,21 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             var externalObjectDirectoryEntity = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity,
-                    objectDirectoryStatusEntity,
+                    objectRecordStatusEntity,
                     externalLocationTypeEntity,
                     UUID.randomUUID()
                 );
             var externalObjectDirectoryEntity2 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity2,
-                    objectDirectoryStatusEntity,
+                    objectRecordStatusEntity,
                     externalLocationTypeEntity,
                     UUID.randomUUID()
                 );
             var externalObjectDirectoryEntity3 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity3,
-                    objectDirectoryStatusEntity,
+                    objectRecordStatusEntity,
                     externalLocationTypeEntity,
                     UUID.randomUUID()
                 );
@@ -109,7 +109,7 @@ public class AudioTransformationServiceHandleKedaInvocationForMediaRequestsGiven
             var externalObjectDirectoryEntity4 = dartsDatabaseStub.getExternalObjectDirectoryStub()
                 .createExternalObjectDirectory(
                     mediaEntity4,
-                    objectDirectoryStatusEntity,
+                    objectRecordStatusEntity,
                     externalLocationTypeEntity,
                     UUID.randomUUID()
                 );
