@@ -88,10 +88,12 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
                 boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
                 if (areAllTransformedMediasExpired) {
                     mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
-                } else {
-                    log.error("Media request with id: {} was found to be soft deleted but has gone missing when trying to mark it as expired",
-                              mediaRequest.getId());
                 }
+            } else {
+                log.error(
+                    "Media request with id: {} was found to be soft deleted but has gone missing when trying to mark it as expired",
+                    mediaRequestId
+                );
             }
 
         }

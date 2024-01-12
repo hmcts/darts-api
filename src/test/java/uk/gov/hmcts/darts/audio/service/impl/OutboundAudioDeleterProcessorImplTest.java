@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
 import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
@@ -15,9 +18,11 @@ import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -72,5 +77,25 @@ class OutboundAudioDeleterProcessorImplTest {
         assertThrows(DartsApiException.class, () ->
             outboundAudioDeleterProcessorImpl.markForDeletion());
     }
+
+
+    @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void testDeleteWhenSystemReturnsIdsForMediaRequestButDoNotExist(CapturedOutput capture) {
+        List<Integer> value = new ArrayList<>();
+        value.add(1);
+
+        when(mediaRequestRepository.findAllIdsByLastAccessedTimeBeforeAndStatus(any(), any())).thenReturn(value);
+        when(mediaRequestRepository.findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(
+            any(),
+            any()
+        )).thenReturn(Collections.emptyList());
+        when(transientObjectDirectoryRepository.findByMediaRequestIds(any())).thenReturn(Collections.emptyList());
+        when(userAccountRepository.findSystemUser(anyString())).thenReturn(new UserAccountEntity());
+        outboundAudioDeleterProcessorImpl.markForDeletion();
+
+        assertTrue(capture.getOut().contains("Media request with id: 1 was found to be soft deleted but has gone missing when trying to mark it as expired"));
+    }
+
 }
 
