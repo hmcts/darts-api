@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.audio.component.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -395,7 +396,7 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioForPlaybackShouldReturnTwoSessionsWhenProvidedAudiosWithVaryingStartEndTimes()
+    void processAudioForPlaybackShouldReturnTwoSessionsWhenProvidedAudiosWithVaryingStartEndTimesOnSameChannel()
         throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo(TIME_10_01.toInstant(),
@@ -424,6 +425,10 @@ class OutboundFileProcessorImplTest {
             .thenReturn(firstTrimmedAudioFileInfo)
             .thenReturn(secondTrimmedAudioFileInfo);
 
+        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(mergedAudioFile1,mergedAudioFile2));
+        when(audioOperationService.concatenateWithGaps(any(), any(), any()))
+            .thenReturn(concatenatedAudioFileInfoList);
+
         var mediaEntity1 = createMediaEntity(
             TIME_10_00,
             TIME_11_00,
@@ -432,7 +437,7 @@ class OutboundFileProcessorImplTest {
         var mediaEntity2 = createMediaEntity(
             TIME_11_01,
             TIME_12_00,
-            2
+            1
         );
 
         var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
