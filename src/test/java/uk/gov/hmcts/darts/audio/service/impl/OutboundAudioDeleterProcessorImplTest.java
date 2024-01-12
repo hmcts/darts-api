@@ -81,7 +81,7 @@ class OutboundAudioDeleterProcessorImplTest {
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void testDeleteWhenSystemReturnsIdsForMediaRequestButDoNotExist(CapturedOutput capture) {
+    void testDeleteWhenSystemReturnsIdsForMediaRequestButDoNotExist(CapturedOutput capture) throws InterruptedException {
         List<Integer> value = new ArrayList<>();
         value.add(1);
 
@@ -93,7 +93,7 @@ class OutboundAudioDeleterProcessorImplTest {
         when(transientObjectDirectoryRepository.findByMediaRequestIds(any())).thenReturn(Collections.emptyList());
         when(userAccountRepository.findSystemUser(anyString())).thenReturn(new UserAccountEntity());
         outboundAudioDeleterProcessorImpl.markForDeletion();
-
+        Thread.sleep(2000);
         assertTrue(capture.getOut().contains("Media request with id: 1 was found to be soft deleted but has gone missing when trying to mark it as expired"));
     }
 

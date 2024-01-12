@@ -425,7 +425,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     private void createTransientDirectoryAndObjectStatus(MediaRequestEntity currentMediaRequest, OffsetDateTime lastAccessedDate) {
         var blobId = UUID.randomUUID();
 
-        var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
+        var objectDirectoryStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
         dartsDatabase.getTransientObjectDirectoryRepository()
             .saveAndFlush(transientObjectDirectoryStub.createTransientObjectDirectoryEntity(
                 currentMediaRequest,
@@ -435,7 +435,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     }
 
     private void createTransientDirectoryWithTransformedMediaNullLastAccessedDate(MediaRequestEntity mediaRequestEntity, OffsetDateTime createdAt) {
-        var objectDirectoryStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(STORED);
+        var objectDirectoryStatusEntity = dartsDatabase.getObjectRecordStatusEntity(STORED);
         TransformedMediaEntity transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(
             mediaRequestEntity,
             null,
