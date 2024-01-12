@@ -30,7 +30,7 @@ public enum AudioApiError implements DartsApiError {
         "Failed to store uploaded audio file"
     ),
     MISSING_SYSTEM_USER(
-        "103",
+        "104",
         null,
         "Failed to mark audio(s) for deletion as system user was not found"
     );

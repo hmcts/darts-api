@@ -109,18 +109,6 @@ public class UserAccountStub {
     }
 
     @Transactional
-    public UserAccountEntity createAuthorisedIntegrationTestUser2(CourthouseEntity courthouseEntity) {
-        SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
-        addCourthouseToSecurityGroup(securityGroupEntity, courthouseEntity);
-
-        var testUser = createIntegrationUser(UUID.randomUUID().toString());
-        testUser.getSecurityGroupEntities().add(securityGroupEntity);
-        testUser = userAccountRepository.saveAndFlush(testUser);
-        return testUser;
-    }
-
-
-    @Transactional
     public UserAccountEntity createAuthorisedIntegrationTestUserWithoutCourthouse() {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-4);
         var testUser = getIntegrationTestUserAccountEntity();

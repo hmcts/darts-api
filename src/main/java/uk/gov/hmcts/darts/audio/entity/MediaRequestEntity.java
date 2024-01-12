@@ -77,5 +77,6 @@ public class MediaRequestEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = END_TIME_COLUMN_NAME, nullable = false)
     private OffsetDateTime endTime;
+
 }
 

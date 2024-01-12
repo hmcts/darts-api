@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -31,7 +30,7 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity im
     @SequenceGenerator(name = "tod_gen", sequenceName = "tod_seq", allocationSize = 1)
     private Integer id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trm_id", foreignKey = @ForeignKey(name = "tod_transformed_media_fk"), nullable = false)
     private TransformedMediaEntity transformedMedia;
 
@@ -58,4 +57,5 @@ public class TransientObjectDirectoryEntity extends CreatedModifiedBaseEntity im
     public UUID getLocation() {
         return externalLocation;
     }
+
 }

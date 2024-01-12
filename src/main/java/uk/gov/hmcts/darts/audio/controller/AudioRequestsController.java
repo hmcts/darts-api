@@ -79,10 +79,8 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {TRANSCRIBER})
-    public ResponseEntity<Resource> download(Integer mediaRequestId) {
-        InputStream audioFileStream = mediaRequestService.download(mediaRequestId);
+    public ResponseEntity<Resource> download(Integer transformedMediaId) {
+        InputStream audioFileStream = mediaRequestService.download(transformedMediaId);
 
         return new ResponseEntity<>(
             new InputStreamResource(audioFileStream),
@@ -118,11 +116,8 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    @Authorisation(contextId = MEDIA_REQUEST_ID,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
-        globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<byte[]> playback(Integer mediaRequestId, String httpRangeList) {
-        InputStream audioFileStream = mediaRequestService.playback(mediaRequestId);
+    public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
+        InputStream audioFileStream = mediaRequestService.playback(transformedMediaId);
 
         return StreamingResponseEntityUtil.createResponseEntity(audioFileStream, httpRangeList);
     }

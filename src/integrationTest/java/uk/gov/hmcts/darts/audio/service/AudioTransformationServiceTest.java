@@ -195,13 +195,13 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
         ExternalLocationTypeEntity externalLocationTypeEntity =
             dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
-        ObjectRecordStatusEntity objectDirectoryStatus =
+        ObjectRecordStatusEntity objectRecordStatus =
             dartsDatabase.getObjectRecordStatusRepository().getReferenceById(STORED.getId());
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();
         ExternalObjectDirectoryEntity externalObjectDirectory1 = externalObjectDirectoryStub.createExternalObjectDirectory(
             newMedia,
-            objectDirectoryStatus,
+            objectRecordStatus,
             externalLocationTypeEntity,
             externalLocation1
         );
@@ -209,7 +209,7 @@ class AudioTransformationServiceTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity externalObjectDirectory2 = externalObjectDirectoryStub.createExternalObjectDirectory(
             newMedia,
-            objectDirectoryStatus,
+            objectRecordStatus,
             externalLocationTypeEntity,
             externalLocation2
         );

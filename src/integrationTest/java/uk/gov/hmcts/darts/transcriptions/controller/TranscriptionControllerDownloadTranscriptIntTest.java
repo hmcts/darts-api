@@ -170,7 +170,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.docx";
         final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
         final int fileSize = 11_937;
-        final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
+        final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(
             STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);
@@ -222,7 +222,7 @@ class TranscriptionControllerDownloadTranscriptIntTest extends IntegrationBase {
         final String fileName = "Test Document.doc";
         final String fileType = "application/msword";
         final int fileSize = 22_528;
-        final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectDirectoryStatusEntity(
+        final ObjectRecordStatusEntity objectRecordStatusEntity = dartsDatabase.getObjectRecordStatusEntity(
             STORED);
         final ExternalLocationTypeEntity externalLocationTypeEntity = dartsDatabase.getExternalLocationTypeEntity(
             UNSTRUCTURED);

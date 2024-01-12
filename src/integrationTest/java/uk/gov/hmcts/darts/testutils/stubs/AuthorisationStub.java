@@ -12,6 +12,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 
@@ -23,6 +24,7 @@ import java.util.Set;
 import static java.time.OffsetDateTime.now;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
+import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.COMPLETED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.common.entity.MediaEntity.MEDIA_TYPE_DEFAULT;
@@ -48,6 +50,7 @@ public class AuthorisationStub {
     private MediaRequestEntity mediaRequestEntity;
     private MediaRequestEntity mediaRequestEntitySystemUser;
     private MediaEntity mediaEntity;
+    private TransformedMediaEntity transformedMediaEntity;
     private TranscriptionEntity transcriptionEntity;
     private UserAccountEntity separateIntegrationUser;
 
@@ -83,11 +86,13 @@ public class AuthorisationStub {
         mediaRequestEntity.setHearing(hearingEntity);
         mediaRequestEntity.setRequestor(testUser);
         mediaRequestEntity.setCurrentOwner(testUser);
-        mediaRequestEntity.setStatus(OPEN);
+        mediaRequestEntity.setStatus(COMPLETED);
         mediaRequestEntity.setRequestType(DOWNLOAD);
         mediaRequestEntity.setStartTime(YESTERDAY);
         mediaRequestEntity.setEndTime(YESTERDAY.plusHours(1));
         dartsDatabaseStub.save(mediaRequestEntity);
+
+        transformedMediaEntity = dartsDatabaseStub.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
 
         mediaRequestEntitySystemUser = new MediaRequestEntity();
         mediaRequestEntitySystemUser.setHearing(hearingEntity);
