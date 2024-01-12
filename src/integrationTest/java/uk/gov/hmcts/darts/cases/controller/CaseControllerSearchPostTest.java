@@ -235,7 +235,6 @@ class CaseControllerSearchPostTest extends IntegrationBase {
         MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
 
         String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
-        System.out.println("actualResponse=" + actualResponse);
 
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseJudgeName.json");
