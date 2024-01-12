@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.cases.http.api.CasesApi;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
+import uk.gov.hmcts.darts.cases.model.AdvancedSearchDetails;
 import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 import uk.gov.hmcts.darts.cases.model.GetCasesRequest;
 import uk.gov.hmcts.darts.cases.model.GetCasesSearchRequest;
@@ -91,6 +92,27 @@ public class CaseController implements CasesApi {
             .defendantName(StringUtils.trimToNull(defendantName))
             .dateFrom(dateFrom).dateTo(dateTo)
             .eventTextContains(StringUtils.trimToNull(eventTextContains))
+            .build();
+
+        RequestValidator.validate(request);
+        List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
+        return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
+
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
+        AdvancedSearchDetails advancedSearchDetails
+    ) {
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber(StringUtils.trimToNull(advancedSearchDetails.getCaseNumber()))
+            .courthouse(StringUtils.trimToNull(advancedSearchDetails.getCourthouse()))
+            .courtroom(StringUtils.trimToNull(advancedSearchDetails.getCourtroom()))
+            .judgeName(StringUtils.trimToNull(advancedSearchDetails.getJudgeName()))
+            .defendantName(StringUtils.trimToNull(advancedSearchDetails.getDefendantName()))
+            .dateFrom(advancedSearchDetails.getDateFrom()).dateTo(advancedSearchDetails.getDateTo())
+            .eventTextContains(StringUtils.trimToNull(advancedSearchDetails.getEventTextContains()))
             .build();
 
         RequestValidator.validate(request);

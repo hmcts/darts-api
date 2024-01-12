@@ -412,7 +412,33 @@ paths:
             application/json+problem:
               schema:
                 $ref: './problem.yaml'
-
+    post:
+      tags:
+        - Cases
+      summary: |-
+        Allows cases to be searched for using partial case numbers, defendant names, etc.
+        All string can be partial matches, and case insensitive.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvancedSearchDetails'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/advancedSearchResult'
+        '400':
+          description: A required parameter is missing or an invalid datatype or value was provided for property.
+        '409':
+          description: Resource already exists.
+        '500':
+          description: Internal Server Error
 components:
   schemas:
     add_case_request:
@@ -664,6 +690,40 @@ components:
           type: string
         transcript_count:
           type: integer
+
+    AdvancedSearchDetails:
+      type: object
+      properties:
+        case_number:
+          type: string
+          example: 1234
+          maxLength: 32
+        courthouse:
+          type: string
+          example: Swansea
+          maxLength: 255
+        courtroom:
+          type: string
+          example: 2
+          maxLength: 255
+        judge_name:
+          type: string
+          example: Judge Walker
+          maxLength: 255
+        defendant_name:
+          type: string
+          example: 'David Defendant'
+          maxLength: 255
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        event_text_contains:
+          type: string
+          example: 'Event text'
+          maxLength: 255
 
     PostCasesErrorCode:
       type: string
