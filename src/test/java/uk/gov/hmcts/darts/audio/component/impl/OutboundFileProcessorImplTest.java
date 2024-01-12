@@ -327,7 +327,7 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioForDownloadShouldReturnThreeSessionsWithDifferentNumbersOfAudioWhenProvidedAudiosWithDiscrepanciesInAudioCounts()
+    void processAudioForPlaybackShouldReturnThreeSessionsWithDifferentNumbersOfAudioWhenProvidedAudiosWithDiscrepanciesInAudioCounts()
         throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
@@ -395,7 +395,7 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioForDownloadShouldReturnTwoSessionsWhenProvidedAudiosWithVaryingStartEndTimes()
+    void processAudioForPlaybackShouldReturnTwoSessionsWhenProvidedAudiosWithVaryingStartEndTimes()
         throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo(TIME_10_01.toInstant(),
