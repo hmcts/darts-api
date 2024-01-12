@@ -41,7 +41,11 @@ class OutboundFileProcessorImplTest {
     private static final OffsetDateTime TIME_12_40 = OffsetDateTime.parse("2023-01-01T12:40Z");
     private static final OffsetDateTime TIME_12_50 = OffsetDateTime.parse("2023-01-01T12:50Z");
     private static final OffsetDateTime TIME_13_00 = OffsetDateTime.parse("2023-01-01T13:00Z");
-
+    private static final OffsetDateTime TIME_10_00 = OffsetDateTime.parse("2023-01-01T10:00Z");
+    private static final OffsetDateTime TIME_10_01 = OffsetDateTime.parse("2023-01-01T10:01Z");
+    private static final OffsetDateTime TIME_11_00 = OffsetDateTime.parse("2023-01-01T11:00Z");
+    private static final OffsetDateTime TIME_11_01 = OffsetDateTime.parse("2023-01-01T11:01Z");
+    private static final OffsetDateTime TIME_11_59 = OffsetDateTime.parse("2023-01-01T11:59Z");
     private OutboundFileProcessorImpl outboundFileProcessor;
 
     @Mock
@@ -323,7 +327,7 @@ class OutboundFileProcessorImplTest {
     }
 
     @Test
-    void processAudioForDownloadShouldReturnThreeSessionsWithDifferentNumbersOfAudioWhenProvidedAudiosWithDiscrepanciesInAudioCounts()
+    void processAudioForPlaybackShouldReturnThreeSessionsWithDifferentNumbersOfAudioWhenProvidedAudiosWithDiscrepanciesInAudioCounts()
         throws ExecutionException, InterruptedException, IOException {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo();
@@ -388,6 +392,70 @@ class OutboundFileProcessorImplTest {
 
         verify(audioOperationService, never()).concatenate(any(), any());
         verify(audioOperationService, times(3)).trim(any(), any(), any(), any());
+    }
+
+    @Test
+    void processAudioForPlaybackShouldReturnTwoSessionsWhenProvidedAudiosWithVaryingStartEndTimesOnSameChannel()
+        throws ExecutionException, InterruptedException, IOException {
+
+        var firstTrimmedAudioFileInfo = new AudioFileInfo(TIME_10_01.toInstant(),
+                                                          TIME_11_00.toInstant(),
+                                                          1,null);
+        var secondTrimmedAudioFileInfo = new AudioFileInfo(TIME_11_01.toInstant(),
+                                                           TIME_11_59.toInstant(),
+                                                           1,null);
+
+        AudioFileInfo mergedAudioFile1 = new AudioFileInfo(TIME_10_00.toInstant(),
+                                                           TIME_11_00.toInstant(),
+                                                           1,null);
+
+        AudioFileInfo mergedAudioFile2 = new AudioFileInfo(TIME_11_00.toInstant(),
+                                                           TIME_12_00.toInstant(),
+                                                           1,null);
+        var reEncodedAudioFileInfo1 = firstTrimmedAudioFileInfo;
+        var reEncodedAudioFileInfo2 = secondTrimmedAudioFileInfo;
+        when(audioOperationService.reEncode(any(), any()))
+            .thenReturn(reEncodedAudioFileInfo1).thenReturn(reEncodedAudioFileInfo2);
+
+        when(audioOperationService.merge(any(), any()))
+            .thenReturn(mergedAudioFile1).thenReturn(mergedAudioFile2);
+
+        when(audioOperationService.trim(any(), any(), any(), any()))
+            .thenReturn(firstTrimmedAudioFileInfo)
+            .thenReturn(secondTrimmedAudioFileInfo);
+
+        List<AudioFileInfo> concatenatedAudioFileInfoList = new ArrayList<>(Arrays.asList(mergedAudioFile1,mergedAudioFile2));
+        when(audioOperationService.concatenateWithGaps(any(), any(), any()))
+            .thenReturn(concatenatedAudioFileInfoList);
+
+        var mediaEntity1 = createMediaEntity(
+            TIME_10_00,
+            TIME_11_00,
+            1
+        );
+        var mediaEntity2 = createMediaEntity(
+            TIME_11_01,
+            TIME_12_00,
+            1
+        );
+
+        var mediaEntityToDownloadLocation = Map.of(mediaEntity1, SOME_DOWNLOAD_PATH,
+                                                   mediaEntity2, SOME_DOWNLOAD_PATH
+        );
+
+        List<AudioFileInfo> sessions = outboundFileProcessor.processAudioForPlaybacks(mediaEntityToDownloadLocation, TIME_10_01, TIME_11_59);
+
+        assertEquals(2, sessions.size());
+        AudioFileInfo firstSession = sessions.get(0);
+        AudioFileInfo secondSession = sessions.get(1);
+
+        assertEquals(TIME_10_01.toInstant(), firstSession.getStartTime());
+        assertEquals(TIME_11_00.toInstant(), firstSession.getEndTime());
+        assertEquals(TIME_11_01.toInstant(), secondSession.getStartTime());
+        assertEquals(TIME_11_59.toInstant(), secondSession.getEndTime());
+
+        verify(audioOperationService, never()).concatenate(any(), any());
+        verify(audioOperationService, times(2)).trim(any(), any(), any(), any());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {

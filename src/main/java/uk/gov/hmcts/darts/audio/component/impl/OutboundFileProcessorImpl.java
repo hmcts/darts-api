@@ -73,8 +73,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
 
     @Override
     public List<AudioFileInfo> processAudioForPlaybacks(Map<MediaEntity, Path> mediaEntityToDownloadLocation,
-                                                        OffsetDateTime startTime,
-                                                        OffsetDateTime endTime)
+                                                        OffsetDateTime mediaRequestStartTime,
+                                                        OffsetDateTime mediaRequestEndTime)
         throws ExecutionException, InterruptedException, IOException {
         List<AudioFileInfo> audioFileInfos = mapToAudioFileInfos(mediaEntityToDownloadLocation);
 
@@ -90,13 +90,14 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         List<AudioFileInfo> concatenatedAndMergedAudioFileInfos = new ArrayList<>();
         for (ChannelAudio audioFileInfoList :  concatenationsList) {
             AudioFileInfo mergedAudio = merge(audioFileInfoList.getAudioFiles());
+            OffsetDateTime mergedAudioStartTime = mergedAudio.getStartTime().atOffset(ZoneOffset.UTC);
+            OffsetDateTime mergedAudioEndTime = mergedAudio.getEndTime().atOffset(ZoneOffset.UTC);
             AudioFileInfo trimmedAudio = trimToPeriod(
                 mergedAudio,
-                mergedAudio.getStartTime().atOffset(ZoneOffset.UTC),
-                mergedAudio.getEndTime().atOffset(ZoneOffset.UTC)
+                mergedAudioStartTime.isAfter(mediaRequestStartTime) ? mergedAudioStartTime : mediaRequestStartTime,
+                mergedAudioEndTime.isBefore(mediaRequestEndTime) ? mergedAudioEndTime : mediaRequestEndTime
             );
             concatenatedAndMergedAudioFileInfos.add(reEncode((trimmedAudio)));
-
         }
 
         return concatenatedAndMergedAudioFileInfos;
@@ -240,7 +241,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return audioOperationService.reEncode(StringUtils.EMPTY, audioFileInfo);
     }
 
-    public static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
+    private static List<ChannelAudio> convertChannelsListToConcatenationsList(List<ChannelAudio> channelsList) {
         List<ChannelAudio> concatenationsList = new ArrayList<>();
         int numChannels = channelsList.size();
         int numConcatenations = channelsList.get(0).getAudioFiles().size();
@@ -254,7 +255,7 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
         return concatenationsList;
     }
 
-    public static List<ChannelAudio> convertChannelsListToFilesList(List<AudioFileInfo> audioFileInfosByChannel) {
+    private static List<ChannelAudio> convertChannelsListToFilesList(List<AudioFileInfo> audioFileInfosByChannel) {
 
         audioFileInfosByChannel.sort(comparing(AudioFileInfo::getStartTime));
 
