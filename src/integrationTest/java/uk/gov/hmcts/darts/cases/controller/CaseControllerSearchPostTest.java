@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
@@ -42,7 +41,6 @@ import static uk.gov.hmcts.darts.testutils.data.JudgeTestData.createJudgeWithNam
 
 
 @AutoConfigureMockMvc
-@Transactional
 @SuppressWarnings({"PMD.VariableDeclarationUsageDistance", "PMD.NcssCount", "PMD.ExcessiveImports"})
 class CaseControllerSearchPostTest extends IntegrationBase {
 
@@ -159,6 +157,88 @@ class CaseControllerSearchPostTest extends IntegrationBase {
 
         String expectedResponse = getContentsFromFile(
             "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponse.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPostEndpointDateRange() throws Exception {
+
+        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(courthouseEntity);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "date_to": "2023-09-20",
+              "date_from": "2023-05-20"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseDateRange.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPostEndpointEventText() throws Exception {
+
+        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(courthouseEntity);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "event_text_contains": "5b"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseEventText.json");
+        assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
+    }
+
+    @Test
+    void casesSearchPostEndpointJudgeName() throws Exception {
+
+        CourthouseEntity courthouseEntity = dartsDatabase.createCourthouseUnlessExists("SWANSEA");
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+            .createAuthorisedIntegrationTestUser(courthouseEntity);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        String requestBody = """
+            {
+              "courthouse": "SWANSEA",
+              "courtroom": "1",
+              "judge_name": "3a"
+            }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestBody);
+        MvcResult response = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
+
+        String actualResponse = TestUtils.removeIds(response.getResponse().getContentAsString());
+        System.out.println("actualResponse=" + actualResponse);
+
+        String expectedResponse = getContentsFromFile(
+            "tests/cases/CaseControllerSearchGetTest/casesSearchGetEndpoint/expectedResponseJudgeName.json");
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
