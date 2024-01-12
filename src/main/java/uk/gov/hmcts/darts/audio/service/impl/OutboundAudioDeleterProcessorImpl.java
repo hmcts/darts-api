@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
@@ -23,11 +24,13 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.MARKED_FOR_DELETION;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterProcessor {
     private final MediaRequestRepository mediaRequestRepository;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
@@ -79,11 +82,18 @@ public class OutboundAudioDeleterProcessorImpl implements OutboundAudioDeleterPr
 
         for (Integer mediaRequestId : mediaRequests) {
             List<TransformedMediaEntity> transformedMedias = transformedMediaRepository.findByMediaRequestId(mediaRequestId);
-            MediaRequestEntity mediaRequest = mediaRequestRepository.findById(mediaRequestId).get();
-            boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
-            if (areAllTransformedMediasExpired) {
-                mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
+            Optional<MediaRequestEntity> mro = mediaRequestRepository.findById(mediaRequestId);
+            if (mro.isPresent()) {
+                MediaRequestEntity mediaRequest = mro.get();
+                boolean areAllTransformedMediasExpired = transformedMedias.stream().allMatch(t -> t.getExpiryTime() != null);
+                if (areAllTransformedMediasExpired) {
+                    mediaRequest.setStatus(MediaRequestStatus.EXPIRED);
+                } else {
+                    log.error("Media request with id: {} was found to be soft deleted but has gone missing when trying to mark it as expired",
+                              mediaRequest.getId());
+                }
             }
+
         }
         return deletedValues;
     }
