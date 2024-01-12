@@ -62,22 +62,22 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
     @Column(name = "version_label", length = 32)
     private String legacyVersionLabel;
 
-    @Column(name = "media_file")
+    @Column(name = "media_file", nullable = false)
     private String mediaFile;
 
-    @Column(name = "media_format")
+    @Column(name = "media_format", nullable = false)
     private String mediaFormat;
 
-    @Column(name = "file_size")
+    @Column(name = "file_size", nullable = false)
     private Long fileSize;
 
     @Column(name = "checksum")
     private String checksum;
 
-    @Column(name = "media_type")
+    @Column(name = "media_type", nullable = false)
     private Character mediaType;
 
-    @Column(name = "content_object_id")
+    @Column(name = "content_object_id", length = 16)
     private String contentObjectId;
 
     @Column(name = "is_hidden", nullable = false)
@@ -85,6 +85,5 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;
-
 
 }
