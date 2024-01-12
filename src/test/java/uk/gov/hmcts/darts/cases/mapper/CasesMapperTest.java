@@ -17,6 +17,7 @@ import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
@@ -45,12 +46,14 @@ class CasesMapperTest {
     private RetrieveCoreObjectService retrieveCoreObjectService;
     @Mock
     private HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
+    @Mock
+    private CaseRetentionRepository caseRetentionRepository;
 
     private CasesMapper caseMapper;
 
     @BeforeEach
     void setUp() {
-        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository);
+        caseMapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository);
     }
 
     @Test
@@ -176,7 +179,6 @@ class CasesMapperTest {
 
     @Test
     void testMapToSingleCaseWithReportingRestriction() throws Exception {
-
         CourtCaseEntity caseEntity = CommonTestDataUtil.createCaseWithId("Case00001", 1);
         EventHandlerEntity reportingRestriction = new EventHandlerEntity();
         reportingRestriction.setEventName("test reporting restriction name");
@@ -189,5 +191,4 @@ class CasesMapperTest {
             "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
     }
-
 }

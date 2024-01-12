@@ -581,6 +581,21 @@ components:
           description: 'Any reporting restrictions associated with the case.'
         reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
+        retain_until_date_time:
+          type: string
+          format: date-time
+          example: 2030-01-31T15:42:10.361Z
+        case_closed_date_time:
+          type: string
+          format: date-time
+          example: 2023-07-20T15:42:10.361Z
+        retention_date_time_applied:
+          type: string
+          format: date-time
+          example: 2023-07-20T15:42:10.361Z
+        retention_policy_applied:
+          type: string
+          example: "MANUAL"
     advancedSearchResult:
       type: object
       properties:
@@ -610,7 +625,7 @@ components:
         hearings:
           type: array
           items:
-            $ref: '#/components/schemas/advancedSearchResultHearing'
+              $ref: '#/components/schemas/advancedSearchResultHearing'
     advancedSearchResultHearing:
       type: object
       properties:

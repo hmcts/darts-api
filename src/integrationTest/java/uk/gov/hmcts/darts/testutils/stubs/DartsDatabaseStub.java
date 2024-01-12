@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.DailyListRepository;
@@ -93,6 +95,7 @@ public class DartsDatabaseStub {
 
     private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
+    private final CaseRetentionRepository caseRetentionRepository;
     private final CourthouseRepository courthouseRepository;
     private final CourtroomRepository courtroomRepository;
     private final DailyListRepository dailyListRepository;
@@ -145,6 +148,7 @@ public class DartsDatabaseStub {
         externalObjectDirectoryRepository.deleteAll();
         annotationDocumentRepository.deleteAll();
         annotationRepository.deleteAll();
+        caseRetentionRepository.deleteAll();
         transcriptionCommentRepository.deleteAll();
         transcriptionWorkflowRepository.deleteAll();
         transcriptionRepository.deleteAll();
@@ -557,6 +561,22 @@ public class DartsDatabaseStub {
         transcriptionEntity.setCreatedBy(systemUserRef);
 
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
+    }
+
+    public HearingEntity saveRetentionsForHearing(HearingEntity hearing, List<CaseRetentionEntity> retentionEntities) {
+        var hearingEntity = hearingRepository.save(hearing);
+        retentionEntities.forEach(event -> saveRetentionForHearing(hearing, event));
+        return hearingEntity;
+    }
+
+    private void saveRetentionForHearing(HearingEntity hearing, CaseRetentionEntity retention) {
+        retention.setCourtCase(hearing.getCourtCase());
+        retention.setCreatedBy(userAccountStub.getSystemUserAccountEntity());
+        retention.setSubmittedBy(userAccountStub.getSystemUserAccountEntity());
+        retention.setLastModifiedBy(userAccountStub.getSystemUserAccountEntity());
+        retention.getRetentionPolicyType().setCreatedBy(userAccountStub.getSystemUserAccountEntity());
+        retention.getRetentionPolicyType().setLastModifiedBy(userAccountStub.getSystemUserAccountEntity());
+        caseRetentionRepository.save(retention);
     }
 
 }
