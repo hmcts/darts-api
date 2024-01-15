@@ -106,7 +106,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectDirectoryStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -150,7 +150,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectDirectoryStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -159,9 +159,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String collectedBlobFilename = prefix + "_1_iu.rsp";
+        String responseBlobFilename = prefix + "_1_iu.rsp";
         Map<String, BlobItem> responseBlobs = new HashMap<>();
-        responseBlobs.put(collectedBlobFilename, new BlobItem());
+        responseBlobs.put(responseBlobFilename, new BlobItem());
 
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
@@ -197,7 +197,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectDirectoryStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -206,9 +206,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        String collectedBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         Map<String, BlobItem> responseBlobs = new HashMap<>();
-        responseBlobs.put(collectedBlobFilename, new BlobItem());
+        responseBlobs.put(responseBlobFilename, new BlobItem());
 
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
@@ -244,7 +244,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectDirectoryStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
@@ -294,7 +294,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
-            dartsDatabase.getObjectDirectoryStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
             dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
             UUID.randomUUID()
         );
