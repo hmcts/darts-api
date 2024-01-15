@@ -184,7 +184,20 @@
 --    some columns from media_request pushed down to transformed_media, where pertain to the media rather than the Request
 --    add boolean is_hidden to annotation_document, transcription_document & media
 --    add media_status column to media, to include statuses of "fully linked", "marked for deletion", "deleted"
---
+--v59 add start_ts and end_ts to transformed_media
+--    add user_full_name to user_account
+--    remove foreign key from daily_list to courthouse, replace daily_list_cth_id text of courthouse 
+--    introduce case_overflow table for additional, legacy only retention attributes for a case
+--    remove retention_applied_from_ts and end_of_sentence_ts from court_case to case_overflow
+--    remove retain_until_ts from court_case
+--    add audio_folder_object_id to case_overflow
+--    i_retain_until_ts to case_overflow to be populated from dm_sysobject_s of audio_folder
+--v60 add associative entity hearing_annotation_ae, removing links from annotation to cas_id, hea_id and crt_id
+--    add foreign keys from new table to hearing and annotation
+--    add is_deleted to annotation
+--    add is_standard_policy and is_permanent_policy to case_overflow
+--    add manifest_file and event_date_ts to external_object_directory
+--    add case_document table, new PK and sequence, FK to case and FK on external_object_directory to it
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -192,7 +205,9 @@
 -- audit                       AUD
 -- audit_activity              AUA
 -- automated_task              AUT
+-- case_document               CAD
 -- case_judge_ae               CAJ
+-- case_overflow               CAO
 -- court_case                  CAS
 -- courthouse                  CTH
 -- courthouse_region_ae        CRA
@@ -205,6 +220,7 @@
 -- external_object_directory   EOD
 -- external_service_auth_token ESA
 -- hearing                     HEA
+-- hearing_annotation_ae       HAA
 -- hearing_event_ae            HEE
 -- hearing_media_ae            HEM
 -- hearing_judge_ae            HEJ
@@ -258,14 +274,12 @@ SET SEARCH_PATH TO darts;
 
 CREATE TABLE annotation
 (ann_id                      INTEGER                       NOT NULL
-,cas_id                      INTEGER                       NOT NULL
-,ctr_id                      INTEGER
-,hea_id                      INTEGER
 ,annotation_text             CHARACTER VARYING
 ,annotation_ts               TIMESTAMP WITH TIME ZONE
 ,annotation_object_id        CHARACTER VARYING(16)
 ,version_label               CHARACTER VARYING(32)
 ,current_owner               INTEGER                       NOT NULL
+,is_deleted                  BOOLEAN                       NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -274,12 +288,6 @@ CREATE TABLE annotation
 
 COMMENT ON COLUMN annotation.ann_id
 IS 'primary key of annotation';
-
-COMMENT ON COLUMN annotation.cas_id
-IS 'foreign key from court_case';
-
-COMMENT ON COLUMN annotation.ctr_id
-IS 'foreign key from courtroom';
 
 COMMENT ON COLUMN annotation.annotation_object_id
 IS 'internal Documentum primary key from moj_annotation_s';
@@ -370,6 +378,18 @@ CREATE TABLE automated_task
 COMMENT ON COLUMN automated_task.aut_id
 IS 'primary key of automated_task';
 
+CREATE TABLE case_document 
+(cad_id                      INTEGER                       NOT NULL
+,cas_id                      INTEGER                       NOT NULL
+,file_name                   CHARACTER VARYING             NOT NULL
+,file_type                   CHARACTER VARYING             NOT NULL
+,file_size                   INTEGER                       NOT NULL
+,checksum                    CHARACTER VARYING             NOT NULL
+,is_hidden                   BOOLEAN                       NOT NULL
+,uploaded_by                 INTEGER                       NOT NULL
+,uploaded_ts                 TIMESTAMP WITH TIME ZONE      NOT NULL
+) TABLESPACE darts_tables;
+
 
 CREATE TABLE case_judge_ae
 (cas_id                      INTEGER                       NOT NULL
@@ -382,6 +402,19 @@ IS 'foreign key from case, part of composite natural key and PK';
 COMMENT ON COLUMN case_judge_ae.jud_id
 IS 'foreign key from judge, part of composite natural key and PK';
 
+CREATE TABLE case_overflow
+(cas_id                      INTEGER                       NOT NULL
+,case_total_sentence         CHARACTER VARYING
+,retention_event_ts          TIMESTAMP WITH TIME ZONE     
+,case_retention_fixed        CHARACTER VARYING
+,retention_applies_from_ts   TIMESTAMP WITH TIME ZONE
+,end_of_sentence_date_ts     TIMESTAMP WITH TIME ZONE
+,manual_retention_override   INTEGER
+,retain_until_ts             TIMESTAMP WITH TIME ZONE
+,is_standard_policy          BOOLEAN
+,is_permanent_policy         BOOLEAN
+,audio_folder_object_id      CHARACTER VARYING(16)
+) TABLESPACE darts_tables;
 
 CREATE TABLE court_case
 (cas_id                      INTEGER                       NOT NULL
@@ -392,9 +425,6 @@ CREATE TABLE court_case
 ,case_closed                 BOOLEAN                       NOT NULL
 ,interpreter_used            BOOLEAN                       NOT NULL
 ,case_closed_ts              TIMESTAMP WITH TIME ZONE
-,retention_applies_from_ts   TIMESTAMP WITH TIME ZONE
-,end_of_sentence_ts          TIMESTAMP WITH TIME ZONE 
-,retain_until_ts             TIMESTAMP WITH TIME ZONE
 ,version_label               CHARACTER VARYING(32)
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -468,13 +498,13 @@ IS 'foreign key to courthouse';
 
 CREATE TABLE daily_list
 (dal_id                      INTEGER                       NOT NULL
-,cth_id                      INTEGER                       NOT NULL
+,listing_courthouse          CHARACTER VARYING             NOT NULL
 ,daily_list_object_id        CHARACTER VARYING(16)
 ,unique_id                   CHARACTER VARYING
 --,c_crown_court_name        CHARACTER VARYING        -- removed, normalised to courthouses, but note that in legacy there is mismatch between moj_courthouse_s.c_id and moj_daily_list_s.c_crown_court_name to be resolved
 ,job_status                  CHARACTER VARYING             NOT NULL  -- one of "New","Partially Processed","Processed","Ignored","Invalid"
 ,published_ts                TIMESTAMP WITH TIME ZONE 
-,start_dt                    DATE   
+,start_dt                    DATE    
 ,end_dt                      DATE -- all values match c_start_date
 ,daily_list_id_s             CHARACTER VARYING        -- non unique integer in legacy
 ,daily_list_source           CHARACTER VARYING        -- one of CPP,XHB ( live also sees nulls and spaces)   
@@ -490,9 +520,6 @@ CREATE TABLE daily_list
 
 COMMENT ON COLUMN daily_list.dal_id
 IS 'primary key of daily_list';
-
-COMMENT ON COLUMN daily_list.cth_id
-IS 'foreign key from courthouse';
 
 COMMENT ON COLUMN daily_list.daily_list_object_id
 IS 'internal Documentum primary key from moj_daily_list_s';
@@ -642,6 +669,7 @@ CREATE TABLE external_object_directory
 ,med_id                      INTEGER
 ,trd_id                      INTEGER                                 -- FK to transcription_document
 ,ado_id                      INTEGER                                 -- FK to annotation_document
+,cad_id                      INTEGER                                 -- FK to case_document
 ,ors_id                      INTEGER                       NOT NULL  -- FK to object_record_status
 ,elt_id                      INTEGER                       NOT NULL  -- FK to external_location_type 
 -- additional optional FKs to other relevant internal objects would require columns here
@@ -650,6 +678,8 @@ CREATE TABLE external_object_directory
 ,external_record_id          CHARACTER VARYING                       -- for use where address of Ext Obj requires 2 fields
 ,checksum                    CHARACTER VARYING                       
 ,transfer_attempts           INTEGER
+,manifest_file               CHARACTER VARYING
+,event_date_ts               TIMESTAMP WITH TIME ZONE                -- date upon which the retention date in ARM is derived
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -740,6 +770,17 @@ IS 'directly sourced from moj_case_r';
 
 COMMENT ON COLUMN hearing.judge_hearing_date
 IS 'directly sourced from moj_case_r';
+
+CREATE TABLE hearing_annotation_ae
+(hea_id                      INTEGER                       NOT NULL
+,ann_id                      INTEGER                       NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON COLUMN hearing_annotation_ae.hea_id
+IS 'foreign key from hearing, part of composite natural key and PK';
+
+COMMENT ON COLUMN hearing_annotation_ae.ann_id
+IS 'foreign key from annotation, part of composite natural key and PK';
 
 CREATE TABLE hearing_event_ae
 (hea_id                      INTEGER                       NOT NULL
@@ -1162,6 +1203,8 @@ CREATE TABLE transcription_workflow
 CREATE TABLE transformed_media
 (trm_id                      INTEGER                       NOT NULL
 ,mer_id                      INTEGER                       NOT NULL  -- FK to media_request
+,start_ts                    TIMESTAMP WITH TIME ZONE
+,end_ts                      TIMESTAMP WITH TIME ZONE
 ,last_accessed_ts            TIMESTAMP WITH TIME ZONE
 ,expiry_ts                   TIMESTAMP WITH TIME ZONE
 ,output_filename             CHARACTER VARYING
@@ -1201,6 +1244,7 @@ CREATE TABLE user_account
 (usr_id                      INTEGER                       NOT NULL
 ,dm_user_s_object_id         CHARACTER VARYING(16)
 ,user_name                   CHARACTER VARYING             NOT NULL
+,user_full_name              CHARACTER VARYING             NOT NULL
 ,user_email_address          CHARACTER VARYING
 ,description                 CHARACTER VARYING
 ,is_active                   BOOLEAN                       NOT NULL
@@ -1238,8 +1282,14 @@ ALTER TABLE audit_activity          ADD PRIMARY KEY USING INDEX audit_activity_p
 CREATE UNIQUE INDEX automated_task_pk ON automated_task(aut_id) TABLESPACE darts_indexes;
 ALTER TABLE automated_task          ADD PRIMARY KEY USING INDEX automated_task_pk;
 
+CREATE UNIQUE INDEX case_document_pk ON case_document(cad_id) TABLESPACE darts_indexes; 
+ALTER TABLE case_document        ADD PRIMARY KEY USING INDEX case_document_pk;
+
 CREATE UNIQUE INDEX case_judge_ae_pk ON case_judge_ae(cas_id,jud_id) TABLESPACE darts_indexes;
 ALTER TABLE case_judge_ae        ADD PRIMARY KEY USING INDEX case_judge_ae_pk;
+
+CREATE UNIQUE INDEX case_overflow_pk ON case_overflow(cas_id) TABLESPACE darts_indexes; 
+ALTER TABLE case_overflow              ADD PRIMARY KEY USING INDEX case_overflow_pk;
 
 CREATE UNIQUE INDEX court_case_pk ON court_case(cas_id) TABLESPACE darts_indexes; 
 ALTER TABLE court_case              ADD PRIMARY KEY USING INDEX court_case_pk;
@@ -1279,6 +1329,9 @@ ALTER TABLE external_service_auth_token   ADD PRIMARY KEY USING INDEX external_s
 
 CREATE UNIQUE INDEX hearing_pk ON hearing(hea_id) TABLESPACE darts_indexes;
 ALTER TABLE hearing                 ADD PRIMARY KEY USING INDEX hearing_pk;
+
+CREATE UNIQUE INDEX hearing_annotation_ae_pk ON hearing_annotation_ae(hea_id,ann_id) TABLESPACE darts_indexes;
+ALTER TABLE hearing_annotation_ae        ADD PRIMARY KEY USING INDEX hearing_annotation_ae_pk;
 
 CREATE UNIQUE INDEX hearing_event_ae_pk ON hearing_event_ae(hea_id,eve_id) TABLESPACE darts_indexes;
 ALTER TABLE hearing_event_ae        ADD PRIMARY KEY USING INDEX hearing_event_ae_pk;
@@ -1354,6 +1407,7 @@ CREATE SEQUENCE ado_seq CACHE 20;
 CREATE SEQUENCE aud_seq CACHE 20;
 CREATE SEQUENCE aua_seq CACHE 20 RESTART WITH 8;
 CREATE SEQUENCE aut_seq CACHE 20;
+CREATE SEQUENCE cad_seq CACHE 20;
 CREATE SEQUENCE cas_seq CACHE 20;
 CREATE SEQUENCE cth_seq CACHE 20;
 CREATE SEQUENCE ctr_seq CACHE 20;
@@ -1385,18 +1439,6 @@ CREATE SEQUENCE usr_seq CACHE 20;
 
 
 -- foreign keys
-
-ALTER TABLE annotation                
-ADD CONSTRAINT annotation_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
-
-ALTER TABLE annotation                
-ADD CONSTRAINT annotation_courtroom_fk
-FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
-
-ALTER TABLE annotation                
-ADD CONSTRAINT annotation_hearing_fk
-FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
 ALTER TABLE annotation   
 ADD CONSTRAINT annotation_current_owner_fk
@@ -1450,6 +1492,10 @@ ALTER TABLE automated_task
 ADD CONSTRAINT automated_task_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
+ALTER TABLE case_document            
+ADD CONSTRAINT case_document_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
 ALTER TABLE case_judge_ae            
 ADD CONSTRAINT case_judge_ae_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
@@ -1457,6 +1503,10 @@ FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 ALTER TABLE case_judge_ae            
 ADD CONSTRAINT case_judge_ae_judge_fk
 FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
+
+ALTER TABLE case_overflow                      
+ADD CONSTRAINT case_overflow_court_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
 
 ALTER TABLE court_case                        
 ADD CONSTRAINT court_case_event_handler_fk
@@ -1497,10 +1547,6 @@ FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 ALTER TABLE courtroom
 ADD CONSTRAINT courtroom_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
-
-ALTER TABLE daily_list                  
-ADD CONSTRAINT daily_list_courthouse_fk
-FOREIGN KEY (cth_id) REFERENCES courthouse(cth_id);
 
 ALTER TABLE daily_list
 ADD CONSTRAINT daily_list_created_by_fk
@@ -1563,6 +1609,10 @@ ADD CONSTRAINT eod_transcription_document_fk
 FOREIGN KEY (trd_id) REFERENCES transcription_document(trd_id);
 
 ALTER TABLE external_object_directory   
+ADD CONSTRAINT eod_case_document_fk
+FOREIGN KEY (cad_id) REFERENCES case_document(cad_id);
+
+ALTER TABLE external_object_directory   
 ADD CONSTRAINT eod_annotation_document_fk
 FOREIGN KEY (ado_id) REFERENCES annotation_document(ado_id);
 
@@ -1605,6 +1655,14 @@ FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
 ALTER TABLE hearing   
 ADD CONSTRAINT hearing_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
+
+ALTER TABLE hearing_annotation_ae            
+ADD CONSTRAINT hearing_annotation_ae_hearing_fk
+FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
+
+ALTER TABLE hearing_annotation_ae            
+ADD CONSTRAINT hearing_annotation_ae_annotation_fk
+FOREIGN KEY (ann_id) REFERENCES annotation(ann_id);
 
 ALTER TABLE hearing_event_ae            
 ADD CONSTRAINT hearing_event_ae_hearing_fk
@@ -1834,6 +1892,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON audit TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON audit_activity TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON automated_task TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON case_judge_ae TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON case_overflow TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON court_case TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON courthouse_region_ae TO darts_user;
@@ -1847,6 +1906,7 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON external_location_type TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_object_directory TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON external_service_auth_token TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing TO darts_user;
+GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_annotation_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_event_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON hearing_media_ae TO darts_user;
 GRANT SELECT,INSERT,UPDATE,DELETE ON judge TO darts_user;

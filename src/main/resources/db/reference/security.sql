@@ -12,7 +12,9 @@
 --v17 add display_name and display_state to security_role 
 --    add global_access and display_state to security_group
 --v18 add use_interpreter boolean on security_group 
---    add defaults to global_access and use_interpreter to false   
+--    add defaults to global_access and use_interpreter to false  
+--v19 remove r_ from dm_group_s_object_id and r_modify_date  from security_group
+--    add display_namr to security_group
 
 -- assuming this already exists:
 -- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
@@ -38,11 +40,11 @@ CREATE TABLE security_group
 ,rol_id                  INTEGER                         NOT NULL
 ,global_access           BOOLEAN                         NOT NULL  DEFAULT FALSE
 ,display_state           BOOLEAN                         NOT NULL
-,r_dm_group_s_object_id  CHARACTER VARYING(16)
+,display_name            CHARACTER VARYING               NOT NULL
+,dm_group_s_object_id    CHARACTER VARYING(16)
 ,group_name              CHARACTER VARYING               NOT NULL
 ,is_private              BOOLEAN
 ,description             CHARACTER VARYING
-,r_modify_date           TIMESTAMP WITH TIME ZONE
 ,group_class             CHARACTER VARYING
 ,group_global_unique_id  CHARACTER VARYING
 ,group_display_name      CHARACTER VARYING
@@ -57,7 +59,7 @@ COMMENT ON TABLE security_group
 IS 'migration columns all sourced directly from dm_group_s, additional attributes may be required from dm_user_s, but data only where dm_user_s.r_is_group=1';
 COMMENT ON COLUMN security_group.grp_id
 IS 'primary key of security_group';
-COMMENT ON COLUMN security_group.r_dm_group_s_object_id
+COMMENT ON COLUMN security_group.dm_group_s_object_id
 IS 'internal Documentum primary key from dm_group_s';
 
 CREATE TABLE security_group_user_account_ae
