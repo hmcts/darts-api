@@ -21,6 +21,11 @@
     <cve>CVE-2023-6378</cve>
   </suppress>
 
+  <suppress until="2024-02-14">
+    <notes>Need Azure-core update to fix </notes>
+    <cve>CVE-2023-36052</cve>
+  </suppress>
+
 
   <!--Please add all the false positives under the below section-->
   <suppress>
