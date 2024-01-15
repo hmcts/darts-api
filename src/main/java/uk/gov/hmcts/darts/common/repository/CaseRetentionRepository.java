@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.common.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
@@ -13,4 +14,14 @@ public interface CaseRetentionRepository  extends JpaRepository<CaseRetentionEnt
     List<CaseRetentionEntity> findAllByCourtCase(CourtCaseEntity courtCase);
 
     Optional<CaseRetentionEntity> findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(CourtCaseEntity courtCase, String currentState);
+
+    @Query("""
+        SELECT c
+        FROM CaseRetentionEntity c, CourtCaseEntity case
+        WHERE case.id = :caseId
+        AND c.courtCase = case
+        ORDER BY c.submitted
+        """
+    )
+    List<CaseRetentionEntity> findByCaseId(Integer caseId);
 }

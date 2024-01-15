@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
@@ -116,6 +117,18 @@ public class FunctionalTest {
             .baseUri(getUri("/functional-tests/courthouse/" + courthouseName + "/courtroom/" + courtroomName))
             .redirects().follow(false)
             .post();
+    }
+
+    protected String createCaseRetentions() {
+        String caseNumber = randomCaseNumber();
+        Response response = buildRequestWithExternalAuth()
+            .baseUri(getUri("/functional-tests/case-retentions/caseNumber/" + caseNumber))
+            .redirects().follow(false)
+            .post().then()
+            .assertThat()
+            .statusCode(200)
+            .extract().response();
+        return response.asString();
     }
 
 }
