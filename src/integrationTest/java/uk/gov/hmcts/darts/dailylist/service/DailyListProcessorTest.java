@@ -72,12 +72,12 @@ class DailyListProcessorTest extends IntegrationBase {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         LocalTime dailyListTIme = LocalTime.of(13, 0);
         DailyListEntity dailyListEntity = DailyListTestData.createDailyList(dailyListTIme, String.valueOf(SourceType.CPP),
-                                                                            swanseaCourtEntity, "tests/dailyListProcessorTest/dailyListCPP.json"
+                                                                            swanseaCourtEntity.getCourthouseName(), "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
         DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(dailyListTIme.minusHours(3),
                                                              String.valueOf(SourceType.CPP),
-                                                             swanseaCourtEntity,
+                                                                               swanseaCourtEntity.getCourthouseName(),
                                                              "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
@@ -122,7 +122,7 @@ class DailyListProcessorTest extends IntegrationBase {
     void dailyListProcessorCppAndXhbDailyLists() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
 
-        dartsDatabase.createDailyLists(swanseaCourtEntity);
+        dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
 
         dailyListProcessor.processAllDailyLists();
 
@@ -180,7 +180,7 @@ class DailyListProcessorTest extends IntegrationBase {
     void dailyListReopenCaseWithNewHearing() throws IOException {
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
 
-        dartsDatabase.createDailyLists(swanseaCourtEntity);
+        dartsDatabase.createDailyLists(swanseaCourtEntity.getCourthouseName());
         dailyListProcessor.processAllDailyLists();
 
         CourtCaseEntity newCase1 = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
@@ -197,7 +197,7 @@ class DailyListProcessorTest extends IntegrationBase {
         assertTrue(closedCase.getClosed());
         assertNotNull(closedCase.getCaseClosedTimestamp());
 
-        dartsDatabase.createDailyLists(swanseaCourtEntity);
+        dartsDatabase.createDailyLists(SWANSEA);
         dailyListProcessor.processAllDailyLists();
 
         CourtCaseEntity updatedCase = caseRepository.findByCaseNumberIgnoreCaseAndCourthouse_CourthouseNameIgnoreCase(URN_1, SWANSEA).get();
