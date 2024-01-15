@@ -24,7 +24,6 @@ import static uk.gov.hmcts.darts.testutils.data.CaseTestData.someMinimalCase;
 @SuppressWarnings({"PMD.DoNotUseThreads"})
 class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
 
-    public static final String UNKNOWN_COURTROOM = "unknown-courtroom";
     public static final String UNKNOWN_COURTHOUSE = "unknown-courthouse";
     public static final String SOME_COURTHOUSE = "some-courthouse";
     public static final String SOME_ROOM = "some-room";
