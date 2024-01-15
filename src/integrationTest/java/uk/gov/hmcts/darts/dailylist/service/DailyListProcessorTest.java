@@ -71,14 +71,18 @@ class DailyListProcessorTest extends IntegrationBase {
         log.info("start dailyListProcessorMultipleDailyList");
         CourthouseEntity swanseaCourtEntity = dartsDatabase.createCourthouseWithTwoCourtrooms();
         LocalTime dailyListTIme = LocalTime.of(13, 0);
-        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(dailyListTIme, String.valueOf(SourceType.CPP),
-                                                                            swanseaCourtEntity.getCourthouseName(), "tests/dailyListProcessorTest/dailyListCPP.json"
+        DailyListEntity dailyListEntity = DailyListTestData.createDailyList(
+            dailyListTIme,
+            String.valueOf(SourceType.CPP),
+            swanseaCourtEntity.getCourthouseName(),
+            "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
-        DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(dailyListTIme.minusHours(3),
-                                                             String.valueOf(SourceType.CPP),
-                                                                               swanseaCourtEntity.getCourthouseName(),
-                                                             "tests/dailyListProcessorTest/dailyListCPP.json"
+        DailyListEntity oldDailyListEntity = DailyListTestData.createDailyList(
+            dailyListTIme.minusHours(3),
+            String.valueOf(SourceType.CPP),
+            swanseaCourtEntity.getCourthouseName(),
+            "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
         dailyListRepository.saveAllAndFlush(List.of(dailyListEntity, oldDailyListEntity));
