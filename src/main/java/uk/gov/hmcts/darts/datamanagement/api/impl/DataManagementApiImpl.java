@@ -61,7 +61,7 @@ public class DataManagementApiImpl implements DataManagementApi {
 
     @Override
     public void deleteBlobDataFromInboundContainer(UUID blobId) throws AzureDeleteBlobException {
-        dataManagementService.deleteBlobData(getOutboundContainerName(), blobId);
+        dataManagementService.deleteBlobData(getInboundContainerName(), blobId);
     }
 
     @Override
