@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_VALID_FOR_USER;
+import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.TRANSFORMED_MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.authorisation.exception.AuthorisationError.USER_NOT_AUTHORISED_FOR_COURTHOUSE;
 import static uk.gov.hmcts.darts.cases.exception.CaseApiError.CASE_NOT_FOUND;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
@@ -214,6 +215,36 @@ class AuthorisationImplTest extends IntegrationBase {
 
         assertEquals(TRANSCRIPTION_NOT_FOUND.getTitle(), exception.getMessage());
         assertEquals(TRANSCRIPTION_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    void authoriseByTransformedMediaId() {
+        assertDoesNotThrow(() -> authorisationToTest.authoriseByTransformedMediaId(
+            authorisationStub.getTransformedMediaEntity().getId(), Set.of(APPROVER, REQUESTER)));
+    }
+
+    @Test
+    void authoriseByTransformedMediaIdShouldThrowAuthorisationErrorUserNotAuthorisedForCourthouse() {
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> authorisationToTest.authoriseByTransformedMediaId(
+                authorisationStub.getTransformedMediaEntity().getId(), Set.of(JUDGE))
+        );
+
+        assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE.getTitle(), exception.getMessage());
+        assertEquals(USER_NOT_AUTHORISED_FOR_COURTHOUSE, exception.getError());
+    }
+
+    @Test
+    void authoriseByTransformedMediaIdShouldThrowAudioRequestsApiErrorTransformedMediaNotFound() {
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> authorisationToTest.authoriseByTransformedMediaId(
+                -1, Set.of(JUDGE))
+        );
+
+        assertEquals(TRANSFORMED_MEDIA_NOT_FOUND.getTitle(), exception.getMessage());
+        assertEquals(TRANSFORMED_MEDIA_NOT_FOUND, exception.getError());
     }
 
 }
