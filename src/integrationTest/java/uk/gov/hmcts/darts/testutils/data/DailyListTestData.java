@@ -16,7 +16,7 @@ import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
 @SuppressWarnings({"HideUtilityClassConstructor"})
 public class DailyListTestData {
 
-    public static DailyListEntity createDailyList(LocalTime time, String source, CourthouseEntity courthouse, String fileLocation) throws IOException, IOException {
+    public static DailyListEntity createDailyList(LocalTime time, String source, CourthouseEntity courthouse, String fileLocation) throws IOException {
         DailyListEntity dailyListEntity = new DailyListEntity();
         dailyListEntity.setStatus(JobStatusType.NEW);
         dailyListEntity.setStartDate(LocalDate.now());
