@@ -91,7 +91,7 @@ public class TestSupportController {
         removeHearings(session, hearingIds);
 
         removeCaseRetentions(session, caseIds);
-        //removeRetentionPolicyType(session);
+        removeRetentionPolicyType(session);
         removeCaseAudit(session, caseIds);
         removeCaseJudgeJoins(session, caseIds);
         removeCaseDefence(session, caseIds);
@@ -364,13 +364,14 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-
     @GetMapping(value = "/bank-holidays/{year}")
     public ResponseEntity<List<Event>> getBankHolidaysForYear(@PathVariable(name = "year") String year) {
         var bankHolidays = bankHolidaysService.getBankHolidays(parseInt(year));
         return new ResponseEntity<>(bankHolidays, OK);
     }
 
+    //Controller only runs in test environment
+    @SuppressWarnings({"java:S2245"})
     @PostMapping(value = "/case-retentions/caseNumber/{caseNumber}")
     public ResponseEntity<Integer> createCaseRetention(@PathVariable(name = "caseNumber") String caseNumber) {
         CourtCaseEntity courtCase = new CourtCaseEntity();
@@ -378,12 +379,10 @@ public class TestSupportController {
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
 
-
+        String courtrooomNamme = "func-" + randomAlphanumeric(7);
         String courthouseName = "func-" + randomAlphanumeric(7);
-        CourthouseEntity courthouse = new CourthouseEntity();
-        courthouse.setCourthouseName(courthouseName);
-        courthouse.setDisplayName(courthouseName);
-        //CourthouseEntity savedCourthouse = courthouseRepository.save(courthouse);
+        CourthouseEntity courthouse = newCourthouse(courthouseName);
+        newCourtroom(courtrooomNamme, courthouse);
 
         courtCase.setCourthouse(courthouse);
         caseRepository.saveAndFlush(courtCase);
