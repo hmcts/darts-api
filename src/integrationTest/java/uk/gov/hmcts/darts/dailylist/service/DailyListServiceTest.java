@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.dailylist.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -28,7 +27,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static uk.gov.hmcts.darts.testutils.TestUtils.getContentsFromFile;
-import static uk.gov.hmcts.darts.testutils.data.CourthouseTestData.createCourthouse;
 
 class DailyListServiceTest extends IntegrationBase {
 
