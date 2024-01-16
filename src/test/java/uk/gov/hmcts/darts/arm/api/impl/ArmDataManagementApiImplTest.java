@@ -37,7 +37,7 @@ class ArmDataManagementApiImplTest {
 
     @BeforeEach
     void setUp() {
-        when(armDataManagementConfiguration.getArmContainerName()).thenReturn(ARM_BLOB_CONTAINER_NAME);
+        when(armDataManagementConfiguration.getContainerName()).thenReturn(ARM_BLOB_CONTAINER_NAME);
         armDataManagementApi = new ArmDataManagementApiImpl(armService, armDataManagementConfiguration);
     }
 
@@ -49,17 +49,25 @@ class ArmDataManagementApiImplTest {
         String filename = "1_1_1";
 
         when(armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, filename, data)).thenReturn(filename);
+
         String actualResult = armDataManagementApi.saveBlobDataToArm(filename, data);
         assertEquals(filename, actualResult);
     }
 
     @Test
     void listCollectedBlobs() {
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(ARM_DROP_ZONE);
+        foldersConfig.setCollected(ARM_DROP_ZONE);
+        foldersConfig.setResponse(ARM_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
         String prefix = "1_1_1";
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         Map<String, BlobItem> responseBlobs = new HashMap<>();
         responseBlobs.put(responseBlobFilename, new BlobItem());
-        when(armDataManagementConfiguration.getArmCollectedDropZone()).thenReturn(ARM_DROP_ZONE);
+
         String filename = ARM_DROP_ZONE + prefix;
         when(armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, filename)).thenReturn(responseBlobs);
 
@@ -70,25 +78,40 @@ class ArmDataManagementApiImplTest {
 
     @Test
     void listResponseBlobs() {
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(ARM_DROP_ZONE);
+        foldersConfig.setCollected(ARM_DROP_ZONE);
+        foldersConfig.setResponse(ARM_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
         String prefix = "1_1_1";
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         Map<String, BlobItem> responseBlobs = new HashMap<>();
         responseBlobs.put(responseBlobFilename, new BlobItem());
-        when(armDataManagementConfiguration.getArmResponseDropZone()).thenReturn(ARM_DROP_ZONE);
+
         String filename = ARM_DROP_ZONE + prefix;
         when(armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, filename)).thenReturn(responseBlobs);
+
         Map<String, BlobItem> blobs = armDataManagementApi.listResponseBlobs(prefix);
         assertEquals(1, blobs.size());
     }
 
     @Test
     void getResponseBlobData() {
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(ARM_DROP_ZONE);
+        foldersConfig.setCollected(ARM_DROP_ZONE);
+        foldersConfig.setResponse(ARM_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String blobname = "1_1_1";
-        when(armDataManagementConfiguration.getArmResponseDropZone()).thenReturn(ARM_DROP_ZONE);
+
         String blobNameAndPath = ARM_DROP_ZONE + blobname;
         when(armService.getBlobData(ARM_BLOB_CONTAINER_NAME, blobNameAndPath)).thenReturn(data);
+
         BinaryData binaryData = armDataManagementApi.getResponseBlobData(blobname);
         assertEquals(data, binaryData);
     }

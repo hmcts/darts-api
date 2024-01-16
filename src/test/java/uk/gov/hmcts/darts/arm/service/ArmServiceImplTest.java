@@ -76,7 +76,12 @@ class ArmServiceImplTest {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        when(armDataManagementConfiguration.getArmCollectedDropZone()).thenReturn(TEST_DROP_ZONE);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
 
         String prefix = "1_1_1";
         Map<String, BlobItem> blobs = armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
@@ -88,7 +93,12 @@ class ArmServiceImplTest {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        when(armDataManagementConfiguration.getArmResponseDropZone()).thenReturn(TEST_DROP_ZONE);
+        
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
 
         String prefix = "1_1_1";
         Map<String, BlobItem> blobs = armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, prefix);

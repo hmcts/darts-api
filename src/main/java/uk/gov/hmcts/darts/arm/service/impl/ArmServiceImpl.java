@@ -52,14 +52,14 @@ public class ArmServiceImpl implements ArmService {
 
     public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
-        String prefix = armDataManagementConfiguration.getArmCollectedDropZone() + filename;
+        String prefix = armDataManagementConfiguration.getFolders().getCollected() + filename;
 
         return listBlobs(containerClient, prefix);
     }
 
     public Map<String, BlobItem> listResponseBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
-        String prefix = armDataManagementConfiguration.getArmResponseDropZone() + filename;
+        String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
 
         return listBlobs(containerClient, prefix);
     }

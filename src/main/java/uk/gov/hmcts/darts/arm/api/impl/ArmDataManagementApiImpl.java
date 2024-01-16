@@ -24,19 +24,23 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     @Override
     public Map<String, BlobItem> listCollectedBlobs(String prefix) {
-        String filename = armDataManagementConfiguration.getArmCollectedDropZone() + prefix;
+        String filename = armDataManagementConfiguration.getFolders().getCollected() + prefix;
         return armService.listCollectedBlobs(getArmContainerName(), filename);
     }
 
     @Override
     public Map<String, BlobItem> listResponseBlobs(String prefix) {
-        return armService.listResponseBlobs(getArmContainerName(),
-                                            armDataManagementConfiguration.getArmResponseDropZone() + prefix);
+        return armService.listResponseBlobs(
+            getArmContainerName(),
+            armDataManagementConfiguration.getFolders().getResponse() + prefix
+        );
     }
 
     public BinaryData getResponseBlobData(String blobName) {
-        return armService.getBlobData(getArmContainerName(),
-                                      armDataManagementConfiguration.getArmResponseDropZone() + blobName);
+        return armService.getBlobData(
+            getArmContainerName(),
+            armDataManagementConfiguration.getFolders().getResponse() + blobName
+        );
     }
 
     private String getArmContainerName() {

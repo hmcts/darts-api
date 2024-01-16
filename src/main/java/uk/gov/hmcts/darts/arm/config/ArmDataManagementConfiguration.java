@@ -11,20 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class ArmDataManagementConfiguration {
 
-    @Value("${darts.storage.arm.connection-string}")
-    private String armStorageAccountConnectionString;
-
-    @Value("${darts.storage.arm.container-name}")
-    private String armContainerName;
-
-    @Value("${darts.storage.arm.folders.submission}")
-    private String armSubmissionDropZone;
-
-    @Value("${darts.storage.arm.folders.collected}")
-    private String armCollectedDropZone;
-
-    @Value("${darts.storage.arm.folders.response}")
-    private String armResponseDropZone;
     private String sasEndpoint;
     private String containerName;
     private Folders folders;
@@ -42,6 +28,8 @@ public class ArmDataManagementConfiguration {
     @Setter
     public static class Folders {
         private String submission;
+        private String collected;
+        private String response;
     }
 
 }
