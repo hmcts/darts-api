@@ -739,4 +739,5 @@ components:
       type: string
       enum:
         - "AUTHORISATION_100"
-      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
+        - "AUDIO_REQUESTS_101"
+      x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE, MEDIA_REQUEST_NOT_VALID_FOR_USER ]

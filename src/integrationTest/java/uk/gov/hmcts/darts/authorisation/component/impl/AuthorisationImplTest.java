@@ -249,6 +249,12 @@ class AuthorisationImplTest extends IntegrationBase {
     }
 
     @Test
+    void authoriseTransformedMediaAgainstUser() {
+        assertDoesNotThrow(() -> authorisationToTest.authoriseTransformedMediaAgainstUser(
+            authorisationStub.getTransformedMediaEntity().getId()));
+    }
+
+    @Test
     void authoriseTransformedMediaAgainstUserShouldThrowAudioRequestsApiErrorMediaRequestNotValidForUser() {
         MediaRequestEntity mediaRequestEntity = authorisationStub.getMediaRequestEntitySystemUser();
         TransformedMediaEntity transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
