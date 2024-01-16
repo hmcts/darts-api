@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class RetentionControllerGetByCaseIdTest extends IntegrationBase {
+class RetentionControllerGetByCaseIdTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
