@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.service.OutboundAudioDeleterProcessor;
-import uk.gov.hmcts.darts.audio.service.impl.LastAccessedDeletionDayCalculator;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestType;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
@@ -56,8 +55,6 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
     @Autowired
     protected TransientObjectDirectoryStub transientObjectDirectoryStub;
 
-    @Autowired
-    LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
 
     @MockBean
     private BankHolidaysService bankHolidaysService;
