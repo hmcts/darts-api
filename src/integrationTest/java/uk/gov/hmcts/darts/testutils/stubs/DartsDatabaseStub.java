@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
@@ -52,6 +53,7 @@ import uk.gov.hmcts.darts.common.repository.NodeRegistrationRepository;
 import uk.gov.hmcts.darts.common.repository.NotificationRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.repository.ProsecutorRepository;
+import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityRoleRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionCommentRepository;
@@ -127,6 +129,8 @@ public class DartsDatabaseStub {
     private final AnnotationRepository annotationRepository;
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
+    private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
+    private final CaseRetentionRepository caseRetentionRepository;
 
     private final AuditStub auditStub;
     private final CourthouseStub courthouseStub;
@@ -164,6 +168,8 @@ public class DartsDatabaseStub {
         defenceRepository.deleteAll();
         defendantRepository.deleteAll();
         prosecutorRepository.deleteAll();
+        caseRetentionRepository.deleteAll();
+        retentionPolicyTypeRepository.deleteAll();
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
@@ -580,4 +586,41 @@ public class DartsDatabaseStub {
         caseRetentionRepository.save(retention);
     }
 
+    public void createCaseRetention(CourtCaseEntity courtCase) {
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeEntity.setId(1);
+        retentionPolicyTypeEntity.setFixedPolicyKey(1);
+        retentionPolicyTypeEntity.setPolicyName("Standard");
+        retentionPolicyTypeEntity.setDuration(7);
+        retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
+        retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
+        retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());
+        retentionPolicyTypeEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        retentionPolicyTypeEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        retentionPolicyTypeEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        retentionPolicyTypeRepository.saveAndFlush(retentionPolicyTypeEntity);
+
+        CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
+        caseRetentionRepository.save(caseRetentionEntity1);
+        CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(2, courtCase, retentionPolicyTypeEntity, "b_state");
+        caseRetentionRepository.save(caseRetentionEntity2);
+        CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
+        caseRetentionRepository.saveAndFlush(caseRetentionEntity3);
+    }
+
+    private CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
+            RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
+        CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
+        caseRetentionEntity.setCourtCase(courtCase);
+        caseRetentionEntity.setId(id);
+        caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
+        caseRetentionEntity.setTotalSentence("10 years?");
+        caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
+        caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
+        caseRetentionEntity.setCurrentState(state);
+        caseRetentionEntity.setSubmitted(OffsetDateTime.now());
+        caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        return caseRetentionEntity;
+    }
 }
