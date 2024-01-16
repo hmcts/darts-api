@@ -85,12 +85,13 @@ class FileOperationServiceTest extends IntegrationBase {
     @DisplayName("Test-6: Test save binary data to specified workspace")
     void saveBinaryDataToSpecifiedWorkspace() throws IOException {
         var tempFilename = UUID.randomUUID().toString();
-        log.debug("Created file {}", filePath);
 
-        filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(mediaFile,
-                                                                            tempFilename,
-                                                                            tempDirectory.getAbsolutePath(),
-                                                                            true);
+        filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
+            mediaFile,
+            tempFilename,
+            tempDirectory.getAbsolutePath(),
+            true
+        );
         assertNotNull(filePath);
     }
 

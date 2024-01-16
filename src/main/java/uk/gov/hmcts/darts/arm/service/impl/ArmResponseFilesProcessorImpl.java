@@ -99,7 +99,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         String prefix = getPrefix(externalObjectDirectory);
         Map<String, BlobItem> inputUploadBlobs = getInputUploadBlobs(externalObjectDirectory, prefix);
         if (nonNull(inputUploadBlobs) && !inputUploadBlobs.isEmpty()) {
-            //String armInputUploadFilename = inputUploadBlobs.keySet().stream().findFirst().get();
             for (String armInputUploadFilename : inputUploadBlobs.keySet()) {
                 log.debug("Found ARM input upload file {}", armInputUploadFilename);
                 if (armInputUploadFilename.endsWith(generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
@@ -173,53 +172,67 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 boolean appendUuidToWorkspace = true;
 
                 BinaryData uploadFileBinary = armDataManagementApi.getResponseBlobData(uploadFilename);
-                if (nonNull(uploadFileBinary)) {
-                    Path jsonPath = null;
-                    try {
-                        jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-                            uploadFileBinary,
-                            uploadFilename,
-                            armDataManagementConfiguration.getTempBlobWorkspace(),
-                            appendUuidToWorkspace
-                        );
-                        if (jsonPath.toFile().exists()) {
-
-                            ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(
-                                jsonPath.toFile(),
-                                ArmResponseUploadFileRecord.class
-                            );
-                            if (nonNull(armResponseUploadFileRecord)) {
-                                if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
-                                    processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
-                                } else {
-                                    //Read the upload file and log the error code and description with EOD
-
-                                    updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
-                                    cleanupTemporaryJsonFile(jsonPath);
-                                }
-                            } else {
-                                updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
-                                cleanupTemporaryJsonFile(jsonPath);
-                            }
-                        } else {
-                            log.error("Unable to write upload file to temp workspace{}", uploadFilename);
-                            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-                            cleanupTemporaryJsonFile(jsonPath);
-                        }
-                    } catch (Exception e) {
-                        log.error("Unable to process arm response upload file {}", uploadFilename);
-                        updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
-                        cleanupTemporaryJsonFile(jsonPath);
-                    }
-                } else {
-                    updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-                }
+                readUploadFile(
+                    externalObjectDirectory,
+                    uploadFileBinary,
+                    uploadFilename,
+                    appendUuidToWorkspace,
+                    uploadFileFilenameProcessor,
+                    armResponseProcessingFailed,
+                    armDropZoneStatus
+                );
             } catch (Exception e) {
                 log.error("Failure with upload file {}", e.getMessage(), e);
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
             }
         } else {
             updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
+        }
+    }
+
+    private void readUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, BinaryData uploadFileBinary, String uploadFilename,
+                                boolean appendUuidToWorkspace, UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                ObjectRecordStatusEntity armResponseProcessingFailed, ObjectRecordStatusEntity armDropZoneStatus) {
+        if (nonNull(uploadFileBinary)) {
+            Path jsonPath = null;
+            try {
+                jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
+                    uploadFileBinary,
+                    uploadFilename,
+                    armDataManagementConfiguration.getTempBlobWorkspace(),
+                    appendUuidToWorkspace
+                );
+                if (jsonPath.toFile().exists()) {
+
+                    ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(
+                        jsonPath.toFile(),
+                        ArmResponseUploadFileRecord.class
+                    );
+                    if (nonNull(armResponseUploadFileRecord)) {
+                        if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
+                            processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
+                        } else {
+                            //Read the upload file and log the error code and description with EOD
+
+                            updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+                            cleanupTemporaryJsonFile(jsonPath);
+                        }
+                    } else {
+                        updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+                        cleanupTemporaryJsonFile(jsonPath);
+                    }
+                } else {
+                    log.error("Unable to write upload file to temp workspace{}", uploadFilename);
+                    updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+                    cleanupTemporaryJsonFile(jsonPath);
+                }
+            } catch (Exception e) {
+                log.error("Unable to process arm response upload file {}", uploadFilename);
+                updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+                cleanupTemporaryJsonFile(jsonPath);
+            }
+        } else {
+            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
         }
     }
 
