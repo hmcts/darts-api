@@ -93,7 +93,7 @@ class ArmServiceImplTest {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
         when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
-        
+
         var foldersConfig = new ArmDataManagementConfiguration.Folders();
         foldersConfig.setSubmission(TEST_DROP_ZONE);
         foldersConfig.setCollected(TEST_DROP_ZONE);
@@ -103,6 +103,17 @@ class ArmServiceImplTest {
         String prefix = "1_1_1";
         Map<String, BlobItem> blobs = armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
         assertNotNull(blobs);
+    }
+
+    @Test
+    void testGetBlobData() {
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(blobClient.exists()).thenReturn(true);
+        when(blobClient.downloadContent()).thenReturn(BINARY_DATA);
+
+        BinaryData binaryData = armService.getBlobData(ARM_BLOB_CONTAINER_NAME, "blobname");
+        assertEquals(BINARY_DATA, binaryData);
     }
 
 }
