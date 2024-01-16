@@ -154,7 +154,7 @@ darts:
         transcription_request_rejected: 739a31cf-13a1-49bc-bcf9-0794f4670dbb
   storage:
     arm:
-      connection-string: ${ARM_STORAGE_CONNECTION_STRING:}
+      sas-endpoint: ${ARM_SAS_ENDPOINT:}
       container-name: darts-arm
       folders:
         submission: dropzone/DARTS/submission/

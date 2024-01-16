@@ -44,9 +44,13 @@ class ArmServiceImplTest {
 
     @Test
     void testSaveBlobData() {
-        when(armDataManagementConfiguration.getArmSubmissionDropZone()).thenReturn(TEST_DROP_ZONE);
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_BINARY_STRING);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+
         String blobName = armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, BLOB_FILENAME, BINARY_DATA);
         assertNotNull(blobName);
         assertEquals(BLOB_FILENAME, blobName);

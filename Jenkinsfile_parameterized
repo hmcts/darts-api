@@ -36,7 +36,7 @@ def secrets = [
     secret('DartsSystemUserEmail', 'SYSTEM_USER_EMAIL'),
     secret('AzureAdB2CFuncTestROPCGlobalUsername', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME'),
     secret('AzureAdB2CFuncTestROPCGlobalPassword', 'AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD'),
-    secret('ARMConnectionString', 'ARM_STORAGE_CONNECTION_STRING'),
+    secret('ARMSasEndpoint', 'ARM_SAS_ENDPOINT'),
   ],
 ]
 
