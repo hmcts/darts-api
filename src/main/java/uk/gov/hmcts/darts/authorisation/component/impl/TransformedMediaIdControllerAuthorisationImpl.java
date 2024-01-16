@@ -46,6 +46,7 @@ public class TransformedMediaIdControllerAuthorisationImpl extends BaseControlle
             ));
             throw new DartsApiException(BAD_REQUEST_TRANSFORMED_MEDIA_ID);
         }
+        authorisation.authoriseTransformedMediaAgainstUser(Integer.valueOf(transformedMediaIdParamOptional.get()));
     }
 
     @Override

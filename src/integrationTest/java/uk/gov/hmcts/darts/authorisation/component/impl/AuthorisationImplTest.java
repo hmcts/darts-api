@@ -5,8 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
@@ -146,7 +148,6 @@ class AuthorisationImplTest extends IntegrationBase {
 
     @Test
     void authoriseMediaRequestAgainstUserShouldThrowAudioRequestsApiErrorMediaRequestNotValidForUser() {
-
         var exception = assertThrows(
             DartsApiException.class,
             () -> authorisationToTest.authoriseMediaRequestAgainstUser(
@@ -245,6 +246,21 @@ class AuthorisationImplTest extends IntegrationBase {
 
         assertEquals(TRANSFORMED_MEDIA_NOT_FOUND.getTitle(), exception.getMessage());
         assertEquals(TRANSFORMED_MEDIA_NOT_FOUND, exception.getError());
+    }
+
+    @Test
+    void authoriseTransformedMediaAgainstUserShouldThrowAudioRequestsApiErrorMediaRequestNotValidForUser() {
+        MediaRequestEntity mediaRequestEntity = authorisationStub.getMediaRequestEntitySystemUser();
+        TransformedMediaEntity transformedMediaEntity = dartsDatabase.getTransformedMediaStub().createTransformedMediaEntity(mediaRequestEntity);
+
+        var exception = assertThrows(
+            DartsApiException.class,
+            () -> authorisationToTest.authoriseTransformedMediaAgainstUser(
+                transformedMediaEntity.getId())
+        );
+
+        assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER.getTitle(), exception.getMessage());
+        assertEquals(MEDIA_REQUEST_NOT_VALID_FOR_USER, exception.getError());
     }
 
 }

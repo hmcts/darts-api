@@ -22,4 +22,6 @@ public interface Authorisation {
 
     void authoriseMediaRequestAgainstUser(Integer mediaRequestId);
 
+    void authoriseTransformedMediaAgainstUser(Integer transformedMediaId);
+
 }

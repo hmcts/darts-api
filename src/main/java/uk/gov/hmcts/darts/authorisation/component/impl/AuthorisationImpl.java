@@ -118,15 +118,17 @@ public class AuthorisationImpl implements Authorisation {
 
     @Override
     public void authoriseMediaRequestAgainstUser(Integer mediaRequestId) {
-        try {
-            MediaRequestEntity mediaRequest = mediaRequestRepository.getReferenceById(mediaRequestId);
-            UserAccountEntity userAccount = userIdentity.getUserAccount();
+        checkMediaRequestIsRequestedByUser(mediaRequestRepository.getReferenceById(mediaRequestId));
+    }
 
-            if (!mediaRequest.getRequestor().getId().equals(userAccount.getId())) {
-                throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
-            }
-        } catch (EntityNotFoundException | IllegalStateException e) {
-            log.error("Unable to validate media requests for user", e);
+    @Override
+    public void authoriseTransformedMediaAgainstUser(Integer transformedMediaId) {
+        checkMediaRequestIsRequestedByUser(transformedMediaRepository.getReferenceById(transformedMediaId).getMediaRequest());
+    }
+
+    private void checkMediaRequestIsRequestedByUser(MediaRequestEntity mediaRequest) {
+        UserAccountEntity userAccount = userIdentity.getUserAccount();
+        if (!mediaRequest.getRequestor().getId().equals(userAccount.getId())) {
             throw new DartsApiException(MEDIA_REQUEST_NOT_VALID_FOR_USER);
         }
     }

@@ -13,8 +13,8 @@ paths:
     get:
       tags:
         - Audio Requests
+      summary: 'Audio requests for a user to view whether Current / Expired'
       operationId: getYourAudio
-      description: 'Audio requests for a user to view whether Current / Expired'
       parameters:
         - in: header
           name: user_id
@@ -54,8 +54,8 @@ paths:
     get:
       tags:
         - Audio Requests
+      summary: 'Audio requests for a user to view whether Current / Expired'
       operationId: getYourAudioV1
-      description: 'Audio requests for a user to view whether Current / Expired'
       parameters:
         - in: header
           name: user_id
@@ -95,9 +95,8 @@ paths:
     post:
       tags:
         - Audio Requests
-      summary: Users can request audio for specific cases and date/time periods
+      summary: Users can request audio for a hearing and date/time periods
       operationId: addAudioRequest
-      description: Adds a user audio request for processing
       responses:
         '200':
           description: OK
@@ -122,8 +121,8 @@ paths:
     get:
       tags:
         - Audio Requests
+      summary: 'Returns count of audio requests not accessed by user provided'
       operationId: getNonAccessedCount
-      description: 'Returns count of audio requests not accessed by user provided'
       parameters:
         - in: header
           name: user_id
@@ -157,7 +156,7 @@ paths:
     delete:
       tags:
         - Audio Requests
-      description: 'Delete Transformed Media and Processed Audio'
+      summary: 'Delete Transformed Media and Processed Audio'
       operationId: deleteTransformedMedia
       parameters:
         - in: path
@@ -168,6 +167,25 @@ paths:
       responses:
         '204':
           description: Transformed Media has been deleted
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/MediaRequestAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -182,7 +200,7 @@ paths:
     patch:
       tags:
         - Audio Requests
-      description: 'Update last accessed timestamp for transformed_media'
+      summary: 'Update last accessed timestamp for transformed_media'
       operationId: updateTransformedMediaLastAccessedTimestamp
       parameters:
         - in: path
@@ -193,6 +211,25 @@ paths:
       responses:
         '204':
           description: No Content
+        '401':
+          description: Unauthorised Error
+        '403':
+          description: Forbidden Error
+          content:
+            application/json+problem:
+              schema:
+                allOf:
+                  - $ref: './problem.yaml'
+                  - type: object
+                    required:
+                      - type
+                    properties:
+                      type:
+                        $ref: '#/components/schemas/MediaRequestAuthorisation403ErrorCode'
+              example:
+                type: "AUTHORISATION_100"
+                title: "User is not authorised for the associated courthouse"
+                status: 403
         '404':
           description: Not Found Error
           content:
@@ -208,7 +245,7 @@ paths:
     delete:
       tags:
         - Audio Requests
-      description: 'Delete Audio Request and Processed Audio'
+      summary: 'Delete Audio Request and Processed Audio'
       operationId: deleteAudioRequest
       parameters:
         - in: path
@@ -262,7 +299,7 @@ paths:
     patch:
       tags:
         - Audio Requests
-      description: 'Update Audio Request last accessed timestamp'
+      summary: 'Update Audio Request last accessed timestamp'
       operationId: updateAudioRequestLastAccessedTimestamp
       parameters:
         - in: path
@@ -319,7 +356,6 @@ paths:
         - Audio Requests
       summary: Download audio
       operationId: download
-      description: Download audio
       parameters:
         - in: query
           name: transformed_media_id
@@ -384,7 +420,6 @@ paths:
         - Audio Requests
       summary: Playback audio
       operationId: playback
-      description: Playback audio
       parameters:
         - in: query
           name: transformed_media_id
