@@ -1,12 +1,10 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.http.rest.PagedIterable;
-import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
-import com.azure.storage.blob.models.BlobListDetails;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +46,7 @@ public class ArmServiceImpl implements ArmService {
         return blobPathAndName;
     }
 
+
     public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getArmCollectedDropZone() + filename;
@@ -57,11 +56,10 @@ public class ArmServiceImpl implements ArmService {
 
     public Map<String, BlobItem> listResponseBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
-        String prefix = armDataManagementConfiguration.getArmResponseDropZone() + filename;
+        String prefix = armDataManagementConfiguration.getArmSubmissionDropZone() + filename;
 
         return listBlobs(containerClient, prefix);
     }
-
 
     public Map<String, BlobItem> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
         Map<String, BlobItem> blobs = new HashMap<>();
@@ -77,30 +75,12 @@ public class ArmServiceImpl implements ArmService {
         return blobs;
     }
 
-    public Iterable<PagedResponse<BlobItem>> listBlobs(BlobContainerClient blobContainerClient,
-                                                       boolean retrieveDeletedBlobs,
-                                                       int maxResultsPerPage) {
-        ListBlobsOptions options = new ListBlobsOptions()
-            .setMaxResultsPerPage(maxResultsPerPage)
-            .setDetails(new BlobListDetails()
-                            .setRetrieveDeletedBlobs(retrieveDeletedBlobs));
-
-        return blobContainerClient.listBlobs(options, null).iterableByPage();
-    }
-
     public PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,
                                                                 String delimiter,
                                                                 String prefix /* ="" */) {
 
-        ListBlobsOptions options = new ListBlobsOptions()
-            .setPrefix(prefix);
-
+        ListBlobsOptions options = new ListBlobsOptions().setPrefix(prefix);
         return blobContainerClient.listBlobsByHierarchy(delimiter, options, null);
-    }
-
-    public Iterable<PagedResponse<BlobItem>> listBlobsFlat(String containerName, String folder) {
-        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
-        return listBlobs(containerClient, false, 3);
     }
 
     public BinaryData getBlobData(String containerName, String blobName) {

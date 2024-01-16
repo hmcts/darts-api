@@ -93,40 +93,17 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
+        ObjectRecordStatusEntity armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
         // IU - Input Upload - This is the manifest file which gets renamed by ARM.
         // EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
         String prefix = getPrefix(externalObjectDirectory);
-        log.debug("Checking ARM for files containing name {}", prefix);
-        Map<String, BlobItem> inputUploadBlobs = null;
-        ObjectRecordStatusEntity armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
-
-        try {
-            inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
-        } catch (Exception e) {
-            updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus); //increment verification attempts
-        }
+        Map<String, BlobItem> inputUploadBlobs = getInputUploadBlobs(externalObjectDirectory, prefix);
         if (nonNull(inputUploadBlobs) && !inputUploadBlobs.isEmpty()) {
             //String armInputUploadFilename = inputUploadBlobs.keySet().stream().findFirst().get();
             for (String armInputUploadFilename: inputUploadBlobs.keySet()) {
                 log.debug("Found ARM input upload file {}", armInputUploadFilename);
                 if (armInputUploadFilename.endsWith(generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
-                    try {
-                        InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
-                        String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
-                        log.debug("List response files starting with hashcode {}", responseFilesHashcode);
-                        Map<String, BlobItem> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
-                        if (nonNull(responseBlobs) && !responseBlobs.isEmpty()) {
-                            processResponseBlobs(responseBlobs, externalObjectDirectory);
-                        } else {
-                            updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
-                        }
-                    } catch (IllegalArgumentException e) {
-                        log.error("Unable to process filename: {}", e.getMessage());
-                        updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-                    } catch (IOException e) {
-                        log.error("Unable to read response file: {}", e.getMessage());
-                        updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-                    }
+                    readInputUploadFile(externalObjectDirectory, armInputUploadFilename, armDropZoneStatus);
                     break;
                 } else {
                     updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
@@ -136,6 +113,39 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             log.info("Unable to find input file with prefix {}", prefix);
             updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
         }
+    }
+
+    private void readInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename,
+                                     ObjectRecordStatusEntity armDropZoneStatus) {
+        try {
+            InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
+            String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
+            log.debug("List response files starting with hashcode {}", responseFilesHashcode);
+            Map<String, BlobItem> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
+            if (nonNull(responseBlobs) && !responseBlobs.isEmpty()) {
+                processResponseBlobs(responseBlobs, externalObjectDirectory);
+            } else {
+                updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
+            }
+        } catch (IllegalArgumentException e) {
+            log.error("Unable to process filename: {}", e.getMessage());
+            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+        } catch (IOException e) {
+            log.error("Unable to read response file: {}", e.getMessage());
+            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+        }
+    }
+
+    private Map<String, BlobItem> getInputUploadBlobs(ExternalObjectDirectoryEntity externalObjectDirectory, String prefix) {
+        ObjectRecordStatusEntity armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
+        log.debug("Checking ARM for files containing name {}", prefix);
+        Map<String, BlobItem> inputUploadBlobs = null;
+        try {
+            inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
+        } catch (Exception e) {
+            updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus); //increment verification attempts
+        }
+        return inputUploadBlobs;
     }
 
     private void processResponseBlobs(Map<String, BlobItem> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) throws IOException {
@@ -164,27 +174,42 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
                 BinaryData uploadFileBinary = armDataManagementApi.getResponseBlobData(uploadFilename);
                 if (nonNull(uploadFileBinary)) {
+                    Path jsonPath = null;
                     try {
-                        Path jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
+                        jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
                             uploadFileBinary,
                             uploadFilename,
                             armDataManagementConfiguration.getTempBlobWorkspace(),
                             appendUuidToWorkspace
                         );
+                        if (jsonPath.toFile().exists()) {
 
-                        ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(jsonPath.toFile(), ArmResponseUploadFileRecord.class);
-                        if (nonNull(armResponseUploadFileRecord)) {
-                            if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
-                                processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
+                            ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(
+                                jsonPath.toFile(),
+                                ArmResponseUploadFileRecord.class
+                            );
+                            if (nonNull(armResponseUploadFileRecord)) {
+                                if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
+                                    processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
+                                } else {
+                                    //Read the upload file and log the error code and description with EOD
+
+                                    updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+                                    cleanupTemporaryJsonFile(jsonPath);
+                                }
                             } else {
                                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+                                cleanupTemporaryJsonFile(jsonPath);
                             }
                         } else {
-                            updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+                            log.error("Unable to write upload file to temp workspace{}", uploadFilename);
+                            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+                            cleanupTemporaryJsonFile(jsonPath);
                         }
                     } catch (Exception e) {
                         log.error("Unable to process arm response upload file {}", uploadFilename);
                         updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+                        cleanupTemporaryJsonFile(jsonPath);
                     }
                 } else {
                     updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
@@ -195,6 +220,16 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         } else {
             updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
+        }
+    }
+
+    private void cleanupTemporaryJsonFile(Path jsonPath) {
+        if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
+            try {
+                jsonPath.toFile().delete();
+            } catch (Exception e) {
+                log.error("Unable to delete temporary file: {}", jsonPath.toFile().toString());
+            }
         }
     }
 

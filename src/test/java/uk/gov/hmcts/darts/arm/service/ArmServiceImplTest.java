@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.models.BlobItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,10 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Spliterator;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class ArmServiceImplTest {
 
     private static final String ARM_BLOB_CONTAINER_NAME = "arm_dummy_container";
@@ -43,7 +50,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testSaveBlobData() {
+    void testSaveBlobDataUsingFilename() {
         var foldersConfig = new ArmDataManagementConfiguration.Folders();
         foldersConfig.setSubmission(TEST_BINARY_STRING);
         when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
@@ -55,4 +62,51 @@ class ArmServiceImplTest {
         assertNotNull(blobName);
         assertEquals(BLOB_FILENAME, blobName);
     }
+
+    @Test
+    void testSaveBlobDataUsingBlobPathAndFilename() {
+        String blobPathAndFilename = TEST_DROP_ZONE + BLOB_FILENAME;
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        String blobName = armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, BINARY_DATA, blobPathAndFilename);
+        assertNotNull(blobName);
+        assertEquals(blobPathAndFilename, blobName);
+    }
+
+    @Test
+    void testListCollectedBlobs() {
+        //PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        PagedIterable pagedIterable = mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any())).thenReturn(pagedIterable);
+
+        BlobItem[] blobItems = { new BlobItem() };
+        Spliterator<BlobItem> spliterator = Arrays.spliterator(blobItems);
+
+        when(pagedIterable.spliterator()).thenReturn(spliterator);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+
+        String prefix = "1_1_1";
+        Map<String, BlobItem> blobs = armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        assertEquals(1, blobs.size());
+    }
+
+    @Test
+    void testListResponseBlobs() {
+        //PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        PagedIterable pagedIterable = mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any())).thenReturn(pagedIterable);
+
+        BlobItem[] blobItems = { new BlobItem() };
+        Spliterator<BlobItem> spliterator = Arrays.spliterator(blobItems);
+
+        when(pagedIterable.spliterator()).thenReturn(spliterator);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+
+        String prefix = "1_1_1";
+        Map<String, BlobItem> blobs = armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        assertEquals(1, blobs.size());
+    }
+
 }

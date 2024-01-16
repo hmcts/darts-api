@@ -24,8 +24,8 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     @Override
     public Map<String, BlobItem> listCollectedBlobs(String prefix) {
-        return armService.listCollectedBlobs(getArmContainerName(),
-                                             armDataManagementConfiguration.getArmCollectedDropZone() + prefix);
+        String filename = armDataManagementConfiguration.getArmCollectedDropZone() + prefix;
+        return armService.listCollectedBlobs(getArmContainerName(), filename);
     }
 
     @Override
