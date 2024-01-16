@@ -38,4 +38,19 @@ public class EventStub {
         return eventEntity;
     }
 
+    public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, OffsetDateTime eventTimestamp) {
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setEventText("testEventText");
+        eventEntity.setEventName("LOG");
+        EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).get();
+        eventEntity.setEventType(eventHandlerEntity);
+        eventEntity.setTimestamp(eventTimestamp);
+        eventEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
+        eventEntity.addHearing(hearing);
+        eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
+        eventEntity.setLastModifiedDateTime(eventTimestamp);
+        eventRepository.saveAndFlush(eventEntity);
+        return eventEntity;
+    }
+
 }

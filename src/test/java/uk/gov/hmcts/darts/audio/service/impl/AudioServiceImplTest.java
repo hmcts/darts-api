@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -21,9 +22,11 @@ import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -40,6 +43,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -62,6 +66,8 @@ class AudioServiceImplTest {
 
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
+
+    private static final List<String> HANDHELD_AUDIO_COURTROOM_NUMBERS = Arrays.asList("199");
 
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
@@ -87,6 +93,10 @@ class AudioServiceImplTest {
     private HearingRepository hearingRepository;
     @Mock
     private UserIdentity userIdentity;
+    @Mock
+    private CourtLogEventRepository courtLogEventRepository;
+    @Mock
+    private AudioConfigurationProperties audioConfigurationProperties;
     @Mock
     private ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     @Mock
@@ -118,7 +128,9 @@ class AudioServiceImplTest {
             mapper,
             dataManagementApi,
             userIdentity,
-            fileContentChecksum
+            fileContentChecksum,
+            courtLogEventRepository,
+            audioConfigurationProperties
         );
     }
 
@@ -216,6 +228,48 @@ class AudioServiceImplTest {
         assertEquals(2, savedMedia.getTotalChannels());
         assertEquals("SWANSEA", savedMedia.getCourtroom().getCourthouse().getCourthouseName());
         assertEquals("1", savedMedia.getCourtroom().getName());
+    }
+
+    @Test
+    void handheldAudioShouldNotLinkAudioToHearingByEvent() {
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        addAudioMetadataRequest.setTotalChannels(1);
+
+        HearingEntity hearing = new HearingEntity();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.addHearing(hearing);
+
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
+            .thenReturn(Arrays.asList(addAudioMetadataRequest.getCourtroom()));
+
+        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        verify(hearingRepository, times(0)).saveAndFlush(any());
+        assertEquals(0, hearing.getMediaList().size());
+    }
+
+    @Test
+    void linkAudioToHearingByEvent() {
+        HearingEntity hearing = new HearingEntity();
+        EventEntity eventEntity = new EventEntity();
+        eventEntity.setTimestamp(STARTED_AT.minusMinutes(30));
+        eventEntity.addHearing(hearing);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        when(courtLogEventRepository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
+            anyString(),
+            anyString(),
+            any(),
+            any()
+        )).thenReturn(Arrays.asList(eventEntity));
+
+        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        verify(hearingRepository, times(addAudioMetadataRequest.getCases().size())).saveAndFlush(any());
+        assertEquals(addAudioMetadataRequest.getCases().size(), hearing.getMediaList().size());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {
