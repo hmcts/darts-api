@@ -41,20 +41,5 @@ public interface MediaRequestRepository extends JpaRepository<MediaRequestEntity
                                                                 OffsetDateTime startTime, OffsetDateTime endTime,
                                                                 AudioRequestType requestType, List<MediaRequestStatus> requestStatuses);
 
-    @Query("""
-        SELECT distinct(mr.id) FROM MediaRequestEntity mr, TransformedMediaEntity tm
-        WHERE tm.mediaRequest = mr
-        AND tm.lastAccessed < :lastAccessedDateTime
-        AND mr.status = :status
-        """)
-    List<Integer> findAllIdsByLastAccessedTimeBeforeAndStatus(OffsetDateTime lastAccessedDateTime, MediaRequestStatus status);
 
-    @Query("""
-        SELECT distinct(mr.id) FROM MediaRequestEntity mr, TransformedMediaEntity tm
-        WHERE tm.mediaRequest = mr
-        AND tm.createdDateTime < :createdDateTime
-        AND mr.status <> :status
-        AND tm.lastAccessed IS NULL
-        """)
-    List<Integer> findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(OffsetDateTime createdDateTime, MediaRequestStatus status);
 }

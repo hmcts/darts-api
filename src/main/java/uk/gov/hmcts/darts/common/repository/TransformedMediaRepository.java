@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.audio.model.TransformedMediaDetailsDto;
 import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -52,5 +53,14 @@ public interface TransformedMediaRepository extends JpaRepository<TransformedMed
         order by 1
         """)
     List<TransformedMediaDetailsDto> findTransformedMediaDetails(Integer userId, boolean expired);
+
+
+    @Query("""
+        SELECT tm FROM MediaRequestEntity mr, TransformedMediaEntity tm
+        WHERE tm.mediaRequest = mr
+        AND ((tm.lastAccessed < :createdAtOrLastAccessedDateTime AND mr.status = 'COMPLETED')
+             OR (tm.createdDateTime < :createdAtOrLastAccessedDateTime AND mr.status <> 'PROCESSING' AND tm.lastAccessed IS NULL))
+        """)
+    List<TransformedMediaEntity> findAllDeletableTransformedMedia(OffsetDateTime createdAtOrLastAccessedDateTime);
 
 }
