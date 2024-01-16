@@ -88,7 +88,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids", Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
                 ORIGINAL_SECURITY_GROUP_ID_2
@@ -140,7 +140,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value("An updated description"))
             .andExpect(jsonPath("$.active").value(false))
-            .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
@@ -219,7 +219,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(false))
-            .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
@@ -253,7 +253,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids").isEmpty());
 
         transactionTemplate.execute(status -> {
@@ -287,7 +287,7 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS))
             .andExpect(jsonPath("$.description").value(ORIGINAL_DESCRIPTION))
             .andExpect(jsonPath("$.active").value(true))
-            .andExpect(jsonPath("$.last_login").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
+            .andExpect(jsonPath("$.last_login_at").value(ORIGINAL_LAST_LOGIN_TIME.toString()))
             .andExpect(jsonPath("$.security_group_ids", not(Matchers.containsInAnyOrder(
                 ORIGINAL_SECURITY_GROUP_ID_1,
                 ORIGINAL_SECURITY_GROUP_ID_2
