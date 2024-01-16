@@ -62,7 +62,9 @@ class ArmDataManagementApiImplTest {
         when(armDataManagementConfiguration.getArmCollectedDropZone()).thenReturn(ARM_DROP_ZONE);
         String filename = ARM_DROP_ZONE + prefix;
         when(armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, filename)).thenReturn(responseBlobs);
+
         Map<String, BlobItem> blobs = armDataManagementApi.listCollectedBlobs(prefix);
+
         assertEquals(1, blobs.size());
     }
 

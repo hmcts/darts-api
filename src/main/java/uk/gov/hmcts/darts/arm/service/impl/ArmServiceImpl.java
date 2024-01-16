@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ import java.util.Map;
 public class ArmServiceImpl implements ArmService {
 
     public static final String FILE_PATH_DELIMITER = "/";
+    private static final long TIMEOUT = 60;
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
@@ -80,7 +83,8 @@ public class ArmServiceImpl implements ArmService {
                                                                 String prefix /* ="" */) {
 
         ListBlobsOptions options = new ListBlobsOptions().setPrefix(prefix);
-        return blobContainerClient.listBlobsByHierarchy(delimiter, options, null);
+        Duration timeout = Duration.of(TIMEOUT, ChronoUnit.SECONDS);
+        return blobContainerClient.listBlobsByHierarchy(delimiter, options, timeout);
     }
 
     public BinaryData getBlobData(String containerName, String blobName) {
