@@ -26,6 +26,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -133,6 +134,15 @@ class TestSupportControllerTest extends IntegrationBase {
 
         String actualResponseBody = response.getResponse().getContentAsString();
         assertThat(actualResponseBody.contains("christmas"));
+    }
+
+    @Test
+    void createRetention() throws Exception {
+        MvcResult response = mockMvc.perform(post(ENDPOINT_URL + "/case-retentions/caseNumber/func-case-a"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        assertFalse(response.getResponse().getContentAsString().isEmpty());
     }
 
     @Test
