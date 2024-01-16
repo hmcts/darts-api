@@ -171,7 +171,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         File archiveRecordFile = archiveRecordFileInfo.getArchiveRecordFile();
         if (archiveRecordFileInfo.isFileGenerationSuccessful() && archiveRecordFile.exists()) {
             try {
-                BinaryData metadataFileBinary = fileOperationService.saveFileToBinaryData(archiveRecordFile.getAbsolutePath());
+                BinaryData metadataFileBinary = fileOperationService.convertFileToBinaryData(archiveRecordFile.getAbsolutePath());
                 armDataManagementApi.saveBlobDataToArm(archiveRecordFileInfo.getArchiveRecordFile().getName(), metadataFileBinary);
             } catch (BlobStorageException e) {
                 if (e.getStatusCode() == BLOB_ALREADY_EXISTS_STATUS_CODE) {

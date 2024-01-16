@@ -65,7 +65,7 @@ public class FileOperationServiceImpl implements FileOperationService {
     }
 
     @Override
-    public BinaryData saveFileToBinaryData(String fileName) {
+    public BinaryData convertFileToBinaryData(String fileName) {
         return BinaryData.fromFile(Path.of(fileName));
     }
 

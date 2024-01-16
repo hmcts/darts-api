@@ -11,5 +11,5 @@ public interface FileOperationService {
 
     Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUuidToWorkspace) throws IOException;
 
-    BinaryData saveFileToBinaryData(String fileName);
+    BinaryData convertFileToBinaryData(String fileName);
 }

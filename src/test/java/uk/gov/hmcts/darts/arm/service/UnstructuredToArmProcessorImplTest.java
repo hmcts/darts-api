@@ -332,7 +332,7 @@ class UnstructuredToArmProcessorImplTest {
         )).thenReturn(Optional.ofNullable(externalObjectDirectoryEntityUnstructured));
 
         BinaryData manifest = BinaryData.fromFile(Path.of(archiveRecordFile.getAbsolutePath()));
-        when(fileOperationService.saveFileToBinaryData(any())).thenReturn(manifest);
+        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(manifest);
         BlobStorageException blobStorageException = mock(BlobStorageException.class);
         when(blobStorageException.getStatusCode()).thenReturn(409);
         when(blobStorageException.getMessage()).thenReturn("Copying blob failed");

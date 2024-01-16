@@ -6,10 +6,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +29,8 @@ class FileOperationServiceTest extends IntegrationBase {
     @Autowired
     private FileOperationService fileOperationService;
 
+    @TempDir
+    private File tempDirectory;
     private Path filePath;
     private BinaryData mediaFile;
     private String fileName;
@@ -42,7 +46,6 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-1: Check if file is created in temporary folder")
     void saveBlobDataToTempWorkspaceTestOne() throws IOException {
-
         filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertTrue(Files.exists(filePath));
     }
@@ -50,7 +53,6 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-2: Check if file is empty")
     void saveBlobDataToTempWorkspaceTestTwo() throws IOException {
-
         filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertNotEquals(0L, Files.size(filePath));
     }
@@ -58,7 +60,6 @@ class FileOperationServiceTest extends IntegrationBase {
     @Test
     @DisplayName("Test-3: Check if the saved file is equal to the original BinaryData file")
     void saveBlobDataToTempWorkspaceTestThree() throws IOException {
-
         filePath = fileOperationService.saveFileToTempWorkspace(mediaFile, fileName);
         assertArrayEquals(mediaFile.toBytes(), Files.readAllBytes(filePath));
     }
@@ -73,11 +74,24 @@ class FileOperationServiceTest extends IntegrationBase {
 
     @Test
     @DisplayName("Test-5: Test converting file to binary data")
-    void saveFileToBinaryData() throws IOException {
+    void convertFileToBinaryData() throws IOException {
         filePath = createDummyFile();
         log.debug("Created file {}", filePath);
-        BinaryData binaryData = fileOperationService.saveFileToBinaryData(filePath.toFile().getAbsolutePath());
+        BinaryData binaryData = fileOperationService.convertFileToBinaryData(filePath.toFile().getAbsolutePath());
         assertNotNull(binaryData);
+    }
+
+    @Test
+    @DisplayName("Test-6: Test save binary data to specified workspace")
+    void saveBinaryDataToSpecifiedWorkspace() throws IOException {
+        var tempFilename = UUID.randomUUID().toString();
+        log.debug("Created file {}", filePath);
+
+        filePath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(mediaFile,
+                                                                            tempFilename,
+                                                                            tempDirectory.getAbsolutePath(),
+                                                                            true);
+        assertNotNull(filePath);
     }
 
     @AfterEach

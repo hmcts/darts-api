@@ -142,7 +142,7 @@ class AudioServiceImplTest {
 
         byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
-        when(fileOperationService.saveFileToBinaryData(any())).thenReturn(data);
+        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
 
         try (InputStream inputStream = audioService.preview(mediaEntity.getId())) {
             byte[] bytes = inputStream.readAllBytes();
