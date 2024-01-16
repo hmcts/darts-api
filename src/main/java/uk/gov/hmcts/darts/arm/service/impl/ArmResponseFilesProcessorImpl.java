@@ -226,7 +226,9 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     private void cleanupTemporaryJsonFile(Path jsonPath) {
         if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
             try {
-                jsonPath.toFile().delete();
+                if (!jsonPath.toFile().delete()) {
+                    log.warn("Delete temporary file: {} failed", jsonPath.toFile().toString());
+                }
             } catch (Exception e) {
                 log.error("Unable to delete temporary file: {}", jsonPath.toFile().toString());
             }
