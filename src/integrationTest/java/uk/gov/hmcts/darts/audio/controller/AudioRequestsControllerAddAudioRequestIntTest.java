@@ -247,6 +247,7 @@ class AudioRequestsControllerAddAudioRequestIntTest extends IntegrationBase {
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_104"))
             .andReturn();
     }
 

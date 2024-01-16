@@ -33,7 +33,7 @@ public class ArmDataManagementDaoImpl implements ArmDataManagementDao {
 
     private BlobServiceClient getBlobServiceClient() {
         return new BlobServiceClientBuilder()
-            .connectionString(armDataManagementConfiguration.getArmStorageAccountConnectionString())
+            .endpoint(armDataManagementConfiguration.getSasEndpoint())
             .buildClient();
     }
 }

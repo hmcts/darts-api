@@ -7,7 +7,7 @@ import org.mapstruct.ReportingPolicy;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
-import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
+import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 @Mapper(componentModel = "spring",
     unmappedSourcePolicy = ReportingPolicy.IGNORE,
@@ -37,7 +37,7 @@ public interface UserAccountMapper {
         @Mapping(source = "emailAddress", target = "emailAddress"),
         @Mapping(source = "userDescription", target = "description"),
         @Mapping(source = "active", target = "active"),
-        @Mapping(source = "lastLoginTime", target = "lastLogin")
+        @Mapping(source = "lastLoginTime", target = "lastLoginAt")
     })
-    UserWithIdAndLastLogin mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
+    UserWithIdAndTimestamps mapToUserWithIdAndLastLoginModel(UserAccountEntity userAccountEntity);
 }

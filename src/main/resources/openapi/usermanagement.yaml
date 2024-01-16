@@ -29,7 +29,7 @@ paths:
             $ref: '#/components/schemas/UserEmailAddress'
       responses:
         '200':
-          $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
+          $ref: '#/components/responses/UserArraySuccessResponseWithIdAndTimestamps'
 
     post:
       summary: Create new user
@@ -52,7 +52,7 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          $ref: '#/components/responses/UserSuccessResponseWithIdAndLastLogin'
+          $ref: '#/components/responses/UserSuccessResponseWithIdAndTimestamps'
         '404':
           $ref: '#/components/responses/UserNotFound'
 
@@ -67,7 +67,7 @@ paths:
         $ref: '#/components/requestBodies/UserPatchRequest'
       responses:
         '200':
-          $ref: '#/components/responses/UserSuccessResponseWithIdAndLastLogin'
+          $ref: '#/components/responses/UserSuccessResponseWithIdAndTimestamps'
         '400':
           $ref: '#/components/responses/BadUserPatchRequest'
         '404':
@@ -83,7 +83,7 @@ paths:
         $ref: '#/components/requestBodies/UserSearchRequest'
       responses:
         '200':
-          $ref: '#/components/responses/UserArraySuccessResponseWithIdAndLastLogin'
+          $ref: '#/components/responses/UserArraySuccessResponseWithIdAndTimestamps'
         '400':
           description: Bad Request Error
           content:
@@ -189,20 +189,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserWithId'
-    UserSuccessResponseWithIdAndLastLogin:
+    UserSuccessResponseWithIdAndTimestamps:
       description: 'Success'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/UserWithIdAndLastLogin'
-    UserArraySuccessResponseWithIdAndLastLogin:
+            $ref: '#/components/schemas/UserWithIdAndTimestamps'
+    UserArraySuccessResponseWithIdAndTimestamps:
       description: 'Success'
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/UserWithIdAndLastLogin'
+              $ref: '#/components/schemas/UserWithIdAndTimestamps'
     SecurityGroupArraySuccessResponse:
       description: 'Success'
       content:
@@ -393,12 +393,18 @@ components:
           $ref: '#/components/schemas/UserId'
       allOf:
         - $ref: '#/components/schemas/User'
-    UserWithIdAndLastLogin:
+    UserWithIdAndTimestamps:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UserId'
-        last_login:
+        last_login_at:
+          type: string
+          format: date-time
+        last_modified_at:
+          type: string
+          format: date-time
+        created_at:
           type: string
           format: date-time
       allOf:

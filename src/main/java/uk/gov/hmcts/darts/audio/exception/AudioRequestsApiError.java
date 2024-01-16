@@ -28,6 +28,11 @@ public enum AudioRequestsApiError implements DartsApiError {
         "103",
         HttpStatus.NOT_FOUND,
         "The requested transformed media cannot be found"
+    ),
+    DUPLICATE_MEDIA_REQUEST(
+        "104",
+        HttpStatus.CONFLICT,
+        "An audio request already exists with these properties"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUDIO_REQUESTS";
