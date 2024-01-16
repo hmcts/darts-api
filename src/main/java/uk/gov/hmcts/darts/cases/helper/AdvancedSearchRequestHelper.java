@@ -71,12 +71,12 @@ public class AdvancedSearchRequestHelper {
         List<Predicate> predicates = new ArrayList<>();
         CollectionUtils.addAll(predicates, createCaseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addHearingDateCriteria(request, criteriaBuilder, caseRoot));
-        CollectionUtils.addAll(predicates, addCourthouseCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addCourtroomCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addJudgeCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addDefendantCriteria(request, criteriaBuilder, caseRoot));
         CollectionUtils.addAll(predicates, addEventCriteria(request, criteriaBuilder, caseRoot));
         if (!userIdentity.userHasGlobalAccess(Set.of(JUDGE))) {
+            CollectionUtils.addAll(predicates, addCourthouseCriteria(request, criteriaBuilder, caseRoot));
             CollectionUtils.addAll(predicates, addUserSecurityRolesCriteria(criteriaBuilder, caseRoot));
         }
 

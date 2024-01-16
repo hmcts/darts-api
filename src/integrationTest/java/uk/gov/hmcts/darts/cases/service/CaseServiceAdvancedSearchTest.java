@@ -47,12 +47,17 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     @MockBean
     private UserIdentity mockUserIdentity;
     CourthouseEntity swanseaCourthouse;
+    CourthouseEntity leedsCourthouse;
 
     @BeforeEach
     void setupData() {
         swanseaCourthouse = someMinimalCourthouse();
         swanseaCourthouse.setCourthouseName("SWANSEA");
         swanseaCourthouse.setDisplayName("SWANSEA");
+
+        leedsCourthouse = someMinimalCourthouse();
+        leedsCourthouse.setCourthouseName("LEEDS");
+        leedsCourthouse.setDisplayName("LEEDS");
 
         CourtCaseEntity case1 = createCaseAt(swanseaCourthouse);
         case1.setCaseNumber("Case1");
@@ -78,6 +83,9 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         CourtCaseEntity case8 = createCaseAt(swanseaCourthouse);
         case8.setCaseNumber("case8");
+
+        CourtCaseEntity case11 = createCaseAt(leedsCourthouse);
+        case11.setCaseNumber("case11");
 
         JudgeEntity judge = createJudgeWithName("aJudge");
         CourtroomEntity courtroom1 = createCourtRoomWithNameAtCourthouse(swanseaCourthouse, "courtroom1");
@@ -126,14 +134,17 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         HearingEntity hearing7b = createHearingWithDefaults(case7, courtroom1, LocalDate.of(2023, 10, 23), judge);
         HearingEntity hearing8 = createHearingWithDefaults(case8, courtroom1, LocalDate.of(2023, 10, 22), judge);
 
+        CourtroomEntity courtroom4 = createCourtRoomWithNameAtCourthouse(leedsCourthouse, "courtroom1");
+        HearingEntity hearing9 = createHearingWithDefaults(case11, courtroom4, LocalDate.of(2023, 5, 20), judge);
+
         dartsDatabase.saveAll(hearing1a, hearing1b, hearing1c,
                               hearing2a, hearing2b, hearing2c,
                               hearing3a, hearing3b, hearing3c,
                               hearing4a, hearing4b, hearing4c,
                               hearing5a, hearing5b, hearing5c,
                               hearing6a, hearing6b, hearing6c,
-                              hearing7a, hearing7b, hearing8
-
+                              hearing7a, hearing7b, hearing8,
+                              hearing9
         );
 
         EventEntity event4a = createEventWith("eventName", "event4a", hearing4a, OffsetDateTime.now());
@@ -299,7 +310,7 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
     }
 
     @Test
-    void whenAdvancedSearchIsRunForUserWithGlobalAccessWithNoCourthouseAccess_thenShouldReturnResultsOk() throws IOException {
+    void whenAdvancedSearchIsRunForJudgeWithGlobalAccess_thenShouldReturnAllCasesForAllCourthouses() throws IOException {
 
         GetCasesSearchRequest request = GetCasesSearchRequest.builder()
             .caseNumber("sE1")
@@ -307,12 +318,13 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+        // not authorised for courthouse but has global access
         when(mockUserIdentity.userHasGlobalAccess(Set.of(JUDGE))).thenReturn(true);
 
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = TestUtils.removeIds(getContentsFromFile(
-            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumberGlobalJudge/expectedResponse.json"));
 
         compareJson(actualResponse, expectedResponse);
     }
@@ -330,6 +342,29 @@ class CaseServiceAdvancedSearchTest extends IntegrationBase {
         List<AdvancedSearchResult> resultList = service.advancedSearch(request);
         String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
         String expectedResponse = "[]";
+
+        compareJson(actualResponse, expectedResponse);
+    }
+
+    @Test
+    void whenAdvancedSearchIsRunForJudgeWithoutGlobalAccess_thenShouldReturnCasesForJudgeOnly() throws IOException {
+
+        // authorised for Swansea courthouse
+        setupUserAccountAndSecurityGroup();
+        // but does not have global access
+        when(mockUserIdentity.userHasGlobalAccess(Set.of(JUDGE))).thenReturn(false);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().createAuthorisedIntegrationTestUserWithoutCourthouse();
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
+            .caseNumber("sE1")
+            .build();
+
+        List<AdvancedSearchResult> resultList = service.advancedSearch(request);
+        String actualResponse = TestUtils.removeIds(objectMapper.writeValueAsString(resultList));
+        String expectedResponse = TestUtils.removeIds(getContentsFromFile(
+            "tests/cases/CaseServiceAdvancedSearchTest/getWithCaseNumber/expectedResponse.json"));
 
         compareJson(actualResponse, expectedResponse);
     }
