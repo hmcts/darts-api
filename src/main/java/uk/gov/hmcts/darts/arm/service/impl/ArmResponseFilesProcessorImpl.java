@@ -214,7 +214,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                             processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
                         } else {
                             //Read the upload file and log the error code and description with EOD
-                            log.error(
+                            log.warn(
                                 "External object id {} status is failed. Arm error description: {} Arm error status: {}",
                                 externalObjectDirectory.getId(),
                                 armResponseUploadFileRecord.getExceptionDescription(),
@@ -223,10 +223,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
                         }
                     } else {
+                        log.warn("Unable to read upload file {}", uploadFilename);
                         updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
                     }
                 } else {
-                    log.error("Failed to write upload file to temp workspace {}", uploadFilename);
+                    log.warn("Failed to write upload file to temp workspace {}", uploadFilename);
                     updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
                 }
             } catch (Exception e) {
