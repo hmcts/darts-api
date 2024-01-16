@@ -142,7 +142,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         try {
             inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
         } catch (Exception e) {
-            updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus); //increment verification attempts
+            log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
+            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
         }
         return inputUploadBlobs;
     }
@@ -186,6 +187,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
             }
         } else {
+            log.info("Unable to find response files for external object {}", externalObjectDirectory.getId());
             updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
         }
     }
