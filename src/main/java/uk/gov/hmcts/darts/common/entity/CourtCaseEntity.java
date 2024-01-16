@@ -92,9 +92,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @OneToMany(mappedBy = COURT_CASE)
     private List<TranscriptionEntity> transcriptions;
 
-    @OneToMany(mappedBy = COURT_CASE)
-    private List<AnnotationEntity> annotations;
-
     @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();
 
