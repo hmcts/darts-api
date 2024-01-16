@@ -4,16 +4,16 @@ import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
-import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
+import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.util.List;
 
 public interface UserManagementService {
 
-    UserWithIdAndLastLogin modifyUser(Integer userId, UserPatch userPatch);
+    UserWithIdAndTimestamps modifyUser(Integer userId, UserPatch userPatch);
 
     UserWithId createUser(User user);
 
-    List<UserWithIdAndLastLogin> search(UserSearch userSearch);
+    List<UserWithIdAndTimestamps> search(UserSearch userSearch);
 
 }

@@ -35,5 +35,5 @@ deployed-application-uri: ${TEST_URL:http://localhost:4550}
 darts:
   storage:
     arm:
-      connection-string: ${ARM_STORAGE_CONNECTION_STRING:}
+      sas-endpoint: ${ARM_SAS_ENDPOINT:}
       container-name: darts-arm

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.darts.audio.component.AudioRequestResponseMapper;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
+import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
 import uk.gov.hmcts.darts.audio.service.MediaRequestService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.audiorequests.http.api.AudioRequestsApi;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponse;
 import uk.gov.hmcts.darts.audiorequests.model.GetAudioRequestResponseV1;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
 import java.io.InputStream;
 import java.util.List;
@@ -101,17 +103,11 @@ public class AudioRequestsController implements AudioRequestsApi {
         MediaRequestEntity audioRequest;
 
         if (mediaRequestService.isUserDuplicateAudioRequest(audioRequestDetails)) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            throw new DartsApiException(AudioRequestsApiError.DUPLICATE_MEDIA_REQUEST);
         }
 
-        try {
-            audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
-            addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);
-        } catch (Exception e) {
-            log.error("Failed to request audio {}", e.getMessage());
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
+        audioRequest = mediaRequestService.saveAudioRequest(audioRequestDetails);
+        addAudioResponse = audioRequestResponseMapper.mapToAddAudioResponse(audioRequest);
         mediaRequestService.scheduleMediaRequestPendingNotification(audioRequest);
         return new ResponseEntity<>(addAudioResponse, HttpStatus.OK);
     }

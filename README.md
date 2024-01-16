@@ -48,7 +48,7 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD | AzureAdB2CFuncTestROPCGlobalPassword      |
 | AZURE_AD_FUNCTIONAL_TEST_USERNAME        | AzureADFunctionalTestUsername             |
 | AZURE_AD_FUNCTIONAL_TEST_PASSWORD        | AzureADFunctionalTestPassword             |
-| ARM_STORAGE_CONNECTION_STRING            | ARMConnectionString                       |
+| ARM_SAS_ENDPOINT                         | ARMSasEndpoint                            |
 
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
