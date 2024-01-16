@@ -11,7 +11,7 @@ import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
-import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
+import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class UserController implements UserApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<List<UserWithIdAndLastLogin>> getUsers(Integer courthouseId, String emailAddress) {
+    public ResponseEntity<List<UserWithIdAndTimestamps>> getUsers(Integer courthouseId, String emailAddress) {
         return UserApi.super.getUsers(courthouseId, emailAddress);
     }
 
@@ -46,8 +46,8 @@ public class UserController implements UserApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<UserWithIdAndLastLogin> modifyUser(Integer userId, UserPatch userPatch) {
-        UserWithIdAndLastLogin updatedUser = userManagementService.modifyUser(userId, userPatch);
+    public ResponseEntity<UserWithIdAndTimestamps> modifyUser(Integer userId, UserPatch userPatch) {
+        UserWithIdAndTimestamps updatedUser = userManagementService.modifyUser(userId, userPatch);
 
         return ResponseEntity.ok(updatedUser);
     }
@@ -55,7 +55,7 @@ public class UserController implements UserApi {
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
-    public ResponseEntity<List<UserWithIdAndLastLogin>> search(UserSearch userSearch) {
+    public ResponseEntity<List<UserWithIdAndTimestamps>> search(UserSearch userSearch) {
         return ResponseEntity.ok(userManagementService.search(userSearch));
     }
 

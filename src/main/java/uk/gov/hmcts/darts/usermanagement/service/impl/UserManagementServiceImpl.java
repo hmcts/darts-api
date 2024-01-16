@@ -16,7 +16,7 @@ import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
 import uk.gov.hmcts.darts.usermanagement.model.UserSearch;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithId;
-import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndLastLogin;
+import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 import uk.gov.hmcts.darts.usermanagement.service.UserManagementService;
 
 import java.time.OffsetDateTime;
@@ -72,13 +72,13 @@ public class UserManagementServiceImpl implements UserManagementService {
 
     @Override
     @Transactional
-    public UserWithIdAndLastLogin modifyUser(Integer userId, UserPatch userPatch) {
+    public UserWithIdAndTimestamps modifyUser(Integer userId, UserPatch userPatch) {
         userAccountExistsValidator.validate(userId);
 
         UserAccountEntity updatedUserEntity = userAccountRepository.findById(userId)
             .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
 
-        UserWithIdAndLastLogin user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
+        UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
         List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
         user.setSecurityGroupIds(securityGroupIds);
 
@@ -86,12 +86,12 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public List<UserWithIdAndLastLogin> search(UserSearch userSearch) {
-        List<UserWithIdAndLastLogin> userWithIdAndLastLoginList = new ArrayList<>();
+    public List<UserWithIdAndTimestamps> search(UserSearch userSearch) {
+        List<UserWithIdAndTimestamps> userWithIdAndLastLoginList = new ArrayList<>();
 
         userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
             .forEach(userAccountEntity -> {
-                UserWithIdAndLastLogin userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
+                UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
                 userWithIdAndLastLogin.setSecurityGroupIds(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
                 userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
             });
