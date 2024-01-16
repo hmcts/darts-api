@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.audio.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -36,7 +35,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
 
 @AutoConfigureMockMvc
-@Slf4j
 class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
 
     @Autowired
@@ -73,7 +71,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
     }
 
     @Test
-    void updateAudioRequestLastAccessedTimestampWhenRequestorDifferentUserThrowsUnauthorizedError() throws Exception {
+    void updateAudioRequestLastAccessedTimestampWhenRequestorDifferentUserThrowsForbiddenError() throws Exception {
         MediaRequestEntity mediaRequestEntityBySystemUser = dartsDatabase.createAndLoadOpenMediaRequestEntity(
             systemUser, AudioRequestType.DOWNLOAD);
 
@@ -84,19 +82,18 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
             String.format("/audio-requests/%d", mediaRequestEntityBySystemUser.getId())));
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
-            .andExpect(status().isUnauthorized())
+            .andExpect(status().isForbidden())
             .andReturn();
 
         String actualJson = mvcResult.getResponse().getContentAsString();
-        log.debug("Result: {}", actualJson);
         String expectedJson = """
             {
               "type":"AUDIO_REQUESTS_101",
               "title":"The audio request is not valid for this user",
-              "status":401
+              "status":403
             }""";
 
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
-
     }
+
 }

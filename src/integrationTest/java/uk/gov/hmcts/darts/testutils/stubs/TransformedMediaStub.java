@@ -35,9 +35,7 @@ public class TransformedMediaStub {
         }
         transformedMediaEntity.setExpiryTime(expiry);
         transformedMediaEntity.setLastAccessed(lastAccessed);
-        transformedMediaRepository.save(transformedMediaEntity);
-
-        return transformedMediaEntity;
+        return transformedMediaRepository.save(transformedMediaEntity);
     }
 
 }

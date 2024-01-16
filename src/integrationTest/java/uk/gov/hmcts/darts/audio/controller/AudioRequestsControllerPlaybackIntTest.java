@@ -30,7 +30,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -96,16 +96,24 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
                 blobId
             ));
 
+        final Integer transformedMediaId = transientObjectDirectoryEntity.getTransformedMedia().getId();
+
+        doNothing().when(mockAuthorisation)
+            .authoriseByTransformedMediaId(
+                transformedMediaId,
+                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            );
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("transformed_media_id", String.valueOf(transientObjectDirectoryEntity.getTransformedMedia().getId()));
+            .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
 
         mockMvc.perform(requestBuilder)
             .andExpect(status().isOk());
 
         verify(dataManagementService).getBlobData(eq("darts-outbound"), any());
 
-        verify(mockAuthorisation, times(0)).authoriseByMediaRequestId(
-            mediaRequestEntity.getId(),
+        verify(mockAuthorisation).authoriseByTransformedMediaId(
+            transformedMediaId,
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
 
@@ -136,16 +144,24 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
     void audioRequestPlaybackGetShouldReturnBadRequestWhenMediaRequestEntityIsDownload() throws Exception {
         authorisationStub.givenTestSchema();
 
+        final Integer transformedMediaId = authorisationStub.getTransformedMediaEntity().getId();
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("transformed_media_id", String.valueOf(authorisationStub.getTransformedMediaEntity().getId()));
+            .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
+
+        doNothing().when(mockAuthorisation)
+            .authoriseByTransformedMediaId(
+                transformedMediaId,
+                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            );
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_102"));
 
-        verify(mockAuthorisation, times(0)).authoriseByMediaRequestId(
-            authorisationStub.getMediaRequestEntity().getId(),
+        verify(mockAuthorisation).authoriseByTransformedMediaId(
+            transformedMediaId,
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }
@@ -158,16 +174,24 @@ class AudioRequestsControllerPlaybackIntTest extends IntegrationBase {
         mediaRequestEntity.setRequestType(PLAYBACK);
         dartsDatabase.save(mediaRequestEntity);
 
+        final Integer transformedMediaId = authorisationStub.getTransformedMediaEntity().getId();
+
         MockHttpServletRequestBuilder requestBuilder = get(ENDPOINT)
-            .queryParam("transformed_media_id", String.valueOf(authorisationStub.getTransformedMediaEntity().getId()));
+            .queryParam("transformed_media_id", String.valueOf(transformedMediaId));
+
+        doNothing().when(mockAuthorisation)
+            .authoriseByTransformedMediaId(
+                transformedMediaId,
+                Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
+            );
 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isInternalServerError())
             .andExpect(jsonPath("$.type").value("AUDIO_101"));
 
-        verify(mockAuthorisation, times(0)).authoriseByMediaRequestId(
-            authorisationStub.getMediaRequestEntity().getId(),
+        verify(mockAuthorisation).authoriseByTransformedMediaId(
+            transformedMediaId,
             Set.of(JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS)
         );
     }

@@ -31,6 +31,7 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
     private final MediaIdControllerAuthorisationImpl mediaIdControllerAuthorisation;
     private final MediaRequestIdControllerAuthorisationImpl mediaRequestIdControllerAuthorisation;
     private final TranscriptionIdControllerAuthorisationImpl transcriptionIdControllerAuthorisation;
+    private final TransformedMediaIdControllerAuthorisationImpl transformedMediaIdControllerAuthorisation;
 
     @Override
     public ContextIdEnum getContextId() {
@@ -54,11 +55,15 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
         Optional<String> transcriptionIdParamOptional = getEntityParamOptional(request, transcriptionIdControllerAuthorisation.getEntityIdParam());
         transcriptionIdControllerAuthorisation.checkAuthorisationByTranscriptionId(transcriptionIdParamOptional, roles);
 
+        Optional<String> transformedMediaIdParamOptional = getEntityParamOptional(request, transcriptionIdControllerAuthorisation.getEntityIdParam());
+        transformedMediaIdControllerAuthorisation.checkAuthorisationByTransformedMediaId(transformedMediaIdParamOptional, roles);
+
         if (hearingIdParamOptional.isEmpty()
             && caseIdParamOptional.isEmpty()
             && mediaIdParamOptional.isEmpty()
             && mediaRequestIdParamOptional.isEmpty()
             && transcriptionIdParamOptional.isEmpty()
+            && transformedMediaIdParamOptional.isEmpty()
         ) {
             entitiesNotFound("parameters");
         }
@@ -94,6 +99,11 @@ public class AnyEntityIdControllerAuthorisationImpl extends BaseControllerAuthor
 
         if (checkEntityExists(jsonNode, transcriptionIdControllerAuthorisation.getEntityIdParam())) {
             authorisation.authoriseByTranscriptionId(jsonNode.path(transcriptionIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
+            entityExists = true;
+        }
+
+        if (checkEntityExists(jsonNode, transformedMediaIdControllerAuthorisation.getEntityIdParam())) {
+            authorisation.authoriseByTransformedMediaId(jsonNode.path(transformedMediaIdControllerAuthorisation.getEntityIdParam()).intValue(), roles);
             entityExists = true;
         }
 

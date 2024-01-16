@@ -18,6 +18,10 @@ public interface Authorisation {
 
     void authoriseByTranscriptionId(Integer transcriptionId, Set<SecurityRoleEnum> securityRoles);
 
+    void authoriseByTransformedMediaId(Integer transformedMediaId, Set<SecurityRoleEnum> securityRoles);
+
     void authoriseMediaRequestAgainstUser(Integer mediaRequestId);
+
+    void authoriseTransformedMediaAgainstUser(Integer transformedMediaId);
 
 }
