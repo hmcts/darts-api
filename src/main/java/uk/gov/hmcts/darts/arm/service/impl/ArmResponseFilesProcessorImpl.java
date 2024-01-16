@@ -203,7 +203,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                     appendUuidToWorkspace
                 );
                 if (jsonPath.toFile().exists()) {
-
                     ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(
                         jsonPath.toFile(),
                         ArmResponseUploadFileRecord.class
@@ -213,22 +212,25 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                             processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
                         } else {
                             //Read the upload file and log the error code and description with EOD
-
+                            log.error(
+                                "External object id {} status is failed. Arm error description: {} Arm error status: {}",
+                                externalObjectDirectory.getId(),
+                                armResponseUploadFileRecord.getExceptionDescription(),
+                                armResponseUploadFileRecord.getErrorStatus()
+                            );
                             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
-                            cleanupTemporaryJsonFile(jsonPath);
                         }
                     } else {
                         updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
-                        cleanupTemporaryJsonFile(jsonPath);
                     }
                 } else {
-                    log.error("Unable to write upload file to temp workspace{}", uploadFilename);
+                    log.error("Failed to write upload file to temp workspace {}", uploadFilename);
                     updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-                    cleanupTemporaryJsonFile(jsonPath);
                 }
             } catch (Exception e) {
                 log.error("Unable to process arm response upload file {}", uploadFilename);
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+            } finally {
                 cleanupTemporaryJsonFile(jsonPath);
             }
         } else {
@@ -288,24 +290,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
         if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
-            String input = armResponseUploadFileRecord.getInput();
-            if (StringUtils.isNotEmpty(input)) {
-                String unescapedJson = StringEscapeUtils.unescapeJson(input);
-                try {
-                    UploadNewFileRecord uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
-                    externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());
-                    externalObjectDirectory.setExternalRecordId(uploadNewFileRecord.getRelationId());
-                    updateExternalObjectDirectory(externalObjectDirectory, storedStatus);
-                } catch (JsonMappingException e) {
-                    log.error("Unable to map the upload record file input field");
-                    updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
-                } catch (JsonProcessingException e) {
-                    log.error("Unable to parse the upload record file ");
-                    updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
-                }
-            } else {
-                log.warn("Unable to get the upload record file input field");
-                updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+            UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
+            if (nonNull(uploadNewFileRecord)) {
+                externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());
+                externalObjectDirectory.setExternalRecordId(uploadNewFileRecord.getRelationId());
+                updateExternalObjectDirectory(externalObjectDirectory, storedStatus);
             }
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}", externalObjectDirectory.getId(),
@@ -314,6 +303,28 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
         }
 
+    }
+
+    private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                              String input) {
+        UploadNewFileRecord uploadNewFileRecord = null;
+        ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
+        if (StringUtils.isNotEmpty(input)) {
+            String unescapedJson = StringEscapeUtils.unescapeJson(input);
+            try {
+                uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
+            } catch (JsonMappingException e) {
+                log.error("Unable to map the upload record file input field");
+                updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+            } catch (JsonProcessingException e) {
+                log.error("Unable to parse the upload record file ");
+                updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+            }
+        } else {
+            log.warn("Unable to get the upload record file input field");
+            updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+        }
+        return uploadNewFileRecord;
     }
 
     private void updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,
