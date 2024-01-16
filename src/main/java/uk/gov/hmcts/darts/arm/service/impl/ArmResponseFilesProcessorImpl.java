@@ -79,10 +79,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
 
-        for (ExternalObjectDirectoryEntity externalObjectDirectory: dataSentToArm) {
+        for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
             updateExternalObjectDirectory(externalObjectDirectory, armProcessingResponseFilesStatus);
         }
-        for (ExternalObjectDirectoryEntity externalObjectDirectory: dataSentToArm) {
+        for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
             try {
                 processInputUploadFile(externalObjectDirectory);
             } catch (Exception e) {
@@ -100,7 +100,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         Map<String, BlobItem> inputUploadBlobs = getInputUploadBlobs(externalObjectDirectory, prefix);
         if (nonNull(inputUploadBlobs) && !inputUploadBlobs.isEmpty()) {
             //String armInputUploadFilename = inputUploadBlobs.keySet().stream().findFirst().get();
-            for (String armInputUploadFilename: inputUploadBlobs.keySet()) {
+            for (String armInputUploadFilename : inputUploadBlobs.keySet()) {
                 log.debug("Found ARM input upload file {}", armInputUploadFilename);
                 if (armInputUploadFilename.endsWith(generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
                     readInputUploadFile(externalObjectDirectory, armInputUploadFilename, armDropZoneStatus);
@@ -275,7 +275,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
             String input = armResponseUploadFileRecord.getInput();
             if (StringUtils.isNotEmpty(input)) {
-                String unescapedJson = StringEscapeUtils.escapeJson(input);
+                String unescapedJson = StringEscapeUtils.unescapeJson(input);
                 try {
                     UploadNewFileRecord uploadNewFileRecord = objectMapper.readValue(unescapedJson, UploadNewFileRecord.class);
                     externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());
@@ -294,7 +294,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}", externalObjectDirectory.getId(),
-                     armResponseUploadFileRecord.getMd5(), objectChecksum);
+                     armResponseUploadFileRecord.getMd5(), objectChecksum
+            );
             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
         }
 

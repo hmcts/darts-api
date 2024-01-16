@@ -2,14 +2,14 @@ package uk.gov.hmcts.darts.arm.model.record.armresponse;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.CREATE_RECORD;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-@Builder
+@NoArgsConstructor
 public class ArmResponseCreateRecord {
     @JsonProperty("operation")
     private final String operation = CREATE_RECORD;

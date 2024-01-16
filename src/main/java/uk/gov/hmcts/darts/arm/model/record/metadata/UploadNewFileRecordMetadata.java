@@ -2,15 +2,13 @@ package uk.gov.hmcts.darts.arm.model.record.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.darts.arm.model.ArchiveMetadata;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Getter
-@Setter
-@Builder
+@Data
+@NoArgsConstructor
 public class UploadNewFileRecordMetadata implements ArchiveMetadata {
 
     @JsonProperty("publisher")

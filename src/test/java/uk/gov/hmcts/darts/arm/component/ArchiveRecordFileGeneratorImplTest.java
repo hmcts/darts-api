@@ -24,6 +24,7 @@ import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @SuppressWarnings("PMD.AssignmentInOperand")
@@ -113,19 +114,19 @@ class ArchiveRecordFileGeneratorImplTest {
 
 
     private UploadNewFileRecord createMediaUploadNewFileRecord(String relationId) {
-        return UploadNewFileRecord.builder()
-            .relationId(relationId)
-            .fileMetadata(createMediaUploadNewFileRecordMetadata())
-            .build();
-
+        UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
+        uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
+        uploadNewFileRecord.setRelationId(relationId);
+        uploadNewFileRecord.setFileMetadata(createMediaUploadNewFileRecordMetadata());
+        return uploadNewFileRecord;
     }
 
     private UploadNewFileRecordMetadata createMediaUploadNewFileRecordMetadata() {
-        return UploadNewFileRecordMetadata.builder()
-            .publisher("DARTS")
-            .dzFilename("123_456_1.mp2") // <EOD>_<MEDID>_<ATTEMPT>.mp2"
-            .fileTag("mp2")
-            .build();
+        UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
+        uploadNewFileRecordMetadata.setPublisher("DARTS");
+        uploadNewFileRecordMetadata.setDzFilename("123_456_1.mp2");
+        uploadNewFileRecordMetadata.setFileTag("mp2");
+        return uploadNewFileRecordMetadata;
 
     }
 }

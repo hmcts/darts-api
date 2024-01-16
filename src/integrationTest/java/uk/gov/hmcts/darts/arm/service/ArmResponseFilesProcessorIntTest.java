@@ -31,7 +31,6 @@ import uk.gov.hmcts.darts.testutils.data.MediaTestData;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -43,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
 @ActiveProfiles({"intTest", "h2db"})
@@ -61,7 +61,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     private ExternalLocationTypeRepository externalLocationTypeRepository;
     @MockBean
     private ArmDataManagementApi armDataManagementApi;
-    @MockBean
+    @Autowired
     private FileOperationService fileOperationService;
     @MockBean
     private ArmDataManagementConfiguration armDataManagementConfiguration;
@@ -77,14 +77,16 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ObjectMapperConfig objectMapperConfig = new ObjectMapperConfig();
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
-        armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(externalObjectDirectoryRepository,
-                                                                      objectRecordStatusRepository,
-                                                                      externalLocationTypeRepository,
-                                                                      armDataManagementApi,
-                                                                      fileOperationService,
-                                                                      armDataManagementConfiguration,
-                                                                      objectMapper,
-                                                                      userIdentity);
+        armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(
+            externalObjectDirectoryRepository,
+            objectRecordStatusRepository,
+            externalLocationTypeRepository,
+            armDataManagementApi,
+            fileOperationService,
+            armDataManagementConfiguration,
+            objectMapper,
+            userIdentity
+        );
     }
 
     @Test
@@ -276,7 +278,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void givenProcessResponseFilesListsBlobsForHashcode() throws IOException {
+    void givenProcessResponseFilesSuccessfullyCompletes() throws IOException {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -291,6 +293,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 OffsetDateTime.parse("2023-09-26T13:45:00Z"),
                 1
             ));
+        savedMedia.setChecksum("C3CCA7021CF79B42F245AF350601C284");
+        dartsDatabase.save(savedMedia);
 
         ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
             savedMedia,
@@ -325,15 +329,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
-        File uploadFileTestFile = new File(uploadFileTestFilename);
-        Path uploadFilePath = Path.of(uploadFileTestFile.getAbsolutePath());
-        when(fileOperationService.saveBinaryDataToSpecifiedWorkspace(
-            uploadFileBinaryData,
-            uploadFileFilename,
-            armDataManagementConfiguration.getTempBlobWorkspace(),
-            true
-        )).thenReturn(uploadFilePath);
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
@@ -343,8 +338,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
 
         assertEquals(1, foundMediaList.size());
-        //ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        //assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(STORED.getId(), foundMedia.getStatus().getId());
     }
 
 
