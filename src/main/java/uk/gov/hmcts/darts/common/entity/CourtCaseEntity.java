@@ -32,8 +32,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
 
     public static final String COURT_CASE = "courtCase";
     public static final String VERSION_LABEL = "version_label";
-    public static final String RETENTION_APPLIES_FROM_TS = "retention_applies_from_ts";
-    public static final String END_OF_SENTENCE_TS = "end_of_sentence_ts";
     public static final String CASE_CLOSED_TS = "case_closed_ts";
     public static final String INTERPRETER_USED = "interpreter_used";
     public static final String CASE_CLOSED = "case_closed";
@@ -42,7 +40,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     public static final String CASE_OBJECT_ID = "case_object_id";
     public static final String EVH_ID = "evh_id";
     public static final String CAS_ID = "cas_id";
-    public static final String RETAIN_UNTIL_TS = "retain_until_ts";
     public static final String TABLE_NAME = "court_case";
 
     @Id
@@ -103,15 +100,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
         joinColumns = {@JoinColumn(name = "cas_id")},
         inverseJoinColumns = {@JoinColumn(name = "jud_id")})
     private List<JudgeEntity> judges = new ArrayList<>();
-
-    @Column(name = RETENTION_APPLIES_FROM_TS)
-    private OffsetDateTime retentionAppliesFromTimestamp;
-
-    @Column(name = END_OF_SENTENCE_TS)
-    private OffsetDateTime endOfSentenceTimestamp;
-
-    @Column(name = RETAIN_UNTIL_TS)
-    private OffsetDateTime retainUntilTs;
 
     public void addDefence(DefenceEntity defence) {
         if (defenceList.stream().noneMatch(defenceEntity -> defenceEntity.getName().equalsIgnoreCase(defence.getName()))) {

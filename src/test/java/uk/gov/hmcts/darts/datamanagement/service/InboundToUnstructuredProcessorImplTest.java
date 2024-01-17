@@ -36,6 +36,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -221,7 +222,7 @@ class InboundToUnstructuredProcessorImplTest {
 
 
         List<ExternalObjectDirectoryEntity> failedList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryEntityFailed));
-        when(externalObjectDirectoryRepository.findByFailedAndType(any(), any(), any(), any(), any(), any(), any())).thenReturn(failedList);
+        when(externalObjectDirectoryRepository.findByStatusIdInAndType(anyList(), any())).thenReturn(failedList);
 
 
         inboundToUnstructuredProcessor.processInboundToUnstructured();

@@ -57,9 +57,8 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
                                 INSERT INTO darts.courtroom (ctr_id, cth_id, courtroom_name, created_ts, created_by)
                                 VALUES (-1, -1, 'Court 1', NULL, NULL);
                                 INSERT INTO darts.court_case (cas_id, cth_id, evh_id, case_object_id, case_number, case_closed, interpreter_used,
-                                case_closed_ts, version_label, created_ts, created_by, last_modified_ts, last_modified_by, retention_applies_from_ts,
-                                end_of_sentence_ts)
-                                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                case_closed_ts, version_label, created_ts, created_by, last_modified_ts, last_modified_by)
+                                VALUES (-1, -1, NULL, NULL, 'T20231009-1', false, false, NULL, NULL, NULL, NULL, NULL, NULL);
                                 INSERT INTO darts.hearing (hea_id, cas_id, ctr_id, hearing_date, scheduled_start_time, hearing_is_actual, judge_hearing_date,
                                 created_ts, created_by, last_modified_ts, last_modified_by)
                                 VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL, NULL);
@@ -179,7 +178,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -10
-                   );
+            );
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isBadRequest()).andReturn();
@@ -202,7 +201,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -1
-                   )
+            )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -220,7 +219,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -1
-                   )
+            )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -238,7 +237,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -10
-                   )
+            )
             .queryParam(ASSIGNED_QUERY_PARAM, FALSE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
@@ -276,7 +275,7 @@ class TranscriptionControllerGetTranscriberTranscriptsIntTest extends Integratio
             .header(
                 USER_ID_HEADER,
                 -10
-                   )
+            )
             .queryParam(ASSIGNED_QUERY_PARAM, TRUE.toString());
 
         final MvcResult mvcResult = mockMvc.perform(requestBuilder)
