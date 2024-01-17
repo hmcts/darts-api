@@ -15,14 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.authorisation.util.AuthorisationUnitOfWork;
-import uk.gov.hmcts.darts.cases.service.CaseService;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
-import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.hearings.service.HearingsService;
-import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
-import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
-import uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError;
 import uk.gov.hmcts.darts.transcriptions.http.api.TranscriptionApi;
 import uk.gov.hmcts.darts.transcriptions.model.AttachTranscriptResponse;
 import uk.gov.hmcts.darts.transcriptions.model.DownloadTranscriptResponse;
@@ -39,13 +33,9 @@ import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionResponse;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscriptionsItem;
 import uk.gov.hmcts.darts.transcriptions.service.TranscriptionService;
 
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static org.springframework.http.HttpHeaders.CONTENT_DISPOSITION;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.ANY_ENTITY_ID;
@@ -56,10 +46,6 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.REQUESTER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSLATION_QA;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.COURT_LOG;
-import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum.SPECIFIED_TIMES;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.AUDIO_NOT_FOUND;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TIMES_OUTSIDE_OF_HEARING_TIMES;
 
 
 @RestController
@@ -68,26 +54,25 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 public class TranscriptionController implements TranscriptionApi {
 
     private final TranscriptionService transcriptionService;
-    private final CaseService caseService;
-    private final HearingsService hearingsService;
     private final AuthorisationUnitOfWork authorisation;
+
+    private final Validator<TranscriptionRequestDetails> transcriptionRequestDetailsValidator;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(bodyAuthorisation = true, contextId = ANY_ENTITY_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
-    public ResponseEntity<RequestTranscriptionResponse> requestTranscription(
-        TranscriptionRequestDetails transcriptionRequestDetails) {
-        validateTranscriptionRequestValues(transcriptionRequestDetails);
+    public ResponseEntity<RequestTranscriptionResponse> requestTranscription(TranscriptionRequestDetails transcriptionRequestDetails) {
+        transcriptionRequestDetailsValidator.validate(transcriptionRequestDetails);
+
+        RequestTranscriptionResponse requestTranscriptionResponse;
         try {
-            return new ResponseEntity<>(
-                transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true),
-                HttpStatus.OK
-            );
+            requestTranscriptionResponse = transcriptionService.saveTranscriptionRequest(transcriptionRequestDetails, true);
         } catch (EntityNotFoundException exception) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>(requestTranscriptionResponse, HttpStatus.OK);
     }
 
     @Override
@@ -160,76 +145,6 @@ public class TranscriptionController implements TranscriptionApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<TranscriberViewSummary>> getTranscriberTranscripts(Integer userId, Boolean assigned) {
         return ResponseEntity.ok(transcriptionService.getTranscriberTranscripts(userId, assigned));
-    }
-
-    private void validateTranscriptionRequestValues(TranscriptionRequestDetails transcriptionRequestDetails) {
-        if (isNull(transcriptionRequestDetails.getHearingId()) && isNull(transcriptionRequestDetails.getCaseId())) {
-            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
-        } else if (nonNull(transcriptionRequestDetails.getHearingId())) {
-            HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
-            if (hearing.getMediaList() == null || hearing.getMediaList().isEmpty()) {
-                log.error(
-                    "Transcription could not be requested. No audio found for hearing id {}",
-                    transcriptionRequestDetails.getHearingId()
-                );
-                throw new DartsApiException(AUDIO_NOT_FOUND);
-            } else {
-                //check times
-                OffsetDateTime requestStartDateTime = transcriptionRequestDetails.getStartDateTime();
-                OffsetDateTime requestEndDateTime = transcriptionRequestDetails.getEndDateTime();
-                if (requestStartDateTime != null && requestEndDateTime != null) {
-                    boolean validTimes = hearing.getMediaList().stream().anyMatch(
-                        m -> checkStartTime(m.getStart().truncatedTo(ChronoUnit.SECONDS),
-                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS))
-                            && checkEndTime(m.getEnd().truncatedTo(ChronoUnit.SECONDS),
-                                            requestStartDateTime.truncatedTo(ChronoUnit.SECONDS), requestEndDateTime.truncatedTo(ChronoUnit.SECONDS)));
-                    if (!validTimes) {
-                        log.error(
-                            "Transcription could not be requested. Times were outside of hearing times for hearing id {}",
-                            transcriptionRequestDetails.getHearingId()
-                        );
-                        throw new DartsApiException(TIMES_OUTSIDE_OF_HEARING_TIMES);
-                    }
-                }
-            }
-        } else {
-            caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId());
-        }
-
-        Integer transcriptionTypeId = transcriptionRequestDetails.getTranscriptionTypeId();
-        TranscriptionTypeEnum.fromId(transcriptionTypeId);
-        TranscriptionUrgencyEnum.fromId(transcriptionRequestDetails.getTranscriptionUrgencyId());
-
-        if (transcriptionTypesThatRequireDates(transcriptionTypeId)
-            && !transcriptionDatesAreSet(
-            transcriptionRequestDetails.getStartDateTime(),
-            transcriptionRequestDetails.getEndDateTime()
-        )) {
-            log.error(
-                "This transcription type {} requires both the start date ({}) and end dates ({})",
-                transcriptionRequestDetails.getTranscriptionTypeId(),
-                transcriptionRequestDetails.getStartDateTime(),
-                transcriptionRequestDetails.getEndDateTime()
-            );
-            throw new DartsApiException(TranscriptionApiError.FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST);
-        }
-    }
-
-    private boolean checkEndTime(OffsetDateTime mediaEndDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
-        return (mediaEndDateTime.isEqual(requestEndDateTime) || mediaEndDateTime.isAfter(requestEndDateTime));
-    }
-
-    private boolean checkStartTime(OffsetDateTime mediaStartDateTime, OffsetDateTime requestStartDateTime, OffsetDateTime requestEndDateTime) {
-        return (mediaStartDateTime.isEqual(requestStartDateTime) || mediaStartDateTime.isBefore(requestStartDateTime));
-    }
-
-    private boolean transcriptionTypesThatRequireDates(Integer transcriptionTypeId) {
-        return SPECIFIED_TIMES.getId().equals(transcriptionTypeId)
-            || COURT_LOG.getId().equals(transcriptionTypeId);
-    }
-
-    private boolean transcriptionDatesAreSet(OffsetDateTime startDateTime, OffsetDateTime endDateTime) {
-        return nonNull(startDateTime) && nonNull(endDateTime);
     }
 
     @Override
