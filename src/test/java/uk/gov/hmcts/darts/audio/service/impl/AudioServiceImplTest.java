@@ -268,8 +268,8 @@ class AudioServiceImplTest {
         )).thenReturn(Arrays.asList(eventEntity));
 
         audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
-        verify(hearingRepository, times(addAudioMetadataRequest.getCases().size())).saveAndFlush(any());
-        assertEquals(addAudioMetadataRequest.getCases().size(), hearing.getMediaList().size());
+        verify(hearingRepository, times(1)).saveAndFlush(any());
+        assertEquals(1, hearing.getMediaList().size());
     }
 
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {
