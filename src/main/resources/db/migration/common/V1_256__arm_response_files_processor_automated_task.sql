@@ -9,7 +9,6 @@ INSERT INTO object_record_status (ors_id, ors_description) VALUES (18, 'Arm Resp
 
 ALTER SEQUENCE ors_seq RESTART WITH 19;
 
---external_file_id and external_record_id, verification_attempts
 ALTER TABLE external_object_directory ADD COLUMN external_file_id CHARACTER VARYING;
 ALTER TABLE external_object_directory ADD COLUMN external_record_id CHARACTER VARYING;
 ALTER TABLE external_object_directory ADD COLUMN verification_attempts INTEGER NOT NULL DEFAULT 1;
