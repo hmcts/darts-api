@@ -17,7 +17,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -37,7 +36,7 @@ public class SecurityGroupEntity {
     @JoinColumn(name = "rol_id", nullable = false, foreignKey = @ForeignKey(name = "security_group_role_fk"))
     private SecurityRoleEntity securityRoleEntity;
 
-    @Column(name = "r_dm_group_s_object_id", length = 16)
+    @Column(name = "dm_group_s_object_id", length = 16)
     private String legacyObjectId;
 
     @Column(name = "group_name", nullable = false)
@@ -49,9 +48,6 @@ public class SecurityGroupEntity {
 
     @Column(name = "description")
     private String description;
-
-    @Column(name = "r_modify_date")
-    private OffsetDateTime legacyModifyDate;
 
     @Column(name = "group_class")
     private String groupClass;
@@ -79,5 +75,8 @@ public class SecurityGroupEntity {
         joinColumns = {@JoinColumn(name = "grp_id")},
         inverseJoinColumns = {@JoinColumn(name = "usr_id")})
     private Set<UserAccountEntity> users = new LinkedHashSet<>();
+
+    @Column(name = "display_name")
+    private String displayName;
 
 }
