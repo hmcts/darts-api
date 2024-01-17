@@ -308,8 +308,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
     }
 
-    private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                              String input) {
+    private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory, String input) {
         UploadNewFileRecord uploadNewFileRecord = null;
         ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
         if (StringUtils.isNotEmpty(input)) {

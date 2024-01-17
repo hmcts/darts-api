@@ -186,6 +186,57 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     }
 
     @Test
+    void givenProcessResponseFilesFailOnUnableToParseFilenameAndReachedMaxAttempts() {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.randomUUID()
+        );
+
+        armEod.setTransferAttempts(1);
+        armEod.setVerificationAttempts(4);
+        dartsDatabase.save(armEod);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        String responseBlobFilename = prefix + "_1_iu.rsp";
+        Map<String, BlobItem> responseBlobs = new HashMap<>();
+        responseBlobs.put(responseBlobFilename, new BlobItem());
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
+
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        armResponseFilesProcessor.processResponseFiles();
+
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(4, foundMedia.getVerificationAttempts());
+
+    }
+
+    @Test
     void givenProcessResponseFilesFoundInputUploadFileUnableToListBlobsForHashcode() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
