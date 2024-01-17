@@ -72,13 +72,15 @@ class ArmServiceFunctionalTest {
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String filename = String.format("functional_test_%s", UUID.randomUUID().toString());
         String blobPathAndName = armSubmissionDropZone + filename;
+
         String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
+
         log.info("Saved blob {} in {}", actualResult, blobPathAndName);
         armSubmissionBlobsToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
         log.info("listSubmissionBlobs - Blob filename {}", actualResult);
 
-        Map<String, BlobItem> submissionBlobs = armService.listSubmissionBlobs(armContainerName, armSubmissionDropZone);
+        Map<String, BlobItem> submissionBlobs = armService.listSubmissionBlobs(armContainerName, "functional_test");
         assertFalse(submissionBlobs.isEmpty());
 
     }
