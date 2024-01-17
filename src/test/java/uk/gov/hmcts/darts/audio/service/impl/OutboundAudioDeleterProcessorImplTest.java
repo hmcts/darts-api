@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
+import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.SystemUserHelper;
-import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
+import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -25,8 +25,7 @@ import static org.mockito.Mockito.when;
 class OutboundAudioDeleterProcessorImplTest {
     @Mock
     LastAccessedDeletionDayCalculator lastAccessedDeletionDayCalculator;
-    @Mock
-    private MediaRequestRepository mediaRequestRepository;
+
     @Mock
     private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
 
@@ -39,14 +38,16 @@ class OutboundAudioDeleterProcessorImplTest {
     @Mock
     private SystemUserHelper systemUserHelper;
 
+    @Mock
+    private TransformedMediaRepository transformedMediaRepository;
+
     @BeforeEach
     void setUp() {
         this.outboundAudioDeleterProcessorImpl = new OutboundAudioDeleterProcessorImpl(
-            mediaRequestRepository,
             transientObjectDirectoryRepository,
             userAccountRepository,
             objectRecordStatusRepository, lastAccessedDeletionDayCalculator,
-            systemUserHelper
+            systemUserHelper, transformedMediaRepository
         );
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn("value");
 
@@ -54,19 +55,15 @@ class OutboundAudioDeleterProcessorImplTest {
 
     @Test
     void testDeleteWhenSystemUserDoesNotExist() {
-        List<Integer> value = new ArrayList<>();
-        value.add(0);
+        List<TransformedMediaEntity> value = new ArrayList<>();
+        value.add(new TransformedMediaEntity());
 
-        when(mediaRequestRepository.findAllIdsByLastAccessedTimeBeforeAndStatus(any(), any())).thenReturn(value);
-        when(mediaRequestRepository.findAllByCreatedDateTimeBeforeAndStatusNotAndLastAccessedDateTimeIsNull(
-            any(),
-            any()
-        )).thenReturn(value);
-        when(transientObjectDirectoryRepository.findByMediaRequestIds(any())).thenReturn(List.of(new TransientObjectDirectoryEntity()));
+        when(transformedMediaRepository.findAllDeletableTransformedMedia(any())).thenReturn(value);
 
         when(systemUserHelper.findSystemUserGuid(anyString())).thenReturn(null);
         assertThrows(DartsApiException.class, () ->
             outboundAudioDeleterProcessorImpl.markForDeletion());
     }
+
 }
 
