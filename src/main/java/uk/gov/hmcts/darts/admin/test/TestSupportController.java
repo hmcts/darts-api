@@ -405,12 +405,14 @@ public class TestSupportController {
         caseRetentionEntity.setId(1);
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
         caseRetentionEntity.setTotalSentence("10 years?");
+        caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
         caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
         caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
         caseRetentionEntity.setCurrentState("a_state");
-        caseRetentionEntity.setSubmitted(OffsetDateTime.now());
         caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
         caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
 
         caseRetentionRepository.saveAndFlush(caseRetentionEntity);
 

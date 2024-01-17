@@ -618,9 +618,12 @@ public class DartsDatabaseStub {
         caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
         caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
         caseRetentionEntity.setCurrentState(state);
-        caseRetentionEntity.setSubmitted(OffsetDateTime.now());
+        caseRetentionEntity.setComments("a comment");
         caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
         caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
         return caseRetentionEntity;
     }
 }
