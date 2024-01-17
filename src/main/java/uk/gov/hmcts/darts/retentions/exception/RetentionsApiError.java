@@ -29,6 +29,18 @@ public enum RetentionsApiError implements DartsApiError {
         "104",
         HttpStatus.BAD_REQUEST,
         "The case must be closed before the retention period can be amended."
+    ), NO_RETENTION_POLICIES_APPLIED(
+        "105",
+        HttpStatus.BAD_REQUEST,
+        "The case must have a retention policy applied before being changed."
+    ), RETENTION_DATE_TO_EARLY(
+        "106",
+        HttpStatus.BAD_REQUEST,
+        "The case must have a retention policy applied before being changed."
+    ), NO_PERMISSIONS_REDUCE_DATE(
+        "107",
+        HttpStatus.BAD_REQUEST,
+        "The case must have a retention policy applied before being changed."
     );
 
     private static final String ERROR_TYPE_PREFIX = "RETENTION";

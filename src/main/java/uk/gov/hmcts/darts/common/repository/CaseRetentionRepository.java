@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface CaseRetentionRepository  extends JpaRepository<CaseRetentionEntity, Integer> {
     List<CaseRetentionEntity> findAllByCourtCase(CourtCaseEntity courtCase);
 
+    List<CaseRetentionEntity> findByCourtCase_Id(Integer courtCaseId);
+
     Optional<CaseRetentionEntity> findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(CourtCaseEntity courtCase, String currentState);
 
     @Query("""
