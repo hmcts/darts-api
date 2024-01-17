@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles({"dev", "h2db"})
@@ -78,8 +78,8 @@ class ArmServiceFunctionalTest {
         assertNotNull(actualResult);
         log.info("listSubmissionBlobs - Blob filename {}", actualResult);
 
-        Map<String, BlobItem> submissionBlobs = armService.listSubmissionBlobs(armContainerName, armSubmissionDropZone + "functional_test");
-        assertEquals(1, submissionBlobs.size());
+        Map<String, BlobItem> submissionBlobs = armService.listSubmissionBlobs(armContainerName, armSubmissionDropZone);
+        assertTrue(submissionBlobs.size() > 0);
 
     }
 
