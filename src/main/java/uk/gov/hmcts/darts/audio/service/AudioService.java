@@ -13,4 +13,6 @@ public interface AudioService {
     void addAudio(MultipartFile audioFile, AddAudioMetadataRequest addAudioMetadata);
 
     void linkAudioAndHearing(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia);
+
+    void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia);
 }
