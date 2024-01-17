@@ -70,7 +70,7 @@ class ArmServiceImplTest {
         assertNotNull(blobName);
         assertEquals(blobPathAndFilename, blobName);
     }
-
+    
     @Test
     void testListCollectedBlobs() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);

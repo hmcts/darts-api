@@ -78,9 +78,9 @@ class ArmServiceFunctionalTest {
         assertNotNull(actualResult);
         log.info("listSubmissionBlobs - Blob filename {}", actualResult);
 
-        Map<String, BlobItem> collectedBlobs = armService.listSubmissionBlobs(armContainerName, armCollectedDropZone + "functional_test");
-        assertEquals(1, collectedBlobs.size());
-        
+        Map<String, BlobItem> submissionBlobs = armService.listSubmissionBlobs(armContainerName, armSubmissionDropZone + "functional_test");
+        assertEquals(1, submissionBlobs.size());
+
     }
 
     @AfterEach
