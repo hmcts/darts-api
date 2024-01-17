@@ -16,9 +16,13 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.config.ObjectMapperConfig;
+import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
@@ -28,6 +32,8 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.TestUtils;
 import uk.gov.hmcts.darts.testutils.data.MediaTestData;
+import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.TranscriptionStub;
 
 import java.io.File;
 import java.io.IOException;
@@ -67,6 +73,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     private ArmDataManagementConfiguration armDataManagementConfiguration;
     @MockBean
     private UserIdentity userIdentity;
+
+    @Autowired
+    private AuthorisationStub authorisationStub;
 
     @TempDir
     private File tempDirectory;
@@ -406,7 +415,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     }
 
     @Test
-    void givenProcessResponseFilesSuccessfullyCompletes() throws IOException {
+    void givenProcessResponseFilesSuccessfullyCompletesForMedia() throws IOException {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
             "Int Test Courtroom 2",
@@ -472,5 +481,122 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals("152821", foundMedia.getExternalRecordId());
     }
 
+    @Test
+    void givenProcessResponseFilesSuccessfullyCompletesForAnnotation() throws IOException {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        String testAnnotation = "TestAnnotation";
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(hearing, testUser, testAnnotation);
+
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+        final String fileName = "judges-notes.txt";
+        final String fileType = "text/plain";
+        final int fileSize = 123;
+        final OffsetDateTime uploadedDateTime = OffsetDateTime.now();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        AnnotationDocumentEntity annotationDocument = dartsDatabase.getAnnotationStub()
+            .createAndSaveAnnotationDocumentEntityWith(annotation, fileName, fileType, fileSize,
+                                                       testUser, uploadedDateTime, checksum
+            );
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            annotationDocument,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
+        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        Map<String, BlobItem> inputUploadFilenameResponseBlobs = new HashMap<>();
+        inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        hashcodeResponseBlobs.put(createRecordFilename, new BlobItem());
+        hashcodeResponseBlobs.put(uploadFileFilename, new BlobItem());
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        String uploadFileTestFilename = "tests/arm/service/ArmResponseFilesProcessorTest/uploadFile/" +
+            "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
+        BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
+        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+
+        armResponseFilesProcessor.processResponseFiles();
+
+        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
+        assertEquals("152821", foundAnnotationEod.getExternalRecordId());
+    }
+
+    @Test
+    void givenProcessResponseFilesSuccessfullyCompletesForTranscription() throws IOException {
+        authorisationStub.givenTestSchema();
+        TranscriptionEntity transcriptionEntity = authorisationStub.getTranscriptionEntity();
+
+        final String fileName = "Test Document.docx";
+        final String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        final int fileSize = 11_937;
+        final UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        final String checksum = "C3CCA7021CF79B42F245AF350601C284";
+        TranscriptionDocumentEntity transcriptionDocumentEntity = TranscriptionStub.createTranscriptionDocumentEntity(
+            transcriptionEntity, fileName, fileType, fileSize, testUser, checksum);
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            transcriptionDocumentEntity,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.randomUUID()
+        );
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
+        String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        Map<String, BlobItem> inputUploadFilenameResponseBlobs = new HashMap<>();
+        inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
+
+        Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
+        String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
+        String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
+        String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        hashcodeResponseBlobs.put(createRecordFilename, new BlobItem());
+        hashcodeResponseBlobs.put(uploadFileFilename, new BlobItem());
+        when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        String fileLocation = tempDirectory.getAbsolutePath();
+        when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);
+
+        String uploadFileTestFilename = "tests/arm/service/ArmResponseFilesProcessorTest/uploadFile/" +
+            "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
+        String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
+        BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
+        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+
+        armResponseFilesProcessor.processResponseFiles();
+
+        ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
+        assertEquals(STORED.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals("A360230516_TestIngestion_1.docx", foundAnnotationEod.getExternalFileId());
+        assertEquals("152821", foundAnnotationEod.getExternalRecordId());
+    }
 
 }
