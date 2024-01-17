@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.DailyListEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.dailylist.enums.JobStatusType;
@@ -22,16 +21,26 @@ public class DailyListMapper {
 
     private final ObjectMapper objectMapper;
 
-
-    public DailyListEntity createDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse) {
-
+    public DailyListEntity createDailyListEntity(DailyListPostRequest postRequest, String listingCourthouse) {
         DailyListEntity dailyListEntity = new DailyListEntity();
         dailyListEntity.setXmlContent(postRequest.getDailyListXml());
-        updateDailyListEntity(postRequest, courthouse, dailyListEntity);
+        updateDailyListEntity(postRequest, listingCourthouse, dailyListEntity);
+
         return dailyListEntity;
     }
 
-    public void updateDailyListEntity(DailyListEntity dailyListEntity, DailyListJsonObject dailyList, CourthouseEntity courthouse) {
+    public void updateDailyListEntity(DailyListPostRequest postRequest, String listingCourthouse, DailyListEntity dailyListEntity) {
+        dailyListEntity.setListingCourthouse(listingCourthouse);
+        dailyListEntity.setSource(postRequest.getSourceSystem());
+        dailyListEntity.setXmlContent(postRequest.getDailyListXml());
+        updateDailyListEntity(dailyListEntity, postRequest.getDailyListJson(), listingCourthouse);
+    }
+
+    public void updateDailyListEntity(DailyListPatchRequest patchRequest, DailyListEntity dailyListEntity) {
+        updateDailyListEntity(dailyListEntity, patchRequest.getDailyListJson(), dailyListEntity.getListingCourthouse());
+    }
+
+    private void updateDailyListEntity(DailyListEntity dailyListEntity, DailyListJsonObject dailyList, String listingCourthouse) {
         if (dailyList == null) {
             return;
         }
@@ -41,30 +50,16 @@ public class DailyListMapper {
         dailyListEntity.setStartDate(dailyList.getListHeader().getStartDate());
         dailyListEntity.setEndDate(dailyList.getListHeader().getEndDate());
         dailyListEntity.setStatus(JobStatusType.NEW);
+        dailyListEntity.setListingCourthouse(listingCourthouse);
         try {
             dailyListEntity.setContent(objectMapper.writeValueAsString(dailyList));
         } catch (JsonProcessingException e) {
             log.error(
                 "An Error has occurred trying to save the json for courthouse {} to the database",
-                courthouse.getCourthouseName(),
+                listingCourthouse,
                 e
             );
             throw new DartsApiException(DailyListError.INTERNAL_ERROR);
         }
     }
-
-    public void updateDailyListEntity(DailyListPostRequest postRequest, CourthouseEntity courthouse,
-                                      DailyListEntity dailyListEntity) {
-        dailyListEntity.setCourthouse(courthouse);
-        dailyListEntity.setSource(postRequest.getSourceSystem());
-        dailyListEntity.setXmlContent(postRequest.getDailyListXml());
-        updateDailyListEntity(dailyListEntity, postRequest.getDailyListJson(), courthouse);
-    }
-
-    public void updateDailyListEntity(DailyListPatchRequest patchRequest,
-                                      DailyListEntity dailyListEntity) {
-        updateDailyListEntity(dailyListEntity, patchRequest.getDailyListJson(), dailyListEntity.getCourthouse());
-    }
-
-
 }

@@ -7,7 +7,6 @@ import uk.gov.hmcts.darts.dailylist.service.DailyListProcessor;
 import uk.gov.hmcts.darts.task.config.AutomatedTaskConfigurationProperties;
 import uk.gov.hmcts.darts.task.status.AutomatedTaskStatus;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class ProcessDailyListAutomatedTask extends AbstractLockableAutomatedTask
 
     @Override
     protected void runTask() {
-        dailyListProcessor.processAllDailyLists(LocalDate.now());
+        dailyListProcessor.processAllDailyLists();
     }
 
     @Override

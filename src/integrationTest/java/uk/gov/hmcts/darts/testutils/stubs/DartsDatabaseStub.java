@@ -296,18 +296,18 @@ public class DartsDatabaseStub {
     }
 
     @Transactional
-    public void createDailyLists(CourthouseEntity courthouseEntity) throws IOException {
+    public void createDailyLists(String listingCourthouse) throws IOException {
         DailyListEntity xhbDailyList = DailyListTestData.createDailyList(
             LocalTime.of(13, 0),
             String.valueOf(SourceType.XHB),
-            courthouseEntity,
+            listingCourthouse,
             "tests/dailyListProcessorTest/dailyListXHB.json"
         );
 
         DailyListEntity cppDailyList = DailyListTestData.createDailyList(
             LocalTime.of(13, 0),
             String.valueOf(SourceType.CPP),
-            courthouseEntity,
+            listingCourthouse,
             "tests/dailyListProcessorTest/dailyListCPP.json"
         );
 
@@ -492,6 +492,10 @@ public class DartsDatabaseStub {
         userAccountRepository.saveAll(asList(testUsers));
     }
 
+    public List<DailyListEntity> saveAll(DailyListEntity... dailyListEntity) {
+        return dailyListRepository.saveAll(asList(dailyListEntity));
+    }
+
     public void addToTrash(EventHandlerEntity... eventHandlerEntities) {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
@@ -549,4 +553,5 @@ public class DartsDatabaseStub {
 
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
+
 }
