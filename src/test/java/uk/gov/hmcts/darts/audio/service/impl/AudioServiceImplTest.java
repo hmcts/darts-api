@@ -272,6 +272,32 @@ class AudioServiceImplTest {
         assertEquals(1, hearing.getMediaList().size());
     }
 
+    @Test
+    void linkAudioToHearingByEventShouldOnlyLinkOncePerHearing() {
+        HearingEntity hearing = new HearingEntity();
+        EventEntity firstEventEntity = new EventEntity();
+        firstEventEntity.setTimestamp(STARTED_AT.plusMinutes(15));
+        firstEventEntity.addHearing(hearing);
+
+        EventEntity secondEventEntity = new EventEntity();
+        secondEventEntity.setTimestamp(STARTED_AT.plusMinutes(20));
+        secondEventEntity.addHearing(hearing);
+
+        AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
+        MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
+
+        when(courtLogEventRepository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
+            anyString(),
+            anyString(),
+            any(),
+            any()
+        )).thenReturn(Arrays.asList(firstEventEntity, secondEventEntity));
+
+        audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
+        verify(hearingRepository, times(1)).saveAndFlush(any());
+        assertEquals(1, hearing.getMediaList().size());
+    }
+
     private MediaEntity createMediaEntity(OffsetDateTime startedAt, OffsetDateTime endedAt) {
         MediaEntity mediaEntity = new MediaEntity();
         mediaEntity.setStart(startedAt);

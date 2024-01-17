@@ -154,8 +154,8 @@ public class AudioServiceImpl implements AudioService {
             var courtLogs = courtLogEventRepository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
                 addAudioMetadataRequest.getCourthouse(),
                 caseNumber,
-                addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleSize()),
-                addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleSize()));
+                addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration()),
+                addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration()));
 
             var associatedHearings = courtLogs.stream()
                 .flatMap(h -> h.getHearingEntities().stream())

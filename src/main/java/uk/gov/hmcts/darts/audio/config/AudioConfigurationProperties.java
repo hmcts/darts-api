@@ -34,7 +34,7 @@ public class AudioConfigurationProperties {
     private List<String> allowedMediaFormats = new ArrayList<>();
     private Integer maxFileSize;
     private Duration allowableAudioGapDuration;
-    private Integer preAmbleSize;
-    private Integer postAmbleSize;
+    private Integer preAmbleDuration;
+    private Integer postAmbleDuration;
     private List<String> handheldAudioCourtroomNumbers;
 }

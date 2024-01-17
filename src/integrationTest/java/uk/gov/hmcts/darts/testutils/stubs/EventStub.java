@@ -24,24 +24,16 @@ public class EventStub {
     }
 
     public EventEntity createEvent(HearingEntity hearing, int eventHandlerId) {
-        EventEntity eventEntity = new EventEntity();
-        eventEntity.setEventText("testEventText");
-        eventEntity.setEventName("testEventName");
-        EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).get();
-        eventEntity.setEventType(eventHandlerEntity);
-        eventEntity.setTimestamp(OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        eventEntity.setCreatedBy(userAccountStub.getIntegrationTestUserAccountEntity());
-        eventEntity.addHearing(hearing);
-        eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
-        eventEntity.setLastModifiedDateTime(OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC));
-        eventRepository.saveAndFlush(eventEntity);
-        return eventEntity;
+        return createEvent(hearing,
+                    eventHandlerId,
+                    OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC),
+                    "testEventName");
     }
 
-    public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, OffsetDateTime eventTimestamp) {
+    public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName) {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("testEventText");
-        eventEntity.setEventName("LOG");
+        eventEntity.setEventName(eventName);
         EventHandlerEntity eventHandlerEntity = eventHandlerRepository.findById(eventHandlerId).get();
         eventEntity.setEventType(eventHandlerEntity);
         eventEntity.setTimestamp(eventTimestamp);

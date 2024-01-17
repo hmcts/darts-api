@@ -69,9 +69,9 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         dartsDatabase.createCase("Bristol", "case3");
 
         HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1","case1", LocalDate.now());
-        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20));
+        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
         HearingEntity secondHearingForEvent = hearingStub.createHearing("Bristol", "Court 1","case1", LocalDate.now());
-        eventStub.createEvent(secondHearingForEvent, 10, STARTED_AT.minusMinutes(20));
+        eventStub.createEvent(secondHearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
 
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol");
 

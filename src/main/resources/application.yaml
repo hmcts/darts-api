@@ -116,9 +116,9 @@ darts:
       - "mpeg2"
       - "mp2"
     max-file-size: 524288000
-    preAmbleSize: 30
-    postAmbleSize: 30
-    handheldAudioCourtroomNumbers:
+    pre-amble-duration: 30
+    post-amble-duration: 30
+    handheld-audio-courtroom-numbers:
       - 199
   azure:
     active-directory-b2c-base-uri: https://hmctsstgextid.b2clogin.com
