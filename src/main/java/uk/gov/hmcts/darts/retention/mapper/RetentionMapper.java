@@ -9,12 +9,11 @@ import uk.gov.hmcts.darts.retentions.model.CaseRetention;
 @Component
 @RequiredArgsConstructor
 public class RetentionMapper {
-
     public CaseRetention mapToCaseRetention(CaseRetentionEntity caseRetentionEntity) {
         CaseRetention caseRetention = new CaseRetention();
+        caseRetention.setRetentionLastChangedDate(caseRetentionEntity.getLastModifiedDateTime());
         caseRetention.setRetentionDate(caseRetentionEntity.getRetainUntil());
-        //Is this right?? No amended_by field
-        caseRetention.setAmendedBy(caseRetentionEntity.getCreatedBy().getEmailAddress());
+        caseRetention.setAmendedBy(caseRetentionEntity.getSubmittedBy().getUserName());
         caseRetention.setRetentionPolicyApplied(caseRetentionEntity.getRetentionPolicyType().getPolicyName());
         caseRetention.setComments(caseRetentionEntity.getComments());
         caseRetention.setStatus(caseRetentionEntity.getCurrentState());
