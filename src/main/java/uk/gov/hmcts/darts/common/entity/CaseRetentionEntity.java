@@ -13,7 +13,7 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.darts.common.entity.base.CreatedBaseEntity;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.OffsetDateTime;
 
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 @Table(name = CaseRetentionEntity.TABLE_NAME)
 @Getter
 @Setter
-public class CaseRetentionEntity extends CreatedBaseEntity {
+public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
 
 
     public static final String ID = "car_id";
@@ -63,7 +63,8 @@ public class CaseRetentionEntity extends CreatedBaseEntity {
     @Column(name = "retention_object_id")
     private String retentionObjectId;
 
-    @Column(name = "submitted_ts", nullable = false)
-    private OffsetDateTime submitted;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "submitted_by", nullable = false)
+    private UserAccountEntity submittedBy;
 
 }

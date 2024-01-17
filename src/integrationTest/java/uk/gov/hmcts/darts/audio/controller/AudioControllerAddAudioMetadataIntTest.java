@@ -18,8 +18,11 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AuthorisationStub;
+import uk.gov.hmcts.darts.testutils.stubs.EventStub;
+import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +43,10 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
     private MockMvc mockMvc;
     @Autowired
     private AuthorisationStub authorisationStub;
+    @Autowired
+    private EventStub eventStub;
+    @Autowired
+    HearingStub hearingStub;
     @MockBean
     private UserIdentity mockUserIdentity;
 
@@ -60,6 +67,12 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         dartsDatabase.createCase("Bristol", "case1");
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
+
+        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1","case1", LocalDate.now());
+        eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
+        HearingEntity secondHearingForEvent = hearingStub.createHearing("Bristol", "Court 1","case1", LocalDate.now());
+        eventStub.createEvent(secondHearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
+
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol");
 
         MockMultipartFile audioFile = new MockMultipartFile(
@@ -92,7 +105,7 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
                 addAudioLinkedHearings.add(hearing);
             }
         }
-        assertEquals(3, addAudioLinkedHearings.size());
+        assertEquals(4, addAudioLinkedHearings.size());
 
         for (HearingEntity hearing : addAudioLinkedHearings) {
             MediaEntity media = hearing.getMediaList().get(0);

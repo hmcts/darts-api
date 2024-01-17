@@ -33,7 +33,6 @@ public class MediaRequestStub {
                 requestor,
                 OffsetDateTime.parse("2023-06-26T13:00:00Z"),
                 OffsetDateTime.parse("2023-06-26T13:45:00Z"),
-                OffsetDateTime.parse("2023-06-30T13:00:00Z"),
                 audioRequestType, status
             ));
     }

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
+import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
+import uk.gov.hmcts.darts.common.repository.CourtLogEventRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
@@ -35,6 +37,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
@@ -57,6 +60,8 @@ public class AudioServiceImpl implements AudioService {
     private final DataManagementApi dataManagementApi;
     private final UserIdentity userIdentity;
     private final FileContentChecksum fileContentChecksum;
+    private final CourtLogEventRepository courtLogEventRepository;
+    private final AudioConfigurationProperties audioConfigurationProperties;
 
     private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return new AudioFileInfo(
@@ -111,6 +116,7 @@ public class AudioServiceImpl implements AudioService {
         MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
         savedMedia.setChecksum(checksum);
         linkAudioAndHearing(addAudioMetadataRequest, savedMedia);
+        linkAudioToHearingByEvent(addAudioMetadataRequest, savedMedia);
 
         saveExternalObjectDirectory(
             externalLocation,
@@ -131,6 +137,37 @@ public class AudioServiceImpl implements AudioService {
             );
             hearing.addMedia(savedMedia);
             hearingRepository.saveAndFlush(hearing);
+        }
+    }
+
+    @Override
+    public void linkAudioToHearingByEvent(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
+
+        if (addAudioMetadataRequest.getTotalChannels() == 1) {
+            if (audioConfigurationProperties.getHandheldAudioCourtroomNumbers()
+                .contains(addAudioMetadataRequest.getCourtroom())) {
+                return;
+            }
+        }
+
+        for (String caseNumber : addAudioMetadataRequest.getCases()) {
+            var courtLogs = courtLogEventRepository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
+                addAudioMetadataRequest.getCourthouse(),
+                caseNumber,
+                addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration()),
+                addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration()));
+
+            var associatedHearings = courtLogs.stream()
+                .flatMap(h -> h.getHearingEntities().stream())
+                .distinct()
+                .collect(Collectors.toList());
+
+            for (var hearing : associatedHearings) {
+                if (!hearing.getMediaList().contains(savedMedia)) {
+                    hearing.addMedia(savedMedia);
+                    hearingRepository.saveAndFlush(hearing);
+                }
+            }
         }
     }
 

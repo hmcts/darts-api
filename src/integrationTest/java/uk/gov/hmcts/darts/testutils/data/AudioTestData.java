@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
 public class AudioTestData {
 
     public MediaRequestEntity createCurrentMediaRequest(HearingEntity hearingEntity, UserAccountEntity requestor,
-                                                        OffsetDateTime startTime, OffsetDateTime endTime, OffsetDateTime lastAccessedTime,
+                                                        OffsetDateTime startTime, OffsetDateTime endTime,
                                                         AudioRequestType audioRequestType, MediaRequestStatus status) {
         MediaRequestEntity mediaRequestEntity = new MediaRequestEntity();
         mediaRequestEntity.setHearing(hearingEntity);
