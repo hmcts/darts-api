@@ -198,6 +198,15 @@
 --    add is_standard_policy and is_permanent_policy to case_overflow
 --    add manifest_file and event_date_ts to external_object_directory
 --    add case_document table, new PK and sequence, FK to case and FK on external_object_directory to it
+--v61 add associative entities to join case to transcription and hearing to transcription
+--    remove hea_id and cas_id from transcription and associated FKs
+--    change evh_id on event to not null
+--    add verification_attempts to external_object_directory
+--    change audit.cas_id to nullable, as not all modernised auditable events are case related
+--    remove audit.application_server
+
+
+
 
 -- List of Table Aliases
 -- annotation                  ANN
@@ -207,6 +216,7 @@
 -- automated_task              AUT
 -- case_document               CAD
 -- case_judge_ae               CAJ
+-- case_transcription_ae       CAT
 -- case_overflow               CAO
 -- court_case                  CAS
 -- courthouse                  CTH
@@ -224,6 +234,7 @@
 -- hearing_event_ae            HEE
 -- hearing_media_ae            HEM
 -- hearing_judge_ae            HEJ
+-- hearing_transcription_ae    HET
 -- judge                       JUD
 -- media                       MED
 -- media_request               MER
@@ -322,10 +333,9 @@ IS 'foreign key from annotation';
 
 CREATE TABLE audit
 (aud_id                      INTEGER                       NOT NULL
-,cas_id                      INTEGER                       NOT NULL
+,cas_id                      INTEGER                       
 ,aua_id                      INTEGER                       NOT NULL
 ,usr_id                      INTEGER                       NOT NULL
-,application_server          CHARACTER VARYING             NOT NULL
 ,additional_data             CHARACTER VARYING
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
@@ -401,6 +411,17 @@ IS 'foreign key from case, part of composite natural key and PK';
 
 COMMENT ON COLUMN case_judge_ae.jud_id
 IS 'foreign key from judge, part of composite natural key and PK';
+
+CREATE TABLE case_transcription_ae
+(cas_id                      INTEGER                       NOT NULL
+,tra_id                      INTEGER                       NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON COLUMN case_transcription_ae.cas_id
+IS 'foreign key from case, part of composite natural key and PK';
+
+COMMENT ON COLUMN case_transcription_ae.tra_id
+IS 'foreign key from transcription, part of composite natural key and PK';
 
 CREATE TABLE case_overflow
 (cas_id                      INTEGER                       NOT NULL
@@ -584,7 +605,7 @@ IS 'foreign key from court_case';
 CREATE TABLE event
 (eve_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER
-,evh_id                      INTEGER
+,evh_id                      INTEGER                       NOT NULL
 ,event_object_id             CHARACTER VARYING(16)
 ,event_id                    INTEGER
 ,event_name                  CHARACTER VARYING -- details of the handler, at point in time the event arose, lots of discussion re import of legacy, retain.
@@ -680,6 +701,7 @@ CREATE TABLE external_object_directory
 ,transfer_attempts           INTEGER
 ,manifest_file               CHARACTER VARYING
 ,event_date_ts               TIMESTAMP WITH TIME ZONE                -- date upon which the retention date in ARM is derived
+,verification_attempts       INTEGER
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -810,10 +832,21 @@ CREATE TABLE hearing_media_ae
 ) TABLESPACE darts_tables;
 
 COMMENT ON COLUMN hearing_media_ae.hea_id
-IS 'foreign key from case, part of composite natural key and PK';
+IS 'foreign key from hearing, part of composite natural key and PK';
 
 COMMENT ON COLUMN hearing_media_ae.med_id
 IS 'foreign key from media, part of composite natural key and PK';
+
+CREATE TABLE hearing_transcription_ae
+(hea_id                      INTEGER                       NOT NULL
+,tra_id                      INTEGER                       NOT NULL
+) TABLESPACE darts_tables;
+
+COMMENT ON COLUMN hearing_transcription_ae.hea_id
+IS 'foreign key from hearing, part of composite natural key and PK';
+
+COMMENT ON COLUMN hearing_transcription_ae.tra_id
+IS 'foreign key from transcription, part of composite natural key and PK';
 
 CREATE TABLE judge
 (jud_id                      INTEGER                       NOT NULL
@@ -1045,11 +1078,9 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_report';
 
 CREATE TABLE transcription
 (tra_id                      INTEGER                       NOT NULL
-,cas_id                      INTEGER                       NOT NULL
 ,trt_id                      INTEGER                       NOT NULL
 ,ctr_id                      INTEGER                  
 ,tru_id                      INTEGER                                -- remains nullable, as nulls present in source data ( c_urgency)       
-,hea_id                      INTEGER                                -- remains nullable, until migration is complete
 ,trs_id                      INTEGER                                -- to be set according to trigger on transcription_workflow only
 ,transcription_object_id     CHARACTER VARYING(16)                  -- legacy pk from moj_transcription_s.r_object_id
 ,requestor                   CHARACTER VARYING                      -- 1055 distinct, from <forname><surname> to <AAANNA>
@@ -1067,9 +1098,6 @@ CREATE TABLE transcription
 
 COMMENT ON COLUMN transcription.tra_id
 IS 'primary key of transcription';
-    
-COMMENT ON COLUMN transcription.cas_id
-IS 'foreign key from case';
 
 COMMENT ON COLUMN transcription.trt_id
 IS 'foreign key to transcription_type, sourced from moj_transcription_s.c_type';
@@ -1504,6 +1532,14 @@ ALTER TABLE case_judge_ae
 ADD CONSTRAINT case_judge_ae_judge_fk
 FOREIGN KEY (jud_id) REFERENCES judge(jud_id);
 
+ALTER TABLE case_transcription_ae            
+ADD CONSTRAINT case_transcription_ae_case_fk
+FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
+
+ALTER TABLE case_transcription_ae            
+ADD CONSTRAINT case_transcription_ae_transcription_fk
+FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
+
 ALTER TABLE case_overflow                      
 ADD CONSTRAINT case_overflow_court_case_fk
 FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
@@ -1688,6 +1724,14 @@ ALTER TABLE hearing_media_ae
 ADD CONSTRAINT hearing_media_ae_media_fk
 FOREIGN KEY (med_id) REFERENCES media(med_id);
 
+ALTER TABLE hearing_transcription_ae            
+ADD CONSTRAINT hearing_transcription_ae_hearing_fk
+FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
+
+ALTER TABLE hearing_transcription_ae            
+ADD CONSTRAINT hearing_transcription_ae_transcription_fk
+FOREIGN KEY (tra_id) REFERENCES transcription(tra_id);
+
 ALTER TABLE judge
 ADD CONSTRAINT judge_created_by_fk
 FOREIGN KEY (created_by) REFERENCES user_account(usr_id);
@@ -1769,10 +1813,6 @@ ADD CONSTRAINT report_modified_by_fk
 FOREIGN KEY (last_modified_by) REFERENCES user_account(usr_id);
 
 ALTER TABLE transcription               
-ADD CONSTRAINT transcription_case_fk
-FOREIGN KEY (cas_id) REFERENCES court_case(cas_id);
-
-ALTER TABLE transcription               
 ADD CONSTRAINT transcription_courtroom_fk
 FOREIGN KEY (ctr_id) REFERENCES courtroom(ctr_id);
 
@@ -1783,10 +1823,6 @@ FOREIGN KEY (trs_id) REFERENCES transcription_status(trs_id);
 ALTER TABLE transcription               
 ADD CONSTRAINT transcription_urgency_fk
 FOREIGN KEY (tru_id) REFERENCES transcription_urgency(tru_id);
-
-ALTER TABLE transcription               
-ADD CONSTRAINT transcription_hearing_fk
-FOREIGN KEY (hea_id) REFERENCES hearing(hea_id);
 
 ALTER TABLE transcription 
 ADD CONSTRAINT transcription_created_by_fk

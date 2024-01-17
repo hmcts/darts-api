@@ -12,6 +12,7 @@
 --    amend eve_id on case_managment_retention to be nullable
 -- v6 change submitted_ts to submitted_by on case_retention and FK for same, and missing one on created_by
 --    add last_modified* to case_retention and FK 
+-- v7 change retention_policy_type.duration from integer to character varying, to support nYnMnD format used elsewhere
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
