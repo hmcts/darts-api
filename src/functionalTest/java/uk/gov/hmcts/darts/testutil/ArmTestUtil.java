@@ -42,8 +42,8 @@ public class ArmTestUtil {
                 throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
             }
 
-        } catch (RuntimeException e) {
-            throw new AzureDeleteBlobException("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e);
+        } catch (Exception e) {
+            log.error("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e.getMessage(), e);
         }
     }
 }
