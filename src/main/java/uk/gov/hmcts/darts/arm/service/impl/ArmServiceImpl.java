@@ -72,6 +72,7 @@ public class ArmServiceImpl implements ArmService {
 
     public Map<String, BlobItem> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
         Map<String, BlobItem> blobs = new HashMap<>();
+        log.debug("About to list files for {}", prefix);
         listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, prefix).forEach(blob -> {
             if (blob.isPrefix()) {
                 log.info("Virtual directory prefix: {}}", FILE_PATH_DELIMITER + blob.getName());
@@ -86,6 +87,7 @@ public class ArmServiceImpl implements ArmService {
 
     public Map<String, BlobItem> listBlobsFlat(BlobContainerClient blobContainerClient, String prefix) {
         Map<String, BlobItem> blobs = new HashMap<>();
+        log.debug("About to list files for {}", prefix);
         blobContainerClient.listBlobs()
             .forEach(
                 blob -> {
