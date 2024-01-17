@@ -69,6 +69,7 @@ public class UserAccountStub {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
         newUser.setUserName("IntegrationTest User");
+        newUser.setUserFullName("IntegrationTest User");
         newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
@@ -83,6 +84,7 @@ public class UserAccountStub {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
         newUser.setUserName("Saad Integration User");
+        newUser.setUserFullName("Saad Integration User");
         newUser.setEmailAddress(SEPARATE_TEST_USER_EMAIL);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);

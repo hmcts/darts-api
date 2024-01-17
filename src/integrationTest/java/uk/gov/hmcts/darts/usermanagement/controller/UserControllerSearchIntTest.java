@@ -311,6 +311,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
         var testTranscriberSG = dartsDatabaseStub.getSecurityGroupRepository().getReferenceById(-4);
         var user = new UserAccountEntity();
         user.setUserName(name);
+        user.setUserFullName(name);
         user.setEmailAddress(name + "@ex.com");
         user.getSecurityGroupEntities().add(testTranscriberSG);
         user.setAccountGuid(UUID.randomUUID().toString());

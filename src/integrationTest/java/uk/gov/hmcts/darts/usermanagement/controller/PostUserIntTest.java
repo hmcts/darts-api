@@ -204,6 +204,7 @@ class PostUserIntTest extends IntegrationBase {
 
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName("James Smith");
+        userAccountEntity.setUserFullName("James Smith");
         userAccountEntity.setEmailAddress("james.smith@hmcts.net");
         userAccountEntity.setIsSystemUser(false);
         userAccountEntity.setActive(false);

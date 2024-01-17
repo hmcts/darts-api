@@ -58,6 +58,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         SecurityGroupEntity judgesSecurityGroup = securityGroupRepository.getReferenceById(-3);
         UserAccountEntity judgeUserAccount = new UserAccountEntity();
         judgeUserAccount.setUserName("Test Judge");
+        judgeUserAccount.setUserFullName("Test Judge");
         judgeUserAccount.setEmailAddress(TEST_JUDGE_EMAIL);
         judgeUserAccount.setSecurityGroupEntities(Set.of(judgesSecurityGroup));
         judgeUserAccount.setCreatedBy(testUser);
@@ -72,6 +73,7 @@ class AuthorisationServiceTest extends IntegrationBase {
         SecurityGroupEntity bristolAppr = securityGroupRepository.getReferenceById(-1);
         UserAccountEntity bristolUserAccount = new UserAccountEntity();
         bristolUserAccount.setUserName("Test Bristol");
+        bristolUserAccount.setUserFullName("Test Bristol");
         bristolUserAccount.setEmailAddress(TEST_BRISTOL_EMAIL);
         bristolUserAccount.setSecurityGroupEntities(Set.of(bristolStaff, bristolAppr));
         bristolUserAccount.setCreatedBy(testUser);
@@ -83,6 +85,7 @@ class AuthorisationServiceTest extends IntegrationBase {
 
         UserAccountEntity newUser = new UserAccountEntity();
         newUser.setUserName("Test New");
+        newUser.setUserFullName("Test New");
         newUser.setEmailAddress(TEST_NEW_EMAIL);
         newUser.setCreatedBy(testUser);
         newUser.setLastModifiedBy(testUser);

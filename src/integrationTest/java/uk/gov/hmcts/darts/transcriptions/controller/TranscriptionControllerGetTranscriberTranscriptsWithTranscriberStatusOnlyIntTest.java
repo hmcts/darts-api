@@ -53,9 +53,9 @@ class TranscriptionControllerGetTranscriberTranscriptsWithTranscriberStatusOnlyI
                                 created_ts, created_by, last_modified_ts, last_modified_by)
                                 VALUES (-1, -1, -1, '2023-11-17', NULL, true, NULL, NULL, NULL, NULL, NULL);
 
-                                INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_email_address, description, is_active, created_ts,
+                                INSERT INTO darts.user_account (usr_id, dm_user_s_object_id, user_name, user_full_name, user_email_address, description, is_active, created_ts,
                                 last_modified_ts, last_login_ts, last_modified_by, created_by, account_guid, is_system_user)
-                                VALUES (-10, NULL, 'Richard B', 'Richard.B@example.com', NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, false);
+                                VALUES (-10, NULL, 'Richard B', 'Richard B', 'Richard.B@example.com', NULL, true, NULL, NULL, NULL, NULL, NULL, NULL, false);
                                 INSERT INTO darts.security_group_user_account_ae (usr_id, grp_id)
                                 VALUES (-10, -4);
                                 INSERT INTO darts.security_group_courthouse_ae (grp_id, cth_id)
