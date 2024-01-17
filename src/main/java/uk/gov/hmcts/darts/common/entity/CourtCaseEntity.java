@@ -98,6 +98,9 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();
 
+    @OneToMany(mappedBy = COURT_CASE)
+    private List<CaseRetentionEntity> caseRetentionEntities = new ArrayList<>();
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "case_judge_ae",
         joinColumns = {@JoinColumn(name = "cas_id")},
