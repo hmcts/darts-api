@@ -49,6 +49,12 @@ public class ArmServiceImpl implements ArmService {
         return blobPathAndName;
     }
 
+    public Map<String, BlobItem> listSubmissionBlobs(String containerName, String filename) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        String prefix = armDataManagementConfiguration.getFolders().getSubmission() + filename;
+
+        return listBlobsFlat(containerClient, prefix);
+    }
 
     public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
@@ -75,6 +81,19 @@ public class ArmServiceImpl implements ArmService {
                 blobs.put(blob.getName(), blob);
             }
         });
+        return blobs;
+    }
+
+    public Map<String, BlobItem> listBlobsFlat(BlobContainerClient blobContainerClient, String prefix) {
+        Map<String, BlobItem> blobs = new HashMap<>();
+        blobContainerClient.listBlobs()
+            .forEach(
+                blob -> {
+                    log.info("Blob name: {}}", blob.getName());
+                    blobs.put(blob.getName(), blob);
+                }
+            );
+
         return blobs;
     }
 

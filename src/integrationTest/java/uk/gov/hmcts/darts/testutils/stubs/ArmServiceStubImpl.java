@@ -31,15 +31,22 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
+    public Map<String, BlobItem> listSubmissionBlobs(String containerName, String filename) {
+        Map<String, BlobItem> listedBlobs = new HashMap<>();
+        listedBlobs.put("filename", new BlobItem());
+        return listedBlobs;
+    }
+
+    @Override
     public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
-        Map<String,BlobItem> listedBlobs = new HashMap<>();
+        Map<String, BlobItem> listedBlobs = new HashMap<>();
         listedBlobs.put("filename", new BlobItem());
         return listedBlobs;
     }
 
     @Override
     public Map<String, BlobItem> listResponseBlobs(String containerName, String filename) {
-        Map<String,BlobItem> listedBlobs = new HashMap<>();
+        Map<String, BlobItem> listedBlobs = new HashMap<>();
         listedBlobs.put("filename", new BlobItem());
         return listedBlobs;
     }

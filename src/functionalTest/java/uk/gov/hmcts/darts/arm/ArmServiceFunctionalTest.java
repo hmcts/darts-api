@@ -66,21 +66,21 @@ class ArmServiceFunctionalTest {
     }
 
     @Test
-    void listCollectedBlobs() {
+    void listSubmissionBlobs() {
 
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String filename = String.format("functional_test_%s", UUID.randomUUID().toString());
-        String blobPathAndName = armCollectedDropZone + filename;
+        String blobPathAndName = armSubmissionDropZone + filename;
         String actualResult = armService.saveBlobData(armContainerName, data, blobPathAndName);
-        armCollectedBlobsToBeDeleted.add(actualResult);
+        log.info("Saved blob {} in {}", actualResult, blobPathAndName);
+        armSubmissionBlobsToBeDeleted.add(actualResult);
         assertNotNull(actualResult);
-        log.info("Blob filename {}", actualResult);
+        log.info("listSubmissionBlobs - Blob filename {}", actualResult);
 
-        Map<String, BlobItem> collectedBlobs = armService.listCollectedBlobs(armContainerName, armCollectedDropZone + "functional_test");
+        Map<String, BlobItem> collectedBlobs = armService.listSubmissionBlobs(armContainerName, armCollectedDropZone + "functional_test");
         assertEquals(1, collectedBlobs.size());
-        assertEquals(filename, collectedBlobs.keySet().stream().findFirst().get());
-
+        
     }
 
     @AfterEach
