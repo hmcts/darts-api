@@ -2,9 +2,9 @@ package uk.gov.hmcts.darts.usermanagement.component.validation.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
-import uk.gov.hmcts.darts.usermanagement.component.validation.Validator;
 import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 
