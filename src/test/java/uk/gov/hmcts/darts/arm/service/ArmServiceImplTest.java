@@ -70,7 +70,24 @@ class ArmServiceImplTest {
         assertNotNull(blobName);
         assertEquals(blobPathAndFilename, blobName);
     }
-    
+
+    @Test
+    void testListSubmissionBlobs() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobs(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        Map<String, BlobItem> blobs = armService.listSubmissionBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        assertNotNull(blobs);
+    }
+
     @Test
     void testListCollectedBlobs() {
         PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
