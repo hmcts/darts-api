@@ -25,7 +25,7 @@ public class ArmTestUtil {
     private final ArmDataManagementDao armDataManagementDao;
 
 
-    public void deleteBlobData(String containerName, String blobPathAndName) throws AzureDeleteBlobException {
+    public void deleteBlobData(String containerName, String blobPathAndName) {
         try {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
             BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
