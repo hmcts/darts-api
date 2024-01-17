@@ -29,6 +29,7 @@ import java.util.List;
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEARING_ID_TRANSCRIBER;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSFORMED_MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.RCJ_APPEALS;
@@ -81,6 +82,8 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
+        securityRoles = {TRANSCRIBER})
     public ResponseEntity<Resource> download(Integer transformedMediaId) {
         InputStream audioFileStream = mediaRequestService.download(transformedMediaId);
 
@@ -112,6 +115,9 @@ public class AudioRequestsController implements AudioRequestsApi {
     @SneakyThrows
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<byte[]> playback(Integer transformedMediaId, String httpRangeList) {
         InputStream audioFileStream = mediaRequestService.playback(transformedMediaId);
 
@@ -120,6 +126,9 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> updateTransformedMediaLastAccessedTimestamp(Integer transformedMediaId) {
         mediaRequestService.updateTransformedMediaLastAccessedTimestamp(transformedMediaId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -127,6 +136,9 @@ public class AudioRequestsController implements AudioRequestsApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = TRANSFORMED_MEDIA_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
     public ResponseEntity<Void> deleteTransformedMedia(Integer transformedMediaId) {
         mediaRequestService.deleteTransformedMedia(transformedMediaId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

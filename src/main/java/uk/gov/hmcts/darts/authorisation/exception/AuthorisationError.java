@@ -48,6 +48,11 @@ public enum AuthorisationError implements DartsApiError {
         "107",
         HttpStatus.FORBIDDEN,
         "Failed to check authorisation"
+    ),
+    BAD_REQUEST_TRANSFORMED_MEDIA_ID(
+        "108",
+        HttpStatus.BAD_REQUEST,
+        "Failed to check authorisation for the transformed media"
     );
 
     private static final String ERROR_TYPE_PREFIX = "AUTHORISATION";
