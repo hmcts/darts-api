@@ -520,6 +520,7 @@ public class DartsDatabaseStub {
             UserAccountEntity testUser = new UserAccountEntity();
             testUser.setEmailAddress("test.user@example.com");
             testUser.setUserName("testuser");
+            testUser.setUserFullName("testuser");
             testUser.setAccountGuid(UUID.randomUUID().toString());
             testUser.setIsSystemUser(false);
             testUser.setActive(true);

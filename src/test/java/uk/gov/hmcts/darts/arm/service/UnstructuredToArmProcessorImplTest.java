@@ -327,7 +327,8 @@ class UnstructuredToArmProcessorImplTest {
             externalLocationTypeUnstructured,
             externalObjectDirectoryEntityArm.getMedia(),
             externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()
+            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
+            externalObjectDirectoryEntityArm.getCaseDocument()
         )).thenReturn(Optional.ofNullable(externalObjectDirectoryEntityUnstructured));
 
         BinaryData manifest = BinaryData.fromFile(Path.of(archiveRecordFile.getAbsolutePath()));
@@ -476,7 +477,8 @@ class UnstructuredToArmProcessorImplTest {
             externalLocationTypeUnstructured,
             externalObjectDirectoryEntityArm.getMedia(),
             externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()
+            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
+            externalObjectDirectoryEntityArm.getCaseDocument()
         )).thenReturn(Optional.ofNullable(externalObjectDirectoryEntityUnstructured));
 
         unstructuredToArmProcessor.processUnstructuredToArm();
@@ -527,7 +529,8 @@ class UnstructuredToArmProcessorImplTest {
             externalLocationTypeUnstructured,
             externalObjectDirectoryEntityArm.getMedia(),
             externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()
+            externalObjectDirectoryEntityArm.getAnnotationDocumentEntity(),
+            externalObjectDirectoryEntityArm.getCaseDocument()
         )).thenReturn(Optional.empty());
 
         unstructuredToArmProcessor.processUnstructuredToArm();

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.CaseDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
@@ -20,8 +21,12 @@ import java.util.Optional;
 public interface ExternalObjectDirectoryRepository extends JpaRepository<ExternalObjectDirectoryEntity, Integer> {
 
     @Query(
-        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
-            "WHERE eod.media = :media AND eod.status = :status AND eod.externalLocationType = :externalLocationType"
+        """
+                SELECT eod FROM ExternalObjectDirectoryEntity eod
+                WHERE eod.media = :media
+                AND eod.status = :status
+                AND eod.externalLocationType = :externalLocationType
+            """
     )
     List<ExternalObjectDirectoryEntity> findByMediaStatusAndType(MediaEntity media, ObjectRecordStatusEntity status,
                                                                  ExternalLocationTypeEntity externalLocationType);
@@ -34,9 +39,10 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eo.id NOT IN
               (
               SELECT eod.id FROM ExternalObjectDirectoryEntity eod, ExternalObjectDirectoryEntity eod2
-              WHERE ((eod.media is not null AND eod.media = eod2.media)
-              OR (eod.transcriptionDocumentEntity is not null AND eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity)
-              OR (eod.annotationDocumentEntity is not null AND eod.annotationDocumentEntity = eod2.annotationDocumentEntity))
+              WHERE (eod.media = eod2.media
+              OR eod.transcriptionDocumentEntity = eod2.transcriptionDocumentEntity
+              OR eod.annotationDocumentEntity = eod2.annotationDocumentEntity
+              OR eod.caseDocument = eod2.caseDocument )
               AND eod.status = :status
               AND eod.externalLocationType = :location1
               AND eod2.externalLocationType = :location2
@@ -44,32 +50,35 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             """
     )
     List<ExternalObjectDirectoryEntity> findExternalObjectsNotIn2StorageLocations(ObjectRecordStatusEntity status,
-                                                                ExternalLocationTypeEntity location1,
-                                                                ExternalLocationTypeEntity location2);
+                                                                                  ExternalLocationTypeEntity location1,
+                                                                                  ExternalLocationTypeEntity location2);
 
 
     @Query(
         """
-        SELECT eod FROM ExternalObjectDirectoryEntity eod
-        WHERE eod.status = :status
-        AND eod.externalLocationType = :location
-        AND (:media is null or eod.media = :media)
-        AND (:transcription is null or eod.transcriptionDocumentEntity = :transcription)
-        AND (:annotation is null or eod.annotationDocumentEntity = :annotation)
-        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status
+            AND eod.externalLocationType = :location
+            AND (eod.media = :media
+            or eod.transcriptionDocumentEntity = :transcription
+            or eod.annotationDocumentEntity = :annotation
+            or eod.caseDocument = :caseDocument)
+            """
     )
-
     Optional<ExternalObjectDirectoryEntity> findMatchingExternalObjectDirectoryEntityByLocation(ObjectRecordStatusEntity status,
                                                                                                 ExternalLocationTypeEntity location,
                                                                                                 MediaEntity media,
                                                                                                 TranscriptionDocumentEntity transcription,
-                                                                                                AnnotationDocumentEntity annotation);
+                                                                                                AnnotationDocumentEntity annotation,
+                                                                                                CaseDocumentEntity caseDocument);
 
     @Query(
-        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
-            "WHERE eod.status in :failedStatuses " +
-            "AND eod.externalLocationType = :type " +
-            "AND eod.transferAttempts <= :transferAttempts"
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status in :failedStatuses
+            AND eod.externalLocationType = :type
+            AND eod.transferAttempts <= :transferAttempts
+            """
     )
     List<ExternalObjectDirectoryEntity> findNotFinishedAndNotExceededRetryInStorageLocation(List<ObjectRecordStatusEntity> failedStatuses,
                                                                                             ExternalLocationTypeEntity type,
@@ -77,30 +86,30 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
 
 
     @Query(
-        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
-            "WHERE eod.status = :status AND eod.externalLocationType = :type"
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status = :status AND eod.externalLocationType = :type
+            """
     )
     List<ExternalObjectDirectoryEntity> findByStatusAndType(ObjectRecordStatusEntity status, ExternalLocationTypeEntity type);
 
     @Query(
-        "SELECT eod FROM ExternalObjectDirectoryEntity eod " +
-            "WHERE (eod.status = :status1 " +
-            "OR eod.status = :status2 " +
-            "OR eod.status = :status3 " +
-            "OR eod.status = :status4 " +
-            "OR eod.status = :status5 " +
-            "OR eod.status = :status6) " +
-            "AND eod.externalLocationType = :type"
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.status.id in :statusList
+            AND eod.externalLocationType = :type
+            """
     )
-    List<ExternalObjectDirectoryEntity> findByFailedAndType(ObjectRecordStatusEntity status1,
-                                                            ObjectRecordStatusEntity status2,
-                                                            ObjectRecordStatusEntity status3,
-                                                            ObjectRecordStatusEntity status4,
-                                                            ObjectRecordStatusEntity status5,
-                                                            ObjectRecordStatusEntity status6,
-                                                            ExternalLocationTypeEntity type);
+    List<ExternalObjectDirectoryEntity> findByStatusIdInAndType(List<Integer> statusList,
+                                                                ExternalLocationTypeEntity type);
 
-    @Query("SELECT eod FROM ExternalObjectDirectoryEntity eod WHERE eod.externalLocationType = :externalLocationTypeEntity AND eod.status = :status")
+    @Query(
+        """
+            SELECT eod FROM ExternalObjectDirectoryEntity eod
+            WHERE eod.externalLocationType = :externalLocationTypeEntity
+            AND eod.status = :status
+            """
+    )
     List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndMarkedForDeletion(ExternalLocationTypeEntity externalLocationTypeEntity,
                                                                                        ObjectRecordStatusEntity status);
 

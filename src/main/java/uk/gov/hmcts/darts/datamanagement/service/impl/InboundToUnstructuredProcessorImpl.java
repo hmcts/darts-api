@@ -83,13 +83,8 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         List<ExternalObjectDirectoryEntity> inboundList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(
             STORED), getType(INBOUND));
         unstructuredStoredList = externalObjectDirectoryRepository.findByStatusAndType(getStatus(STORED), getType(UNSTRUCTURED));
-        unstructuredFailedList = externalObjectDirectoryRepository.findByFailedAndType(
-            getStatus(FAILURE),
-            getStatus(FAILURE_FILE_NOT_FOUND),
-            getStatus(FAILURE_ARM_INGESTION_FAILED),
-            getStatus(FAILURE_FILE_TYPE_CHECK_FAILED),
-            getStatus(FAILURE_FILE_SIZE_CHECK_FAILED),
-            getStatus(FAILURE_CHECKSUM_FAILED),
+        unstructuredFailedList = externalObjectDirectoryRepository.findByStatusIdInAndType(
+            failureStatesList,
             getType(UNSTRUCTURED)
         );
 

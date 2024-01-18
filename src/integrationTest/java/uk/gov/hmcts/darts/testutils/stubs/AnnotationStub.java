@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.AnnotationEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
@@ -18,13 +17,9 @@ public class AnnotationStub {
     private final AnnotationRepository annotationRepository;
     private final AnnotationDocumentRepository annotationDocumentRepository;
 
-    public AnnotationEntity createAndSaveAnnotationEntityWith(HearingEntity hearingEntity,
-                                                              UserAccountEntity currentOwner,
+    public AnnotationEntity createAndSaveAnnotationEntityWith(UserAccountEntity currentOwner,
                                                               String annotationText) {
         AnnotationEntity annotationEntity = new AnnotationEntity();
-        annotationEntity.setHearingId(hearingEntity.getId());
-        annotationEntity.setCourtCase(hearingEntity.getCourtCase());
-        annotationEntity.setCourtroom(hearingEntity.getCourtroom());
         annotationEntity.setCurrentOwner(currentOwner);
         annotationEntity.setText(annotationText);
         return annotationRepository.save(annotationEntity);
