@@ -97,6 +97,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
 
     public void addMedia(MediaEntity mediaEntity) {
         mediaList.add(mediaEntity);
+        mediaEntity.getHearingList().add(this);
     }
 
     public void addJudge(JudgeEntity judgeEntity) {

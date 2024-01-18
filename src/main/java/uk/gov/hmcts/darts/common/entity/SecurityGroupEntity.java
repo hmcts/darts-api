@@ -70,10 +70,7 @@ public class SecurityGroupEntity {
         inverseJoinColumns = {@JoinColumn(name = "cth_id")})
     private Set<CourthouseEntity> courthouseEntities = new LinkedHashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "security_group_user_account_ae",
-        joinColumns = {@JoinColumn(name = "grp_id")},
-        inverseJoinColumns = {@JoinColumn(name = "usr_id")})
+    @ManyToMany(mappedBy = UserAccountEntity_.SECURITY_GROUP_ENTITIES)
     private Set<UserAccountEntity> users = new LinkedHashSet<>();
 
     @Column(name = "display_name")
