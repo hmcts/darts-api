@@ -21,6 +21,7 @@ import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.MEDIA_NOT_FOUND;
 import static uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError.MEDIA_REQUEST_NOT_FOUND;
@@ -83,11 +84,20 @@ public class AuthorisationImpl implements Authorisation {
     @Override
     public void authoriseByMediaId(Integer mediaId, Set<SecurityRoleEnum> securityRoles) {
         try {
-            final List<CourthouseEntity> courthouses = List.of(mediaRepository.getReferenceById(mediaId)
-                                                                   .getCourtroom().getCourthouse());
-            authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
+            final Set<CourthouseEntity> courthouses = mediaRepository.getReferenceById(mediaId)
+                .getHearingList()
+                .stream()
+                .map(hearingEntity -> hearingEntity.getCourtroom().getCourthouse())
+                .collect(Collectors.toUnmodifiableSet());
+
+            authorisationApi.checkCourthouseAuthorisation(
+                courthouses
+                    .stream()
+                    .collect(Collectors.toUnmodifiableList()),
+                securityRoles
+            );
         } catch (EntityNotFoundException e) {
-            log.error("Unable to find Media-Courtroom-Courthouse for checkAuthorisation", e);
+            log.error("Unable to find Media-Hearing-Courtroom-Courthouse for checkAuthorisation", e);
             throw new DartsApiException(MEDIA_NOT_FOUND);
         }
     }
