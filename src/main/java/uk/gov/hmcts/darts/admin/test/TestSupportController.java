@@ -391,7 +391,7 @@ public class TestSupportController {
         retentionPolicyTypeEntity.setId(1);
         retentionPolicyTypeEntity.setFixedPolicyKey(1);
         retentionPolicyTypeEntity.setPolicyName("Standard");
-        retentionPolicyTypeEntity.setDuration("7");
+        retentionPolicyTypeEntity.setDuration(7);
         retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
         retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
         retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());

@@ -34,7 +34,7 @@ public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     private String policyName;
 
     @Column(name = "duration")
-    private String duration;
+    private Integer duration;
 
     @Column(name = "policy_start_ts")
     private OffsetDateTime policyStart;

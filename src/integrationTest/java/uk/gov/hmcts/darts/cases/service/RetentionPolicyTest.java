@@ -165,7 +165,7 @@ class RetentionPolicyTest extends IntegrationBase {
         retentionPolicyType.setPolicyStart(OffsetDateTime.parse("2023-07-22T15:42:10.361Z"));
         retentionPolicyType.setPolicyEnd(OffsetDateTime.parse("2030-01-31T15:42:10.361Z"));
         retentionPolicyType.setCreatedDateTime(OffsetDateTime.parse("2023-07-22T15:42:10.361Z"));
-        retentionPolicyType.setDuration("1");
+        retentionPolicyType.setDuration(1);
         return retentionPolicyType;
     }
 
