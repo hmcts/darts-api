@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
@@ -402,6 +403,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
+        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
@@ -468,6 +473,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
 
         armResponseFilesProcessor.processResponseFiles();
 
@@ -537,6 +546,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
         when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
+        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
+
         armResponseFilesProcessor.processResponseFiles();
 
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
@@ -574,6 +587,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
+
         Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
@@ -581,6 +595,10 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         hashcodeResponseBlobs.put(createRecordFilename, new BlobItem());
         hashcodeResponseBlobs.put(uploadFileFilename, new BlobItem());
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
+
+        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
+        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
 
         String fileLocation = tempDirectory.getAbsolutePath();
         when(armDataManagementConfiguration.getTempBlobWorkspace()).thenReturn(fileLocation);

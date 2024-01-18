@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +17,8 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -131,6 +135,24 @@ class ArmServiceImplTest {
 
         BinaryData binaryData = armService.getBlobData(ARM_BLOB_CONTAINER_NAME, "blobname");
         assertEquals(BINARY_DATA, binaryData);
+    }
+
+    @Test
+    void testDeleteResponseBlob() {
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+
+        Response<Boolean> response = mock(Response.class);
+
+        when(blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE, null, Duration.of(60, ChronoUnit.SECONDS), null)).thenReturn(response);
+
+        armService.deleteResponseBlob(ARM_BLOB_CONTAINER_NAME, "blobname");
     }
 
 }

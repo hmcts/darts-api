@@ -14,4 +14,6 @@ public interface ArmDataManagementApi {
     Map<String, BlobItem> listResponseBlobs(String prefix);
 
     BinaryData getResponseBlobData(String blobName);
+
+    void deleteResponseBlob(String blobName);
 }

@@ -122,7 +122,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             log.debug("List response files starting with hashcode {}", responseFilesHashcode);
             Map<String, BlobItem> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
             if (nonNull(responseBlobs) && !responseBlobs.isEmpty()) {
-                processResponseBlobs(responseBlobs, externalObjectDirectory);
+                processResponseBlobs(responseBlobs, externalObjectDirectory, inputUploadFilenameProcessor);
             } else {
                 updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
             }
@@ -148,18 +148,14 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         return inputUploadBlobs;
     }
 
-    private void processResponseBlobs(Map<String, BlobItem> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory) throws IOException {
+    private void processResponseBlobs(Map<String, BlobItem> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory,
+                                      InputUploadFilenameProcessor inputUploadFilenameProcessor) throws IOException {
         String createRecordFilename = null;
         String uploadFilename = null;
         ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
         ObjectRecordStatusEntity armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
 
         for (String responseFile : responseBlobs.keySet()) {
-            /*
-               CR - Create Record - This is the create record file which represents record creation in ARM.
-               -- 6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp
-               UF - Upload File - This is the Upload file which represents the File which is ingested by ARM.
-               -- 6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp */
             if (responseFile.endsWith(generateSuffix(ARM_CREATE_RECORD_FILENAME_KEY))) {
                 createRecordFilename = responseFile;
             } else if (responseFile.endsWith(generateSuffix(ARM_UPLOAD_FILE_FILENAME_KEY))) {
@@ -170,17 +166,16 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         if (nonNull(createRecordFilename) && nonNull(uploadFilename)) {
             try {
                 UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFilename);
-                boolean appendUuidToWorkspace = true;
 
                 BinaryData uploadFileBinary = armDataManagementApi.getResponseBlobData(uploadFilename);
                 readUploadFile(
                     externalObjectDirectory,
                     uploadFileBinary,
-                    uploadFilename,
-                    appendUuidToWorkspace,
                     uploadFileFilenameProcessor,
                     armResponseProcessingFailed,
-                    armDropZoneStatus
+                    armDropZoneStatus,
+                    createRecordFilename,
+                    inputUploadFilenameProcessor
                 );
             } catch (Exception e) {
                 log.error("Failure with upload file {}", e.getMessage(), e);
@@ -192,18 +187,24 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
     }
 
-    private void readUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, BinaryData uploadFileBinary, String uploadFilename,
-                                boolean appendUuidToWorkspace, UploadFileFilenameProcessor uploadFileFilenameProcessor,
-                                ObjectRecordStatusEntity armResponseProcessingFailed, ObjectRecordStatusEntity armDropZoneStatus) {
+    private void readUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                BinaryData uploadFileBinary,
+                                UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                ObjectRecordStatusEntity armResponseProcessingFailed,
+                                ObjectRecordStatusEntity armDropZoneStatus,
+                                String createRecordFilename,
+                                InputUploadFilenameProcessor inputUploadFilenameProcessor) {
         if (nonNull(uploadFileBinary)) {
             Path jsonPath = null;
             try {
+                boolean appendUuidToWorkspace = true;
                 jsonPath = fileOperationService.saveBinaryDataToSpecifiedWorkspace(
                     uploadFileBinary,
-                    uploadFilename,
+                    uploadFileFilenameProcessor.getUploadFileFilename(),
                     armDataManagementConfiguration.getTempBlobWorkspace(),
                     appendUuidToWorkspace
                 );
+
                 if (jsonPath.toFile().exists()) {
                     ArmResponseUploadFileRecord armResponseUploadFileRecord = objectMapper.readValue(
                         jsonPath.toFile(),
@@ -211,11 +212,13 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                     );
                     if (nonNull(armResponseUploadFileRecord)) {
                         if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
-                            processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
+                            processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory,
+                                                         uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor
+                            );
                         } else {
                             //Read the upload file and log the error code and description with EOD
                             log.warn(
-                                "External object id {} status is failed. Arm error description: {} Arm error status: {}",
+                                "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
                                 externalObjectDirectory.getId(),
                                 armResponseUploadFileRecord.getExceptionDescription(),
                                 armResponseUploadFileRecord.getErrorStatus()
@@ -223,15 +226,15 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
                         }
                     } else {
-                        log.warn("Unable to read upload file {}", uploadFilename);
+                        log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
                         updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
                     }
                 } else {
-                    log.warn("Failed to write upload file to temp workspace {}", uploadFilename);
+                    log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilename());
                     updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
                 }
             } catch (Exception e) {
-                log.error("Unable to process arm response upload file {}", uploadFilename);
+                log.error("Unable to process arm response upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
@@ -254,9 +257,13 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void processUploadFileDataSuccess(ArmResponseUploadFileRecord armResponseUploadFileRecord,
-                                              ExternalObjectDirectoryEntity externalObjectDirectory) {
+                                              ExternalObjectDirectoryEntity externalObjectDirectory,
+                                              UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                              String createRecordFilename,
+                                              InputUploadFilenameProcessor inputUploadFilenameProcessor) {
         // Validate the checksum in external object directory table against the Media, TranscriptionDocument, or AnnotationDocument
         ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
+
         if (nonNull(externalObjectDirectory.getMedia())) {
             MediaEntity media = externalObjectDirectory.getMedia();
             if (nonNull(media.getChecksum())) {
@@ -285,6 +292,16 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
             }
         }
+        deleteResponseFiles(uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor);
+    }
+
+    private void deleteResponseFiles(UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                     String createRecordFilename,
+                                     InputUploadFilenameProcessor inputUploadFilenameProcessor) {
+        armDataManagementApi.deleteResponseBlob(uploadFileFilenameProcessor.getUploadFileFilename());
+        armDataManagementApi.deleteResponseBlob(createRecordFilename);
+        armDataManagementApi.deleteResponseBlob(inputUploadFilenameProcessor.getInputUploadFilename());
+
     }
 
     private void verifyChecksum(ArmResponseUploadFileRecord armResponseUploadFileRecord,
@@ -300,7 +317,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 updateExternalObjectDirectory(externalObjectDirectory, storedStatus);
             }
         } else {
-            log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}", externalObjectDirectory.getId(),
+            log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
+                     externalObjectDirectory.getId(),
                      armResponseUploadFileRecord.getMd5(), objectChecksum
             );
             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);

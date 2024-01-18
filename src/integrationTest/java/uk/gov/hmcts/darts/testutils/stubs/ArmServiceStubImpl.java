@@ -56,6 +56,11 @@ public class ArmServiceStubImpl implements ArmService {
         return BinaryData.fromBytes(new byte[1024]);
     }
 
+    @Override
+    public boolean deleteResponseBlob(String containerName, String filename) {
+        return true;
+    }
+
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"

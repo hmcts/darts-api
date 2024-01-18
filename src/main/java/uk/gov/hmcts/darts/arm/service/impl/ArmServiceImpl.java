@@ -1,10 +1,12 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.models.ListBlobsOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.ArmService;
+import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -26,7 +29,9 @@ import java.util.Map;
 public class ArmServiceImpl implements ArmService {
 
     public static final String FILE_PATH_DELIMITER = "/";
-    private static final long TIMEOUT = 60;
+    public static final int STATUS_CODE_202 = 202;
+    protected static final long TIMEOUT = 60;
+
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
 
@@ -103,5 +108,34 @@ public class ArmServiceImpl implements ArmService {
             return null;
         }
         return blobClient.downloadContent();
+    }
+
+    public boolean deleteResponseBlob(String containerName, String filename) {
+        String blobname = armDataManagementConfiguration.getFolders().getSubmission() + filename;
+        return deleteBlobData(containerName, blobname);
+    }
+
+    public boolean deleteBlobData(String containerName, String blobPathAndName) {
+        try {
+            BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+            BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
+
+            Response<Boolean> response = blobClient.deleteIfExistsWithResponse(
+                DeleteSnapshotsOptionType.INCLUDE,
+                null,
+                Duration.of(TIMEOUT, ChronoUnit.SECONDS),
+                null
+            );
+
+            log.debug("Attempted to delete blob data for blob path {}, Returned status code {}", blobPathAndName, response.getStatusCode());
+            if (STATUS_CODE_202 != response.getStatusCode()) {
+                throw new AzureDeleteBlobException("Failed to delete blob " + blobPathAndName + " because of status code: " + response.getStatusCode());
+            }
+
+        } catch (Exception e) {
+            log.error("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e.getMessage(), e);
+            return false;
+        }
+        return true;
     }
 }

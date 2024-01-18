@@ -17,4 +17,6 @@ public interface ArmService {
     Map<String, BlobItem> listResponseBlobs(String containerName, String filename);
 
     BinaryData getBlobData(String containerName, String blobName);
+
+    boolean deleteResponseBlob(String containerName, String filename);
 }
