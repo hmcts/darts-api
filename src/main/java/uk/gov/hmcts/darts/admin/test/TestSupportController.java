@@ -20,26 +20,32 @@ import uk.gov.hmcts.darts.audit.api.AuditActivity;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.AuditActivityEntity;
 import uk.gov.hmcts.darts.common.entity.AuditEntity;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.AuditActivityRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.CourtroomRepository;
 import uk.gov.hmcts.darts.common.repository.NodeRegistrationRepository;
+import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.bankholidays.BankHolidaysService;
 import uk.gov.hmcts.darts.common.service.bankholidays.Event;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Integer.parseInt;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
@@ -60,6 +66,8 @@ public class TestSupportController {
     private final AuditRepository auditRepository;
     private final CaseRepository caseRepository;
     private final UserIdentity userIdentity;
+    private final CaseRetentionRepository caseRetentionRepository;
+    private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
 
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
@@ -82,6 +90,8 @@ public class TestSupportController {
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
 
+        removeCaseRetentions(session, caseIds);
+        removeRetentionPolicyType(session);
         removeCaseAudit(session, caseIds);
         removeCaseJudgeJoins(session, caseIds);
         removeCaseDefence(session, caseIds);
@@ -258,6 +268,21 @@ public class TestSupportController {
             .executeUpdate();
     }
 
+    private void removeCaseRetentions(Session session, List<Integer> caseIds) {
+        session.createNativeQuery("""
+                                      delete from darts.case_retention where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
+    }
+
+    private void removeRetentionPolicyType(Session session) {
+        session.createNativeQuery("""
+                                      delete from darts.retention_policy_type where rpt_id = 1
+                                      """, Integer.class)
+            .executeUpdate();
+    }
+
     private void removeCaseJudgeJoins(Session session, List<Integer> caseIds) {
         session.createNativeQuery("""
                                       delete from darts.case_judge_ae where cas_id in (?)
@@ -339,10 +364,58 @@ public class TestSupportController {
             .executeUpdate();
     }
 
-
     @GetMapping(value = "/bank-holidays/{year}")
     public ResponseEntity<List<Event>> getBankHolidaysForYear(@PathVariable(name = "year") String year) {
         var bankHolidays = bankHolidaysService.getBankHolidays(parseInt(year));
         return new ResponseEntity<>(bankHolidays, OK);
+    }
+
+    //Controller only runs in test environment
+    @SuppressWarnings({"java:S2245"})
+    @PostMapping(value = "/case-retentions/caseNumber/{caseNumber}")
+    public ResponseEntity<Integer> createCaseRetention(@PathVariable(name = "caseNumber") String caseNumber) {
+        CourtCaseEntity courtCase = new CourtCaseEntity();
+        courtCase.setCaseNumber(caseNumber);
+        courtCase.setClosed(false);
+        courtCase.setInterpreterUsed(false);
+
+        String courtrooomNamme = "func-" + randomAlphanumeric(7);
+        String courthouseName = "func-" + randomAlphanumeric(7);
+        CourthouseEntity courthouse = newCourthouse(courthouseName);
+        newCourtroom(courtrooomNamme, courthouse);
+
+        courtCase.setCourthouse(courthouse);
+        caseRepository.saveAndFlush(courtCase);
+
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeEntity.setId(1);
+        retentionPolicyTypeEntity.setFixedPolicyKey(1);
+        retentionPolicyTypeEntity.setPolicyName("Standard");
+        retentionPolicyTypeEntity.setDuration(7);
+        retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
+        retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
+        retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());
+        retentionPolicyTypeEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        retentionPolicyTypeEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        retentionPolicyTypeEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        retentionPolicyTypeRepository.saveAndFlush(retentionPolicyTypeEntity);
+
+        CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
+        caseRetentionEntity.setCourtCase(courtCase);
+        caseRetentionEntity.setId(1);
+        caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
+        caseRetentionEntity.setTotalSentence("10 years?");
+        caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
+        caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
+        caseRetentionEntity.setCurrentState("a_state");
+        caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+
+        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+
+        return new ResponseEntity<>(courtCase.getId(), OK);
     }
 }

@@ -2,23 +2,29 @@ package uk.gov.hmcts.darts.cases.mapper;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.cases.model.AddCaseRequest;
 import uk.gov.hmcts.darts.cases.model.PostCaseResponse;
 import uk.gov.hmcts.darts.cases.model.ReportingRestriction;
 import uk.gov.hmcts.darts.cases.model.ScheduledCase;
 import uk.gov.hmcts.darts.cases.model.SingleCase;
+import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.DefenceEntity;
 import uk.gov.hmcts.darts.common.entity.DefendantEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.entity.ProsecutorEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.retention.enums.CaseStatus;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -27,10 +33,12 @@ import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 @Component
 @RequiredArgsConstructor
 @SuppressWarnings({"PMD.TooManyMethods"})
+@Slf4j
 public class CasesMapper {
 
     private final RetrieveCoreObjectService retrieveCoreObjectService;
     private final HearingReportingRestrictionsRepository hearingReportingRestrictionsRepository;
+    private final CaseRetentionRepository caseRetentionRepository;
 
     public List<ScheduledCase> mapToScheduledCases(List<HearingEntity> hearings) {
         return emptyIfNull(hearings).stream().map(this::mapToScheduledCase)
@@ -94,6 +102,23 @@ public class CasesMapper {
     @Transactional
     public SingleCase mapToSingleCase(CourtCaseEntity caseEntity) {
         SingleCase singleCase = new SingleCase();
+
+        Optional<CaseRetentionEntity> caseRetentionOptional = caseRetentionRepository
+                                                                    .findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(
+                                                                        caseEntity,
+                                                                        String.valueOf(CaseStatus.COMPLETE));
+
+        if (!caseRetentionOptional.isEmpty()) {
+            CaseRetentionEntity caseRetention = caseRetentionOptional.get();
+            RetentionPolicyTypeEntity retentionPolicy = caseRetention.getRetentionPolicyType();
+
+            singleCase.setRetainUntilDateTime(caseRetention.getRetainUntil());
+            singleCase.setRetentionDateTimeApplied(caseRetention.getRetainUntilAppliedOn());
+            singleCase.setRetentionPolicyApplied(retentionPolicy.getPolicyName());
+
+        }
+
+        singleCase.setCaseClosedDateTime(caseEntity.getCaseClosedTimestamp());
         singleCase.setCaseId(caseEntity.getId());
         singleCase.setCaseNumber(caseEntity.getCaseNumber());
         singleCase.setCourthouse(caseEntity.getCourthouse().getCourthouseName());
@@ -111,10 +136,9 @@ public class CasesMapper {
                 reportingRestrictionWithName(caseEntity.getReportingRestrictions().getEventName()));
         }
 
-        singleCase.setReportingRestrictions(
-            sortedByTimestamp(reportingRestrictions));
+        singleCase.setReportingRestrictions(sortedByTimestamp(reportingRestrictions));
 
-        // Will be removed when FE up to date
+        //Will be removed when FE up to date
         populateReportingRestrictionField(caseEntity, singleCase);
 
         return singleCase;

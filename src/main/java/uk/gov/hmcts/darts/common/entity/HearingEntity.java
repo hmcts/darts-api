@@ -89,8 +89,15 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 
+    @ManyToMany
+    @JoinTable(name = "hearing_annotation_ae",
+        joinColumns = {@JoinColumn(name = HEA_ID)},
+        inverseJoinColumns = {@JoinColumn(name = "ann_id")})
+    private List<AnnotationEntity> annotations = new ArrayList<>();
+
     public void addMedia(MediaEntity mediaEntity) {
         mediaList.add(mediaEntity);
+        mediaEntity.getHearingList().add(this);
     }
 
     public void addJudge(JudgeEntity judgeEntity) {
@@ -112,5 +119,9 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
 
     public List<String> getJudgesStringList() {
         return CollectionUtils.emptyIfNull(judges).stream().map(JudgeEntity::getName).toList();
+    }
+
+    public void addAnnotation(AnnotationEntity annotationEntity) {
+        annotations.add(annotationEntity);
     }
 }

@@ -8,7 +8,6 @@ CREATE TABLE hearing_annotation_ae
 ALTER TABLE annotation DROP CONSTRAINT annotation_case_fk;
 ALTER TABLE annotation DROP CONSTRAINT annotation_courtroom_fk;
 ALTER TABLE annotation DROP CONSTRAINT annotation_hearing_fk;
-ALTER TABLE daily_list DROP CONSTRAINT daily_list_courthouse_fk;
 
 INSERT INTO darts.hearing_annotation_ae(
 	   hea_id, ann_id)

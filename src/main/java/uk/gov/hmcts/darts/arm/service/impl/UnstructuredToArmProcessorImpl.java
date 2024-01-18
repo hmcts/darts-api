@@ -144,10 +144,11 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
             String filename = generateFilename(armExternalObjectDirectory);
 
-            boolean copyRawDataToArmSuccessful = copyRawDataToArm(unstructuredExternalObjectDirectory,
-                                                                  armExternalObjectDirectory,
-                                                                  filename,
-                                                                  previousStatus
+            boolean copyRawDataToArmSuccessful = copyRawDataToArm(
+                unstructuredExternalObjectDirectory,
+                armExternalObjectDirectory,
+                filename,
+                previousStatus
             );
             if (copyRawDataToArmSuccessful && generateAndCopyMetadataToArm(armExternalObjectDirectory)) {
                 updateExternalObjectDirctoryStatus(armExternalObjectDirectory, ARM_DROP_ZONE);
@@ -238,7 +239,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 log.info("BLOB already exists {}", e.getMessage());
             } else {
                 log.error("Failed to move BLOB data for file {} due to {}", unstructuredExternalObjectDirectory.getExternalLocation(),
-                          e.getMessage());
+                          e.getMessage()
+                );
                 updateExternalObjectDirectoryStatusToFailed(armExternalObjectDirectory, FAILURE_ARM_RAW_DATA_FAILED);
                 return false;
             }
@@ -271,7 +273,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
             externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.UNSTRUCTURED.getId()),
             externalObjectDirectoryEntity.getMedia(),
             externalObjectDirectoryEntity.getTranscriptionDocumentEntity(),
-            externalObjectDirectoryEntity.getAnnotationDocumentEntity()
+            externalObjectDirectoryEntity.getAnnotationDocumentEntity(),
+            externalObjectDirectoryEntity.getCaseDocument()
         );
     }
 

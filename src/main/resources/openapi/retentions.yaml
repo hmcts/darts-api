@@ -1,0 +1,66 @@
+openapi: 3.0.1
+
+info:
+
+  version: ${version}
+  title: Modernised DARTS
+  description: |-
+    Modernised DARTS (Digital Audio Recording and Transcription Service).
+
+servers:
+  - url: http://localhost:4550/
+
+
+paths:
+  /retentions:
+    get:
+      tags:
+        - Retention
+      summary: Get retention history
+      parameters:
+        - in: query
+          name: case_id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetCaseRetentionsResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+
+        '500':
+          description: Internal Server Error
+          content:
+            application/json+problem:
+              schema:
+                $ref: './problem.yaml'
+components:
+  schemas:
+    GetCaseRetentionsResponse:
+      type: object
+      properties:
+        retention_last_changed_date:
+          type: string
+          format: date-time
+        retention_date:
+          type: string
+          format: date-time
+        amended_by:
+          type: string
+        retention_policy_applied:
+          type: string
+        status:
+          type: string
+        comments:
+          type: string

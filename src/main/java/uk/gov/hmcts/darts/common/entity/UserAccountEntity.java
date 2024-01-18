@@ -37,6 +37,9 @@ public class UserAccountEntity extends CreatedModifiedBaseEntity {
     @Column(name = "user_name", nullable = false)
     private String userName;
 
+    @Column(name = "user_full_name")
+    private String userFullName;
+
     @Column(name = "user_email_address")
     private String emailAddress;
 

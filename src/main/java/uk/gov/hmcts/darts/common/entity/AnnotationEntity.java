@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
@@ -31,19 +30,8 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "ann_gen", sequenceName = "ann_seq", allocationSize = 1)
     private Integer id;
 
-    @OneToOne
-    @JoinColumn(name = "cas_id")
-    private CourtCaseEntity courtCase;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ctr_id")
-    private CourtroomEntity courtroom;
-
     @Column(name = "annotation_text")
     private String text;
-
-    @Column(name = "hea_id")
-    private Integer hearingId;
 
     @Column(name = "annotation_ts")
     private OffsetDateTime timestamp;
@@ -57,4 +45,7 @@ public class AnnotationEntity extends CreatedModifiedBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "current_owner", nullable = false)
     private UserAccountEntity currentOwner;
+
+    @Column(name = "is_deleted")
+    private boolean deleted;
 }

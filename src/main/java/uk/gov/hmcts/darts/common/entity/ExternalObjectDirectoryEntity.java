@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static jakarta.persistence.CascadeType.MERGE;
@@ -46,6 +47,10 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     private AnnotationDocumentEntity annotationDocumentEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cad_id", foreignKey = @ForeignKey(name = "eod_case_document_fk"))
+    private CaseDocumentEntity caseDocument;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ors_id", foreignKey = @ForeignKey(name = "eod_object_record_status_fk"), nullable = false)
     private ObjectRecordStatusEntity status;
 
@@ -62,6 +67,12 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
 
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
+
+    @Column(name = "manifest_file")
+    private String manifestFile;
+
+    @Column(name = "event_date_ts")
+    private LocalDateTime eventDateTs;
 
     @Override
     public int getStatusId() {

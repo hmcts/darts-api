@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -85,5 +86,8 @@ public class MediaEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "media_status")//leaving nullable for now
     private String mediaStatus;
+
+    @ManyToMany(mappedBy = HearingEntity_.MEDIA_LIST)
+    private List<HearingEntity> hearingList = new ArrayList<>();
 
 }

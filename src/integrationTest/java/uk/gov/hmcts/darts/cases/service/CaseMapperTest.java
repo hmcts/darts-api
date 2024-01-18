@@ -149,7 +149,6 @@ class CaseMapperTest extends IntegrationBase {
                 List.of(caseWithReportingRestrictions.getReportingRestrictions().getEventName()));
     }
 
-
     private List<OffsetDateTime> orderedTsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
             .map(EventEntity::getTimestamp).sorted(naturalOrder())

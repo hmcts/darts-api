@@ -28,6 +28,7 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.exception.CommonApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
+import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.HearingReportingRestrictionsRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
@@ -79,6 +80,9 @@ class CaseServiceImplTest {
     @Mock
     TranscriptionRepository transcriptionRepository;
 
+    @Mock
+    private CaseRetentionRepository caseRetentionRepository;
+
     @Captor
     ArgumentCaptor<CourtCaseEntity> caseEntityArgumentCaptor;
 
@@ -86,7 +90,7 @@ class CaseServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository);
+        mapper = new CasesMapper(retrieveCoreObjectService, hearingReportingRestrictionsRepository, caseRetentionRepository);
         service = new CaseServiceImpl(
             mapper,
             hearingRepository,
