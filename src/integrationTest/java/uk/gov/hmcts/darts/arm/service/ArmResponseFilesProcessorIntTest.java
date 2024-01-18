@@ -492,16 +492,9 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
     @Test
     void givenProcessResponseFilesSuccessfullyCompletesForAnnotation() throws IOException {
-        HearingEntity hearing = dartsDatabase.createHearing(
-            "NEWCASTLE",
-            "Int Test Courtroom 2",
-            "2",
-            HEARING_DATE
-        );
-
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         String testAnnotation = "TestAnnotation";
-        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(hearing, testUser, testAnnotation);
+        AnnotationEntity annotation = dartsDatabase.getAnnotationStub().createAndSaveAnnotationEntityWith(testUser, testAnnotation);
 
         when(userIdentity.getUserAccount()).thenReturn(testUser);
         final String fileName = "judges-notes.txt";

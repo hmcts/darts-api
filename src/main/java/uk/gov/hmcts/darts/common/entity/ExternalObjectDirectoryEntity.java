@@ -83,7 +83,7 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
 
     @Column(name = "verification_attempts")
     private Integer verificationAttempts;
-	
+    
     @Column(name = "manifest_file")
     private String manifestFile;
 
