@@ -32,6 +32,7 @@ import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -245,10 +246,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void cleanupTemporaryJsonFile(Path jsonPath) {
-        if (nonNull(jsonPath) && jsonPath.toFile().exists()) {
+        if (nonNull(jsonPath)) {
             try {
-                if (!jsonPath.toFile().delete()) {
-                    log.warn("Delete temporary file: {} failed", jsonPath.toFile().toString());
+                if (!Files.deleteIfExists(jsonPath)) {
+                    log.warn("Deleting temporary file: {} failed", jsonPath.toFile().toString());
                 }
             } catch (Exception e) {
                 log.error("Unable to delete temporary file: {}", jsonPath.toFile().toString());
@@ -292,16 +293,24 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
             }
         }
-        deleteResponseFiles(uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor);
+
+        deleteResponseFiles(externalObjectDirectory, uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor);
     }
 
-    private void deleteResponseFiles(UploadFileFilenameProcessor uploadFileFilenameProcessor,
+    private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                     UploadFileFilenameProcessor uploadFileFilenameProcessor,
                                      String createRecordFilename,
                                      InputUploadFilenameProcessor inputUploadFilenameProcessor) {
-        armDataManagementApi.deleteResponseBlob(uploadFileFilenameProcessor.getUploadFileFilename());
-        armDataManagementApi.deleteResponseBlob(createRecordFilename);
-        armDataManagementApi.deleteResponseBlob(inputUploadFilenameProcessor.getInputUploadFilename());
+        ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
+        ObjectRecordStatusEntity armStoredStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
 
+        ExternalObjectDirectoryEntity latestEod = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectory.getId());
+        //Check the state is in a finalised state and not retry state
+        if (armResponseProcessingFailed.equals(latestEod.getStatus()) || armStoredStatus.equals(latestEod.getStatus())) {
+            armDataManagementApi.deleteResponseBlob(uploadFileFilenameProcessor.getUploadFileFilename());
+            armDataManagementApi.deleteResponseBlob(createRecordFilename);
+            armDataManagementApi.deleteResponseBlob(inputUploadFilenameProcessor.getInputUploadFilename());
+        }
     }
 
     private void verifyChecksum(ArmResponseUploadFileRecord armResponseUploadFileRecord,

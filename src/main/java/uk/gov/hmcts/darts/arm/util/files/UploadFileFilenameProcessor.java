@@ -14,7 +14,7 @@ public class UploadFileFilenameProcessor {
     private static final int NUMBER_OF_TOKENS = 4;
     private String uploadFileFilename;
     private String hashcode;
-    private String hashcode2; //TODO find out what this field represents
+    private String hashcode2;
     private String status;
 
     public UploadFileFilenameProcessor(String uploadFileFilename) {

@@ -79,7 +79,7 @@ public class ArmServiceImpl implements ArmService {
         Map<String, BlobItem> blobs = new HashMap<>();
         log.debug("About to list files for {}", prefix);
         listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, prefix).forEach(blob -> {
-            if (blob.isPrefix()) {
+            if (Boolean.TRUE.equals(blob.isPrefix())) {
                 log.info("Virtual directory prefix: {}}", FILE_PATH_DELIMITER + blob.getName());
                 listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, blob.getName());
             } else {
@@ -103,7 +103,7 @@ public class ArmServiceImpl implements ArmService {
 
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobName);
-        if (!blobClient.exists()) {
+        if (Boolean.FALSE.equals(blobClient.exists())) {
             log.error("Blob {} does not exist in {} container", blobName, containerName);
             return null;
         }

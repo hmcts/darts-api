@@ -22,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -152,7 +153,8 @@ class ArmServiceImplTest {
 
         when(blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE, null, Duration.of(60, ChronoUnit.SECONDS), null)).thenReturn(response);
 
-        armService.deleteResponseBlob(ARM_BLOB_CONTAINER_NAME, "blobname");
+        boolean result = armService.deleteResponseBlob(ARM_BLOB_CONTAINER_NAME, "blobname");
+        assertFalse(result);
     }
 
 }
