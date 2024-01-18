@@ -62,6 +62,12 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "external_location", unique = true, nullable = false)
     private UUID externalLocation;
 
+    @Column(name = "external_file_id")
+    private String externalFileId;
+
+    @Column(name = "external_record_id")
+    private String externalRecordId;
+
     @Column(name = "checksum")
     private String checksum;
 

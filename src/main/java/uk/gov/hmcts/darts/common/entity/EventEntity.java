@@ -63,6 +63,9 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "message_id")
     private String messageId;
 
+    @Column(name = "is_log_entry")
+    private Boolean isLogEntry;
+
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",
         joinColumns = {@JoinColumn(name = "eve_id")},

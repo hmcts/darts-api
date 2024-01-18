@@ -27,6 +27,7 @@ public class EventTestData {
         event.setEventName(eventName);
         event.setEventText(eventText);
         event.setTimestamp(eventTime);
+        event.setIsLogEntry(false);
         return event;
     }
 

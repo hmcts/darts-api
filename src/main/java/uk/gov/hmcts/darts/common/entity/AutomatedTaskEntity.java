@@ -25,6 +25,7 @@ public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
     public static final String CRON_EDITABLE = "cron_editable";
     private static final String TASK_GEN = "task_gen";
     private static final String AUTOMATED_TASK_SEQ = "aut_seq";
+    private static final String TASK_ENABLED = "task_enabled";
 
 
     @Id
@@ -44,5 +45,10 @@ public class AutomatedTaskEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = CRON_EDITABLE)
     private Boolean cronEditable;
+
+    @Column(name = TASK_ENABLED)
+    private Boolean taskEnabled;
+
+
 
 }
