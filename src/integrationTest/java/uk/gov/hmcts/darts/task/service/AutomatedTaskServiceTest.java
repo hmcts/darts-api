@@ -2,9 +2,7 @@ package uk.gov.hmcts.darts.task.service;
 
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.FixedDelayTask;
@@ -13,6 +11,7 @@ import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskHolder;
 import org.springframework.scheduling.config.Task;
 import org.springframework.scheduling.config.TriggerTask;
+import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -32,6 +31,7 @@ import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
@@ -49,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static uk.gov.hmcts.darts.testutils.AwaitabilityUtil.waitForMax10SecondsWithOneSecondPoll;
 
 @Slf4j
-@TestMethodOrder(OrderAnnotation.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
 class AutomatedTaskServiceTest extends IntegrationPerClassBase {
 
@@ -88,6 +87,9 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     @Autowired
     private UnstructuredToArmProcessor unstructuredToArmProcessor;
 
+    @Autowired
+    private ArmResponseFilesProcessor armResponseFilesProcessor;
+
     private static void displayTasks(Set<ScheduledTask> scheduledTasks) {
         log.info("Number of scheduled tasks " + scheduledTasks.size());
         scheduledTasks.forEach(
@@ -117,7 +119,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
     }
 
     @Test
-    void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() throws InterruptedException {
+    void givenAutomatedTaskVerifyStatusBeforeAndAfterRunning() {
         ProcessDailyListAutomatedTask automatedTask = new ProcessDailyListAutomatedTask(automatedTaskRepository, lockProvider,
                                                                                         automatedTaskConfigurationProperties
         );
@@ -128,7 +130,7 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                  originalAutomatedTaskEntity.get().getCronExpression()
         );
 
-        // this may have transitioned to complete. Lets check the history to ensure that
+        // this may have transitioned to complete. Let's check the history to ensure that
         // we started with not started state
         assertTrue(automatedTask.hasTransitionState(AutomatedTaskStatus.NOT_STARTED));
 
@@ -561,6 +563,65 @@ class AutomatedTaskServiceTest extends IntegrationPerClassBase {
                 lockProvider,
                 automatedTaskConfigurationProperties,
                 unstructuredToArmProcessor
+            );
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        boolean mayInterruptIfRunning = false;
+        boolean taskCancelled = automatedTaskService.cancelAutomatedTask(
+            automatedTask.getTaskName(),
+            mayInterruptIfRunning
+        );
+        assertTrue(taskCancelled);
+
+        log.info("About to reload task {}", automatedTask.getTaskName());
+        automatedTaskService.reloadTaskByName(automatedTask.getTaskName());
+
+    }
+
+
+    @Test
+    void givenConfiguredTasksUpdateCronAndResetCronForProcessArmResponseFilesAutomatedTask() {
+        AutomatedTask automatedTask =
+            new ProcessArmResponseFilesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                armResponseFilesProcessor
+            );
+
+        Optional<AutomatedTaskEntity> originalAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Original task {} cron expression {}", automatedTask.getTaskName(),
+                 originalAutomatedTaskEntity.get().getCronExpression()
+        );
+
+        automatedTaskService.updateAutomatedTaskCronExpression(automatedTask.getTaskName(), "*/9 * * * * *");
+
+        Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();
+        displayTasks(scheduledTasks);
+
+        Optional<AutomatedTaskEntity> updatedAutomatedTaskEntity =
+            automatedTaskService.getAutomatedTaskEntityByTaskName(automatedTask.getTaskName());
+        log.info("TEST - Updated task {} cron expression {}", automatedTask.getTaskName(),
+                 updatedAutomatedTaskEntity.get().getCronExpression()
+        );
+        assertEquals(originalAutomatedTaskEntity.get().getTaskName(), updatedAutomatedTaskEntity.get().getTaskName());
+        assertNotEquals(originalAutomatedTaskEntity.get().getCronExpression(), updatedAutomatedTaskEntity.get().getCronExpression());
+
+        automatedTaskService.updateAutomatedTaskCronExpression(
+            automatedTask.getTaskName(), originalAutomatedTaskEntity.get().getCronExpression());
+    }
+
+    @Test
+    void givenConfiguredTaskCancelProcessArmResponseFilesAutomatedTask() {
+        AutomatedTask automatedTask =
+            new ProcessArmResponseFilesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                armResponseFilesProcessor
             );
 
         Set<ScheduledTask> scheduledTasks = scheduledTaskHolder.getScheduledTasks();

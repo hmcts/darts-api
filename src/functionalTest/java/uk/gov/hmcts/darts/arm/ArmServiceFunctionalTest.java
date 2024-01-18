@@ -41,7 +41,7 @@ class ArmServiceFunctionalTest {
     @Autowired
     private ArmTestUtil armTestUtil;
 
-    private final List<String> blobsToBeDeleted = new ArrayList<>();
+    private final List<String> armSubmissionBlobsToBeDeleted = new ArrayList<>();
 
     @Test
     void saveBlobData() {
@@ -52,16 +52,16 @@ class ArmServiceFunctionalTest {
         String actualResult = armService.saveBlobData(armContainerName, filename, data);
         assertNotNull(actualResult);
         log.info("Blob filename {}", actualResult);
-        blobsToBeDeleted.add(actualResult);
+        armSubmissionBlobsToBeDeleted.add(actualResult);
     }
 
     @AfterEach
     void cleanupArmBlobData() throws AzureDeleteBlobException {
 
-        for (String blobName : blobsToBeDeleted) {
+        for (String blobName : armSubmissionBlobsToBeDeleted) {
             String blobPathAndName = armSubmissionDropZone + blobName;
             armTestUtil.deleteBlobData(armContainerName, blobPathAndName);
         }
-        blobsToBeDeleted.clear();
+        armSubmissionBlobsToBeDeleted.clear();
     }
 }

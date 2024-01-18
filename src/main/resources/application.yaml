@@ -163,7 +163,10 @@ darts:
       container-name: darts-arm
       folders:
         submission: dropzone/DARTS/submission/
+        collected: dropzone/DARTS/collected/
+        response: dropzone/DARTS/response/
       max-retry-attempts: 3
+      max-blobs-per-page: 3
       publisher: DARTS
       region: GBR
       media_record_class: DARTSMedia
@@ -172,6 +175,7 @@ darts:
       temp-blob-workspace: ${user.home}/arm/tempworkspace
       date_time_format: yyyy-MM-dd'T'HH:mm:ss
       file_extension: a360
+      list_blobs_timeout_duration: 60s
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

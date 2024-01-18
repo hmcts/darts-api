@@ -1,8 +1,13 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobListDetails;
+import com.azure.storage.blob.models.ListBlobsOptions;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -10,6 +15,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.ArmService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -30,4 +38,61 @@ public class ArmServiceImpl implements ArmService {
         return filename;
     }
 
+
+
+    public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        String prefix = armDataManagementConfiguration.getArmCollectedDropZone() + filename;
+
+        return listBlobs(containerClient, prefix);
+    }
+
+    public Map<String, BlobItem> listResponseBlobs(String containerName, String filename) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        String prefix = armDataManagementConfiguration.getArmResponseDropZone() + filename;
+
+        return listBlobs(containerClient, prefix);
+    }
+
+
+    public Map<String, BlobItem> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
+        String delimiter = "/";
+        Map<String, BlobItem> blobs = new HashMap<>();
+        listBlobsHierarchicalListing(blobContainerClient, delimiter, prefix).forEach(blob -> {
+            if (blob.isPrefix()) {
+                log.info("Virtual directory prefix: {}}", delimiter + blob.getName());
+                listBlobsHierarchicalListing(blobContainerClient, delimiter, blob.getName());
+            } else {
+                log.info("Blob name: {}}", blob.getName());
+                blobs.put(blob.getName(), blob);
+            }
+        });
+        return blobs;
+    }
+
+    public PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,
+                                                                String delimiter,
+                                                                String prefix /* ="" */) {
+
+        ListBlobsOptions options = new ListBlobsOptions()
+            .setPrefix(prefix);
+
+        return blobContainerClient.listBlobsByHierarchy(delimiter, options, null);
+    }
+
+    public Iterable<PagedResponse<BlobItem>> listBlobsFlat(String containerName, String folder) {
+        BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
+        return listBlobs(containerClient, false, 3);
+    }
+
+    public Iterable<PagedResponse<BlobItem>> listBlobs(BlobContainerClient blobContainerClient,
+                                                       boolean retrieveDeletedBlobs,
+                                                       int maxResultsPerPage) {
+        ListBlobsOptions options = new ListBlobsOptions()
+            .setMaxResultsPerPage(maxResultsPerPage)
+            .setDetails(new BlobListDetails()
+                            .setRetrieveDeletedBlobs(retrieveDeletedBlobs));
+
+        return blobContainerClient.listBlobs(options, null).iterableByPage();
+    }
 }
