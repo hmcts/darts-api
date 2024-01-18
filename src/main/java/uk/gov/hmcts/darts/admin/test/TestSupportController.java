@@ -79,7 +79,6 @@ public class TestSupportController {
     @SuppressWarnings("unchecked")
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
-        /*
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
@@ -114,8 +113,6 @@ public class TestSupportController {
 
         session.getTransaction().commit();
         session.close();
-
-         */
     }
 
     private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
