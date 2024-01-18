@@ -3,14 +3,14 @@ package uk.gov.hmcts.darts.retention.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
-import uk.gov.hmcts.darts.retentions.model.CaseRetention;
+import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 
 
 @Component
 @RequiredArgsConstructor
 public class RetentionMapper {
-    public CaseRetention mapToCaseRetention(CaseRetentionEntity caseRetentionEntity) {
-        CaseRetention caseRetention = new CaseRetention();
+    public GetCaseRetentionsResponse mapToCaseRetention(CaseRetentionEntity caseRetentionEntity) {
+        GetCaseRetentionsResponse caseRetention = new GetCaseRetentionsResponse();
         caseRetention.setRetentionLastChangedDate(caseRetentionEntity.getLastModifiedDateTime());
         caseRetention.setRetentionDate(caseRetentionEntity.getRetainUntil());
         caseRetention.setAmendedBy(caseRetentionEntity.getSubmittedBy().getUserName());
