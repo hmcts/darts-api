@@ -38,7 +38,7 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "cas_id")
     private CourtCaseEntity courtCase;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST},fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.PERSIST}, fetch = FetchType.LAZY)
     @JoinColumn(name = "rpt_id", nullable = false)
     private RetentionPolicyTypeEntity retentionPolicyType;
 
@@ -68,4 +68,6 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "submitted_by", nullable = false)
     private UserAccountEntity submittedBy;
 
+    @Column(name = "is_manual_override")
+    private boolean manualOverride;
 }

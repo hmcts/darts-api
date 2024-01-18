@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
-import uk.gov.hmcts.darts.retention.enums.CaseStatus;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.Policy;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
@@ -15,7 +15,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
@@ -68,7 +67,7 @@ class RetentionPolicyTest extends IntegrationBase {
 
         CaseRetentionEntity olderCaseRetentionComplete = createCompleteCaseRetention(minimalHearing.getCourtCase());
         CaseRetentionEntity caseRetentionPending = createCompleteCaseRetention(minimalHearing.getCourtCase());
-        caseRetentionPending.setCurrentState(String.valueOf(CaseStatus.PENDING));
+        caseRetentionPending.setCurrentState(String.valueOf(CaseRetentionStatus.PENDING));
 
         List<CaseRetentionEntity> caseRetentionList = new ArrayList<>();
         caseRetentionList.add(olderCaseRetentionComplete);
@@ -94,7 +93,7 @@ class RetentionPolicyTest extends IntegrationBase {
         CaseRetentionEntity caseRetentionPending = createCompleteCaseRetention(minimalHearing.getCourtCase());
         caseRetentionPending.setRetainUntil(OffsetDateTime.parse("2030-01-31T15:42:10.361Z"));
         caseRetentionPending.setRetainUntilAppliedOn(OffsetDateTime.parse("2023-07-22T15:42:10.361Z"));
-        caseRetentionPending.setCurrentState(String.valueOf(CaseStatus.PENDING));
+        caseRetentionPending.setCurrentState(String.valueOf(CaseRetentionStatus.PENDING));
 
         List<CaseRetentionEntity> caseRetentionList = new ArrayList<>();
         caseRetentionList.add(olderCaseRetentionCompleted);
@@ -128,7 +127,7 @@ class RetentionPolicyTest extends IntegrationBase {
 
         minimalHearing.getCourtCase().setCaseClosedTimestamp(OffsetDateTime.now());
         CaseRetentionEntity caseRetentionPending = createCompleteCaseRetention(minimalHearing.getCourtCase());
-        caseRetentionPending.setCurrentState(String.valueOf(CaseStatus.PENDING));
+        caseRetentionPending.setCurrentState(String.valueOf(CaseRetentionStatus.PENDING));
 
         List<CaseRetentionEntity> caseRetentionList = new ArrayList<>();
         caseRetentionList.add(caseRetentionPending);
@@ -151,7 +150,7 @@ class RetentionPolicyTest extends IntegrationBase {
         caseRetention.setTotalSentence("20Y2M10D");
         caseRetention.setRetainUntil(OffsetDateTime.parse("2029-01-31T15:42:10.361Z"));
         caseRetention.setRetainUntilAppliedOn(OffsetDateTime.parse("2022-07-22T15:42:10.361Z"));
-        caseRetention.setCurrentState(String.valueOf(CaseStatus.COMPLETE));
+        caseRetention.setCurrentState(String.valueOf(CaseRetentionStatus.COMPLETE));
         caseRetention.setSubmittedBy(testUser);
         caseRetention.setLastModifiedBy(testUser);
         caseRetention.setCourtCase(courtCase);

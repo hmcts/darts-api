@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.retentions.exception;
+package uk.gov.hmcts.darts.retention.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -7,7 +7,7 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 
 @Getter
 @RequiredArgsConstructor
-public enum RetentionsApiError implements DartsApiError {
+public enum RetentionApiError implements DartsApiError {
 
     NO_PERMISSION_REDUCE_RETENTION_ERROR(
         "100",
