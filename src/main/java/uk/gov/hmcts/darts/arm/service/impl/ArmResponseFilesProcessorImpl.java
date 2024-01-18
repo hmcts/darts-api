@@ -212,6 +212,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                         ArmResponseUploadFileRecord.class
                     );
                     if (nonNull(armResponseUploadFileRecord)) {
+                        //If the filename contains 1
                         if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
                             processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory,
                                                          uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor
@@ -226,6 +227,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                             );
                             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
                         }
+                        deleteResponseFiles(externalObjectDirectory, uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor);
                     } else {
                         log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
                         updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
@@ -294,7 +296,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         }
 
-        deleteResponseFiles(externalObjectDirectory, uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor);
+
     }
 
     private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory,
