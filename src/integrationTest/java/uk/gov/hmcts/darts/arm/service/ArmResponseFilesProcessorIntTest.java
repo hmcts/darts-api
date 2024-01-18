@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.arm.service;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobStorageException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -293,6 +294,56 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
+
+    }
+
+    @Test
+    void givenProcessResponseFilesFoundInputUploadFileThrowsExceptionWhenListBlobsForHashcode() {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.randomUUID()
+        );
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
+        Map<String, BlobItem> responseBlobs = new HashMap<>();
+        responseBlobs.put(responseBlobFilename, new BlobItem());
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new BlobStorageException("Failed", null, null));
+
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        armResponseFilesProcessor.processResponseFiles();
+
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        assertEquals(2, foundMedia.getVerificationAttempts());
 
     }
 

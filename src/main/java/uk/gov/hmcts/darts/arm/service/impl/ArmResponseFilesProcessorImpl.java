@@ -302,8 +302,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         } else {
             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
         }
-
-
     }
 
     private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory,

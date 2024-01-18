@@ -131,7 +131,7 @@ class ArmServiceImplTest {
     void testGetBlobData() {
         when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
         when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
-        when(blobClient.exists()).thenReturn(true);
+        when(blobClient.exists()).thenReturn(Boolean.TRUE);
         when(blobClient.downloadContent()).thenReturn(BINARY_DATA);
 
         BinaryData binaryData = armService.getBlobData(ARM_BLOB_CONTAINER_NAME, "blobname");
