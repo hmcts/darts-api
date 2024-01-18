@@ -29,7 +29,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RetentionHistory'
+                type: array
+                items:
+                  $ref: '#/components/schemas/case_retention'
         '404':
           description: Not Found
           content:
@@ -45,10 +47,6 @@ paths:
                 $ref: './problem.yaml'
 components:
   schemas:
-    RetentionHistory:
-      type: array
-      items:
-        $ref: '#/components/schemas/case_retention'
     case_retention:
       type: object
       properties:

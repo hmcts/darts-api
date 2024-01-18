@@ -130,7 +130,6 @@ public class DartsDatabaseStub {
     private final TranscriptionTypeRepository transcriptionTypeRepository;
     private final TranscriptionStatusRepository transcriptionStatusRepository;
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
-    private final CaseRetentionRepository caseRetentionRepository;
 
     private final AuditStub auditStub;
     private final CourthouseStub courthouseStub;
