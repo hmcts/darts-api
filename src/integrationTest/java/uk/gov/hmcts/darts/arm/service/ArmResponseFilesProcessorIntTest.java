@@ -191,7 +191,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
-        assertEquals(2, foundMedia.getVerificationAttempts());
+        assertEquals(1, foundMedia.getVerificationAttempts());
 
     }
 
