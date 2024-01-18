@@ -85,7 +85,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
         for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
             try {
-                processInputUploadFile(externalObjectDirectory);
+                findInputUploadFile(externalObjectDirectory);
             } catch (Exception e) {
                 log.error("Unable to process response files for external object directory {}", e.getMessage());
                 updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
@@ -93,12 +93,19 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
     }
 
-    private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
+    private void findInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
         ObjectRecordStatusEntity armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
         // IU - Input Upload - This is the manifest file which gets renamed by ARM.
         // EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
         String prefix = getPrefix(externalObjectDirectory);
-        Map<String, BlobItem> inputUploadBlobs = getInputUploadBlobs(externalObjectDirectory, prefix);
+        Map<String, BlobItem> inputUploadBlobs = null;
+        boolean foundInputUploadResponseBlob = false;
+        try {
+            inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
+        } catch (Exception e) {
+            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+            log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
+        }
         if (nonNull(inputUploadBlobs) && !inputUploadBlobs.isEmpty()) {
             for (String armInputUploadFilename : inputUploadBlobs.keySet()) {
                 log.debug("Found ARM input upload file {}", armInputUploadFilename);
@@ -111,12 +118,15 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         } else {
             log.info("Unable to find input file with prefix {}", prefix);
-            updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
+            if (!foundInputUploadResponseBlob) {
+                updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
+            }
         }
     }
 
     private void readInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory, String armInputUploadFilename,
                                      ObjectRecordStatusEntity armDropZoneStatus) {
+        ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
         try {
             InputUploadFilenameProcessor inputUploadFilenameProcessor = new InputUploadFilenameProcessor(armInputUploadFilename);
             String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
@@ -128,29 +138,17 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 updateExternalObjectDirectory(externalObjectDirectory, armDropZoneStatus);
             }
         } catch (IllegalArgumentException e) {
+            // This occurs when the filename is not parsable
             log.error("Unable to process filename: {}", e.getMessage());
-            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-        } catch (IOException e) {
-            log.error("Unable to read response file: {}", e.getMessage());
-            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-        }
-    }
-
-    private Map<String, BlobItem> getInputUploadBlobs(ExternalObjectDirectoryEntity externalObjectDirectory, String prefix) {
-        ObjectRecordStatusEntity armDropZoneStatus = objectRecordStatusRepository.getReferenceById(ARM_DROP_ZONE.getId());
-        log.debug("Checking ARM for files containing name {}", prefix);
-        Map<String, BlobItem> inputUploadBlobs = null;
-        try {
-            inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
+            updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
         } catch (Exception e) {
-            log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
+            log.error("Unable to list responses: {}", e.getMessage());
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
         }
-        return inputUploadBlobs;
     }
 
     private void processResponseBlobs(Map<String, BlobItem> responseBlobs, ExternalObjectDirectoryEntity externalObjectDirectory,
-                                      InputUploadFilenameProcessor inputUploadFilenameProcessor) throws IOException {
+                                      InputUploadFilenameProcessor inputUploadFilenameProcessor) {
         String createRecordFilename = null;
         String uploadFilename = null;
         ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
@@ -178,9 +176,13 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                     createRecordFilename,
                     inputUploadFilenameProcessor
                 );
-            } catch (Exception e) {
-                log.error("Failure with upload file {}", e.getMessage(), e);
+            } catch (IllegalArgumentException e) {
+                // This occurs when the filename is not parsable
+                log.error("Unable to process filename: {}", e.getMessage());
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
+            } catch (Exception e) {
+                log.error("Failure with to get upload file {}", e.getMessage(), e);
+                updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
             }
         } else {
             log.info("Unable to find response files for external object {}", externalObjectDirectory.getId());
@@ -236,6 +238,9 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                     log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilename());
                     updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
                 }
+            } catch (IOException e) {
+                log.error("Unable to write upload file to temporary workspace {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
+                updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
             } catch (Exception e) {
                 log.error("Unable to process arm response upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
@@ -294,6 +299,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 log.warn("Unable to verify annotation checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
             }
+        } else {
+            updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
         }
 
 
