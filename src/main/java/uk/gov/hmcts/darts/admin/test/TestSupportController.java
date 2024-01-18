@@ -79,6 +79,7 @@ public class TestSupportController {
     @SuppressWarnings("unchecked")
     @DeleteMapping(value = "/clean")
     public void cleanUpDataAfterFunctionalTests() {
+        /*
         Session session = sessionFactory.openSession();
         session.beginTransaction();
 
@@ -113,6 +114,8 @@ public class TestSupportController {
 
         session.getTransaction().commit();
         session.close();
+
+         */
     }
 
     private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
@@ -391,7 +394,7 @@ public class TestSupportController {
         retentionPolicyTypeEntity.setId(1);
         retentionPolicyTypeEntity.setFixedPolicyKey(1);
         retentionPolicyTypeEntity.setPolicyName("Standard");
-        retentionPolicyTypeEntity.setDuration(7);
+        retentionPolicyTypeEntity.setDuration("7");
         retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
         retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
         retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());
