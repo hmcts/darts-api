@@ -17,10 +17,9 @@ class TagMatcherTest {
 
     @Test
     void givenGetJsonTagValuesFromLine() {
-        //"relation_id": "152820",
         String line = "\"relation_id\": \"152820\",";
         final String tagToSearchFor = "exception_description";
-        List<String> results = TagMatcher.getXmlTagValuesFromLine(line, tagToSearchFor);
+        List<String> results = TagMatcher.getJsonTagValuesFromLine(line, tagToSearchFor);
         log.info("found: {}", results);
     }
 }

@@ -7,12 +7,15 @@ import java.util.regex.Pattern;
 
 public class TagMatcher {
 
-    private static final String xmlPattern = "<%s>(.+?)</%s>";
-    private static final String jsonPattern = "\"%s\":([^\\n]*)";
+    private TagMatcher() {
+    }
+
+    private static final String XML_PATTERN = "<%s>(.+?)</%s>";
+    private static final String JSON_PATTERN = "\"%s\":([^\\n]*)";
 
     public static List<String> getXmlTagValuesFromLine(final String line, final String tagToSearchFor) {
         final List<String> tagValues = new ArrayList<>();
-        String tagPatternStr = String.format(xmlPattern, tagToSearchFor, tagToSearchFor);
+        String tagPatternStr = String.format(XML_PATTERN, tagToSearchFor, tagToSearchFor);
         final Pattern xmlTagPattern = Pattern.compile(tagPatternStr, Pattern.DOTALL);
         final Matcher matcher = xmlTagPattern.matcher(line);
 
@@ -24,7 +27,7 @@ public class TagMatcher {
 
     public static List<String> getJsonTagValuesFromLine(final String line, final String tagToSearchFor) {
         final List<String> tagValues = new ArrayList<>();
-        String tagPatternStr = String.format(jsonPattern, tagToSearchFor);
+        String tagPatternStr = String.format(JSON_PATTERN, tagToSearchFor);
         final Pattern jsonTagPattern = Pattern.compile(tagPatternStr, Pattern.DOTALL);
         final Matcher matcher = jsonTagPattern.matcher(line);
 
@@ -33,4 +36,5 @@ public class TagMatcher {
         }
         return tagValues;
     }
+
 }

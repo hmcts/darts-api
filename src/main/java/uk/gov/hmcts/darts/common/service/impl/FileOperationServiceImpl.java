@@ -42,11 +42,11 @@ public class FileOperationServiceImpl implements FileOperationService {
     }
 
     @Override
-    public Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUUIDToWorkspace)
+    public Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUuidToWorkspace)
         throws IOException {
 
         Path workspacePath = Path.of(workspace);
-        if (appendUUIDToWorkspace) {
+        if (appendUuidToWorkspace) {
             workspacePath = workspacePath.resolve(UUID.randomUUID().toString());
         }
         Path targetTempFile = workspacePath.resolve(fileName);

@@ -284,6 +284,8 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         armExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(ARM.getId()));
         armExternalObjectDirectoryEntity.setStatus(armStatuses.get(ARM_INGESTION));
         armExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
+        armExternalObjectDirectoryEntity.setVerificationAttempts(1);
+
 
         if (nonNull(externalObjectDirectory.getMedia())) {
             armExternalObjectDirectoryEntity.setMedia(externalObjectDirectory.getMedia());

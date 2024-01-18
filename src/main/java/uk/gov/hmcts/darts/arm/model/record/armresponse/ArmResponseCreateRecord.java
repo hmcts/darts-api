@@ -23,7 +23,8 @@ public class ArmResponseCreateRecord {
     private String processTime;
     @JsonProperty("status")
     private Integer status;
-    //TODO - add input field - Unsure of type
+    @JsonProperty("input")
+    private String input;
     @JsonProperty("exception_description")
     private String exceptionDescription;
     @JsonProperty("error_status")

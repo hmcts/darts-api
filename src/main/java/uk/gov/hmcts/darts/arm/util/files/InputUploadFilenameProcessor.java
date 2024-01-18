@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
 
-import static uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl.ARM_FILENAME_SEPARATOR;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 
 @Getter
 @Slf4j

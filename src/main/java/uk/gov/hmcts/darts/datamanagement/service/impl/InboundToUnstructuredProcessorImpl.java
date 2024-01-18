@@ -289,6 +289,7 @@ public class InboundToUnstructuredProcessorImpl implements InboundToUnstructured
         unstructuredExternalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(UNSTRUCTURED.getId()));
         unstructuredExternalObjectDirectoryEntity.setStatus(getStatus(AWAITING_VERIFICATION));
         unstructuredExternalObjectDirectoryEntity.setExternalLocation(externalObjectDirectory.getExternalLocation());
+        unstructuredExternalObjectDirectoryEntity.setVerificationAttempts(1);
         MediaEntity mediaEntity = externalObjectDirectory.getMedia();
         if (mediaEntity != null) {
             unstructuredExternalObjectDirectoryEntity.setMedia(mediaEntity);

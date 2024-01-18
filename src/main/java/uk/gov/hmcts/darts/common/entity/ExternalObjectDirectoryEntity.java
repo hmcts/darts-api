@@ -75,6 +75,15 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "transfer_attempts")
     private Integer transferAttempts;
 
+    @Column(name = "external_file_id")
+    private String externalFileId;
+
+    @Column(name = "external_record_id")
+    private String externalRecordId;
+
+    @Column(name = "verification_attempts")
+    private Integer verificationAttempts;
+	
     @Column(name = "manifest_file")
     private String manifestFile;
 

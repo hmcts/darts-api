@@ -72,6 +72,7 @@ public class ExternalObjectDirectoryStub {
         externalObjectDirectory.setExternalLocation(externalLocation);
         externalObjectDirectory.setChecksum(null);
         externalObjectDirectory.setTransferAttempts(null);
+        externalObjectDirectory.setVerificationAttempts(1);
 
         var user = userAccountStub.getIntegrationTestUserAccountEntity();
         externalObjectDirectory.setCreatedBy(user);

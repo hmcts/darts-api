@@ -4,5 +4,13 @@ VALUES (9,'ProcessArmResponseFiles','Processes ARM response files','0 0/10 * * *
 ALTER SEQUENCE aut_seq RESTART WITH 10;
 
 INSERT INTO object_record_status (ors_id, ors_description) VALUES (16, 'Arm Processing Response Files');
-ALTER SEQUENCE ors_seq RESTART WITH 17;
+INSERT INTO object_record_status (ors_id, ors_description) VALUES (17, 'Arm Response Process Failed');
+INSERT INTO object_record_status (ors_id, ors_description) VALUES (18, 'Arm Response Checksum Verification Failed');
+
+ALTER SEQUENCE ors_seq RESTART WITH 19;
+
+--external_file_id and external_record_id, verification_attempts
+ALTER TABLE external_object_directory ADD COLUMN external_file_id CHARACTER VARYING;
+ALTER TABLE external_object_directory ADD COLUMN external_record_id CHARACTER VARYING;
+ALTER TABLE external_object_directory ADD COLUMN verification_attempts INTEGER NOT NULL DEFAULT 1;
 

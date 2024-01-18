@@ -470,6 +470,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
+        externalObjectDirectoryEntity.setVerificationAttempts(1);
         externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
         externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
         externalObjectDirectoryEntity = externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);
