@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.retention.mapper.RetentionMapper;
-import uk.gov.hmcts.darts.retentions.model.CaseRetention;
+import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +19,11 @@ public class RetentionServiceImpl implements RetentionService {
     private final RetentionMapper retentionMapper;
 
     @Override
-    public List<CaseRetention> getCaseRetentions(Integer caseId) {
+    public List<GetCaseRetentionsResponse> getCaseRetentions(Integer caseId) {
         List<CaseRetentionEntity> caseRetentionEntities =
             caseRetentionRepository.findByCaseId(caseId);
 
-        List<CaseRetention> caseRetentions = new ArrayList<>();
+        List<GetCaseRetentionsResponse> caseRetentions = new ArrayList<>();
         for (CaseRetentionEntity caseRetentionEntity: caseRetentionEntities) {
             caseRetentions.add(retentionMapper.mapToCaseRetention(caseRetentionEntity));
         }

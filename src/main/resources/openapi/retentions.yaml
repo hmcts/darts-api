@@ -31,7 +31,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/case_retention'
+                  $ref: '#/components/schemas/GetCaseRetentionsResponse'
         '404':
           description: Not Found
           content:
@@ -47,7 +47,7 @@ paths:
                 $ref: './problem.yaml'
 components:
   schemas:
-    case_retention:
+    GetCaseRetentionsResponse:
       type: object
       properties:
         retention_last_changed_date:
