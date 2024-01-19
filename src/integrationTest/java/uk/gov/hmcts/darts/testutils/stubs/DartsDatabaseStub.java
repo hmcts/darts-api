@@ -599,18 +599,28 @@ public class DartsDatabaseStub {
         caseRetentionRepository.save(retention);
     }
 
+    @Transactional
     public void createCaseRetention(CourtCaseEntity courtCase) {
-        Optional<RetentionPolicyTypeEntity> retentionPolicyTypeEntity = retentionPolicyTypeRepository.findById(1);
-        List<RetentionPolicyTypeEntity> retentionPolicyTypeEntityList = retentionPolicyTypeRepository.findAll();
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeEntity.setId(1);
+        retentionPolicyTypeEntity.setFixedPolicyKey(1);
+        retentionPolicyTypeEntity.setPolicyName("Standard");
+        retentionPolicyTypeEntity.setDuration("7");
+        retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
+        retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
+        retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());
+        retentionPolicyTypeEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        retentionPolicyTypeEntity.setLastModifiedDateTime(OffsetDateTime.now());
+        retentionPolicyTypeEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        retentionPolicyTypeRepository.saveAndFlush(retentionPolicyTypeEntity);
 
-        if (retentionPolicyTypeEntity.isPresent()) {
-            CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity.get(), "a_state");
-            caseRetentionRepository.save(caseRetentionEntity1);
-            CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(2, courtCase, retentionPolicyTypeEntity.get(), "b_state");
-            caseRetentionRepository.save(caseRetentionEntity2);
-            CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity.get(), "c_state");
-            caseRetentionRepository.saveAndFlush(caseRetentionEntity3);
-        }
+        CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
+        caseRetentionRepository.save(caseRetentionEntity1);
+        CaseRetentionEntity caseRetentionEntity2 = createCaseRetentionObject(2, courtCase, retentionPolicyTypeEntity, "b_state");
+        caseRetentionRepository.save(caseRetentionEntity2);
+        CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
+        caseRetentionRepository.saveAndFlush(caseRetentionEntity3);
+
     }
 
     private CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,

@@ -1,5 +1,8 @@
+ALTER TABLE case_management_retention ADD COLUMN is_manual_override   BOOLEAN NOT NULL;
+ALTER TABLE case_management_retention ADD COLUMN event_ts             TIMESTAMP WITH TIME ZONE;
+ALTER TABLE case_management_retention ALTER COLUMN eve_id DROP NOT NULL;
+
 ALTER TABLE retention_policy_type ALTER COLUMN duration TYPE CHARACTER VARYING;
---ALTER TABLE case_management_retention ADD COLUMN event_ts    TIMESTAMP WITH TIME ZONE;
 ALTER TABLE retention_policy_type ALTER COLUMN policy_end_ts DROP NOT NULL;
 
 INSERT INTO darts.retention_policy_type
