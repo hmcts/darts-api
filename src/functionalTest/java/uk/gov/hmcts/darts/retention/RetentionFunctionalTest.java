@@ -36,6 +36,6 @@ class RetentionFunctionalTest extends FunctionalTest {
         assertEquals(200, response.getStatusCode());
 
         String retentionPolicyApplied = response.jsonPath().getString("[0].retention_policy_applied");
-        assertEquals("Standard", retentionPolicyApplied);
+        assertEquals("DARTS Standard Retention v3", retentionPolicyApplied);
     }
 }
