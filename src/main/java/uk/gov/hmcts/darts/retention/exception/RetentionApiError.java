@@ -36,7 +36,7 @@ public enum RetentionApiError implements DartsApiError {
     ), RETENTION_DATE_TO_EARLY(
         "106",
         HttpStatus.BAD_REQUEST,
-        "The case must have a retention policy applied before being changed."
+        "The retention date being applied is too early."
     ), NO_PERMISSIONS_REDUCE_DATE(
         "107",
         HttpStatus.BAD_REQUEST,

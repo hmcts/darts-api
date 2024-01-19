@@ -1,5 +1,6 @@
 package uk.gov.hmcts.darts.cases.service;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.cases.mapper.CasesMapper;
@@ -8,7 +9,7 @@ import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
-import uk.gov.hmcts.darts.retention.enums.Policy;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicy;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -35,9 +36,9 @@ class RetentionPolicyTest extends IntegrationBase {
         var hearingEntity = dartsDatabase.saveRetentionsForHearing(minimalHearing, caseRetentionList);
         var singleCase = casesMapper.mapToSingleCase(hearingEntity.getCourtCase());
 
-        assertThat(singleCase.getRetentionPolicyApplied()).isEqualTo(caseRetention.getRetentionPolicyType().getPolicyName());
-        assertThat(singleCase.getRetainUntilDateTime()).isEqualTo(caseRetention.getRetainUntil());
-        assertThat(singleCase.getRetentionDateTimeApplied()).isEqualTo(caseRetention.getRetainUntilAppliedOn());
+        Assertions.assertEquals(singleCase.getRetentionPolicyApplied(), caseRetention.getRetentionPolicyType().getPolicyName());
+        Assertions.assertEquals(singleCase.getRetainUntilDateTime(), caseRetention.getRetainUntil());
+        Assertions.assertEquals(singleCase.getRetentionDateTimeApplied(), caseRetention.getRetainUntilAppliedOn());
     }
 
     @Test
@@ -56,9 +57,9 @@ class RetentionPolicyTest extends IntegrationBase {
         var hearingEntity = dartsDatabase.saveRetentionsForHearing(minimalHearing, caseRetentionList);
         var singleCase = casesMapper.mapToSingleCase(hearingEntity.getCourtCase());
 
-        assertThat(singleCase.getRetentionPolicyApplied()).isEqualTo(latestCaseRetentionCompleted.getRetentionPolicyType().getPolicyName());
-        assertThat(singleCase.getRetainUntilDateTime()).isEqualTo(latestCaseRetentionCompleted.getRetainUntil());
-        assertThat(singleCase.getRetentionDateTimeApplied()).isEqualTo(latestCaseRetentionCompleted.getRetainUntilAppliedOn());
+        Assertions.assertEquals(singleCase.getRetentionPolicyApplied(), latestCaseRetentionCompleted.getRetentionPolicyType().getPolicyName());
+        Assertions.assertEquals(singleCase.getRetainUntilDateTime(), latestCaseRetentionCompleted.getRetainUntil());
+        Assertions.assertEquals(singleCase.getRetentionDateTimeApplied(), latestCaseRetentionCompleted.getRetainUntilAppliedOn());
     }
 
     @Test
@@ -77,9 +78,9 @@ class RetentionPolicyTest extends IntegrationBase {
         var hearingEntity = dartsDatabase.saveRetentionsForHearing(minimalHearing, caseRetentionList);
         var singleCase = casesMapper.mapToSingleCase(hearingEntity.getCourtCase());
 
-        assertThat(singleCase.getRetentionPolicyApplied()).isEqualTo(olderCaseRetentionComplete.getRetentionPolicyType().getPolicyName());
-        assertThat(singleCase.getRetainUntilDateTime()).isEqualTo(olderCaseRetentionComplete.getRetainUntil());
-        assertThat(singleCase.getRetentionDateTimeApplied()).isEqualTo(olderCaseRetentionComplete.getRetainUntilAppliedOn());
+        Assertions.assertEquals(singleCase.getRetentionPolicyApplied(), olderCaseRetentionComplete.getRetentionPolicyType().getPolicyName());
+        Assertions.assertEquals(singleCase.getRetainUntilDateTime(), olderCaseRetentionComplete.getRetainUntil());
+        Assertions.assertEquals(singleCase.getRetentionDateTimeApplied(), olderCaseRetentionComplete.getRetainUntilAppliedOn());
     }
 
     @Test
@@ -104,9 +105,9 @@ class RetentionPolicyTest extends IntegrationBase {
         var hearingEntity = dartsDatabase.saveRetentionsForHearing(minimalHearing, caseRetentionList);
         var singleCase = casesMapper.mapToSingleCase(hearingEntity.getCourtCase());
 
-        assertThat(singleCase.getRetentionPolicyApplied()).isEqualTo(latestCaseRetentionCompleted.getRetentionPolicyType().getPolicyName());
-        assertThat(singleCase.getRetainUntilDateTime()).isEqualTo(latestCaseRetentionCompleted.getRetainUntil());
-        assertThat(singleCase.getRetentionDateTimeApplied()).isEqualTo(latestCaseRetentionCompleted.getRetainUntilAppliedOn());
+        Assertions.assertEquals(singleCase.getRetentionPolicyApplied(), latestCaseRetentionCompleted.getRetentionPolicyType().getPolicyName());
+        Assertions.assertEquals(singleCase.getRetainUntilDateTime(), latestCaseRetentionCompleted.getRetainUntil());
+        Assertions.assertEquals(singleCase.getRetentionDateTimeApplied(), latestCaseRetentionCompleted.getRetainUntilAppliedOn());
     }
 
     @Test
@@ -116,9 +117,9 @@ class RetentionPolicyTest extends IntegrationBase {
         var hearingEntity = dartsDatabase.saveRetentionsForHearing(minimalHearing, caseRetentionList);
         var singleCase = casesMapper.mapToSingleCase(hearingEntity.getCourtCase());
 
-        assertThat(singleCase.getRetentionPolicyApplied()).isNull();
-        assertThat(singleCase.getRetainUntilDateTime()).isNull();
-        assertThat(singleCase.getRetentionDateTimeApplied()).isNull();
+        Assertions.assertNull(singleCase.getRetentionPolicyApplied());
+        Assertions.assertNull(singleCase.getRetainUntilDateTime());
+        Assertions.assertNull(singleCase.getRetentionDateTimeApplied());
     }
 
     @Test
@@ -136,10 +137,10 @@ class RetentionPolicyTest extends IntegrationBase {
         var hearingEntity = dartsDatabase.saveRetentionsForHearing(minimalHearing, caseRetentionList);
         var singleCase = casesMapper.mapToSingleCase(hearingEntity.getCourtCase());
 
-        assertThat(singleCase.getRetentionPolicyApplied()).isNull();
-        assertThat(singleCase.getRetainUntilDateTime()).isNull();
-        assertThat(singleCase.getRetentionDateTimeApplied()).isNull();
-        assertThat(singleCase.getCaseClosedDateTime()).isEqualTo(caseRetentionPending.getCourtCase().getCaseClosedTimestamp());
+        Assertions.assertNull(singleCase.getRetentionPolicyApplied());
+        Assertions.assertNull(singleCase.getRetainUntilDateTime());
+        Assertions.assertNull(singleCase.getRetentionDateTimeApplied());
+        Assertions.assertEquals(singleCase.getCaseClosedDateTime(), caseRetentionPending.getCourtCase().getCaseClosedTimestamp());
 
     }
 
@@ -160,7 +161,7 @@ class RetentionPolicyTest extends IntegrationBase {
     private static RetentionPolicyTypeEntity createRetentionPolicyType() {
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setFixedPolicyKey(1);
-        retentionPolicyType.setPolicyName(String.valueOf(Policy.STANDARD));
+        retentionPolicyType.setPolicyName(String.valueOf(RetentionPolicy.STANDARD));
         retentionPolicyType.setPolicyStart(OffsetDateTime.parse("2023-07-22T15:42:10.361Z"));
         retentionPolicyType.setPolicyEnd(OffsetDateTime.parse("2030-01-31T15:42:10.361Z"));
         retentionPolicyType.setCreatedDateTime(OffsetDateTime.parse("2023-07-22T15:42:10.361Z"));

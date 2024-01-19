@@ -39,7 +39,6 @@ paths:
               schema:
                 $ref: './problem.yaml'
 
-  /retentions/:
     post:
       tags:
         - Retention
@@ -116,6 +115,9 @@ components:
 
     post_retention_request:
       type: object
+      required:
+        - case_id
+        - comments
       properties:
         case_id:
           type: integer

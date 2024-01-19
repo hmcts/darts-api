@@ -4,29 +4,27 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.audit.api.AuditActivity;
+import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
-import uk.gov.hmcts.darts.common.entity.CaseOverflowEntity;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
-import uk.gov.hmcts.darts.common.repository.CaseOverflowRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
+import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,12 +33,13 @@ import java.util.Optional;
 @Slf4j
 public class RetentionPostServiceImpl implements RetentionPostService {
 
-    public static final List<SecurityRoleEnum> JUDGE_AND_ADMIN = List.of(SecurityRoleEnum.JUDGE, SecurityRoleEnum.ADMIN);
+    public static final List<SecurityRoleEnum> JUDGE_AND_ADMIN_ROLES = List.of(SecurityRoleEnum.JUDGE, SecurityRoleEnum.ADMIN);
     private final CaseRepository caseRepository;
     private final CaseRetentionRepository caseRetentionRepository;
     private final AuthorisationApi authorisationApi;
-    private final CaseOverflowRepository caseOverflowRepository;
+    private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final CurrentTimeHelper currentTimeHelper;
+    private final AuditApi auditApi;
 
     @Override
     public void postRetention(PostRetentionRequest postRetentionRequest) {
@@ -57,11 +56,10 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         validation(postRetentionRequest, courtCase);
 
         OffsetDateTime newRetentionDate;
-        if (postRetentionRequest.getIsPermanentRetention()) {
-
+        if (BooleanUtils.isTrue(postRetentionRequest.getIsPermanentRetention())) {
             newRetentionDate = currentTimeHelper.currentOffsetDateTime().plus(99, ChronoUnit.YEARS);
         } else {
-            newRetentionDate = postRetentionRequest.getRetentionDate().atTime(OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC));
+            newRetentionDate = DateConverterUtil.toOffsetDateTime(postRetentionRequest.getRetentionDate());
         }
         createNewCaseRetention(postRetentionRequest, courtCase, newRetentionDate);
 
@@ -70,7 +68,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     private void validation(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase) {
         //No retention can be applied/amended when then case is open
         if (BooleanUtils.isNotTrue(courtCase.getClosed())) {
-            log.error("A retention police of {} was attempted to be applied to an open case", postRetentionRequest);
+            log.error("A retention policy of {} was attempted to be applied to an open case", postRetentionRequest);
             throw new DartsApiException(
                 RetentionApiError.CASE_NOT_CLOSED,
                 MessageFormat.format("caseId ''{0}'' must be closed before the retention period can be amended.", courtCase.getId())
@@ -79,58 +77,57 @@ public class RetentionPostServiceImpl implements RetentionPostService {
 
 
         //No retention can be applied/amended when no current retention policy has been applied
-        List<CaseRetentionEntity> caseRetentions = caseRetentionRepository.findByCourtCase_Id(courtCase.getId());
-        if (caseRetentions.isEmpty()) {
-            throw new DartsApiException(
-                RetentionApiError.NO_RETENTION_POLICIES_APPLIED,
-                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId())
-            );
-        }
+        CaseRetentionEntity lastCompletedAutomatedCaseRetention = getLatestCompleteAutomatedCaseRetention(courtCase);
 
-        if (!postRetentionRequest.getIsPermanentRetention()) {
-            //No users can reduce the retention date to earlier than the initial Case Management date input.
-            CaseRetentionEntity firstCaseRetention = getFirstCaseRetention(caseRetentions);
-            LocalDate originalRetentionDate = firstCaseRetention.getRetainUntil().toLocalDate();
-            LocalDate newRetentionDate = postRetentionRequest.getRetentionDate();
-            if (newRetentionDate.isBefore(originalRetentionDate)) {
+        if (BooleanUtils.isNotTrue(postRetentionRequest.getIsPermanentRetention())) {
+            //No users can reduce the retention date to earlier than the last Completed automated date.
+            OffsetDateTime latestCompletedRetentionDate = lastCompletedAutomatedCaseRetention.getRetainUntil();
+            OffsetDateTime newRetentionDate = DateConverterUtil.toOffsetDateTime(postRetentionRequest.getRetentionDate());
+            if (newRetentionDate.isBefore(latestCompletedRetentionDate)) {
                 throw new DartsApiException(
                     RetentionApiError.RETENTION_DATE_TO_EARLY,
-                    MessageFormat.format("caseId ''{0}'' must have a retention date after the original {1}.", courtCase.getId(), originalRetentionDate)
+                    MessageFormat.format(
+                        "caseId ''{0}'' must have a retention date after the last Completed Automated retention date ''{1}''.",
+                        courtCase.getId(),
+                        latestCompletedRetentionDate
+                    )
                 );
             }
 
 
             //Only Judges and Admin can reduce a set retention date
-            CaseOverflowEntity caseOverflow = getCaseOverflowEntity(courtCase);
-            LocalDate currentRetentionDate = caseOverflow.getRetainUntilTs().toLocalDate();
+            OffsetDateTime currentRetentionDate = getLatestCompletedCaseRetention(courtCase).getRetainUntil();
             if (newRetentionDate.isBefore(currentRetentionDate)) {
-                if (!authorisationApi.userHasOneOfGlobalRoles(JUDGE_AND_ADMIN)) {
+                if (!authorisationApi.userHasOneOfRoles(JUDGE_AND_ADMIN_ROLES)) {
                     throw new DartsApiException(
                         RetentionApiError.NO_PERMISSION_REDUCE_RETENTION_ERROR, "You do not have permission to reduce the retention period."
                     );
-
                 }
             }
 
         }
     }
 
-    private CaseOverflowEntity getCaseOverflowEntity(CourtCaseEntity courtCase) {
-        Optional<CaseOverflowEntity> caseOverflowOpt = caseOverflowRepository.findById(courtCase.getId());
-        if (caseOverflowOpt.isEmpty()) {
+    private CaseRetentionEntity getLatestCompleteAutomatedCaseRetention(CourtCaseEntity courtCase) {
+        Optional<CaseRetentionEntity> latestCompletedAutomatedRetentionOpt = caseRetentionRepository.findLatestCompletedAutomatedRetention(courtCase);
+        if (latestCompletedAutomatedRetentionOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.NO_RETENTION_POLICIES_APPLIED,
-                MessageFormat.format("caseId ''{0}'' must have a corresponding case Overflow record.", courtCase.getId())
+                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId())
             );
         }
-        CaseOverflowEntity caseOverflow = caseOverflowOpt.get();
-        return caseOverflow;
+        return latestCompletedAutomatedRetentionOpt.get();
     }
 
-    private CaseRetentionEntity getFirstCaseRetention(List<CaseRetentionEntity> caseRetentions) {
-        return caseRetentions.stream()
-            .sorted(Comparator.comparing(CaseRetentionEntity::getCreatedDateTime))
-            .findFirst().orElse(null);
+    private CaseRetentionEntity getLatestCompletedCaseRetention(CourtCaseEntity courtCase) {
+        Optional<CaseRetentionEntity> latestCompletedAutomatedRetentionOpt = caseRetentionRepository.findLatestCompletedRetention(courtCase);
+        if (latestCompletedAutomatedRetentionOpt.isEmpty()) {
+            throw new DartsApiException(
+                RetentionApiError.NO_RETENTION_POLICIES_APPLIED,
+                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId())
+            );
+        }
+        return latestCompletedAutomatedRetentionOpt.get();
     }
 
     private CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
@@ -144,9 +141,17 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setSubmittedBy(currentUser);
         caseRetention.setComments(postRetentionRequest.getComments());
         caseRetention.setRetainUntil(newRetentionDate);
-        caseRetention.setCurrentState(String.valueOf(CaseRetentionStatus.PENDING));
+        caseRetention.setCurrentState(String.valueOf(CaseRetentionStatus.COMPLETE));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
-        caseRetentionRepository.save(caseRetention);
+
+        caseRetention.setRetentionPolicyType(retentionPolicyTypeRepository.getReferenceById(1));//todo update once decision has been made
+
+        caseRetentionRepository.saveAndFlush(caseRetention);
+        auditApi.recordAudit(
+            AuditActivity.APPLY_RETENTION,
+            currentUser,
+            courtCase
+        );
         return caseRetention;
     }
 

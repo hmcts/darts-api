@@ -19,5 +19,5 @@ public interface AuthorisationApi {
 
     UserAccountEntity getCurrentUser();
 
-    boolean userHasOneOfGlobalRoles(List<SecurityRoleEnum> globalSecurityRoles);
+    boolean userHasOneOfRoles(List<SecurityRoleEnum> globalSecurityRoles);
 }

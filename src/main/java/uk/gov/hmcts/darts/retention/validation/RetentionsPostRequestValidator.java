@@ -19,7 +19,7 @@ public class RetentionsPostRequestValidator {
             }
         } else {
             if (postRetentionRequest.getRetentionDate() == null) {
-                throw new DartsApiException(RetentionApiError.INVALID_REQUEST, "Either 'is_permanent_retention' or 'retention_date' must be se.");
+                throw new DartsApiException(RetentionApiError.INVALID_REQUEST, "Either 'is_permanent_retention' or 'retention_date' must be set.");
             }
         }
     }
