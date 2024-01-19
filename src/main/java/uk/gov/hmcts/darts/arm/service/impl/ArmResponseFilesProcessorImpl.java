@@ -229,7 +229,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                             );
                             updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
                         }
-                        deleteResponseFiles(externalObjectDirectory, uploadFileFilenameProcessor, createRecordFilename, inputUploadFilenameProcessor);
                     } else {
                         log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
                         updateExternalObjectDirectory(externalObjectDirectory, armResponseProcessingFailed);
@@ -304,10 +303,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
     }
 
-    private void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                     UploadFileFilenameProcessor uploadFileFilenameProcessor,
-                                     String createRecordFilename,
-                                     InputUploadFilenameProcessor inputUploadFilenameProcessor) {
+    public void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory,
+                                    UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                    String createRecordFilename,
+                                    InputUploadFilenameProcessor inputUploadFilenameProcessor) {
         ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(ARM_RESPONSE_PROCESSING_FAILED.getId());
         ObjectRecordStatusEntity armStoredStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
 
