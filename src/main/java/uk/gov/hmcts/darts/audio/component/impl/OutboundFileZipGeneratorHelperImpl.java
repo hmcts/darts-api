@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.audio.service.impl;
+package uk.gov.hmcts.darts.audio.component.impl;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
@@ -7,24 +7,34 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
+import uk.gov.hmcts.darts.audio.model.ViqHeader;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
 import uk.gov.hmcts.darts.audio.model.xml.ViqPlayListItem;
-import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.util.XmlUtil;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -41,7 +51,7 @@ import static java.util.Locale.UK;
 @Slf4j
 @Service
 @SuppressWarnings("PMD.ExcessiveImports")
-public class ViqHeaderServiceImpl implements ViqHeaderService {
+public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGeneratorHelper {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)
         .withLocale(UK);
@@ -59,8 +69,8 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     private final OutboundDocumentGenerator annotationXmlGenerator;
     private final EventRepository eventRepository;
 
-    public ViqHeaderServiceImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator,
-                                EventRepository eventRepository) {
+    public OutboundFileZipGeneratorHelperImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator,
+                                              EventRepository eventRepository) {
         this.annotationXmlGenerator = annotationXmlGenerator;
         this.eventRepository = eventRepository;
     }
@@ -141,6 +151,34 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
         return readmeFile.getAbsolutePath();
+    }
+
+    @Override
+    public Path generateViqFile(ViqHeader viqHeader, AudioFileInfo audioFileInfo) {
+
+        if (!audioFileInfo.isTrimmed()) {
+            return audioFileInfo.getPath();
+        }
+
+        Path outputFilePath = Paths.get(""); //TODO filename name generation
+
+        try (FileOutputStream outputStream = new FileOutputStream(outputFilePath.toString())) {
+            outputStream.write(viqHeader.getViqHeader());
+
+            try (BufferedReader inputFile = Files.newBufferedReader(audioFileInfo.getPath())) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputFile.read()) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+            };
+        } catch (IOException exception) {
+            log.error("Unable to generate vig header file: {}", outputFilePath, exception);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+        }
+
+        return outputFilePath;
+
     }
 
     private static ViqPlayListItem createViqPlaylistItem(PlaylistInfo playlistInfo) {

@@ -9,10 +9,11 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
+import uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
-import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -41,12 +42,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.COURTHOUSE_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.END_TIME_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_BY_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.README_TXT_FILENAME;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.REQUEST_TYPE_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.START_TIME_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.COURTHOUSE_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.END_TIME_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.RAISED_BY_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.README_TXT_FILENAME;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.REQUEST_TYPE_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.START_TIME_README_LABEL;
 import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.readTempFileContent;
 import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
@@ -55,11 +56,11 @@ import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports"})
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class ViqHeaderServiceImplTest {
+class OutboundFileZipGeneratorHelperImplTest {
 
     private static final String CASE_NUMBER = "T2023041301_1";
 
-    private ViqHeaderService viqHeaderService;
+    private OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper;
 
     @Mock
     private EventRepository eventRepository;
@@ -69,7 +70,7 @@ class ViqHeaderServiceImplTest {
 
     @BeforeEach
     void setUp() throws ParserConfigurationException {
-        viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
+        outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
     }
 
     @Test
@@ -80,7 +81,7 @@ class ViqHeaderServiceImplTest {
 
         String playlistOutputFile = tempDirectory.getAbsolutePath();
 
-        String playListFile = viqHeaderService.generatePlaylist(playlistInfos, playlistOutputFile);
+        String playListFile = outboundFileZipGeneratorHelper.generatePlaylist(playlistInfos, playlistOutputFile);
         log.debug("Playlist file {}", playListFile);
         assertTrue(Files.exists(Path.of(playListFile)));
         Playlist playlist = unmarshalXmlFile(Playlist.class, playListFile);
@@ -99,12 +100,12 @@ class ViqHeaderServiceImplTest {
     @Test
     void generatePlayListWithNullPlayListInfoThrowsException() {
         String playlistOutputFile = tempDirectory.getAbsolutePath();
-        assertThrows(DartsApiException.class, () -> viqHeaderService.generatePlaylist(null, playlistOutputFile));
+        assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generatePlaylist(null, playlistOutputFile));
     }
 
     @Test
     void generatePlayListWithNullPlayListInfoAndNullPathThrowsException() {
-        assertThrows(DartsApiException.class, () -> viqHeaderService.generatePlaylist(null, null));
+        assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generatePlaylist(null, null));
     }
 
     @Test
@@ -121,7 +122,7 @@ class ViqHeaderServiceImplTest {
         );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
-        String annotationsFile = viqHeaderService.generateAnnotation(
+        String annotationsFile = outboundFileZipGeneratorHelper.generateAnnotation(
             hearingEntity,
             startTime,
             endTime,
@@ -159,7 +160,7 @@ class ViqHeaderServiceImplTest {
         );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
-        String annotationsFile = viqHeaderService.generateAnnotation(
+        String annotationsFile = outboundFileZipGeneratorHelper.generateAnnotation(
             hearingEntity,
             startTime,
             endTime,
@@ -187,7 +188,7 @@ class ViqHeaderServiceImplTest {
         String invalidPath = "/non_existent_directory/0_annotations.xml";
 
         var exception = assertThrows(DartsApiException.class, () ->
-            viqHeaderService.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
+            outboundFileZipGeneratorHelper.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
 
         assertEquals("Failed to process audio request", exception.getMessage());
         assertEquals(
@@ -217,7 +218,7 @@ class ViqHeaderServiceImplTest {
             .build();
 
         String fileLocation = tempDirectory.getAbsolutePath();
-        String readmeFile = viqHeaderService.generateReadme(viqMetaData, fileLocation);
+        String readmeFile = outboundFileZipGeneratorHelper.generateReadme(viqMetaData, fileLocation);
 
         assertNotNull(readmeFile);
         log.debug("Reading file " + readmeFile);

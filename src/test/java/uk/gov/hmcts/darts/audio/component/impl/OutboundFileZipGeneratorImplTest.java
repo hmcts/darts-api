@@ -8,8 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
-import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
-import uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -64,11 +63,11 @@ class OutboundFileZipGeneratorImplTest {
 
     @BeforeEach
     void setUp() throws IOException, ParserConfigurationException {
-        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
+        OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
 
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(
             audioConfigurationProperties,
-            viqHeaderService
+            outboundFileZipGeneratorHelper
         );
 
         var tempDirectoryName = UUID.randomUUID().toString();
@@ -157,7 +156,7 @@ class OutboundFileZipGeneratorImplTest {
 
     private AudioFileInfo createDummyFileAndAudioFileInfo(int channel) {
         Path path = createDummyFile();
-        return new AudioFileInfo(SOME_START_TIME, SOME_END_TIME, channel, path);
+        return new AudioFileInfo(SOME_START_TIME, SOME_END_TIME, channel, path, false);
     }
 
     private Path createDummyFile() {

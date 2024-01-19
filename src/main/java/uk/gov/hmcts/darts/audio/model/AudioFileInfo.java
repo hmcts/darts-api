@@ -23,5 +23,6 @@ public class AudioFileInfo {
     private Integer channel;
     @NotNull
     private Path path;
+    private boolean isTrimmed;
 
 }

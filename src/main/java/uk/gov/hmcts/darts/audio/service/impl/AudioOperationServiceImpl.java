@@ -77,7 +77,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             getEarliestStartTime(audioFileInfos),
             getLatestEndTime(audioFileInfos),
             channel,
-            outputPath
+            outputPath,
+            false
         );
     }
 
@@ -110,7 +111,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
                 getEarliestStartTime(seperatedAudioFileInfo),
                 getLatestEndTime(seperatedAudioFileInfo),
                 channel,
-                outputPath
+                outputPath,
+                false
             );
             audioFileInfoList.add(audioFileInfo);
         }
@@ -146,7 +148,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             getEarliestStartTime(audioFilesInfo),
             getLatestEndTime(audioFilesInfo),
             0,
-            outputPath
+            outputPath,
+            false
         );
     }
 
@@ -175,7 +178,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             adjustTimeDuration(audioFileInfo.getStartTime(), startDuration),
             adjustTimeDuration(audioFileInfo.getStartTime(), endDuration),
             audioFileInfo.getChannel(),
-            outputPath
+            outputPath,
+            true
         );
     }
 
@@ -217,7 +221,8 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             audioFileInfo.getStartTime(),
             audioFileInfo.getEndTime(),
             audioFileInfo.getChannel(),
-            outputPath
+            outputPath,
+            audioFileInfo.isTrimmed()
         );
     }
 
