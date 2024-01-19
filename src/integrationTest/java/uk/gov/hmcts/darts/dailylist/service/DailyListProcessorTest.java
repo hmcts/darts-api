@@ -43,8 +43,8 @@ class DailyListProcessorTest extends IntegrationBase {
     public static final String SWANSEA = "SWANSEA";
     public static final String URN_1 = "42GD2391421";
     public static final String URN_2 = "42GD2391433";
-    public static final String COURTROOM_1 = "1";
-    public static final String COURTROOM_2 = "2";
+    public static final String COURTROOM_1 = "1A";
+    public static final String COURTROOM_2 = "2B";
     public static final String CASE_NUMBER_1 = "Case1";
     public static final String CASE_NUMBER_2 = "Case2";
     static final ObjectMapper MAPPER = new ObjectMapper();

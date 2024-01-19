@@ -323,8 +323,8 @@ components:
       type: object
       properties:
         court_room_number:
-          type: integer
-          example: 1
+          type: string
+          example: "1"
           description: ""
         sitting_sequence_no:
           type: integer

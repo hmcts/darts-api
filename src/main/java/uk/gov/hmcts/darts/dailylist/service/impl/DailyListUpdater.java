@@ -68,7 +68,7 @@ class DailyListUpdater {
                         String caseNumber = getCaseNumber(dailyListEntity, dailyListHearing);
 
                         HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
-                            courtHouseName, String.valueOf(sitting.getCourtRoomNumber()),
+                            courtHouseName, sitting.getCourtRoomNumber(),
                             caseNumber, dailyListHearing.getHearingDetails().getHearingDate()
                         );
 
