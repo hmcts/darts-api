@@ -1,3 +1,6 @@
+DELETE FROM case_retention;
+DELETE FROM retention_policy_type;
+
 ALTER TABLE case_management_retention ADD COLUMN is_manual_override   BOOLEAN NOT NULL;
 ALTER TABLE case_management_retention ADD COLUMN event_ts             TIMESTAMP WITH TIME ZONE;
 ALTER TABLE case_management_retention ALTER COLUMN eve_id DROP NOT NULL;
