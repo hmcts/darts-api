@@ -31,7 +31,7 @@
       },
       "sittings": [
         {
-          "court_room_number": 1,
+          "court_room_number": "1A",
           "sitting_sequence_no": 1,
           "sitting_at": "10:00:00",
           "sitting_priority": "T",
