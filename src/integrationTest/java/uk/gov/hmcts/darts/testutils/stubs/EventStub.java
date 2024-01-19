@@ -41,6 +41,7 @@ public class EventStub {
         eventEntity.addHearing(hearing);
         eventEntity.setLastModifiedBy(userAccountStub.getIntegrationTestUserAccountEntity());
         eventEntity.setLastModifiedDateTime(eventTimestamp);
+        eventEntity.setIsLogEntry(false);
         eventRepository.saveAndFlush(eventEntity);
         return eventEntity;
     }
