@@ -387,34 +387,25 @@ public class TestSupportController {
         courtCase.setCourthouse(courthouse);
         caseRepository.saveAndFlush(courtCase);
 
-        RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
-        retentionPolicyTypeEntity.setId(1);
-        retentionPolicyTypeEntity.setFixedPolicyKey(1);
-        retentionPolicyTypeEntity.setPolicyName("Standard");
-        retentionPolicyTypeEntity.setDuration(7);
-        retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
-        retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
-        retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());
-        retentionPolicyTypeEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
-        retentionPolicyTypeEntity.setLastModifiedDateTime(OffsetDateTime.now());
-        retentionPolicyTypeEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
-        retentionPolicyTypeRepository.saveAndFlush(retentionPolicyTypeEntity);
+        Optional<RetentionPolicyTypeEntity> retentionPolicyTypeEntity = retentionPolicyTypeRepository.findById(2);
 
-        CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
-        caseRetentionEntity.setCourtCase(courtCase);
-        caseRetentionEntity.setId(1);
-        caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
-        caseRetentionEntity.setTotalSentence("10 years?");
-        caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
-        caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
-        caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
-        caseRetentionEntity.setCurrentState("a_state");
-        caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
-        caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
-        caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
-        caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        if (retentionPolicyTypeEntity.isPresent()) {
+            CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
+            caseRetentionEntity.setCourtCase(courtCase);
+            caseRetentionEntity.setId(1);
+            caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity.get());
+            caseRetentionEntity.setTotalSentence("10 years?");
+            caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
+            caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
+            caseRetentionEntity.setCurrentState("a_state");
+            caseRetentionEntity.setCreatedDateTime(OffsetDateTime.now());
+            caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+            caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
+            caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
 
-        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+            caseRetentionRepository.saveAndFlush(caseRetentionEntity);
+        }
 
         return new ResponseEntity<>(courtCase.getId(), OK);
     }

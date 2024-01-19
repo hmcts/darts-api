@@ -599,12 +599,13 @@ public class DartsDatabaseStub {
         caseRetentionRepository.save(retention);
     }
 
+    @Transactional
     public void createCaseRetention(CourtCaseEntity courtCase) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
         retentionPolicyTypeEntity.setId(1);
         retentionPolicyTypeEntity.setFixedPolicyKey(1);
         retentionPolicyTypeEntity.setPolicyName("Standard");
-        retentionPolicyTypeEntity.setDuration(7);
+        retentionPolicyTypeEntity.setDuration("7");
         retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
         retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
         retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());
@@ -619,6 +620,7 @@ public class DartsDatabaseStub {
         caseRetentionRepository.save(caseRetentionEntity2);
         CaseRetentionEntity caseRetentionEntity3 = createCaseRetentionObject(3, courtCase, retentionPolicyTypeEntity, "c_state");
         caseRetentionRepository.saveAndFlush(caseRetentionEntity3);
+
     }
 
     private CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
