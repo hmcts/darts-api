@@ -15,6 +15,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNullElse;
+import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.darts.event.exception.EventError.EVENT_HANDLER_NOT_FOUND_IN_DB;
 
 @Service
@@ -36,10 +40,11 @@ public class EventDispatcherImpl implements EventDispatcher {
             .filter(handler -> handler.isHandlerFor(foundHandlerEntity.getHandler()))
             .findAny();
         if (foundHandler.isPresent()) {
+            logEvent(event, foundHandler.get());
             foundHandler.get().handle(event, foundHandlerEntity);
         } else {
             // Event registered in DB, but no handler defined...just log and return OK.
-            log.warn(String.format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));
+            log.warn(format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));
         }
     }
 
@@ -57,10 +62,10 @@ public class EventDispatcherImpl implements EventDispatcher {
             event.getSubType()
         );
         if (foundMappings.isEmpty()) {
-            log.warn(String.format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));
+            log.warn(format(HANDLER_NOT_FOUND_MESSAGE, event.getMessageId(), event.getType(), event.getSubType()));
             throw new DartsApiException(
                 EVENT_HANDLER_NOT_FOUND_IN_DB,
-                String.format(NO_HANDLER_IN_DB_MESSAGE, event.getMessageId(), event.getType(), event.getSubType())
+                format(NO_HANDLER_IN_DB_MESSAGE, event.getMessageId(), event.getType(), event.getSubType())
             );
         }
 
@@ -68,6 +73,15 @@ public class EventDispatcherImpl implements EventDispatcher {
         EventHandlerEntity eventHandlerEntity = foundMappings.get(0);
         eventHandlerCache.put(key, eventHandlerEntity);
         return eventHandlerEntity;
+    }
+
+    private static void logEvent(DartsEvent event, EventHandler foundHandler) {
+        var caseNumbers = String.join(", ", ofNullable(event.getCaseNumbers()).orElse(emptyList()));
+        log.info(
+            "Executing event handler: {} for event: {} and case number(s): {}",
+            foundHandler.getClass().getName(),
+            requireNonNullElse(event.getEventId(), "non provided"),
+            caseNumbers);
     }
 
 }

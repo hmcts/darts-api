@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.entity.JudgeEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
+import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionCommentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionWorkflowEntity;
@@ -78,6 +79,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static java.time.LocalDate.now;
@@ -143,6 +145,7 @@ public class DartsDatabaseStub {
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
+    private final List<SecurityGroupEntity> securityGroupBin = new ArrayList<>();
 
     private final EntityManager entityManager;
 
@@ -172,11 +175,13 @@ public class DartsDatabaseStub {
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
+        userAccountRepository.deleteAll(userAccountBin);
+        userAccountBin.clear();
+        securityGroupRepository.deleteAll(securityGroupBin);
+        securityGroupBin.clear();
         courthouseRepository.deleteAll();
         eventHandlerRepository.deleteAll(eventHandlerBin);
         eventHandlerBin.clear();
-        userAccountRepository.deleteAll(userAccountBin);
-        userAccountBin.clear();
     }
 
     public List<EventHandlerEntity> findByHandlerAndActiveTrue(String handlerName) {
@@ -514,6 +519,14 @@ public class DartsDatabaseStub {
         this.eventHandlerBin.addAll(asList(eventHandlerEntities));
     }
 
+    public void addToTrash(SecurityGroupEntity... securityGroupEntities) {
+        this.securityGroupBin.addAll(asList(securityGroupEntities));
+    }
+
+    public void addToTrash(Set<SecurityGroupEntity> securityGroupEntities) {
+        this.securityGroupBin.addAll(securityGroupEntities);
+    }
+
     public void addToUserAccountTrash(String... emailAddresses) {
         stream(emailAddresses)
             .flatMap(email -> userAccountRepository.findByEmailAddressIgnoreCase(email).stream())
@@ -625,5 +638,16 @@ public class DartsDatabaseStub {
         caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
         return caseRetentionEntity;
+    }
+
+    public UserAccountEntity saveUserWithGroup(UserAccountEntity user) {
+        securityGroupRepository.saveAll(user.getSecurityGroupEntities());
+        return userAccountRepository.save(user);
+    }
+
+    public List<NotificationEntity> getNotificationFor(String someCaseNumber) {
+        return notificationRepository.findAll().stream()
+            .filter(notification -> notification.getCourtCase().getCaseNumber().equals(someCaseNumber))
+            .toList();
     }
 }

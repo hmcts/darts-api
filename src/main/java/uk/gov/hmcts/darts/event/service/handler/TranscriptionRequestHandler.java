@@ -16,8 +16,9 @@ import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionTypeEnum;
 import uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum;
 import uk.gov.hmcts.darts.transcriptions.model.RequestTranscriptionResponse;
-import uk.gov.hmcts.darts.transcriptions.model.TranscriptionRequestDetails;
 import uk.gov.hmcts.darts.transcriptions.model.UpdateTranscription;
+
+import static uk.gov.hmcts.darts.event.mapper.TranscriptionRequestDetailsMapper.transcriptionRequestDetailsFrom;
 
 @Slf4j
 @Service
@@ -41,15 +42,11 @@ public class TranscriptionRequestHandler extends EventHandlerBase {
     public void handle(final DartsEvent dartsEvent, EventHandlerEntity eventHandler) {
         //save the event in the database
         var createdHearing = createHearingAndSaveEvent(dartsEvent, eventHandler);
+        var transcriptionRequestDetails = transcriptionRequestDetailsFrom(dartsEvent, createdHearing.getHearingEntity());
 
         //create automatic transcription request
-        TranscriptionRequestDetails transcriptionRequestDetails = new TranscriptionRequestDetails();
-        transcriptionRequestDetails.setCaseId(createdHearing.getHearingEntity().getCourtCase().getId());
         transcriptionRequestDetails.setTranscriptionTypeId(TranscriptionTypeEnum.OTHER.getId());
         transcriptionRequestDetails.setTranscriptionUrgencyId(TranscriptionUrgencyEnum.OVERNIGHT.getId());
-        transcriptionRequestDetails.setStartDateTime(dartsEvent.getStartTime());
-        transcriptionRequestDetails.setEndDateTime(dartsEvent.getEndTime());
-        transcriptionRequestDetails.setHearingId(createdHearing.getHearingEntity().getId());
         RequestTranscriptionResponse transcriptionResponse = transcriptionsApi.saveTranscriptionRequest(
             transcriptionRequestDetails, false);
 

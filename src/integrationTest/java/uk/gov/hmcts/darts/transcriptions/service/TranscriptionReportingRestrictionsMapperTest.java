@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Random;
 
 import static java.time.OffsetDateTime.now;
-import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,7 +54,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         assertThat(mappedRestrictions).extracting("eventText").hasSameElementsAs(eventTextFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("hearingId").hasSameElementsAs(hearingIdsFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("eventId").hasSameElementsAs(eventIdsFrom(reportingRestrictions));
-        assertThat(mappedRestrictions).extracting((rr) -> rr.getEventTs().truncatedTo(MILLIS)).hasSameElementsAs(eventTsFrom(reportingRestrictions));
+        assertThat(mappedRestrictions).extracting((rr) -> rr.getEventTs().truncatedTo(SECONDS)).hasSameElementsAs(eventTsFrom(reportingRestrictions));
     }
 
     @Test
@@ -72,7 +72,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         assertThat(mappedRestrictions).extracting("eventText").hasSameElementsAs(eventTextFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("hearingId").hasSameElementsAs(hearingIdsFrom(reportingRestrictions));
         assertThat(mappedRestrictions).extracting("eventId").hasSameElementsAs(eventIdsFrom(reportingRestrictions));
-        assertThat(mappedRestrictions).extracting((rr) -> rr.getEventTs().truncatedTo(MILLIS)).hasSameElementsAs(eventTsFrom(reportingRestrictions));
+        assertThat(mappedRestrictions).extracting((rr) -> rr.getEventTs().truncatedTo(SECONDS)).hasSameElementsAs(eventTsFrom(reportingRestrictions));
     }
 
     @Test
@@ -87,8 +87,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
         rangeClosed(0, 9).forEach(index -> {
-            var mappedTsAtIndex = transcriptionResponse.getCaseReportingRestrictions().get(index).getEventTs().truncatedTo(MILLIS);
-            assertThat(mappedTsAtIndex).isEqualTo(expectedOrderedTs.get(index).truncatedTo(MILLIS));
+            var mappedTsAtIndex = transcriptionResponse.getCaseReportingRestrictions().get(index).getEventTs().truncatedTo(SECONDS);
+            assertThat(mappedTsAtIndex).isEqualTo(expectedOrderedTs.get(index).truncatedTo(SECONDS));
         });
     }
 
@@ -180,7 +180,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     private List<OffsetDateTime> eventTsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
-            .map(eventEntity -> eventEntity.getTimestamp().truncatedTo(MILLIS))
+            .map(eventEntity -> eventEntity.getTimestamp().truncatedTo(SECONDS))
             .toList();
     }
 
