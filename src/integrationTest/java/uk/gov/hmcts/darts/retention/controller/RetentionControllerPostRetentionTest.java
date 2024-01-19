@@ -1,75 +1,76 @@
 package uk.gov.hmcts.darts.retention.controller;
 
-import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
-import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.net.URI;
 import java.time.OffsetDateTime;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @AutoConfigureMockMvc
 class RetentionControllerPostRetentionTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
+
+    @MockBean
+    private UserIdentity mockUserIdentity;
+
+    public static final String ENDPOINT_URL = "/retentions";
+
     private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
     private static final String SOME_COURTROOM = "some-courtroom";
-    private static final String SOME_CASE_NUMBER = "1";
+    private static final String SOME_CASE_NUMBER = "12345";
+
+    @BeforeEach
+    void setUp() {
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+                .createAuthorisedIntegrationTestUser(SOME_COURTHOUSE);
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+    }
+
 
     @Test
-    void testGetRetentionsOk() throws Exception {
-        HearingEntity hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
-                SOME_CASE_NUMBER,
+    void happyPath() throws Exception {
+        CourtCaseEntity courtCase = dartsDatabase.createCase(
                 SOME_COURTHOUSE,
-                SOME_COURTROOM,
-                SOME_DATE_TIME.toLocalDate()
+                SOME_CASE_NUMBER
         );
-        CourtCaseEntity courtCase = hearingEntity.getCourtCase();
+        courtCase.setClosed(true);
+        dartsDatabase.save(courtCase);
 
-        dartsDatabase.createCaseRetention(courtCase);
+        OffsetDateTime retainUntilDate = OffsetDateTime.parse("2023-01-01T12:00Z");
 
-        var requestBuilder = get(URI.create(String.format("/retentions?case_id=%s", SOME_CASE_NUMBER)));
+        dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.COMPLETE, retainUntilDate, false);
 
-        mockMvc.perform(requestBuilder).andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_last_changed_date", Matchers.is(Matchers.notNullValue())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_date", Matchers.is(Matchers.notNullValue())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].amended_by", Matchers.is("system")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].retention_policy_applied", Matchers.is("Standard")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].comments", Matchers.is("a comment")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].status", Matchers.is("a_state")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_last_changed_date", Matchers.is(Matchers.notNullValue())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_date", Matchers.is(Matchers.notNullValue())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].amended_by", Matchers.is("system")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].retention_policy_applied", Matchers.is("Standard")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].comments", Matchers.is("a comment")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[1].status", Matchers.is("b_state")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_last_changed_date", Matchers.is(Matchers.notNullValue())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_date", Matchers.is(Matchers.notNullValue())))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[2].amended_by", Matchers.is("system")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[2].retention_policy_applied", Matchers.is("Standard")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[2].comments", Matchers.is("a comment")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[2].status", Matchers.is("c_state")));
+
+        String requestBody = """
+                {
+                  "case_id": 1,
+                  "retention_date": "2024-05-20",
+                  "is_permanent_retention": false,
+                  "comments": "string"
+                }""";
+
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(requestBody);
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk()).andReturn();
+
     }
 
-    @Test
-    void testCaseDoesNotExist() throws Exception {
-        var requestBuilder = get(URI.create(String.format("/retentions?case_id=%s", "500")));
-
-        MvcResult mvcResult = mockMvc.perform(requestBuilder).andExpect(status().isOk()).andReturn();
-
-        String actualJson = mvcResult.getResponse().getContentAsString();
-        JSONAssert.assertEquals("[]", actualJson, JSONCompareMode.NON_EXTENSIBLE);
-    }
 }

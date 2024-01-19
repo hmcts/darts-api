@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
@@ -68,6 +69,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
@@ -148,6 +150,7 @@ public class DartsDatabaseStub {
     private final List<SecurityGroupEntity> securityGroupBin = new ArrayList<>();
 
     private final EntityManager entityManager;
+    private final CurrentTimeHelper currentTimeHelper;
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
@@ -171,7 +174,6 @@ public class DartsDatabaseStub {
         defendantRepository.deleteAll();
         prosecutorRepository.deleteAll();
         caseRetentionRepository.deleteAll();
-        retentionPolicyTypeRepository.deleteAll();
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
@@ -624,7 +626,7 @@ public class DartsDatabaseStub {
     }
 
     private CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
-            RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
+                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);
         caseRetentionEntity.setId(id);
@@ -639,6 +641,28 @@ public class DartsDatabaseStub {
         caseRetentionEntity.setLastModifiedDateTime(OffsetDateTime.now());
         caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
+        return caseRetentionEntity;
+    }
+
+    @Transactional
+    public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
+                                                         CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
+        CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
+        caseRetentionEntity.setCourtCase(courtCase);
+        caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeRepository.getReferenceById(1));
+        caseRetentionEntity.setTotalSentence("10 years?");
+        caseRetentionEntity.setRetainUntil(retainUntilDate);
+        caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
+        caseRetentionEntity.setCurrentState(retentionStatus.name());
+        caseRetentionEntity.setComments("a comment");
+        caseRetentionEntity.setManualOverride(isManual);
+        caseRetentionEntity.setManualOverride(isManual);
+        caseRetentionEntity.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime());
+        caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionEntity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
+        caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
+        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
         return caseRetentionEntity;
     }
 
