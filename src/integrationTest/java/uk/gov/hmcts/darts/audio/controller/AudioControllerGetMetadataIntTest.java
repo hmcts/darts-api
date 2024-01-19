@@ -13,10 +13,8 @@ import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -26,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
+    private static final String ENDPOINT_URL = "/audio/hearings/{hearing_id}/audios";
     private static final OffsetDateTime MEDIA_START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime MEDIA_END_TIME = MEDIA_START_TIME.plusHours(1);
 
@@ -36,8 +35,11 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
 
     @Test
-    void getAudioMetadataGetShouldReturnMetadataAssociatedWithProvidedHearing() throws Exception {
-        var mediaEntity = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 999);
+    void getAudioMetadataGetShouldReturnMediaChannel1MetadataAssociatedWithProvidedHearing() throws Exception {
+        var mediaChannel1 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        var mediaChannel2 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 2);
+        var mediaChannel3 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 3);
+        var mediaChannel4 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 4);
 
         var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "999",
@@ -45,13 +47,16 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
             "test",
             LocalDate.now()
         );
-        hearingEntity.setMediaList(Collections.singletonList(mediaEntity));
+        hearingEntity.addMedia(mediaChannel1);
+        hearingEntity.addMedia(mediaChannel2);
+        hearingEntity.addMedia(mediaChannel3);
+        hearingEntity.addMedia(mediaChannel4);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
-        var requestBuilder = get(URI.create(String.format("/audio/hearings/%d/audios", hearingEntity.getId())));
+        var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
@@ -83,7 +88,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
             .createAuthorisedIntegrationTestUser(hearingEntity.getCourtroom().getCourthouse());
         when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
 
-        var requestBuilder = get(URI.create(String.format("/audio/hearings/%d/audios", hearingEntity.getId())));
+        var requestBuilder = get(ENDPOINT_URL, hearingEntity.getId());
 
         MvcResult mvcResult = mockMvc.perform(requestBuilder)
             .andExpect(status().isOk())
@@ -95,7 +100,7 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
     @Test
     void getAudioMetadataHearingNotFound() throws Exception {
-        var requestBuilder = get(URI.create(String.format("/audio/hearings/%d/audios", 999)));
+        var requestBuilder = get(ENDPOINT_URL, 999);
 
         mockMvc.perform(requestBuilder).andExpect(status().isNotFound());
     }

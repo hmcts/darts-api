@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
-import uk.gov.hmcts.darts.audit.service.AuditService;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -32,7 +31,6 @@ import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.HearingRepository;
 import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
-import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
@@ -67,17 +65,12 @@ class AudioServiceImplTest {
     private static final OffsetDateTime START_TIME = OffsetDateTime.parse("2023-01-01T12:00:00Z");
     private static final OffsetDateTime END_TIME = OffsetDateTime.parse("2023-01-01T13:00:00Z");
 
-    private static final List<String> HANDHELD_AUDIO_COURTROOM_NUMBERS = Arrays.asList("199");
-
     @Captor
     ArgumentCaptor<MediaEntity> mediaEntityArgumentCaptor;
     @Captor
     ArgumentCaptor<BinaryData> inboundBlobStorageArgumentCaptor;
     @Mock
     private AudioTransformationService audioTransformationService;
-
-    @Mock
-    private TransientObjectDirectoryRepository transientObjectDirectoryRepository;
 
     @Mock
     private AudioOperationService audioOperationService;
@@ -107,9 +100,6 @@ class AudioServiceImplTest {
     private DataManagementApi dataManagementApi;
 
     private AudioService audioService;
-
-    @Mock
-    private AuditService auditService;
 
     @BeforeEach
     void setUp() {
@@ -243,7 +233,7 @@ class AudioServiceImplTest {
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
         when(audioConfigurationProperties.getHandheldAudioCourtroomNumbers())
-            .thenReturn(Arrays.asList(addAudioMetadataRequest.getCourtroom()));
+            .thenReturn(List.of(addAudioMetadataRequest.getCourtroom()));
 
         audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(0)).saveAndFlush(any());
@@ -265,7 +255,7 @@ class AudioServiceImplTest {
             anyString(),
             any(),
             any()
-        )).thenReturn(Arrays.asList(eventEntity));
+        )).thenReturn(List.of(eventEntity));
 
         audioService.linkAudioToHearingByEvent(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(1)).saveAndFlush(any());
