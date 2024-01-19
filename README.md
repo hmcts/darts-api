@@ -308,6 +308,20 @@ brew install --cask another-redis-desktop-manager
 sudo xattr -rd com.apple.quarantine /Applications/Another\ Redis\ Desktop\ Manager.app
 ```
 
+## Restoring the Staging database locally
+
+This can be useful for debugging issues locally, or for testing new flyway scripts.
+
+To restore the staging database, tables and data, into a locally running database, use the following command:
+
+```bash
+./bin/db-stg-to-local.sh
+```
+
+The script will check for required executables and prompt before continuing.
+
+_Disclaimer: The script has been written to work using `bash`._
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
