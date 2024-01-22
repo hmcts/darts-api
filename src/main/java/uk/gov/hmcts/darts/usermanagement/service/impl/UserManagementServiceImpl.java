@@ -8,9 +8,12 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupIdMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
@@ -34,6 +37,7 @@ import static java.util.Objects.isNull;
 public class UserManagementServiceImpl implements UserManagementService {
 
     private final UserAccountMapper userAccountMapper;
+    private final SecurityGroupIdMapper securityGroupIdMapper;
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
     private final AuthorisationApi authorisationApi;
@@ -97,6 +101,17 @@ public class UserManagementServiceImpl implements UserManagementService {
             });
 
         return userWithIdAndLastLoginList;
+    }
+
+    @Override
+    public UserWithIdAndTimestamps getUsersById(Integer userId) {
+        Optional<UserAccountEntity> entity = userAccountRepository.findById(userId);
+        if (entity.isPresent()) {
+            return securityGroupIdMapper.mapToUserWithSecurityGroups(entity.get());
+        }
+        throw new DartsApiException(
+            UserManagementError.USER_NOT_FOUND,
+            String.format("User id %d not found", userId));
     }
 
     private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
