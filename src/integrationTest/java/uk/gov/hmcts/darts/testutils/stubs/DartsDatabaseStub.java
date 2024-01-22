@@ -590,19 +590,6 @@ public class DartsDatabaseStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
-    public void saveRetentionsForCase(CourtCaseEntity courtCase, List<CaseRetentionEntity> retentionEntities) {
-        retentionEntities.forEach(event -> saveRetentionForCase(courtCase, event));
-    }
-
-    @Transactional
-    private void saveRetentionForCase(CourtCaseEntity courtCase, CaseRetentionEntity retention) {
-        retention.setCourtCase(courtCase);
-        retention.setCreatedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.setSubmittedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.setLastModifiedBy(userAccountStub.getSystemUserAccountEntity());
-        caseRetentionRepository.save(retention);
-    }
-
     @Transactional
     public void createCaseRetention(CourtCaseEntity courtCase) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
