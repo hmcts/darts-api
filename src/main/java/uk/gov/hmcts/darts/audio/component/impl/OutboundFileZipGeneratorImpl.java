@@ -13,7 +13,7 @@ import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
-import uk.gov.hmcts.darts.common.util.DateConverters;
+import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +30,7 @@ import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static uk.gov.hmcts.darts.common.util.DateConverters.EUROPE_LONDON_ZONE;
+import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
 
 @Component
 @RequiredArgsConstructor
@@ -39,7 +39,6 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
 
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final ViqHeaderService viqHeaderService;
-    private final DateConverters dateConverters;
 
     /**
      * Produce a structured zip file containing audio files.
@@ -82,8 +81,8 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
         return ViqMetaData.builder()
             .courthouse(mediaRequestEntity.getHearing().getCourtroom().getCourthouse().getCourthouseName())
             .raisedBy(null)
-            .startTime(dateConverters.offsetDateTimeToLegacyDateTime(mediaRequestEntity.getStartTime()))
-            .endTime(dateConverters.offsetDateTimeToLegacyDateTime(mediaRequestEntity.getEndTime()))
+            .startTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getStartTime()))
+            .endTime(DateConverterUtil.toZonedDateTime(mediaRequestEntity.getEndTime()))
             .build();
     }
 

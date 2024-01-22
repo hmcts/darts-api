@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = CaseOverflowEntity.TABLE_NAME)
@@ -32,22 +32,22 @@ public class CaseOverflowEntity {
     private String caseTotalSentence;
 
     @Column(name = "retention_event_ts")
-    private LocalDateTime retentionEventTs;
+    private OffsetDateTime retentionEventTs;
 
     @Column(name = "case_retention_fixed")
     private String caseRetentionFixed;
 
     @Column(name = "retention_applies_from_ts")
-    private LocalDateTime retentionAppliesFromTimestamp;
+    private OffsetDateTime retentionAppliesFromTimestamp;
 
     @Column(name = "end_of_sentence_date_ts")
-    private LocalDateTime endOfSentenceTimestamp;
+    private OffsetDateTime endOfSentenceTimestamp;
 
     @Column(name = "manual_retention_override")
     private Integer manualRetentionOverride;
 
     @Column(name = "retain_until_ts")
-    private LocalDateTime retainUntilTs;
+    private OffsetDateTime retainUntilTs;
 
     @Column(name = "is_standard_policy")
     private Boolean isStandardPolicy;

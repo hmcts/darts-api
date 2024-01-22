@@ -10,10 +10,35 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CaseRetentionRepository  extends JpaRepository<CaseRetentionEntity, Integer> {
+public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEntity, Integer> {
     List<CaseRetentionEntity> findAllByCourtCase(CourtCaseEntity courtCase);
 
+    List<CaseRetentionEntity> findByCourtCase_Id(Integer courtCaseId);
+
     Optional<CaseRetentionEntity> findTopByCourtCaseAndCurrentStateOrderByCreatedDateTimeDesc(CourtCaseEntity courtCase, String currentState);
+
+    @Query("""
+        SELECT c
+        FROM CaseRetentionEntity c
+        WHERE courtCase = :courtCase
+        AND manualOverride=false
+        AND currentState='COMPLETE'
+        ORDER BY c.createdDateTime desc
+        limit 1
+        """
+    )
+    Optional<CaseRetentionEntity> findLatestCompletedAutomatedRetention(CourtCaseEntity courtCase);
+
+    @Query("""
+        SELECT c
+        FROM CaseRetentionEntity c
+        WHERE courtCase = :courtCase
+        AND currentState='COMPLETE'
+        ORDER BY c.createdDateTime desc
+        limit 1
+        """
+    )
+    Optional<CaseRetentionEntity> findLatestCompletedRetention(CourtCaseEntity courtCase);
 
     @Query("""
         SELECT c

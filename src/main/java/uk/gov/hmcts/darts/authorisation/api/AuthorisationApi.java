@@ -18,4 +18,6 @@ public interface AuthorisationApi {
     List<UserAccountEntity> getUsersWithRoleAtCourthouse(SecurityRoleEnum securityRole, CourthouseEntity courthouse);
 
     UserAccountEntity getCurrentUser();
+
+    boolean userHasOneOfRoles(List<SecurityRoleEnum> globalSecurityRoles);
 }

@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
-import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,7 +47,7 @@ import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.README_TXT_FILENAME;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.REQUEST_TYPE_README_LABEL;
 import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.START_TIME_README_LABEL;
-import static uk.gov.hmcts.darts.common.util.DateConverters.EUROPE_LONDON_ZONE;
+import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.readTempFileContent;
 import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
 
@@ -70,7 +69,7 @@ class ViqHeaderServiceImplTest {
 
     @BeforeEach
     void setUp() throws ParserConfigurationException {
-        viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(new DateConverters()), eventRepository);
+        viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
     }
 
     @Test
@@ -268,7 +267,7 @@ class ViqHeaderServiceImplTest {
         List<EventEntity> eventEntities = new ArrayList<>();
         HearingEntity hearingEntity = CommonTestDataUtil.createHearing("Case0000001", LocalTime.of(10, 0));
         EventEntity eventEntity = CommonTestDataUtil.createEventWith("LOG", "Start Recording", hearingEntity,
-                                                                 OffsetDateTime.parse("2023-07-01T10:00:00Z")
+                                                                     OffsetDateTime.parse("2023-07-01T10:00:00Z")
         );
 
         eventEntities.add(eventEntity);
