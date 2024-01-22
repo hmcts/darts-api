@@ -151,6 +151,7 @@ public class UserAccountStub {
         return testUser;
     }
 
+    @Transactional
     public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-3);
         assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());

@@ -18,7 +18,6 @@ import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
-import uk.gov.hmcts.darts.common.util.DateConverters;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,14 +64,11 @@ class OutboundFileZipGeneratorImplTest {
 
     @BeforeEach
     void setUp() throws IOException, ParserConfigurationException {
-        DateConverters dateConverters = new DateConverters();
-
-        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(dateConverters), eventRepository);
+        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
 
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(
             audioConfigurationProperties,
-            viqHeaderService,
-            dateConverters
+            viqHeaderService
         );
 
         var tempDirectoryName = UUID.randomUUID().toString();

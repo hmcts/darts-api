@@ -13,6 +13,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = CaseManagementRetentionEntity.TABLE_NAME)
 @Getter
@@ -41,4 +43,7 @@ public class CaseManagementRetentionEntity {
 
     @Column(name = "total_sentence", nullable = false)
     private String totalSentence;
+
+    @Column(name = "event_ts", nullable = false)
+    private OffsetDateTime eventDatetime;
 }

@@ -31,6 +31,7 @@ import uk.gov.hmcts.darts.common.entity.TransformedMediaEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum;
+import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.AnnotationDocumentRepository;
 import uk.gov.hmcts.darts.common.repository.AnnotationRepository;
 import uk.gov.hmcts.darts.common.repository.AuditRepository;
@@ -68,6 +69,7 @@ import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
+import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
@@ -142,12 +144,14 @@ public class DartsDatabaseStub {
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
     private final AnnotationStub annotationStub;
+    private final CaseRetentionStub caseRetentionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
     private final List<SecurityGroupEntity> securityGroupBin = new ArrayList<>();
 
     private final EntityManager entityManager;
+    private final CurrentTimeHelper currentTimeHelper;
 
     public void clearDatabaseInThisOrder() {
         auditRepository.deleteAll();
@@ -171,7 +175,6 @@ public class DartsDatabaseStub {
         defendantRepository.deleteAll();
         prosecutorRepository.deleteAll();
         caseRetentionRepository.deleteAll();
-        retentionPolicyTypeRepository.deleteAll();
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
@@ -441,6 +444,10 @@ public class DartsDatabaseStub {
         return caseRepository.save(courtCaseEntity);
     }
 
+    public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
+        return caseRetentionRepository.save(caseRetentionEntity);
+    }
+
     public CourthouseEntity save(CourthouseEntity courthouseEntity) {
         return courthouseRepository.save(courthouseEntity);
     }
@@ -583,22 +590,6 @@ public class DartsDatabaseStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
-    public HearingEntity saveRetentionsForHearing(HearingEntity hearing, List<CaseRetentionEntity> retentionEntities) {
-        var hearingEntity = hearingRepository.save(hearing);
-        retentionEntities.forEach(event -> saveRetentionForHearing(hearing, event));
-        return hearingEntity;
-    }
-
-    private void saveRetentionForHearing(HearingEntity hearing, CaseRetentionEntity retention) {
-        retention.setCourtCase(hearing.getCourtCase());
-        retention.setCreatedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.setSubmittedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.setLastModifiedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.getRetentionPolicyType().setCreatedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.getRetentionPolicyType().setLastModifiedBy(userAccountStub.getSystemUserAccountEntity());
-        caseRetentionRepository.save(retention);
-    }
-
     @Transactional
     public void createCaseRetention(CourtCaseEntity courtCase) {
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
@@ -624,12 +615,12 @@ public class DartsDatabaseStub {
     }
 
     private CaseRetentionEntity createCaseRetentionObject(Integer id, CourtCaseEntity courtCase,
-            RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
+                                                          RetentionPolicyTypeEntity retentionPolicyTypeEntity, String state) {
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);
         caseRetentionEntity.setId(id);
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
-        caseRetentionEntity.setTotalSentence("10 years?");
+        caseRetentionEntity.setTotalSentence("10y0m0d");
         caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
         caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
         caseRetentionEntity.setCurrentState(state);
@@ -640,6 +631,11 @@ public class DartsDatabaseStub {
         caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
         caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
         return caseRetentionEntity;
+    }
+
+    public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
+                                                         CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
+        return caseRetentionStub.createCaseRetentionObject(courtCase, retentionStatus, retainUntilDate, isManual);
     }
 
     public UserAccountEntity saveUserWithGroup(UserAccountEntity user) {
