@@ -27,7 +27,7 @@ public class CaseRetentionStub {
         CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
         caseRetentionEntity.setCourtCase(courtCase);
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeRepository.getReferenceById(1));
-        caseRetentionEntity.setTotalSentence("10 years?");
+        caseRetentionEntity.setTotalSentence("10y0m0d");
         caseRetentionEntity.setRetainUntil(retainUntilDate);
         caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
         caseRetentionEntity.setCurrentState(retentionStatus.name());

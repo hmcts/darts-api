@@ -620,7 +620,7 @@ public class DartsDatabaseStub {
         caseRetentionEntity.setCourtCase(courtCase);
         caseRetentionEntity.setId(id);
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
-        caseRetentionEntity.setTotalSentence("10 years?");
+        caseRetentionEntity.setTotalSentence("10y0m0d");
         caseRetentionEntity.setRetainUntil(OffsetDateTime.now().plusYears(7));
         caseRetentionEntity.setRetainUntilAppliedOn(OffsetDateTime.now().plusYears(1));
         caseRetentionEntity.setCurrentState(state);

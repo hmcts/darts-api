@@ -32,9 +32,7 @@ class RetentionControllerPostRetentionTest extends IntegrationBase {
 
     public static final String ENDPOINT_URL = "/retentions";
 
-    private static final OffsetDateTime SOME_DATE_TIME = OffsetDateTime.parse("2023-01-01T12:00Z");
     private static final String SOME_COURTHOUSE = "some-courthouse";
-    private static final String SOME_COURTROOM = "some-courtroom";
     private static final String SOME_CASE_NUMBER = "12345";
 
     @Test
@@ -57,11 +55,13 @@ class RetentionControllerPostRetentionTest extends IntegrationBase {
 
         String requestBody = """
             {
-              "case_id": 1,
+              "case_id": <<caseId>>,
               "retention_date": "2024-05-20",
               "is_permanent_retention": false,
               "comments": "string"
             }""";
+
+        requestBody = requestBody.replace("<<caseId>>", courtCase.getId().toString());
 
         MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
             .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -72,7 +72,7 @@ class RetentionControllerPostRetentionTest extends IntegrationBase {
     }
 
     @Test
-    void happyPath_judge() throws Exception {
+    void happyPath_judgeReducingRetention() throws Exception {
         CourtCaseEntity courtCase = dartsDatabase.createCase(
             SOME_COURTHOUSE,
             SOME_CASE_NUMBER
