@@ -8,7 +8,6 @@ import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +18,7 @@ public class SecurityGroupIdMapper {
     public UserWithIdAndTimestamps mapToUserWithSecurityGroups(UserAccountEntity userAccountEntity) {
         UserWithIdAndTimestamps userWithIdAndTimestamps = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
         Set<SecurityGroupEntity> securityGroupEntities =  userAccountEntity.getSecurityGroupEntities();
-        List<Integer> securityGroupIds =  securityGroupEntities.stream().map(SecurityGroupEntity::getId).collect(Collectors.toList());
+        List<Integer> securityGroupIds =  securityGroupEntities.stream().map(SecurityGroupEntity::getId).toList();
         return userWithIdAndTimestamps.securityGroupIds(securityGroupIds);
     }
 }

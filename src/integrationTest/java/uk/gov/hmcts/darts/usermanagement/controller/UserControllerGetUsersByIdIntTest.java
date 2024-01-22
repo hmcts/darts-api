@@ -35,6 +35,28 @@ class UserControllerGetUsersByIdIntTest extends IntegrationBase {
     private UserIdentity mockUserIdentity;
 
     @Test
+    void usersGetShouldReturnOk() throws Exception {
+        adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL + "1"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String expectedResponse = """
+            {"id":1,"full_name":"system_housekeeping",
+            "description":"Housekeeping job", "active":true,"security_group_ids":[]}
+            """;
+        JSONAssert.assertEquals(
+            expectedResponse,
+            mvcResult.getResponse().getContentAsString(),
+            JSONCompareMode.NON_EXTENSIBLE
+        );
+
+        verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
+        verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
     void usersGetShouldReturnForbiddenError() throws Exception {
         adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
 
