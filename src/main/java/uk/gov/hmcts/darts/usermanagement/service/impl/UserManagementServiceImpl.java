@@ -10,6 +10,7 @@ import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
+import uk.gov.hmcts.darts.usermanagement.component.UserManagementQuery;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
@@ -38,6 +39,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final SecurityGroupRepository securityGroupRepository;
     private final AuthorisationApi authorisationApi;
     private final UserSearchQuery userSearchQuery;
+    private final UserManagementQuery userManagementQuery;
     private final Validator<User> duplicateEmailValidator;
     private final Validator<Integer> userAccountExistsValidator;
 
@@ -97,6 +99,21 @@ public class UserManagementServiceImpl implements UserManagementService {
             });
 
         return userWithIdAndLastLoginList;
+    }
+
+    @Override
+    public List<UserWithIdAndTimestamps> getUsers(String emailAddress) {
+        List<UserWithIdAndTimestamps> userWithIdAndLastLoginList = new ArrayList<>();
+
+        userManagementQuery.getUsers(emailAddress)
+            .forEach(userAccountEntity -> {
+                UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
+                userWithIdAndLastLogin.setSecurityGroupIds(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
+            });
+
+        return userWithIdAndLastLoginList;
+
     }
 
     private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {

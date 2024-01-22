@@ -9,14 +9,20 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 
@@ -24,6 +30,16 @@ import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.ADMIN;
 class UserControllerGetUsersIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/users";
+    public static final String EMAIL_ADDRESS = "Email-Address";
+    public static final String COURTHOUSE_ID = "courthouse_id";
+
+    private static final String ORIGINAL_USERNAME = "James Smith";
+    private static final String ORIGINAL_EMAIL_ADDRESS = "james.smith@hmcts.net";
+    private static final String ORIGINAL_DESCRIPTION = "A test user";
+    private static final boolean ORIGINAL_SYSTEM_USER_FLAG = false;
+    private static final OffsetDateTime ORIGINAL_LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime ORIGINAL_LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime ORIGINAL_CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
     @Autowired
     private MockMvc mockMvc;
@@ -56,14 +72,74 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
     }
 
     @Test
-    void usersGetShouldReturnNotImplemented() throws Exception {
-        adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+    void getUsersAuthorised() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
 
-        mockMvc.perform(get(ENDPOINT_URL).queryParam("courthouse", "-1"))
-            .andExpect(status().isNotImplemented());
+        createEnabledUserAccountEntity(user);
+
+        mockMvc.perform(get(ENDPOINT_URL)
+                            .header("Content-Type", "application/json")
+                            .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
+                            .queryParam(COURTHOUSE_ID, "21"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").isNumber())
+            .andExpect(jsonPath("$[0].full_name").value(ORIGINAL_USERNAME))
+            .andExpect(jsonPath("$[0].email_address").value(ORIGINAL_EMAIL_ADDRESS))
+            .andExpect(jsonPath("$[0].active").value(true))
+            .andExpect(jsonPath("$[0].last_login_at").value("2023-10-27T22:00:00Z"))
+            .andExpect(jsonPath("$[0].last_modified_at").exists())
+            .andExpect(jsonPath("$[0].created_at").exists())
+            .andReturn();
 
         verify(mockUserIdentity).userHasGlobalAccess(Set.of(ADMIN));
         verifyNoMoreInteractions(mockUserIdentity);
+    }
+
+    @Test
+    void getUsersEmailNotFound() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(mockUserIdentity);
+
+        createEnabledUserAccountEntity(user);
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
+                            .header(EMAIL_ADDRESS, "james.smith@hmcts.com")
+                            .queryParam(COURTHOUSE_ID, "21"))
+            .andReturn();
+
+        assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.com"));
+        assertEquals(200, response.getResponse().getStatus());
+    }
+
+    @Test
+    void getUsersNotAuthorised() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsNotAuthorised(mockUserIdentity);
+        createEnabledUserAccountEntity(user);
+
+        MvcResult response = mockMvc.perform(get(ENDPOINT_URL)
+                            .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
+                            .queryParam(COURTHOUSE_ID, "21"))
+            .andReturn();
+
+        assertFalse(response.getResponse().getContentAsString().contains("james.smith@hmcts.net"));
+        assertEquals(403, response.getResponse().getStatus());
+    }
+
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setUserName(ORIGINAL_USERNAME);
+        userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
+        userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
+        userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
+        userAccountEntity.setActive(true);
+        userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
+        userAccountEntity.setLastModifiedDateTime(ORIGINAL_LAST_MODIFIED_DATE_TIME);
+        userAccountEntity.setCreatedDateTime(ORIGINAL_CREATED_DATE_TIME);
+        userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
+        userAccountEntity.setCreatedBy(user);
+        userAccountEntity.setLastModifiedBy(user);
+
+        return dartsDatabase.getUserAccountRepository()
+            .save(userAccountEntity);
     }
 
 }
