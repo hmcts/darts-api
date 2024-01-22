@@ -171,4 +171,10 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     public List<String> getJudgeStringList() {
         return CollectionUtils.emptyIfNull(judges).stream().map(JudgeEntity::getName).sorted().distinct().toList();
     }
+
+    //Made private so that cases are added to Retentions, not the other way around.
+    private void setCaseRetentionEntities(List<CaseRetentionEntity> caseRetentionEntities) {
+        this.caseRetentionEntities = caseRetentionEntities;
+    }
 }
+

@@ -144,6 +144,7 @@ public class DartsDatabaseStub {
     private final TransformedMediaStub transformedMediaStub;
     private final UserAccountStub userAccountStub;
     private final AnnotationStub annotationStub;
+    private final CaseRetentionStub caseRetentionStub;
 
     private final List<EventHandlerEntity> eventHandlerBin = new ArrayList<>();
     private final List<UserAccountEntity> userAccountBin = new ArrayList<>();
@@ -443,6 +444,10 @@ public class DartsDatabaseStub {
         return caseRepository.save(courtCaseEntity);
     }
 
+    public CaseRetentionEntity save(CaseRetentionEntity caseRetentionEntity) {
+        return caseRetentionRepository.save(caseRetentionEntity);
+    }
+
     public CourthouseEntity save(CourthouseEntity courthouseEntity) {
         return courthouseRepository.save(courthouseEntity);
     }
@@ -585,19 +590,16 @@ public class DartsDatabaseStub {
         return transcriptionRepository.saveAndFlush(transcriptionEntity);
     }
 
-    public HearingEntity saveRetentionsForHearing(HearingEntity hearing, List<CaseRetentionEntity> retentionEntities) {
-        var hearingEntity = hearingRepository.save(hearing);
-        retentionEntities.forEach(event -> saveRetentionForHearing(hearing, event));
-        return hearingEntity;
+    public void saveRetentionsForCase(CourtCaseEntity courtCase, List<CaseRetentionEntity> retentionEntities) {
+        retentionEntities.forEach(event -> saveRetentionForCase(courtCase, event));
     }
 
-    private void saveRetentionForHearing(HearingEntity hearing, CaseRetentionEntity retention) {
-        retention.setCourtCase(hearing.getCourtCase());
+    @Transactional
+    private void saveRetentionForCase(CourtCaseEntity courtCase, CaseRetentionEntity retention) {
+        retention.setCourtCase(courtCase);
         retention.setCreatedBy(userAccountStub.getSystemUserAccountEntity());
         retention.setSubmittedBy(userAccountStub.getSystemUserAccountEntity());
         retention.setLastModifiedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.getRetentionPolicyType().setCreatedBy(userAccountStub.getSystemUserAccountEntity());
-        retention.getRetentionPolicyType().setLastModifiedBy(userAccountStub.getSystemUserAccountEntity());
         caseRetentionRepository.save(retention);
     }
 
@@ -644,26 +646,9 @@ public class DartsDatabaseStub {
         return caseRetentionEntity;
     }
 
-    @Transactional
     public CaseRetentionEntity createCaseRetentionObject(CourtCaseEntity courtCase,
                                                          CaseRetentionStatus retentionStatus, OffsetDateTime retainUntilDate, boolean isManual) {
-        CaseRetentionEntity caseRetentionEntity = new CaseRetentionEntity();
-        caseRetentionEntity.setCourtCase(courtCase);
-        caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeRepository.getReferenceById(1));
-        caseRetentionEntity.setTotalSentence("10 years?");
-        caseRetentionEntity.setRetainUntil(retainUntilDate);
-        caseRetentionEntity.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
-        caseRetentionEntity.setCurrentState(retentionStatus.name());
-        caseRetentionEntity.setComments("a comment");
-        caseRetentionEntity.setManualOverride(isManual);
-        caseRetentionEntity.setManualOverride(isManual);
-        caseRetentionEntity.setCreatedDateTime(currentTimeHelper.currentOffsetDateTime());
-        caseRetentionEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
-        caseRetentionEntity.setLastModifiedDateTime(currentTimeHelper.currentOffsetDateTime());
-        caseRetentionEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
-        caseRetentionEntity.setSubmittedBy(userAccountRepository.getReferenceById(0));
-        caseRetentionRepository.saveAndFlush(caseRetentionEntity);
-        return caseRetentionEntity;
+        return caseRetentionStub.createCaseRetentionObject(courtCase, retentionStatus, retainUntilDate, isManual);
     }
 
     public UserAccountEntity saveUserWithGroup(UserAccountEntity user) {
