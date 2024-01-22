@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-public class SecurityRoleControllerIntTest extends IntegrationBase {
+class SecurityRoleControllerIntTest extends IntegrationBase {
 
     public static final String ENDPOINT_URL = "/admin/security-roles";
 

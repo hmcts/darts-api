@@ -5,12 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import uk.gov.hmcts.darts.arm.model.ArchiveMetadata;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
 @Builder
+@ToString
 public class MediaCreateArchiveRecordMetadata implements ArchiveMetadata {
 
     @JsonProperty("publisher")
