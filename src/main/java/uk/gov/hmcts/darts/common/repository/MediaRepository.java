@@ -19,4 +19,14 @@ public interface MediaRepository extends JpaRepository<MediaEntity, Integer> {
         """)
     List<MediaEntity> findAllByHearingId(Integer hearingId);
 
+    @Query("""
+           SELECT me
+           FROM HearingEntity he
+           JOIN he.mediaList me
+           WHERE he.id = :hearingId
+           AND me.channel = :channel
+           ORDER BY me.start
+        """)
+    List<MediaEntity> findAllByHearingIdAndChannel(Integer hearingId, Integer channel);
+
 }

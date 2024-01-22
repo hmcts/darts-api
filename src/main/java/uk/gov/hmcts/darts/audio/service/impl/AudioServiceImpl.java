@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -70,6 +71,11 @@ public class AudioServiceImpl implements AudioService {
             mediaEntity.getChannel(),
             downloadPath
         );
+    }
+
+    @Override
+    public List<MediaEntity> getAudioMetadata(Integer hearingId, Integer channel) {
+        return mediaRepository.findAllByHearingIdAndChannel(hearingId, channel);
     }
 
     @Override
@@ -155,7 +161,8 @@ public class AudioServiceImpl implements AudioService {
                 addAudioMetadataRequest.getCourthouse(),
                 caseNumber,
                 addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration()),
-                addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration()));
+                addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration())
+            );
 
             var associatedHearings = courtLogs.stream()
                 .flatMap(h -> h.getHearingEntities().stream())
