@@ -111,7 +111,7 @@ paths:
                       - type
                     properties:
                       type:
-                        $ref: '#/components/schemas/UserAuthorisation407ErrorCode'
+                        $ref: '#/components/schemas/UserAuthorisation403107ErrorCode'
               example:
                 type: AUTHORISATION_107
                 title: Failed to check authorisation
@@ -162,7 +162,7 @@ paths:
                       - type
                     properties:
                       type:
-                        $ref: '#/components/schemas/UserAuthorisation409ErrorCode'
+                        $ref: '#/components/schemas/UserAuthorisation403109ErrorCode'
 
 ########################################################################################################################
 # COMPONENT DEFINITIONS
@@ -422,13 +422,13 @@ components:
           format: date-time
       allOf:
         - $ref: '#/components/schemas/User'
-    UserAuthorisation407ErrorCode:
+    UserAuthorisation403107ErrorCode:
       type: string
       enum:
         - "AUTHORISATION_107"
       x-enum-varnames: [ BAD_REQUEST_ANY_ID ]
 
-    UserAuthorisation409ErrorCode:
+    UserAuthorisation403109ErrorCode:
       type: string
       enum:
         - "AUTHORISATION_109"
