@@ -116,6 +116,8 @@ public class TestSupportController {
 
         log.info("Cleaned Courthouses");
 
+        removeUserPermission(session);
+
         removeUsers(session);
         removeSecurityGroups(session);
 
@@ -127,12 +129,36 @@ public class TestSupportController {
         log.info("Cleanup finished");
     }
 
+    private void removeUserPermission(Session session) {
+        session.createNativeQuery("""
+            delete from darts.security_group_user_account_ae where usr_id in
+            (select usr_id from darts.user_account where description = 'A temporary user created by functional test');
+            """)
+            .executeUpdate();
+    }
+
     private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
+        session.createNativeQuery("""
+            delete from darts.security_group_courthouse_ae where cth_id in
+            (select cth_id from darts.courthouse where courthouse_name like 'func-%');
+            """)
+            .executeUpdate();
+        /*
         session.createNativeQuery("""
                                       delete from darts.security_group_courthouse_ae where cth_id in (?)
                                       """, Integer.class)
             .setParameter(1, cthIds)
             .executeUpdate();
+
+        String courthouseSelect = "select cth_id from darts.courthouse where courthouse_name like 'func-%'";
+        String nativeQuery = """
+                             delete from darts.security_group_courthouse_ae where cth_id in (<<SELECT>>)
+                             """;
+        nativeQuery = nativeQuery.replace("<<SELECT>>", courthouseSelect);
+        session.createNativeQuery(nativeQuery)
+            .executeUpdate();
+
+         */
     }
 
     private void removeDailyLists(Session session) {

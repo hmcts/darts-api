@@ -99,6 +99,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
         return response;
     }
 
+
     /*
     @Test
     void shouldGetUserById() {
@@ -106,7 +107,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
         int userId = new JSONObject(createUserResponse.asString())
             .getInt("id");
 
-        Response modifyUserResponse = buildRequestWithExternalGlobalAccessAuth()
+        Response getUserByIdResponse = buildRequestWithExternalGlobalAccessAuth()
             .baseUri(getUri("/admin/users/" + userId))
             .get()
             .thenReturn();
@@ -116,13 +117,13 @@ class UserManagementFunctionalTest extends FunctionalTest {
                 {
                     "id": "",
                     "full_name": "James Smith",
-                    "email_address": "james.smith@hmcts.net",
+                    "email_address": "james.smith.get@hmcts.net",
                     "description": "A temporary user created by functional test",
                     "active": true,
                     "security_group_ids": [-1, -2, -3 ]
                 }
                 """,
-            modifyUserResponse.asString(),
+            getUserByIdResponse.asString(),
             new CustomComparator(
                 JSONCompareMode.NON_EXTENSIBLE,
                 new Customization("id", new RegularExpressionValueMatcher<>("^" + userId + "$"))
@@ -137,7 +138,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
             .body("""
                       {
                            "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net",
+                           "email_address": "james.smith.get@hmcts.net",
                            "description": "A temporary user created by functional test",
                            "security_group_ids": [-1, -2, -3]
                       }
@@ -149,6 +150,6 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
         return response;
     }
-    
+
      */
 }
