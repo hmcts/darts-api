@@ -307,7 +307,7 @@ class MediaRequestServiceImplTest {
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
-        verify(mockMediaRequestRepository).deleteById(eq(mediaRequestId));
+        verify(mockMediaRequestRepository).deleteById(mediaRequestId);
         verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(UUID.class));
         verify(mockTransientObjectDirectoryRepository).deleteById(any());
     }
@@ -330,7 +330,7 @@ class MediaRequestServiceImplTest {
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
-        verify(mockMediaRequestRepository).deleteById(eq(mediaRequestId));
+        verify(mockMediaRequestRepository).deleteById(mediaRequestId);
         verifyNoInteractions(dataManagementApi);
         verify(mockTransientObjectDirectoryRepository).deleteById(any());
     }
@@ -350,7 +350,7 @@ class MediaRequestServiceImplTest {
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
-        verify(mockMediaRequestRepository).deleteById(eq(mediaRequestId));
+        verify(mockMediaRequestRepository).deleteById(mediaRequestId);
         verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
         verify(mockTransientObjectDirectoryRepository, times(0)).deleteById(any());
     }
