@@ -165,6 +165,19 @@ public class UserAccountStub {
         return testUser;
     }
 
+    @Transactional
+    public UserAccountEntity createJudgeUser() {
+        SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-3).get();
+        securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
+
+        var testUser = getIntegrationTestUserAccountEntity();
+        testUser.getSecurityGroupEntities().clear();
+        testUser.getSecurityGroupEntities().add(securityGroupEntity);
+        testUser = userAccountRepository.saveAndFlush(testUser);
+        return testUser;
+    }
+
     public UserAccountEntity createXhibitExternalUser(String guid, CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-14);
         securityGroupEntity.setGlobalAccess(true);
