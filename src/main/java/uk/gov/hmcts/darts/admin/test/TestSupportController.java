@@ -90,6 +90,8 @@ public class TestSupportController {
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
 
+        log.info("Cleaned Events and Hearings");
+
         removeCaseRetentions(session, caseIds);
         removeRetentionPolicyType(session);
         removeCaseAudit(session, caseIds);
@@ -99,20 +101,30 @@ public class TestSupportController {
         removeCaseProsecutor(session, caseIds);
         removeCases(session, caseIds);
 
+        log.info("Cleaned case data");
+
         List<Integer> nodeRegisterIds = nodeRegisterIdsToBeDeleted(session, courtroomTrash);
         removeNodeRegisters(nodeRegisterIds);
 
         removeDailyLists(session);
 
+        log.info("Cleaned node register and daily lists");
+
         removeUserCourthousePermissions(session, courthouseTrash);
 
         removeCourtHouses(session);
 
+        log.info("Cleaned Courthouses");
+
         removeUsers(session);
         removeSecurityGroups(session);
 
+        log.info("Cleaned users and groups");
+
         session.getTransaction().commit();
         session.close();
+
+        log.info("Cleanup finished");
     }
 
     private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
