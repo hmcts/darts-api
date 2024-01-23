@@ -67,11 +67,15 @@ public class AuthorisationAspect {
         }
 
         if (!hasGlobalAccess) {
-            JsonNode jsonNode = objectMapper.valueToTree(body);
-            controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(
-                jsonNode,
-                roles
-            );
+            if (!roles.isEmpty()) {
+                JsonNode jsonNode = objectMapper.valueToTree(body);
+                controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(
+                    jsonNode,
+                    roles
+                );
+            } else {
+                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
+            }
         }
 
         return joinPoint.proceed();
@@ -101,7 +105,11 @@ public class AuthorisationAspect {
         }
 
         if (!hasGlobalAccess) {
-            controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(request, roles);
+            if (!roles.isEmpty()) {
+                controllerAuthorisationFactory.getHandler(authorisationAnnotation.contextId()).checkAuthorisation(request, roles);
+            } else {
+                throw new DartsApiException(AuthorisationError.USER_NOT_AUTHORISED_FOR_ENDPOINT);
+            }
         }
     }
 
