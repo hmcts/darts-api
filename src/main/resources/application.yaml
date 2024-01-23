@@ -149,6 +149,7 @@ darts:
       api-key: ${GOVUK_NOTIFY_API_KEY:00000000-0000-0000-0000-000000000000}
       template-map:
         audio_request_being_processed: d0890ee6-b3d3-45aa-b53a-fcbd651f8aef
+        audio_request_being_processed_from_archive: a2104bc2-1a36-4c4f-b68f-2dfd6adbf438
         court_manager_approve_transcript: a8390fa6-3f18-44c0-b224-f59971a5e20a
         error_processing_audio: 707fc9fd-4a64-4503-bf6a-4c6bd7dda1dd
         request_to_transcriber: 12a70a9c-9bcf-4880-8291-1a5c6a4c4b08

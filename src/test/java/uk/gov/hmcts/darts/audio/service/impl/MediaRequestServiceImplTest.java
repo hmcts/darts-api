@@ -1,17 +1,17 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import com.azure.core.util.BinaryData;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.exception.AudioRequestsApiError;
+import uk.gov.hmcts.darts.audio.model.AudioRequestBeingProcessedFromArchiveQueryResult;
 import uk.gov.hmcts.darts.audiorequests.model.AudioNonAccessedResponse;
 import uk.gov.hmcts.darts.audiorequests.model.AudioRequestDetails;
 import uk.gov.hmcts.darts.audit.api.AuditActivity;
@@ -31,7 +31,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -50,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -61,6 +63,8 @@ import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.DOWNLOAD;
 import static uk.gov.hmcts.darts.audiorequests.model.AudioRequestType.PLAYBACK;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings({"PMD.ExcessiveImports"})
@@ -88,7 +92,7 @@ class MediaRequestServiceImplTest {
     @Mock
     private TransientObjectDirectoryRepository mockTransientObjectDirectoryRepository;
     @Mock
-    private DataManagementApiImpl dataManagementApi;
+    private DataManagementApi dataManagementApi;
     @Mock
     private NotificationApi notificationApi;
     @Mock
@@ -104,6 +108,9 @@ class MediaRequestServiceImplTest {
     private CourtCaseEntity mockCourtCaseEntity;
     @Mock
     private UserAccountEntity mockUserAccountEntity;
+
+    @Mock
+    private AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
 
     @BeforeEach
     void beforeEach() {
@@ -225,25 +232,59 @@ class MediaRequestServiceImplTest {
         assertTrue(isDuplicateRequest);
     }
 
-
-    @SneakyThrows
     @Test
-    @SuppressWarnings("PMD.LawOfDemeter")
-    void shouldScheduleRequestPendingNotification() {
+    void shouldScheduleNotificationWithAudioRequestBeingProcessed() {
+        Integer mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
         var mockCourtCaseEntity = new CourtCaseEntity();
         mockCourtCaseEntity.setId(1001);
         mockMediaRequestEntity.getHearing().setCourtCase(mockCourtCaseEntity);
         var mockUserAccountEntity = new UserAccountEntity();
         mockUserAccountEntity.setEmailAddress("test@test.com");
         mockMediaRequestEntity.setRequestor(mockUserAccountEntity);
+
+        when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
+            .thenReturn(emptyList());
+
         mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
 
         var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-            .eventId(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString())
+            .eventId(AUDIO_REQUEST_PROCESSING.toString())
             .caseId(1001)
             .emailAddresses("test@test.com")
             .build();
-        verify(notificationApi, Mockito.times(1)).scheduleNotification(eq(saveNotificationToDbRequest));
+        verify(audioRequestBeingProcessedFromArchiveQuery).getResults(mediaRequestId);
+        verify(notificationApi).scheduleNotification(saveNotificationToDbRequest);
+    }
+
+    @Test
+    void shouldScheduleNotificationWithAudioRequestBeingProcessedFromArchive() {
+        Integer mediaRequestId = 1;
+        mockMediaRequestEntity.setId(mediaRequestId);
+        var mockCourtCaseEntity = new CourtCaseEntity();
+        mockCourtCaseEntity.setId(1001);
+        mockMediaRequestEntity.getHearing().setCourtCase(mockCourtCaseEntity);
+        var mockUserAccountEntity = new UserAccountEntity();
+        mockUserAccountEntity.setEmailAddress("test@test.com");
+        mockMediaRequestEntity.setRequestor(mockUserAccountEntity);
+
+        when(audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequestId))
+            .thenReturn(List.of(
+                new AudioRequestBeingProcessedFromArchiveQueryResult(181, 2561, 2759),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(182, 2562, 2763),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(183, 2545, 2766),
+                new AudioRequestBeingProcessedFromArchiveQueryResult(184, 2547, 2750)
+            ));
+
+        mediaRequestService.scheduleMediaRequestPendingNotification(mockMediaRequestEntity);
+
+        var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
+            .eventId(AUDIO_REQUEST_PROCESSING_ARCHIVE.toString())
+            .caseId(1001)
+            .emailAddresses("test@test.com")
+            .build();
+        verify(audioRequestBeingProcessedFromArchiveQuery).getResults(mediaRequestId);
+        verify(notificationApi).scheduleNotification(saveNotificationToDbRequest);
     }
 
     @Test
@@ -266,9 +307,9 @@ class MediaRequestServiceImplTest {
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
-        verify(mockMediaRequestRepository, Mockito.times(1)).deleteById(eq(mediaRequestId));
-        verify(dataManagementApi, Mockito.times(1)).deleteBlobDataFromOutboundContainer(any(UUID.class));
-        verify(mockTransientObjectDirectoryRepository, Mockito.times(1)).deleteById(any());
+        verify(mockMediaRequestRepository).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(mockTransientObjectDirectoryRepository).deleteById(any());
     }
 
     @Test
@@ -289,9 +330,9 @@ class MediaRequestServiceImplTest {
 
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
-        verify(mockMediaRequestRepository, Mockito.times(1)).deleteById(eq(mediaRequestId));
-        verify(dataManagementApi, Mockito.times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
-        verify(mockTransientObjectDirectoryRepository, Mockito.times(1)).deleteById(any());
+        verify(mockMediaRequestRepository).deleteById(eq(mediaRequestId));
+        verifyNoInteractions(dataManagementApi);
+        verify(mockTransientObjectDirectoryRepository).deleteById(any());
     }
 
     @Test
@@ -309,9 +350,9 @@ class MediaRequestServiceImplTest {
         mediaRequestService.deleteAudioRequest(mediaRequestId);
 
         verify(mockTransformedMediaRepository).findByMediaRequestId(mediaRequestId);
-        verify(mockMediaRequestRepository, Mockito.times(1)).deleteById(eq(mediaRequestId));
-        verify(dataManagementApi, Mockito.times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
-        verify(mockTransientObjectDirectoryRepository, Mockito.times(0)).deleteById(any());
+        verify(mockMediaRequestRepository).deleteById(eq(mediaRequestId));
+        verify(dataManagementApi, times(0)).deleteBlobDataFromOutboundContainer(any(UUID.class));
+        verify(mockTransientObjectDirectoryRepository, times(0)).deleteById(any());
     }
 
     @Test

@@ -132,10 +132,11 @@ class GovNotifyServiceTest {
             parameterMap
         );
         assertEquals("Your transcript request was rejected", emailResponse.getSubject());
-        compare("""
-                 Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
+        compare(
+            """
+                Your transcript request for case ID TheCaseId has been rejected due to TheRejectionReason.
 
-                 You can resubmit your request, but take into account the reason for the original request's rejection.""",
+                You can resubmit your request, but take into account the reason for the original request's rejection.""",
             emailResponse
         );
     }
@@ -153,40 +154,55 @@ class GovNotifyServiceTest {
     }
 
     @Test
+    void audioRequestBeingProcessedFromArchive() throws NotificationClientException, TemplateNotFoundException {
+        SendEmailResponse emailResponse = createAndSend(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE.toString());
+        assertEquals("DARTS has received your audio recording order", emailResponse.getSubject());
+        compare("""
+                    We have received your audio recording order for case Number TheCaseId.
+
+                    Processing your order may take a little longer as it must be retrieved from the archives.
+
+                    We'll notify you when it is ready and available for use.
+
+                    Alternatively, you can visit the Your audio section of the DARTS Portal to check its progress.""", emailResponse);
+    }
+
+    @Test
     void errorProcessingAudio() throws NotificationClientException, TemplateNotFoundException {
         Map<String, String> parameterMap = new ConcurrentHashMap<>();
         parameterMap.put(REQUEST_ID, "TheRequestID");
         parameterMap.put(COURTHOUSE, "TheCourthouse");
         parameterMap.put(DEFENDANTS, "Defendant1,Defendant2");
         parameterMap.put(HEARING_DATE, "TheHearingDate");
-        parameterMap.put(AUDIO_START_TIME,"TheStartTime");
+        parameterMap.put(AUDIO_START_TIME, "TheStartTime");
         parameterMap.put(AUDIO_END_TIME, "TheEndTime");
         SendEmailResponse emailResponse = createAndSend(
             NotificationApi.NotificationTemplate.ERROR_PROCESSING_AUDIO.toString(),
             parameterMap
         );
         assertEquals("Your audio recording order has failed", emailResponse.getSubject());
-        compare("""
-                    Your audio recording order for case ID TheCaseId has failed.
+        compare(
+            """
+                Your audio recording order for case ID TheCaseId has failed.
 
-                    Due to unforeseen errors, your audio recording order has failed.
+                Due to unforeseen errors, your audio recording order has failed.
 
-                    To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
+                To resolve this issue, email crownITsupport@justice.gov.uk quoting TheRequestID, and provide them with the following information:
 
-                    ## Case details
+                ## Case details
 
-                    Case ID: TheCaseId
-                    Courthouse: TheCourthouse
-                    Defendants: Defendant1,Defendant2
+                Case ID: TheCaseId
+                Courthouse: TheCourthouse
+                Defendants: Defendant1,Defendant2
 
-                    ## Audio details
+                ## Audio details
 
-                    Hearing date: TheHearingDate
-                    Requested start time: TheStartTime
-                    Requested end time: TheEndTime
+                Hearing date: TheHearingDate
+                Requested start time: TheStartTime
+                Requested end time: TheEndTime
 
-                    They will raise a Service Now ticket to process this issue.""",
-                emailResponse
+                They will raise a Service Now ticket to process this issue.""",
+            emailResponse
         );
     }
 }
