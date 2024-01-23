@@ -148,7 +148,7 @@ public class TestSupportController {
                                       """)
             .executeUpdate();
         session.createNativeQuery("""
-                                      delete from darts.courthouse where courthouse_name like 'func-%' CASCADE
+                                      delete from darts.courthouse where courthouse_name like 'func-%'
                                       """)
             .executeUpdate();
     }
