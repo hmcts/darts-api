@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity_;
 import uk.gov.hmcts.darts.audio.enums.AudioRequestOutputFormat;
@@ -50,7 +51,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 import uk.gov.hmcts.darts.common.repository.TransientObjectDirectoryRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.datamanagement.api.impl.DataManagementApiImpl;
+import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import uk.gov.hmcts.darts.notification.api.NotificationApi;
 import uk.gov.hmcts.darts.notification.dto.SaveNotificationToDbRequest;
 
@@ -67,6 +68,8 @@ import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.EXPIRED;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.OPEN;
 import static uk.gov.hmcts.darts.audio.enums.MediaRequestStatus.PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING;
+import static uk.gov.hmcts.darts.notification.api.NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING_ARCHIVE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -79,12 +82,13 @@ public class MediaRequestServiceImpl implements MediaRequestService {
     private final MediaRequestRepository mediaRequestRepository;
     private final EntityManager entityManager;
     private final TransientObjectDirectoryRepository transientObjectDirectoryRepository;
-    private final DataManagementApiImpl dataManagementApi;
+    private final DataManagementApi dataManagementApi;
     private final NotificationApi notificationApi;
     private final AuditApi auditApi;
     private final TransformedMediaRepository transformedMediaRepository;
     private final TransformedMediaDetailsMapper transformedMediaDetailsMapper;
     private final MediaRequestDetailsMapper mediaRequestDetailsMapper;
+    private final AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
 
     @Override
     public Optional<MediaRequestEntity> getOldestMediaRequestByStatus(MediaRequestStatus status) {
@@ -144,17 +148,23 @@ public class MediaRequestServiceImpl implements MediaRequestService {
 
     @Override
     public void scheduleMediaRequestPendingNotification(MediaRequestEntity mediaRequest) {
+        NotificationApi.NotificationTemplate notificationTemplate;
+        if (audioRequestBeingProcessedFromArchiveQuery.getResults(mediaRequest.getId())
+            .isEmpty()) {
+            notificationTemplate = AUDIO_REQUEST_PROCESSING;
+        } else {
+            notificationTemplate = AUDIO_REQUEST_PROCESSING_ARCHIVE;
+        }
+
         try {
-            var hearingEntity = mediaRequest.getHearing();
-            var courtCase = hearingEntity.getCourtCase();
             var saveNotificationToDbRequest = SaveNotificationToDbRequest.builder()
-                .eventId(NotificationApi.NotificationTemplate.AUDIO_REQUEST_PROCESSING.toString())
-                .caseId(courtCase.getId())
+                .eventId(notificationTemplate.toString())
+                .caseId(mediaRequest.getHearing().getCourtCase().getId())
                 .emailAddresses(mediaRequest.getRequestor().getEmailAddress())
                 .build();
             notificationApi.scheduleNotification(saveNotificationToDbRequest);
         } catch (Exception e) {
-            log.error("Unable to schedule media request pending notification: {}", e.getMessage());
+            log.error("Unable to schedule media request [{}] pending notification [{}]", mediaRequest.getId(), notificationTemplate, e);
         }
     }
 
