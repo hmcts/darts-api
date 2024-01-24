@@ -204,24 +204,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                         jsonPath.toFile(),
                         ArmResponseUploadFileRecord.class
                     );
-                    if (nonNull(armResponseUploadFileRecord)) {
-                        //If the filename contains 1
-                        if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
-                            processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
-                        } else {
-                            //Read the upload file and log the error code and description with EOD
-                            log.warn(
-                                "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
-                                externalObjectDirectory.getId(),
-                                armResponseUploadFileRecord.getExceptionDescription(),
-                                armResponseUploadFileRecord.getErrorStatus()
-                            );
-                            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
-                        }
-                    } else {
-                        log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
-                        updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
-                    }
+                    processUploadFileObject(externalObjectDirectory, uploadFileFilenameProcessor, armResponseProcessingFailed, armResponseUploadFileRecord);
                 } else {
                     log.warn("Failed to write upload file to temp workspace {}", uploadFileFilenameProcessor.getUploadFileFilename());
                     updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
@@ -237,6 +220,28 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         } else {
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+        }
+    }
+
+    private void processUploadFileObject(ExternalObjectDirectoryEntity externalObjectDirectory, UploadFileFilenameProcessor uploadFileFilenameProcessor,
+                                         ObjectRecordStatusEntity armResponseProcessingFailed, ArmResponseUploadFileRecord armResponseUploadFileRecord) {
+        if (nonNull(armResponseUploadFileRecord)) {
+            //If the filename contains 1
+            if (ARM_RESPONSE_SUCCESS_STATUS_CODE.equals(uploadFileFilenameProcessor.getStatus())) {
+                processUploadFileDataSuccess(armResponseUploadFileRecord, externalObjectDirectory);
+            } else {
+                //Read the upload file and log the error code and description with EOD
+                log.warn(
+                    "ARM status is failed for external object id {}. ARM error description: {} ARM error status: {}",
+                    externalObjectDirectory.getId(),
+                    armResponseUploadFileRecord.getExceptionDescription(),
+                    armResponseUploadFileRecord.getErrorStatus()
+                );
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            }
+        } else {
+            log.warn("Unable to read upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
         }
     }
 
