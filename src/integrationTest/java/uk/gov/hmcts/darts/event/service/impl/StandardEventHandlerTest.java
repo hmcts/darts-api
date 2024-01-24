@@ -72,6 +72,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
@@ -105,6 +106,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
@@ -140,6 +142,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_OTHER_ROOM);
+        assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
         assertThat(caseHearing.size()).isEqualTo(1);
         assertThat(caseHearing.get(0).getHearingIsActual()).isEqualTo(true);
@@ -177,6 +180,7 @@ class StandardEventHandlerTest extends IntegrationBaseWithGatewayStub {
         var persistedEvent = dartsDatabase.getAllEvents().get(0);
 
         assertThat(persistedEvent.getCourtroom().getName()).isEqualTo(SOME_ROOM);
+        assertThat(persistedEvent.getIsLogEntry()).isEqualTo(false);
         assertThat(persistedCase.getCourthouse().getCourthouseName()).isEqualTo(SOME_COURTHOUSE);
         assertThat(hearingsForCase.size()).isEqualTo(1);
         assertThat(hearingsForCase.get(0).getHearingIsActual()).isEqualTo(true);
