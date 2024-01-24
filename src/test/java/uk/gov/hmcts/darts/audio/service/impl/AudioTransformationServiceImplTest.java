@@ -201,7 +201,7 @@ class AudioTransformationServiceImplTest {
         when(mockTransientObjectDirectoryEntity.getTransformedMedia(
         )).thenReturn(transformedMediaEntity);
 
-        AudioFileInfo audioFileInfo = new AudioFileInfo(Instant.now(), Instant.now(), 0, null);
+        AudioFileInfo audioFileInfo = new AudioFileInfo(Instant.now(), Instant.now(), 0, null, false);
 
         transformedMediaHelper.saveToStorage(
             mediaRequestEntity,

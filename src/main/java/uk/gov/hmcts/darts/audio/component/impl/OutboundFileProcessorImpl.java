@@ -146,7 +146,8 @@ public class OutboundFileProcessorImpl implements OutboundFileProcessor {
             mediaEntity.getStart().toInstant(),
             mediaEntity.getEnd().toInstant(),
             mediaEntity.getChannel(),
-            path
+            path,
+            false
         );
     }
 

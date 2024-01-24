@@ -66,13 +66,15 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 1,
-                createFile(tempDirectory, "original0.mp3")
+                createFile(tempDirectory, "original0.mp3"),
+                false
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z),
                 Instant.parse(T_11_00_00_Z),
                 1,
-                createFile(tempDirectory, "original1.mp3")
+                createFile(tempDirectory, "original1.mp3"),
+                false
             ))
         );
 
@@ -81,13 +83,15 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 1,
-                createFile(tempDirectory, "original2.mp3")
+                createFile(tempDirectory, "original2.mp3"),
+                false
             ),
             new AudioFileInfo(
                 Instant.parse(T_11_00_00_Z),
                 Instant.parse(T_11_30_00_Z),
                 1,
-                createFile(tempDirectory, "original3.mp3")
+                createFile(tempDirectory, "original3.mp3"),
+                false
             ))
         );
 
@@ -96,13 +100,15 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 1,
-                createFile(tempDirectory, "original4.mp3")
+                createFile(tempDirectory, "original4.mp3"),
+                false
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z_MS_1200),
                 Instant.parse(T_11_30_00_Z),
                 1,
-                createFile(tempDirectory, "original5.mp3")
+                createFile(tempDirectory, "original5.mp3"),
+                false
             ))
         );
     }
@@ -116,13 +122,15 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 1,
-                Path.of("/path/to/audio/original0.mp3")
+                Path.of("/path/to/audio/original0.mp3"),
+                false
             ),
             new AudioFileInfo(
                 Instant.parse(T_10_30_00_Z),
                 Instant.parse(T_11_00_00_Z),
                 1,
-                Path.of("/path/to/audio/original1.mp3")
+                Path.of("/path/to/audio/original1.mp3"),
+                false
             )
         );
 
@@ -190,7 +198,8 @@ class AudioOperationServiceImplTest {
                 Instant.parse(T_09_00_00_Z),
                 Instant.parse(T_10_30_00_Z),
                 1,
-                file
+                file,
+                false
             ),
             Duration.of(45, MINUTES),
             Duration.of(75, MINUTES)
