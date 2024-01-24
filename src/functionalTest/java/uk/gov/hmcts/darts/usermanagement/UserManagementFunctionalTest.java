@@ -98,9 +98,7 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
         return response;
     }
-
-
-    /*
+    
     @Test
     void shouldGetUserById() {
         Response createUserResponse = createUserWithSecurityGroups();
@@ -150,6 +148,4 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
         return response;
     }
-
-     */
 }
