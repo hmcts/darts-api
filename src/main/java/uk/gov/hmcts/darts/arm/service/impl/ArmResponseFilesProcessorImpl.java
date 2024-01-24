@@ -67,10 +67,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     @Transactional
     @Override
     public void processResponseFiles() {
-        startProcessingResponseFiles();
-    }
-
-    private void startProcessingResponseFiles() {
         // Fetch All records from external Object Directory table with external_location_type as 'ARM' and status with 'ARM dropzone'.
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
 
@@ -265,7 +261,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             MediaEntity media = externalObjectDirectory.getMedia();
             if (nonNull(media.getChecksum())) {
                 String objectChecksum = media.getChecksum();
-                verifyChecksum(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
             } else {
                 log.warn("Unable to verify media checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
@@ -274,7 +270,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             TranscriptionDocumentEntity transcriptionDocument = externalObjectDirectory.getTranscriptionDocumentEntity();
             if (nonNull(transcriptionDocument.getChecksum())) {
                 String objectChecksum = transcriptionDocument.getChecksum();
-                verifyChecksum(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
             } else {
                 log.warn("Unable to verify transcription checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
@@ -283,7 +279,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
             if (nonNull(annotationDocument.getChecksum())) {
                 String objectChecksum = annotationDocument.getChecksum();
-                verifyChecksum(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
+                verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
             } else {
                 log.warn("Unable to verify annotation checksum for external object {}", externalObjectDirectory.getId());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
@@ -308,9 +304,9 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
     }
 
-    private void verifyChecksum(ArmResponseUploadFileRecord armResponseUploadFileRecord,
-                                ExternalObjectDirectoryEntity externalObjectDirectory,
-                                String objectChecksum) {
+    private void verifyChecksumAndUpdateStatus(ArmResponseUploadFileRecord armResponseUploadFileRecord,
+                                               ExternalObjectDirectoryEntity externalObjectDirectory,
+                                               String objectChecksum) {
         ObjectRecordStatusEntity storedStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
         ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(FAILURE_ARM_RESPONSE_PROCESSING.getId());
         if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
