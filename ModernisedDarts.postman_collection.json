@@ -1,11 +1,44 @@
 {
 	"info": {
-		"_postman_id": "e5cd0e01-efc7-4ede-98b9-552099849988",
+		"_postman_id": "e75a05ea-068a-40ae-becb-129212e42ac4",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "30362290"
 	},
 	"item": [
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "/admin/security-roles",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{global_access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{serverUrl}}/admin/security-roles",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"admin",
+								"security-roles"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
 		{
 			"name": "EventAPI",
 			"item": [
@@ -2186,6 +2219,37 @@
 									"key": "ip_address",
 									"value": "192.0.0.1"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Retention",
+			"item": [
+				{
+					"name": "/retentions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"case_id\": 12345,\n  \"retention_date\": \"2022-05-20\",\n  \"is_permanent_retention\": true,\n  \"comments\": \"commentstring\"\n}"
+						},
+						"url": {
+							"raw": "{{serverUrl}}/retentions",
+							"host": [
+								"{{serverUrl}}"
+							],
+							"path": [
+								"retentions"
 							]
 						}
 					},
