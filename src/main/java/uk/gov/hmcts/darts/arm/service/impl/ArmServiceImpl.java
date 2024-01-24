@@ -19,8 +19,8 @@ import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -54,29 +54,29 @@ public class ArmServiceImpl implements ArmService {
         return blobPathAndName;
     }
 
-    public Map<String, BlobItem> listSubmissionBlobs(String containerName, String filename) {
+    public List<String> listSubmissionBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getSubmission() + filename;
 
         return listBlobs(containerClient, prefix);
     }
 
-    public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
+    public List<String> listCollectedBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getCollected() + filename;
 
         return listBlobs(containerClient, prefix);
     }
 
-    public Map<String, BlobItem> listResponseBlobs(String containerName, String filename) {
+    public List<String> listResponseBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
 
         return listBlobs(containerClient, prefix);
     }
 
-    public Map<String, BlobItem> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
-        Map<String, BlobItem> blobs = new HashMap<>();
+    public List<String> listBlobs(BlobContainerClient blobContainerClient, String prefix) {
+        List<String> files = new ArrayList<>();
         log.debug("About to list files for {}", prefix);
         listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, prefix).forEach(blob -> {
             if (Boolean.TRUE.equals(blob.isPrefix())) {
@@ -84,10 +84,10 @@ public class ArmServiceImpl implements ArmService {
                 listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, blob.getName());
             } else {
                 log.info("Blob name: {}}", blob.getName());
-                blobs.put(blob.getName(), blob);
+                files.add(blob.getName());
             }
         });
-        return blobs;
+        return files;
     }
 
     public PagedIterable<BlobItem> listBlobsHierarchicalListing(BlobContainerClient blobContainerClient,

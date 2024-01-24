@@ -19,7 +19,7 @@ import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -89,7 +89,7 @@ class ArmServiceImplTest {
         when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
 
         String prefix = "1_1_1";
-        Map<String, BlobItem> blobs = armService.listSubmissionBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        List<String> blobs = armService.listSubmissionBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
         assertNotNull(blobs);
     }
 
@@ -106,7 +106,7 @@ class ArmServiceImplTest {
         when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
 
         String prefix = "1_1_1";
-        Map<String, BlobItem> blobs = armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        List<String> blobs = armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
         assertNotNull(blobs);
     }
 
@@ -123,7 +123,7 @@ class ArmServiceImplTest {
         when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
 
         String prefix = "1_1_1";
-        Map<String, BlobItem> blobs = armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        List<String> blobs = armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
         assertNotNull(blobs);
     }
 

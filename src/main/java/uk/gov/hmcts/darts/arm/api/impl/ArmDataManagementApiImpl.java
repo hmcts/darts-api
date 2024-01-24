@@ -1,14 +1,13 @@
 package uk.gov.hmcts.darts.arm.api.impl;
 
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
-import java.util.Map;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +22,13 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     }
 
     @Override
-    public Map<String, BlobItem> listCollectedBlobs(String prefix) {
+    public List<String> listCollectedBlobs(String prefix) {
         String filename = armDataManagementConfiguration.getFolders().getCollected() + prefix;
         return armService.listCollectedBlobs(getArmContainerName(), filename);
     }
 
     @Override
-    public Map<String, BlobItem> listResponseBlobs(String prefix) {
+    public List<String> listResponseBlobs(String prefix) {
         return armService.listResponseBlobs(
             getArmContainerName(),
             armDataManagementConfiguration.getFolders().getResponse() + prefix

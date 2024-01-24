@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm;
 
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobItem;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import uk.gov.hmcts.darts.testutil.ArmTestUtil;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -80,7 +78,7 @@ class ArmServiceFunctionalTest {
         assertNotNull(actualResult);
         log.info("listSubmissionBlobs - Blob filename {}", actualResult);
 
-        Map<String, BlobItem> submissionBlobs = armService.listSubmissionBlobs(armContainerName, "functional_test");
+        List<String> submissionBlobs = armService.listSubmissionBlobs(armContainerName, "functional_test");
         assertFalse(submissionBlobs.isEmpty());
 
     }

@@ -23,6 +23,7 @@ public class ArmDataManagementConfiguration {
     private String tempBlobWorkspace;
     private String dateTimeFormat;
     private String fileExtension;
+    private String listBlobsTimeoutDuration;
 
     @Getter
     @Setter

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.darts.arm.api.impl;
 
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobItem;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,8 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -65,13 +64,13 @@ class ArmDataManagementApiImplTest {
 
         String prefix = "1_1_1";
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        Map<String, BlobItem> responseBlobs = new HashMap<>();
-        responseBlobs.put(responseBlobFilename, new BlobItem());
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
 
         String filename = ARM_DROP_ZONE + prefix;
         when(armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, filename)).thenReturn(responseBlobs);
 
-        Map<String, BlobItem> blobs = armDataManagementApi.listCollectedBlobs(prefix);
+        List<String> blobs = armDataManagementApi.listCollectedBlobs(prefix);
 
         assertEquals(1, blobs.size());
     }
@@ -86,13 +85,13 @@ class ArmDataManagementApiImplTest {
 
         String prefix = "1_1_1";
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        Map<String, BlobItem> responseBlobs = new HashMap<>();
-        responseBlobs.put(responseBlobFilename, new BlobItem());
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
 
         String filename = ARM_DROP_ZONE + prefix;
         when(armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, filename)).thenReturn(responseBlobs);
 
-        Map<String, BlobItem> blobs = armDataManagementApi.listResponseBlobs(prefix);
+        List<String> blobs = armDataManagementApi.listResponseBlobs(prefix);
         assertEquals(1, blobs.size());
     }
 

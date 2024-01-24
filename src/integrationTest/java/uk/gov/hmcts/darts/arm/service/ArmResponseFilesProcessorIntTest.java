@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_RESPONSE_PROCESSING_FAILED;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
@@ -128,7 +129,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
-        Map<String, BlobItem> responseBlobs = new HashMap<>();
+        List<String> responseBlobs = new ArrayList<>();
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
@@ -175,8 +176,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String responseBlobFilename = prefix + "_1_iu.rsp";
-        Map<String, BlobItem> responseBlobs = new HashMap<>();
-        responseBlobs.put(responseBlobFilename, new BlobItem());
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -191,7 +192,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
 
     }
@@ -226,8 +227,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String responseBlobFilename = prefix + "_1_iu.rsp";
-        Map<String, BlobItem> responseBlobs = new HashMap<>();
-        responseBlobs.put(responseBlobFilename, new BlobItem());
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -242,7 +243,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundMedia.getStatus().getId());
         assertEquals(4, foundMedia.getVerificationAttempts());
 
     }
@@ -276,8 +277,8 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        Map<String, BlobItem> responseBlobs = new HashMap<>();
-        responseBlobs.put(responseBlobFilename, new BlobItem());
+        List<String> responseBlobs = new ArrayList<>();
+        responseBlobs.add(responseBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(responseBlobs);
 
         when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
@@ -376,11 +377,11 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        Map<String, BlobItem> inputUploadFilenameResponseBlobs = new HashMap<>();
-        inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
-        Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
@@ -430,16 +431,16 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_0_iu.rsp";
-        Map<String, BlobItem> inputUploadFilenameResponseBlobs = new HashMap<>();
-        inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
-        Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_0_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp";
-        hashcodeResponseBlobs.put(createRecordFilename, new BlobItem());
-        hashcodeResponseBlobs.put(uploadFileFilename, new BlobItem());
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -465,7 +466,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(ARM_RESPONSE_PROCESSING_FAILED.getId(), foundMedia.getStatus().getId());
+        assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
 
     }
@@ -501,16 +502,16 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
         String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        Map<String, BlobItem> inputUploadFilenameResponseBlobs = new HashMap<>();
-        inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
-        Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
-        hashcodeResponseBlobs.put(createRecordFilename, new BlobItem());
-        hashcodeResponseBlobs.put(uploadFileFilename, new BlobItem());
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -569,16 +570,16 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), annotationDocument.getId());
         String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        Map<String, BlobItem> inputUploadFilenameResponseBlobs = new HashMap<>();
-        inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
-        Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
-        hashcodeResponseBlobs.put(createRecordFilename, new BlobItem());
-        hashcodeResponseBlobs.put(uploadFileFilename, new BlobItem());
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
         String fileLocation = tempDirectory.getAbsolutePath();
@@ -627,17 +628,17 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         String prefix = String.format("%d_%d_1", armEod.getId(), transcriptionDocumentEntity.getId());
         String inputUploadBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
-        Map<String, BlobItem> inputUploadFilenameResponseBlobs = new HashMap<>();
-        inputUploadFilenameResponseBlobs.put(inputUploadBlobFilename, new BlobItem());
+        List<String> inputUploadFilenameResponseBlobs = new ArrayList<>();
+        inputUploadFilenameResponseBlobs.add(inputUploadBlobFilename);
         when(armDataManagementApi.listResponseBlobs(prefix)).thenReturn(inputUploadFilenameResponseBlobs);
 
 
-        Map<String, BlobItem> hashcodeResponseBlobs = new HashMap<>();
+        List<String> hashcodeResponseBlobs = new ArrayList<>();
         String hashcode = "6a374f19a9ce7dc9cc480ea8d4eca0fb";
         String createRecordFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_a17b9015-e6ad-77c5-8d1e-13259aae1895_1_cr.rsp";
         String uploadFileFilename = "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
-        hashcodeResponseBlobs.put(createRecordFilename, new BlobItem());
-        hashcodeResponseBlobs.put(uploadFileFilename, new BlobItem());
+        hashcodeResponseBlobs.add(createRecordFilename);
+        hashcodeResponseBlobs.add(uploadFileFilename);
         when(armDataManagementApi.listResponseBlobs(hashcode)).thenReturn(hashcodeResponseBlobs);
 
         doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);

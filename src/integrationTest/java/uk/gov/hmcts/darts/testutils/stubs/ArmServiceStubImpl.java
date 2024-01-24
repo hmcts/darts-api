@@ -1,15 +1,14 @@
 package uk.gov.hmcts.darts.testutils.stubs;
 
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.models.BlobItem;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -31,23 +30,23 @@ public class ArmServiceStubImpl implements ArmService {
     }
 
     @Override
-    public Map<String, BlobItem> listSubmissionBlobs(String containerName, String filename) {
-        Map<String, BlobItem> listedBlobs = new HashMap<>();
-        listedBlobs.put("filename", new BlobItem());
+    public List<String> listSubmissionBlobs(String containerName, String filename) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
         return listedBlobs;
     }
 
     @Override
-    public Map<String, BlobItem> listCollectedBlobs(String containerName, String filename) {
-        Map<String, BlobItem> listedBlobs = new HashMap<>();
-        listedBlobs.put("filename", new BlobItem());
+    public List<String> listCollectedBlobs(String containerName, String filename) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
         return listedBlobs;
     }
 
     @Override
-    public Map<String, BlobItem> listResponseBlobs(String containerName, String filename) {
-        Map<String, BlobItem> listedBlobs = new HashMap<>();
-        listedBlobs.put("filename", new BlobItem());
+    public List<String> listResponseBlobs(String containerName, String filename) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
         return listedBlobs;
     }
 
