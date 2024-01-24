@@ -376,10 +376,10 @@ public class TestSupportController {
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
 
-        String courtrooomNamme = "func-" + randomAlphanumeric(7);
+        String courtroomName = "func-" + randomAlphanumeric(7);
         String courthouseName = "func-" + randomAlphanumeric(7);
         CourthouseEntity courthouse = newCourthouse(courthouseName);
-        newCourtroom(courtrooomNamme, courthouse);
+        newCourtroom(courtroomName, courthouse);
 
         courtCase.setCourthouse(courthouse);
         caseRepository.saveAndFlush(courtCase);
