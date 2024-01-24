@@ -273,6 +273,11 @@ public class TestSupportController {
                                       """, Integer.class)
             .setParameter(1, caseIds)
             .executeUpdate();
+        session.createNativeQuery("""
+                                      delete from darts.case_management_retention where cas_id in (?)
+                                      """, Integer.class)
+            .setParameter(1, caseIds)
+            .executeUpdate();
     }
 
     private void removeCaseJudgeJoins(Session session, List<Integer> caseIds) {
