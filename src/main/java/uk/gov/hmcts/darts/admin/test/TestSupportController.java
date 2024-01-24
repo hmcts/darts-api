@@ -93,7 +93,6 @@ public class TestSupportController {
         log.info("Cleaned Events and Hearings");
 
         removeCaseRetentions(session, caseIds);
-        removeRetentionPolicyType(session);
         removeCaseAudit(session, caseIds);
         removeCaseJudgeJoins(session, caseIds);
         removeCaseDefence(session, caseIds);
@@ -296,12 +295,10 @@ public class TestSupportController {
                                       """, Integer.class)
             .setParameter(1, caseIds)
             .executeUpdate();
-    }
-
-    private void removeRetentionPolicyType(Session session) {
         session.createNativeQuery("""
-                                      delete from darts.retention_policy_type where rpt_id = 1
+                                      delete from darts.case_management_retention where cas_id in (?)
                                       """, Integer.class)
+            .setParameter(1, caseIds)
             .executeUpdate();
     }
 
@@ -401,10 +398,10 @@ public class TestSupportController {
         courtCase.setClosed(false);
         courtCase.setInterpreterUsed(false);
 
-        String courtrooomNamme = "func-" + randomAlphanumeric(7);
+        String courtroomName = "func-" + randomAlphanumeric(7);
         String courthouseName = "func-" + randomAlphanumeric(7);
         CourthouseEntity courthouse = newCourthouse(courthouseName);
-        newCourtroom(courtrooomNamme, courthouse);
+        newCourtroom(courtroomName, courthouse);
 
         courtCase.setCourthouse(courthouse);
         caseRepository.saveAndFlush(courtCase);
