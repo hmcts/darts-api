@@ -18,7 +18,15 @@ public class SecurityGroupIdMapper {
     public UserWithIdAndTimestamps mapToUserWithSecurityGroups(UserAccountEntity userAccountEntity) {
         UserWithIdAndTimestamps userWithIdAndTimestamps = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
         Set<SecurityGroupEntity> securityGroupEntities =  userAccountEntity.getSecurityGroupEntities();
-        List<Integer> securityGroupIds =  securityGroupEntities.stream().map(SecurityGroupEntity::getId).toList();
+        List<Integer> securityGroupIds =  mapSecurityGroupEntitiesToIds(securityGroupEntities);
         return userWithIdAndTimestamps.securityGroupIds(securityGroupIds);
     }
+
+    public List<Integer> mapSecurityGroupEntitiesToIds(Set<SecurityGroupEntity> securityGroupEntities) {
+        return securityGroupEntities.stream()
+            .map(SecurityGroupEntity::getId)
+            .toList();
+    }
+
+
 }

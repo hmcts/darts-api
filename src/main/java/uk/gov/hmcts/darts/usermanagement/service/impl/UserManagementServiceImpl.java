@@ -68,7 +68,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         var createdUserEntity = userAccountRepository.save(userEntity);
 
         UserWithId userWithId = userAccountMapper.mapToUserWithIdModel(createdUserEntity);
-        List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(createdUserEntity.getSecurityGroupEntities());
+        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(createdUserEntity.getSecurityGroupEntities());
         userWithId.setSecurityGroupIds(securityGroupIds);
 
         return userWithId;
@@ -83,7 +83,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
 
         UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
-        List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
+        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
         user.setSecurityGroupIds(securityGroupIds);
 
         return user;
@@ -96,7 +96,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
             .forEach(userAccountEntity -> {
                 UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
-                userWithIdAndLastLogin.setSecurityGroupIds(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
                 userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
             });
 
@@ -104,7 +104,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     @Override
-    public UserWithIdAndTimestamps getUsersById(Integer userId) {
+    public UserWithIdAndTimestamps getUserById(Integer userId) {
         Optional<UserAccountEntity> entity = userAccountRepository.findById(userId);
         if (entity.isPresent()) {
             return securityGroupIdMapper.mapToUserWithSecurityGroups(entity.get());
@@ -155,9 +155,5 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
     }
 
-    private List<Integer> mapSecurityGroupEntitiesToIds(Set<SecurityGroupEntity> securityGroupEntities) {
-        return securityGroupEntities.stream()
-            .map(SecurityGroupEntity::getId)
-            .toList();
-    }
+
 }

@@ -143,22 +143,6 @@ public class TestSupportController {
             (select cth_id from darts.courthouse where courthouse_name like 'func-%');
             """)
             .executeUpdate();
-        /*
-        session.createNativeQuery("""
-                                      delete from darts.security_group_courthouse_ae where cth_id in (?)
-                                      """, Integer.class)
-            .setParameter(1, cthIds)
-            .executeUpdate();
-
-        String courthouseSelect = "select cth_id from darts.courthouse where courthouse_name like 'func-%'";
-        String nativeQuery = """
-                             delete from darts.security_group_courthouse_ae where cth_id in (<<SELECT>>)
-                             """;
-        nativeQuery = nativeQuery.replace("<<SELECT>>", courthouseSelect);
-        session.createNativeQuery(nativeQuery)
-            .executeUpdate();
-
-         */
     }
 
     private void removeDailyLists(Session session) {
