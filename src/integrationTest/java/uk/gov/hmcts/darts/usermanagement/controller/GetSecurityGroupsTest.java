@@ -45,15 +45,13 @@ class GetSecurityGroupsTest extends IntegrationBase {
     private MockMvc mockMvc;
 
     @Test
-    void testReturnAllSecurityGroupsWithCourthouseIds() throws Exception {
+    void shouldReturnAllSecurityGroupsWithCourthouseIds() throws Exception {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
-        //create a security group
         CourthouseEntity courthouseEntity = courthouseStub.createCourthouseUnlessExists("func-test-courthouse");
         SecurityGroupEntity securityGroupEntity = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity);
         securityGroupRepository.saveAndFlush(securityGroupEntity);
 
-        //test the get call
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isOk())
             .andReturn();
@@ -66,7 +64,7 @@ class GetSecurityGroupsTest extends IntegrationBase {
     }
 
     @Test
-    void givenAUserNotAuthorisedTheReturnA403() throws Exception {
+    void givenAUserNotAuthorisedThenReturnA403() throws Exception {
         adminUserStub.givenUserIsNotAuthorised(userIdentity);
 
         CourthouseEntity courthouseEntity = courthouseStub.createCourthouseUnlessExists("func-test-courthouse");

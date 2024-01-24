@@ -14,7 +14,6 @@ import uk.gov.hmcts.darts.usermanagement.model.SecurityGroup;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 import uk.gov.hmcts.darts.usermanagement.service.SecurityGroupService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -50,11 +49,9 @@ public class SecurityGroupServiceImpl implements SecurityGroupService {
 
     public List<SecurityGroupWithIdAndRole> getSecurityGroups() {
         List<SecurityGroupEntity> securityGroupEntities = securityGroupRepository.findAll();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = new ArrayList<>();
-        for (SecurityGroupEntity securityGroupEntity: securityGroupEntities) {
-            securityGroupWithIdAndRoles
-                .add(securityGroupCourthouseMapper.mapToSecurityGroupWithIdAndRoleWithCourthouse(securityGroupEntity));
-        }
+        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = securityGroupEntities.stream()
+            .map(securityGroupCourthouseMapper::mapToSecurityGroupWithIdAndRoleWithCourthouse).toList();
+
         return securityGroupWithIdAndRoles;
     }
 
