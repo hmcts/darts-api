@@ -294,21 +294,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
     }
 
-    public void deleteResponseFiles(ExternalObjectDirectoryEntity externalObjectDirectory,
-                                    List<String> responseFiles) {
-        ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(FAILURE_ARM_RESPONSE_PROCESSING.getId());
-        ObjectRecordStatusEntity armStoredStatus = objectRecordStatusRepository.getReferenceById(STORED.getId());
-
-        ExternalObjectDirectoryEntity latestEod = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectory.getId());
-        //Check the state is in a finalised state and not retry state
-        if ((armResponseProcessingFailed.equals(latestEod.getStatus()) || armStoredStatus.equals(latestEod.getStatus()))
-            && nonNull(responseFiles)) {
-            for (String responseFile : responseFiles) {
-                armDataManagementApi.deleteResponseBlob(responseFile);
-            }
-        }
-    }
-
     private void verifyChecksumAndUpdateStatus(ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                                ExternalObjectDirectoryEntity externalObjectDirectory,
                                                String objectChecksum) {

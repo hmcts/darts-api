@@ -266,7 +266,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         );
 
         armEod.setTransferAttempts(1);
-        armEod.setVerificationAttempts(4);
+        armEod.setVerificationAttempts(3);
         dartsDatabase.save(armEod);
 
         String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
@@ -288,7 +288,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
         assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundMedia.getStatus().getId());
-        assertEquals(4, foundMedia.getVerificationAttempts());
+        assertEquals(3, foundMedia.getVerificationAttempts());
 
     }
 
@@ -495,10 +495,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
-
-        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
 
         armResponseFilesProcessor.processResponseFiles();
 
