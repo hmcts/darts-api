@@ -526,10 +526,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
 
-        doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
-        doNothing().when(armDataManagementApi).deleteResponseBlob(uploadFileFilename);
-
         armResponseFilesProcessor.processResponseFiles();
 
         List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()

@@ -67,6 +67,10 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     @Transactional
     @Override
     public void processResponseFiles() {
+        startProcessingResponseFiles();
+    }
+
+    private void startProcessingResponseFiles() {
         // Fetch All records from external Object Directory table with external_location_type as 'ARM' and status with 'ARM dropzone'.
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
 
@@ -102,7 +106,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
             log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
         }
-        if (nonNull(inputUploadBlobs) && !inputUploadBlobs.isEmpty()) {
+        if (!CollectionUtils.isEmpty(inputUploadBlobs)) {
             for (String armInputUploadFilename : inputUploadBlobs) {
                 log.debug("Found ARM input upload file {}", armInputUploadFilename);
                 if (armInputUploadFilename.endsWith(generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
@@ -128,7 +132,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
             log.debug("List response files starting with hashcode {}", responseFilesHashcode);
             List<String> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
-            if (CollectionUtils.isEmpty(responseBlobs)) {
+            if (!CollectionUtils.isEmpty(responseBlobs)) {
                 processResponseBlobs(responseBlobs, externalObjectDirectory);
             } else {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
