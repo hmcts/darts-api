@@ -91,7 +91,6 @@ public class TestSupportController {
         removeHearings(session, hearingIds);
 
         removeCaseRetentions(session, caseIds);
-        removeRetentionPolicyType(session);
         removeCaseAudit(session, caseIds);
         removeCaseJudgeJoins(session, caseIds);
         removeCaseDefence(session, caseIds);
@@ -273,13 +272,6 @@ public class TestSupportController {
                                       delete from darts.case_retention where cas_id in (?)
                                       """, Integer.class)
             .setParameter(1, caseIds)
-            .executeUpdate();
-    }
-
-    private void removeRetentionPolicyType(Session session) {
-        session.createNativeQuery("""
-                                      delete from darts.retention_policy_type where rpt_id = 1
-                                      """, Integer.class)
             .executeUpdate();
     }
 
