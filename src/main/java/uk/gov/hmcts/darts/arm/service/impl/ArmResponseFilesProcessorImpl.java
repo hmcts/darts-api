@@ -349,7 +349,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
     private void updateExternalObjectDirectoryStatusAndVerificationAttempt(ExternalObjectDirectoryEntity externalObjectDirectory,
                                                                            ObjectRecordStatusEntity objectRecordStatus) {
-        if (externalObjectDirectory.getVerificationAttempts() <= armDataManagementConfiguration.getMaxRetryAttempts()) {
+        if (externalObjectDirectory.getVerificationAttempts() < armDataManagementConfiguration.getMaxRetryAttempts()) {
             int verificationAttempts = externalObjectDirectory.getVerificationAttempts() + 1;
             externalObjectDirectory.setVerificationAttempts(verificationAttempts);
             updateExternalObjectDirectoryStatus(externalObjectDirectory, objectRecordStatus);
