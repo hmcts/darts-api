@@ -145,6 +145,53 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
     }
 
     @Test
+    void givenProcessResponseFilesGetInputUploadFileThrowsException() {
+        HearingEntity hearing = dartsDatabase.createHearing(
+            "NEWCASTLE",
+            "Int Test Courtroom 2",
+            "2",
+            HEARING_DATE
+        );
+
+        MediaEntity savedMedia = dartsDatabase.save(
+            MediaTestData.createMediaWith(
+                hearing.getCourtroom(),
+                OffsetDateTime.parse("2023-09-26T13:00:00Z"),
+                OffsetDateTime.parse("2023-09-26T13:45:00Z"),
+                1
+            ));
+
+        ExternalObjectDirectoryEntity armEod = dartsDatabase.getExternalObjectDirectoryStub().createExternalObjectDirectory(
+            savedMedia,
+            dartsDatabase.getObjectRecordStatusEntity(ARM_DROP_ZONE),
+            dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM),
+            UUID.randomUUID()
+        );
+
+        armEod.setTransferAttempts(1);
+        dartsDatabase.save(armEod);
+
+        String prefix = String.format("%d_%d_1", armEod.getId(), savedMedia.getId());
+        when(armDataManagementApi.listResponseBlobs(prefix)).thenThrow(new BlobStorageException("Failed", null, null));
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
+        when(userIdentity.getUserAccount()).thenReturn(testUser);
+
+        when(armDataManagementConfiguration.getMaxRetryAttempts()).thenReturn(3);
+
+        armResponseFilesProcessor.processResponseFiles();
+
+        List<ExternalObjectDirectoryEntity> foundMediaList = dartsDatabase.getExternalObjectDirectoryRepository()
+            .findByMediaAndExternalLocationType(savedMedia, dartsDatabase.getExternalLocationTypeEntity(ExternalLocationTypeEnum.ARM));
+
+        assertEquals(1, foundMediaList.size());
+        ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
+        assertEquals(ARM_DROP_ZONE.getId(), foundMedia.getStatus().getId());
+        assertEquals(2, foundMedia.getVerificationAttempts());
+
+    }
+
+    @Test
     void givenProcessResponseFilesFoundInputUploadFilenameUnableToParseFilename() {
         HearingEntity hearing = dartsDatabase.createHearing(
             "NEWCASTLE",
