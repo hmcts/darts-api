@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
@@ -43,11 +44,13 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -178,9 +181,14 @@ class AudioServiceImplTest {
             "bytes=0-1024"
         );
 
-        stream.take(1).subscribe(c -> {
-            System.out.println(c.getStatusCode());
-        });
+        StepVerifier.create(stream)
+            .recordWith(ArrayList::new)
+            .thenConsumeWhile(x -> true)
+            .consumeRecordedWith(elements -> {
+                elements.iterator().next().getStatusCode().is2xxSuccessful();
+                assertThat(elements.size()).isEqualTo(1);
+            })
+            .verifyComplete();
 
     }
 
