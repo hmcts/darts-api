@@ -134,7 +134,7 @@ public class AudioController implements AudioApi {
 
             });
 
-        Flux<ResponseEntity<byte[]>> heartBeat = Flux.interval(Duration.ofSeconds(1))
+        Flux<ResponseEntity<byte[]>> heartBeat = Flux.interval(Duration.ofSeconds(5))
             .map(sequence -> new ResponseEntity<byte[]>(HttpStatus.CONTINUE)).takeUntilOther(work);
 
         return Flux.merge(heartBeat, work);
