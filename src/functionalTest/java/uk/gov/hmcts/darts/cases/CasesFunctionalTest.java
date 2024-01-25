@@ -116,6 +116,34 @@ class CasesFunctionalTest  extends FunctionalTest {
 
     @Test
     @Order(3)
+    void searchPostCase() {
+        String caseBody = """
+        {
+            "case_number": "<<caseNumber>>"
+        }
+            """;
+
+        caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
+
+        // search for case using case number
+        Response response = buildRequestWithExternalAuth()
+            .contentType(ContentType.JSON)
+            .when()
+            .baseUri(getUri(CASES_PATH + "/search"))
+            .body(caseBody)
+            .post()
+            .then()
+            .extract().response();
+
+        assertEquals(200, response.statusCode());
+        var caseList = response.jsonPath().getList("", AdvancedSearchResult.class);
+        assertEquals(1, caseList.size());
+        var firstCase = caseList.get(0);
+        caseId = firstCase.getCaseId();
+    }
+
+    @Test
+    @Order(4)
     void getCaseById() {
         Response getCaseresponse = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -130,7 +158,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void getCaseByIdNotFound() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -144,7 +172,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void patchCase() {
         String patchCaseBody = """
             {
@@ -175,31 +203,4 @@ class CasesFunctionalTest  extends FunctionalTest {
         assertEquals(CASE_NUMBER, getCaseresponse.jsonPath().get("case_number"));
     }
 
-    @Test
-    @Order(6)
-    void searchPostCase() {
-        String caseBody = """
-        {
-            "case_number": "<<caseNumber>>"
-        }
-            """;
-
-        caseBody = caseBody.replace("<<caseNumber>>", CASE_NUMBER);
-
-        // search for case using case number
-        Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_PATH + "/search"))
-            .body(caseBody)
-            .post()
-            .then()
-            .extract().response();
-
-        assertEquals(200, response.statusCode());
-        var caseList = response.jsonPath().getList("", AdvancedSearchResult.class);
-        assertEquals(1, caseList.size());
-        var firstCase = caseList.get(0);
-        caseId = firstCase.getCaseId();
-    }
 }
