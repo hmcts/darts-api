@@ -311,6 +311,9 @@ components:
         end_time:
           type: string
           format: date-time
+        is_mid_tier:
+          type: boolean
+          default: false
 
     EventsResponse:
       type: object

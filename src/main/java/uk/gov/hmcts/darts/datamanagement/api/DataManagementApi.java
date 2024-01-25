@@ -14,6 +14,8 @@ public interface DataManagementApi {
 
     BinaryData getBlobDataFromOutboundContainer(UUID blobId);
 
+    BinaryData getBlobDataFromInboundContainer(UUID blobId);
+
     UUID saveBlobDataToOutboundContainer(BinaryData binaryData);
 
     BlobClient saveBlobDataToContainer(BinaryData binaryData, DatastoreContainerType container, Map<String, String> metadata);

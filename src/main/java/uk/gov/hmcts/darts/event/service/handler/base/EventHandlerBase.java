@@ -45,7 +45,7 @@ public abstract class EventHandlerBase implements EventHandler {
         event.setEventText(dartsEvent.getEventText());
         event.setEventType(eventHandler);
         event.setMessageId(dartsEvent.getMessageId());
-        event.setIsLogEntry(false);
+        event.setIsLogEntry(dartsEvent.getIsMidTier());
         return event;
     }
 
