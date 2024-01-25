@@ -13,13 +13,10 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
-import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 
-import java.util.Comparator;
 import java.util.List;
 
-import static java.util.Comparator.naturalOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -78,7 +75,8 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         assertEquals(200, response.getStatusCode());
 
         ObjectMapper objectMapper = new ObjectMapper();
-        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(), new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles =
+            objectMapper.readValue(response.asString(), new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
         assertFalse(securityGroupWithIdAndRoles.isEmpty());
     }
 }
