@@ -1,8 +1,12 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.rest.Response;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,13 +17,19 @@ import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.impl.ArmServiceImpl;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class ArmServiceImplTest {
 
     private static final String ARM_BLOB_CONTAINER_NAME = "arm_dummy_container";
@@ -43,7 +53,7 @@ class ArmServiceImplTest {
     }
 
     @Test
-    void testSaveBlobData() {
+    void testSaveBlobDataUsingFilename() {
         var foldersConfig = new ArmDataManagementConfiguration.Folders();
         foldersConfig.setSubmission(TEST_BINARY_STRING);
         when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
@@ -55,4 +65,96 @@ class ArmServiceImplTest {
         assertNotNull(blobName);
         assertEquals(BLOB_FILENAME, blobName);
     }
+
+    @Test
+    void testSaveBlobDataUsingBlobPathAndFilename() {
+        String blobPathAndFilename = TEST_DROP_ZONE + BLOB_FILENAME;
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        String blobName = armService.saveBlobData(ARM_BLOB_CONTAINER_NAME, BINARY_DATA, blobPathAndFilename);
+        assertNotNull(blobName);
+        assertEquals(blobPathAndFilename, blobName);
+    }
+
+    @Test
+    void testListSubmissionBlobs() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        List<String> blobs = armService.listSubmissionBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        assertNotNull(blobs);
+    }
+
+    @Test
+    void testListCollectedBlobs() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        List<String> blobs = armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        assertNotNull(blobs);
+    }
+
+    @Test
+    void testListResponseBlobs() {
+        PagedIterable<BlobItem> pagedIterable = (PagedIterable<BlobItem>) mock(PagedIterable.class);
+        when(blobContainerClient.listBlobsByHierarchy(any(), any(), any())).thenReturn(pagedIterable);
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        String prefix = "1_1_1";
+        List<String> blobs = armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, prefix);
+        assertNotNull(blobs);
+    }
+
+    @Test
+    void testGetBlobData() {
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+        when(blobClient.exists()).thenReturn(Boolean.TRUE);
+        when(blobClient.downloadContent()).thenReturn(BINARY_DATA);
+
+        BinaryData binaryData = armService.getBlobData(ARM_BLOB_CONTAINER_NAME, "blobname");
+        assertEquals(BINARY_DATA, binaryData);
+    }
+
+    @Test
+    void testDeleteResponseBlob() {
+        var foldersConfig = new ArmDataManagementConfiguration.Folders();
+        foldersConfig.setSubmission(TEST_DROP_ZONE);
+        foldersConfig.setCollected(TEST_DROP_ZONE);
+        foldersConfig.setResponse(TEST_DROP_ZONE);
+        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
+
+        when(armDataManagementDao.getBlobContainerClient(ARM_BLOB_CONTAINER_NAME)).thenReturn(blobContainerClient);
+        when(armDataManagementDao.getBlobClient(any(), any())).thenReturn(blobClient);
+
+        Response<Boolean> response = mock(Response.class);
+
+        when(blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE, null, Duration.of(60, ChronoUnit.SECONDS), null)).thenReturn(response);
+
+        boolean result = armService.deleteResponseBlob(ARM_BLOB_CONTAINER_NAME, "blobname");
+        assertFalse(result);
+    }
+
 }

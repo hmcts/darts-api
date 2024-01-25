@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
 
 @Component
 @RequiredArgsConstructor
@@ -88,17 +89,18 @@ public class MediaArchiveRecordMapperImpl implements MediaArchiveRecordMapper {
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(MediaEntity media, Integer relationId) {
-        return UploadNewFileRecord.builder()
-            .relationId(relationId.toString())
-            .fileMetadata(createUploadNewFileRecordMetadata(media))
-            .build();
+        UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
+        uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
+        uploadNewFileRecord.setRelationId(relationId.toString());
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(media));
+        return uploadNewFileRecord;
     }
 
     private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(MediaEntity media) {
-        return UploadNewFileRecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .dzFilename(media.getMediaFile()) //"<EOD>_<MEDID>_<ATTEMPT>.mp2"
-            .fileTag(media.getMediaFormat())
-            .build();
+        UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
+        uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
+        uploadNewFileRecordMetadata.setDzFilename(media.getMediaFile());
+        uploadNewFileRecordMetadata.setFileTag(media.getMediaFormat());
+        return uploadNewFileRecordMetadata;
     }
 }

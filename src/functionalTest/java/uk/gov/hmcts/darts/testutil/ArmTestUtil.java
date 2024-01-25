@@ -25,23 +25,25 @@ public class ArmTestUtil {
     private final ArmDataManagementDao armDataManagementDao;
 
 
-    public void deleteBlobData(String containerName, String blobPathAndName) throws AzureDeleteBlobException {
+    public void deleteBlobData(String containerName, String blobPathAndName) {
         try {
             BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
             BlobClient blobClient = armDataManagementDao.getBlobClient(containerClient, blobPathAndName);
 
-            Response<Boolean> response = blobClient.deleteIfExistsWithResponse(DeleteSnapshotsOptionType.INCLUDE,
-                                                  null,
-                                                  Duration.of(DELETE_TIMEOUT, ChronoUnit.SECONDS),
-                                                  null);
+            Response<Boolean> response = blobClient.deleteIfExistsWithResponse(
+                DeleteSnapshotsOptionType.INCLUDE,
+                null,
+                Duration.of(DELETE_TIMEOUT, ChronoUnit.SECONDS),
+                null
+            );
 
-            log.info("Status code {}", response.getStatusCode());
+            log.info("deleteBlobData for container {}, Blob path {}, Returned status code {}", containerName, response.getStatusCode());
             if (STATUS_CODE_202 != response.getStatusCode()) {
                 throw new AzureDeleteBlobException("Failed to delete from container because of http code: " + response.getStatusCode());
             }
 
-        } catch (RuntimeException e) {
-            throw new AzureDeleteBlobException("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e);
+        } catch (Exception e) {
+            log.error("Could not delete from container: " + containerName + " blobPathAndName: " + blobPathAndName, e.getMessage(), e);
         }
     }
 }

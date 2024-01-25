@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -18,6 +21,45 @@ public class ArmServiceStubImpl implements ArmService {
         log.warn("Returning filename to mimic successful upload: {}", filename);
         return filename;
     }
+
+    @Override
+    public String saveBlobData(String containerName, BinaryData binaryData, String blobPathAndName) {
+        logStubUsageWarning();
+        log.warn("Returning filename to mimic successful upload: {}", blobPathAndName);
+        return blobPathAndName;
+    }
+
+    @Override
+    public List<String> listSubmissionBlobs(String containerName, String filename) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
+        return listedBlobs;
+    }
+
+    @Override
+    public List<String> listCollectedBlobs(String containerName, String filename) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
+        return listedBlobs;
+    }
+
+    @Override
+    public List<String> listResponseBlobs(String containerName, String filename) {
+        List<String> listedBlobs = new ArrayList<>();
+        listedBlobs.add(filename);
+        return listedBlobs;
+    }
+
+    @Override
+    public BinaryData getBlobData(String containerName, String blobName) {
+        return BinaryData.fromBytes(new byte[1024]);
+    }
+
+    @Override
+    public boolean deleteResponseBlob(String containerName, String filename) {
+        return true;
+    }
+
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"

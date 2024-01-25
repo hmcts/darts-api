@@ -110,8 +110,8 @@ public interface ExternalObjectDirectoryRepository extends JpaRepository<Externa
             AND eod.status = :status
             """
     )
-    List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndMarkedForDeletion(ExternalLocationTypeEntity externalLocationTypeEntity,
-                                                                                       ObjectRecordStatusEntity status);
+    List<ExternalObjectDirectoryEntity> findByExternalLocationTypeAndObjectStatus(ExternalLocationTypeEntity externalLocationTypeEntity,
+                                                                                  ObjectRecordStatusEntity status);
 
     List<ExternalObjectDirectoryEntity> findByMediaAndExternalLocationType(MediaEntity media,
                                                                            ExternalLocationTypeEntity externalLocationType);

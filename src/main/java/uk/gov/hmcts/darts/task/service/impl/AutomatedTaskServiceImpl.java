@@ -13,6 +13,7 @@ import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.service.ArmResponseFilesProcessor;
 import uk.gov.hmcts.darts.arm.service.UnstructuredToArmProcessor;
 import uk.gov.hmcts.darts.audio.deleter.impl.inbound.ExternalInboundDataStoreDeleter;
 import uk.gov.hmcts.darts.audio.deleter.impl.outbound.ExternalOutboundDataStoreDeleter;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.darts.task.runner.impl.ExternalDataStoreDeleterAutomatedTask
 import uk.gov.hmcts.darts.task.runner.impl.InboundAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.InboundToUnstructuredAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.OutboundAudioDeleterAutomatedTask;
+import uk.gov.hmcts.darts.task.runner.impl.ProcessArmResponseFilesAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.ProcessDailyListAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredAudioDeleterAutomatedTask;
 import uk.gov.hmcts.darts.task.runner.impl.UnstructuredToArmAutomatedTask;
@@ -47,6 +49,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.FAILED_TO_FIND_AUTOMATED_TASK;
 import static uk.gov.hmcts.darts.task.exception.AutomatedTaskSetupError.INVALID_CRON_EXPRESSION;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME;
@@ -54,6 +57,7 @@ import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.EXTERNAL_DATASTOR
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.INBOUND_TO_UNSTRUCTURED_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.OUTBOUND_AUDIO_DELETER_TASK_NAME;
+import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_ARM_RESPONSE_FILES_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.PROCESS_DAILY_LIST_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_AUDIO_DELETER_TASK_NAME;
 import static uk.gov.hmcts.darts.task.runner.AutomatedTaskName.UNSTRUCTURED_TO_ARM_TASK_NAME;
@@ -101,6 +105,8 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     private final UnstructuredToArmProcessor unstructuredToArmProcessor;
 
+    private final ArmResponseFilesProcessor armResponseFilesProcessor;
+
     @Override
     public void configureAndLoadAutomatedTasks(ScheduledTaskRegistrar taskRegistrar) {
         addProcessDailyListToTaskRegistrar(taskRegistrar);
@@ -111,6 +117,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         addExternalDataStoreDeleterToTaskRegistrar(taskRegistrar);
         addUnstructuredAudioDeleterAutomatedTaskToTaskRegistrar(taskRegistrar);
         addUnstructuredToArmTaskRegistrar(taskRegistrar);
+        addProcessArmResponseFilesTaskRegistrar(taskRegistrar);
     }
 
     @Override
@@ -171,24 +178,20 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
 
     @Override
     public void reloadTaskByName(String taskName) {
-        if (PROCESS_DAILY_LIST_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleProcessDailyListAutomatedTask();
-        } else if (CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
-        } else if (OUTBOUND_AUDIO_DELETER_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleOutboundAudioDeleterAutomatedTask();
-        } else if (INBOUND_TO_UNSTRUCTURED_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleInboundToUnstructuredAutomatedTask();
-        } else if (EXTERNAL_DATASTORE_DELETER == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleExternalDataStoreDeleterAutomatedTask();
-        } else if (INBOUND_AUDIO_DELETER_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleInboundAudioDeleterAutomatedTask();
-        } else if (UNSTRUCTURED_AUDIO_DELETER_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleUnstructuredAudioDeleterAutomatedTask();
-        } else if (UNSTRUCTURED_TO_ARM_TASK_NAME == AutomatedTaskName.valueOfTaskName(taskName)) {
-            rescheduleUnstructuredToArmAutomatedTask();
-        } else {
+        if (isNull(AutomatedTaskName.valueOfTaskName(taskName))) {
             throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
+        }
+        switch (AutomatedTaskName.valueOfTaskName(taskName)) {
+            case PROCESS_DAILY_LIST_TASK_NAME -> rescheduleProcessDailyListAutomatedTask();
+            case CLOSE_OLD_UNFINISHED_TRANSCRIPTIONS_TASK_NAME -> rescheduleCloseNonCompletedTranscriptionsAutomatedTask();
+            case OUTBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleOutboundAudioDeleterAutomatedTask();
+            case INBOUND_TO_UNSTRUCTURED_TASK_NAME -> rescheduleInboundToUnstructuredAutomatedTask();
+            case EXTERNAL_DATASTORE_DELETER -> rescheduleExternalDataStoreDeleterAutomatedTask();
+            case INBOUND_AUDIO_DELETER_TASK_NAME -> rescheduleInboundAudioDeleterAutomatedTask();
+            case UNSTRUCTURED_AUDIO_DELETER_TASK_NAME -> rescheduleUnstructuredAudioDeleterAutomatedTask();
+            case UNSTRUCTURED_TO_ARM_TASK_NAME -> rescheduleUnstructuredToArmAutomatedTask();
+            case PROCESS_ARM_RESPONSE_FILES_TASK_NAME -> rescheduleProcesArmResponseFilesAutomatedTask();
+            default -> throw new DartsApiException(FAILED_TO_FIND_AUTOMATED_TASK);
         }
     }
 
@@ -359,6 +362,20 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         taskRegistrar.addTriggerTask(unstructuredToArmAutomatedTask, trigger);
     }
 
+    private void addProcessArmResponseFilesTaskRegistrar(ScheduledTaskRegistrar taskRegistrar) {
+        ProcessArmResponseFilesAutomatedTask processArmResponseFilesTask = new ProcessArmResponseFilesAutomatedTask(
+            automatedTaskRepository,
+            lockProvider,
+            automatedTaskConfigurationProperties,
+            armResponseFilesProcessor
+        );
+        processArmResponseFilesTask.setLastCronExpression(getAutomatedTaskCronExpression(
+            processArmResponseFilesTask));
+        Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
+        taskRegistrar.addTriggerTask(processArmResponseFilesTask, trigger);
+    }
+
+
     private void rescheduleProcessDailyListAutomatedTask() {
         TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_DAILY_LIST_TASK_NAME.getTaskName());
         if (triggerAndAutomatedTask == null) {
@@ -493,6 +510,23 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
         }
     }
 
+    private void rescheduleProcesArmResponseFilesAutomatedTask() {
+
+        TriggerAndAutomatedTask triggerAndAutomatedTask = getTriggerAndAutomatedTask(PROCESS_ARM_RESPONSE_FILES_TASK_NAME.getTaskName());
+        if (triggerAndAutomatedTask == null) {
+            ProcessArmResponseFilesAutomatedTask processArmResponseFilesTask = new ProcessArmResponseFilesAutomatedTask(
+                automatedTaskRepository,
+                lockProvider,
+                automatedTaskConfigurationProperties,
+                armResponseFilesProcessor
+            );
+            Trigger trigger = createAutomatedTaskTrigger(processArmResponseFilesTask);
+            taskScheduler.schedule(processArmResponseFilesTask, trigger);
+        } else {
+            taskScheduler.schedule(triggerAndAutomatedTask.getAutomatedTask(), triggerAndAutomatedTask.getTrigger());
+        }
+    }
+
     private TriggerAndAutomatedTask getTriggerAndAutomatedTask(String taskName) {
         Set<ScheduledTask> scheduledTasks = taskHolder.getScheduledTasks();
         for (ScheduledTask scheduledTask : scheduledTasks) {
@@ -510,8 +544,7 @@ public class AutomatedTaskServiceImpl implements AutomatedTaskService {
     }
 
     private boolean cancelTriggerTask(String taskName, ScheduledTask scheduledTask, TriggerTask triggerTask, boolean mayInterruptIfRunning) {
-        if (triggerTask.getRunnable() instanceof AutomatedTask automatedTask && automatedTask.getTaskName().equals(
-            taskName)) {
+        if (triggerTask.getRunnable() instanceof AutomatedTask automatedTask && automatedTask.getTaskName().equals(taskName)) {
             log.info("About to cancel task: " + taskName);
             scheduledTask.cancel(mayInterruptIfRunning);
             return true;

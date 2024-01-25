@@ -14,6 +14,8 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 import java.io.File;
 
+import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.UPLOAD_NEW_FILE;
+
 @Component
 @RequiredArgsConstructor
 public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecordMapper {
@@ -23,8 +25,10 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     @Override
     public AnnotationArchiveRecord mapToAnnotationArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, File archiveRecordFile) {
         AnnotationDocumentEntity annotationDocument = externalObjectDirectory.getAnnotationDocumentEntity();
-        AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(externalObjectDirectory,
-                                                                                                                     externalObjectDirectory.getId());
+        AnnotationCreateArchiveRecordOperation annotationCreateArchiveRecordOperation = createArchiveRecordOperation(
+            externalObjectDirectory,
+            externalObjectDirectory.getId()
+        );
         UploadNewFileRecord uploadNewFileRecord = createUploadNewFileRecord(annotationDocument, externalObjectDirectory.getId());
         return createAnnotationArchiveRecord(annotationCreateArchiveRecordOperation, uploadNewFileRecord);
     }
@@ -38,18 +42,19 @@ public class AnnotationArchiveRecordMapperImpl implements AnnotationArchiveRecor
     }
 
     private UploadNewFileRecord createUploadNewFileRecord(AnnotationDocumentEntity annotationDocument, Integer relationId) {
-        return UploadNewFileRecord.builder()
-            .relationId(relationId.toString())
-            .fileMetadata(createUploadNewFileRecordMetadata(annotationDocument))
-            .build();
+        UploadNewFileRecord uploadNewFileRecord = new UploadNewFileRecord();
+        uploadNewFileRecord.setOperation(UPLOAD_NEW_FILE);
+        uploadNewFileRecord.setRelationId(relationId.toString());
+        uploadNewFileRecord.setFileMetadata(createUploadNewFileRecordMetadata(annotationDocument));
+        return uploadNewFileRecord;
     }
 
     private UploadNewFileRecordMetadata createUploadNewFileRecordMetadata(AnnotationDocumentEntity annotationDocument) {
-        return UploadNewFileRecordMetadata.builder()
-            .publisher(armDataManagementConfiguration.getPublisher())
-            .dzFilename(annotationDocument.getFileName())
-            .fileTag(annotationDocument.getFileType())
-            .build();
+        UploadNewFileRecordMetadata uploadNewFileRecordMetadata = new UploadNewFileRecordMetadata();
+        uploadNewFileRecordMetadata.setPublisher(armDataManagementConfiguration.getPublisher());
+        uploadNewFileRecordMetadata.setDzFilename(annotationDocument.getFileName());
+        uploadNewFileRecordMetadata.setFileTag(annotationDocument.getFileType());
+        return uploadNewFileRecordMetadata;
     }
 
     private AnnotationCreateArchiveRecordOperation createArchiveRecordOperation(ExternalObjectDirectoryEntity externalObjectDirectory,

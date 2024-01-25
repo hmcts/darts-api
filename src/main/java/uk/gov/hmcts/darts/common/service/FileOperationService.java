@@ -9,5 +9,7 @@ public interface FileOperationService {
 
     Path saveFileToTempWorkspace(BinaryData mediaFile, String fileName) throws IOException;
 
-    BinaryData saveFileToBinaryData(String fileName);
+    Path saveBinaryDataToSpecifiedWorkspace(BinaryData binaryData, String fileName, String workspace, boolean appendUuidToWorkspace) throws IOException;
+
+    BinaryData convertFileToBinaryData(String fileName);
 }

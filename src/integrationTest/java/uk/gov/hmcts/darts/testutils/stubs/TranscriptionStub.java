@@ -174,6 +174,7 @@ public class TranscriptionStub {
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
         externalObjectDirectoryEntity.setTransferAttempts(null);
+        externalObjectDirectoryEntity.setVerificationAttempts(1);
         externalObjectDirectoryEntity.setCreatedBy(testUser);
         externalObjectDirectoryEntity.setLastModifiedBy(testUser);
         externalObjectDirectoryEntity.setTranscriptionDocumentEntity(transcriptionDocumentEntity);

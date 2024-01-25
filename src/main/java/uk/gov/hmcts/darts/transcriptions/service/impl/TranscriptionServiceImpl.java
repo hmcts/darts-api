@@ -98,6 +98,7 @@ import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.
 public class TranscriptionServiceImpl implements TranscriptionService {
 
     private static final String AUTOMATICALLY_CLOSED_TRANSCRIPTION = "Automatically closed transcription";
+    public static final int INITIAL_VERIFICATION_ATTEMPTS = 1;
 
     private final TranscriptionConfigurationProperties transcriptionConfigurationProperties;
 
@@ -470,6 +471,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         externalObjectDirectoryEntity.setExternalLocationType(externalLocationTypeRepository.getReferenceById(INBOUND.getId()));
         externalObjectDirectoryEntity.setExternalLocation(externalLocation);
         externalObjectDirectoryEntity.setChecksum(checksum);
+        externalObjectDirectoryEntity.setVerificationAttempts(INITIAL_VERIFICATION_ATTEMPTS);
         externalObjectDirectoryEntity.setCreatedBy(userAccountEntity);
         externalObjectDirectoryEntity.setLastModifiedBy(userAccountEntity);
         externalObjectDirectoryEntity = externalObjectDirectoryRepository.save(externalObjectDirectoryEntity);

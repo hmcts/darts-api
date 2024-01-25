@@ -23,11 +23,14 @@ public class ArmDataManagementConfiguration {
     private String tempBlobWorkspace;
     private String dateTimeFormat;
     private String fileExtension;
+    private String listBlobsTimeoutDuration;
 
     @Getter
     @Setter
     public static class Folders {
         private String submission;
+        private String collected;
+        private String response;
     }
 
 }
