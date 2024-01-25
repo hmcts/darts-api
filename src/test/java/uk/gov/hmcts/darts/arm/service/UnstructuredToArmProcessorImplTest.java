@@ -431,6 +431,7 @@ class UnstructuredToArmProcessorImplTest {
 
     @Test
     void processPreviousFailedAttemptMovingFromUnstructuredStorageToArm() {
+        when(objectRecordStatusEntityRawDataFailed.getDescription()).thenReturn("FAILURE_ARM_RAW_DATA_FAILED");
 
         String fileLocation = tempDirectory.getAbsolutePath();
         ArchiveRecordFileInfo archiveRecordFileInfo = ArchiveRecordFileInfo.builder()
@@ -467,11 +468,11 @@ class UnstructuredToArmProcessorImplTest {
         )).thenReturn(pendingFailureList);
 
         BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
-        when(dataManagementApi.getBlobDataFromUnstructuredContainer(any())).thenReturn(binaryData);
         when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
         when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
         when(externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(externalObjectDirectoryEntityArm.getStatus()).thenReturn(objectRecordStatusEntityRawDataFailed);
         when(externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
             objectRecordStatusEntityStored,
             externalLocationTypeUnstructured,
@@ -483,12 +484,14 @@ class UnstructuredToArmProcessorImplTest {
 
         unstructuredToArmProcessor.processUnstructuredToArm();
 
-        verify(externalObjectDirectoryRepository, times(3)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
+        verify(externalObjectDirectoryRepository, times(2)).saveAndFlush(externalObjectDirectoryEntityCaptor.capture());
 
     }
 
     @Test
     void processPreviousFailedAttempt() {
+
+        when(objectRecordStatusEntityRawDataFailed.getDescription()).thenReturn("FAILURE_ARM_RAW_DATA_FAILED");
 
         when(objectRecordStatusRepository.getReferenceById(2)).thenReturn(objectRecordStatusEntityStored);
         when(objectRecordStatusRepository.getReferenceById(12)).thenReturn(objectRecordStatusEntityArmIngestion);
@@ -524,6 +527,7 @@ class UnstructuredToArmProcessorImplTest {
         when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
         when(externalObjectDirectoryEntityArm.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(externalObjectDirectoryEntityArm.getStatus()).thenReturn(objectRecordStatusEntityRawDataFailed);
         when(externalObjectDirectoryRepository.findMatchingExternalObjectDirectoryEntityByLocation(
             objectRecordStatusEntityStored,
             externalLocationTypeUnstructured,
