@@ -8,7 +8,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import reactor.core.publisher.Flux;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
@@ -148,6 +150,38 @@ class AudioServiceImplTest {
             byte[] bytes = inputStream.readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
+    }
+
+
+    @Test
+    void previewFluxShouldReturnSuccess() throws IOException, ExecutionException, InterruptedException {
+
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setStart(START_TIME);
+        mediaEntity.setEnd(END_TIME);
+        mediaEntity.setChannel(1);
+
+        Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
+        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+        when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
+
+        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"));
+        when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
+
+        byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
+        BinaryData data = BinaryData.fromBytes(testStringInBytes);
+        when(fileOperationService.saveFileToBinaryData(any())).thenReturn(data);
+
+        Flux<ResponseEntity<byte[]>> stream = audioService.getResponseEntityFlux(
+            mediaEntity.getId(),
+            "bytes=0-1024"
+        );
+
+        stream.take(1).subscribe(c -> {
+            System.out.println(c.getStatusCode());
+        });
+
     }
 
     @Test
