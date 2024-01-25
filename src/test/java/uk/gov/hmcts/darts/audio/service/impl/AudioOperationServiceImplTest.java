@@ -25,6 +25,7 @@ import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -162,6 +163,7 @@ class AudioOperationServiceImplTest {
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
+        assertFalse(audioFileInfo.isTrimmed());
     }
 
     @Test
@@ -179,6 +181,7 @@ class AudioOperationServiceImplTest {
         assertEquals(0, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.getEndTime());
+        assertFalse(audioFileInfo.isTrimmed());
     }
 
     @Test
@@ -209,6 +212,7 @@ class AudioOperationServiceImplTest {
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse("2023-04-28T09:45:00Z"), audioFileInfo.getStartTime());
         assertEquals(Instant.parse("2023-04-28T10:15:00Z"), audioFileInfo.getEndTime());
+        assertTrue(audioFileInfo.isTrimmed());
     }
 
     @Test
@@ -269,6 +273,7 @@ class AudioOperationServiceImplTest {
         assertEquals(1, audioFileInfo.getChannel());
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.getStartTime());
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.getEndTime());
+        assertFalse(audioFileInfo.isTrimmed());
     }
 
     private Path createTempDirectory() throws IOException {
@@ -297,6 +302,7 @@ class AudioOperationServiceImplTest {
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
+        assertFalse(audioFileInfo.get(0).isTrimmed());
     }
 
     @Test
@@ -317,6 +323,7 @@ class AudioOperationServiceImplTest {
         assertEquals(Instant.parse(T_10_30_00_Z), audioFileInfo.get(0).getEndTime());
         assertEquals(Instant.parse(T_10_30_00_Z_MS_1200), audioFileInfo.get(1).getStartTime());
         assertEquals(Instant.parse(T_11_30_00_Z), audioFileInfo.get(1).getEndTime());
+        assertFalse(audioFileInfo.get(0).isTrimmed());
     }
 
     @Test
@@ -336,5 +343,6 @@ class AudioOperationServiceImplTest {
         assertEquals(Instant.parse(T_09_00_00_Z), audioFileInfo.get(0).getStartTime());
         assertEquals(Instant.parse(T_11_00_00_Z), audioFileInfo.get(0).getEndTime());
         assertEquals(1, audioFileInfo.size());
+        assertFalse(audioFileInfo.get(0).isTrimmed());
     }
 }
