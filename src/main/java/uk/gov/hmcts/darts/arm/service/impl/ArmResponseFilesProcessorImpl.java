@@ -350,6 +350,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEntity objectRecordStatus) {
+        log.debug("Updating ARM status from {} to {}", externalObjectDirectory.getStatus().getDescription(), objectRecordStatus.getDescription());
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
         externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
