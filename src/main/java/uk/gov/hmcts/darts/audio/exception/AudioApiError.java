@@ -11,7 +11,7 @@ public enum AudioApiError implements DartsApiError {
 
     FAILED_TO_PROCESS_AUDIO_REQUEST(
         "100",
-        null,
+        HttpStatus.INTERNAL_SERVER_ERROR,
         "Failed to process audio request"
     ),
     REQUESTED_DATA_CANNOT_BE_LOCATED(
