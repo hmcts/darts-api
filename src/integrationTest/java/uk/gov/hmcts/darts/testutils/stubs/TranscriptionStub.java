@@ -255,6 +255,7 @@ public class TranscriptionStub {
                                                               OffsetDateTime workflowTimestamp,
                                                               TranscriptionStatusEntity status) {
         final var transcriptionEntity = new TranscriptionEntity();
+        transcriptionEntity.addCase(courtCaseEntity);
         transcriptionEntity.addHearing(hearingEntity);
         transcriptionEntity.setTranscriptionType(getTranscriptionTypeByEnum(SPECIFIED_TIMES));
         transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));

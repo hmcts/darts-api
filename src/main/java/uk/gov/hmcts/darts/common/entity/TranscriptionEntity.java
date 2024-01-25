@@ -100,12 +100,16 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
 
     public void addCase(CourtCaseEntity courtCase) {
-        courtCases.add(courtCase);
+        if (courtCase != null) {
+            courtCases.add(courtCase);
+        }
     }
 
     public void addHearing(HearingEntity hearing) {
-        courtCases.add(hearing.getCourtCase());
-        hearings.add(hearing);
+        if (hearing != null) {
+            addCase(hearing.getCourtCase());
+            hearings.add(hearing);
+        }
     }
 
     /*
