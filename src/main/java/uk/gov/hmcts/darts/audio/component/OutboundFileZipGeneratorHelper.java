@@ -2,11 +2,9 @@ package uk.gov.hmcts.darts.audio.component;
 
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
-import uk.gov.hmcts.darts.audio.model.ViqHeader;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.Set;
@@ -20,5 +18,5 @@ public interface OutboundFileZipGeneratorHelper {
 
     String generateReadme(ViqMetaData viqMetaData, String fileLocation);
 
-    Path generateViqFile(ViqHeader viqHeader, AudioFileInfo audioFileInfo);
+    Path generateViqFile(AudioFileInfo audioFileInfo, Path viqOutputFile);
 }

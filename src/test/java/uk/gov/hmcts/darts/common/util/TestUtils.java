@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -82,5 +83,24 @@ public final class TestUtils {
             output = output.replaceAll("\"" + tagToRemove + "\".+?}", "}");
         }
         return output;
+    }
+
+    /**
+     * Search byte array for the byte pattern.
+     *
+     * @param array to look into
+     * @param pattern to search
+     * @return index of first occurrence of the pattern, -1 otherwise
+     */
+    public static int searchBytePattern(byte[] array, byte[] pattern) {
+        if (pattern.length > array.length) {
+            return -1;
+        }
+        for (int i = 0; i <= array.length - pattern.length; i++) {
+            if (Arrays.compare(array, i, i + pattern.length, pattern, 0, pattern.length) == 0) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

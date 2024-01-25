@@ -2,10 +2,12 @@ package uk.gov.hmcts.darts.audio.component.impl;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
@@ -14,27 +16,18 @@ import uk.gov.hmcts.darts.audio.model.ViqHeader;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
 import uk.gov.hmcts.darts.audio.model.xml.ViqPlayListItem;
-import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.util.XmlUtil;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.EventRepository;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
@@ -154,31 +147,23 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
     }
 
     @Override
-    public Path generateViqFile(ViqHeader viqHeader, AudioFileInfo audioFileInfo) {
+    public Path generateViqFile(AudioFileInfo audioFileInfo, Path viqOutputFile) {
 
         if (!audioFileInfo.isTrimmed()) {
             return audioFileInfo.getPath();
         }
 
-        Path outputFilePath = Paths.get(""); //TODO filename name generation
+        ViqHeader viqHeader = new ViqHeader(audioFileInfo.getStartTime());
 
-        try (FileOutputStream outputStream = new FileOutputStream(outputFilePath.toString())) {
-            outputStream.write(viqHeader.getViqHeader());
-
-            try (BufferedReader inputFile = Files.newBufferedReader(audioFileInfo.getPath())) {
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = inputFile.read()) > 0) {
-                    outputStream.write(buffer, 0, length);
-                }
-            };
+        try {
+            FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), viqHeader.getViqHeader());
+            FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), Files.readAllBytes(audioFileInfo.getPath()), true);
         } catch (IOException exception) {
-            log.error("Unable to generate vig header file: {}", outputFilePath, exception);
+            log.error("Unable to generate viq header for file: {}", viqOutputFile, exception);
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
 
-        return outputFilePath;
-
+        return viqOutputFile;
     }
 
     private static ViqPlayListItem createViqPlaylistItem(PlaylistInfo playlistInfo) {

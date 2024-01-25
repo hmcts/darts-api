@@ -4,14 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGenerator;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
-import uk.gov.hmcts.darts.audio.model.ViqHeader;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
-import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
@@ -114,9 +113,9 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
                     EUROPE_LONDON_ZONE
                 );
 
-                ViqHeader viqHeader = new ViqHeader(audioFileInfo.getStartTime());
-                Path viqFilePath = outboundFileZipGeneratorHelper.generateViqFile(viqHeader, audioFileInfo);
-                Path path = generateZipPath(i, audioFileInfo);
+                Path path = generateDestinationAudioFilePath(i, audioFileInfo);
+                Path viqOutputFile = Path.of(mediaRequestDirString, path.toString());
+                Path viqFilePath = outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, viqOutputFile);
                 sourceToDestinationPaths.put(viqFilePath, path);
 
                 String parentPathString = path.getParent().toString();
@@ -150,7 +149,7 @@ public class OutboundFileZipGeneratorImpl implements OutboundFileZipGenerator {
         return sourceToDestinationPaths;
     }
 
-    private Path generateZipPath(int directoryIndex, AudioFileInfo audioFileInfo) {
+    private Path generateDestinationAudioFilePath(int directoryIndex, AudioFileInfo audioFileInfo) {
         var directoryName = String.format("%04d", directoryIndex + 1);
 
         var filename = String.format("%s.a%02d", directoryName, audioFileInfo.getChannel() - 1);
