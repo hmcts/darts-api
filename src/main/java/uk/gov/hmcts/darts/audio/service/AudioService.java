@@ -1,6 +1,8 @@
 package uk.gov.hmcts.darts.audio.service;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
@@ -12,6 +14,8 @@ public interface AudioService {
     List<MediaEntity> getAudioMetadata(Integer hearingId, Integer channel);
 
     InputStream preview(Integer mediaId);
+
+    Flux<ResponseEntity<byte[]>> getResponseEntityFlux(Integer mediaId, String range);
 
     void addAudio(MultipartFile audioFile, AddAudioMetadataRequest addAudioMetadata);
 

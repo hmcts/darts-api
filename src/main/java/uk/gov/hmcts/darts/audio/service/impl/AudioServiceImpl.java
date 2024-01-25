@@ -4,8 +4,11 @@ import com.azure.core.util.BinaryData;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -14,6 +17,7 @@ import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.service.AudioOperationService;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.service.AudioTransformationService;
+import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -105,6 +109,20 @@ public class AudioServiceImpl implements AudioService {
         }
 
         return mediaBinaryData.toStream();
+    }
+
+    @Override
+    public Flux<ResponseEntity<byte[]>> getResponseEntityFlux(Integer mediaId, String range) {
+        return Flux.just(mediaId)
+            .publishOn(Schedulers.boundedElastic()).map(m -> {
+                InputStream audioMediaFile = preview(m);
+                try {
+                    return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
+                } catch (IOException e) {
+                    throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
+                }
+
+            });
     }
 
     @Override
