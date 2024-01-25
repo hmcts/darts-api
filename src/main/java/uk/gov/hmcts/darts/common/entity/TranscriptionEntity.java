@@ -109,7 +109,7 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     }
 
     /*
-
+        courtCases should be looped through
      */
     @Deprecated
     public CourtCaseEntity getCourtCase() {

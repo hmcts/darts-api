@@ -139,6 +139,7 @@ public class DartsDatabaseStub {
     private final CourthouseStub courthouseStub;
     private final EventStub eventStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
+    private final HearingStub hearingStub;
     private final MediaRequestStub mediaRequestStub;
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;

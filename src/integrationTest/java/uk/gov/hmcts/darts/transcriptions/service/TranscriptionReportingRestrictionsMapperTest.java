@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
@@ -20,9 +21,6 @@ import static uk.gov.hmcts.darts.testutils.data.EventTestData.REPORTING_RESTRICT
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
-import static uk.gov.hmcts.darts.testutils.data.TranscriptionTestData.minimalTranscription;
-import static uk.gov.hmcts.darts.testutils.data.TranscriptionTestData.someTranscriptionForCase;
-import static uk.gov.hmcts.darts.testutils.data.TranscriptionTestData.someTranscriptionForHearing;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
 class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
@@ -32,7 +30,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
 
     @Test
     void mapsTranscriptionsCorrectlyWhenZeroReportingRestrictionsAssociatedWithCase() {
-        var transcriptionEntity = dartsDatabase.saveWithType(minimalTranscription());
+        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createMinimalTranscription();
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
@@ -44,8 +42,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDefaults(1).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
-        var hearingEntity = dartsDatabase.saveEventsForHearing(createSomeMinimalHearing(), reportingRestrictions);
-        var transcriptionEntity = dartsDatabase.saveWithType(someTranscriptionForHearing(hearingEntity));
+        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
@@ -62,8 +60,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         var reportingRestrictions = createEventsWithDifferentTimestamps(3).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
-        var hearingEntity = dartsDatabase.saveEventsForHearing(createSomeMinimalHearing(), reportingRestrictions);
-        var transcriptionEntity = dartsDatabase.saveWithType(someTranscriptionForHearing(hearingEntity));
+        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
@@ -81,8 +79,8 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         var expectedOrderedTs = orderedTsFrom(reportingRestrictions);
-        var hearingEntity = dartsDatabase.saveEventsForHearing(createSomeMinimalHearing(), reportingRestrictions);
-        var transcriptionEntity = dartsDatabase.saveWithType(someTranscriptionForHearing(hearingEntity));
+        var hearingEntity = dartsDatabase.saveEventsForHearing(dartsDatabase.getHearingStub().createMinimalHearing(), reportingRestrictions);
+        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
@@ -103,8 +101,12 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
         event2.setTimestamp(now());
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
-        var hearingEntity = dartsDatabase.saveEventsForHearing(createSomeMinimalHearing(), reportingRestriction, reportingRestrictionLifted);
-        var transcriptionEntity = dartsDatabase.saveWithType(someTranscriptionForHearing(hearingEntity));
+        var hearingEntity = dartsDatabase.saveEventsForHearing(
+            dartsDatabase.getHearingStub().createMinimalHearing(),
+            reportingRestriction,
+            reportingRestrictionLifted
+        );
+        TranscriptionEntity transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
@@ -135,7 +137,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
             reappliedReportingRestriction
         );
 
-        var transcriptionEntity = dartsDatabase.saveWithType(someTranscriptionForHearing(hearingEntity));
+        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(hearingEntity);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
@@ -147,7 +149,7 @@ class TranscriptionReportingRestrictionsMapperTest extends IntegrationBase {
     @Test
     void includesMigratedCaseWithRestrictionPersistedOnCaseTable() {
         var caseWithReportingRestrictions = dartsDatabase.addHandlerToCase(createSomeMinimalCase(), someReportingRestrictionId());
-        var transcriptionEntity = dartsDatabase.saveWithType(someTranscriptionForCase(caseWithReportingRestrictions));
+        var transcriptionEntity = dartsDatabase.getTranscriptionStub().createTranscription(caseWithReportingRestrictions);
 
         var transcriptionResponse = transcriptionService.getTranscription(transcriptionEntity.getId());
 
