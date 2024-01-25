@@ -136,25 +136,6 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
     }
 
-    private Response createUser() {
-        Response response = buildRequestWithExternalGlobalAccessAuth()
-            .baseUri(getUri(ADMIN_USERS))
-            .contentType(ContentType.JSON)
-            .body("""
-                      {
-                           "full_name": "James Smith",
-                           "email_address": "james.smith@hmcts.net",
-                           "description": "A temporary user created by functional test"
-                      }
-                      """)
-            .post()
-            .thenReturn();
-
-        assertEquals(201, response.getStatusCode());
-
-        return response;
-    }
-
     @Test
     void shouldGetUserById() {
         Response createUserResponse = createUserWithSecurityGroups();
@@ -174,13 +155,17 @@ class UserManagementFunctionalTest extends FunctionalTest {
                     "email_address": "james.smith.get@hmcts.net",
                     "description": "A temporary user created by functional test",
                     "active": true,
-                    "security_group_ids": [-1, -2, -3 ]
+                    "security_group_ids": [-1, -2, -3 ],
+                    "created_at": "",
+                    "last_modified_at": ""
                 }
                 """,
             getUserByIdResponse.asString(),
             new CustomComparator(
                 JSONCompareMode.NON_EXTENSIBLE,
-                new Customization("id", new RegularExpressionValueMatcher<>("^" + userId + "$"))
+                new Customization("id", new RegularExpressionValueMatcher<>("^" + userId + "$")),
+                new Customization("created_at", (actual, expected) -> isIsoDateTimeString(actual.toString())),
+                new Customization("last_modified_at", (actual, expected) -> isIsoDateTimeString(actual.toString()))
             )
         );
     }
@@ -195,6 +180,25 @@ class UserManagementFunctionalTest extends FunctionalTest {
                            "email_address": "james.smith.get@hmcts.net",
                            "description": "A temporary user created by functional test",
                            "security_group_ids": [-1, -2, -3]
+                      }
+                      """)
+            .post()
+            .thenReturn();
+
+        assertEquals(201, response.getStatusCode());
+
+        return response;
+    }
+
+    private Response createUser() {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri(ADMIN_USERS))
+            .contentType(ContentType.JSON)
+            .body("""
+                      {
+                           "full_name": "James Smith",
+                           "email_address": "james.smith@hmcts.net",
+                           "description": "A temporary user created by functional test"
                       }
                       """)
             .post()
