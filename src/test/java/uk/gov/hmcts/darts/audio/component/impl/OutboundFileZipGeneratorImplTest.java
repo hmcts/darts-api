@@ -91,9 +91,10 @@ class OutboundFileZipGeneratorImplTest {
             audioWithSession2AndChannel1
         );
 
+        var caseNumber = "T20190024";
         Path path = outboundFileZipGenerator.generateAndWriteZip(
             List.of(session1, session2),
-            createDummyMediaRequestEntity()
+            createDummyMediaRequestEntity(caseNumber)
         );
 
         assertTrue(Files.exists(path));
@@ -101,16 +102,16 @@ class OutboundFileZipGeneratorImplTest {
         List<String> paths = readZipStructure(path);
 
         assertEquals(7, paths.size());
-        assertThat(paths, hasItem("0001/0001.a00"));
-        assertThat(paths, hasItem("0001/0001.a01"));
-        assertThat(paths, hasItem("0002/0002.a00"));
         assertThat(paths, hasItem("readMe.txt"));
         assertThat(paths, hasItem("playlist.xml"));
-        assertThat(paths, hasItem("0001/annotations.xml"));
-        assertThat(paths, hasItem("0002/annotations.xml"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0001/0001.a00"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0001/0001.a01"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0001/annotations.xml"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0002/0002.a00"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0002/annotations.xml"));
     }
 
-    private MediaRequestEntity createDummyMediaRequestEntity() {
+    private MediaRequestEntity createDummyMediaRequestEntity(String caseNumber) {
 
         HearingEntity mockHearingEntity = mock(HearingEntity.class);
         CourtCaseEntity mockCourtCaseEntity = mock(CourtCaseEntity.class);
@@ -132,7 +133,7 @@ class OutboundFileZipGeneratorImplTest {
         CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
         when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");
-        when(mockCourtCaseEntity.getCaseNumber()).thenReturn("T20190024");
+        when(mockCourtCaseEntity.getCaseNumber()).thenReturn(caseNumber);
 
         UserAccountEntity mockUserAccountEntity = mock(UserAccountEntity.class);
 

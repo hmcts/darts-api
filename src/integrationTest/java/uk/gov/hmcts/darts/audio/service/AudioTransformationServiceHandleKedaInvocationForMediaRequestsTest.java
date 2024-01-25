@@ -70,7 +70,7 @@ class AudioTransformationServiceHandleKedaInvocationForMediaRequestsTest extends
     @BeforeEach
     void setUp() {
         dartsDatabase.getUserAccountStub().getSystemUserAccountEntity();
-        hearing = given.aHearingWith("1", "some-courthouse", "some-courtroom", MOCK_HEARING_DATE);
+        hearing = given.aHearingWith("T202304130121", "some-courthouse", "some-courtroom", MOCK_HEARING_DATE);
     }
 
     @Transactional
