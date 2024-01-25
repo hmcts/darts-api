@@ -227,8 +227,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
                 || ARM_INGESTION.getId().equals(previousStatus.getId())) {
                 BinaryData inboundFile = dataManagementApi.getBlobDataFromUnstructuredContainer(
                     unstructuredExternalObjectDirectory.getExternalLocation());
-
+                log.info("About to push raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
                 armDataManagementApi.saveBlobDataToArm(filename, inboundFile);
+                log.info("Pushed raw data to ARM for EOD {}", armExternalObjectDirectory.getId());
                 armExternalObjectDirectory.setChecksum(unstructuredExternalObjectDirectory.getChecksum());
                 armExternalObjectDirectory.setExternalLocation(UUID.randomUUID());
                 armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
