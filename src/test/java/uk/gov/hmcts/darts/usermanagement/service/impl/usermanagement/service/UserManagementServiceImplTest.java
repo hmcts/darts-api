@@ -1,6 +1,5 @@
 package uk.gov.hmcts.darts.usermanagement.service.impl.usermanagement.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,9 +10,9 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
-import uk.gov.hmcts.darts.common.util.TestUtils;
 import uk.gov.hmcts.darts.usermanagement.component.UserManagementQuery;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
+import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupIdMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapperImpl;
 import uk.gov.hmcts.darts.usermanagement.model.UserWithIdAndTimestamps;
@@ -49,8 +48,8 @@ class UserManagementServiceImplTest {
     @Mock
     UserManagementQuery userManagementQuery;
 
-    private ObjectMapper objectMapper;
-
+    @Mock
+    SecurityGroupIdMapper securityGroupIdMapper;
 
     @BeforeEach
     void setUp() {
@@ -60,6 +59,7 @@ class UserManagementServiceImplTest {
 
         service = new UserManagementServiceImpl(
             mapper,
+            securityGroupIdMapper,
             userAccountRepository,
             securityGroupRepository,
             authorisationApi,
@@ -68,7 +68,6 @@ class UserManagementServiceImplTest {
             duplicateEmailValidator,
             userAccountExistsValidator
         );
-        this.objectMapper = TestUtils.getObjectMapper();
     }
 
 
