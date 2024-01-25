@@ -63,7 +63,9 @@ class OutboundFileZipGeneratorImplTest {
 
     @BeforeEach
     void setUp() throws IOException, ParserConfigurationException {
-        OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
+        OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(
+            new AnnotationXmlGeneratorImpl(), eventRepository
+        );
 
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(
             audioConfigurationProperties,

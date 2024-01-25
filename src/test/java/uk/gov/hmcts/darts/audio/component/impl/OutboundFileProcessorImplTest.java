@@ -337,7 +337,7 @@ class OutboundFileProcessorImplTest {
 
         AudioFileInfo mergedAudioFile = new AudioFileInfo(TIME_12_00.toInstant(),
                                                           TIME_12_20.toInstant(),
-                                                          1, null, false);
+                                                          1,null,false);
 
         var reEncodedAudioFileInfo1 = new AudioFileInfo();
         var reEncodedAudioFileInfo2 = new AudioFileInfo();
@@ -402,18 +402,18 @@ class OutboundFileProcessorImplTest {
 
         var firstTrimmedAudioFileInfo = new AudioFileInfo(TIME_10_01.toInstant(),
                                                           TIME_11_00.toInstant(),
-                                                          1,null, true);
+                                                          1,null,true);
         var secondTrimmedAudioFileInfo = new AudioFileInfo(TIME_11_01.toInstant(),
                                                            TIME_11_59.toInstant(),
-                                                           1,null, true);
+                                                           1,null,true);
 
         AudioFileInfo mergedAudioFile1 = new AudioFileInfo(TIME_10_00.toInstant(),
                                                            TIME_11_00.toInstant(),
-                                                           1,null, false);
+                                                           1,null,false);
 
         AudioFileInfo mergedAudioFile2 = new AudioFileInfo(TIME_11_00.toInstant(),
                                                            TIME_12_00.toInstant(),
-                                                           1,null, false);
+                                                           1,null,false);
         var reEncodedAudioFileInfo1 = firstTrimmedAudioFileInfo;
         var reEncodedAudioFileInfo2 = secondTrimmedAudioFileInfo;
         when(audioOperationService.reEncode(any(), any()))
