@@ -157,7 +157,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
     }
 
     private void updateExternalObjectDirctoryStatus(ExternalObjectDirectoryEntity armExternalObjectDirectory, ObjectRecordStatusEnum armStatus) {
-        log.debug("Updating ARM status from {} to {}", armExternalObjectDirectory.getStatus().getDescription(), armStatus.name());
+        log.debug("Updating ARM status from {} to {} for ID {}", armExternalObjectDirectory.getStatus().getDescription(), armStatus.name(),
+                  armExternalObjectDirectory.getId()
+        );
         armExternalObjectDirectory.setStatus(armStatuses.get(armStatus));
         armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
@@ -262,7 +264,9 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
 
     private void updateExternalObjectDirectoryStatusToFailed(ExternalObjectDirectoryEntity armExternalObjectDirectory,
                                                              ObjectRecordStatusEnum objectRecordStatusEnum) {
-        log.debug("Updating ARM status from {} to {}", armExternalObjectDirectory.getStatus().getDescription(), objectRecordStatusEnum.name());
+        log.debug("Updating ARM status from {} to {} for ID ", armExternalObjectDirectory.getStatus().getDescription(), objectRecordStatusEnum.name(),
+                  armExternalObjectDirectory.getId()
+        );
         armExternalObjectDirectory.setStatus(armStatuses.get(objectRecordStatusEnum));
         updateTransferAttempts(armExternalObjectDirectory);
         armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
