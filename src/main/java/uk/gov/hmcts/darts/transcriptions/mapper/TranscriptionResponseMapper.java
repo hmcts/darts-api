@@ -1,9 +1,11 @@
 package uk.gov.hmcts.darts.transcriptions.mapper;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.entity.HearingReportingRestrictionsEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
@@ -97,9 +99,10 @@ public class TranscriptionResponseMapper {
         latestTranscriptionDocumentEntity.ifPresent(
             transcriptionDocumentEntity -> transcriptionResponse.setTranscriptFileName(transcriptionDocumentEntity.getFileName()));
 
-        if (nonNull(transcriptionEntity.getHearing())) {
-            transcriptionResponse.setHearingId(transcriptionEntity.getHearing().getId());
-            transcriptionResponse.setHearingDate(transcriptionEntity.getHearing().getHearingDate());
+        if (CollectionUtils.isNotEmpty(transcriptionEntity.getHearings())) {
+            HearingEntity hearing = transcriptionEntity.getHearings().get(0);
+            transcriptionResponse.setHearingId(hearing.getId());
+            transcriptionResponse.setHearingDate(hearing.getHearingDate());
         } else {
             transcriptionResponse.setHearingDate(transcriptionEntity.getHearingDate());
         }

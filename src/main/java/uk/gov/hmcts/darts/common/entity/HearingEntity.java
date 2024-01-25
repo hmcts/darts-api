@@ -68,7 +68,7 @@ public class HearingEntity extends CreatedModifiedBaseEntity {
         inverseJoinColumns = {@JoinColumn(name = "med_id")})
     private List<MediaEntity> mediaList = new ArrayList<>();
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARING)
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = TranscriptionEntity_.HEARINGS)
     private List<TranscriptionEntity> transcriptions = new ArrayList<>();
 
     @OneToMany(mappedBy = MediaRequestEntity_.HEARING)

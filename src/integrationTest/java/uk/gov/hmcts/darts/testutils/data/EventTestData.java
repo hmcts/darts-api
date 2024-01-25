@@ -28,6 +28,7 @@ public class EventTestData {
         event.setEventText(eventText);
         event.setTimestamp(eventTime);
         event.setIsLogEntry(false);
+        event.setEventType(createTestEventHandlerEntity());
         return event;
     }
 
@@ -55,4 +56,13 @@ public class EventTestData {
         return REPORTING_RESTRICTIONS_DB_IDS.get(
             new Random().nextInt(REPORTING_RESTRICTIONS_DB_IDS.size()));
     }
+
+    private EventHandlerEntity createTestEventHandlerEntity() {
+        EventHandlerEntity entity = new EventHandlerEntity();
+        entity.setId(1);
+        entity.setEventName("Eventname");
+        entity.setType("Eventtype");
+        return entity;
+    }
+
 }

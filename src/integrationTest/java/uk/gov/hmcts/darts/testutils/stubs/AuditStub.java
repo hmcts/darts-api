@@ -42,7 +42,6 @@ public class AuditStub {
         auditEntity.setCourtCase(courtCase);
         auditEntity.setAuditActivity(auditActivity);
         auditEntity.setUser(userAccount);
-        auditEntity.setApplicationServer(applicationServer);
         auditEntity.setAdditionalData(additionalData);
         auditEntity.setCreatedBy(userAccount);
         auditEntity.setLastModifiedBy(userAccount);

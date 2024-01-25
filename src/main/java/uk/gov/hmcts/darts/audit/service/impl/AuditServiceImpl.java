@@ -38,7 +38,6 @@ public class AuditServiceImpl implements AuditService {
         auditEntity.setCourtCase(courtCase);
         auditEntity.setAuditActivity(auditActivityRepository.getReferenceById(activity.getId()));
         auditEntity.setUser(userAccountEntity);
-        auditEntity.setApplicationServer(applicationServer);
         auditEntity.setAdditionalData(null);
         auditEntity.setCreatedBy(userAccountEntity);
         auditEntity.setLastModifiedBy(userAccountEntity);

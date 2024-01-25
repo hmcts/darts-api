@@ -95,9 +95,8 @@ public class TranscriptionStub {
                                                                 TranscriptionUrgencyEntity transcriptionUrgency,
                                                                 UserAccountEntity testUser) {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setCourtCase(hearing.getCourtCase());
         transcription.setCourtroom(hearing.getCourtroom());
-        transcription.setHearing(hearing);
+        transcription.addHearing(hearing);
         transcription.setTranscriptionType(transcriptionType);
         transcription.setTranscriptionStatus(transcriptionStatus);
         transcription.setTranscriptionUrgency(transcriptionUrgency);
@@ -187,7 +186,7 @@ public class TranscriptionStub {
     }
 
     public static TranscriptionDocumentEntity createTranscriptionDocumentEntity(TranscriptionEntity transcriptionEntity, String fileName, String fileType,
-                                                                                 int fileSize, UserAccountEntity testUser, String checksum) {
+                                                                                int fileSize, UserAccountEntity testUser, String checksum) {
         TranscriptionDocumentEntity transcriptionDocumentEntity = new TranscriptionDocumentEntity();
         transcriptionDocumentEntity.setTranscription(transcriptionEntity);
         transcriptionDocumentEntity.setFileName(fileName);
@@ -217,8 +216,7 @@ public class TranscriptionStub {
                                                               OffsetDateTime workflowTimestamp,
                                                               TranscriptionStatusEntity status) {
         final var transcriptionEntity = new TranscriptionEntity();
-        transcriptionEntity.setCourtCase(courtCaseEntity);
-        transcriptionEntity.setHearing(hearingEntity);
+        transcriptionEntity.addHearing(hearingEntity);
         transcriptionEntity.setTranscriptionType(getTranscriptionTypeByEnum(SPECIFIED_TIMES));
         transcriptionEntity.setTranscriptionUrgency(getTranscriptionUrgencyByEnum(STANDARD));
         transcriptionEntity.setTranscriptionStatus(status);

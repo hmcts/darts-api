@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -72,9 +71,6 @@ public class TestSupportController {
     private final List<Integer> courthouseTrash = new ArrayList<>();
     private final List<Integer> courtroomTrash = new ArrayList<>();
     private final BankHolidaysService bankHolidaysService;
-
-    @Value("${darts.audit.application-server}")
-    private String applicationServer;
 
     @SuppressWarnings("unchecked")
     @DeleteMapping(value = "/clean")
@@ -223,8 +219,6 @@ public class TestSupportController {
                 AuditActivity.valueOf(auditActivity).getId()
             );
             audit.setAuditActivity(foundAuditActivity);
-
-            audit.setApplicationServer(applicationServer);
 
             auditRepository.saveAndFlush(audit);
             return new ResponseEntity<>(CREATED);

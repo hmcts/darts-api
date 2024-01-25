@@ -28,22 +28,26 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 -- Transcript Requests (transcriber-view?assigned=false)
                 SELECT
                     tra.tra_id as transcription_id,
-                    tra.cas_id as case_id,
+                    cas.cas_id as case_id,
                     cas.case_number,
                     cth.courthouse_name,
                     hea.hearing_date,
-                    trt.description             as transcription_type,
-                    trs.display_name            as status,
-                    tru.description             as urgency,
-                    requested_trw.workflow_ts   as requested_ts,
+                    trt.description                  as transcription_type,
+                    trs.display_name                 as status,
+                    tru.description                  as urgency,
+                    requested_trw.workflow_ts        as requested_ts,
                     approved_trw.workflow_ts    as state_change_ts,
-                    tra.is_manual_transcription as is_manual
+                    tra.is_manual_transcription      as is_manual
                 FROM
                     darts.transcription tra
                 INNER JOIN
+                    darts.case_transcription_ae case_transcription
+                ON
+                    tra.tra_id = case_transcription.tra_id
+                INNER JOIN
                     darts.court_case cas
                 ON
-                    tra.cas_id = cas.cas_id
+                    case_transcription.cas_id = cas.cas_id
                 INNER JOIN
                     darts.courthouse cth
                 ON
@@ -69,9 +73,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                             usr.usr_id = :usr_id
                         AND grp.rol_id = :rol_id)
                 INNER JOIN
+                    darts.hearing_transcription_ae hearing_transcription
+                ON
+                    tra.tra_id = hearing_transcription.tra_id
+                INNER JOIN
                     darts.hearing hea
                 ON
-                    tra.hea_id = hea.hea_id
+                    hearing_transcription.hea_id = hea.hea_id
                 INNER JOIN
                     darts.transcription_type trt
                 ON
@@ -112,7 +120,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 -- Your work > To do (transcriber-view?assigned=true)
                 SELECT
                     tra.tra_id as transcription_id,
-                    tra.cas_id as case_id,
+                    cas.cas_id as case_id,
                     cas.case_number,
                     cth.courthouse_name,
                     hea.hearing_date,
@@ -125,9 +133,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 FROM
                     darts.transcription tra
                 INNER JOIN
+                    darts.case_transcription_ae case_transcription
+                ON
+                    tra.tra_id = case_transcription.tra_id
+                INNER JOIN
                     darts.court_case cas
                 ON
-                    tra.cas_id = cas.cas_id
+                    case_transcription.cas_id = cas.cas_id
                 INNER JOIN
                     darts.courthouse cth
                 ON
@@ -153,9 +165,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                             usr.usr_id = :usr_id
                         AND grp.rol_id = :rol_id)
                 INNER JOIN
+                    darts.hearing_transcription_ae hearing_transcription
+                ON
+                    tra.tra_id = hearing_transcription.tra_id
+                INNER JOIN
                     darts.hearing hea
                 ON
-                    tra.hea_id = hea.hea_id
+                    hearing_transcription.hea_id = hea.hea_id
                 INNER JOIN
                     darts.transcription_type trt
                 ON
@@ -187,7 +203,7 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 -- Your work > Completed today (transcriber-view?assigned=true)
                 SELECT
                     tra.tra_id as transcription_id,
-                    tra.cas_id as case_id,
+                    cas.cas_id as case_id,
                     cas.case_number,
                     cth.courthouse_name,
                     hea.hearing_date,
@@ -200,9 +216,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 FROM
                     darts.transcription tra
                 INNER JOIN
+                    darts.case_transcription_ae case_transcription
+                ON
+                    tra.tra_id = case_transcription.tra_id
+                INNER JOIN
                     darts.court_case cas
                 ON
-                    tra.cas_id = cas.cas_id
+                    case_transcription.cas_id = cas.cas_id
                 INNER JOIN
                     darts.courthouse cth
                 ON
@@ -228,9 +248,13 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                             usr.usr_id = :usr_id
                         AND grp.rol_id = :rol_id)
                 INNER JOIN
+                    darts.hearing_transcription_ae hearing_transcription
+                ON
+                    tra.tra_id = hearing_transcription.tra_id
+                INNER JOIN
                     darts.hearing hea
                 ON
-                    tra.hea_id = hea.hea_id
+                    hearing_transcription.hea_id = hea.hea_id
                 INNER JOIN
                     darts.transcription_type trt
                 ON
@@ -303,9 +327,14 @@ public class TranscriberTranscriptsQueryImpl implements TranscriberTranscriptsQu
                 count(*)
             FROM
                 darts.transcription transcription
-            JOIN
+            INNER JOIN
+                darts.case_transcription_ae case_transcription
+            ON
+                transcription.tra_id = case_transcription.tra_id
+            INNER JOIN
                 darts.court_case court_case
-                    on court_case.cas_id=transcription.cas_id
+            ON
+                case_transcription.cas_id = court_case.cas_id
             JOIN
                 darts.courthouse courthouse
                     on courthouse.cth_id=court_case.cth_id

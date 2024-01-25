@@ -3,12 +3,16 @@ package uk.gov.hmcts.darts.authorisation.component.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.authorisation.component.Authorisation;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
+import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
+import uk.gov.hmcts.darts.common.entity.HearingEntity;
+import uk.gov.hmcts.darts.common.entity.TranscriptionEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -19,7 +23,9 @@ import uk.gov.hmcts.darts.common.repository.MediaRequestRepository;
 import uk.gov.hmcts.darts.common.repository.TranscriptionRepository;
 import uk.gov.hmcts.darts.common.repository.TransformedMediaRepository;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -105,13 +111,37 @@ public class AuthorisationImpl implements Authorisation {
     @Override
     public void authoriseByTranscriptionId(Integer transcriptionId, Set<SecurityRoleEnum> securityRoles) {
         try {
-            final List<CourthouseEntity> courthouses = List.of(transcriptionRepository.getReferenceById(transcriptionId)
-                                                                   .getCourtCase().getCourthouse());
+            final List<CourthouseEntity> courthouses = getCourthousesFromTranscription(transcriptionId);
+            if (CollectionUtils.isEmpty(courthouses)) {
+                throw new EntityNotFoundException();
+            }
             authorisationApi.checkCourthouseAuthorisation(courthouses, securityRoles);
         } catch (EntityNotFoundException e) {
-            log.error("Unable to find Transcription-Courtroom-Courthouse for checkAuthorisation", e);
+            log.error("Unable to find Transcription-Courtroom-Courthouse for checkAuthorisation. TranscriptionId={}", transcriptionId, e);
             throw new DartsApiException(TRANSCRIPTION_NOT_FOUND);
         }
+    }
+
+    private List<CourthouseEntity> getCourthousesFromTranscription(Integer transcriptionId) {
+        Optional<TranscriptionEntity> transcriptionEntityOpt = transcriptionRepository.findById(transcriptionId);
+        List<CourthouseEntity> returnList = new ArrayList<>();
+        if (transcriptionEntityOpt.isEmpty()) {
+            return returnList;
+        }
+        TranscriptionEntity transcriptionEntity = transcriptionEntityOpt.get();
+        List<CourtCaseEntity> courtCases = transcriptionEntity.getCourtCases();
+        if (CollectionUtils.isNotEmpty(courtCases)) {
+            CollectionUtils.addAll(returnList, courtCases.stream().map(CourtCaseEntity::getCourthouse).toList());
+        }
+        List<HearingEntity> hearings = transcriptionEntity.getHearings();
+        if (CollectionUtils.isNotEmpty(hearings)) {
+            CollectionUtils.addAll(returnList, hearings.stream()
+                .map(HearingEntity::getCourtCase)
+                .map(CourtCaseEntity::getCourthouse)
+                .toList());
+        }
+        return returnList.stream().distinct().toList();
+
     }
 
     @Override

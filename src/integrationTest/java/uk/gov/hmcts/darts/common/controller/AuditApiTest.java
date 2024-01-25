@@ -101,7 +101,6 @@ class AuditApiTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
             .andExpect(jsonPath("$[0].audit_activity_id", is(auditEntity.getAuditActivity().getId())))
             .andExpect(jsonPath("$[0].user_id", is(defaultUser.getId())))
-            .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
 
         //get by eventId
@@ -113,7 +112,6 @@ class AuditApiTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
             .andExpect(jsonPath("$[0].audit_activity_id", is(auditEntity.getAuditActivity().getId())))
             .andExpect(jsonPath("$[0].user_id", is(defaultUser.getId())))
-            .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
     }
 
@@ -136,7 +134,6 @@ class AuditApiTest extends IntegrationBase {
             .andExpect(jsonPath("$[0].created_at", is(notNullValue())))
             .andExpect(jsonPath("$[0].audit_activity_id", is(AUDIT_ACTIVITY_ID)))
             .andExpect(jsonPath("$[0].user_id", is(defaultUser.getId())))
-            .andExpect(jsonPath("$[0].application_server", is("application_server")))
             .andExpect(jsonPath("$[0].additional_data", is("additional_data")));
     }
 

@@ -574,9 +574,6 @@ public class DartsDatabaseStub {
 
     @Transactional
     public TranscriptionEntity saveWithType(TranscriptionEntity transcriptionEntity) {
-        var courtCase = transcriptionEntity.getCourtCase();
-        entityManager.merge(courtCase);
-
         var typeRef = transcriptionTypeRepository.getReferenceById(transcriptionEntity.getTranscriptionType().getId());
         transcriptionEntity.setTranscriptionType(typeRef);
 
