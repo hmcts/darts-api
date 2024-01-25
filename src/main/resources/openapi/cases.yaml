@@ -575,10 +575,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/defence'
-        reporting_restriction:
-          type: string
-          example: "Section 4(2) of the Contempt of Court Act 1981"
-          description: 'Any reporting restrictions associated with the case.'
         reporting_restrictions:
           $ref: './common.yaml#/components/schemas/reporting_restrictions'
         retain_until_date_time:

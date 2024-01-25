@@ -139,9 +139,6 @@ public class CasesMapper {
 
         singleCase.setReportingRestrictions(sortedByTimestamp(reportingRestrictions));
 
-        //Will be removed when FE up to date
-        populateReportingRestrictionField(caseEntity, singleCase);
-
         return singleCase;
     }
 
@@ -155,12 +152,6 @@ public class CasesMapper {
         var reportingRestriction = new ReportingRestriction();
         reportingRestriction.setEventName(name);
         return reportingRestriction;
-    }
-
-    private static void populateReportingRestrictionField(CourtCaseEntity caseEntity, SingleCase singleCase) {
-        if (caseEntity.getReportingRestrictions() != null) {
-            singleCase.setReportingRestriction(caseEntity.getReportingRestrictions().getEventName());
-        }
     }
 
     private ReportingRestriction toReportingRestriction(HearingReportingRestrictionsEntity restrictionsEntity) {

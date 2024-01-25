@@ -18,6 +18,5 @@
     "defence_Case00001_1",
     "defence_Case00001_2"
   ],
-  "reporting_restriction": "test reporting restriction name",
   "reporting_restrictions": [{"event_name": "test reporting restriction name"}]
 }
