@@ -263,6 +263,7 @@ public class UnstructuredToArmProcessorImpl implements UnstructuredToArmProcesso
         armExternalObjectDirectory.setStatus(armStatuses.get(objectRecordStatusEnum));
         updateTransferAttempts(armExternalObjectDirectory);
         armExternalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
+        armExternalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
         externalObjectDirectoryRepository.saveAndFlush(armExternalObjectDirectory);
     }
 
