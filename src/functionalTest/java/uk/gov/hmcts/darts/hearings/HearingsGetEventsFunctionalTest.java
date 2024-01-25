@@ -5,6 +5,7 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.darts.FunctionalTest;
+import uk.gov.hmcts.darts.cases.model.AdvancedSearchResult;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -101,15 +102,27 @@ class HearingsGetEventsFunctionalTest extends FunctionalTest {
     }
 
     private int getHearingIdByCaseNumber(String caseNumber) {
+        String caseBody = """
+        {
+            "case_number": "<<caseNumber>>"
+        }
+            """;
+
+        caseBody = caseBody.replace("<<caseNumber>>", caseNumber);
+
+        // search for case using case number
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
-            .param("case_number", caseNumber)
             .when()
-            .redirects().follow(false)
-            .get(getUri(CASE_SEARCH_URL))
+            .baseUri(getUri(CASE_SEARCH_URL))
+            .body(caseBody)
+            .post()
             .then()
             .extract().response();
-        return response.jsonPath().get("[0].hearings.id[0]");
+
+        var caseList = response.jsonPath().getList("", AdvancedSearchResult.class);
+        var firstCase = caseList.get(0);
+        return firstCase.getHearings().get(0).getId();
     }
 
 }
