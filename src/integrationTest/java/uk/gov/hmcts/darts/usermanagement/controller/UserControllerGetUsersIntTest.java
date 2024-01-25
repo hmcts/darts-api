@@ -79,8 +79,7 @@ class UserControllerGetUsersIntTest extends IntegrationBase {
 
         mockMvc.perform(get(ENDPOINT_URL)
                             .header("Content-Type", "application/json")
-                            .header(EMAIL_ADDRESS, "james.smith@hmcts.net")
-                            .queryParam(COURTHOUSE_ID, "21"))
+                            .header(EMAIL_ADDRESS, "james.smith@hmcts.net"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").isNumber())
             .andExpect(jsonPath("$[0].full_name").value(ORIGINAL_USERNAME))

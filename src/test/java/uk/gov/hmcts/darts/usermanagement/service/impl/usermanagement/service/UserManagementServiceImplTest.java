@@ -7,8 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
@@ -26,11 +24,11 @@ import uk.gov.hmcts.darts.usermanagement.service.validation.UserAccountExistsVal
 import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static uk.gov.hmcts.darts.common.util.TestUtils.getContentsFromFile;
 
 @ExtendWith(MockitoExtension.class)
 class UserManagementServiceImplTest {
@@ -76,39 +74,25 @@ class UserManagementServiceImplTest {
 
     @Test
     void testGetUser() throws IOException {
-
-        List<UserWithIdAndTimestamps> userWithIdAndTimestamps = new ArrayList<>();
-        List<UserAccountEntity> userAccountEntities = new ArrayList<>();
-        userWithIdAndTimestamps.add(createUserWithIdAndTimestamp(1, EXISTING_EMAIL_ADDRESS));
-        userAccountEntities.add(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
+        List<UserAccountEntity> userAccountEntities = Collections.singletonList(createUserAccount(1, EXISTING_EMAIL_ADDRESS));
 
         Mockito.when(userManagementQuery.getUsers(
-            eq(userWithIdAndTimestamps.get(0).getEmailAddress())
+            eq(EXISTING_EMAIL_ADDRESS)
         )).thenReturn(userAccountEntities);
 
-        List<UserWithIdAndTimestamps> resultList = service.getUsers(userWithIdAndTimestamps.get(0).getEmailAddress());
+        List<UserWithIdAndTimestamps> resultList = service.getUsers(EXISTING_EMAIL_ADDRESS);
 
-        String actualResponse = objectMapper.writeValueAsString(resultList);
-        String expectedResponse = getContentsFromFile(
-            "Tests/usermanagement/UserManagementTest/testGetUser/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
-    }
-
-    private static UserWithIdAndTimestamps createUserWithIdAndTimestamp(int id, String emailAddress) {
-        UserWithIdAndTimestamps userWithIdAndTimestamps = new UserWithIdAndTimestamps();
-        userWithIdAndTimestamps.setId(id);
-        userWithIdAndTimestamps.setFullName("Tom Smith");
-        userWithIdAndTimestamps.setCreatedAt(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
-        userWithIdAndTimestamps.setLastLoginAt(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
-        userWithIdAndTimestamps.setLastModifiedAt(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
-        userWithIdAndTimestamps.setEmailAddress(emailAddress);
-        return userWithIdAndTimestamps;
+        assertEquals(userAccountEntities.get(0).getUserName(), resultList.get(0).getFullName());
+        assertEquals(userAccountEntities.get(0).getEmailAddress(), resultList.get(0).getEmailAddress());
+        assertEquals(userAccountEntities.get(0).getLastLoginTime(), resultList.get(0).getLastLoginAt());
+        assertEquals(userAccountEntities.get(0).getLastModifiedDateTime(), resultList.get(0).getLastModifiedAt());
+        assertEquals(userAccountEntities.get(0).getCreatedDateTime(), resultList.get(0).getCreatedAt());
     }
 
     private static UserAccountEntity createUserAccount(int id, String emailAddress) {
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(id);
-        userAccount.setUserName("Tom Smith");
+        userAccount.setUserName("James Smith");
         userAccount.setIsSystemUser(true);
         userAccount.setActive(true);
         userAccount.setCreatedDateTime(OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC));
