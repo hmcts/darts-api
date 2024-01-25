@@ -58,7 +58,10 @@ class GetSecurityGroupsTest extends IntegrationBase {
 
         List<SecurityGroupWithIdAndRole> groups = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
-        SecurityGroupWithIdAndRole securityGroupWithIdAndRole = groups.stream().filter(g -> "some-group-name".equals(g.getName())).findFirst().orElse(null);
+        SecurityGroupWithIdAndRole securityGroupWithIdAndRole = groups.stream()
+            .filter(group -> "some-group-name".equals(group.getName()))
+            .findFirst().orElse(null);
+
         assertEquals(securityGroupWithIdAndRole.getSecurityRoleId(), 1);
         assertTrue(securityGroupWithIdAndRole.getCourthouseIds().contains(courthouseEntity.getId()));
     }
@@ -67,13 +70,18 @@ class GetSecurityGroupsTest extends IntegrationBase {
     void givenAUserNotAuthorisedThenReturnA403() throws Exception {
         adminUserStub.givenUserIsNotAuthorised(userIdentity);
 
-        CourthouseEntity courthouseEntity = courthouseStub.createCourthouseUnlessExists("func-test-courthouse");
+        CourthouseEntity courthouseEntity = courthouseStub.createCourthouseUnlessExists("int-test-courthouse");
         SecurityGroupEntity securityGroupEntity = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity);
         securityGroupRepository.saveAndFlush(securityGroupEntity);
 
-        mockMvc.perform(get(ENDPOINT_URL))
+        MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isForbidden())
             .andReturn();
+
+        String expectedResponse = """
+            {"type":"AUTHORISATION_109","title":"User is not authorised for this endpoint","status":403}""";
+
+        assertEquals(expectedResponse, mvcResult.getResponse().getContentAsString());
     }
 
 

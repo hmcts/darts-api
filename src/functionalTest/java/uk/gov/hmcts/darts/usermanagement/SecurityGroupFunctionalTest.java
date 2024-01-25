@@ -1,5 +1,8 @@
 package uk.gov.hmcts.darts.usermanagement;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
@@ -10,8 +13,15 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.skyscreamer.jsonassert.RegularExpressionValueMatcher;
 import org.skyscreamer.jsonassert.comparator.CustomComparator;
 import uk.gov.hmcts.darts.FunctionalTest;
+import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
+import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 
+import java.util.Comparator;
+import java.util.List;
+
+import static java.util.Comparator.naturalOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class SecurityGroupFunctionalTest extends FunctionalTest {
 
@@ -57,4 +67,18 @@ class SecurityGroupFunctionalTest extends FunctionalTest {
         );
     }
 
+    @Test
+    void shouldGetSecurityGroups() throws JsonProcessingException {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/security-groups"))
+            .contentType(ContentType.JSON)
+            .get()
+            .thenReturn();
+
+        assertEquals(200, response.getStatusCode());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<SecurityGroupWithIdAndRole> securityGroupWithIdAndRoles = objectMapper.readValue(response.asString(), new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
+        assertFalse(securityGroupWithIdAndRoles.isEmpty());
+    }
 }
