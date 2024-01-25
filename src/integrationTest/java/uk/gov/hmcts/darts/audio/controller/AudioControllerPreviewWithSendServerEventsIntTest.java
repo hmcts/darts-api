@@ -79,9 +79,7 @@ class AudioControllerPreviewWithSendServerEventsIntTest {
         StepVerifier.create(result.getResponseBody())
             .recordWith(ArrayList::new)
             .thenConsumeWhile(x -> true)
-            .consumeRecordedWith(elements -> {
-                assertThat(elements.isEmpty()).isFalse();
-            })
+            .consumeRecordedWith(elements -> assertThat(elements.isEmpty()).isFalse())
             .verifyComplete();
     }
 
