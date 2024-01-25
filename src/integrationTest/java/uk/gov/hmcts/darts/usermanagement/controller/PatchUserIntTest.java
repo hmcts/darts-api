@@ -357,7 +357,7 @@ class PatchUserIntTest extends IntegrationBase {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
 
         createEnabledUserAccountEntity(user);
-        UserAccountEntity secondAccount = createSecondUserAccountEntity(user);
+        UserAccountEntity secondAccount = createEnabledUserAccountEntity(user, SECOND_EMAIL_ADDRESS);
         Integer userId = secondAccount.getId();
 
         MockHttpServletRequestBuilder request = buildRequest(userId)
@@ -391,11 +391,11 @@ class PatchUserIntTest extends IntegrationBase {
             .andExpect(status().isForbidden());
     }
 
-    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user, String email) {
         UserAccountEntity userAccountEntity = new UserAccountEntity();
         userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
-        userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
+        userAccountEntity.setEmailAddress(email);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
         userAccountEntity.setActive(true);
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
@@ -413,28 +413,9 @@ class PatchUserIntTest extends IntegrationBase {
         return dartsDatabase.getUserAccountRepository()
             .save(userAccountEntity);
     }
-
-    private UserAccountEntity createSecondUserAccountEntity(UserAccountEntity user) {
-        UserAccountEntity userAccountEntity = new UserAccountEntity();
-        userAccountEntity.setUserName(ORIGINAL_USERNAME);
-        userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
-        userAccountEntity.setEmailAddress(SECOND_EMAIL_ADDRESS);
-        userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
-        userAccountEntity.setActive(true);
-        userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
-
-        userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
-        userAccountEntity.setCreatedBy(user);
-        userAccountEntity.setLastModifiedBy(user);
-
-        SecurityGroupEntity securityGroupEntity1 = dartsDatabase.getSecurityGroupRepository()
-            .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_1);
-        SecurityGroupEntity securityGroupEntity2 = dartsDatabase.getSecurityGroupRepository()
-            .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_2);
-        userAccountEntity.setSecurityGroupEntities(Set.of(securityGroupEntity1, securityGroupEntity2));
-
-        return dartsDatabase.getUserAccountRepository()
-            .save(userAccountEntity);
+    
+    private UserAccountEntity createEnabledUserAccountEntity(UserAccountEntity user) {
+        return createEnabledUserAccountEntity(user, ORIGINAL_EMAIL_ADDRESS);
     }
 
     private UserAccountEntity createDisabledUserAccountEntity(UserAccountEntity user) {
