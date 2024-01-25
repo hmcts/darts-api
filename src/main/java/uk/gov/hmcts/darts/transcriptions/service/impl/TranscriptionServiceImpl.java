@@ -5,7 +5,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.darts.audit.api.AuditApi;
@@ -73,14 +72,11 @@ import java.util.stream.Collectors;
 
 import static java.lang.Boolean.TRUE;
 import static java.time.ZoneOffset.UTC;
-import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.audit.api.AuditActivity.DOWNLOAD_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.IMPORT_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.audit.api.AuditActivity.REQUEST_TRANSCRIPTION;
 import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
-import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.UNSTRUCTURED;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.TRANSCRIBER;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.APPROVED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AWAITING_AUTHORISATION;
@@ -91,7 +87,6 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.WI
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.BAD_REQUEST_WORKFLOW_COMMENT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_ATTACH_TRANSCRIPT;
-import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.FAILED_TO_DOWNLOAD_TRANSCRIPT;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_NOT_FOUND;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.TRANSCRIPTION_WORKFLOW_ACTION_INVALID;
 import static uk.gov.hmcts.darts.transcriptions.exception.TranscriptionApiError.USER_NOT_TRANSCRIBER;
@@ -135,6 +130,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
     private final TranscriberTranscriptsQuery transcriberTranscriptsQuery;
     private final List<TranscriptionsUpdateValidator> updateTranscriptionsValidator;
     private final TranscriptionResponseMapper transcriptionResponseMapper;
+    private final TranscriptionDownloader transcriptionDownloader;
 
     @Override
     @Transactional
@@ -426,32 +422,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
 
     @Override
     public DownloadTranscriptResponse downloadTranscript(Integer transcriptionId) {
-        final var userAccountEntity = getUserAccount();
-        final var transcriptionEntity = transcriptionRepository.getReferenceById(transcriptionId);
-
-        final var latestTranscriptionDocumentEntity = transcriptionEntity.getTranscriptionDocumentEntities()
-            .stream()
-            .max(comparing(TranscriptionDocumentEntity::getUploadedDateTime))
-            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
-
-        final var externalObjectDirectoryEntity = latestTranscriptionDocumentEntity.getExternalObjectDirectoryEntities()
-            .stream()
-            .filter(externalObjectDirectoryEntity1 ->
-                        UNSTRUCTURED.getId().equals(externalObjectDirectoryEntity1.getExternalLocationType().getId())
-                            && nonNull(externalObjectDirectoryEntity1.getExternalLocation()))
-            .max(comparing(ExternalObjectDirectoryEntity::getCreatedDateTime))
-            .orElseThrow(() -> new DartsApiException(FAILED_TO_DOWNLOAD_TRANSCRIPT));
-
-        final UUID externalLocation = externalObjectDirectoryEntity.getExternalLocation();
-        auditApi.recordAudit(DOWNLOAD_TRANSCRIPTION, userAccountEntity, transcriptionEntity.getCourtCase());
-
-        return DownloadTranscriptResponse.builder()
-            .resource(new InputStreamResource(dataManagementApi.getBlobDataFromUnstructuredContainer(externalLocation)
-                                                  .toStream()))
-            .contentType(latestTranscriptionDocumentEntity.getFileType())
-            .fileName(latestTranscriptionDocumentEntity.getFileName())
-            .externalLocation(externalLocation)
-            .transcriptionDocumentId(latestTranscriptionDocumentEntity.getId()).build();
+        return transcriptionDownloader.downloadTranscript(transcriptionId);
     }
 
     @Override

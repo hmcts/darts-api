@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
+import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -88,5 +89,9 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Override
     public UUID getLocation() {
         return externalLocation;
+    }
+
+    public boolean isForLocationType(ExternalLocationTypeEnum type) {
+        return getExternalLocationType().getId().equals(type.getId());
     }
 }

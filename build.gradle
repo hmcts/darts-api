@@ -390,7 +390,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.0'
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '4.1.1'
   testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
 
   // https://mvnrepository.com/artifact/org.awaitility/awaitility
