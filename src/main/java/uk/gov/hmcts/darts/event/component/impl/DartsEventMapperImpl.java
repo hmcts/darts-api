@@ -27,6 +27,7 @@ public class DartsEventMapperImpl implements DartsEventMapper {
         dartsEvent.setEventText(request.getText());
         dartsEvent.setDateTime(request.getLogEntryDateTime());
         dartsEvent.setRetentionPolicy(null);
+        dartsEvent.setIsMidTier(true);
 
         return dartsEvent;
     }
