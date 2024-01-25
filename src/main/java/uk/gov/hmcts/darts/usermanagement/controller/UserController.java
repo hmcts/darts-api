@@ -59,4 +59,11 @@ public class UserController implements UserApi {
         return ResponseEntity.ok(userManagementService.search(userSearch));
     }
 
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
+    public ResponseEntity<UserWithIdAndTimestamps> getUsersById(Integer userId) {
+        return ResponseEntity.ok(userManagementService.getUserById(userId));
+    }
+
 }

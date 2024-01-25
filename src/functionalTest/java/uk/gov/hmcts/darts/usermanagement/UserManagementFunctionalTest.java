@@ -98,5 +98,54 @@ class UserManagementFunctionalTest extends FunctionalTest {
 
         return response;
     }
+    
+    @Test
+    void shouldGetUserById() {
+        Response createUserResponse = createUserWithSecurityGroups();
+        int userId = new JSONObject(createUserResponse.asString())
+            .getInt("id");
 
+        Response getUserByIdResponse = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/users/" + userId))
+            .get()
+            .thenReturn();
+
+        JSONAssert.assertEquals(
+            """
+                {
+                    "id": "",
+                    "full_name": "James Smith",
+                    "email_address": "james.smith.get@hmcts.net",
+                    "description": "A temporary user created by functional test",
+                    "active": true,
+                    "security_group_ids": [-1, -2, -3 ]
+                }
+                """,
+            getUserByIdResponse.asString(),
+            new CustomComparator(
+                JSONCompareMode.NON_EXTENSIBLE,
+                new Customization("id", new RegularExpressionValueMatcher<>("^" + userId + "$"))
+            )
+        );
+    }
+
+    private Response createUserWithSecurityGroups() {
+        Response response = buildRequestWithExternalGlobalAccessAuth()
+            .baseUri(getUri("/admin/users"))
+            .contentType(ContentType.JSON)
+            .body("""
+                      {
+                           "full_name": "James Smith",
+                           "email_address": "james.smith.get@hmcts.net",
+                           "description": "A temporary user created by functional test",
+                           "security_group_ids": [-1, -2, -3]
+                      }
+                      """)
+            .post()
+            .thenReturn();
+
+        assertEquals(201, response.getStatusCode());
+
+        return response;
+    }
 }

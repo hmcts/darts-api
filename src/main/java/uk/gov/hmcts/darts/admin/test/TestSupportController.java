@@ -90,6 +90,8 @@ public class TestSupportController {
         removeEvents(session, eventIds);
         removeHearings(session, hearingIds);
 
+        log.info("Cleaned Events and Hearings");
+
         removeCaseRetentions(session, caseIds);
         removeCaseAudit(session, caseIds);
         removeCaseJudgeJoins(session, caseIds);
@@ -98,27 +100,47 @@ public class TestSupportController {
         removeCaseProsecutor(session, caseIds);
         removeCases(session, caseIds);
 
+        log.info("Cleaned case data");
+
         List<Integer> nodeRegisterIds = nodeRegisterIdsToBeDeleted(session, courtroomTrash);
         removeNodeRegisters(nodeRegisterIds);
 
         removeDailyLists(session);
 
+        log.info("Cleaned node register and daily lists");
+
         removeUserCourthousePermissions(session, courthouseTrash);
 
         removeCourtHouses(session);
 
+        log.info("Cleaned Courthouses");
+
+        removeUserPermission(session);
+
         removeUsers(session);
         removeSecurityGroups(session);
 
+        log.info("Cleaned users and groups");
+
         session.getTransaction().commit();
         session.close();
+
+        log.info("Cleanup finished");
+    }
+
+    private void removeUserPermission(Session session) {
+        session.createNativeQuery("""
+            delete from darts.security_group_user_account_ae where usr_id in
+            (select usr_id from darts.user_account where description = 'A temporary user created by functional test');
+            """)
+            .executeUpdate();
     }
 
     private void removeUserCourthousePermissions(Session session, List<Integer> cthIds) {
         session.createNativeQuery("""
-                                      delete from darts.security_group_courthouse_ae where cth_id in (?)
-                                      """, Integer.class)
-            .setParameter(1, cthIds)
+            delete from darts.security_group_courthouse_ae where cth_id in
+            (select cth_id from darts.courthouse where courthouse_name like 'func-%');
+            """)
             .executeUpdate();
     }
 

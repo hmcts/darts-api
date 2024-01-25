@@ -16,4 +16,5 @@ public interface UserManagementService {
 
     List<UserWithIdAndTimestamps> search(UserSearch userSearch);
 
+    UserWithIdAndTimestamps getUserById(Integer userId);
 }
