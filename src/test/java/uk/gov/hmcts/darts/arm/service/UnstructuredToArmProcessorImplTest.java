@@ -467,7 +467,6 @@ class UnstructuredToArmProcessorImplTest {
             armDataManagementConfiguration.getMaxRetryAttempts()
         )).thenReturn(pendingFailureList);
 
-        BinaryData binaryData = BinaryData.fromString(TEST_BINARY_DATA);
         when(externalObjectDirectoryEntityArm.getExternalLocationType()).thenReturn(externalLocationTypeArm);
         when(externalObjectDirectoryEntityArm.getMedia()).thenReturn(mediaEntity);
         when(externalObjectDirectoryEntityArm.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
