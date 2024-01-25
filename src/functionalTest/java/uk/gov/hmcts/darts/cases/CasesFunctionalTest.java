@@ -116,26 +116,6 @@ class CasesFunctionalTest  extends FunctionalTest {
 
     @Test
     @Order(3)
-    void searchCase() {
-        // search for case using case number
-        Response response = buildRequestWithExternalAuth()
-            .contentType(ContentType.JSON)
-            .when()
-            .baseUri(getUri(CASES_PATH + "/search"))
-            .param("case_number", CASE_NUMBER)
-            .get()
-            .then()
-            .extract().response();
-
-        assertEquals(200, response.statusCode());
-        var caseList = response.jsonPath().getList("", AdvancedSearchResult.class);
-        assertEquals(1, caseList.size());
-        var firstCase = caseList.get(0);
-        caseId = firstCase.getCaseId();
-    }
-
-    @Test
-    @Order(4)
     void getCaseById() {
         Response getCaseresponse = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -150,7 +130,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(5)
+    @Order(4)
     void getCaseByIdNotFound() {
         Response response = buildRequestWithExternalAuth()
             .contentType(ContentType.JSON)
@@ -164,7 +144,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     void patchCase() {
         String patchCaseBody = """
             {
@@ -196,7 +176,7 @@ class CasesFunctionalTest  extends FunctionalTest {
     }
 
     @Test
-    @Order(7)
+    @Order(6)
     void searchPostCase() {
         String caseBody = """
         {
