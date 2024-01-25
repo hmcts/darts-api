@@ -117,6 +117,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             });
 
         return userWithIdAndLastLoginList;
+    }
 
     public UserWithIdAndTimestamps getUserById(Integer userId) {
         Optional<UserAccountEntity> entity = userAccountRepository.findById(userId);
