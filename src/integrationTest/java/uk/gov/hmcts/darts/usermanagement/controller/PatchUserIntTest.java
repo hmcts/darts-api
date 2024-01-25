@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.usermanagement.controller;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -24,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItems;
@@ -44,6 +42,8 @@ class PatchUserIntTest extends IntegrationBase {
     private static final int ORIGINAL_SECURITY_GROUP_ID_2 = -2;
     private static final boolean ORIGINAL_SYSTEM_USER_FLAG = false;
     private static final OffsetDateTime ORIGINAL_LAST_LOGIN_TIME = OffsetDateTime.parse("2023-04-11T15:37:59Z");
+
+    private static final String SECOND_EMAIL_ADDRESS = "jimmy.smith@hmcts.net";
 
     @Autowired
     private MockMvc mockMvc;
@@ -313,8 +313,7 @@ class PatchUserIntTest extends IntegrationBase {
     }
 
     @Test
-    @Disabled("To be updated by DMP-1995")
-    void patchUserShouldFailIfEmailAddressChangeIsAttemptedAndDataShouldRemainUnchanged() throws Exception {
+    void patchUserShouldSucceedIfEmailAddressChangeDifferent() throws Exception {
         UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
@@ -323,22 +322,56 @@ class PatchUserIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest(userId)
             .content("""
                          {
-                           "email_address": "jimmy.smith@hmcts.net"
+                           "email_address": "jimmy.nail@hmcts.net"
                          }
                          """);
         mockMvc.perform(request)
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.detail", containsString("Unrecognized field \"email_address\"")));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+            .andExpect(jsonPath("$.email_address").value("jimmy.nail@hmcts.net"));
 
-        UserAccountEntity latestUserAccountEntity = dartsDatabase.getUserAccountRepository()
-            .findById(userId)
-            .orElseThrow();
-        assertEquals(ORIGINAL_SYSTEM_USER_FLAG, latestUserAccountEntity.getIsSystemUser());
-        assertEquals(ORIGINAL_USERNAME, latestUserAccountEntity.getUserName());
-        assertEquals(ORIGINAL_EMAIL_ADDRESS, latestUserAccountEntity.getEmailAddress());
-        assertEquals(ORIGINAL_DESCRIPTION, latestUserAccountEntity.getUserDescription());
-        assertEquals(true, latestUserAccountEntity.isActive());
-        assertEquals(ORIGINAL_LAST_LOGIN_TIME, latestUserAccountEntity.getLastLoginTime());
+
+    }
+
+    @Test
+    void patchUserSameEmailShouldBeOkAndDataShouldRemainUnchanged() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        UserAccountEntity existingAccount = createEnabledUserAccountEntity(user);
+        Integer userId = existingAccount.getId();
+
+        MockHttpServletRequestBuilder request = buildRequest(userId)
+            .content("""
+                         {
+                           "email_address": "james.smith@hmcts.net"
+                         }
+                         """);
+        mockMvc.perform(request)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.full_name").value(ORIGINAL_USERNAME))
+            .andExpect(jsonPath("$.email_address").value(ORIGINAL_EMAIL_ADDRESS));
+    }
+
+    @Test
+    void patchUserDuplicateEmailShouldFail() throws Exception {
+        UserAccountEntity user = adminUserStub.givenUserIsAuthorised(userIdentity);
+
+        createEnabledUserAccountEntity(user);
+        UserAccountEntity secondAccount = createSecondUserAccountEntity(user);
+        Integer userId = secondAccount.getId();
+
+        MockHttpServletRequestBuilder request = buildRequest(userId)
+            .content("""
+                         {
+                           "email_address": "james.smith@hmcts.net"
+                         }
+                         """);
+        mockMvc.perform(request)
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_101"))
+            .andExpect(jsonPath("$.title").value("The provided email already exists"))
+            .andExpect(jsonPath("$.status").value(409))
+            .andExpect(jsonPath("$.detail").value("User with email james.smith@hmcts.net already exists"));
     }
 
     @Test
@@ -363,6 +396,29 @@ class PatchUserIntTest extends IntegrationBase {
         userAccountEntity.setUserName(ORIGINAL_USERNAME);
         userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
         userAccountEntity.setEmailAddress(ORIGINAL_EMAIL_ADDRESS);
+        userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
+        userAccountEntity.setActive(true);
+        userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);
+
+        userAccountEntity.setIsSystemUser(ORIGINAL_SYSTEM_USER_FLAG);
+        userAccountEntity.setCreatedBy(user);
+        userAccountEntity.setLastModifiedBy(user);
+
+        SecurityGroupEntity securityGroupEntity1 = dartsDatabase.getSecurityGroupRepository()
+            .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_1);
+        SecurityGroupEntity securityGroupEntity2 = dartsDatabase.getSecurityGroupRepository()
+            .getReferenceById(ORIGINAL_SECURITY_GROUP_ID_2);
+        userAccountEntity.setSecurityGroupEntities(Set.of(securityGroupEntity1, securityGroupEntity2));
+
+        return dartsDatabase.getUserAccountRepository()
+            .save(userAccountEntity);
+    }
+
+    private UserAccountEntity createSecondUserAccountEntity(UserAccountEntity user) {
+        UserAccountEntity userAccountEntity = new UserAccountEntity();
+        userAccountEntity.setUserName(ORIGINAL_USERNAME);
+        userAccountEntity.setUserFullName(ORIGINAL_USERNAME);
+        userAccountEntity.setEmailAddress(SECOND_EMAIL_ADDRESS);
         userAccountEntity.setUserDescription(ORIGINAL_DESCRIPTION);
         userAccountEntity.setActive(true);
         userAccountEntity.setLastLoginTime(ORIGINAL_LAST_LOGIN_TIME);

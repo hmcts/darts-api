@@ -120,6 +120,11 @@ public class UserManagementServiceImpl implements UserManagementService {
     }
 
     private void updateEntity(UserPatch userPatch, UserAccountEntity userAccountEntity) {
+        if (userPatch.getEmailAddress() != null && !userPatch.getEmailAddress().equals(userAccountEntity.getEmailAddress())) {
+            duplicateEmailValidator.validate(new User(userPatch.getFullName(), userPatch.getEmailAddress()));
+            userAccountEntity.setEmailAddress(userPatch.getEmailAddress());
+        }
+
         String name = userPatch.getFullName();
         if (name != null) {
             userAccountEntity.setUserName(name);
