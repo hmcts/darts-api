@@ -8,10 +8,13 @@ import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.component.validation.Validator;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.exception.DartsApiException;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 import uk.gov.hmcts.darts.usermanagement.component.UserManagementQuery;
 import uk.gov.hmcts.darts.usermanagement.component.UserSearchQuery;
+import uk.gov.hmcts.darts.usermanagement.exception.UserManagementError;
+import uk.gov.hmcts.darts.usermanagement.mapper.impl.SecurityGroupIdMapper;
 import uk.gov.hmcts.darts.usermanagement.mapper.impl.UserAccountMapper;
 import uk.gov.hmcts.darts.usermanagement.model.User;
 import uk.gov.hmcts.darts.usermanagement.model.UserPatch;
@@ -35,6 +38,7 @@ import static java.util.Objects.isNull;
 public class UserManagementServiceImpl implements UserManagementService {
 
     private final UserAccountMapper userAccountMapper;
+    private final SecurityGroupIdMapper securityGroupIdMapper;
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
     private final AuthorisationApi authorisationApi;
@@ -66,7 +70,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         var createdUserEntity = userAccountRepository.save(userEntity);
 
         UserWithId userWithId = userAccountMapper.mapToUserWithIdModel(createdUserEntity);
-        List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(createdUserEntity.getSecurityGroupEntities());
+        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(createdUserEntity.getSecurityGroupEntities());
         userWithId.setSecurityGroupIds(securityGroupIds);
 
         return userWithId;
@@ -81,7 +85,7 @@ public class UserManagementServiceImpl implements UserManagementService {
             .map(userEntity -> updatedUserAccount(userPatch, userEntity)).orElseThrow();
 
         UserWithIdAndTimestamps user = userAccountMapper.mapToUserWithIdAndLastLoginModel(updatedUserEntity);
-        List<Integer> securityGroupIds = mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
+        List<Integer> securityGroupIds = securityGroupIdMapper.mapSecurityGroupEntitiesToIds(updatedUserEntity.getSecurityGroupEntities());
         user.setSecurityGroupIds(securityGroupIds);
 
         return user;
@@ -94,7 +98,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         userSearchQuery.getUsers(userSearch.getFullName(), userSearch.getEmailAddress(), userSearch.getActive())
             .forEach(userAccountEntity -> {
                 UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
-                userWithIdAndLastLogin.setSecurityGroupIds(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
                 userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
             });
 
@@ -108,12 +112,20 @@ public class UserManagementServiceImpl implements UserManagementService {
         userManagementQuery.getUsers(emailAddress)
             .forEach(userAccountEntity -> {
                 UserWithIdAndTimestamps userWithIdAndLastLogin = userAccountMapper.mapToUserWithIdAndLastLoginModel(userAccountEntity);
-                userWithIdAndLastLogin.setSecurityGroupIds(mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
+                userWithIdAndLastLogin.setSecurityGroupIds(securityGroupIdMapper.mapSecurityGroupEntitiesToIds(userAccountEntity.getSecurityGroupEntities()));
                 userWithIdAndLastLoginList.add(userWithIdAndLastLogin);
             });
 
         return userWithIdAndLastLoginList;
 
+    public UserWithIdAndTimestamps getUserById(Integer userId) {
+        Optional<UserAccountEntity> entity = userAccountRepository.findById(userId);
+        if (entity.isPresent()) {
+            return securityGroupIdMapper.mapToUserWithSecurityGroups(entity.get());
+        }
+        throw new DartsApiException(
+            UserManagementError.USER_NOT_FOUND,
+            String.format("User id %d not found", userId));
     }
 
     private UserAccountEntity updatedUserAccount(UserPatch userPatch, UserAccountEntity userEntity) {
@@ -157,9 +169,5 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
     }
 
-    private List<Integer> mapSecurityGroupEntitiesToIds(Set<SecurityGroupEntity> securityGroupEntities) {
-        return securityGroupEntities.stream()
-            .map(SecurityGroupEntity::getId)
-            .toList();
-    }
+
 }
