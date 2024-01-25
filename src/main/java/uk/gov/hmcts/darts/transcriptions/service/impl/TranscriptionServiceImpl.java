@@ -174,7 +174,7 @@ public class TranscriptionServiceImpl implements TranscriptionService {
             transcriptionNotifications.notifyApprovers(transcription);
         }
 
-        auditApi.recordAudit(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCase());
+        auditApi.recordAudit(REQUEST_TRANSCRIPTION, userAccount, transcription.getCourtCases().get(0));
 
         RequestTranscriptionResponse requestTranscriptionResponse = new RequestTranscriptionResponse();
         requestTranscriptionResponse.setTranscriptionId(transcription.getId());
