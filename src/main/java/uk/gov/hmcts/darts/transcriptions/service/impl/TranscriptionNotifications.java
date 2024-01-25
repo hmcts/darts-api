@@ -80,7 +80,7 @@ public class TranscriptionNotifications {
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(templateName)
             .userAccountsToEmail(List.of(transcription.getCreatedBy()))
-            .caseId(transcription.getCourtCases().get(0).getId())
+            .caseId(transcription.getCourtCase().getId())
             .templateValues(templateParams)
             .build();
         notificationApi.scheduleNotification(request);
@@ -93,12 +93,12 @@ public class TranscriptionNotifications {
     public void notifyApprovers(TranscriptionEntity transcription) {
         List<UserAccountEntity> usersToNotify = authorisationApi.getUsersWithRoleAtCourthouse(
             SecurityRoleEnum.APPROVER,
-            transcription.getCourtCases().get(0).getCourthouse()
+            transcription.getCourtCase().getCourthouse()
         );
         SaveNotificationToDbRequest request = SaveNotificationToDbRequest.builder()
             .eventId(COURT_MANAGER_APPROVE_TRANSCRIPT.toString())
             .userAccountsToEmail(usersToNotify)
-            .caseId(transcription.getCourtCases().get(0).getId())
+            .caseId(transcription.getCourtCase().getId())
             .build();
         notificationApi.scheduleNotification(request);
     }
