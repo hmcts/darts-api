@@ -72,3 +72,10 @@ GROUP BY cth.cth_id,
 ORDER BY cth.cth_id,
          usr.usr_id,
          grp.rol_id;
+
+
+
+ALTER TABLE security_group ADD COLUMN created_ts TIMESTAMP WITH TIME ZONE;
+ALTER TABLE security_group ADD COLUMN created_by INTEGER;
+ALTER TABLE security_group ADD COLUMN last_modified_ts TIMESTAMP WITH TIME ZONE;
+ALTER TABLE security_group ADD COLUMN last_modified_by INTEGER;
