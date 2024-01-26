@@ -10,7 +10,6 @@ import uk.gov.hmcts.darts.testutils.IntegrationBase;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
@@ -85,7 +84,18 @@ class CaseMapperTest extends IntegrationBase {
 
     @Test
     void ordersMultipleReportingRestrictionsElementCorrectly() {
-        var reportingRestrictions = createEventsWithDifferentTimestamps(10).stream()
+        List<OffsetDateTime> eventDateTimes = new ArrayList<>();
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T14:45:12Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:10:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:15:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T14:25:12Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T12:45:12Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T12:10:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T12:15:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T12:25:12Z"));
+        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         var expectedOrderedTs = orderedTsFrom(reportingRestrictions);
@@ -164,13 +174,6 @@ class CaseMapperTest extends IntegrationBase {
             .toList();
     }
 
-    private List<EventEntity> createEventsWithDifferentTimestamps(int quantity) {
-        var random = new Random();
-        return createEventsWithDefaults(quantity).stream()
-            .peek(event -> event.setTimestamp(now().plusDays(random.nextInt(1, 1000))))
-            .toList();
-    }
-
     private List<EventEntity> createEventsWithDifferentTimestamps(List<OffsetDateTime> eventDateTimes) {
         return rangeClosed(1, eventDateTimes.size())
             .mapToObj(index -> {
@@ -213,18 +216,5 @@ class CaseMapperTest extends IntegrationBase {
             .map(EventEntity::getEventName)
             .toList();
     }
-
-    private List<EventEntity> createEventsWithDefaults(int quantity) {
-        return rangeClosed(1, quantity)
-            .mapToObj(index -> {
-                var event = createEventWithDefaults();
-                event.setEventName("some-event-name-" + index);
-                event.setEventText("some-event-text-" + index);
-                event.setMessageId("some-message-id-" + index);
-                event.setTimestamp(now());
-                return event;
-            }).toList();
-    }
-
 
 }
