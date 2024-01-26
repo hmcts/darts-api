@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -58,7 +59,13 @@ class CaseMapperTest extends IntegrationBase {
 
     @Test
     void mapsMultipleReportingRestrictionsValuesCorrectly() {
-        var reportingRestrictions = createEventsWithDifferentTimestamps(3).stream()
+
+        List<OffsetDateTime> eventDateTimes = new ArrayList<>();
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:45:00Z"));
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T14:45:12Z"));
+
+        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         var minimalHearing = createSomeMinimalHearing();
@@ -162,6 +169,18 @@ class CaseMapperTest extends IntegrationBase {
             .toList();
     }
 
+    private List<EventEntity> createEventsWithDifferentTimestamps(List<OffsetDateTime> eventDateTimes) {
+        return rangeClosed(1, eventDateTimes.size())
+            .mapToObj(index -> {
+                var event = createEventWithDefaults();
+                event.setEventName("some-event-name-" + index);
+                event.setEventText("some-event-text-" + index);
+                event.setMessageId("some-message-id-" + index);
+                event.setTimestamp(eventDateTimes.get(index - 1));
+                return event;
+            }).toList();
+    }
+
     private List<Integer> hearingIdsFrom(List<EventEntity> reportingRestrictions) {
         return reportingRestrictions.stream()
             .flatMap(eventEntity -> eventEntity.getHearingEntities().stream())
@@ -204,5 +223,6 @@ class CaseMapperTest extends IntegrationBase {
                 return event;
             }).toList();
     }
+
 
 }
