@@ -15,7 +15,7 @@ public enum UserManagementError implements DartsApiError {
         "The provided user does not exist"),
     DUPLICATE_EMAIL(
         "101",
-            HttpStatus.UNPROCESSABLE_ENTITY,
+            HttpStatus.CONFLICT,
         "The provided email already exists"),
     DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED(
         "110",
