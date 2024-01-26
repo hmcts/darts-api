@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("VariableDeclarationUsageDistance")
-class RetentionPolicyEnumTest extends IntegrationBase {
+class RetentionPolicyTest extends IntegrationBase {
 
     @Autowired
     private CasesMapper casesMapper;
