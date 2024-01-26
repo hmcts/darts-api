@@ -29,7 +29,7 @@ class RetentionMapperTest {
         caseRetentionEntity.setId(1);
 
         RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
-        retentionPolicyTypeEntity.setPolicyName("Standard");
+        retentionPolicyTypeEntity.setDisplayName("Standard");
         caseRetentionEntity.setRetentionPolicyType(retentionPolicyTypeEntity);
 
         caseRetentionEntity.setComments("Some comments");
@@ -38,11 +38,11 @@ class RetentionMapperTest {
         RetentionMapper retentionMapper = new RetentionMapper();
         GetCaseRetentionsResponse caseRetention = retentionMapper.mapToCaseRetention(caseRetentionEntity);
 
-        assertEquals(caseRetention.getRetentionLastChangedDate(), caseRetentionEntity.getLastModifiedDateTime());
-        assertEquals(caseRetention.getRetentionDate(), caseRetentionEntity.getRetainUntil());
-        assertEquals(caseRetention.getAmendedBy(), caseRetentionEntity.getSubmittedBy().getUserName());
-        assertEquals(caseRetention.getRetentionPolicyApplied(), caseRetentionEntity.getRetentionPolicyType().getPolicyName());
-        assertEquals(caseRetention.getComments(), caseRetentionEntity.getComments());
-        assertEquals(caseRetention.getStatus(), caseRetentionEntity.getCurrentState());
+        assertEquals(caseRetentionEntity.getLastModifiedDateTime(), caseRetention.getRetentionLastChangedDate());
+        assertEquals(caseRetentionEntity.getRetainUntil(), caseRetention.getRetentionDate());
+        assertEquals(caseRetentionEntity.getSubmittedBy().getUserName(), caseRetention.getAmendedBy());
+        assertEquals(caseRetentionEntity.getRetentionPolicyType().getDisplayName(), caseRetention.getRetentionPolicyApplied());
+        assertEquals(caseRetentionEntity.getComments(), caseRetention.getComments());
+        assertEquals(caseRetentionEntity.getCurrentState(), caseRetention.getStatus());
     }
 }

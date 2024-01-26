@@ -14,7 +14,7 @@ update retention_policy_type set display_name = 'Default', description = 'DARTS 
 
 INSERT INTO darts.retention_policy_type
 (rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
-VALUES(7, '0', 'DARTS Default Policy', 'Default', 'DARTS Default retention policy', 'yY0M0D', '2024-01-01 00:00:00', '', current_timestamp, 0, current_timestamp, 0);
+VALUES(7, '0', 'DARTS Default Policy', 'Default', 'DARTS Default retention policy', '7Y0M0D', '2024-01-01 00:00:00', '', current_timestamp, 0, current_timestamp, 0);
 
 INSERT INTO darts.retention_policy_type
 (rpt_id, fixed_policy_key, policy_name, display_name, description, duration, policy_start_ts, retention_policy_object_id, created_ts, created_by, last_modified_ts, last_modified_by)
