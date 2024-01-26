@@ -156,10 +156,10 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         return caseRetention;
     }
 
-    private RetentionPolicyTypeEntity getRetentionPolicy(boolean isPermanent) {
+    private RetentionPolicyTypeEntity getRetentionPolicy(Boolean isPermanent) {
 
         String policyKey;
-        if (isPermanent) {
+        if (BooleanUtils.isTrue(isPermanent)) {
             policyKey = RetentionPolicyEnum.PERMANENT.getPolicyKey();
         } else {
             policyKey = RetentionPolicyEnum.MANUAL.getPolicyKey();
@@ -172,7 +172,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         if (manualPolicyEntityOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.INTERNAL_SERVER_ERROR,
-                MessageFormat.format("Cannot find Policy with FixedPolicyKey {}", policyKey)
+                MessageFormat.format("Cannot find Policy with FixedPolicyKey ''{0}''", policyKey)
             );
         }
         return manualPolicyEntityOpt.get();

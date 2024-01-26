@@ -23,7 +23,7 @@ import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.AP
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionStatusEnum.REQUESTED;
 import static uk.gov.hmcts.darts.transcriptions.enums.TranscriptionUrgencyEnum.STANDARD;
 
-class SentencingRemarksAndRetentionPolicyHandlerTestEnum extends IntegrationBase {
+class SentencingRemarksAndRetentionPolicyHandlerTest extends IntegrationBase {
 
     private static final String SOME_CASE_NUMBER = "CASE1";
     private static final String SWANSEA_COURTHOUSE = "SWANSEA";
