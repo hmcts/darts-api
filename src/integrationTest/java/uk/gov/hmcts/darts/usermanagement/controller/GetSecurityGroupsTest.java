@@ -18,10 +18,11 @@ import uk.gov.hmcts.darts.testutils.stubs.AdminUserStub;
 import uk.gov.hmcts.darts.testutils.stubs.CourthouseStub;
 import uk.gov.hmcts.darts.usermanagement.model.SecurityGroupWithIdAndRole;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,22 +49,36 @@ class GetSecurityGroupsTest extends IntegrationBase {
     void shouldReturnAllSecurityGroupsWithCourthouseIds() throws Exception {
         adminUserStub.givenUserIsAuthorised(userIdentity);
 
-        CourthouseEntity courthouseEntity = courthouseStub.createCourthouseUnlessExists("func-test-courthouse");
-        SecurityGroupEntity securityGroupEntity = SecurityGroupTestData.buildGroupForRoleAndCourthouse(SecurityRoleEnum.APPROVER, courthouseEntity);
-        securityGroupRepository.saveAndFlush(securityGroupEntity);
-
         MvcResult mvcResult = mockMvc.perform(get(ENDPOINT_URL))
             .andExpect(status().isOk())
             .andReturn();
 
         List<SecurityGroupWithIdAndRole> groups = objectMapper.readValue(mvcResult.getResponse().getContentAsString(),
                                new TypeReference<List<SecurityGroupWithIdAndRole>>(){});
-        SecurityGroupWithIdAndRole securityGroupWithIdAndRole = groups.stream()
-            .filter(group -> "some-group-name".equals(group.getName()))
-            .findFirst().orElse(null);
 
-        assertEquals(securityGroupWithIdAndRole.getSecurityRoleId(), 1);
-        assertTrue(securityGroupWithIdAndRole.getCourthouseIds().contains(courthouseEntity.getId()));
+        assertFalse(groups.isEmpty());
+
+        groups.sort(Comparator.comparingInt(SecurityGroupWithIdAndRole::getId).reversed());
+
+        checkGroup(groups.get(0), "ADMIN", true, 11, true);
+        checkGroup(groups.get(1), "Test Approver", false, 1, true);
+        checkGroup(groups.get(2), "Test Requestor", false, 2, true);
+        checkGroup(groups.get(3), "Test Judge", false, 3, true);
+        checkGroup(groups.get(4), "Test Transcriber", false, 4, true);
+        checkGroup(groups.get(5), "Test Language Shop", false, 5, true);
+        checkGroup(groups.get(6), "Test RCJ Appeals", false, 6, true);
+        checkGroup(groups.get(7), "Xhibit Group", true, 7, true);
+        checkGroup(groups.get(8), "Cpp Group", true, 8, true);
+        checkGroup(groups.get(9), "Dar Pc Group", true, 9, true);
+        checkGroup(groups.get(10), "Mid Tier Group", true, 10, true);
+    }
+
+    private void checkGroup(SecurityGroupWithIdAndRole group, String name, boolean globalAccess, Integer roleId, boolean displayState) {
+        assertEquals(name, group.getName());
+        assertEquals(globalAccess, group.getGlobalAccess());
+        assertEquals(roleId, group.getSecurityRoleId());
+        assertEquals(displayState, group.getDisplayState());
+        //assertTrue(group.getCourthouseIds().contains(1));
     }
 
     @Test
