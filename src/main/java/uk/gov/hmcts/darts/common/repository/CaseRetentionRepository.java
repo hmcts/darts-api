@@ -19,10 +19,10 @@ public interface CaseRetentionRepository extends JpaRepository<CaseRetentionEnti
 
     @Query("""
         SELECT c
-        FROM CaseRetentionEntity c
-        WHERE courtCase = :courtCase
-        AND manualOverride=false
-        AND currentState='COMPLETE'
+        FROM CaseRetentionEntity c, RetentionPolicyTypeEntity rpt
+        WHERE c.courtCase = :courtCase
+        and c.retentionPolicyType.fixedPolicyKey not in ('PERM', 'MANUAL')
+        AND c.currentState='COMPLETE'
         ORDER BY c.createdDateTime desc
         limit 1
         """

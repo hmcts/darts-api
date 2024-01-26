@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
@@ -134,7 +136,6 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                                                        OffsetDateTime newRetentionDate) {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
-        caseRetention.setManualOverride(true);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         caseRetention.setLastModifiedBy(currentUser);
         caseRetention.setCreatedBy(currentUser);
@@ -144,7 +145,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setCurrentState(String.valueOf(CaseRetentionStatus.COMPLETE));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
 
-        caseRetention.setRetentionPolicyType(retentionPolicyTypeRepository.getReferenceById(1));//todo update once decision has been made
+        caseRetention.setRetentionPolicyType(getRetentionPolicy(postRetentionRequest.getIsPermanentRetention()));
 
         caseRetentionRepository.saveAndFlush(caseRetention);
         auditApi.recordAudit(
@@ -153,6 +154,28 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             courtCase
         );
         return caseRetention;
+    }
+
+    private RetentionPolicyTypeEntity getRetentionPolicy(boolean isPermanent) {
+
+        String policyKey;
+        if (isPermanent) {
+            policyKey = RetentionPolicyEnum.PERMANENT.getPolicyKey();
+        } else {
+            policyKey = RetentionPolicyEnum.MANUAL.getPolicyKey();
+        }
+
+        Optional<RetentionPolicyTypeEntity> manualPolicyEntityOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+            policyKey,
+            currentTimeHelper.currentOffsetDateTime()
+        );
+        if (manualPolicyEntityOpt.isEmpty()) {
+            throw new DartsApiException(
+                RetentionApiError.INTERNAL_SERVER_ERROR,
+                MessageFormat.format("Cannot find Policy with FixedPolicyKey {}", policyKey)
+            );
+        }
+        return manualPolicyEntityOpt.get();
     }
 
 }

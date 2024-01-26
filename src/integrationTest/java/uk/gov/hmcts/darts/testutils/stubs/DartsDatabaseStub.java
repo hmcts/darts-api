@@ -70,6 +70,7 @@ import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 import uk.gov.hmcts.darts.dailylist.enums.SourceType;
 import uk.gov.hmcts.darts.notification.entity.NotificationEntity;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.testutils.data.AudioTestData;
 import uk.gov.hmcts.darts.testutils.data.CourthouseTestData;
 import uk.gov.hmcts.darts.testutils.data.DailyListTestData;
@@ -175,7 +176,6 @@ public class DartsDatabaseStub {
         defenceRepository.deleteAll();
         defendantRepository.deleteAll();
         prosecutorRepository.deleteAll();
-        caseRetentionRepository.deleteAll();
         caseRepository.deleteAll();
         judgeRepository.deleteAll();
         dailyListRepository.deleteAll();
@@ -590,18 +590,10 @@ public class DartsDatabaseStub {
 
     @Transactional
     public void createCaseRetention(CourtCaseEntity courtCase) {
-        RetentionPolicyTypeEntity retentionPolicyTypeEntity = new RetentionPolicyTypeEntity();
-        retentionPolicyTypeEntity.setId(1);
-        retentionPolicyTypeEntity.setFixedPolicyKey(1);
-        retentionPolicyTypeEntity.setPolicyName("Standard");
-        retentionPolicyTypeEntity.setDuration("7");
-        retentionPolicyTypeEntity.setPolicyStart(OffsetDateTime.now().minusYears(1));
-        retentionPolicyTypeEntity.setPolicyEnd(OffsetDateTime.now().plusYears(1));
-        retentionPolicyTypeEntity.setCreatedDateTime(OffsetDateTime.now());
-        retentionPolicyTypeEntity.setCreatedBy(userAccountRepository.getReferenceById(0));
-        retentionPolicyTypeEntity.setLastModifiedDateTime(OffsetDateTime.now());
-        retentionPolicyTypeEntity.setLastModifiedBy(userAccountRepository.getReferenceById(0));
-        retentionPolicyTypeRepository.saveAndFlush(retentionPolicyTypeEntity);
+        RetentionPolicyTypeEntity retentionPolicyTypeEntity = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+            RetentionPolicyEnum.MANUAL.getPolicyKey(),
+            currentTimeHelper.currentOffsetDateTime()
+        ).get();
 
         CaseRetentionEntity caseRetentionEntity1 = createCaseRetentionObject(1, courtCase, retentionPolicyTypeEntity, "a_state");
         caseRetentionRepository.save(caseRetentionEntity1);

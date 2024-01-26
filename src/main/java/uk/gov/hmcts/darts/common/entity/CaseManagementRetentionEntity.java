@@ -41,7 +41,7 @@ public class CaseManagementRetentionEntity {
     @JoinColumn(name = "eve_id", nullable = false)
     private EventEntity eventEntity;
 
-    @Column(name = "total_sentence", nullable = false)
+    @Column(name = "total_sentence")
     private String totalSentence;
 
     @Column(name = "event_ts", nullable = false)

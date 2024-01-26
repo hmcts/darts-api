@@ -28,10 +28,13 @@ public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     private Integer id;
 
     @Column(name = "fixed_policy_key")
-    private Integer fixedPolicyKey;
+    private String fixedPolicyKey;
 
     @Column(name = "policy_name")
     private String policyName;
+
+    @Column(name = "display_name")
+    private String displayName;
 
     @Column(name = "duration")
     private String duration;
@@ -42,4 +45,9 @@ public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     @Column(name = "policy_end_ts")
     private OffsetDateTime policyEnd;
 
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "retention_policy_object_id")
+    private String retentionPolicyObjectId;
 }

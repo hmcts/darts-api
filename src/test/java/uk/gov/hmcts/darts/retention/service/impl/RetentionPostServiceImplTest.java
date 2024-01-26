@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.time.LocalDate;
@@ -31,7 +32,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -80,7 +80,10 @@ class RetentionPostServiceImplTest {
         caseRetentionLater.setCurrentState(CaseRetentionStatus.COMPLETE.name());
         caseRetentionLater.setCreatedDateTime(OffsetDateTime.of(2020, 10, 1, 11, 0, 0, 0, ZoneOffset.UTC));
         caseRetentionLater.setRetainUntil(OffsetDateTime.of(2026, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
-        caseRetentionLater.setManualOverride(true);
+        caseRetentionLater.setRetentionPolicyType(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+            RetentionPolicyEnum.MANUAL.getPolicyKey(),
+            currentTimeHelper.currentOffsetDateTime()
+        ).get());
         when(caseRetentionRepository.findLatestCompletedRetention(any())).thenReturn(Optional.of(caseRetentionLater));
 
         when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2020, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
@@ -215,7 +218,7 @@ class RetentionPostServiceImplTest {
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2026-01-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
-        assertTrue(savedRetention.isManualOverride());
+        assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getPolicyName());
 
     }
 
@@ -236,7 +239,7 @@ class RetentionPostServiceImplTest {
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2027-01-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
-        assertTrue(savedRetention.isManualOverride());
+        assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getPolicyName());
     }
 
     @Test
@@ -256,8 +259,7 @@ class RetentionPostServiceImplTest {
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2119-10-01T10:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
-        assertTrue(savedRetention.isManualOverride());
+        assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getPolicyName());
     }
-
 
 }
