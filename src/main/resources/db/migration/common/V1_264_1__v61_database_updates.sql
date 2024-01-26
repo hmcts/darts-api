@@ -5,9 +5,6 @@ update event set evh_id=1 WHERE evh_id is null;
 ALTER TABLE event ALTER COLUMN evh_id SET NOT NULL;
 
 
-ALTER TABLE external_object_directory ADD COLUMN verification_attempts       INTEGER;
-
-
 CREATE TABLE case_transcription_ae
 (cas_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
