@@ -124,11 +124,13 @@ class ExternalInboundDataStoreDeleterImplTest {
         inboundData1.setStatus(deletedStatus);
         inboundData1.setExternalLocationType(new ExternalLocationTypeEntity());
         inboundData1.setId(1);
+        inboundData1.setVerificationAttempts(1);
 
         ExternalObjectDirectoryEntity inboundData2 = new ExternalObjectDirectoryEntity();
         inboundData2.setStatus(deletedStatus);
         inboundData2.setExternalLocationType(new ExternalLocationTypeEntity());
         inboundData2.setId(2);
+        inboundData2.setVerificationAttempts(2);
 
         ArrayList<ExternalObjectDirectoryEntity> inboundDataList = new ArrayList<>();
         inboundDataList.add(inboundData1);

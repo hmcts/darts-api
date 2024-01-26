@@ -30,7 +30,7 @@ public class UserController implements UserApi {
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ANY_ENTITY_ID, globalAccessSecurityRoles = ADMIN)
     public ResponseEntity<List<UserWithIdAndTimestamps>> getUsers(Integer courthouseId, String emailAddress) {
-        return UserApi.super.getUsers(courthouseId, emailAddress);
+        return ResponseEntity.ok(userManagementService.getUsers(emailAddress));
     }
 
     @Override

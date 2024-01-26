@@ -218,6 +218,7 @@ class ViqHeaderServiceImplTest {
 
         String fileLocation = tempDirectory.getAbsolutePath();
         String readmeFile = viqHeaderService.generateReadme(viqMetaData, fileLocation);
+
         assertNotNull(readmeFile);
         log.debug("Reading file " + readmeFile);
         assertTrue(readmeFile.endsWith(README_TXT_FILENAME));

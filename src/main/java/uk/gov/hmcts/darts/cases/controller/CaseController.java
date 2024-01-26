@@ -73,35 +73,6 @@ public class CaseController implements CasesApi {
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
-    public ResponseEntity<List<AdvancedSearchResult>> casesSearchGet(
-        String caseNumber,
-        String courthouse,
-        String courtroom,
-        String judgeName,
-        String defendantName,
-        LocalDate dateFrom,
-        LocalDate dateTo,
-        String eventTextContains
-    ) {
-
-        GetCasesSearchRequest request = GetCasesSearchRequest.builder()
-            .caseNumber(StringUtils.trimToNull(caseNumber))
-            .courthouse(StringUtils.trimToNull(courthouse))
-            .courtroom(StringUtils.trimToNull(courtroom))
-            .judgeName(StringUtils.trimToNull(judgeName))
-            .defendantName(StringUtils.trimToNull(defendantName))
-            .dateFrom(dateFrom).dateTo(dateTo)
-            .eventTextContains(StringUtils.trimToNull(eventTextContains))
-            .build();
-
-        RequestValidator.validate(request);
-        List<AdvancedSearchResult> advancedSearchResults = caseService.advancedSearch(request);
-        return new ResponseEntity<>(advancedSearchResults, HttpStatus.OK);
-
-    }
-
-    @Override
-    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     public ResponseEntity<List<AdvancedSearchResult>> casesSearchPost(
         AdvancedSearchDetails advancedSearchDetails
     ) {

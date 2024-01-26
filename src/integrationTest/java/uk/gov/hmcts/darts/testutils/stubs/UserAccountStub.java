@@ -9,6 +9,8 @@ import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +28,9 @@ public class UserAccountStub {
     private static final int SYSTEM_USER_ID = 0;
     private static final String INTEGRATION_TEST_USER_EMAIL = "integrationtest.user@example.com";
     private static final String SEPARATE_TEST_USER_EMAIL = "separateintegrationtest.user@example.com";
+    private static final OffsetDateTime LAST_LOGIN_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime LAST_MODIFIED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime CREATED_DATE_TIME = OffsetDateTime.of(2023, 10, 27, 22, 0, 0, 0, ZoneOffset.UTC);
 
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
@@ -76,6 +81,9 @@ public class UserAccountStub {
         newUser.setActive(true);
         newUser.setAccountGuid(guid);
         newUser.setIsSystemUser(false);
+        newUser.setCreatedDateTime(CREATED_DATE_TIME);
+        newUser.setLastModifiedDateTime(LAST_MODIFIED_DATE_TIME);
+        newUser.setLastLoginTime(LAST_LOGIN_TIME);
         return userAccountRepository.saveAndFlush(newUser);
     }
 

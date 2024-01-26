@@ -14,7 +14,9 @@ public enum AutomatedTaskName {
     INBOUND_AUDIO_DELETER_TASK_NAME("InboundAudioDeleter"),
     EXTERNAL_DATASTORE_DELETER("ExternalDataStoreDeleter"),
     UNSTRUCTURED_AUDIO_DELETER_TASK_NAME("UnstructuredAudioDeleter"),
-    UNSTRUCTURED_TO_ARM_TASK_NAME("UnstructuredToArmDataStore");
+    UNSTRUCTURED_TO_ARM_TASK_NAME("UnstructuredToArmDataStore"),
+    PROCESS_ARM_RESPONSE_FILES_TASK_NAME("ProcessArmResponseFiles");
+
     private final String taskName;
 
     private static final Map<String, AutomatedTaskName> BY_TASK_NAME = new HashMap<>();
