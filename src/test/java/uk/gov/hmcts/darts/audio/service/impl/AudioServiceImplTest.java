@@ -175,7 +175,7 @@ class AudioServiceImplTest {
 
         byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
-        when(fileOperationService.saveFileToBinaryData(any())).thenReturn(data);
+        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
 
         Flux<ResponseEntity<byte[]>> stream = audioService.getAudioPreviewFlux(
             mediaEntity.getId(),
@@ -212,7 +212,7 @@ class AudioServiceImplTest {
 
         BinaryData data = mock(BinaryData.class);
         InputStream inputStream = mock(InputStream.class);
-        when(fileOperationService.saveFileToBinaryData(any())).thenReturn(data);
+        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
         when(data.toStream()).thenReturn(inputStream);
         when(inputStream.read(any())).thenThrow(new IOException());
 
