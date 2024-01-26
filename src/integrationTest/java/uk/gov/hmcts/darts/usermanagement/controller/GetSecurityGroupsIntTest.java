@@ -78,7 +78,6 @@ class GetSecurityGroupsIntTest extends IntegrationBase {
         assertEquals(globalAccess, group.getGlobalAccess());
         assertEquals(roleId, group.getSecurityRoleId());
         assertEquals(displayState, group.getDisplayState());
-        //assertTrue(group.getCourthouseIds().contains(1));
     }
 
     @Test
