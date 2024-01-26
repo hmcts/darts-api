@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
 
@@ -24,5 +25,10 @@ public class HearingStub {
             caseNumber,
             hearingDate
         );
+    }
+
+    public HearingEntity createMinimalHearing() {
+        CourthouseEntity minimalCourthouse = courthouseStub.createMinimalCourthouse();
+        return createHearing(minimalCourthouse.getCourthouseName(), "1", "caseNumber1", LocalDate.of(2020, 10, 1));
     }
 }

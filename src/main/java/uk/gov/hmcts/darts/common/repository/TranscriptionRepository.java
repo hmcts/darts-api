@@ -15,9 +15,9 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
 
     @Query("""
         SELECT t
-        FROM TranscriptionEntity t, CourtCaseEntity case
+        FROM TranscriptionEntity t
+        join t.courtCases case
         WHERE case.id = :caseId
-        AND t.courtCase = case
         ORDER BY t.createdDateTime
         """
     )
@@ -34,9 +34,9 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
 
     @Query("""
         SELECT t
-        FROM TranscriptionEntity t, HearingEntity hearing
+        FROM TranscriptionEntity t
+        join t.hearings hearing
         WHERE hearing.id = :hearingId
-        AND t.hearing = hearing
         ORDER BY t.createdDateTime
         """
     )
@@ -44,9 +44,9 @@ public interface TranscriptionRepository extends JpaRepository<TranscriptionEnti
 
     @Query("""
         SELECT t
-        FROM TranscriptionEntity t, HearingEntity hearing
+        FROM TranscriptionEntity t
+        join t.hearings hearing
         WHERE hearing.id = :hearingId
-        AND t.hearing = hearing
         AND t.transcriptionType = :transcriptionType
         AND t.startTime = :startTime
         AND t.endTime = :endTime

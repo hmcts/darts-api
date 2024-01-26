@@ -86,9 +86,6 @@ public class CourtCaseEntity extends CreatedModifiedBaseEntity {
     @Column(name = VERSION_LABEL, length = 32)
     private String legacyVersionLabel;
 
-    @OneToMany(mappedBy = COURT_CASE)
-    private List<TranscriptionEntity> transcriptions;
-
     @OneToMany(mappedBy = COURT_CASE, cascade = CascadeType.PERSIST)
     private List<HearingEntity> hearings = new ArrayList<>();
 

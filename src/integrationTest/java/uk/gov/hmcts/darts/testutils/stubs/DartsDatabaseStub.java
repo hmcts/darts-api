@@ -139,6 +139,7 @@ public class DartsDatabaseStub {
     private final CourthouseStub courthouseStub;
     private final EventStub eventStub;
     private final ExternalObjectDirectoryStub externalObjectDirectoryStub;
+    private final HearingStub hearingStub;
     private final MediaRequestStub mediaRequestStub;
     private final TranscriptionStub transcriptionStub;
     private final TransformedMediaStub transformedMediaStub;
@@ -574,9 +575,6 @@ public class DartsDatabaseStub {
 
     @Transactional
     public TranscriptionEntity saveWithType(TranscriptionEntity transcriptionEntity) {
-        var courtCase = transcriptionEntity.getCourtCase();
-        entityManager.merge(courtCase);
-
         var typeRef = transcriptionTypeRepository.getReferenceById(transcriptionEntity.getTranscriptionType().getId());
         transcriptionEntity.setTranscriptionType(typeRef);
 

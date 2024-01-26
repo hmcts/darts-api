@@ -26,7 +26,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 -- "requester_transcriptions"
                 SELECT
                     tra.tra_id as transcription_id,
-                    tra.cas_id as case_id,
+                    cas.cas_id as case_id,
                     cas.case_number,
                     cth.courthouse_name,
                     hea.hearing_date,
@@ -41,17 +41,25 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 ON
                     trw.tra_id = tra.tra_id
                 INNER JOIN
+                    darts.case_transcription_ae case_transcription
+                ON
+                    tra.tra_id = case_transcription.tra_id
+                INNER JOIN
                     darts.court_case cas
                 ON
-                    tra.cas_id = cas.cas_id
+                    case_transcription.cas_id = cas.cas_id
                 INNER JOIN
                     darts.courthouse cth
                 ON
                     cas.cth_id = cth.cth_id
                 INNER JOIN
+                    darts.hearing_transcription_ae hearing_transcription
+                ON
+                    tra.tra_id = hearing_transcription.tra_id
+                INNER JOIN
                     darts.hearing hea
                 ON
-                    tra.hea_id = hea.hea_id
+                    hearing_transcription.hea_id = hea.hea_id
                 INNER JOIN
                     darts.transcription_type trt
                 ON
@@ -75,7 +83,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 -- Migrated "requester_transcriptions"
                 SELECT
                     tra.tra_id as transcription_id,
-                    tra.cas_id as case_id,
+                    cas.cas_id as case_id,
                     cas.case_number,
                     cth.courthouse_name,
                     tra.hearing_date,
@@ -90,9 +98,13 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 ON
                     trw.tra_id = tra.tra_id
                 INNER JOIN
+                    darts.case_transcription_ae case_transcription
+                ON
+                    tra.tra_id = case_transcription.tra_id
+                INNER JOIN
                     darts.court_case cas
                 ON
-                    tra.cas_id = cas.cas_id
+                    case_transcription.cas_id = cas.cas_id
                 INNER JOIN
                     darts.courthouse cth
                 ON
@@ -113,7 +125,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                     trw.workflow_actor = :usr_id
                 AND trw.trs_id = 1
                 AND tra.trs_id <> 7
-                AND tra.hea_id IS NULL
+                AND not exists (select 1 from darts.hearing_transcription_ae hear_tran where tra.tra_id = hear_tran.tra_id)
                 AND (:include_hidden_from_requester OR tra.hide_request_from_requestor = false)
                 ORDER BY transcription_id desc
                 """,
@@ -131,7 +143,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 -- approver_transcriptions
                 SELECT
                     tra.tra_id as transcription_id,
-                    tra.cas_id as case_id,
+                    cas.cas_id as case_id,
                     cas.case_number,
                     cth.courthouse_name,
                     hea.hearing_date,
@@ -142,9 +154,13 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 FROM
                     darts.transcription tra
                 INNER JOIN
+                    darts.case_transcription_ae case_transcription
+                ON
+                    tra.tra_id = case_transcription.tra_id
+                INNER JOIN
                     darts.court_case cas
                 ON
-                    tra.cas_id = cas.cas_id
+                    case_transcription.cas_id = cas.cas_id
                 INNER JOIN
                     darts.courthouse cth
                 ON
@@ -170,9 +186,13 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                             usr.usr_id = :usr_id
                         AND grp.rol_id = :rol_id)
                 INNER JOIN
+                    darts.hearing_transcription_ae hearing_transcription
+                ON
+                    tra.tra_id = hearing_transcription.tra_id
+                INNER JOIN
                     darts.hearing hea
                 ON
-                    tra.hea_id = hea.hea_id
+                    hearing_transcription.hea_id = hea.hea_id
                 INNER JOIN
                     darts.transcription_type trt
                 ON
@@ -199,7 +219,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 -- Migrated approver_transcriptions
                 SELECT
                     tra.tra_id as transcription_id,
-                    tra.cas_id as case_id,
+                    cas.cas_id as case_id,
                     cas.case_number,
                     cth.courthouse_name,
                     hearing_date,
@@ -210,9 +230,13 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 FROM
                     darts.transcription tra
                 INNER JOIN
+                    darts.case_transcription_ae case_transcription
+                ON
+                    tra.tra_id = case_transcription.tra_id
+                INNER JOIN
                     darts.court_case cas
                 ON
-                    tra.cas_id = cas.cas_id
+                    case_transcription.cas_id = cas.cas_id
                 INNER JOIN
                     darts.courthouse cth
                 ON
@@ -257,7 +281,7 @@ public class YourTranscriptsQueryImpl implements YourTranscriptsQuery {
                 WHERE
                     tra.trs_id = :trs_id
                 AND trw.workflow_actor <> :usr_id
-                AND tra.hea_id IS NULL
+                AND not exists (select 1 from darts.hearing_transcription_ae hear_tran where tra.tra_id = hear_tran.tra_id)
                 ORDER BY transcription_id desc
                 """,
             new MapSqlParameterSource("usr_id", userId)

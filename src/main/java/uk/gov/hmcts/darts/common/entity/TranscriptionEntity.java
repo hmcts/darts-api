@@ -2,16 +2,20 @@ package uk.gov.hmcts.darts.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.time.LocalDate;
@@ -34,9 +38,11 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "tra_gen", sequenceName = "tra_seq", allocationSize = 1)
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "cas_id", nullable = false)
-    private CourtCaseEntity courtCase;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "case_transcription_ae",
+        joinColumns = {@JoinColumn(name = "tra_id")},
+        inverseJoinColumns = {@JoinColumn(name = "cas_id")})
+    private List<CourtCaseEntity> courtCases = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "trt_id", nullable = false)
@@ -50,9 +56,11 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "tru_id")
     private TranscriptionUrgencyEntity transcriptionUrgency;
 
-    @ManyToOne
-    @JoinColumn(name = "hea_id")
-    private HearingEntity hearing;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "hearing_transcription_ae",
+        joinColumns = {@JoinColumn(name = "tra_id")},
+        inverseJoinColumns = {@JoinColumn(name = "hea_id")})
+    private List<HearingEntity> hearings = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "trs_id")
@@ -91,4 +99,39 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @OneToMany(mappedBy = TranscriptionDocumentEntity_.TRANSCRIPTION)
     private List<TranscriptionDocumentEntity> transcriptionDocumentEntities = new ArrayList<>();
 
+    public void addCase(CourtCaseEntity courtCase) {
+        if (courtCase != null) {
+            courtCases.add(courtCase);
+        }
+    }
+
+    public void addHearing(HearingEntity hearing) {
+        if (hearing != null) {
+            addCase(hearing.getCourtCase());
+            hearings.add(hearing);
+        }
+    }
+
+    /*
+        courtCases should be looped through
+     */
+    @Deprecated
+    public CourtCaseEntity getCourtCase() {
+        if (CollectionUtils.isEmpty(courtCases)) {
+            HearingEntity hearing = getHearing();
+            if (hearing == null) {
+                return null;
+            } else {
+                return hearing.getCourtCase();
+            }
+        }
+        return courtCases.get(0);
+    }
+
+    public HearingEntity getHearing() {
+        if (CollectionUtils.isEmpty(hearings)) {
+            return null;
+        }
+        return hearings.get(0);
+    }
 }

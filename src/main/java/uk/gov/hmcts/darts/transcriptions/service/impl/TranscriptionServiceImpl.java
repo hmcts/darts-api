@@ -265,15 +265,12 @@ public class TranscriptionServiceImpl implements TranscriptionService {
         transcription.setHideRequestFromRequestor(false);
 
         if (nonNull(transcriptionRequestDetails.getCaseId())) {
-            transcription.setCourtCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));
+            transcription.addCase(caseService.getCourtCaseById(transcriptionRequestDetails.getCaseId()));
         }
 
         if (nonNull(transcriptionRequestDetails.getHearingId())) {
             HearingEntity hearing = hearingsService.getHearingById(transcriptionRequestDetails.getHearingId());
-            transcription.setHearing(hearing);
-            if (isNull(transcription.getCourtCase())) {
-                transcription.setCourtCase(hearing.getCourtCase());
-            }
+            transcription.addHearing(hearing);
         }
 
         return transcriptionRepository.saveAndFlush(transcription);

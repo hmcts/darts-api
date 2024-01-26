@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.hmcts.darts.common.entity.base.CreatedModifiedBaseEntity;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -24,7 +25,7 @@ import java.util.Set;
 @Table(name = "security_group")
 @Getter
 @Setter
-public class SecurityGroupEntity {
+public class SecurityGroupEntity extends CreatedModifiedBaseEntity {
 
     @Id
     @Column(name = "grp_id")
@@ -63,6 +64,9 @@ public class SecurityGroupEntity {
 
     @Column(name = "display_state")
     private Boolean displayState;
+
+    @Column(name = "use_interpreter")
+    private Boolean useInterpreter;
 
     @ManyToMany
     @JoinTable(name = "security_group_courthouse_ae",

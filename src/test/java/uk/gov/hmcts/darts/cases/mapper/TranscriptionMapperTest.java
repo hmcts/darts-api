@@ -31,7 +31,7 @@ class TranscriptionMapperTest {
         assertEquals(102, transcript.getHearingId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
         assertEquals("SENTENCING_REMARKS", transcript.getType());
-        assertEquals(OffsetDateTime.of(2020, 6, 20,10, 10, 0, 0,ZoneOffset.UTC), transcript.getRequestedOn());
+        assertEquals(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC), transcript.getRequestedOn());
         assertEquals("testUsername", transcript.getRequestedByName());
         assertEquals("APPROVED", transcript.getStatus());
     }
@@ -39,7 +39,7 @@ class TranscriptionMapperTest {
     @Test
     void happyPathLegacy() {
         TranscriptionEntity transcription = new TranscriptionEntity();
-        transcription.setCourtCase(CommonTestDataUtil.createCase("theCase"));
+        transcription.addCase(CommonTestDataUtil.createCase("theCase"));
         TranscriptionTypeEntity transcriptionType = new TranscriptionTypeEntity();
         transcriptionType.setId(1);
         transcriptionType.setDescription(TranscriptionTypeEnum.SENTENCING_REMARKS.name());
@@ -59,7 +59,7 @@ class TranscriptionMapperTest {
         assertEquals(1, transcript.getTranscriptionId());
         assertEquals(LocalDate.of(2023, 6, 20), transcript.getHearingDate());
         assertEquals("SENTENCING_REMARKS", transcript.getType());
-        assertEquals(OffsetDateTime.of(2020, 6, 20,10, 10, 0, 0,ZoneOffset.UTC), transcript.getRequestedOn());
+        assertEquals(OffsetDateTime.of(2020, 6, 20, 10, 10, 0, 0, ZoneOffset.UTC), transcript.getRequestedOn());
         assertEquals("someLegacyRequestor", transcript.getRequestedByName());
         assertEquals("APPROVED", transcript.getStatus());
     }

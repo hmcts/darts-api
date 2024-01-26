@@ -18,7 +18,7 @@ public class TranscriptionTestData {
     public static TranscriptionEntity minimalTranscription() {
         var minimalTranscription = new TranscriptionEntity();
         var someMinimalCase = createSomeMinimalCase();
-        minimalTranscription.setCourtCase(someMinimalCase);
+        minimalTranscription.addCase(someMinimalCase);
         minimalTranscription.setTranscriptionType(someTranscriptionType());
         minimalTranscription.setTranscriptionStatus(someTranscriptionStatus());
         minimalTranscription.setHideRequestFromRequestor(false);
@@ -28,14 +28,13 @@ public class TranscriptionTestData {
 
     public static TranscriptionEntity someTranscriptionForHearing(HearingEntity hearingEntity) {
         var someTranscription = minimalTranscription();
-        someTranscription.setHearing(hearingEntity);
-        someTranscription.setCourtCase(hearingEntity.getCourtCase());
+        someTranscription.addHearing(hearingEntity);
         return someTranscription;
     }
 
     public static TranscriptionEntity someTranscriptionForCase(CourtCaseEntity courtCaseEntity) {
         var someTranscription = minimalTranscription();
-        someTranscription.setCourtCase(courtCaseEntity);
+        someTranscription.addCase(courtCaseEntity);
         return someTranscription;
     }
 
