@@ -41,7 +41,9 @@ class CaseMapperTest extends IntegrationBase {
 
     @Test
     void mapsOneReportingRestrictionsCorrectly() {
-        var reportingRestrictions = createEventsWithDefaults(1).stream()
+        List<OffsetDateTime> eventDateTimes = new ArrayList<>();
+        eventDateTimes.add(OffsetDateTime.parse("2023-06-26T13:00:00Z"));
+        var reportingRestrictions = createEventsWithDifferentTimestamps(eventDateTimes).stream()
             .map(eve -> dartsDatabase.addHandlerToEvent(eve, someReportingRestrictionId()))
             .toList();
         var minimalHearing = createSomeMinimalHearing();

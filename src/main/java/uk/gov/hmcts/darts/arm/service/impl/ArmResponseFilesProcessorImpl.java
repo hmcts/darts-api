@@ -75,17 +75,21 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
-
-        for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
-        }
-        for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
-            try {
-                processInputUploadFile(externalObjectDirectory);
-            } catch (Exception e) {
-                log.error("Unable to process response files for external object directory {}", e.getMessage());
-                updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+        if (!CollectionUtils.isEmpty(dataSentToArm)) {
+            log.info("ARM Response process found : {} records to be processed", dataSentToArm.size());
+            for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
             }
+            for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
+                try {
+                    processInputUploadFile(externalObjectDirectory);
+                } catch (Exception e) {
+                    log.error("Unable to process response files for external object directory {}", e.getMessage());
+                    updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+                }
+            }
+        } else {
+            log.info("ARM Response process unable to find any records to process");
         }
     }
 
@@ -95,8 +99,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         // EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
         String prefix = getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
-        boolean foundInputUploadResponseBlob = false;
         try {
+            log.info("About to look for files starting with prefix: {}", prefix);
             inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
         } catch (Exception e) {
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
@@ -109,12 +113,17 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                     readInputUploadFile(externalObjectDirectory, armInputUploadFilename, armDropZoneStatus);
                     break;
                 } else {
+                    log.warn("ARM file {} not input upload file", armInputUploadFilename);
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
                 }
             }
         } else {
-            log.info("Unable to find input file with prefix {}", prefix);
-            if (!foundInputUploadResponseBlob) {
+            log.info("Unable to find input upload file with prefix {}", prefix);
+
+            ExternalObjectDirectoryEntity latestEod = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectory.getId());
+            ObjectRecordStatusEntity armProcessingResponseFilesStatus = objectRecordStatusRepository.getReferenceById(ARM_PROCESSING_RESPONSE_FILES.getId());
+
+            if (armProcessingResponseFilesStatus.equals(latestEod.getStatus())) {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
             }
         }
@@ -350,8 +359,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEntity objectRecordStatus) {
-        log.debug("Updating ARM status from {} to {} for ID {}", externalObjectDirectory.getStatus().getDescription(), objectRecordStatus.getDescription(),
-                  externalObjectDirectory.getId()
+        log.info(
+            "ARM Push updating ARM status from {} to {} for ID {}",
+            externalObjectDirectory.getStatus().getDescription(),
+            objectRecordStatus.getDescription(),
+            externalObjectDirectory.getId()
         );
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
