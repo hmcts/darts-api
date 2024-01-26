@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
-class GetSecurityGroupsTest extends IntegrationBase {
+class GetSecurityGroupsIntTest extends IntegrationBase {
 
     private static final String ENDPOINT_URL = "/admin/security-groups";
     @Autowired
