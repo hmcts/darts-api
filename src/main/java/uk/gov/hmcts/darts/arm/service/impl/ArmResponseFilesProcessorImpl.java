@@ -75,7 +75,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
-        if (CollectionUtils.isEmpty(dataSentToArm)) {
+        if (!CollectionUtils.isEmpty(dataSentToArm)) {
             log.info("ARM Response process found : {} records to be processed", dataSentToArm.size());
             for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
