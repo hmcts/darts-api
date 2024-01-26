@@ -112,7 +112,7 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public Flux<ResponseEntity<byte[]>> getResponseEntityFlux(Integer mediaId, String range) {
+    public Flux<ResponseEntity<byte[]>> getAudioPreviewFlux(Integer mediaId, String range) {
         return Flux.just(mediaId)
             .publishOn(Schedulers.boundedElastic()).map(m -> {
                 InputStream audioMediaFile = preview(m);

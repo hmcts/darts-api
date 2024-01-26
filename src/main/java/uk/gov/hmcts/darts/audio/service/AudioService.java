@@ -15,7 +15,7 @@ public interface AudioService {
 
     InputStream preview(Integer mediaId);
 
-    Flux<ResponseEntity<byte[]>> getResponseEntityFlux(Integer mediaId, String range);
+    Flux<ResponseEntity<byte[]>> getAudioPreviewFlux(Integer mediaId, String range);
 
     void addAudio(MultipartFile audioFile, AddAudioMetadataRequest addAudioMetadata);
 

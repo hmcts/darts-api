@@ -55,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -176,7 +177,7 @@ class AudioServiceImplTest {
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         when(fileOperationService.saveFileToBinaryData(any())).thenReturn(data);
 
-        Flux<ResponseEntity<byte[]>> stream = audioService.getResponseEntityFlux(
+        Flux<ResponseEntity<byte[]>> stream = audioService.getAudioPreviewFlux(
             mediaEntity.getId(),
             "bytes=0-1024"
         );
@@ -190,6 +191,41 @@ class AudioServiceImplTest {
             })
             .verifyComplete();
 
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    @Test
+    void previewFluxShouldReturnError() throws IOException, ExecutionException, InterruptedException {
+
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setStart(START_TIME);
+        mediaEntity.setEnd(END_TIME);
+        mediaEntity.setChannel(1);
+
+        Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
+        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+        when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
+
+        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"));
+        when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
+
+        BinaryData data = mock(BinaryData.class);
+        InputStream inputStream = mock(InputStream.class);
+        when(fileOperationService.saveFileToBinaryData(any())).thenReturn(data);
+        when(data.toStream()).thenReturn(inputStream);
+        when(inputStream.read(any())).thenThrow(new IOException());
+
+        Flux<ResponseEntity<byte[]>> stream = audioService.getAudioPreviewFlux(
+            mediaEntity.getId(),
+            "bytes=0-1024"
+        );
+
+        StepVerifier
+            .create(stream)
+            .expectErrorMatches(throwable -> throwable instanceof DartsApiException
+                && throwable.getMessage().equals(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST.getTitle())
+            ).verify();
     }
 
     @Test

@@ -95,7 +95,7 @@ public class AudioController implements AudioApi {
         @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
         @RequestHeader(value = "range", required = false) String range
     ) {
-        Flux<ResponseEntity<byte[]>> work = audioService.getResponseEntityFlux(mediaId, range);
+        Flux<ResponseEntity<byte[]>> work = audioService.getAudioPreviewFlux(mediaId, range);
 
         Flux<ResponseEntity<byte[]>> heartBeat = Flux.interval(Duration.ofSeconds(5))
             .map(sequence -> new ResponseEntity<byte[]>(HttpStatus.CONTINUE)).takeUntilOther(work);
