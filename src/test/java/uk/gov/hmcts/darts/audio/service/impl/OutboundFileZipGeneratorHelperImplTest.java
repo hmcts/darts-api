@@ -80,8 +80,24 @@ class OutboundFileZipGeneratorHelperImplTest {
     @Test
     void generatePlaylistReturnsXmlFile() throws IOException, JAXBException {
         Set<PlaylistInfo> playlistInfos = new LinkedHashSet<>();
-        playlistInfos.add(createPlaylistInfo1());
-        playlistInfos.add(createPlaylistInfo2());
+        PlaylistInfo playlistInfo1 = PlaylistInfo.builder()
+            .caseNumber(CASE_NUMBER)
+            .startTime(ZonedDateTime.ofInstant(
+                Instant.parse("2023-06-11T12:00:00Z"),
+                EUROPE_LONDON_ZONE
+            ))
+            .fileLocation("daudio/localaudio/T2023/041301_1/0001")
+            .build();
+        playlistInfos.add(playlistInfo1);
+        PlaylistInfo playlistInfo2 = PlaylistInfo.builder()
+            .caseNumber(CASE_NUMBER)
+            .startTime(ZonedDateTime.ofInstant(
+                Instant.parse("2023-06-11T13:00:00Z"),
+                EUROPE_LONDON_ZONE
+            ))
+            .fileLocation("daudio/localaudio/T2023/041301_1/0002")
+            .build();
+        playlistInfos.add(playlistInfo2);
 
         String playlistOutputFile = tempDirectory.getAbsolutePath();
 
@@ -99,6 +115,7 @@ class OutboundFileZipGeneratorHelperImplTest {
         assertEquals("13", playlist.getItems().get(0).getStartTimeHour());
         assertEquals("0", playlist.getItems().get(0).getStartTimeMinutes());
         assertEquals("0", playlist.getItems().get(0).getStartTimeSeconds());
+        assertEquals("daudio\\localaudio\\T2023\\041301_1\\0001\\", playlist.getItems().get(0).getValue());
     }
 
     @Test
@@ -305,28 +322,6 @@ class OutboundFileZipGeneratorHelperImplTest {
 
         assertEquals(viqFile, sourceFile);
         assertTrue(Files.isSameFile(sourceFile, viqFile));
-    }
-
-    private PlaylistInfo createPlaylistInfo1() {
-        return PlaylistInfo.builder()
-            .caseNumber(CASE_NUMBER)
-            .startTime(ZonedDateTime.ofInstant(
-                Instant.parse("2023-06-11T12:00:00Z"),
-                EUROPE_LONDON_ZONE
-            ))
-            .fileLocation("daudio/localaudio/T2023/041301_1/0001")
-            .build();
-    }
-
-    private PlaylistInfo createPlaylistInfo2() {
-        return PlaylistInfo.builder()
-            .caseNumber(CASE_NUMBER)
-            .startTime(ZonedDateTime.ofInstant(
-                Instant.parse("2023-06-11T13:00:00Z"),
-                EUROPE_LONDON_ZONE
-            ))
-            .fileLocation("daudio/localaudio/T2023/041301_1/0002")
-            .build();
     }
 
 

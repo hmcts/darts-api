@@ -169,7 +169,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
     private static ViqPlayListItem createViqPlaylistItem(PlaylistInfo playlistInfo) {
         ViqPlayListItem playlistItem = new ViqPlayListItem();
 
-        playlistItem.setValue(playlistInfo.getFileLocation());
+        playlistItem.setValue(toPlaylistPathFormat(playlistInfo.getFileLocation()));
         playlistItem.setCaseNumber(playlistInfo.getCaseNumber());
 
         ZonedDateTime itemStartTime = playlistInfo.getStartTime();
@@ -195,5 +195,10 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
             .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime.toOffsetDateTime()))
             .sorted(Comparator.comparing(EventEntity::getTimestamp))
             .collect(Collectors.toList());
+    }
+
+    private static String toPlaylistPathFormat(String path) {
+        String playlistPath = path.replace("/", "\\");
+        return playlistPath + "\\";
     }
 }
