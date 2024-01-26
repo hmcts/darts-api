@@ -23,16 +23,12 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     @Override
     public List<String> listCollectedBlobs(String prefix) {
-        String filename = armDataManagementConfiguration.getFolders().getCollected() + prefix;
-        return armService.listCollectedBlobs(getArmContainerName(), filename);
+        return armService.listCollectedBlobs(getArmContainerName(), prefix);
     }
 
     @Override
     public List<String> listResponseBlobs(String prefix) {
-        return armService.listResponseBlobs(
-            getArmContainerName(),
-            armDataManagementConfiguration.getFolders().getResponse() + prefix
-        );
+        return armService.listResponseBlobs(getArmContainerName(), prefix);
     }
 
     public BinaryData getResponseBlobData(String blobName) {
@@ -44,7 +40,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     @Override
     public void deleteResponseBlob(String blobName) {
-        armService.deleteResponseBlob(getArmContainerName(), armDataManagementConfiguration.getFolders().getResponse() + blobName);
+        armService.deleteResponseBlob(getArmContainerName(), blobName);
     }
 
     private String getArmContainerName() {
