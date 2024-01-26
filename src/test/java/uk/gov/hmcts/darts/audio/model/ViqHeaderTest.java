@@ -46,7 +46,7 @@ class ViqHeaderTest {
         assertThat(header[FORMAT_OFFSET_0]).isEqualTo((byte) FORMAT_OFFSET_VALUE_0);
         assertThat(header[FORMAT_OFFSET_1]).isEqualTo((byte) FORMAT_OFFSET_VALUE_1);
         assertThat(header[DAY_OFFSET]).isEqualTo((byte) 28);
-        assertThat(header[MONTH_OFFSET]).isEqualTo((byte) 5);
+        assertThat(header[MONTH_OFFSET]).isEqualTo((byte) 4);
         assertThat(header[MINUTE_OFFSET]).isEqualTo((byte) 23);
         assertThat(header[HOUR_OFFSET]).isEqualTo((byte) 9);
         assertThat(header[SECONDS_OFFSET]).isEqualTo((byte) 11);

@@ -38,7 +38,7 @@ public class ViqHeader {
 
         viqHeader = new byte[VIQ_HEADER_SIZE];
         viqHeader[DAY_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getDayOfMonth();
-        viqHeader[MONTH_OFFSET] = (byte) (instant.atOffset(ZoneOffset.UTC).getMonthValue() + 1);
+        viqHeader[MONTH_OFFSET] = (byte) (instant.atOffset(ZoneOffset.UTC).getMonthValue());
         viqHeader[MINUTE_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getMinute();
         viqHeader[HOUR_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getHour();
         viqHeader[SECONDS_OFFSET] = (byte) instant.atOffset(ZoneOffset.UTC).getSecond();
