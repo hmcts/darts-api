@@ -99,7 +99,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         // EODID_MEDID_ATTEMPTS_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp
         String prefix = getPrefix(externalObjectDirectory);
         List<String> inputUploadBlobs = null;
-        boolean foundInputUploadResponseBlob = false;
         try {
             log.info("About to look for files starting with prefix: {}", prefix);
             inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
@@ -114,12 +113,17 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                     readInputUploadFile(externalObjectDirectory, armInputUploadFilename, armDropZoneStatus);
                     break;
                 } else {
+                    log.warn("ARM file {} not input upload file", armInputUploadFilename);
                     updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
                 }
             }
         } else {
-            log.info("Unable to find input file with prefix {}", prefix);
-            if (!foundInputUploadResponseBlob) {
+            log.info("Unable to find input upload file with prefix {}", prefix);
+
+            ExternalObjectDirectoryEntity latestEod = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectory.getId());
+            ObjectRecordStatusEntity armProcessingResponseFilesStatus = objectRecordStatusRepository.getReferenceById(ARM_PROCESSING_RESPONSE_FILES.getId());
+
+            if (armProcessingResponseFilesStatus.equals(latestEod.getStatus())) {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
             }
         }
