@@ -84,9 +84,6 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "event_date_ts")
     private LocalDateTime eventDateTs;
 
-    @Column(name = "verification_attempts")
-    private Integer verificationAttempts;
-
     @Override
     public int getStatusId() {
         return getStatus().getId();
