@@ -75,17 +75,21 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
-
-        for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
-        }
-        for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
-            try {
-                processInputUploadFile(externalObjectDirectory);
-            } catch (Exception e) {
-                log.error("Unable to process response files for external object directory {}", e.getMessage());
-                updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+        if (CollectionUtils.isEmpty(dataSentToArm)) {
+            log.info("ARM Response process found : {} records to be processed", dataSentToArm.size());
+            for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
             }
+            for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
+                try {
+                    processInputUploadFile(externalObjectDirectory);
+                } catch (Exception e) {
+                    log.error("Unable to process response files for external object directory {}", e.getMessage());
+                    updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
+                }
+            }
+        } else {
+            log.info("ARM Response process unable to find any records to process");
         }
     }
 
@@ -97,6 +101,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         List<String> inputUploadBlobs = null;
         boolean foundInputUploadResponseBlob = false;
         try {
+            log.info("About to look for files starting with prefix: {}", prefix);
             inputUploadBlobs = armDataManagementApi.listResponseBlobs(prefix);
         } catch (Exception e) {
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
@@ -350,8 +355,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     private void updateExternalObjectDirectoryStatus(ExternalObjectDirectoryEntity externalObjectDirectory, ObjectRecordStatusEntity objectRecordStatus) {
-        log.debug("Updating ARM status from {} to {} for ID {}", externalObjectDirectory.getStatus().getDescription(), objectRecordStatus.getDescription(),
-                  externalObjectDirectory.getId()
+        log.info(
+            "ARM Push updating ARM status from {} to {} for ID {}",
+            externalObjectDirectory.getStatus().getDescription(),
+            objectRecordStatus.getDescription(),
+            externalObjectDirectory.getId()
         );
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
