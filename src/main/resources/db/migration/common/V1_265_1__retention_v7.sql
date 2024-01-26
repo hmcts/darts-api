@@ -27,3 +27,5 @@ VALUES(9, 'MANUAL', 'DARTS Manual Policy', 'Manual', 'DARTS Manually Applied ret
 ALTER TABLE retention_policy_type ALTER COLUMN fixed_policy_key SET NOT NULL;
 ALTER TABLE retention_policy_type ALTER COLUMN description SET NOT NULL;
 
+ALTER SEQUENCE rpt_seq
+RESTART WITH 10;
