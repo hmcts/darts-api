@@ -56,19 +56,12 @@ class ArmDataManagementApiImplTest {
     @Test
     void listCollectedBlobs() {
 
-        var foldersConfig = new ArmDataManagementConfiguration.Folders();
-        foldersConfig.setSubmission(ARM_DROP_ZONE);
-        foldersConfig.setCollected(ARM_DROP_ZONE);
-        foldersConfig.setResponse(ARM_DROP_ZONE);
-        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
-
         String prefix = "1_1_1";
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> responseBlobs = new ArrayList<>();
         responseBlobs.add(responseBlobFilename);
 
-        String filename = ARM_DROP_ZONE + prefix;
-        when(armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, filename)).thenReturn(responseBlobs);
+        when(armService.listCollectedBlobs(ARM_BLOB_CONTAINER_NAME, prefix)).thenReturn(responseBlobs);
 
         List<String> blobs = armDataManagementApi.listCollectedBlobs(prefix);
 
@@ -77,19 +70,12 @@ class ArmDataManagementApiImplTest {
 
     @Test
     void listResponseBlobs() {
-        var foldersConfig = new ArmDataManagementConfiguration.Folders();
-        foldersConfig.setSubmission(ARM_DROP_ZONE);
-        foldersConfig.setCollected(ARM_DROP_ZONE);
-        foldersConfig.setResponse(ARM_DROP_ZONE);
-        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
-
         String prefix = "1_1_1";
         String responseBlobFilename = prefix + "_6a374f19a9ce7dc9cc480ea8d4eca0fb_1_iu.rsp";
         List<String> responseBlobs = new ArrayList<>();
         responseBlobs.add(responseBlobFilename);
 
-        String filename = ARM_DROP_ZONE + prefix;
-        when(armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, filename)).thenReturn(responseBlobs);
+        when(armService.listResponseBlobs(ARM_BLOB_CONTAINER_NAME, prefix)).thenReturn(responseBlobs);
 
         List<String> blobs = armDataManagementApi.listResponseBlobs(prefix);
         assertEquals(1, blobs.size());
