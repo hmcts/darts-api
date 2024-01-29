@@ -21,8 +21,8 @@ import uk.gov.hmcts.darts.testutils.stubs.EventStub;
 import uk.gov.hmcts.darts.testutils.stubs.HearingStub;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,8 +35,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
 
     private static final URI ENDPOINT = URI.create("/audios");
-    private static final OffsetDateTime STARTED_AT = OffsetDateTime.now().minusHours(1);
-    private static final OffsetDateTime ENDED_AT = OffsetDateTime.now();
+    private static final OffsetDateTime STARTED_AT = OffsetDateTime.of(2024, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC);
+    private static final OffsetDateTime ENDED_AT = OffsetDateTime.of(2024, 10, 10, 11, 0, 0, 0, ZoneOffset.UTC);
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -66,11 +66,11 @@ class AudioControllerAddAudioMetadataIntTest extends IntegrationBase {
         dartsDatabase.createCase("Bristol", "case2");
         dartsDatabase.createCase("Bristol", "case3");
 
-        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", LocalDate.now());
+        HearingEntity hearingForEvent = hearingStub.createHearing("Bristol", "1", "case1", STARTED_AT.toLocalDate());
         eventStub.createEvent(hearingForEvent, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", LocalDate.now());
+        HearingEntity hearingDifferentCourtroom = hearingStub.createHearing("Bristol", "2", "case2", STARTED_AT.toLocalDate());
         eventStub.createEvent(hearingDifferentCourtroom, 10, STARTED_AT.minusMinutes(20), "LOG");
-        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", LocalDate.now());
+        HearingEntity hearingAfter = hearingStub.createHearing("Bristol", "1", "case3", STARTED_AT.toLocalDate());
         eventStub.createEvent(hearingAfter, 10, ENDED_AT.plusMinutes(20), "LOG");
 
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT, "Bristol", "1");
