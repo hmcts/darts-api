@@ -4,9 +4,11 @@ import com.azure.core.util.BinaryData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -41,6 +43,11 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
     @Override
     public void deleteResponseBlob(String blobName) {
         armService.deleteResponseBlob(getArmContainerName(), blobName);
+    }
+
+    @Override
+    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
+        return armService.updateMetadata(externalRecordId, eventTimestamp);
     }
 
     private String getArmContainerName() {

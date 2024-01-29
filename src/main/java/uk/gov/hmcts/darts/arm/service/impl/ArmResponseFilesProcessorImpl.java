@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.armresponse.ArmResponseUploadFileRecord;
@@ -34,9 +35,9 @@ import uk.gov.hmcts.darts.common.service.FileOperationService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.OffsetDateTime;
 import java.util.List;
 
+import static java.time.OffsetDateTime.now;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
@@ -311,9 +312,14 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
             UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
             if (nonNull(uploadNewFileRecord)) {
+                String externalRecordId = uploadNewFileRecord.getRelationId();
                 externalObjectDirectory.setExternalFileId(uploadNewFileRecord.getFileMetadata().getDzFilename());
-                externalObjectDirectory.setExternalRecordId(uploadNewFileRecord.getRelationId());
+                externalObjectDirectory.setExternalRecordId(externalRecordId);
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, storedStatus);
+                UpdateMetadataResponse updateMetadataResponse = armDataManagementApi.updateMetadata(externalRecordId, now().plusYears(7));
+                if (updateMetadataResponse.isError()) {
+                    log.error(updateMetadataResponse.toString());
+                }
             }
         } else {
             log.warn("External object id {} checksum differs. Arm checksum: {} Object Checksum: {}",
@@ -367,7 +373,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         );
         externalObjectDirectory.setStatus(objectRecordStatus);
         externalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
-        externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
+        externalObjectDirectory.setLastModifiedDateTime(now());
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
     }
 

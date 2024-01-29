@@ -76,6 +76,12 @@ java:
           alias: ARM_SAS_ENDPOINT
         - name: ArmTokenBaseUrl
           alias: ARM_TOKEN_BASE_URL
+        - name: ArmUrl
+          alias: ARM_URL
+        - name: ArmUsername
+          alias: ARM_USERNAME
+        - name: ArmPassword
+          alias: ARM_PASSWORD
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require

@@ -177,6 +177,11 @@ darts:
       file_extension: a360
       list-blobs-timeout-duration: 60s
       token-base-url: ${ARM_TOKEN_BASE_URL:}
+    arm-api:
+      arm-username: ${ARM_USERNAME:}
+      arm-password: ${ARM_PASSWORD:}
+      url: ${ARM_URL:}
+      update-metadata-path: /api/v3/UpdateMetadata
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

@@ -24,9 +24,9 @@ spring:
             jwk-set-uri: http://localhost:8080/discovery/v2.0/keys
   autoconfigure:
     exclude:
-    - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-    - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
-    - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
 
 darts:
   gateway:
@@ -42,6 +42,13 @@ darts:
   bank-holidays:
     api:
       baseurl: http://localhost:8080
+  storage:
+    token-base-url: ${darts.storage.arm-api.url}
+    arm-api:
+      arm-username: some-username
+      arm-password: some-password
+      url: https://darts-stub-services.staging.platform.hmcts.net
+      update-metadata-path: /api/v3/UpdateMetadata
 
 logging:
   level:
