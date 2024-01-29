@@ -3,6 +3,7 @@ package uk.gov.hmcts.darts.arm.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import uk.gov.hmcts.darts.arm.client.config.ArmClientConfig;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 

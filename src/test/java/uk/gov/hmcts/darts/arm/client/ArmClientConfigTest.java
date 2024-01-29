@@ -4,6 +4,7 @@ import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import org.junit.jupiter.api.Test;
+import uk.gov.hmcts.darts.arm.client.config.ArmClientConfig;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

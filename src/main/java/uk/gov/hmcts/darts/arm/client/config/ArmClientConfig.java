@@ -1,4 +1,4 @@
-package uk.gov.hmcts.darts.arm.client;
+package uk.gov.hmcts.darts.arm.client.config;
 
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
