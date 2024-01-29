@@ -204,8 +204,13 @@
 --    add verification_attempts to external_object_directory
 --    change audit.cas_id to nullable, as not all modernised auditable events are case related
 --    remove audit.application_server
-
-
+--v62 change courhouse.courthouse_code to be nullable and remove unique clause
+--    change media.ctr_id & event.ctr_id to be not null
+--    add chronicle_id, antecedant_id to event, media & transcription
+--    add error_code and is_response_cleaned to external_object_directory
+--    add clip_id to media, annotation_document, transcription_document
+--    amend event_ts to not null on event
+--
 
 
 -- List of Table Aliases
@@ -316,6 +321,7 @@ CREATE TABLE annotation_document
 (ado_id                      INTEGER                       NOT NULL
 ,ann_id                      INTEGER                       NOT NULL
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content 
+,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL
@@ -479,7 +485,7 @@ IS 'inherited from dm_sysobject_r, for r_object_type of moj_case, containing the
 
 CREATE TABLE courthouse
 (cth_id                      INTEGER                       NOT NULL
-,courthouse_code             INTEGER                       NOT NULL          UNIQUE
+,courthouse_code             INTEGER                       
 ,courthouse_name             CHARACTER VARYING             NOT NULL          UNIQUE
 ,display_name                CHARACTER VARYING             NOT NULL
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -604,17 +610,19 @@ IS 'foreign key from court_case';
 
 CREATE TABLE event
 (eve_id                      INTEGER                       NOT NULL
-,ctr_id                      INTEGER
+,ctr_id                      INTEGER                       NOT NULL
 ,evh_id                      INTEGER                       NOT NULL
-,event_object_id             CHARACTER VARYING(16)
-,event_id                    INTEGER
-,event_name                  CHARACTER VARYING -- details of the handler, at point in time the event arose, lots of discussion re import of legacy, retain.
+,event_object_id             CHARACTER VARYING(16)                   -- legacy id of this event
+,event_id                    INTEGER                       
+,event_name                  CHARACTER VARYING                       -- details of the handler, at point in time the event arose, lots of discussion re import of legacy, retain.
 ,event_text                  CHARACTER VARYING
-,event_ts                    TIMESTAMP WITH TIME ZONE  
+,event_ts                    TIMESTAMP WITH TIME ZONE      NOT NULL
 ,case_number                 CHARACTER VARYING(32)[] 
 ,message_id                  CHARACTER VARYING
 ,is_log_entry                BOOLEAN                       NOT NULL  -- needs to be not null to ensure only 2 valid states
 ,version_label               CHARACTER VARYING(32)
+,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
+,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -702,6 +710,8 @@ CREATE TABLE external_object_directory
 ,manifest_file               CHARACTER VARYING
 ,event_date_ts               TIMESTAMP WITH TIME ZONE                -- date upon which the retention date in ARM is derived
 ,verification_attempts       INTEGER
+,error_code                  CHARACTER VARYING
+,is_response_cleaned         BOOLEAN                       NOT NULL  DEFAULT false
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -862,9 +872,10 @@ IS 'primary key of judge';
 
 CREATE TABLE media
 (med_id                      INTEGER                       NOT NULL
-,ctr_id                      INTEGER
-,media_object_id             CHARACTER VARYING(16)
-,content_object_id           CHARACTER VARYING(16)
+,ctr_id                      INTEGER                       NOT NULL
+,media_object_id             CHARACTER VARYING(16)                  -- legacy id of this media
+,content_object_id           CHARACTER VARYING(16)                  -- legacy id of the content record associated with the external media
+,clip_id                     CHARACTER VARYING(54)
 ,channel                     INTEGER                       NOT NULL -- 1,2,3,4 or rarely 5
 ,total_channels              INTEGER                       NOT NULL --99.9% are "4" in legacy, occasionally 1,2,5 
 ,reference_id                CHARACTER VARYING             --all nulls in legacy
@@ -879,6 +890,8 @@ CREATE TABLE media
 ,media_status                CHARACTER VARYING             NOT NULL
 ,case_number                 CHARACTER VARYING(32)[]       --this is a placeholder for moj_case_document_r.c_case_id, known to be repeated for moj_media object types
 ,version_label               CHARACTER VARYING(32)
+,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
+,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1090,6 +1103,8 @@ CREATE TABLE transcription
 ,is_manual_transcription     BOOLEAN                       NOT NULL
 ,hide_request_from_requestor BOOLEAN                       NOT NULL 
 ,version_label               CHARACTER VARYING(32)
+,chronicle_id                CHARACTER VARYING(16)                   -- legacy id of the 1.0 version of the event
+,antecedent_id               CHARACTER VARYING(16)                   -- legacy id of the immediately  preceding event 
 ,created_ts                  TIMESTAMP WITH TIME ZONE      NOT NULL
 ,created_by                  INTEGER                       NOT NULL
 ,last_modified_ts            TIMESTAMP WITH TIME ZONE      NOT NULL
@@ -1162,6 +1177,7 @@ CREATE TABLE transcription_document
 (trd_id                      INTEGER                       NOT NULL
 ,tra_id                      INTEGER                       NOT NULL
 ,content_object_id           CHARACTER VARYING(16)                  -- legacy PK from dmr_content object
+,clip_id                     CHARACTER VARYING(54)
 ,file_name                   CHARACTER VARYING             NOT NULL
 ,file_type                   CHARACTER VARYING             NOT NULL
 ,file_size                   INTEGER                       NOT NULL

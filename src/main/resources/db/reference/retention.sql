@@ -18,6 +18,9 @@
 --    add display_name and description to retention_policy_type
 --    remove is_manual_override  from case_retention
 --    amend fixed_policy_key from integer to character varying
+--    amend eve_id on case_management_retention to not null
+--    remove event_ts from case_management_retention 
+
 
 SET ROLE DARTS_OWNER;
 SET SEARCH_PATH TO darts;
@@ -32,8 +35,7 @@ CREATE TABLE case_management_retention
 (cmr_id                      INTEGER                       NOT NULL
 ,cas_id                      INTEGER                       NOT NULL
 ,rpt_id                      INTEGER                       NOT NULL
-,eve_id                      INTEGER                       
-,event_ts                    TIMESTAMP WITH TIME ZONE      
+,eve_id                      INTEGER                       NOT NULL                
 ,total_sentence              CHARACTER VARYING                       -- < is this integer or the nYnMnD >
 ) TABLESPACE darts_tables;
 
