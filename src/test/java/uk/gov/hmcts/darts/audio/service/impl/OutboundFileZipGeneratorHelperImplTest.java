@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
@@ -44,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.COURTHOUSE_README_LABEL;
 import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.END_TIME_README_LABEL;
@@ -292,16 +294,17 @@ class OutboundFileZipGeneratorHelperImplTest {
     @Test
     void generateViqFileThrowsExceptionWhenErrorInWritingViqHeader() {
 
-        Path sourceFile = Paths.get("src/test/resources/Tests/audio/testAudio.mp2");
+        Path outputFile = mock(Path.class);
+        when(outputFile.toFile()).thenThrow(RuntimeException.class);
         AudioFileInfo audioFileInfo = new AudioFileInfo(
             Instant.parse("2023-04-28T09:00:00Z"),
             Instant.parse("2023-04-28T10:30:00Z"),
             1,
-            sourceFile,
+            Paths.get("src/test/resources/Tests/audio/testAudio.mp2"),
             true
         );
 
-        assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, Path.of("/non-existing-file")));
+        assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile));
     }
 
     @Test

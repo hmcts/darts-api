@@ -158,7 +158,7 @@ public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGenera
         try {
             FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), viqHeader.getViqHeader());
             FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), Files.readAllBytes(audioFileInfo.getPath()), true);
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             log.error("Unable to generate viq header for file: {}", viqOutputFile, exception);
             throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
         }
