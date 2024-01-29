@@ -12,12 +12,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
+import uk.gov.hmcts.darts.arm.client.ArmUpdateMetadataClient;
+import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
+import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
+import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
+import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.dao.ArmDataManagementDao;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 import uk.gov.hmcts.darts.common.exception.AzureDeleteBlobException;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +42,9 @@ public class ArmServiceImpl implements ArmService {
 
     private final ArmDataManagementDao armDataManagementDao;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ArmApiConfigurationProperties armApiConfigurationProperties;
+    private final ArmTokenClient armTokenClient;
+    private final ArmUpdateMetadataClient armUpdateMetadataClient;
 
     @Override
     public String saveBlobData(String containerName, String filename, BinaryData binaryData) {
@@ -121,6 +132,28 @@ public class ArmServiceImpl implements ArmService {
     public boolean deleteResponseBlob(String containerName, String filename) {
         String blobname = armDataManagementConfiguration.getFolders().getSubmission() + filename;
         return deleteBlobData(containerName, blobname);
+    }
+
+    @Override
+    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
+        ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
+            armApiConfigurationProperties.getArmUsername(),
+            armApiConfigurationProperties.getArmPassword(),
+            "password"
+        ));
+
+        UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
+            .itemId(externalRecordId)
+            .manifest(UpdateMetadataRequest.Manifest.builder()
+                          .eventDate(eventTimestamp)
+                          .build())
+            .useGuidsForFields(false)
+            .build();
+
+        return armUpdateMetadataClient.updateMetadata(
+            String.format("Bearer %s", armTokenResponse.getAccessToken()),
+            armUpdateMetadataRequest
+        ).getBody();
     }
 
     public boolean deleteBlobData(String containerName, String blobPathAndName) {
