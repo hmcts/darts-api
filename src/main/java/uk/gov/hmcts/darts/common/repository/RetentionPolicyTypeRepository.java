@@ -16,7 +16,7 @@ public interface RetentionPolicyTypeRepository extends JpaRepository<RetentionPo
         FROM RetentionPolicyTypeEntity r
         WHERE fixedPolicyKey = :fixedPolicyKey
         and policyStart <= :currentTime
-        and (policyEnd is null or policyEnd > current_time)
+        and (policyEnd is null or policyEnd > :currentTime)
         """
     )
     Optional<RetentionPolicyTypeEntity> findCurrentWithFixedPolicyKey(String fixedPolicyKey, OffsetDateTime currentTime);
