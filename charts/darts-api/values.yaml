@@ -74,6 +74,8 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
+        - name: ArmTokenBaseUrl
+          alias: ARM_TOKEN_BASE_URL
   environment:
     NOTIFICATION_SCHEDULER_CRON: "3 */2 * * * MON-FRI"
     POSTGRES_SSL_MODE: require
@@ -161,6 +163,8 @@ function:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
+        - name: ArmTokenBaseUrl
+          alias: ARM_TOKEN_BASE_URL
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require
