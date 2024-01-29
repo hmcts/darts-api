@@ -332,7 +332,8 @@ public class AudioTransformationServiceImpl implements AudioTransformationServic
             mediaRequestEntity.getStartTime().toInstant(),
             mediaRequestEntity.getEndTime().toInstant(),
             0,
-            outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity)
+            outboundFileZipGenerator.generateAndWriteZip(processedAudio, mediaRequestEntity),
+            false
         );
 
         return Collections.singletonList(zipAudioFileInfo);

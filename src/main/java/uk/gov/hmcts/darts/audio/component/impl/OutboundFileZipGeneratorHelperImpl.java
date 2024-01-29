@@ -1,18 +1,21 @@
-package uk.gov.hmcts.darts.audio.service.impl;
+package uk.gov.hmcts.darts.audio.component.impl;
 
 import jakarta.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.audio.component.OutboundDocumentGenerator;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
+import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
 import uk.gov.hmcts.darts.audio.model.ViqAnnotationData;
+import uk.gov.hmcts.darts.audio.model.ViqHeader;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
 import uk.gov.hmcts.darts.audio.model.xml.ViqPlayListItem;
-import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.audio.util.XmlUtil;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -41,7 +44,7 @@ import static java.util.Locale.UK;
 @Slf4j
 @Service
 @SuppressWarnings("PMD.ExcessiveImports")
-public class ViqHeaderServiceImpl implements ViqHeaderService {
+public class OutboundFileZipGeneratorHelperImpl implements OutboundFileZipGeneratorHelper {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofLocalizedDateTime(LONG)
         .withLocale(UK);
@@ -59,8 +62,8 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
     private final OutboundDocumentGenerator annotationXmlGenerator;
     private final EventRepository eventRepository;
 
-    public ViqHeaderServiceImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator,
-                                EventRepository eventRepository) {
+    public OutboundFileZipGeneratorHelperImpl(@Qualifier("annotationXmlGenerator") OutboundDocumentGenerator annotationXmlGenerator,
+                                              EventRepository eventRepository) {
         this.annotationXmlGenerator = annotationXmlGenerator;
         this.eventRepository = eventRepository;
     }
@@ -143,10 +146,30 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
         return readmeFile.getAbsolutePath();
     }
 
+    @Override
+    public Path generateViqFile(AudioFileInfo audioFileInfo, Path viqOutputFile) {
+
+        if (!audioFileInfo.isTrimmed()) {
+            return audioFileInfo.getPath();
+        }
+
+        ViqHeader viqHeader = new ViqHeader(audioFileInfo.getStartTime());
+
+        try {
+            FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), viqHeader.getViqHeader());
+            FileUtils.writeByteArrayToFile(viqOutputFile.toFile(), Files.readAllBytes(audioFileInfo.getPath()), true);
+        } catch (Exception exception) {
+            log.error("Unable to generate viq header for file: {}", viqOutputFile, exception);
+            throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST, exception);
+        }
+
+        return viqOutputFile;
+    }
+
     private static ViqPlayListItem createViqPlaylistItem(PlaylistInfo playlistInfo) {
         ViqPlayListItem playlistItem = new ViqPlayListItem();
 
-        playlistItem.setValue(playlistInfo.getFileLocation());
+        playlistItem.setValue(toPlaylistPathFormat(playlistInfo.getFileLocation()));
         playlistItem.setCaseNumber(playlistInfo.getCaseNumber());
 
         ZonedDateTime itemStartTime = playlistInfo.getStartTime();
@@ -172,5 +195,10 @@ public class ViqHeaderServiceImpl implements ViqHeaderService {
             .filter(eventEntity -> !eventEntity.getTimestamp().isAfter(endTime.toOffsetDateTime()))
             .sorted(Comparator.comparing(EventEntity::getTimestamp))
             .collect(Collectors.toList());
+    }
+
+    private static String toPlaylistPathFormat(String path) {
+        String playlistPath = path.replace("/", "\\");
+        return playlistPath + "\\";
     }
 }

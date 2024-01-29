@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.entity.MediaRequestEntity;
 import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
-import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
-import uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.CourtroomEntity;
@@ -64,11 +63,13 @@ class OutboundFileZipGeneratorImplTest {
 
     @BeforeEach
     void setUp() throws IOException, ParserConfigurationException {
-        ViqHeaderService viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
+        OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(
+            new AnnotationXmlGeneratorImpl(), eventRepository
+        );
 
         outboundFileZipGenerator = new OutboundFileZipGeneratorImpl(
             audioConfigurationProperties,
-            viqHeaderService
+            outboundFileZipGeneratorHelper
         );
 
         var tempDirectoryName = UUID.randomUUID().toString();
@@ -92,9 +93,10 @@ class OutboundFileZipGeneratorImplTest {
             audioWithSession2AndChannel1
         );
 
+        var caseNumber = "T20190024";
         Path path = outboundFileZipGenerator.generateAndWriteZip(
             List.of(session1, session2),
-            createDummyMediaRequestEntity()
+            createDummyMediaRequestEntity(caseNumber)
         );
 
         assertTrue(Files.exists(path));
@@ -102,16 +104,16 @@ class OutboundFileZipGeneratorImplTest {
         List<String> paths = readZipStructure(path);
 
         assertEquals(7, paths.size());
-        assertThat(paths, hasItem("0001/0001.a00"));
-        assertThat(paths, hasItem("0001/0001.a01"));
-        assertThat(paths, hasItem("0002/0002.a00"));
         assertThat(paths, hasItem("readMe.txt"));
         assertThat(paths, hasItem("playlist.xml"));
-        assertThat(paths, hasItem("0001/annotations.xml"));
-        assertThat(paths, hasItem("0002/annotations.xml"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0001/0001.a00"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0001/0001.a01"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0001/annotations.xml"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0002/0002.a00"));
+        assertThat(paths, hasItem("daudio/localaudio/T2019/0024/0002/annotations.xml"));
     }
 
-    private MediaRequestEntity createDummyMediaRequestEntity() {
+    private MediaRequestEntity createDummyMediaRequestEntity(String caseNumber) {
 
         HearingEntity mockHearingEntity = mock(HearingEntity.class);
         CourtCaseEntity mockCourtCaseEntity = mock(CourtCaseEntity.class);
@@ -133,7 +135,7 @@ class OutboundFileZipGeneratorImplTest {
         CourthouseEntity mockCourthouseEntity = mock(CourthouseEntity.class);
         when(mockCourtroomEntity.getCourthouse()).thenReturn(mockCourthouseEntity);
         when(mockCourthouseEntity.getCourthouseName()).thenReturn("SWANSEA");
-        when(mockCourtCaseEntity.getCaseNumber()).thenReturn("T20190024");
+        when(mockCourtCaseEntity.getCaseNumber()).thenReturn(caseNumber);
 
         UserAccountEntity mockUserAccountEntity = mock(UserAccountEntity.class);
 
@@ -157,7 +159,7 @@ class OutboundFileZipGeneratorImplTest {
 
     private AudioFileInfo createDummyFileAndAudioFileInfo(int channel) {
         Path path = createDummyFile();
-        return new AudioFileInfo(SOME_START_TIME, SOME_END_TIME, channel, path);
+        return new AudioFileInfo(SOME_START_TIME, SOME_END_TIME, channel, path, false);
     }
 
     private Path createDummyFile() {

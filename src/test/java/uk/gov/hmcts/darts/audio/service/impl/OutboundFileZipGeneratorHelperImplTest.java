@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service.impl;
 
 import jakarta.xml.bind.JAXBException;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,11 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.darts.audio.component.OutboundFileZipGeneratorHelper;
 import uk.gov.hmcts.darts.audio.component.impl.AnnotationXmlGeneratorImpl;
+import uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl;
+import uk.gov.hmcts.darts.audio.model.AudioFileInfo;
 import uk.gov.hmcts.darts.audio.model.PlaylistInfo;
+import uk.gov.hmcts.darts.audio.model.ViqHeader;
 import uk.gov.hmcts.darts.audio.model.ViqMetaData;
 import uk.gov.hmcts.darts.audio.model.xml.Playlist;
-import uk.gov.hmcts.darts.audio.service.ViqHeaderService;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -40,26 +44,28 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.COURTHOUSE_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.END_TIME_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.RAISED_BY_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.README_TXT_FILENAME;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.REQUEST_TYPE_README_LABEL;
-import static uk.gov.hmcts.darts.audio.service.impl.ViqHeaderServiceImpl.START_TIME_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.COURTHOUSE_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.END_TIME_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.RAISED_BY_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.README_TXT_FILENAME;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.REQUEST_TYPE_README_LABEL;
+import static uk.gov.hmcts.darts.audio.component.impl.OutboundFileZipGeneratorHelperImpl.START_TIME_README_LABEL;
 import static uk.gov.hmcts.darts.common.util.DateConverterUtil.EUROPE_LONDON_ZONE;
 import static uk.gov.hmcts.darts.common.util.TestUtils.readTempFileContent;
+import static uk.gov.hmcts.darts.common.util.TestUtils.searchBytePattern;
 import static uk.gov.hmcts.darts.common.util.TestUtils.unmarshalXmlFile;
 
 
 @SuppressWarnings({"PMD.AvoidInstantiatingObjectsInLoops", "PMD.AssignmentInOperand", "PMD.ExcessiveImports"})
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class ViqHeaderServiceImplTest {
+class OutboundFileZipGeneratorHelperImplTest {
 
     private static final String CASE_NUMBER = "T2023041301_1";
 
-    private ViqHeaderService viqHeaderService;
+    private OutboundFileZipGeneratorHelper outboundFileZipGeneratorHelper;
 
     @Mock
     private EventRepository eventRepository;
@@ -69,18 +75,34 @@ class ViqHeaderServiceImplTest {
 
     @BeforeEach
     void setUp() throws ParserConfigurationException {
-        viqHeaderService = new ViqHeaderServiceImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
+        outboundFileZipGeneratorHelper = new OutboundFileZipGeneratorHelperImpl(new AnnotationXmlGeneratorImpl(), eventRepository);
     }
 
     @Test
     void generatePlaylistReturnsXmlFile() throws IOException, JAXBException {
         Set<PlaylistInfo> playlistInfos = new LinkedHashSet<>();
-        playlistInfos.add(createPlaylistInfo1());
-        playlistInfos.add(createPlaylistInfo2());
+        PlaylistInfo playlistInfo1 = PlaylistInfo.builder()
+            .caseNumber(CASE_NUMBER)
+            .startTime(ZonedDateTime.ofInstant(
+                Instant.parse("2023-06-11T12:00:00Z"),
+                EUROPE_LONDON_ZONE
+            ))
+            .fileLocation("daudio/localaudio/T2023/041301_1/0001")
+            .build();
+        playlistInfos.add(playlistInfo1);
+        PlaylistInfo playlistInfo2 = PlaylistInfo.builder()
+            .caseNumber(CASE_NUMBER)
+            .startTime(ZonedDateTime.ofInstant(
+                Instant.parse("2023-06-11T13:00:00Z"),
+                EUROPE_LONDON_ZONE
+            ))
+            .fileLocation("daudio/localaudio/T2023/041301_1/0002")
+            .build();
+        playlistInfos.add(playlistInfo2);
 
         String playlistOutputFile = tempDirectory.getAbsolutePath();
 
-        String playListFile = viqHeaderService.generatePlaylist(playlistInfos, playlistOutputFile);
+        String playListFile = outboundFileZipGeneratorHelper.generatePlaylist(playlistInfos, playlistOutputFile);
         log.debug("Playlist file {}", playListFile);
         assertTrue(Files.exists(Path.of(playListFile)));
         Playlist playlist = unmarshalXmlFile(Playlist.class, playListFile);
@@ -94,17 +116,18 @@ class ViqHeaderServiceImplTest {
         assertEquals("13", playlist.getItems().get(0).getStartTimeHour());
         assertEquals("0", playlist.getItems().get(0).getStartTimeMinutes());
         assertEquals("0", playlist.getItems().get(0).getStartTimeSeconds());
+        assertEquals("daudio\\localaudio\\T2023\\041301_1\\0001\\", playlist.getItems().get(0).getValue());
     }
 
     @Test
     void generatePlayListWithNullPlayListInfoThrowsException() {
         String playlistOutputFile = tempDirectory.getAbsolutePath();
-        assertThrows(DartsApiException.class, () -> viqHeaderService.generatePlaylist(null, playlistOutputFile));
+        assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generatePlaylist(null, playlistOutputFile));
     }
 
     @Test
     void generatePlayListWithNullPlayListInfoAndNullPathThrowsException() {
-        assertThrows(DartsApiException.class, () -> viqHeaderService.generatePlaylist(null, null));
+        assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generatePlaylist(null, null));
     }
 
     @Test
@@ -121,7 +144,7 @@ class ViqHeaderServiceImplTest {
         );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
-        String annotationsFile = viqHeaderService.generateAnnotation(
+        String annotationsFile = outboundFileZipGeneratorHelper.generateAnnotation(
             hearingEntity,
             startTime,
             endTime,
@@ -159,7 +182,7 @@ class ViqHeaderServiceImplTest {
         );
         Path annotationsOutputFile = Path.of(tempDirectory.getAbsolutePath(), "0_annotations.xml");
 
-        String annotationsFile = viqHeaderService.generateAnnotation(
+        String annotationsFile = outboundFileZipGeneratorHelper.generateAnnotation(
             hearingEntity,
             startTime,
             endTime,
@@ -187,7 +210,7 @@ class ViqHeaderServiceImplTest {
         String invalidPath = "/non_existent_directory/0_annotations.xml";
 
         var exception = assertThrows(DartsApiException.class, () ->
-            viqHeaderService.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
+            outboundFileZipGeneratorHelper.generateAnnotation(hearingEntity, startTime, endTime, invalidPath));
 
         assertEquals("Failed to process audio request", exception.getMessage());
         assertEquals(
@@ -217,7 +240,7 @@ class ViqHeaderServiceImplTest {
             .build();
 
         String fileLocation = tempDirectory.getAbsolutePath();
-        String readmeFile = viqHeaderService.generateReadme(viqMetaData, fileLocation);
+        String readmeFile = outboundFileZipGeneratorHelper.generateReadme(viqMetaData, fileLocation);
 
         assertNotNull(readmeFile);
         log.debug("Reading file " + readmeFile);
@@ -240,27 +263,67 @@ class ViqHeaderServiceImplTest {
         }
     }
 
+    @Test
+    @SneakyThrows
+    void generateViqFileAddsViqHeaderWhenSourceFileIsTrimmed() {
 
-    private PlaylistInfo createPlaylistInfo1() {
-        return PlaylistInfo.builder()
-            .caseNumber(CASE_NUMBER)
-            .startTime(ZonedDateTime.ofInstant(
-                Instant.parse("2023-06-11T12:00:00Z"),
-                EUROPE_LONDON_ZONE
-            ))
-            .fileLocation("daudio/localaudio/T2023/041301_1/0001")
-            .build();
+        Path sourceFile = Paths.get("src/test/resources/Tests/audio/testAudio.mp2");
+        AudioFileInfo audioFileInfo = new AudioFileInfo(
+            Instant.parse("2023-04-28T09:23:11Z"),
+            Instant.parse("2023-04-28T10:30:00Z"),
+            1,
+            sourceFile,
+            true
+        );
+        Path outputFile = Path.of(tempDirectory.getAbsolutePath(), "0001.a00");
+
+        Path viqFile = outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile);
+
+        assertEquals(viqFile, outputFile);
+        byte[] expectedViqHeader = new ViqHeader(audioFileInfo.getStartTime()).getViqHeader();
+        int expectedViqHeaderOffset = 0;
+        assertEquals(expectedViqHeaderOffset, searchBytePattern(Files.readAllBytes(viqFile), expectedViqHeader));
+        int expectedSourceFileOffset = expectedViqHeader.length;
+        assertEquals(expectedSourceFileOffset, searchBytePattern(Files.readAllBytes(viqFile), Files.readAllBytes(sourceFile)));
+        long expectedViqFileSize = expectedViqHeader.length + Files.size(sourceFile);
+        assertEquals(expectedViqFileSize, Files.size(viqFile));
     }
 
-    private PlaylistInfo createPlaylistInfo2() {
-        return PlaylistInfo.builder()
-            .caseNumber(CASE_NUMBER)
-            .startTime(ZonedDateTime.ofInstant(
-                Instant.parse("2023-06-11T13:00:00Z"),
-                EUROPE_LONDON_ZONE
-            ))
-            .fileLocation("daudio/localaudio/T2023/041301_1/0002")
-            .build();
+
+    @Test
+    void generateViqFileThrowsExceptionWhenErrorInWritingViqHeader() {
+
+        Path outputFile = mock(Path.class);
+        when(outputFile.toFile()).thenThrow(RuntimeException.class);
+        AudioFileInfo audioFileInfo = new AudioFileInfo(
+            Instant.parse("2023-04-28T09:00:00Z"),
+            Instant.parse("2023-04-28T10:30:00Z"),
+            1,
+            Paths.get("src/test/resources/Tests/audio/testAudio.mp2"),
+            true
+        );
+
+        assertThrows(DartsApiException.class, () -> outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile));
+    }
+
+    @Test
+    @SneakyThrows
+    void generateViqFileRetainsSourceFileWhenNotTrimmed() {
+
+        Path sourceFile = Paths.get("src/test/resources/Tests/audio/testAudio.mp2");
+        AudioFileInfo audioFileInfo = new AudioFileInfo(
+            Instant.parse("2023-04-28T09:00:00Z"),
+            Instant.parse("2023-04-28T10:30:00Z"),
+            1,
+            sourceFile,
+            false
+        );
+        Path outputFile = Path.of(tempDirectory.getAbsolutePath(), "0001.a00");
+
+        Path viqFile = outboundFileZipGeneratorHelper.generateViqFile(audioFileInfo, outputFile);
+
+        assertEquals(viqFile, sourceFile);
+        assertTrue(Files.isSameFile(sourceFile, viqFile));
     }
 
 
