@@ -84,12 +84,6 @@ class ArmDataManagementApiImplTest {
     @Test
     void getResponseBlobData() {
 
-        var foldersConfig = new ArmDataManagementConfiguration.Folders();
-        foldersConfig.setSubmission(ARM_DROP_ZONE);
-        foldersConfig.setCollected(ARM_DROP_ZONE);
-        foldersConfig.setResponse(ARM_DROP_ZONE);
-        when(armDataManagementConfiguration.getFolders()).thenReturn(foldersConfig);
-
         byte[] testStringInBytes = TEST_BINARY_STRING.getBytes(StandardCharsets.UTF_8);
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         String blobname = "1_1_1";
@@ -97,7 +91,7 @@ class ArmDataManagementApiImplTest {
         String blobNameAndPath = ARM_DROP_ZONE + blobname;
         when(armService.getBlobData(ARM_BLOB_CONTAINER_NAME, blobNameAndPath)).thenReturn(data);
 
-        BinaryData binaryData = armDataManagementApi.getResponseBlobData(blobname);
+        BinaryData binaryData = armDataManagementApi.getBlobData(blobNameAndPath);
         assertEquals(data, binaryData);
     }
 }

@@ -12,7 +12,7 @@ public interface ArmDataManagementApi {
 
     List<String> listResponseBlobs(String prefix);
 
-    BinaryData getResponseBlobData(String blobName);
+    BinaryData getBlobData(String blobName);
 
     void deleteResponseBlob(String blobName);
 }

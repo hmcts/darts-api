@@ -491,7 +491,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_0_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -558,7 +558,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -624,7 +624,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -687,7 +687,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         armResponseFilesProcessor.processResponseFiles();
 
@@ -744,7 +744,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         armResponseFilesProcessor.processResponseFiles();
 
@@ -802,7 +802,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         UserAccountEntity testUser = dartsDatabase.getUserAccountStub().getIntegrationTestUserAccountEntity();
         when(userIdentity.getUserAccount()).thenReturn(testUser);
@@ -866,7 +866,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         doNothing().when(armDataManagementApi).deleteResponseBlob(inputUploadBlobFilename);
         doNothing().when(armDataManagementApi).deleteResponseBlob(createRecordFilename);
@@ -929,7 +929,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
             "6a374f19a9ce7dc9cc480ea8d4eca0fb_04e6bc3b-952a-79b6-8362-13259aae1895_1_uf.rsp";
         String uploadFileJson = TestUtils.getContentsFromFile(uploadFileTestFilename);
         BinaryData uploadFileBinaryData = BinaryData.fromString(uploadFileJson);
-        when(armDataManagementApi.getResponseBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
+        when(armDataManagementApi.getBlobData(uploadFileFilename)).thenReturn(uploadFileBinaryData);
 
         armResponseFilesProcessor.processResponseFiles();
 
