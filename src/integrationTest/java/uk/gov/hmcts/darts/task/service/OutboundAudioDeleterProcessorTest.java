@@ -439,6 +439,7 @@ class OutboundAudioDeleterProcessorTest extends IntegrationBase {
         );
 
         assertNotNull(transientObjectDirectoryEntity.getTransformedMedia().getExpiryTime());
+        assertEquals(1, transientObjectDirectoryEntity.getTransformedMedia().getLastModifiedBy().getId());
     }
 
     private void assertTransientObjectDirectoryStateNotChanged(TransientObjectDirectoryEntity transientObjectDirectoryEntity) {
