@@ -52,12 +52,12 @@ public class FileOperationServiceImpl implements FileOperationService {
         Path targetTempFile = workspacePath.resolve(fileName);
 
         try (InputStream audioInputStream = binaryData.toStream()) {
-            Files.createDirectories(workspacePath);
+            Files.createDirectories(targetTempFile.getParent());
             Path tempFilePath = Files.createFile(targetTempFile);
             Files.copy(audioInputStream, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
         } catch (IOException e) {
-            log.error("IOException. Unable to copy binary data to workspace {}", workspace);
+            log.error("Unable to copy binary data to workspace {} - {}", workspace, e.getMessage());
             throw new IOException(e);
         }
 
