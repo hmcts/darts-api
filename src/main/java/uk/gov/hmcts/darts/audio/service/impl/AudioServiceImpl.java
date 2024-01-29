@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
@@ -53,6 +54,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 @Slf4j
 public class AudioServiceImpl implements AudioService {
 
+    public static final String AUDIO_RESPONSE_EVENT_NAME = "audio response";
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -112,16 +114,18 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public Flux<ResponseEntity<byte[]>> getAudioPreviewFlux(Integer mediaId, String range) {
+    public Flux<ServerSentEvent<ResponseEntity<byte[]>>> getAudioPreviewFlux(Integer mediaId, String range) {
         return Flux.just(mediaId)
             .publishOn(Schedulers.boundedElastic()).map(m -> {
-                InputStream audioMediaFile = preview(m);
-                try {
-                    return StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
+                try (InputStream audioMediaFile = preview(m)) {
+                    return ServerSentEvent.<ResponseEntity<byte[]>>builder().event(AUDIO_RESPONSE_EVENT_NAME)
+                        .data(StreamingResponseEntityUtil.createResponseEntity(
+                        audioMediaFile,
+                        range
+                    )).build();
                 } catch (IOException e) {
                     throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
                 }
-
             });
     }
 

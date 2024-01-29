@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.audio.service;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -15,7 +16,7 @@ public interface AudioService {
 
     InputStream preview(Integer mediaId);
 
-    Flux<ResponseEntity<byte[]>> getAudioPreviewFlux(Integer mediaId, String range);
+    Flux<ServerSentEvent<ResponseEntity<byte[]>>> getAudioPreviewFlux(Integer mediaId, String range);
 
     void addAudio(MultipartFile audioFile, AddAudioMetadataRequest addAudioMetadata);
 

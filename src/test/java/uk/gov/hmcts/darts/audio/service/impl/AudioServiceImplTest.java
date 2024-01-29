@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.mock.web.MockMultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -177,7 +178,7 @@ class AudioServiceImplTest {
         BinaryData data = BinaryData.fromBytes(testStringInBytes);
         when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
 
-        Flux<ResponseEntity<byte[]>> stream = audioService.getAudioPreviewFlux(
+        Flux<ServerSentEvent<ResponseEntity<byte[]>>> stream = audioService.getAudioPreviewFlux(
             mediaEntity.getId(),
             "bytes=0-1024"
         );
@@ -186,7 +187,7 @@ class AudioServiceImplTest {
             .recordWith(ArrayList::new)
             .thenConsumeWhile(x -> true)
             .consumeRecordedWith(elements -> {
-                elements.iterator().next().getStatusCode().is2xxSuccessful();
+                elements.iterator().next().data().getStatusCode().is2xxSuccessful();
                 assertThat(elements.size()).isEqualTo(1);
             })
             .verifyComplete();
@@ -216,7 +217,7 @@ class AudioServiceImplTest {
         when(data.toStream()).thenReturn(inputStream);
         when(inputStream.read(any())).thenThrow(new IOException());
 
-        Flux<ResponseEntity<byte[]>> stream = audioService.getAudioPreviewFlux(
+        Flux<ServerSentEvent<ResponseEntity<byte[]>>> stream = audioService.getAudioPreviewFlux(
             mediaEntity.getId(),
             "bytes=0-1024"
         );

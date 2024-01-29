@@ -8,6 +8,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -89,16 +90,20 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = MEDIA_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
-    public Flux<ResponseEntity<byte[]>> previewAlternative(
+    public Flux<ServerSentEvent<ResponseEntity<byte[]>>> previewAlternative(
         @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
         @PathVariable("media_id") Integer mediaId,
         @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
         @RequestHeader(value = "range", required = false) String range
     ) {
-        Flux<ResponseEntity<byte[]>> work = audioService.getAudioPreviewFlux(mediaId, range);
+        Flux<ServerSentEvent<ResponseEntity<byte[]>>> work = audioService.getAudioPreviewFlux(mediaId, range);
 
-        Flux<ResponseEntity<byte[]>> heartBeat = Flux.interval(Duration.ofSeconds(5))
-            .map(sequence -> new ResponseEntity<byte[]>(HttpStatus.CONTINUE)).takeUntilOther(work);
+        Flux<ServerSentEvent<ResponseEntity<byte[]>>> heartBeat = Flux.interval(Duration.ofSeconds(5))
+            .map(sequence -> ServerSentEvent.<ResponseEntity<byte[]>>builder()
+                .id(String.valueOf(sequence))
+                .event("heartbeat")
+                .build())
+            .takeUntilOther(work);
         return Flux.merge(heartBeat, work);
     }
 

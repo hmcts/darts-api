@@ -21,12 +21,18 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @Profile("intTest")
+@SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
 public class DataManagementServiceStubImpl implements DataManagementService {
 
     @Override
     public BinaryData getBlobData(String containerName, UUID blobId) {
         logStubUsageWarning();
 
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         log.warn("Returning dummy file to mimic Blob storage download");
         return BinaryData.fromBytes(new byte[1024]);
     }
