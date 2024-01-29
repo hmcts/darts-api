@@ -9,14 +9,14 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 @RequiredArgsConstructor
 public enum RetentionApiError implements DartsApiError {
 
-    NO_PERMISSION_REDUCE_RETENTION_ERROR(
+    NO_PERMISSION_REDUCE_RETENTION(
         "100",
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.FORBIDDEN,
         "You do not have permission to reduce the retention period."
-    ), RETENTION_DATE_INVALID_ERROR(
+    ), RETENTION_DATE_TOO_EARLY(
         "101",
-        HttpStatus.BAD_REQUEST,
-        "The retention date provided is invalid."
+        HttpStatus.UNPROCESSABLE_ENTITY,
+        "The retention date being applied is too early."
     ), INVALID_REQUEST(
         "102",
         HttpStatus.BAD_REQUEST,
@@ -31,14 +31,6 @@ public enum RetentionApiError implements DartsApiError {
         "The case must be closed before the retention period can be amended."
     ), NO_RETENTION_POLICIES_APPLIED(
         "105",
-        HttpStatus.BAD_REQUEST,
-        "The case must have a retention policy applied before being changed."
-    ), RETENTION_DATE_TO_EARLY(
-        "106",
-        HttpStatus.UNPROCESSABLE_ENTITY,
-        "The retention date being applied is too early."
-    ), NO_PERMISSIONS_REDUCE_DATE(
-        "107",
         HttpStatus.BAD_REQUEST,
         "The case must have a retention policy applied before being changed."
     );
