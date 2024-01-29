@@ -46,7 +46,7 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     @JoinColumn(name = "cmr_id")
     private CaseManagementRetentionEntity caseManagementRetention;
 
-    @Column(name = "total_sentence", nullable = false)
+    @Column(name = "total_sentence")
     private String totalSentence;
 
     @Column(name = "retain_until_ts", nullable = false)
@@ -67,7 +67,4 @@ public class CaseRetentionEntity extends CreatedModifiedBaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "submitted_by", nullable = false)
     private UserAccountEntity submittedBy;
-
-    @Column(name = "is_manual_override")
-    private boolean manualOverride;
 }

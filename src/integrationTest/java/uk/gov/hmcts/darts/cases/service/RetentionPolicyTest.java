@@ -28,7 +28,7 @@ class RetentionPolicyTest extends IntegrationBase {
 
     @BeforeEach
     void setup() {
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.parse("2020-01-01T10:00:00.000Z"));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.parse("2024-01-01T10:00:00.000Z"));
     }
 
     @Test
@@ -38,9 +38,9 @@ class RetentionPolicyTest extends IntegrationBase {
 
         var singleCase = casesMapper.mapToSingleCase(courtCase);
 
-        Assertions.assertEquals("DARTS Permanent Retention v3", singleCase.getRetentionPolicyApplied());
+        Assertions.assertEquals("DARTS Default Policy", singleCase.getRetentionPolicyApplied());
         Assertions.assertEquals(OffsetDateTime.parse("2029-01-31T15:42:10.361Z"), singleCase.getRetainUntilDateTime());
-        Assertions.assertEquals(OffsetDateTime.parse("2020-01-01T10:00:00.000Z"), singleCase.getRetentionDateTimeApplied());
+        Assertions.assertEquals(OffsetDateTime.parse("2024-01-01T10:00:00.000Z"), singleCase.getRetentionDateTimeApplied());
     }
 
     @Test
@@ -54,7 +54,7 @@ class RetentionPolicyTest extends IntegrationBase {
 
         var singleCase = casesMapper.mapToSingleCase(courtCase);
 
-        Assertions.assertEquals("DARTS Permanent Retention v3", singleCase.getRetentionPolicyApplied());
+        Assertions.assertEquals("DARTS Default Policy", singleCase.getRetentionPolicyApplied());
         Assertions.assertEquals(OffsetDateTime.parse("2030-01-31T15:42:10.361Z"), singleCase.getRetainUntilDateTime());
         Assertions.assertEquals(OffsetDateTime.parse("2023-07-22T15:42:10.361Z"), singleCase.getRetentionDateTimeApplied());
     }
@@ -70,9 +70,9 @@ class RetentionPolicyTest extends IntegrationBase {
 
         var singleCase = casesMapper.mapToSingleCase(courtCase);
 
-        Assertions.assertEquals("DARTS Permanent Retention v3", singleCase.getRetentionPolicyApplied());
+        Assertions.assertEquals("DARTS Default Policy", singleCase.getRetentionPolicyApplied());
         Assertions.assertEquals(OffsetDateTime.parse("2029-01-31T15:42:10.361Z"), singleCase.getRetainUntilDateTime());
-        Assertions.assertEquals(OffsetDateTime.parse("2020-01-01T10:00:00.000Z"), singleCase.getRetentionDateTimeApplied());
+        Assertions.assertEquals(OffsetDateTime.parse("2024-01-01T10:00:00.000Z"), singleCase.getRetentionDateTimeApplied());
     }
 
     @Test
@@ -92,7 +92,7 @@ class RetentionPolicyTest extends IntegrationBase {
 
         var singleCase = casesMapper.mapToSingleCase(courtCase);
 
-        Assertions.assertEquals("DARTS Permanent Retention v3", singleCase.getRetentionPolicyApplied());
+        Assertions.assertEquals("DARTS Default Policy", singleCase.getRetentionPolicyApplied());
         Assertions.assertEquals(OffsetDateTime.parse("2030-01-31T15:42:10.361Z"), singleCase.getRetainUntilDateTime());
         Assertions.assertEquals(OffsetDateTime.parse("2023-07-22T15:42:10.361Z"), singleCase.getRetentionDateTimeApplied());
     }

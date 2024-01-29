@@ -27,19 +27,27 @@ public class RetentionPolicyTypeEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "rpt_gen", sequenceName = "rpt_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "fixed_policy_key")
-    private Integer fixedPolicyKey;
+    @Column(name = "fixed_policy_key", nullable = false)
+    private String fixedPolicyKey;
 
-    @Column(name = "policy_name")
+    @Column(name = "policy_name", nullable = false)
     private String policyName;
 
-    @Column(name = "duration")
+    @Column(name = "display_name", nullable = false)
+    private String displayName;
+
+    @Column(name = "duration", nullable = false)
     private String duration;
 
-    @Column(name = "policy_start_ts")
+    @Column(name = "policy_start_ts", nullable = false)
     private OffsetDateTime policyStart;
 
     @Column(name = "policy_end_ts")
     private OffsetDateTime policyEnd;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
+    @Column(name = "retention_policy_object_id")
+    private String retentionPolicyObjectId;
 }

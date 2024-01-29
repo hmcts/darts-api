@@ -22,6 +22,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 
 import java.time.LocalDate;
@@ -31,10 +32,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,19 +72,34 @@ class RetentionPostServiceImplTest {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
         caseRetention.setCurrentState(CaseRetentionStatus.COMPLETE.name());
-        caseRetention.setCreatedDateTime(OffsetDateTime.of(2020, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        caseRetention.setCreatedDateTime(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
         caseRetention.setRetainUntil(OffsetDateTime.of(2025, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
         when(caseRetentionRepository.findLatestCompletedAutomatedRetention(any())).thenReturn(Optional.of(caseRetention));
 
         CaseRetentionEntity caseRetentionLater = new CaseRetentionEntity();
         caseRetentionLater.setCourtCase(courtCase);
         caseRetentionLater.setCurrentState(CaseRetentionStatus.COMPLETE.name());
-        caseRetentionLater.setCreatedDateTime(OffsetDateTime.of(2020, 10, 1, 11, 0, 0, 0, ZoneOffset.UTC));
+        caseRetentionLater.setCreatedDateTime(OffsetDateTime.of(2024, 10, 1, 11, 0, 0, 0, ZoneOffset.UTC));
         caseRetentionLater.setRetainUntil(OffsetDateTime.of(2026, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
-        caseRetentionLater.setManualOverride(true);
-        when(caseRetentionRepository.findLatestCompletedRetention(any())).thenReturn(Optional.of(caseRetentionLater));
 
-        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2020, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        RetentionPolicyTypeEntity retentionPolicyTypeManual = new RetentionPolicyTypeEntity();
+        retentionPolicyTypeManual.setId(1);
+        retentionPolicyTypeManual.setFixedPolicyKey("MANUAL");
+        caseRetentionLater.setRetentionPolicyType(retentionPolicyTypeManual);
+        when(caseRetentionRepository.findLatestCompletedRetention(any())).thenReturn(Optional.of(caseRetentionLater));
+        when(currentTimeHelper.currentOffsetDateTime()).thenReturn(OffsetDateTime.of(2024, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(eq(RetentionPolicyEnum.MANUAL.getPolicyKey()), any(OffsetDateTime.class))).thenReturn(
+            Optional.of(retentionPolicyTypeManual));
+
+        RetentionPolicyTypeEntity retentionPolicyTypePermanent = new RetentionPolicyTypeEntity();
+        retentionPolicyTypePermanent.setId(2);
+        retentionPolicyTypePermanent.setFixedPolicyKey("PERM");
+        when(retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+            eq(RetentionPolicyEnum.PERMANENT.getPolicyKey()),
+            any(OffsetDateTime.class)
+        )).thenReturn(
+            Optional.of(retentionPolicyTypePermanent));
 
         UserAccountEntity userAccount = new UserAccountEntity();
         userAccount.setId(10);
@@ -215,7 +231,7 @@ class RetentionPostServiceImplTest {
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2026-01-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
-        assertTrue(savedRetention.isManualOverride());
+        assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
 
     }
 
@@ -236,7 +252,7 @@ class RetentionPostServiceImplTest {
         assertEquals("TheComments", savedRetention.getComments());
         assertEquals("2027-01-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
-        assertTrue(savedRetention.isManualOverride());
+        assertEquals(RetentionPolicyEnum.MANUAL.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
     }
 
     @Test
@@ -254,10 +270,9 @@ class RetentionPostServiceImplTest {
         CaseRetentionEntity savedRetention = caseRetentionEntityArgumentCaptor.getValue();
         assertEquals("COMPLETE", savedRetention.getCurrentState());
         assertEquals("TheComments", savedRetention.getComments());
-        assertEquals("2119-10-01T10:00Z", savedRetention.getRetainUntil().toString());
+        assertEquals("2123-10-01T10:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
-        assertTrue(savedRetention.isManualOverride());
+        assertEquals(RetentionPolicyEnum.PERMANENT.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
     }
-
 
 }
