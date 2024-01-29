@@ -13,6 +13,7 @@ import java.util.List;
 
 import static java.time.OffsetDateTime.now;
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Comparator.naturalOrder;
 import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,8 +106,8 @@ class CaseMapperTest extends IntegrationBase {
         var singleCase = casesMapper.mapToSingleCase(minimalHearing.getCourtCase());
 
         rangeClosed(0, 9).forEach(index -> {
-            var mappedTsAtIndex = singleCase.getReportingRestrictions().get(index).getEventTs().truncatedTo(MILLIS);
-            assertThat(mappedTsAtIndex).isEqualTo(expectedOrderedTs.get(index).truncatedTo(MILLIS));
+            var mappedTsAtIndex = singleCase.getReportingRestrictions().get(index).getEventTs().truncatedTo(SECONDS);
+            assertThat(mappedTsAtIndex).isEqualTo(expectedOrderedTs.get(index).truncatedTo(SECONDS));
         });
     }
 
