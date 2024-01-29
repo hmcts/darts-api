@@ -250,7 +250,7 @@ class AudioServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        when(courtLogEventRepository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
+        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             anyString(),
             anyString(),
             any(),
@@ -276,7 +276,7 @@ class AudioServiceImplTest {
         AddAudioMetadataRequest addAudioMetadataRequest = createAddAudioRequest(STARTED_AT, ENDED_AT);
         MediaEntity mediaEntity = createMediaEntity(STARTED_AT, ENDED_AT);
 
-        when(courtLogEventRepository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
+        when(courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
             anyString(),
             anyString(),
             any(),
@@ -326,7 +326,7 @@ class AudioServiceImplTest {
             anyString(),
             any()
         )).thenReturn(hearing);
-        audioService.linkAudioAndHearing(addAudioMetadataRequest, mediaEntity);
+        audioService.linkAudioToHearingInMetadata(addAudioMetadataRequest, mediaEntity);
         verify(hearingRepository, times(3)).saveAndFlush(any());
         assertEquals(3, hearing.getMediaList().size());
     }
