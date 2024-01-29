@@ -50,7 +50,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         if (caseOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.CASE_NOT_FOUND,
-                MessageFormat.format("The selected caseId ''{0}'' cannot be found.", postRetentionRequest.getCaseId())
+                MessageFormat.format("The selected caseId ''{0}'' cannot be found.", postRetentionRequest.getCaseId().toString())
             );
         }
 
@@ -73,7 +73,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             log.error("A retention policy of {} was attempted to be applied to an open case", postRetentionRequest);
             throw new DartsApiException(
                 RetentionApiError.CASE_NOT_CLOSED,
-                MessageFormat.format("caseId ''{0}'' must be closed before the retention period can be amended.", courtCase.getId())
+                MessageFormat.format("caseId ''{0}'' must be closed before the retention period can be amended.", courtCase.getId().toString())
             );
         }
 
@@ -90,7 +90,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                     RetentionApiError.RETENTION_DATE_TOO_EARLY,
                     MessageFormat.format(
                         "caseId ''{0}'' must have a retention date after the last completed automated retention date ''{1}''.",
-                        courtCase.getId(),
+                        courtCase.getId().toString(),
                         latestCompletedRetentionDate
                     )
                 );
@@ -115,7 +115,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         if (latestCompletedAutomatedRetentionOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.NO_RETENTION_POLICIES_APPLIED,
-                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId())
+                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId().toString())
             );
         }
         return latestCompletedAutomatedRetentionOpt.get();
@@ -126,7 +126,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         if (latestCompletedAutomatedRetentionOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.NO_RETENTION_POLICIES_APPLIED,
-                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId())
+                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId().toString())
             );
         }
         return latestCompletedAutomatedRetentionOpt.get();
