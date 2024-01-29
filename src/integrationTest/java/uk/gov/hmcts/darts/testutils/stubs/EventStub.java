@@ -2,6 +2,7 @@ package uk.gov.hmcts.darts.testutils.stubs;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.EventEntity;
 import uk.gov.hmcts.darts.common.entity.EventHandlerEntity;
 import uk.gov.hmcts.darts.common.entity.HearingEntity;
@@ -24,12 +25,15 @@ public class EventStub {
     }
 
     public EventEntity createEvent(HearingEntity hearing, int eventHandlerId) {
-        return createEvent(hearing,
-                    eventHandlerId,
-                    OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC),
-                    "testEventName");
+        return createEvent(
+            hearing,
+            eventHandlerId,
+            OffsetDateTime.of(2020, 6, 20, 10, 0, 0, 0, ZoneOffset.UTC),
+            "testEventName"
+        );
     }
 
+    @Transactional
     public EventEntity createEvent(HearingEntity hearing, int eventHandlerId, OffsetDateTime eventTimestamp, String eventName) {
         EventEntity eventEntity = new EventEntity();
         eventEntity.setEventText("testEventText");

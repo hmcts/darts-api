@@ -35,6 +35,7 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -122,7 +123,7 @@ public class AudioServiceImpl implements AudioService {
 
         MediaEntity savedMedia = mediaRepository.save(mapper.mapToMedia(addAudioMetadataRequest));
         savedMedia.setChecksum(checksum);
-        linkAudioAndHearing(addAudioMetadataRequest, savedMedia);
+        linkAudioToHearingInMetadata(addAudioMetadataRequest, savedMedia);
         linkAudioToHearingByEvent(addAudioMetadataRequest, savedMedia);
 
         saveExternalObjectDirectory(
@@ -134,7 +135,7 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public void linkAudioAndHearing(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
+    public void linkAudioToHearingInMetadata(AddAudioMetadataRequest addAudioMetadataRequest, MediaEntity savedMedia) {
         for (String caseNumber : addAudioMetadataRequest.getCases()) {
             HearingEntity hearing = retrieveCoreObjectService.retrieveOrCreateHearing(
                 addAudioMetadataRequest.getCourthouse(),
@@ -157,24 +158,26 @@ public class AudioServiceImpl implements AudioService {
             }
         }
 
-        for (String caseNumber : addAudioMetadataRequest.getCases()) {
-            var courtLogs = courtLogEventRepository.findByCourthouseAndCaseNumberBetweenStartAndEnd(
-                addAudioMetadataRequest.getCourthouse(),
-                caseNumber,
-                addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration()),
-                addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration())
-            );
+        String courthouse = addAudioMetadataRequest.getCourthouse();
+        String courtroom = addAudioMetadataRequest.getCourtroom();
+        OffsetDateTime start = addAudioMetadataRequest.getStartedAt().minusMinutes(audioConfigurationProperties.getPreAmbleDuration());
+        OffsetDateTime end = addAudioMetadataRequest.getEndedAt().plusMinutes(audioConfigurationProperties.getPostAmbleDuration());
+        var courtLogs = courtLogEventRepository.findByCourthouseAndCourtroomBetweenStartAndEnd(
+            courthouse,
+            courtroom,
+            start,
+            end
+        );
 
-            var associatedHearings = courtLogs.stream()
-                .flatMap(h -> h.getHearingEntities().stream())
-                .distinct()
-                .collect(Collectors.toList());
+        var associatedHearings = courtLogs.stream()
+            .flatMap(h -> h.getHearingEntities().stream())
+            .distinct()
+            .collect(Collectors.toList());
 
-            for (var hearing : associatedHearings) {
-                if (!hearing.getMediaList().contains(savedMedia)) {
-                    hearing.addMedia(savedMedia);
-                    hearingRepository.saveAndFlush(hearing);
-                }
+        for (var hearing : associatedHearings) {
+            if (!hearing.getMediaList().contains(savedMedia)) {
+                hearing.addMedia(savedMedia);
+                hearingRepository.saveAndFlush(hearing);
             }
         }
     }
