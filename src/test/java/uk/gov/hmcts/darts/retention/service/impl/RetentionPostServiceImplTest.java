@@ -111,6 +111,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("The selected caseId '1' cannot be found.", exception.getDetail());
         assertEquals("RETENTION_103", exception.getError().getType().toString());
+        assertEquals(400, exception.getError().getHttpStatus().value());
     }
 
     @Test
@@ -132,6 +133,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("caseId '101' must be closed before the retention period can be amended.", exception.getDetail());
         assertEquals("RETENTION_104", exception.getError().getType().toString());
+        assertEquals(400, exception.getError().getHttpStatus().value());
     }
 
     @Test
@@ -151,6 +153,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("caseId '101' must have a retention policy applied before being changed.", exception.getDetail());
         assertEquals("RETENTION_105", exception.getError().getType().toString());
+        assertEquals(400, exception.getError().getHttpStatus().value());
     }
 
     @Test
@@ -167,8 +170,9 @@ class RetentionPostServiceImplTest {
             () -> retentionPostService.postRetention(postRetentionRequest)
         );
 
-        assertEquals("caseId '101' must have a retention date after the last Completed Automated retention date '2025-10-01T10:00Z'.", exception.getDetail());
-        assertEquals("RETENTION_106", exception.getError().getType().toString());
+        assertEquals("caseId '101' must have a retention date after the last completed automated retention date '2025-10-01T10:00Z'.", exception.getDetail());
+        assertEquals("RETENTION_101", exception.getError().getType().toString());
+        assertEquals(422, exception.getError().getHttpStatus().value());
     }
 
     @Test
@@ -189,6 +193,7 @@ class RetentionPostServiceImplTest {
 
         assertEquals("You do not have permission to reduce the retention period.", exception.getDetail());
         assertEquals("RETENTION_100", exception.getError().getType().toString());
+        assertEquals(403, exception.getError().getHttpStatus().value());
     }
 
     @Test

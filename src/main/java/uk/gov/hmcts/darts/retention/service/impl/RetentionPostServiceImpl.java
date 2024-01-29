@@ -85,9 +85,9 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             OffsetDateTime newRetentionDate = DateConverterUtil.toOffsetDateTime(postRetentionRequest.getRetentionDate());
             if (newRetentionDate.isBefore(latestCompletedRetentionDate)) {
                 throw new DartsApiException(
-                    RetentionApiError.RETENTION_DATE_TO_EARLY,
+                    RetentionApiError.RETENTION_DATE_TOO_EARLY,
                     MessageFormat.format(
-                        "caseId ''{0}'' must have a retention date after the last Completed Automated retention date ''{1}''.",
+                        "caseId ''{0}'' must have a retention date after the last completed automated retention date ''{1}''.",
                         courtCase.getId(),
                         latestCompletedRetentionDate
                     )
@@ -100,7 +100,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             if (newRetentionDate.isBefore(currentRetentionDate)) {
                 if (!authorisationApi.userHasOneOfRoles(JUDGE_AND_ADMIN_ROLES)) {
                     throw new DartsApiException(
-                        RetentionApiError.NO_PERMISSION_REDUCE_RETENTION_ERROR, "You do not have permission to reduce the retention period."
+                        RetentionApiError.NO_PERMISSION_REDUCE_RETENTION, "You do not have permission to reduce the retention period."
                     );
                 }
             }

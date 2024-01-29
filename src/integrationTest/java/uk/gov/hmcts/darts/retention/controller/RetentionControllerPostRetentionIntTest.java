@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @AutoConfigureMockMvc
-class RetentionControllerPostRetentionTest extends IntegrationBase {
+class RetentionControllerPostRetentionIntTest extends IntegrationBase {
     @Autowired
     private transient MockMvc mockMvc;
 
@@ -135,12 +135,14 @@ class RetentionControllerPostRetentionTest extends IntegrationBase {
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(requestBody);
         mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
-            .andExpect(jsonPath("type", is("RETENTION_106")))
+            .andExpect(jsonPath("type", is("RETENTION_101")))
             .andExpect(jsonPath("title", is("The retention date being applied is too early.")))
             .andExpect(jsonPath("status", is(422)))
-            .andExpect(jsonPath("detail",
+            .andExpect(jsonPath(
+                "detail",
                 is("caseId '" + courtCase.getId().toString()
-                       + "' must have a retention date after the last Completed Automated retention date '2024-01-01T12:00Z'.")));
+                       + "' must have a retention date after the last completed automated retention date '2024-01-01T12:00Z'.")
+            ));
     }
 
 }
