@@ -31,10 +31,10 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
         return armService.listResponseBlobs(getArmContainerName(), prefix);
     }
 
-    public BinaryData getResponseBlobData(String blobName) {
+    public BinaryData getBlobData(String blobPathAndName) {
         return armService.getBlobData(
             getArmContainerName(),
-            armDataManagementConfiguration.getFolders().getResponse() + blobName
+            blobPathAndName
         );
     }
 

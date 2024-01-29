@@ -68,6 +68,13 @@ public class ArmServiceImpl implements ArmService {
         return listBlobs(containerClient, prefix);
     }
 
+    /**
+     * Returns a list of the blobs in the response dropzone containing the specified filename with full path.
+     *
+     * @param containerName name of container
+     * @param filename      name of file to look for
+     * @return list of the blobs in the response dropzone containing the specified filename with full path
+     */
     public List<String> listResponseBlobs(String containerName, String filename) {
         BlobContainerClient containerClient = armDataManagementDao.getBlobContainerClient(containerName);
         String prefix = armDataManagementConfiguration.getFolders().getResponse() + filename;
@@ -80,10 +87,10 @@ public class ArmServiceImpl implements ArmService {
         log.debug("About to list files for {}", prefix);
         listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, prefix).forEach(blob -> {
             if (Boolean.TRUE.equals(blob.isPrefix())) {
-                log.info("Virtual directory prefix: {}}", FILE_PATH_DELIMITER + blob.getName());
+                log.info("Virtual directory prefix: {}", FILE_PATH_DELIMITER + blob.getName());
                 listBlobsHierarchicalListing(blobContainerClient, FILE_PATH_DELIMITER, blob.getName());
             } else {
-                log.info("Blob name: {}}", blob.getName());
+                log.info("Blob name: {}", blob.getName());
                 files.add(blob.getName());
             }
         });

@@ -170,7 +170,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             try {
                 UploadFileFilenameProcessor uploadFileFilenameProcessor = new UploadFileFilenameProcessor(uploadFilename);
 
-                BinaryData uploadFileBinary = armDataManagementApi.getResponseBlobData(uploadFilename);
+                BinaryData uploadFileBinary = armDataManagementApi.getBlobData(uploadFilename);
                 readUploadFile(
                     externalObjectDirectory,
                     uploadFileBinary,
