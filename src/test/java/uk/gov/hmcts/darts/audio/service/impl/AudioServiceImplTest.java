@@ -171,7 +171,7 @@ class AudioServiceImplTest {
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
         when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
 
-        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"));
+        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"), true);
         when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
 
         byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
@@ -208,7 +208,7 @@ class AudioServiceImplTest {
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
         when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
 
-        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"));
+        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"), true);
         when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
 
         BinaryData data = mock(BinaryData.class);
