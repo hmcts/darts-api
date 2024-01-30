@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
 import uk.gov.hmcts.darts.common.entity.TranscriptionDocumentEntity;
+import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum;
 import uk.gov.hmcts.darts.common.repository.ExternalLocationTypeRepository;
 import uk.gov.hmcts.darts.common.repository.ExternalObjectDirectoryRepository;
@@ -65,9 +66,9 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
     private ObjectRecordStatusEntity armDropZoneStatus;
     private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
-    ObjectRecordStatusEntity armResponseProcessingFailed;
-    ObjectRecordStatusEntity storedStatus;
-
+    private ObjectRecordStatusEntity armResponseProcessingFailed;
+    private ObjectRecordStatusEntity storedStatus;
+    private UserAccountEntity userAccount;
 
     @Override
     public void processResponseFiles() {
@@ -102,6 +103,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
         armResponseProcessingFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_PROCESSING.getId()).get();
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
+
+        userAccount = userIdentity.getUserAccount();
     }
 
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
@@ -359,7 +362,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             externalObjectDirectory.getId()
         );
         externalObjectDirectory.setStatus(objectRecordStatus);
-        externalObjectDirectory.setLastModifiedBy(userIdentity.getUserAccount());
+        externalObjectDirectory.setLastModifiedBy(userAccount);
         externalObjectDirectory.setLastModifiedDateTime(OffsetDateTime.now());
         externalObjectDirectoryRepository.saveAndFlush(externalObjectDirectory);
     }
