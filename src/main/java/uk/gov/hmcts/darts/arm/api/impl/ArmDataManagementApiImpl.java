@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 import java.time.OffsetDateTime;
@@ -17,6 +18,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     private final ArmService armService;
     private final ArmDataManagementConfiguration armDataManagementConfiguration;
+    private final ArmApiService armApiService;
 
     @Override
     public String saveBlobDataToArm(String filename, BinaryData binaryData) {
@@ -47,7 +49,7 @@ public class ArmDataManagementApiImpl implements ArmDataManagementApi {
 
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
-        return armService.updateMetadata(externalRecordId, eventTimestamp);
+        return armApiService.updateMetadata(externalRecordId, eventTimestamp);
     }
 
     private String getArmContainerName() {

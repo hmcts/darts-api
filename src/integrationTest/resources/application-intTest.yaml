@@ -43,12 +43,10 @@ darts:
     api:
       baseurl: http://localhost:8080
   storage:
-    token-base-url: ${darts.storage.arm-api.url}
     arm-api:
       arm-username: some-username
       arm-password: some-password
       url: https://darts-stub-services.staging.platform.hmcts.net
-      update-metadata-path: /api/v3/UpdateMetadata
 
 logging:
   level:

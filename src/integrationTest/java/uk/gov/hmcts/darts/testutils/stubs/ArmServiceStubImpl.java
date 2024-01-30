@@ -5,13 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @Slf4j
@@ -62,21 +59,6 @@ public class ArmServiceStubImpl implements ArmService {
     public boolean deleteResponseBlob(String containerName, String filename) {
         return true;
     }
-
-    @Override
-    public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
-        return UpdateMetadataResponse.builder()
-            .itemId(UUID.fromString(externalRecordId))
-            .cabinetId(101)
-            .objectId(UUID.fromString("4bfe4fc7-4e2f-4086-8a0e-146cc4556260"))
-            .objectType(1)
-            .fileName("UpdateMetadata-20241801-122819.json")
-            .isError(false)
-            .responseStatus(0)
-            .responseStatusMessages(null)
-            .build();
-    }
-
 
     private void logStubUsageWarning() {
         log.warn("### This implementation is intended only for integration tests. If you see this log message elsewhere"

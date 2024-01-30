@@ -74,8 +74,6 @@ java:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
-        - name: ArmTokenBaseUrl
-          alias: ARM_TOKEN_BASE_URL
         - name: ArmUrl
           alias: ARM_URL
         - name: ArmUsername
@@ -169,8 +167,12 @@ function:
           alias: AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD
         - name: ARMSasEndpoint
           alias: ARM_SAS_ENDPOINT
-        - name: ArmTokenBaseUrl
-          alias: ARM_TOKEN_BASE_URL
+        - name: ArmUrl
+          alias: ARM_URL
+        - name: ArmUsername
+          alias: ARM_USERNAME
+        - name: ArmPassword
+          alias: ARM_PASSWORD
   environment:
     ATS_MODE: true
     POSTGRES_SSL_MODE: require

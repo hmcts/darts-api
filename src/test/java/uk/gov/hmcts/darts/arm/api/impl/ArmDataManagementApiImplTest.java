@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
+import uk.gov.hmcts.darts.arm.service.ArmApiService;
 import uk.gov.hmcts.darts.arm.service.ArmService;
 
 import java.nio.charset.StandardCharsets;
@@ -33,11 +34,13 @@ class ArmDataManagementApiImplTest {
     private ArmService armService;
     @Mock
     private ArmDataManagementConfiguration armDataManagementConfiguration;
+    @Mock
+    private ArmApiService armApiService;
 
     @BeforeEach
     void setUp() {
         when(armDataManagementConfiguration.getContainerName()).thenReturn(ARM_BLOB_CONTAINER_NAME);
-        armDataManagementApi = new ArmDataManagementApiImpl(armService, armDataManagementConfiguration);
+        armDataManagementApi = new ArmDataManagementApiImpl(armService, armDataManagementConfiguration, armApiService);
     }
 
     @Test

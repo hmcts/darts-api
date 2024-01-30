@@ -11,9 +11,11 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@FeignClient(name = "arm-update-metadata-client",
-    url = "${darts.storage.arm-api.url}")
-public interface ArmUpdateMetadataClient {
+@FeignClient(
+    name = "arm-api-client",
+    url = "${darts.storage.arm-api.url}"
+)
+public interface ArmApiClient {
 
     @PostMapping(value = "${darts.storage.arm-api.update-metadata-path}",
         consumes = APPLICATION_JSON_VALUE,

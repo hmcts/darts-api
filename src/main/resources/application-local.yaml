@@ -26,8 +26,6 @@ darts:
   redis:
     ssl-enabled: false
   storage:
-    arm:
-      token-base-url: ${ARM_TOKEN_BASE_URL:localhost:4551}
     arm-api:
       url: ${ARM_URL:http://localhost:4551}
 
