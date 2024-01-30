@@ -14,7 +14,9 @@
 --v18 add use_interpreter boolean on security_group 
 --    add defaults to global_access and use_interpreter to false  
 --v19 remove r_ from dm_group_s_object_id and r_modify_date  from security_group
---    add display_namr to security_group
+--    add display_name to security_group
+--v20 remove group_class and group_display_name from security_group
+--
 
 -- assuming this already exists:
 -- CREATE TABLESPACE darts_tables  location 'E:/PostgreSQL/Tables';
@@ -45,9 +47,7 @@ CREATE TABLE security_group
 ,group_name              CHARACTER VARYING               NOT NULL
 ,is_private              BOOLEAN
 ,description             CHARACTER VARYING
-,group_class             CHARACTER VARYING
 ,group_global_unique_id  CHARACTER VARYING
-,group_display_name      CHARACTER VARYING
 ,use_interpreter         BOOLEAN                         NOT NULL  DEFAULT FALSE
 ,created_ts              TIMESTAMP WITH TIME ZONE        NOT NULL
 ,created_by              INTEGER                         NOT NULL

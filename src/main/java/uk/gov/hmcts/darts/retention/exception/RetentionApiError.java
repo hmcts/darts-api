@@ -33,6 +33,10 @@ public enum RetentionApiError implements DartsApiError {
         "105",
         HttpStatus.BAD_REQUEST,
         "The case must have a retention policy applied before being changed."
+    ), INTERNAL_SERVER_ERROR(
+        "106",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "An Internal server error has occurred."
     );
 
     private static final String ERROR_TYPE_PREFIX = "RETENTION";

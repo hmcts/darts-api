@@ -24,6 +24,7 @@ DROP SEQUENCE rol_seq;
 DROP SEQUENCE per_seq;
 
 DROP TABLE case_judge_ae;
+DROP TABLE case_transcription_ae;
 DROP TABLE hearing_judge_ae;
 DROP TABLE defence;
 DROP TABLE defendant;
@@ -38,6 +39,7 @@ DROP TABLE object_record_status;
 DROP TABLE external_location_type;  
 DROP TABLE annotation_document;
 DROP TABLE hearing_annotation_ae;
+DROP TABLE hearing_transcription_ae;
 DROP TABLE annotation ;
 DROP TABLE media_request;
 

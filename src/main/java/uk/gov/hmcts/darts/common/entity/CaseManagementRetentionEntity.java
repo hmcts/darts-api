@@ -38,12 +38,12 @@ public class CaseManagementRetentionEntity {
     private RetentionPolicyTypeEntity retentionPolicyTypeEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eve_id", nullable = false)
+    @JoinColumn(name = "eve_id")
     private EventEntity eventEntity;
 
-    @Column(name = "total_sentence", nullable = false)
+    @Column(name = "total_sentence")
     private String totalSentence;
 
-    @Column(name = "event_ts", nullable = false)
+    @Column(name = "event_ts")
     private OffsetDateTime eventDatetime;
 }

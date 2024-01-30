@@ -9,6 +9,7 @@ import uk.gov.hmcts.darts.audit.api.AuditApi;
 import uk.gov.hmcts.darts.authorisation.api.AuthorisationApi;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.common.entity.CourtCaseEntity;
+import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.common.enums.SecurityRoleEnum;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
+import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
@@ -48,7 +50,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         if (caseOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.CASE_NOT_FOUND,
-                MessageFormat.format("The selected caseId ''{0}'' cannot be found.", postRetentionRequest.getCaseId())
+                MessageFormat.format("The selected caseId ''{0}'' cannot be found.", postRetentionRequest.getCaseId().toString())
             );
         }
 
@@ -71,7 +73,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             log.error("A retention policy of {} was attempted to be applied to an open case", postRetentionRequest);
             throw new DartsApiException(
                 RetentionApiError.CASE_NOT_CLOSED,
-                MessageFormat.format("caseId ''{0}'' must be closed before the retention period can be amended.", courtCase.getId())
+                MessageFormat.format("caseId ''{0}'' must be closed before the retention period can be amended.", courtCase.getId().toString())
             );
         }
 
@@ -80,20 +82,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         CaseRetentionEntity lastCompletedAutomatedCaseRetention = getLatestCompleteAutomatedCaseRetention(courtCase);
 
         if (BooleanUtils.isNotTrue(postRetentionRequest.getIsPermanentRetention())) {
-            //No users can reduce the retention date to earlier than the last Completed automated date.
-            OffsetDateTime latestCompletedRetentionDate = lastCompletedAutomatedCaseRetention.getRetainUntil();
             OffsetDateTime newRetentionDate = DateConverterUtil.toOffsetDateTime(postRetentionRequest.getRetentionDate());
-            if (newRetentionDate.isBefore(latestCompletedRetentionDate)) {
-                throw new DartsApiException(
-                    RetentionApiError.RETENTION_DATE_TOO_EARLY,
-                    MessageFormat.format(
-                        "caseId ''{0}'' must have a retention date after the last completed automated retention date ''{1}''.",
-                        courtCase.getId(),
-                        latestCompletedRetentionDate
-                    )
-                );
-            }
-
 
             //Only Judges and Admin can reduce a set retention date
             OffsetDateTime currentRetentionDate = getLatestCompletedCaseRetention(courtCase).getRetainUntil();
@@ -105,6 +94,19 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                 }
             }
 
+            //No users can reduce the retention date to earlier than the last Completed automated date.
+            OffsetDateTime latestCompletedRetentionDate = lastCompletedAutomatedCaseRetention.getRetainUntil();
+            if (newRetentionDate.isBefore(latestCompletedRetentionDate)) {
+                throw new DartsApiException(
+                    RetentionApiError.RETENTION_DATE_TOO_EARLY,
+                    MessageFormat.format(
+                        "caseId ''{0}'' must have a retention date after the last completed automated retention date ''{1}''.",
+                        courtCase.getId().toString(),
+                        latestCompletedRetentionDate
+                    )
+                );
+            }
+
         }
     }
 
@@ -113,7 +115,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         if (latestCompletedAutomatedRetentionOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.NO_RETENTION_POLICIES_APPLIED,
-                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId())
+                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId().toString())
             );
         }
         return latestCompletedAutomatedRetentionOpt.get();
@@ -124,7 +126,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         if (latestCompletedAutomatedRetentionOpt.isEmpty()) {
             throw new DartsApiException(
                 RetentionApiError.NO_RETENTION_POLICIES_APPLIED,
-                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId())
+                MessageFormat.format("caseId ''{0}'' must have a retention policy applied before being changed.", courtCase.getId().toString())
             );
         }
         return latestCompletedAutomatedRetentionOpt.get();
@@ -134,7 +136,6 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                                                        OffsetDateTime newRetentionDate) {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
-        caseRetention.setManualOverride(true);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
         caseRetention.setLastModifiedBy(currentUser);
         caseRetention.setCreatedBy(currentUser);
@@ -144,7 +145,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setCurrentState(String.valueOf(CaseRetentionStatus.COMPLETE));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
 
-        caseRetention.setRetentionPolicyType(retentionPolicyTypeRepository.getReferenceById(1));//todo update once decision has been made
+        caseRetention.setRetentionPolicyType(getRetentionPolicy(postRetentionRequest.getIsPermanentRetention()));
 
         caseRetentionRepository.saveAndFlush(caseRetention);
         auditApi.recordAudit(
@@ -153,6 +154,28 @@ public class RetentionPostServiceImpl implements RetentionPostService {
             courtCase
         );
         return caseRetention;
+    }
+
+    private RetentionPolicyTypeEntity getRetentionPolicy(Boolean isPermanent) {
+
+        String policyKey;
+        if (BooleanUtils.isTrue(isPermanent)) {
+            policyKey = RetentionPolicyEnum.PERMANENT.getPolicyKey();
+        } else {
+            policyKey = RetentionPolicyEnum.MANUAL.getPolicyKey();
+        }
+
+        Optional<RetentionPolicyTypeEntity> manualPolicyEntityOpt = retentionPolicyTypeRepository.findCurrentWithFixedPolicyKey(
+            policyKey,
+            currentTimeHelper.currentOffsetDateTime()
+        );
+        if (manualPolicyEntityOpt.isEmpty()) {
+            throw new DartsApiException(
+                RetentionApiError.INTERNAL_SERVER_ERROR,
+                MessageFormat.format("Cannot find Policy with FixedPolicyKey ''{0}''", policyKey)
+            );
+        }
+        return manualPolicyEntityOpt.get();
     }
 
 }
