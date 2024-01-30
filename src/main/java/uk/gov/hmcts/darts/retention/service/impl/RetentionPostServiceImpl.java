@@ -82,20 +82,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         CaseRetentionEntity lastCompletedAutomatedCaseRetention = getLatestCompleteAutomatedCaseRetention(courtCase);
 
         if (BooleanUtils.isNotTrue(postRetentionRequest.getIsPermanentRetention())) {
-            //No users can reduce the retention date to earlier than the last Completed automated date.
-            OffsetDateTime latestCompletedRetentionDate = lastCompletedAutomatedCaseRetention.getRetainUntil();
             OffsetDateTime newRetentionDate = DateConverterUtil.toOffsetDateTime(postRetentionRequest.getRetentionDate());
-            if (newRetentionDate.isBefore(latestCompletedRetentionDate)) {
-                throw new DartsApiException(
-                    RetentionApiError.RETENTION_DATE_TOO_EARLY,
-                    MessageFormat.format(
-                        "caseId ''{0}'' must have a retention date after the last completed automated retention date ''{1}''.",
-                        courtCase.getId().toString(),
-                        latestCompletedRetentionDate
-                    )
-                );
-            }
-
 
             //Only Judges and Admin can reduce a set retention date
             OffsetDateTime currentRetentionDate = getLatestCompletedCaseRetention(courtCase).getRetainUntil();
@@ -105,6 +92,19 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                         RetentionApiError.NO_PERMISSION_REDUCE_RETENTION, "You do not have permission to reduce the retention period."
                     );
                 }
+            }
+
+            //No users can reduce the retention date to earlier than the last Completed automated date.
+            OffsetDateTime latestCompletedRetentionDate = lastCompletedAutomatedCaseRetention.getRetainUntil();
+            if (newRetentionDate.isBefore(latestCompletedRetentionDate)) {
+                throw new DartsApiException(
+                    RetentionApiError.RETENTION_DATE_TOO_EARLY,
+                    MessageFormat.format(
+                        "caseId ''{0}'' must have a retention date after the last completed automated retention date ''{1}''.",
+                        courtCase.getId().toString(),
+                        latestCompletedRetentionDate
+                    )
+                );
             }
 
         }

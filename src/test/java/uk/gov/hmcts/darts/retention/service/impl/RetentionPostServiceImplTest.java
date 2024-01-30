@@ -176,6 +176,8 @@ class RetentionPostServiceImplTest {
     void fail_BeforeAutomatedRetentionDate() {
         setupStubs();
 
+        when(authorisationApi.userHasOneOfRoles(anyList())).thenReturn(true);
+        
         PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
         postRetentionRequest.setCaseId(1);
         postRetentionRequest.setRetentionDate(LocalDate.of(2024, 1, 1));
