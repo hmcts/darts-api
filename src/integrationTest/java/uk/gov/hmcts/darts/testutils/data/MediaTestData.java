@@ -31,20 +31,6 @@ public class MediaTestData {
         return media;
     }
 
-    public static MediaEntity createMediaWith(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        var mediaEntity = someMinimalMedia();
-        mediaEntity.setStart(startTime);
-        mediaEntity.setEnd(endTime);
-        mediaEntity.setChannel(channel);
-        mediaEntity.setTotalChannels(2);
-        mediaEntity.setMediaFile("a-media-file");
-        mediaEntity.setChecksum("a-checksum");
-        mediaEntity.setFileSize(1000L);
-        mediaEntity.setMediaFormat("mp3");
-        mediaEntity.setMediaType(MEDIA_TYPE_DEFAULT);
-        return mediaEntity;
-    }
-
     public static MediaEntity createMediaWith(CourtroomEntity courtroomEntity, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
         var mediaEntity = someMinimalMedia();
         mediaEntity.setCourtroom(courtroomEntity);

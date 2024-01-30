@@ -54,6 +54,9 @@ public class AnnotationDocumentEntity {
     @Column(name = "content_object_id")
     private String contentObjectId;
 
+    @Column(name = "clip_id")
+    private String clipId;
+
     @Column(name = "is_hidden", nullable = false)
     private boolean isHidden;
 

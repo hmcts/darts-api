@@ -51,6 +51,7 @@ public class AudioTransformationServiceGivenBuilder {
     private static final OffsetDateTime MEDIA_END_TIME = MEDIA_START_TIME.plusHours(1);
 
     public void setupTest() {
+        courtroomAtNewcastle = dartsDatabase.createCourtroomUnlessExists("Newcastle", "room_a");
         hearingEntityWithMedia1 = dartsDatabase.createHearing(
             "NEWCASTLE",
             "room_a",

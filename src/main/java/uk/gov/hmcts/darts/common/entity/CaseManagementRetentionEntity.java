@@ -13,8 +13,6 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.OffsetDateTime;
-
 @Entity
 @Table(name = CaseManagementRetentionEntity.TABLE_NAME)
 @Getter
@@ -38,12 +36,9 @@ public class CaseManagementRetentionEntity {
     private RetentionPolicyTypeEntity retentionPolicyTypeEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "eve_id")
+    @JoinColumn(name = "eve_id", nullable = false)
     private EventEntity eventEntity;
 
     @Column(name = "total_sentence")
     private String totalSentence;
-
-    @Column(name = "event_ts")
-    private OffsetDateTime eventDatetime;
 }
