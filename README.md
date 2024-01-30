@@ -1,5 +1,5 @@
 # darts-api
-
+# This branch is dedicated for Justice AD integration will never get merged
 # Modernised DARTS SwaggerUI
 
 * To View the embedded Swagger UI in Github Pages: https://hmcts.github.io/darts-api/
