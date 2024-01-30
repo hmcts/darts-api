@@ -98,6 +98,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         }
     }
 
+    @SuppressWarnings("java:S3655")
     private void initialisePreloadedObjects() {
         armDropZoneStatus = objectRecordStatusRepository.findById(ARM_DROP_ZONE.getId()).get();
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
@@ -303,7 +304,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     private void verifyChecksumAndUpdateStatus(ArmResponseUploadFileRecord armResponseUploadFileRecord,
                                                ExternalObjectDirectoryEntity externalObjectDirectory,
                                                String objectChecksum) {
-        ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(FAILURE_ARM_RESPONSE_PROCESSING.getId());
         if (objectChecksum.equals(armResponseUploadFileRecord.getMd5())) {
             UploadNewFileRecord uploadNewFileRecord = readInputJson(externalObjectDirectory, armResponseUploadFileRecord.getInput());
             if (nonNull(uploadNewFileRecord)) {
@@ -323,7 +323,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
     private UploadNewFileRecord readInputJson(ExternalObjectDirectoryEntity externalObjectDirectory, String input) {
         UploadNewFileRecord uploadNewFileRecord = null;
-        ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(FAILURE_ARM_RESPONSE_PROCESSING.getId());
         if (StringUtils.isNotEmpty(input)) {
             String unescapedJson = StringEscapeUtils.unescapeJson(input);
             try {
