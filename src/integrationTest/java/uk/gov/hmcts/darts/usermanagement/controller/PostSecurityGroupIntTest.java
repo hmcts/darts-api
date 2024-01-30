@@ -82,7 +82,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                 .orElseThrow();
 
             assertEquals("ACME", createdSecurityGroupEntity.getGroupName());
-            assertEquals("ACME Transcription Services", createdSecurityGroupEntity.getGroupDisplayName());
+            assertEquals("ACME Transcription Services", createdSecurityGroupEntity.getDisplayName());
             assertNull(createdSecurityGroupEntity.getDescription());
             assertFalse(createdSecurityGroupEntity.getGlobalAccess());
             assertTrue(createdSecurityGroupEntity.getDisplayState());
@@ -124,7 +124,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
                 .orElseThrow();
 
             assertEquals("Scribe It", createdSecurityGroupEntity.getGroupName());
-            assertEquals("Scribe It Transcription Services", createdSecurityGroupEntity.getGroupDisplayName());
+            assertEquals("Scribe It Transcription Services", createdSecurityGroupEntity.getDisplayName());
             assertEquals(DESCRIPTION, createdSecurityGroupEntity.getDescription());
             assertFalse(createdSecurityGroupEntity.getGlobalAccess());
             assertTrue(createdSecurityGroupEntity.getDisplayState());
@@ -164,7 +164,7 @@ class PostSecurityGroupIntTest extends IntegrationBase {
             .andExpect(status().isCreated())
             .andReturn();
         JSONObject initialSecurityGroup = new JSONObject(initialResponse.getResponse()
-                                                   .getContentAsString());
+                                                             .getContentAsString());
 
         MockHttpServletRequestBuilder requestForDuplicateGroup = buildRequest()
             .content("""

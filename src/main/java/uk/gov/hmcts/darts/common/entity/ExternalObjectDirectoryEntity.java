@@ -84,6 +84,12 @@ public class ExternalObjectDirectoryEntity extends CreatedModifiedBaseEntity imp
     @Column(name = "event_date_ts")
     private LocalDateTime eventDateTs;
 
+    @Column(name = "error_code")
+    private String errorCode;
+
+    @Column(name = "is_response_cleaned")
+    private boolean responseCleaned;
+
     @Override
     public int getStatusId() {
         return getStatus().getId();

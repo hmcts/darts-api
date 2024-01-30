@@ -36,10 +36,10 @@ class AudioControllerGetMetadataIntTest extends IntegrationBase {
 
     @Test
     void getAudioMetadataGetShouldReturnMediaChannel1MetadataAssociatedWithProvidedHearing() throws Exception {
-        var mediaChannel1 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 1);
-        var mediaChannel2 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 2);
-        var mediaChannel3 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 3);
-        var mediaChannel4 = dartsDatabase.createMediaEntity(MEDIA_START_TIME, MEDIA_END_TIME, 4);
+        var mediaChannel1 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 1);
+        var mediaChannel2 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 2);
+        var mediaChannel3 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 3);
+        var mediaChannel4 = dartsDatabase.createMediaEntity("testCourthouse", "testCourtroom", MEDIA_START_TIME, MEDIA_END_TIME, 4);
 
         var hearingEntity = dartsDatabase.givenTheDatabaseContainsCourtCaseWithHearingAndCourthouseWithRoom(
             "999",

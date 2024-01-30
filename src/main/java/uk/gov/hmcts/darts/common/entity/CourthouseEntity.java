@@ -32,7 +32,7 @@ public class CourthouseEntity extends CreatedModifiedBaseEntity {
     @SequenceGenerator(name = "cth_gen", sequenceName = "cth_seq", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "courthouse_code", unique = true)
+    @Column(name = "courthouse_code")
     @EqualsAndHashCode.Include
     private Integer code;
 
