@@ -8,6 +8,7 @@ import uk.gov.hmcts.darts.common.entity.HearingEntity;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,6 @@ import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.darts.testutils.data.CaseTestData.createSomeMinimalCase;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.REPORTING_RESTRICTIONS_LIFTED_DB_ID;
-import static uk.gov.hmcts.darts.testutils.data.EventTestData.createEventWithDefaults;
 import static uk.gov.hmcts.darts.testutils.data.EventTestData.someReportingRestrictionId;
 import static uk.gov.hmcts.darts.testutils.data.HearingTestData.createSomeMinimalHearing;
 
@@ -113,13 +113,16 @@ class CaseMapperTest extends IntegrationBase {
 
     @Test
     void includesReportingRestrictionsLifted() {
-        var event1 = createEventWithDefaults();
-        event1.setTimestamp(now().minusDays(1));
+
+        var event1 = dartsDatabase.getEventStub().createDefaultEvent();
+        event1.setTimestamp(OffsetDateTime.of(2020, 10, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(event1);
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
-        var event2 = createEventWithDefaults();
+        var event2 = dartsDatabase.getEventStub().createDefaultEvent();
         event2.setEventName("reporting-restrictions-lifted");
-        event2.setTimestamp(now());
+        event2.setTimestamp(OffsetDateTime.of(2020, 11, 1, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(event2);
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
         var minimalHearing = createSomeMinimalHearing();
@@ -133,16 +136,16 @@ class CaseMapperTest extends IntegrationBase {
 
     @Test
     void includesReportingRestrictionsLiftedWhenReapplied() {
-        var event1 = createEventWithDefaults();
+        var event1 = dartsDatabase.getEventStub().createDefaultEvent();
         event1.setTimestamp(now().minusDays(2));
         var reportingRestriction = dartsDatabase.addHandlerToEvent(event1, someReportingRestrictionId());
 
-        var event2 = createEventWithDefaults();
+        var event2 = dartsDatabase.getEventStub().createDefaultEvent();
         event2.setEventName("reporting-restrictions-lifted");
         event2.setTimestamp(now().minusDays(1));
         var reportingRestrictionLifted = dartsDatabase.addHandlerToEvent(event2, REPORTING_RESTRICTIONS_LIFTED_DB_ID);
 
-        var event3 = createEventWithDefaults();
+        var event3 = dartsDatabase.getEventStub().createDefaultEvent();
         event3.setEventName("reapplying-reporting-restrictions");
         event3.setTimestamp(now());
         var reappliedReportingRestriction = dartsDatabase.addHandlerToEvent(event3, someReportingRestrictionId());
@@ -178,7 +181,7 @@ class CaseMapperTest extends IntegrationBase {
     private List<EventEntity> createEventsWithDifferentTimestamps(List<OffsetDateTime> eventDateTimes) {
         return rangeClosed(1, eventDateTimes.size())
             .mapToObj(index -> {
-                var event = createEventWithDefaults();
+                var event = dartsDatabase.getEventStub().createDefaultEvent();
                 event.setEventName("some-event-name-" + index);
                 event.setEventText("some-event-text-" + index);
                 event.setMessageId("some-message-id-" + index);

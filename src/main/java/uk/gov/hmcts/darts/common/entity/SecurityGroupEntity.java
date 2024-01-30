@@ -50,14 +50,8 @@ public class SecurityGroupEntity extends CreatedModifiedBaseEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "group_class")
-    private String groupClass;
-
     @Column(name = "group_global_unique_id")
     private String groupGlobalUniqueId;
-
-    @Column(name = "group_display_name")
-    private String groupDisplayName;
 
     @Column(name = "global_access")
     private Boolean globalAccess;

@@ -50,11 +50,11 @@ public class EventEntity extends CreatedModifiedBaseEntity {
     @Column(name = "event_text")
     private String eventText;
 
-    @Column(name = "event_ts")
+    @Column(name = "event_ts", nullable = false)
     private OffsetDateTime timestamp;
 
     @ManyToOne
-    @JoinColumn(name = "ctr_id")
+    @JoinColumn(name = "ctr_id", nullable = false)
     private CourtroomEntity courtroom;
 
     @Column(name = "version_label", length = 32)
@@ -65,6 +65,12 @@ public class EventEntity extends CreatedModifiedBaseEntity {
 
     @Column(name = "is_log_entry")
     private Boolean isLogEntry;
+
+    @Column(name = "chronicle_id")
+    private String chronicleId;
+
+    @Column(name = "antecedent_id")
+    private String antecedentId;
 
     @ManyToMany
     @JoinTable(name = "hearing_event_ae",

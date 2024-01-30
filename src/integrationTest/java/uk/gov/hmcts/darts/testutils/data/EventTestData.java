@@ -44,14 +44,6 @@ public class EventTestData {
         return event;
     }
 
-    public static EventEntity createEventWithDefaults() {
-        var event = someMinimalEvent();
-        event.setEventName("some-event-name");
-        event.setEventText("some-event-text");
-        event.setMessageId("some-message-id");
-        return event;
-    }
-
     public static int someReportingRestrictionId() {
         return REPORTING_RESTRICTIONS_DB_IDS.get(
             new Random().nextInt(REPORTING_RESTRICTIONS_DB_IDS.size()));

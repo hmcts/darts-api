@@ -90,6 +90,12 @@ public class TranscriptionEntity extends CreatedModifiedBaseEntity {
     @Column(name = "hide_request_from_requestor", nullable = false)
     private Boolean hideRequestFromRequestor;
 
+    @Column(name = "chronicle_id")
+    private String chronicleId;
+
+    @Column(name = "antecedent_id")
+    private String antecedentId;
+
     @OneToMany(mappedBy = TranscriptionCommentEntity_.TRANSCRIPTION)
     private List<TranscriptionCommentEntity> transcriptionCommentEntities = new ArrayList<>();
 

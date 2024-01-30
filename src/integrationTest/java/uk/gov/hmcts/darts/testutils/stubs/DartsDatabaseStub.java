@@ -333,10 +333,10 @@ public class DartsDatabaseStub {
         dailyListRepository.saveAllAndFlush(List.of(xhbDailyList, cppDailyList));
     }
 
-    public MediaEntity createMediaEntity(OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
-        return mediaRepository.saveAndFlush(createMediaWith(startTime, endTime, channel));
+    public MediaEntity createMediaEntity(String courthouseName, String courtroomName, OffsetDateTime startTime, OffsetDateTime endTime, int channel) {
+        CourtroomEntity courtroom = createCourtroomUnlessExists(courthouseName, courtroomName);
+        return mediaRepository.saveAndFlush(createMediaWith(courtroom, startTime, endTime, channel));
     }
-
 
     public CourtroomEntity findCourtroomBy(String courthouseName, String courtroomName) {
         return courtroomRepository.findByCourthouseNameAndCourtroomName(courthouseName, courtroomName).orElse(null);
@@ -455,6 +455,10 @@ public class DartsDatabaseStub {
 
     public CourtroomEntity save(CourtroomEntity courtroom) {
         return courtroomRepository.save(courtroom);
+    }
+
+    public EventEntity save(EventEntity eventEntity) {
+        return eventRepository.save(eventEntity);
     }
 
     public MediaRequestEntity save(MediaRequestEntity mediaRequestEntity) {

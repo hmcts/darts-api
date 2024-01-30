@@ -36,6 +36,9 @@ public class TranscriptionDocumentEntity {
     @JoinColumn(name = "tra_id", nullable = false, foreignKey = @ForeignKey(name = "transcription_document_transcription_fk"))
     private TranscriptionEntity transcription;
 
+    @Column(name = "clip_id")
+    private String clipId;
+
     @Column(name = "file_name", nullable = false)
     private String fileName;
 
