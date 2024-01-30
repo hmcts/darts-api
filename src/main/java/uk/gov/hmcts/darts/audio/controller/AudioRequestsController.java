@@ -28,6 +28,7 @@ import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.DOWNLOAD_HEARING_ID_TRANSCRIBER;
+import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.MEDIA_REQUEST_ID;
 import static uk.gov.hmcts.darts.authorisation.enums.ContextIdEnum.TRANSFORMED_MEDIA_ID;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.APPROVER;
 import static uk.gov.hmcts.darts.common.enums.SecurityRoleEnum.JUDGE;
@@ -57,6 +58,26 @@ public class AudioRequestsController implements AudioRequestsApi {
     public ResponseEntity<List<GetAudioRequestResponseV1>> getYourAudioV1(Integer userId, Boolean expired) {
 
         return new ResponseEntity<>(mediaRequestService.getAudioRequestsV1(userId, expired), HttpStatus.OK);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = MEDIA_REQUEST_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
+    public ResponseEntity<Void> deleteAudioRequest(Integer mediaRequestId) {
+        mediaRequestService.deleteAudioRequest(mediaRequestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
+    @Authorisation(contextId = MEDIA_REQUEST_ID,
+        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
+        globalAccessSecurityRoles = {JUDGE})
+    public ResponseEntity<Void> updateAudioRequestLastAccessedTimestamp(Integer mediaRequestId) {
+        mediaRequestService.updateTransformedMediaLastAccessedTimestampForMediaRequestId(mediaRequestId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @Override
