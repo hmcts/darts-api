@@ -46,7 +46,7 @@ darts:
     arm-api:
       arm-username: some-username
       arm-password: some-password
-      url: https://darts-stub-services.staging.platform.hmcts.net
+      url: http://localhost:4551
 
 logging:
   level:
