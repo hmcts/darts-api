@@ -78,7 +78,7 @@ class ExceptionHandlerTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"TEST_999",
+                "type":"999",
                 "title":"A descriptive title",
                 "status":418
             }
@@ -101,7 +101,7 @@ class ExceptionHandlerTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"TEST_999",
+                "type":"999",
                 "title":"A descriptive title",
                 "status":418,
                 "detail":"Some descriptive details"

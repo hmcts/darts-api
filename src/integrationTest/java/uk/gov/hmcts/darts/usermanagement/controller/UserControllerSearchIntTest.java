@@ -66,7 +66,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
             .andReturn();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_107","title":"Failed to check authorisation","status":403}
+            {"type":"107","title":"Failed to check authorisation","status":403}
             """;
         JSONAssert.assertEquals(
             expectedResponse,

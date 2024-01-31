@@ -95,7 +95,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
-              "type": "HEARING_100",
+              "type": "100",
               "title": "The requested hearing cannot be found",
               "status": 404
             }
@@ -117,7 +117,7 @@ class HearingsGetEventsControllerTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+            {"type":"106","title":"Could not obtain user details","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

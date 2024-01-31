@@ -85,3 +85,19 @@ components:
           example: '2023-05-31T09:00:00Z'
         audit_activity_id:
           type: integer
+
+    AuditErrorCode:
+      type: string
+      enum:
+        - "100"
+        - "101"
+        - "102"
+      x-enum-varnames: [ AUDIT_FILTERS_WERE_EMPTY, FILTER_EMPTY, NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT]
+
+    AuditTitleErrors:
+      type: string
+      enum:
+        - "All filters were empty."
+        - "When using date filters, both must be provided."
+        - "No hearing or user found when auditing 'add audio' request."
+      x-enum-varnames: [ AUDIT_FILTERS_WERE_EMPTY, FILTER_EMPTY, NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT]

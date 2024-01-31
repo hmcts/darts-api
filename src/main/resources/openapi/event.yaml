@@ -336,22 +336,12 @@ components:
       type: string
       maxLength: 25
 
-    EventErrorCode:
-      type: string
-      enum:
-        - "ADD_EVENT_101"
-        - "ADD_EVENT_102"
-        - "ADD_EVENT_103"
-      x-enum-varnames: [EVENT_COURT_HOUSE_NOT_FOUND, EVENT_DOCUMENT_CANT_PARSED, PROCESSOR_NOT_FOUND]
-
-
     GetCourtLogsErrorCode:
       type: string
       enum:
         - "GET_COURTLOG_101"
         - "GET_COURTLOG_102"
       x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND]
-
 
     PostCourtLogsErrorCode:
       type: string
@@ -360,3 +350,18 @@ components:
         - "ADD_COURTLOG_102"
         - "ADD_COURTLOG_103"
       x-enum-varnames: [COURTLOG_COURT_HOUSE_NOT_FOUND, COURTLOG_DOCUMENT_CANT_BE_PARSED]
+
+    EventErrorCode:
+      type: string
+      enum:
+          - "100"
+          - "101"
+      x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB]
+
+    EventTitleErrors:
+        type: string
+        enum:
+          - "Data on the event could not be reconciled with Darts records"
+          - "No event handler found in database"
+        x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB]
+

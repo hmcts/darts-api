@@ -148,7 +148,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
+            {"type":"101","title":"The requested transcription cannot be found","status":404}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -170,7 +170,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
+            {"type":"105","title":"Transcription workflow action is not permitted","status":409}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -198,7 +198,7 @@ class TranscriptionControllerUpdateTranscriptionWithTranscriberIntTest extends I
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"AUTHORISATION_100","title":"User is not authorised for the associated courthouse","status":403}
+            {"type":"100","title":"User is not authorised for the associated courthouse","status":403}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

@@ -129,7 +129,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_103"));
+            .andExpect(jsonPath("$.type").value("103"));
     }
 
     @Test
@@ -152,7 +152,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_102"));
+            .andExpect(jsonPath("$.type").value("102"));
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,
@@ -176,7 +176,7 @@ class AudioRequestsControllerDownloadIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.type").value("AUDIO_101"));
+            .andExpect(jsonPath("$.type").value("101"));
 
         verify(mockAuthorisation).authoriseByTransformedMediaId(
             transformedMediaId,

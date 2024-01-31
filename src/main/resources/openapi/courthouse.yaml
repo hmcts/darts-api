@@ -144,3 +144,17 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ExtendedCourthouse'
+
+    CourthouseErrorCode:
+     type: string
+     enum:
+      - "100"
+      - "101"
+     x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
+
+    CourthouseTitleErrors:
+     type: string
+     enum:
+      - "Provided courthouse name already exists."
+      - "Provided courthouse code already exists."
+     x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]

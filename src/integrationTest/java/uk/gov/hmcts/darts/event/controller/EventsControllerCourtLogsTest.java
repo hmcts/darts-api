@@ -289,7 +289,7 @@ class EventsControllerCourtLogsTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_107","title":"Failed to check authorisation","status":403}
+            {"type":"107","title":"Failed to check authorisation","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 

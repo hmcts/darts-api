@@ -197,7 +197,7 @@ class PatchUserIntTest extends IntegrationBase {
                          """);
         mockMvc.perform(request)
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("USER_MANAGEMENT_100"));
+            .andExpect(jsonPath("$.type").value("100"));
     }
 
     @Test

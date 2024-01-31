@@ -58,7 +58,7 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+            {"type":"106","title":"Could not obtain user details","status":403}
             """;
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
@@ -104,7 +104,7 @@ class CaseControllerPatchCaseTest extends IntegrationBase {
         String actualResponse = response.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"CASE_106","title":"The request does not contain any values that are supported by the PATCH operation.","status":400}""";
+            {"type":"106","title":"The request does not contain any values that are supported by the PATCH operation.","status":400}""";
         assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 

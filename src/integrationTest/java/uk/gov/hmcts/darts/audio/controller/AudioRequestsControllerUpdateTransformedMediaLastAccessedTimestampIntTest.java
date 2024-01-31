@@ -87,7 +87,7 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.type").value("AUDIO_REQUESTS_103"));
+            .andExpect(jsonPath("$.type").value("103"));
     }
 
     @Test
@@ -110,7 +110,7 @@ class AudioRequestsControllerUpdateTransformedMediaLastAccessedTimestampIntTest 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
-              "type":"AUDIO_REQUESTS_101",
+              "type":"101",
               "title":"The audio request is not valid for this user",
               "status":403
             }""";

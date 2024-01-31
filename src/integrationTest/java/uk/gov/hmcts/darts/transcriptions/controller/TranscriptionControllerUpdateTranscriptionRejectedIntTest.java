@@ -103,7 +103,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_103","title":"The workflow comment is required for this transcription update","status":400}
+            {"type":"103","title":"The workflow comment is required for this transcription update","status":400}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -172,7 +172,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_101","title":"The requested transcription cannot be found","status":404}
+            {"type":"101","title":"The requested transcription cannot be found","status":404}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -198,7 +198,7 @@ class TranscriptionControllerUpdateTranscriptionRejectedIntTest extends Integrat
 
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
-            {"type":"TRANSCRIPTION_105","title":"Transcription workflow action is not permitted","status":409}
+            {"type":"105","title":"Transcription workflow action is not permitted","status":409}
             """;
         JSONAssert.assertEquals(expectedJson, actualJson, JSONCompareMode.NON_EXTENSIBLE);
 

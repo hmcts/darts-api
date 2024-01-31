@@ -244,3 +244,15 @@ components:
       enum:
         - "AUTHORISATION_100"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE ]
+
+    HearingsErrorCode:
+      type: string
+      enum:
+        - "100"
+      x-enum-varnames: [HEARING_NOT_FOUND]
+
+    HearingsTitleErrors:
+      type: string
+      enum:
+        - "The requested hearing cannot be found"
+      x-enum-varnames: [HEARING_NOT_FOUND]

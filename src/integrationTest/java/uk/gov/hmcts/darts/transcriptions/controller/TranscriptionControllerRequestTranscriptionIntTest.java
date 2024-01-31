@@ -87,7 +87,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private static void assertTranscriptionFailed100Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "TRANSCRIPTION_100",
+              "type": "100",
               "title": "Failed to validate transcription request",
               "status": 400
             }""";
@@ -204,7 +204,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
 
         mockMvc.perform(requestBuilderDup)
             .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_107")))
+            .andExpect(jsonPath("$.type", is("107")))
             .andExpect(jsonPath("$.duplicate_transcription_id", greaterThan(0)))
             .andReturn();
     }
@@ -268,7 +268,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertFailedTranscription110Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "TRANSCRIPTION_110",
+              "type": "110",
               "title": "Transcription could not be requested, no audio",
               "status": 404
             }
@@ -391,7 +391,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertFailedTranscription111Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "TRANSCRIPTION_111",
+              "type": "111",
               "title": "Transcription could not be requested, times outside of hearing times",
               "status": 404
             }
@@ -453,7 +453,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertFailedAuthentication107Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "AUTHORISATION_107",
+              "type": "107",
               "title": "Failed to check authorisation",
               "status": 403
             }
@@ -532,7 +532,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_106")));
+            .andExpect(jsonPath("$.type", is("106")));
 
         assertAudit(0);
     }
@@ -574,7 +574,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.type", is("TRANSCRIPTION_104")));
+            .andExpect(jsonPath("$.type", is("104")));
 
         assertAudit(0);
     }
@@ -607,7 +607,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertHearingNotFound404Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "HEARING_100",
+              "type": "100",
               "title": "The requested hearing cannot be found",
               "status": 404
             }
@@ -619,7 +619,7 @@ class TranscriptionControllerRequestTranscriptionIntTest extends IntegrationBase
     private void assertCaseNotFound404Error(String actualJson) {
         String expectedJson = """
             {
-              "type": "CASE_104",
+              "type": "104",
               "title": "The requested case cannot be found",
               "status": 404
             }

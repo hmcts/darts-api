@@ -148,7 +148,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"AUTHORISATION_106","title":"Could not obtain user details","status":403}
+            {"type":"106","title":"Could not obtain user details","status":403}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -177,7 +177,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
+            {"type":"108","title":"Failed to attach transcript","status":400}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
@@ -209,7 +209,7 @@ class TranscriptionControllerAttachTranscriptIntTest extends IntegrationBase {
         String actualResponse = mvcResult.getResponse().getContentAsString();
 
         String expectedResponse = """
-            {"type":"TRANSCRIPTION_108","title":"Failed to attach transcript","status":400}
+            {"type":"108","title":"Failed to attach transcript","status":400}
             """;
         JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
