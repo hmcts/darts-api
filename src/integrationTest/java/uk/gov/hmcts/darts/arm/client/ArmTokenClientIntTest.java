@@ -28,9 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * of a broader integration test.
  */
 @TestPropertySource(properties = {
-    "darts.storage.arm.token-base-url=http://localhost:8080"
+    "darts.storage.arm-api.url=http://localhost:8080"
 })
-class ArmClientIntTest extends IntegrationBase {
+class ArmTokenClientIntTest extends IntegrationBase {
 
     @Autowired
     private ArmTokenClient armTokenClient;
@@ -88,8 +88,10 @@ class ArmClientIntTest extends IntegrationBase {
         FeignException exception = assertThrows(FeignException.class, () -> armTokenClient.getToken(armTokenRequest));
 
         // Then
-        assertEquals("[403 Forbidden] during [GET] to [http://localhost:8080/api/v1/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
-                     exception.getMessage());
+        assertEquals(
+            "[403 Forbidden] during [GET] to [http://localhost:8080/api/v1/token] [ArmTokenClient#getToken(ArmTokenRequest)]: []",
+            exception.getMessage()
+        );
     }
 
     private static ArmTokenRequest createTokenRequest() {
