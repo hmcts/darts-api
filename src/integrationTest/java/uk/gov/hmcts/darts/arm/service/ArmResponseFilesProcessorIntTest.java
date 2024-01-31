@@ -48,6 +48,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @SpringBootTest
@@ -636,7 +637,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
 
         assertEquals(1, foundMediaList.size());
         ExternalObjectDirectoryEntity foundMedia = foundMediaList.get(0);
-        assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundMedia.getStatus().getId());
+        assertEquals(FAILURE_CHECKSUM_FAILED.getId(), foundMedia.getStatus().getId());
         assertEquals(1, foundMedia.getVerificationAttempts());
     }
 
@@ -692,7 +693,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
-        assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals(FAILURE_CHECKSUM_FAILED.getId(), foundAnnotationEod.getStatus().getId());
     }
 
     @Test
@@ -749,7 +750,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
-        assertEquals(FAILURE_ARM_RESPONSE_PROCESSING.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals(FAILURE_CHECKSUM_FAILED.getId(), foundAnnotationEod.getStatus().getId());
     }
 
     @Test
