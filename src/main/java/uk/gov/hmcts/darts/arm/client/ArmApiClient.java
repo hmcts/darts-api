@@ -2,6 +2,8 @@ package uk.gov.hmcts.darts.arm.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -24,4 +26,9 @@ public interface ArmApiClient {
     ResponseEntity<UpdateMetadataResponse> updateMetadata(@RequestHeader(AUTHORIZATION) String bearerAuth,
                                                           @RequestBody UpdateMetadataRequest updateMetadataRequest);
 
+    @GetMapping(value = "${darts.storage.arm-api.download-data-path}")
+    byte[] downloadArmData(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                                @PathVariable("cabinetId") String cabinetId,
+                                                @PathVariable("recordId") String externalRecordId,
+                                                @PathVariable("fileId") String externalFileId);
 }

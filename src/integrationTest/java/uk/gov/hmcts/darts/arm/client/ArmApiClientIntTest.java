@@ -19,6 +19,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -30,6 +32,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
     "darts.storage.arm-api.url=http://localhost:8080"
 })
 class ArmApiClientIntTest extends IntegrationBase {
+
+    private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
+    private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
+    private static final String CABINET_ID = "100";
+    private static final String DOWNLOAD_ARM_DATA_PATH = "/api/v1/downloadBlob/(.*)/(.*)/(.*)";
 
     @Autowired
     private ArmApiClient armApiClient;
@@ -92,4 +99,22 @@ class ArmApiClientIntTest extends IntegrationBase {
         assertFalse(body.isError());
     }
 
+    @Test
+    void downloadArmDataShouldSucceedIfServerReturns200Success() {
+        // Given
+        byte[] serverResponse = "some binary content".getBytes();
+        stubFor(
+            WireMock.get(urlPathMatching(DOWNLOAD_ARM_DATA_PATH))
+                .willReturn(
+                    aResponse()
+                        .withHeader("Content-type", "application/octet-stream")
+                        .withBody(serverResponse)
+                        .withStatus(200)));
+
+        // When
+        byte[] response = armApiClient.downloadArmData("bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+
+        // Then
+        assertThat(response).isEqualTo(serverResponse);
+    }
 }

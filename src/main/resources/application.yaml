@@ -179,9 +179,11 @@ darts:
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
+      cabinet-id: 100
       url: ${ARM_URL:}
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
+      download-data-path: /api/v1/downloadBlob/{cabinetId}/{recordId}/{fileId}
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

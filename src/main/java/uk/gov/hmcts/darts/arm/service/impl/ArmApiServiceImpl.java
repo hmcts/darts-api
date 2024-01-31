@@ -11,6 +11,8 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.time.OffsetDateTime;
 
 @Service
@@ -23,11 +25,6 @@ public class ArmApiServiceImpl implements ArmApiService {
 
     @Override
     public UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp) {
-        ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
-            armApiConfigurationProperties.getArmUsername(),
-            armApiConfigurationProperties.getArmPassword(),
-            "password"
-        ));
 
         UpdateMetadataRequest armUpdateMetadataRequest = UpdateMetadataRequest.builder()
             .itemId(externalRecordId)
@@ -38,9 +35,29 @@ public class ArmApiServiceImpl implements ArmApiService {
             .build();
 
         return armApiClient.updateMetadata(
-            String.format("Bearer %s", armTokenResponse.getAccessToken()),
+            getArmBearerToken(),
             armUpdateMetadataRequest
         ).getBody();
+    }
+
+    @Override
+    public InputStream downloadArmData(String externalRecordId, String externalFileId) {
+        byte[] response = armApiClient.downloadArmData(
+            getArmBearerToken(),
+            armApiConfigurationProperties.getCabinetId(),
+            externalRecordId,
+            externalFileId
+        );
+        return new ByteArrayInputStream(response);
+    }
+
+    private String getArmBearerToken() {
+        ArmTokenResponse armTokenResponse = armTokenClient.getToken(new ArmTokenRequest(
+            armApiConfigurationProperties.getArmUsername(),
+            armApiConfigurationProperties.getArmPassword(),
+            "password"
+        ));
+        return String.format("Bearer %s", armTokenResponse.getAccessToken());
     }
 
 }
