@@ -42,6 +42,7 @@ import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperatio
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
@@ -68,6 +69,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     private ObjectRecordStatusEntity armProcessingResponseFilesStatus;
     private ObjectRecordStatusEntity armResponseProcessingFailed;
     private ObjectRecordStatusEntity storedStatus;
+    private ObjectRecordStatusEntity checksumFailedStatus;
     private UserAccountEntity userAccount;
 
     @Override
@@ -104,6 +106,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
         armResponseProcessingFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_PROCESSING.getId()).get();
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
+        checksumFailedStatus = objectRecordStatusRepository.findById(FAILURE_CHECKSUM_FAILED.getId()).get();
 
         userAccount = userIdentity.getUserAccount();
     }
@@ -316,7 +319,8 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                      externalObjectDirectory.getId(),
                      armResponseUploadFileRecord.getMd5(), objectChecksum
             );
-            updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+            externalObjectDirectory.setErrorCode(armResponseUploadFileRecord.getErrorStatus());
+            updateExternalObjectDirectoryStatus(externalObjectDirectory, checksumFailedStatus);
         }
 
     }
