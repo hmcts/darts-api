@@ -33,7 +33,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
     void updateMetadata() {
         // Given
         var externalRecordId = "7683ee65-c7a7-7343-be80-018b8ac13602";
-        var eventTimestamp = OffsetDateTime.now().plusYears(7);
+        var eventTimestamp = OffsetDateTime.parse("2024-01-31T11:29:56.101701Z").plusYears(7);
 
         var armTokenRequest = new ArmTokenRequest("some-username", "some-password", "password");
         when(armTokenClient.getToken(armTokenRequest))
