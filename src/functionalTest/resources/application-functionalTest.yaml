@@ -23,12 +23,12 @@ azure-ad-b2c-global-auth:
   client-secret: ${AAD_B2C_ROPC_CLIENT_SECRET_KEY:#{null}}
 
 azure-ad-b2c-darpc-midtier-global-auth:
-    token-uri: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com/B2C_1_ropc_darts_signin/oauth2/v2.0/token
-    scope: https://hmctsstgextid.onmicrosoft.com/${AAD_B2C_ROPC_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}/Functional.Test
-    username: ${DAR_MIDTIER_USER_NAME:#{null}}
-    password: ${DAR_MIDTIER_PASSWORD:#{null}}
-    client-id: ${AAD_B2C_ROPC_CLIENT_ID_KEY:#{null}}
-    client-secret: ${AAD_B2C_ROPC_CLIENT_SECRET_KEY:#{null}}
+  token-uri: https://hmctsstgextid.b2clogin.com/hmctsstgextid.onmicrosoft.com/B2C_1_ropc_darts_signin/oauth2/v2.0/token
+  scope: https://hmctsstgextid.onmicrosoft.com/${AAD_B2C_ROPC_CLIENT_ID_KEY:00000000-0000-0000-0000-000000000000}/Functional.Test
+  username: ${DAR_MIDTIER_USER_NAME:#{null}}
+  password: ${DAR_MIDTIER_PASSWORD:#{null}}
+  client-id: ${AAD_B2C_ROPC_CLIENT_ID_KEY:#{null}}
+  client-secret: ${AAD_B2C_ROPC_CLIENT_SECRET_KEY:#{null}}
 
 deployed-application-uri: ${TEST_URL:http://localhost:4550}
 
@@ -37,3 +37,7 @@ darts:
     arm:
       sas-endpoint: ${ARM_SAS_ENDPOINT:}
       container-name: darts-arm
+    arm-api:
+      arm-username: ${ARM_USERNAME:func-username}
+      arm-password: ${ARM_PASSWORD:func-password}
+      url: ${ARM_URL:http://localhost:4551}
