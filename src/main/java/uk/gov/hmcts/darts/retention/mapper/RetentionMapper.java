@@ -5,8 +5,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.darts.common.entity.CaseRetentionEntity;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 
-import java.time.temporal.ChronoUnit;
-
 
 @Component
 @RequiredArgsConstructor
