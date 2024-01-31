@@ -37,7 +37,7 @@ public class ArmApiServiceImpl implements ArmApiService {
         return armApiClient.updateMetadata(
             getArmBearerToken(),
             armUpdateMetadataRequest
-        ).getBody();
+        );
     }
 
     @Override

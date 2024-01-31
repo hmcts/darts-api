@@ -4,7 +4,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
@@ -22,10 +21,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @TestPropertySource(properties = {
@@ -81,7 +78,7 @@ class ArmApiClientIntTest extends IntegrationBase {
             .build();
 
         // When
-        ResponseEntity<UpdateMetadataResponse> updateMetadataResponse = armApiClient.updateMetadata(bearerAuth, updateMetadataRequest);
+        UpdateMetadataResponse updateMetadataResponse = armApiClient.updateMetadata(bearerAuth, updateMetadataRequest);
 
         // Then
         wireMockServer.verify(postRequestedFor(urlEqualTo(UPDATE_METADATA_PATH))
@@ -93,10 +90,7 @@ class ArmApiClientIntTest extends IntegrationBase {
                                           .and(matchingJsonPath("$.itemId", equalTo(externalRecordId)))
                                   ));
 
-        assertEquals(OK, updateMetadataResponse.getStatusCode());
-        var body = updateMetadataResponse.getBody();
-        assertEquals(UUID.fromString(externalRecordId), body.getItemId());
-        assertFalse(body.isError());
+        assertEquals(UUID.fromString(externalRecordId), updateMetadataResponse.getItemId());
     }
 
     @Test

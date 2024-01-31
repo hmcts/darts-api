@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
 import uk.gov.hmcts.darts.arm.client.ArmTokenClient;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
@@ -24,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("PMD.CloseResource")
 class ArmApiServiceIntTest extends IntegrationBase {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -77,7 +77,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
         when(armApiClient.updateMetadata(
             bearerAuth,
             updateMetadataRequest
-        )).thenReturn(ResponseEntity.ok(updateMetadataResponse));
+        )).thenReturn(updateMetadataResponse);
 
         // When
         var responseToTest = armApiService.updateMetadata(EXTERNAL_RECORD_ID, eventTimestamp);

@@ -3,7 +3,6 @@ package uk.gov.hmcts.darts.event.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
@@ -41,8 +40,8 @@ public class DarNotifyServiceImpl {
                 .caseNumbers(openCaseNumbers)
                 .build();
 
-            ResponseEntity<Void> darPcResponse = dartsGatewayClient.darNotify(darNotifyEvent);
-            log.trace("response from DarNotify for event {} is {}", event.getDartsEvent().getEventId(), darPcResponse);
+            dartsGatewayClient.darNotify(darNotifyEvent);
+            log.trace("response from DarNotify for event {} is successful", event.getDartsEvent().getEventId());
         }
     }
 }

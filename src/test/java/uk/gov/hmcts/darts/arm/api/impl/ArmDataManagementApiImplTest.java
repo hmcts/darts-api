@@ -22,6 +22,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.CloseResource")
 @Slf4j
 class ArmDataManagementApiImplTest {
 
@@ -30,8 +31,8 @@ class ArmDataManagementApiImplTest {
     private static final String ARM_BLOB_CONTAINER_NAME = "arm_dummy_container";
 
     private static final String ARM_DROP_ZONE = "arm_drop_zone/";
-    public static final String EXTERNAL_RECORD_ID = "4bfe4fc7-4e2f-4086-8a0e-146cc4556260";
-    public static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
+    private static final String EXTERNAL_RECORD_ID = "4bfe4fc7-4e2f-4086-8a0e-146cc4556260";
+    private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
 
     private ArmDataManagementApiImpl armDataManagementApi;
 
