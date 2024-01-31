@@ -6,7 +6,10 @@ import uk.gov.hmcts.darts.common.entity.RetentionPolicyTypeEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,7 +42,8 @@ class RetentionMapperTest {
         GetCaseRetentionsResponse caseRetention = retentionMapper.mapToCaseRetention(caseRetentionEntity);
 
         assertEquals(caseRetentionEntity.getLastModifiedDateTime(), caseRetention.getRetentionLastChangedDate());
-        assertEquals(caseRetentionEntity.getRetainUntil(), caseRetention.getRetentionDate());
+
+        assertEquals(caseRetentionEntity.getRetainUntil().toLocalDate(), caseRetention.getRetentionDate());
         assertEquals(caseRetentionEntity.getSubmittedBy().getUserName(), caseRetention.getAmendedBy());
         assertEquals(caseRetentionEntity.getRetentionPolicyType().getDisplayName(), caseRetention.getRetentionPolicyApplied());
         assertEquals(caseRetentionEntity.getComments(), caseRetention.getComments());
