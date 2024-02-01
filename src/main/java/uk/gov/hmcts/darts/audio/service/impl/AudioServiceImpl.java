@@ -233,11 +233,14 @@ public class AudioServiceImpl implements AudioService {
             SseEmitter.SseEventBuilder event = createPreviewSse(range, audioMediaFile);
             emitter.send(event);
             emitter.complete();
-        } catch (Exception e) {
+        } catch (IOException e) {
             DartsApiException dartsApiException = new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
             log.error("Error when creating preview SSE", e);
             emitter.completeWithError(dartsApiException);
             throw dartsApiException;
+        } catch (DartsApiException e) {
+            emitter.completeWithError(e);
+            throw e;
         }
     }
 }
