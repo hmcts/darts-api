@@ -1,5 +1,9 @@
 package uk.gov.hmcts.darts.testutils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.FileUtils;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
@@ -34,14 +38,20 @@ public final class TestUtils {
             .replaceAll("\"id\".{1,6},", "");
     }
 
-    public static String removeTags(List<String> tagsToRemove, String input) {
-        String output = input;
-        for (String tagToRemove : tagsToRemove) {
-            output = output.replaceAll("\"" + tagToRemove + "\".+?,", "");
-            output = output.replaceAll("\"" + tagToRemove + "\".+?}", "}");
-            output = output.replaceAll("\"" + tagToRemove + "\".+?\n", "\n");
+    public static String removeTags(List<String> tagsToRemove, String json) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            JsonNode jsonNode = objectMapper.readTree(json);
+            for (String tagToRemove : tagsToRemove) {
+                List<JsonNode> parentNodes = jsonNode.findParents(tagToRemove);
+                for (JsonNode parentNode : parentNodes) {
+                    ((ObjectNode) parentNode).remove(tagToRemove);
+                }
+            }
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonNode);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
-        return output;
     }
 
     public static String substituteHearingDateWithToday(String expectedResponse) {
