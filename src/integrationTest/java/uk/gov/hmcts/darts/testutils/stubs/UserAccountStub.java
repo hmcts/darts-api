@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.darts.common.entity.CourthouseEntity;
 import uk.gov.hmcts.darts.common.entity.SecurityGroupEntity;
 import uk.gov.hmcts.darts.common.entity.UserAccountEntity;
+import uk.gov.hmcts.darts.common.repository.CourthouseRepository;
 import uk.gov.hmcts.darts.common.repository.SecurityGroupRepository;
 import uk.gov.hmcts.darts.common.repository.UserAccountRepository;
 
@@ -35,6 +36,7 @@ public class UserAccountStub {
     private final UserAccountRepository userAccountRepository;
     private final SecurityGroupRepository securityGroupRepository;
     private final CourthouseStub courthouseStub;
+    private final CourthouseRepository courthouseRepository;
 
     public UserAccountEntity getSystemUserAccountEntity() {
 
@@ -61,6 +63,20 @@ public class UserAccountStub {
         return userAccounts.get(0);
     }
 
+    /**
+     * If we want to create a different user for judge, than for admin, we pass in a unique identifier, otherwise it will change the user.
+     *
+     * @param identifier unique reference
+     * @return
+     */
+    public UserAccountEntity getIntegrationTestUserAccountEntity(String identifier) {
+        List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(identifier);
+        if (userAccounts.isEmpty()) {
+            return createIntegrationUser(UUID.randomUUID().toString());
+        }
+        return userAccounts.get(0);
+    }
+
     public UserAccountEntity getSeparateIntegrationTestUserAccountEntity() {
         List<UserAccountEntity> userAccounts = userAccountRepository.findByEmailAddressIgnoreCase(SEPARATE_TEST_USER_EMAIL);
         if (userAccounts.isEmpty()) {
@@ -71,11 +87,15 @@ public class UserAccountStub {
 
 
     private UserAccountEntity createIntegrationUser(String guid) {
+        return createIntegrationUser(guid, INTEGRATION_TEST_USER_EMAIL);
+    }
+
+    private UserAccountEntity createIntegrationUser(String guid, String emailAddress) {
         UserAccountEntity systemUser = userAccountRepository.getReferenceById(SYSTEM_USER_ID);
         var newUser = new UserAccountEntity();
         newUser.setUserName("IntegrationTest User");
         newUser.setUserFullName("IntegrationTest User");
-        newUser.setEmailAddress(INTEGRATION_TEST_USER_EMAIL);
+        newUser.setEmailAddress(emailAddress);
         newUser.setCreatedBy(systemUser);
         newUser.setLastModifiedBy(systemUser);
         newUser.setActive(true);
@@ -162,7 +182,6 @@ public class UserAccountStub {
     @Transactional
     public UserAccountEntity createJudgeUser(CourthouseEntity courthouseEntity) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.getReferenceById(-3);
-        assertTrue(securityGroupEntity.getCourthouseEntities().isEmpty());
         securityGroupEntity.getCourthouseEntities().add(courthouseEntity);
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
@@ -175,11 +194,17 @@ public class UserAccountStub {
 
     @Transactional
     public UserAccountEntity createJudgeUser() {
+        return createJudgeUser("default");
+    }
+
+    @Transactional
+    public UserAccountEntity createJudgeUser(String identifier) {
         SecurityGroupEntity securityGroupEntity = securityGroupRepository.findById(-3).get();
         securityGroupEntity.setGlobalAccess(true);
+        securityGroupEntity.getCourthouseEntities().addAll(courthouseRepository.findAll());
         securityGroupEntity = securityGroupRepository.saveAndFlush(securityGroupEntity);
 
-        var testUser = getIntegrationTestUserAccountEntity();
+        var testUser = getIntegrationTestUserAccountEntity("Judge" + identifier);
         testUser.getSecurityGroupEntities().clear();
         testUser.getSecurityGroupEntities().add(securityGroupEntity);
         testUser = userAccountRepository.saveAndFlush(testUser);
@@ -239,7 +264,7 @@ public class UserAccountStub {
         var adminGroup = securityGroupRepository.findByGroupName("ADMIN")
             .orElseThrow();
 
-        var user = getIntegrationTestUserAccountEntity();
+        var user = getIntegrationTestUserAccountEntity("adminUserAccount");
         user.setSecurityGroupEntities(Collections.singleton(adminGroup));
 
         return userAccountRepository.saveAndFlush(user);

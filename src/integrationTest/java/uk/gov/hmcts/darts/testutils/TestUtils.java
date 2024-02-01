@@ -39,6 +39,7 @@ public final class TestUtils {
         for (String tagToRemove : tagsToRemove) {
             output = output.replaceAll("\"" + tagToRemove + "\".+?,", "");
             output = output.replaceAll("\"" + tagToRemove + "\".+?}", "}");
+            output = output.replaceAll("\"" + tagToRemove + "\".+?\n", "\n");
         }
         return output;
     }
