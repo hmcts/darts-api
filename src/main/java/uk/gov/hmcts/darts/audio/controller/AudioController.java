@@ -8,25 +8,24 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AudioResponseMapper;
 import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioService;
+import uk.gov.hmcts.darts.audio.service.impl.AudioServiceImpl;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
-import java.time.Duration;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -90,21 +89,12 @@ public class AudioController implements AudioApi {
     @Authorisation(contextId = MEDIA_ID,
         securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, RCJ_APPEALS},
         globalAccessSecurityRoles = {JUDGE})
-    public Flux<ServerSentEvent<ResponseEntity<byte[]>>> previewAlternative(
+    public SseEmitter previewAlternative(
         @Parameter(name = "media_id", description = "Internal identifier for media", required = true, in = ParameterIn.PATH)
         @PathVariable("media_id") Integer mediaId,
         @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
         @RequestHeader(value = "range", required = false) String range
     ) {
-        Flux<ServerSentEvent<ResponseEntity<byte[]>>> work = audioService.getAudioPreviewFlux(mediaId, range);
-
-        Flux<ServerSentEvent<ResponseEntity<byte[]>>> heartBeat = Flux.interval(Duration.ofSeconds(5))
-            .map(sequence -> ServerSentEvent.<ResponseEntity<byte[]>>builder()
-                .id(String.valueOf(sequence))
-                .event("heartbeat")
-                .build())
-            .takeUntilOther(work);
-        return Flux.merge(heartBeat, work);
+        return audioService.startStreamingPreview(mediaId, range, new SseEmitter(AudioServiceImpl.EMITTER_TIMEOUT));
     }
-
 }

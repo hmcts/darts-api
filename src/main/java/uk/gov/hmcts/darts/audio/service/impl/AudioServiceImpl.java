@@ -5,11 +5,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -34,16 +32,20 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.darts.audio.exception.AudioApiError.FAILED_TO_UPLOAD_AUDIO_FILE;
@@ -55,6 +57,7 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 public class AudioServiceImpl implements AudioService {
 
     public static final String AUDIO_RESPONSE_EVENT_NAME = "audio response";
+    public static final long EMITTER_TIMEOUT = 120_000L;
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -79,6 +82,15 @@ public class AudioServiceImpl implements AudioService {
             downloadPath,
             false
         );
+    }
+
+    private static SseEmitter.SseEventBuilder createPreviewSse(String range, InputStream audioMediaFile) throws IOException {
+        ResponseEntity<byte[]> response;
+        response = StreamingResponseEntityUtil.createResponseEntity(audioMediaFile, range);
+
+        return SseEmitter.event()
+            .data(response)
+            .name("audio response");
     }
 
     @Override
@@ -111,22 +123,6 @@ public class AudioServiceImpl implements AudioService {
         }
 
         return mediaBinaryData.toStream();
-    }
-
-    @Override
-    public Flux<ServerSentEvent<ResponseEntity<byte[]>>> getAudioPreviewFlux(Integer mediaId, String range) {
-        return Flux.just(mediaId)
-            .publishOn(Schedulers.boundedElastic()).map(m -> {
-                try (InputStream audioMediaFile = preview(m)) {
-                    return ServerSentEvent.<ResponseEntity<byte[]>>builder().event(AUDIO_RESPONSE_EVENT_NAME)
-                        .data(StreamingResponseEntityUtil.createResponseEntity(
-                        audioMediaFile,
-                        range
-                    )).build();
-                } catch (IOException e) {
-                    throw new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
-                }
-            });
     }
 
     @Override
@@ -222,4 +218,26 @@ public class AudioServiceImpl implements AudioService {
         return externalObjectDirectoryEntity;
     }
 
+    @Override
+    public SseEmitter startStreamingPreview(Integer mediaId, String range, SseEmitter emitter) {
+        new SentServerEventsHeartBeatEmitter(Duration.ofSeconds(5)).startHeartBeat(emitter);
+        ExecutorService previewExecutor = Executors.newSingleThreadExecutor();
+        previewExecutor.execute(() -> this.sendPreview(emitter, mediaId, range));
+
+        return emitter;
+    }
+
+    private void sendPreview(SseEmitter emitter, Integer mediaId, String range) {
+        try {
+            InputStream audioMediaFile = preview(mediaId);
+            SseEmitter.SseEventBuilder event = createPreviewSse(range, audioMediaFile);
+            emitter.send(event);
+            emitter.complete();
+        } catch (Exception e) {
+            DartsApiException dartsApiException = new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
+            log.error("Error when creating preview SSE", e);
+            emitter.completeWithError(dartsApiException);
+            throw dartsApiException;
+        }
+    }
 }

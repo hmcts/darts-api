@@ -110,11 +110,15 @@ class AudioControllerPreviewWithSendServerEventsIntTest {
     @Test
     void previewShouldReturnError() {
         webClient.get().uri(uriBuilder -> uriBuilder.path(
-                URL + -1).build())
-            .header(RANGE, RANGE_1024)
-            .accept(TEXT_EVENT_STREAM)
-            .exchange()
-            .expectStatus().is5xxServerError().returnResult(String.class);
+                        URL + -1).build())
+                .header(RANGE, RANGE_1024)
+                .accept(TEXT_EVENT_STREAM)
+                .exchange()
+                .expectBody().consumeWith(c -> {
+                    String fullResponse = new String(Objects.requireNonNull(c.getResponseBody()));
+                    assertTrue(fullResponse.contains("{\"type\":\"AUDIO_101\",\"title\":\"The requested data cannot be located\",\"status\":500}"));
+                });
+
     }
 
     @Setter
