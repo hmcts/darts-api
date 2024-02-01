@@ -6,6 +6,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +20,7 @@ public class SentServerEventsHeartBeatEmitter {
     private final CountDownLatch latch = new CountDownLatch(1);
     private Duration waitBetweenHeartBeats;
 
-    private void heartBeat(SseEmitter emitter) {
+    private void heartBeat(SseEmitter emitter) throws InterruptedException {
         int counter = 0;
         emitter.onCompletion(latch::countDown);
         try {
@@ -30,7 +31,7 @@ public class SentServerEventsHeartBeatEmitter {
                 emitter.send(event);
                 Thread.sleep(waitBetweenHeartBeats.toMillis());
             } while (latch.getCount() > 0);
-        } catch (Exception e) {
+        } catch (IOException e) {
             DartsApiException dartsApiException = new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
             emitter.completeWithError(dartsApiException);
             log.error("Error while emitting heartbeat", e);
@@ -40,6 +41,13 @@ public class SentServerEventsHeartBeatEmitter {
 
     public void startHeartBeat(SseEmitter emitter) {
         ExecutorService emitterExecutor = Executors.newSingleThreadExecutor();
-        emitterExecutor.execute(() -> heartBeat(emitter));
+        emitterExecutor.execute(() -> {
+            try {
+                heartBeat(emitter);
+            } catch (InterruptedException e) {
+                log.error("Emitter interrupted while emitting heartbeat", e);
+                emitter.completeWithError(e);
+            }
+        });
     }
 }
