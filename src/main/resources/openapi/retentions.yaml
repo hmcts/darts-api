@@ -103,7 +103,7 @@ components:
           format: date-time
         retention_date:
           type: string
-          format: date-time
+          format: date
         amended_by:
           type: string
         retention_policy_applied:
