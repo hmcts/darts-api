@@ -96,7 +96,7 @@ import static uk.gov.hmcts.darts.testutils.data.MediaTestData.createMediaWith;
 
 @Service
 @AllArgsConstructor
-@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass"})
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.ExcessivePublicCount", "PMD.GodClass", "PMD.CouplingBetweenObjects"})
 @Getter
 @Slf4j
 public class DartsDatabaseStub {

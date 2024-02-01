@@ -162,7 +162,7 @@ class UserControllerSearchIntTest extends IntegrationBase {
 
     @Test
     void searchByFullNameShouldReturnOk() throws Exception {
-        UserAccountEntity userAccount = adminUserStub.givenUserIsAuthorised(userIdentity);
+        adminUserStub.givenUserIsAuthorised(userIdentity);
 
         UserSearch userSearch = new UserSearch();
         userSearch.setFullName("adminUserAccount");

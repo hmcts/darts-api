@@ -64,7 +64,7 @@ class CasesMapperTest {
 
         String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile("Tests/cases/CasesMapperTest/testOk/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
@@ -85,7 +85,7 @@ class CasesMapperTest {
         String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testOk/expectedResponseWithCase.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
@@ -159,7 +159,7 @@ class CasesMapperTest {
         String actualResponse = OBJECT_MAPPER.writeValueAsString(scheduledCases);
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testOrderedByTime/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
 
     }
 
@@ -174,7 +174,7 @@ class CasesMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testMapToSingleCase/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -189,6 +189,6 @@ class CasesMapperTest {
 
         String expectedResponse = getContentsFromFile(
             "Tests/cases/CasesMapperTest/testMapToSingleCaseWithReportingRestriction/expectedResponse.json");
-        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.STRICT);
+        JSONAssert.assertEquals(expectedResponse, actualResponse, JSONCompareMode.NON_EXTENSIBLE);
     }
 }

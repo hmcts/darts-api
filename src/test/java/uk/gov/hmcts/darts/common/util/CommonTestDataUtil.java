@@ -194,7 +194,7 @@ public class CommonTestDataUtil {
     }
 
     public HearingEntity createHearing(String caseNumber, LocalTime time) {
-        return createHearing(caseNumber, LocalDate.of(2023, 6, 20), LocalTime.NOON);
+        return createHearing(caseNumber, LocalDate.of(2023, 6, 20), time);
     }
 
     public HearingEntity createHearing(String caseNumber, LocalDate date) {
