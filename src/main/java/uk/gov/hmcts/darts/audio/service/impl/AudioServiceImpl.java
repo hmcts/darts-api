@@ -90,7 +90,7 @@ public class AudioServiceImpl implements AudioService {
 
         return SseEmitter.event()
             .data(response)
-            .name("audio response");
+            .name(AUDIO_RESPONSE_EVENT_NAME);
     }
 
     @Override
