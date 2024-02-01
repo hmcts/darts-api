@@ -45,11 +45,11 @@ java:
           alias: AZURE_STORAGE_CONNECTION_STRING
         - name: api-POSTGRES-CONNECTION-STRING
           alias: DARTS_API_DB_CONNECTION_STRING
-        - name: AzureADTenantId
+        - name: AzureADTenantIdDev
           alias: AAD_TENANT_ID
-        - name: AzureADClientId
+        - name: AzureADClientIdDev
           alias: AAD_CLIENT_ID
-        - name: AzureADClientSecret
+        - name: AzureADClientSecretDev
           alias: AAD_CLIENT_SECRET
         - name: XhibitUserName
           alias: XHIBIT_USER_NAME
