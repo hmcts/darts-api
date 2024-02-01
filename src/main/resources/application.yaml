@@ -37,8 +37,8 @@ spring:
             claims: emails
             provider: external-azure-ad-provider
           internal-azure-ad:
-            client-id: ${AAD_CLIENT_ID:00000000-0000-0000-0000-000000000000}
-            client-secret: ${AAD_CLIENT_SECRET:}
+            client-id: ${AAD_CLIENT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}
+            client-secret: ${AAD_CLIENT_SECRET_JUSTICE:}
             scope: openid
             redirect-uri: ${darts.portal.url}/auth/internal/callback
             logout-redirect-uri: ${darts.portal.url}/auth/internal/logout-callback
@@ -46,7 +46,7 @@ spring:
             response-type: code
             response-mode: form_post
             prompt:
-            issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/v2.0
+            issuer-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/v2.0
             claims: preferred_username
             provider: internal-azure-ad-provider
         provider:
@@ -57,11 +57,11 @@ spring:
             logout-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-signin-policy}/oauth2/v2.0/logout
             reset-password-uri: ${darts.azure.active-directory-b2c-auth-uri}/${darts.azure.active-directory-b2c-external-user-passwordreset-policy}/oauth2/v2.0/authorize
           internal-azure-ad-provider:
-            authorization-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
-            token-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
-            jwk-set-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/discovery/v2.0/keys
-            logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
-            reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
+            authorization-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
+            token-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/token
+            jwk-set-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/discovery/v2.0/keys
+            logout-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/logout
+            reset-password-uri: ${darts.azure.active-directory-justice-auth-uri}/${AAD_TENANT_ID_JUSTICE:00000000-0000-0000-0000-000000000000}/oauth2/v2.0/authorize
 
   servlet:
     multipart:
@@ -195,7 +195,7 @@ darts:
       - "application/msword"
     max-created-by-duration: 30d
   portal:
-    url: ${DARTS_PORTAL_URL:https://darts.staging.apps.hmcts.net}
+    url: ${DARTS_PORTAL_URL:https://darts-portal-pr-781.dev.platform.hmcts.net}
   automated:
     task:
       thread-pool-size: 5

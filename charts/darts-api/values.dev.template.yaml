@@ -45,12 +45,18 @@ java:
           alias: AZURE_STORAGE_CONNECTION_STRING
         - name: api-POSTGRES-CONNECTION-STRING
           alias: DARTS_API_DB_CONNECTION_STRING
-        - name: AzureADTenantIdDev
+        - name: AzureADTenantId
           alias: AAD_TENANT_ID
-        - name: AzureADClientIdDev
+        - name: AzureADClientId
           alias: AAD_CLIENT_ID
-        - name: AzureADClientSecretDev
+        - name: AzureADClientSecret
           alias: AAD_CLIENT_SECRET
+        - name: AzureADTenantIdJustice
+          alias: AAD_TENANT_ID_JUSTICE
+        - name: AzureADClientIdJustice
+          alias: AAD_CLIENT_ID_JUSTICE
+        - name: AzureADClientSecretJustice
+          alias: AAD_CLIENT_SECRET_JUSTICE
         - name: XhibitUserName
           alias: XHIBIT_USER_NAME
         - name: XhibitPassword
@@ -88,6 +94,7 @@ java:
     spring.profiles.active: dev
     TESTING_SUPPORT_ENDPOINTS_ENABLED: true
     DARTS_GATEWAY_URL: https://darts-gateway.staging.platform.hmcts.net
+    DARTS_PORTAL_URL: https://darts-portal-pr-781.dev.platform.hmcts.net
   secrets:
     DARTS_API_DB_PASSWORD:
       secretRef: "postgres"
