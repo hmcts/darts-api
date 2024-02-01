@@ -33,6 +33,7 @@ import uk.gov.hmcts.darts.common.repository.MediaRepository;
 import uk.gov.hmcts.darts.common.repository.ObjectRecordStatusRepository;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.RetrieveCoreObjectService;
+import uk.gov.hmcts.darts.common.sse.SentServerEventsHeartBeatEmitter;
 import uk.gov.hmcts.darts.common.util.FileContentChecksum;
 import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 
@@ -99,6 +100,9 @@ class AudioServiceImplTest {
     @Mock
     private DataManagementApi dataManagementApi;
 
+    @Mock
+    SentServerEventsHeartBeatEmitter emitter;
+
     private AudioService audioService;
 
     @BeforeEach
@@ -120,7 +124,7 @@ class AudioServiceImplTest {
             userIdentity,
             fileContentChecksum,
             courtLogEventRepository,
-            audioConfigurationProperties
+            audioConfigurationProperties, emitter
         );
     }
 
