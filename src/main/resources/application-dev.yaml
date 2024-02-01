@@ -15,6 +15,13 @@ spring:
   flyway:
     locations: classpath:db/migration/common,db/migration/postgres,db/migration/local
 
+darts:
+  storage:
+    arm-api:
+      arm-username: ${ARM_USERNAME:dev-username}
+      arm-password: ${ARM_PASSWORD:dev-password}
+      url: ${ARM_URL:http://localhost:4551}
+
 logging:
   level:
     uk.gov.hmcts.darts: DEBUG

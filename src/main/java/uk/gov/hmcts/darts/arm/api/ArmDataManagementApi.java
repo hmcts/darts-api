@@ -1,7 +1,9 @@
 package uk.gov.hmcts.darts.arm.api;
 
 import com.azure.core.util.BinaryData;
+import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface ArmDataManagementApi {
@@ -15,4 +17,7 @@ public interface ArmDataManagementApi {
     BinaryData getBlobData(String blobName);
 
     void deleteResponseBlob(String blobName);
+
+    UpdateMetadataResponse updateMetadata(String externalRecordId, OffsetDateTime eventTimestamp);
+
 }

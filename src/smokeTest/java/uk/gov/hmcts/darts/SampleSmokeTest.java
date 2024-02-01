@@ -13,11 +13,10 @@ import org.springframework.test.context.ActiveProfiles;
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest
-@ActiveProfiles({"h2db"})
+@ActiveProfiles({"smoke", "h2db"})
 class SampleSmokeTest {
-    protected static final String CONTENT_TYPE_VALUE = "application/json";
 
-    @Value("${TEST_URL:http://localhost:4550}")
+    @Value("${test-url}")
     private String testUrl;
 
     @BeforeEach

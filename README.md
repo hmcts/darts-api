@@ -49,7 +49,9 @@ The required value of each variable is stored in Azure Key Vault as a Secret.
 | AZURE_AD_FUNCTIONAL_TEST_USERNAME        | AzureADFunctionalTestUsername             |
 | AZURE_AD_FUNCTIONAL_TEST_PASSWORD        | AzureADFunctionalTestPassword             |
 | ARM_SAS_ENDPOINT                         | ARMSasEndpoint                            |
-
+| ARM_URL                                  | ArmUrl                                    |
+| ARM_USERNAME                             | ArmUsername                               |
+| ARM_PASSWORD                             | ArmPassword                               |
 
 To obtain the secret value, you may retrieve the keys from the Azure Vault by running the `az keyvault secret show`
 command in the terminal. E.g. to obtain the value for `GOVUK_NOTIFY_API_KEY`, you should run:
@@ -64,7 +66,8 @@ Alternatively, you can log into the [Azure home page](https://portal.azure.com/#
 `Key Vault -> darts-stg -> Secrets`. Note in your Portal Settings you must have the `CJS Common Platform` directory
 active for the secrets to be visible.
 
-> Note: there is also a convenient script for exporting all these secret values from the key-vault, ensure you have the Azure CLI, `az`, installed and have run `az login`.
+> Note: there is also a convenient script for exporting all these secret values from the key-vault, ensure you have the Azure CLI, `az`, installed and have
+> run `az login`.
 > ```bash
 > source bin/secrets-stg.sh
 > ```
@@ -105,7 +108,10 @@ export AZURE_AD_FUNCTIONAL_TEST_GLOBAL_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_GLOBAL_PASSWORD=
 export AZURE_AD_FUNCTIONAL_TEST_USERNAME=
 export AZURE_AD_FUNCTIONAL_TEST_PASSWORD=
-export ARM_STORAGE_CONNECTION_STRING=
+export ARM_SAS_ENDPOINT=
+export ARM_URL=
+export ARM_USERNAME=
+export ARM_PASSWORD=
 ```
 
 ### Storage Account

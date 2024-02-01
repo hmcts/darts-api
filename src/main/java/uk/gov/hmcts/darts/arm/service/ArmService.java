@@ -18,4 +18,5 @@ public interface ArmService {
     BinaryData getBlobData(String containerName, String blobName);
 
     boolean deleteResponseBlob(String containerName, String filename);
+
 }
