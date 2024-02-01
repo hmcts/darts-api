@@ -47,6 +47,7 @@ public class SentServerEventsHeartBeatEmitter {
             } catch (InterruptedException e) {
                 log.error("Emitter interrupted while emitting heartbeat", e);
                 emitter.completeWithError(e);
+                Thread.currentThread().interrupt();
             }
         });
     }
