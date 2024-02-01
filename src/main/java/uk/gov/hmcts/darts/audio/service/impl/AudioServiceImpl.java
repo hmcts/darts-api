@@ -39,7 +39,6 @@ import uk.gov.hmcts.darts.datamanagement.api.DataManagementApi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -57,7 +56,6 @@ import static uk.gov.hmcts.darts.common.enums.ExternalLocationTypeEnum.INBOUND;
 public class AudioServiceImpl implements AudioService {
 
     public static final String AUDIO_RESPONSE_EVENT_NAME = "audio response";
-    public static final long EMITTER_TIMEOUT = 120_000L;
     private final AudioTransformationService audioTransformationService;
     private final ExternalObjectDirectoryRepository externalObjectDirectoryRepository;
     private final ObjectRecordStatusRepository objectRecordStatusRepository;
@@ -73,6 +71,7 @@ public class AudioServiceImpl implements AudioService {
     private final FileContentChecksum fileContentChecksum;
     private final CourtLogEventRepository courtLogEventRepository;
     private final AudioConfigurationProperties audioConfigurationProperties;
+    private final SentServerEventsHeartBeatEmitter heartBeatEmitter;
 
     private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return new AudioFileInfo(
@@ -220,7 +219,7 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public SseEmitter startStreamingPreview(Integer mediaId, String range, SseEmitter emitter) {
-        new SentServerEventsHeartBeatEmitter(Duration.ofSeconds(5)).startHeartBeat(emitter);
+        heartBeatEmitter.startHeartBeat(emitter);
         ExecutorService previewExecutor = Executors.newSingleThreadExecutor();
         previewExecutor.execute(() -> this.sendPreview(emitter, mediaId, range));
 

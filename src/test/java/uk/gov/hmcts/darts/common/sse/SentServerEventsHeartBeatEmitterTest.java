@@ -28,7 +28,8 @@ class SentServerEventsHeartBeatEmitterTest {
 
     @Test
     void shouldCreateHeartBeat() throws IOException {
-        SentServerEventsHeartBeatEmitter heartbeatEmitter = new SentServerEventsHeartBeatEmitter(Duration.ofSeconds(2));
+        SentServerEventsHeartBeatEmitter heartbeatEmitter = new SentServerEventsHeartBeatEmitter();
+        heartbeatEmitter.setWaitBetweenHeartBeats(Duration.ofSeconds(2).toMillis());
         heartbeatEmitter.startHeartBeat(emitter);
         Mockito.verify(emitter, Mockito.timeout(5000).times(1)).send(any(SseEmitter.SseEventBuilder.class));
 
@@ -44,7 +45,8 @@ class SentServerEventsHeartBeatEmitterTest {
         }).when(emitter).completeWithError(exceptionCaptor.capture());
 
         Mockito.doThrow(new IOException()).when(emitter).send(any(SseEmitter.SseEventBuilder.class));
-        SentServerEventsHeartBeatEmitter heartbeatEmitter = new SentServerEventsHeartBeatEmitter(Duration.ofSeconds(1));
+        SentServerEventsHeartBeatEmitter heartbeatEmitter = new SentServerEventsHeartBeatEmitter();
+        heartbeatEmitter.setWaitBetweenHeartBeats(Duration.ofSeconds(1).toMillis());
         heartbeatEmitter.startHeartBeat(emitter);
 
         boolean result = latch.await(2, TimeUnit.SECONDS);

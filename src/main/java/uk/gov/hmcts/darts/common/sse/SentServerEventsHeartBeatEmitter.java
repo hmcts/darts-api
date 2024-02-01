@@ -1,7 +1,11 @@
 package uk.gov.hmcts.darts.common.sse;
 
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.common.exception.DartsApiException;
@@ -13,12 +17,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Service
 public class SentServerEventsHeartBeatEmitter {
 
     public static final String HEARTBEAT_EVENT_NAME = "heartbeat";
     private final CountDownLatch latch = new CountDownLatch(1);
-    private Duration waitBetweenHeartBeats;
+
+    @Setter
+    @Getter
+    @Value("${darts.sse.heartbeat: 5}")
+    private long waitBetweenHeartBeats;
 
     private void heartBeat(SseEmitter emitter) throws InterruptedException {
         int counter = 0;
@@ -29,7 +38,7 @@ public class SentServerEventsHeartBeatEmitter {
                     .id(String.valueOf(counter++))
                     .name(HEARTBEAT_EVENT_NAME);
                 emitter.send(event);
-                Thread.sleep(waitBetweenHeartBeats.toMillis());
+                Thread.sleep(Duration.ofSeconds(waitBetweenHeartBeats).toMillis());
             } while (latch.getCount() > 0);
         } catch (IOException e) {
             DartsApiException dartsApiException = new DartsApiException(AudioApiError.FAILED_TO_PROCESS_AUDIO_REQUEST);
@@ -51,4 +60,5 @@ public class SentServerEventsHeartBeatEmitter {
             }
         });
     }
+
 }

@@ -19,12 +19,13 @@ import uk.gov.hmcts.darts.audio.http.api.AudioApi;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
 import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioService;
-import uk.gov.hmcts.darts.audio.service.impl.AudioServiceImpl;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
+import uk.gov.hmcts.darts.common.SentServerEventsConfig;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.List;
 
 import static uk.gov.hmcts.darts.authorisation.constants.AuthorisationConstants.SECURITY_SCHEMES_BEARER_AUTH;
@@ -45,6 +46,7 @@ public class AudioController implements AudioApi {
 
     private final AudioService audioService;
     private final AudioResponseMapper audioResponseMapper;
+    private final SentServerEventsConfig sentServerEventsConfig;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -93,6 +95,10 @@ public class AudioController implements AudioApi {
         @Parameter(name = "range", description = "Range header, required for streaming audio.", in = ParameterIn.HEADER)
         @RequestHeader(value = "range", required = false) String range
     ) {
-        return audioService.startStreamingPreview(mediaId, range, new SseEmitter(AudioServiceImpl.EMITTER_TIMEOUT));
+        return audioService.startStreamingPreview(
+            mediaId,
+            range,
+            new SseEmitter(Duration.ofMinutes(sentServerEventsConfig.getPreviewTimeout()).toMillis())
+        );
     }
 }
