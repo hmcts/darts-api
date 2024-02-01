@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -78,8 +79,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         // Fetch All records from external Object Directory table with external_location_type as 'ARM' and status with 'ARM dropzone'.
         ExternalLocationTypeEntity armLocation = externalLocationTypeRepository.getReferenceById(ExternalLocationTypeEnum.ARM.getId());
 
-        List<ExternalObjectDirectoryEntity> dataSentToArm =
-            externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
+        List<ExternalObjectDirectoryEntity> dataSentToArm = getArmDropZoneExternalObjectDirectoryEntities(armLocation);
         if (!CollectionUtils.isEmpty(dataSentToArm)) {
             log.info("ARM Response process found : {} records to be processed", dataSentToArm.size());
             for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
@@ -98,6 +98,11 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         } else {
             log.info("ARM Response process unable to find any records to process");
         }
+    }
+
+    @Transactional
+    private List<ExternalObjectDirectoryEntity> getArmDropZoneExternalObjectDirectoryEntities(ExternalLocationTypeEntity armLocation) {
+        return externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
     }
 
     @SuppressWarnings("java:S3655")
