@@ -1,6 +1,7 @@
 package uk.gov.hmcts.darts.arm.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.darts.arm.config.ArmApiConfigurationProperties;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.arm.service.ArmApiService;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
 
@@ -44,15 +44,16 @@ public class ArmApiServiceImpl implements ArmApiService {
     }
 
     @Override
+    @SneakyThrows
     public InputStream downloadArmData(String externalRecordId, String externalFileId) {
-        byte[] response = armApiClient.downloadArmData(
+        feign.Response response = armApiClient.downloadArmData(
             getArmBearerToken(),
             armApiConfigurationProperties.getCabinetId(),
             externalRecordId,
             externalFileId
         );
         log.debug("Successfully downloaded ARM data for recordId: {}, fileId: {}", externalRecordId, externalFileId);
-        return new ByteArrayInputStream(response);
+        return response.body().asInputStream();
     }
 
     private String getArmBearerToken() {

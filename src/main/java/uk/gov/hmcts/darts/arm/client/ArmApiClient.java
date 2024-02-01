@@ -26,8 +26,8 @@ public interface ArmApiClient {
                                                           @RequestBody UpdateMetadataRequest updateMetadataRequest);
 
     @GetMapping(value = "${darts.storage.arm-api.download-data-path}")
-    byte[] downloadArmData(@RequestHeader(AUTHORIZATION) String bearerAuth,
-                                                @PathVariable("cabinet_id") String cabinetId,
-                                                @PathVariable("record_id") String externalRecordId,
-                                                @PathVariable("file_id") String externalFileId);
+    feign.Response downloadArmData(@RequestHeader(AUTHORIZATION) String bearerAuth,
+                                        @PathVariable("cabinet_id") String cabinetId,
+                                        @PathVariable("record_id") String externalRecordId,
+                                        @PathVariable("file_id") String externalFileId);
 }

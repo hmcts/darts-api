@@ -2,13 +2,19 @@ package uk.gov.hmcts.darts.arm.client;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -19,8 +25,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -28,6 +34,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @TestPropertySource(properties = {
     "darts.storage.arm-api.url=http://localhost:8080"
 })
+@SuppressWarnings("PMD.CloseResource")
 class ArmApiClientIntTest extends IntegrationBase {
 
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
@@ -94,21 +101,22 @@ class ArmApiClientIntTest extends IntegrationBase {
     }
 
     @Test
+    @SneakyThrows
     void downloadArmDataShouldSucceedIfServerReturns200Success() {
         // Given
-        byte[] serverResponse = "some binary content".getBytes();
         stubFor(
             WireMock.get(urlPathMatching(DOWNLOAD_ARM_DATA_PATH))
                 .willReturn(
                     aResponse()
-                        .withHeader("Content-type", "application/octet-stream")
-                        .withBody(serverResponse)
+                        .withHeader("Content-type", MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                        .withBodyFile("testAudio.mp3")
                         .withStatus(200)));
 
         // When
-        byte[] response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        feign.Response response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
 
-        // Then
-        assertThat(response).isEqualTo(serverResponse);
+        //Then
+        InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integrationTest/resources/wiremock/__files/testAudio.mp3"));
+        assertTrue(IOUtils.contentEquals(response.body().asInputStream(), expectedInputStream));
     }
 }

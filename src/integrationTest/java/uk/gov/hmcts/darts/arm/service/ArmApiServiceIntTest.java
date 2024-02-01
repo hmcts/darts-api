@@ -1,8 +1,10 @@
 package uk.gov.hmcts.darts.arm.service;
 
+import feign.Response;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.arm.client.ArmApiClient;
@@ -14,8 +16,10 @@ import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
 import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,8 +98,14 @@ class ArmApiServiceIntTest extends IntegrationBase {
     void downloadArmData() {
 
         // Given
-        byte[] serverResponse = "some binary content".getBytes();
-        when(armApiClient.downloadArmData(any(), any(), any(), any())).thenReturn(serverResponse);
+        byte[] binaryData = "some binary content".getBytes();
+        Response response = Response.builder()
+            .status(200)
+            .headers(new HashMap<>())
+            .request(Mockito.mock(feign.Request.class))
+            .body(new ByteArrayInputStream(binaryData), binaryData.length)
+            .build();
+        when(armApiClient.downloadArmData(any(), any(), any(), any())).thenReturn(response);
 
         // When
         InputStream inputStreamResult = armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
@@ -103,7 +113,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
         // Then
         verify(armTokenClient).getToken(armTokenRequest);
         verify(armApiClient).downloadArmData("Bearer some-token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
-        assertThat(inputStreamResult.readAllBytes()).isEqualTo(serverResponse);
+        assertThat(inputStreamResult.readAllBytes()).isEqualTo(binaryData);
     }
 
 }
