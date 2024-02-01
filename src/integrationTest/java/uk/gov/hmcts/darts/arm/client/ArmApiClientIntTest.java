@@ -33,14 +33,14 @@ class ArmApiClientIntTest extends IntegrationBase {
     private static final String EXTERNAL_RECORD_ID = "7683ee65-c7a7-7343-be80-018b8ac13602";
     private static final String EXTERNAL_FILE_ID = "075987ea-b34d-49c7-b8db-439bfbe2496c";
     private static final String CABINET_ID = "100";
-    private static final String DOWNLOAD_ARM_DATA_PATH = "/api/v1/downloadBlob/(.*)/(.*)/(.*)";
+    private static final String UPDATE_METADATA_PATH = "/api/v3/UpdateMetadata";
+    private static final String DOWNLOAD_ARM_DATA_PATH = "/api/v1/downloadBlob/\\S+/\\S+/\\S+";
 
     @Autowired
     private ArmApiClient armApiClient;
     @Autowired
     private WireMockServer wireMockServer;
 
-    private static final String UPDATE_METADATA_PATH = "/api/v3/UpdateMetadata";
 
     @Test
     void updateMetadataShouldSucceedIfServerReturns200Success() {
@@ -106,7 +106,7 @@ class ArmApiClientIntTest extends IntegrationBase {
                         .withStatus(200)));
 
         // When
-        byte[] response = armApiClient.downloadArmData("bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
+        byte[] response = armApiClient.downloadArmData("Bearer token", CABINET_ID, EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
 
         // Then
         assertThat(response).isEqualTo(serverResponse);

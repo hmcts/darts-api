@@ -47,7 +47,6 @@ darts:
       arm-username: some-username
       arm-password: some-password
       url: http://localhost:4551
-      update-metadata-path: /api/v3/UpdateMetadata
 
 logging:
   level:

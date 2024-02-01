@@ -183,7 +183,7 @@ darts:
       url: ${ARM_URL:}
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
-      download-data-path: /api/v1/downloadBlob/{cabinetId}/{recordId}/{fileId}
+      download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

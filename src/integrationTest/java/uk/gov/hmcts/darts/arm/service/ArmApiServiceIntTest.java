@@ -11,6 +11,7 @@ import uk.gov.hmcts.darts.arm.client.model.ArmTokenRequest;
 import uk.gov.hmcts.darts.arm.client.model.ArmTokenResponse;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataRequest;
 import uk.gov.hmcts.darts.arm.client.model.UpdateMetadataResponse;
+import uk.gov.hmcts.darts.arm.enums.GrantType;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.io.InputStream;
@@ -42,7 +43,7 @@ class ArmApiServiceIntTest extends IntegrationBase {
 
     @BeforeEach
     void setup() {
-        armTokenRequest = new ArmTokenRequest("some-username", "some-password", "password");
+        armTokenRequest = new ArmTokenRequest("some-username", "some-password", GrantType.PASSWORD.getValue());
         when(armTokenClient.getToken(armTokenRequest))
             .thenReturn(ArmTokenResponse.builder()
                             .accessToken("some-token")

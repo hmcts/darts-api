@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -107,11 +108,11 @@ class ArmDataManagementApiImplTest {
     @Test
     void downloadArmData() {
 
-        var inputStream = ByteArrayInputStream.nullInputStream();
+        var inputStream = new ByteArrayInputStream("some file binary content".getBytes());
         when(armApiService.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID)).thenReturn(inputStream);
 
         InputStream result = armDataManagementApi.downloadArmData(EXTERNAL_RECORD_ID, EXTERNAL_FILE_ID);
 
-        assertEquals(inputStream, result);
+        assertThat(result).isEqualTo(inputStream);
     }
 }
