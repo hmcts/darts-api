@@ -39,7 +39,8 @@ class RetentionMapperTest {
         GetCaseRetentionsResponse caseRetention = retentionMapper.mapToCaseRetention(caseRetentionEntity);
 
         assertEquals(caseRetentionEntity.getLastModifiedDateTime(), caseRetention.getRetentionLastChangedDate());
-        assertEquals(caseRetentionEntity.getRetainUntil(), caseRetention.getRetentionDate());
+
+        assertEquals(caseRetentionEntity.getRetainUntil().toLocalDate(), caseRetention.getRetentionDate());
         assertEquals(caseRetentionEntity.getSubmittedBy().getUserName(), caseRetention.getAmendedBy());
         assertEquals(caseRetentionEntity.getRetentionPolicyType().getDisplayName(), caseRetention.getRetentionPolicyApplied());
         assertEquals(caseRetentionEntity.getComments(), caseRetention.getComments());

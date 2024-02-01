@@ -1,0 +1,8 @@
+test-url: ${TEST_URL:http://localhost:4550}
+
+darts:
+  storage:
+    arm-api:
+      arm-username: some-username
+      arm-password: some-password
+      url: http://localhost:4551

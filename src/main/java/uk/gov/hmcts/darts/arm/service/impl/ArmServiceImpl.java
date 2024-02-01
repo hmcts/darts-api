@@ -117,6 +117,7 @@ public class ArmServiceImpl implements ArmService {
         return blobClient.downloadContent();
     }
 
+    @Override
     public boolean deleteResponseBlob(String containerName, String filename) {
         String blobname = armDataManagementConfiguration.getFolders().getSubmission() + filename;
         return deleteBlobData(containerName, blobname);
@@ -145,4 +146,5 @@ public class ArmServiceImpl implements ArmService {
         }
         return true;
     }
+
 }
