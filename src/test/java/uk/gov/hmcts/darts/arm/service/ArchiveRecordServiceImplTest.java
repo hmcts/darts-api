@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
@@ -19,6 +21,10 @@ import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.impl.AnnotationArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.MediaArchiveRecordMapperImpl;
 import uk.gov.hmcts.darts.arm.mapper.impl.TranscriptionArchiveRecordMapperImpl;
+import uk.gov.hmcts.darts.arm.mapper.template.AnnotationRecordTemplateMapper;
+import uk.gov.hmcts.darts.arm.mapper.template.CaseRecordTemplateMapper;
+import uk.gov.hmcts.darts.arm.mapper.template.MediaRecordTemplateMapper;
+import uk.gov.hmcts.darts.arm.mapper.template.TranscriptionRecordTemplateMapper;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
 import uk.gov.hmcts.darts.arm.service.impl.ArchiveRecordServiceImpl;
 import uk.gov.hmcts.darts.common.entity.AnnotationDocumentEntity;
@@ -73,6 +79,9 @@ class ArchiveRecordServiceImplTest {
     @Mock
     private CourthouseEntity courthouseEntity;
 
+    @Autowired
+    private ResourceLoader resourceLoader;
+
     @Mock
     private CurrentTimeHelper currentTimeHelper;
 
@@ -90,12 +99,25 @@ class ArchiveRecordServiceImplTest {
         TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper = new TranscriptionArchiveRecordMapperImpl(armDataManagementConfiguration);
         AnnotationArchiveRecordMapper annotationArchiveRecordMapper = new AnnotationArchiveRecordMapperImpl(armDataManagementConfiguration);
 
+        AnnotationRecordTemplateMapper annotationRecordTemplateMapper =
+            new AnnotationRecordTemplateMapper(armDataManagementConfiguration, currentTimeHelper);
+        CaseRecordTemplateMapper caseRecordTemplateMapper =
+            new CaseRecordTemplateMapper(armDataManagementConfiguration, currentTimeHelper);
+        MediaRecordTemplateMapper mediaRecordTemplateMapper =
+            new MediaRecordTemplateMapper(armDataManagementConfiguration, currentTimeHelper);
+        TranscriptionRecordTemplateMapper transcriptionRecordTemplateMapper =
+            new TranscriptionRecordTemplateMapper(armDataManagementConfiguration, currentTimeHelper);
+
         archiveRecordService = new ArchiveRecordServiceImpl(
             armDataManagementConfiguration,
             archiveRecordFileGenerator,
             mediaArchiveRecordMapper,
             transcriptionArchiveRecordMapper,
-            annotationArchiveRecordMapper
+            annotationArchiveRecordMapper,
+            annotationRecordTemplateMapper,
+            caseRecordTemplateMapper,
+            mediaRecordTemplateMapper,
+            transcriptionRecordTemplateMapper
         );
 
     }
@@ -132,11 +154,14 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getMedia()).thenReturn(mediaEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
         when(armDataManagementConfiguration.getMediaRecordClass()).thenReturn("DARTSMedia");
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
+        when(armDataManagementConfiguration.getMediaRecordTemplate()).thenReturn(
+            "Tests/arm/templates/live/media-record.tmpl");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -153,8 +178,8 @@ class ArchiveRecordServiceImplTest {
 
     @Test
     void givenNoData_WhenGenerateArchiveRecord_ReturnEmptyList() throws IOException {
-        ArchiveRecordFileInfo archiveRecordFileInfo =
-            archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
 
         assertFalse(archiveRecordFileInfo.isFileGenerationSuccessful());
     }
@@ -168,10 +193,11 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getTranscriptionDocumentEntity()).thenReturn(transcriptionDocumentEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());
@@ -199,10 +225,11 @@ class ArchiveRecordServiceImplTest {
 
         when(externalObjectDirectoryEntity.getId()).thenReturn(EODID);
         when(externalObjectDirectoryEntity.getAnnotationDocumentEntity()).thenReturn(annotationDocumentEntity);
+        when(externalObjectDirectoryEntity.getTransferAttempts()).thenReturn(1);
 
         when(armDataManagementConfiguration.getFileExtension()).thenReturn("a360");
 
-        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity, 1);
+        ArchiveRecordFileInfo archiveRecordFileInfo = archiveRecordService.generateArchiveRecord(externalObjectDirectoryEntity);
 
         log.info("Reading file {}", archiveRecordFileInfo.getArchiveRecordFile().getAbsoluteFile());
         Assertions.assertEquals("1234_1_1.a360", archiveRecordFileInfo.getArchiveRecordFile().getName());

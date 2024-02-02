@@ -1,6 +1,11 @@
-package uk.gov.hmcts.darts.arm.mapper.template;
+package uk.gov.hmcts.darts.arm.util;
 
-public class TemplateConstants {
+
+public final class TemplateConstants {
+
+    private TemplateConstants() {
+    }
+
     public static final String CREATE_RECORD_OPERATION_KEY = "<<CREATE_RECORD_OPERATION>>";
     public static final String RELATION_ID_KEY = "<<RELATION_ID>>";
     public static final String RECORD_CLASS_KEY = "<<RECORD_CLASS>>";

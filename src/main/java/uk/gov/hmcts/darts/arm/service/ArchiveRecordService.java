@@ -5,5 +5,5 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 
 public interface ArchiveRecordService {
 
-    ArchiveRecordFileInfo generateArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory, Integer archiveRecordAttempt);
+    ArchiveRecordFileInfo generateArchiveRecord(ExternalObjectDirectoryEntity externalObjectDirectory);
 }
