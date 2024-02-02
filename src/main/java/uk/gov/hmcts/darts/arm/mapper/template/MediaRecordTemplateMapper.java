@@ -6,6 +6,7 @@ import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static java.util.Objects.nonNull;
@@ -45,34 +46,29 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
         MediaEntity media = externalObjectDirectory.getMedia();
         String courthouseName = media.getCourtroom().getCourthouse().getCourthouseName();
         String courtroomName = media.getCourtroom().getName();
-        String createdDateTime = "";
-        if (nonNull(media.getCreatedDateTime())) {
-            createdDateTime = media.getCreatedDateTime().format(dateTimeFormatter);
-        }
 
-        String caseNumbers = "";
+        contents = parseNullableDateTime(media.getCreatedDateTime(), dateTimeFormatter, contents, CREATED_DATE_TIME_KEY);
+
+        String caseNumbers = null;
         if (nonNull(media.getCaseNumberList())) {
             caseNumbers = caseListToString(media.getCaseNumberList());
         }
+        contents = parseNullableStrings(caseNumbers, contents, CASE_NUMBERS_KEY);
 
-        String checksum = "";
-        if (nonNull(media.getChecksum())) {
-            checksum = media.getChecksum();
-        }
-        String hearingDate = "";
+        contents = parseNullableStrings(media.getChecksum(), contents, CHECKSUM_KEY);
+
+        String hearingDate = null;
         if (!CollectionUtils.isEmpty(media.getHearingList())) {
             hearingDate = media.getHearingList().get(1).getHearingDate().format(dateFormatter);
         }
+        contents = parseNullableStrings(hearingDate, contents, HEARING_DATE_KEY);
+
         String comments = "";
 
         return contents.replaceAll(FILENAME_KEY, media.getMediaFile())
             .replaceAll(CONTRIBUTOR_KEY, courthouseName + CONTRIBUTOR_SEPARATOR + courtroomName)
-            .replaceAll(CASE_NUMBERS_KEY, caseNumbers)
             .replaceAll(FILE_TYPE_KEY, media.getMediaFormat())
-            .replaceAll(HEARING_DATE_KEY, hearingDate)
-            .replaceAll(CHECKSUM_KEY, checksum)
             .replaceAll(COMMENTS_KEY, comments)
-            .replaceAll(CREATED_DATE_TIME_KEY, createdDateTime)
             .replaceAll(OBJECT_ID_KEY, String.valueOf(media.getId()))
             .replaceAll(PARENT_ID_KEY, String.valueOf(media.getId()))
             .replaceAll(CHANNEL_KEY, String.valueOf(media.getChannel()))
@@ -83,6 +79,29 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
             .replaceAll(COURTROOM_KEY, courtroomName)
             .replaceAll(DZ_FILE_NAME_KEY, media.getMediaFile());
 
+    }
+
+    private String parseNullableStrings(String parseableValue, String contents, String key) {
+        if (nonNull(parseableValue)) {
+            contents = contents.replaceAll(key, parseableValue);
+        } else {
+            while (contents.contains(key)) {
+                contents = contents.replace(key, "");
+            }
+        }
+        return contents;
+    }
+
+    private static String parseNullableDateTime(OffsetDateTime offsetDateTime, DateTimeFormatter dateTimeFormatter, String contents, String key) {
+        if (nonNull(offsetDateTime)) {
+            String createdDateTime = offsetDateTime.format(dateTimeFormatter);
+            contents = contents.replaceAll(key, createdDateTime);
+        } else {
+            while (contents.contains(key)) {
+                contents = contents.replace(key, "");
+            }
+        }
+        return contents;
     }
 
 }
