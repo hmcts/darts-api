@@ -47,10 +47,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/post_retention_request'
+              $ref: '#/components/schemas/PostRetentionRequest'
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostRetentionResponse'
         '401':
           description: Unauthorised Error
         '403':
@@ -65,7 +69,7 @@ paths:
                       - type
                     properties:
                       type:
-                        $ref: '#/components/schemas/no_permission_reduce_retention_error'
+                        $ref: '#/components/schemas/NoPermissionReduceRetentionError'
               example:
                 type: "RETENTION_100"
                 title: "User does not have permission to reduce the retention period."
@@ -82,7 +86,7 @@ paths:
                       - type
                     properties:
                       type:
-                        $ref: '#/components/schemas/retention_date_invalid_error'
+                        $ref: '#/components/schemas/RetentionDateInvalidError'
               example:
                 type: "RETENTION_101"
                 title: "Retention date not valid."
@@ -113,7 +117,7 @@ components:
         comments:
           type: string
 
-    post_retention_request:
+    PostRetentionRequest:
       type: object
       required:
         - case_id
@@ -129,16 +133,27 @@ components:
           description: Conditional Mandatory. If is_permanent_retention is false, then this must be provided. Date must not be less that the current retention period of the last automated sentencing type.
         is_permanent_retention:
           type: boolean
+        validate_only:
+          type: boolean
+          default: false
+          description: Optional - If set to true, will not apply retention to database, but still do all the validation on the date provided.
         comments:
           type: string
 
-    no_permission_reduce_retention_error:
+    PostRetentionResponse:
+      type: object
+      properties:
+        retention_date:
+          type: string
+          format: date
+
+    NoPermissionReduceRetentionError:
       type: string
       enum:
         - "RETENTION_100"
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION_ERROR ]
 
-    retention_date_invalid_error:
+    RetentionDateInvalidError:
       type: string
       enum:
         - "RETENTION_101"
