@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringEscapeUtils;
@@ -80,20 +81,16 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
+        List<Integer> list = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
         if (!CollectionUtils.isEmpty(dataSentToArm)) {
             log.info("ARM Response process found : {} records to be processed", dataSentToArm.size());
             for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
             }
             int row = 1;
-            for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
+            for (Integer eodId : list) {
                 log.info("ARM Response process about to process {} of {} rows", row++, dataSentToArm.size());
-                try {
-                    processInputUploadFile(externalObjectDirectory);
-                } catch (Exception e) {
-                    log.error("Unable to process response files for external object directory {}", e.getMessage());
-                    updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
-                }
+                processInputUploadFile(eodId);
             }
         } else {
             log.info("ARM Response process unable to find any records to process");
@@ -109,6 +106,17 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         checksumFailedStatus = objectRecordStatusRepository.findById(FAILURE_CHECKSUM_FAILED.getId()).get();
 
         userAccount = userIdentity.getUserAccount();
+    }
+
+    @Transactional
+    public void processInputUploadFile(Integer eodId) {
+        ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryRepository.findById(eodId).get();
+        try {
+            processInputUploadFile(externalObjectDirectoryEntity);
+        } catch (Exception e) {
+            log.error("Unable to process response files for external object directory.", e);
+            updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectoryEntity, armDropZoneStatus);
+        }
     }
 
     private void processInputUploadFile(ExternalObjectDirectoryEntity externalObjectDirectory) {
@@ -137,7 +145,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         } else {
             log.info("Unable to find input upload file with prefix {}", prefix);
 
-            ExternalObjectDirectoryEntity latestEod = externalObjectDirectoryRepository.getReferenceById(externalObjectDirectory.getId());
+            ExternalObjectDirectoryEntity latestEod = externalObjectDirectoryRepository.findById(externalObjectDirectory.getId()).get();
 
             if (armProcessingResponseFilesStatus.equals(latestEod.getStatus())) {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
@@ -352,7 +360,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             externalObjectDirectory.setVerificationAttempts(verificationAttempts);
             updateExternalObjectDirectoryStatus(externalObjectDirectory, objectRecordStatus);
         } else {
-            ObjectRecordStatusEntity armResponseProcessingFailed = objectRecordStatusRepository.getReferenceById(FAILURE_ARM_RESPONSE_PROCESSING.getId());
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
         }
     }
