@@ -44,5 +44,23 @@ public class ArchiveRecordFileGeneratorImpl implements ArchiveRecordFileGenerato
         return generatedArchiveRecord;
     }
 
+    public boolean generateArchiveRecord(String archiveRecordContents, File archiveRecordFile, ArchiveRecordType archiveRecordType) {
+        boolean generatedArchiveRecord = false;
+        if (isNull(archiveRecordContents) || isNull(archiveRecordFile)) {
+            log.error("Unable to generate {} arm record due to invalid data", archiveRecordContents);
+            return false;
+        }
+        try {
+
+            log.debug("About to write {} to file {}", archiveRecordContents, archiveRecordFile.getAbsolutePath());
+            try (BufferedWriter fileWriter = Files.newBufferedWriter(archiveRecordFile.toPath()); PrintWriter printWriter = new PrintWriter(fileWriter)) {
+                printWriter.println(archiveRecordContents);
+                generatedArchiveRecord = true;
+            }
+        } catch (IOException e) {
+            log.error("Unable to write ARM file {}, due to {}", archiveRecordFile.getAbsoluteFile(), e.getMessage());
+        }
+        return generatedArchiveRecord;
+    }
 
 }

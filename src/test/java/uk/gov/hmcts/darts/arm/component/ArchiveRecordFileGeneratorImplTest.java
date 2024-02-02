@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 import uk.gov.hmcts.darts.arm.component.impl.ArchiveRecordFileGeneratorImpl;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
+import uk.gov.hmcts.darts.arm.model.ArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
 import uk.gov.hmcts.darts.arm.model.record.metadata.MediaCreateArchiveRecordMetadata;
@@ -62,7 +63,8 @@ class ArchiveRecordFileGeneratorImplTest {
     void generateArchiveRecordWithNullArchiveRecord() {
         String fileLocation = tempDirectory.getAbsolutePath();
         File archiveFile = new File(fileLocation, "test-media-arm.a360");
-        boolean result = archiveRecordFileGenerator.generateArchiveRecord(null, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
+        ArchiveRecord archiveRecord = null;
+        boolean result = archiveRecordFileGenerator.generateArchiveRecord(archiveRecord, archiveFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE);
         assertFalse(result);
     }
 
