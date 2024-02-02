@@ -8,9 +8,9 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.model.record.UploadNewFileRecord;
@@ -81,15 +81,15 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
 
         List<ExternalObjectDirectoryEntity> dataSentToArm =
             externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
-        List<Integer> list = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
-        if (!CollectionUtils.isEmpty(dataSentToArm)) {
-            log.info("ARM Response process found : {} records to be processed", dataSentToArm.size());
+        if (CollectionUtils.isNotEmpty(dataSentToArm)) {
+            List<Integer> externalObjects = dataSentToArm.stream().map(ExternalObjectDirectoryEntity::getId).toList();
+            log.info("ARM Response process found : {} records to be processed", externalObjects.size());
             for (ExternalObjectDirectoryEntity externalObjectDirectory : dataSentToArm) {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armProcessingResponseFilesStatus);
             }
             int row = 1;
-            for (Integer eodId : list) {
-                log.info("ARM Response process about to process {} of {} rows", row++, dataSentToArm.size());
+            for (Integer eodId : externalObjects) {
+                log.info("ARM Response process about to process {} of {} rows", row++, externalObjects.size());
                 processInputUploadFile(eodId);
             }
         } else {
@@ -132,7 +132,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
             log.error("Unable to find response file for prefix: {} - {}", prefix, e.getMessage());
         }
-        if (!CollectionUtils.isEmpty(inputUploadBlobs)) {
+        if (CollectionUtils.isNotEmpty(inputUploadBlobs)) {
             for (String armInputUploadFilename : inputUploadBlobs) {
                 log.debug("Found ARM input upload file {}", armInputUploadFilename);
                 if (armInputUploadFilename.endsWith(generateSuffix(ARM_INPUT_UPLOAD_FILENAME_KEY))) {
@@ -145,7 +145,6 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             }
         } else {
             log.info("Unable to find input upload file with prefix {}", prefix);
-
             ExternalObjectDirectoryEntity latestEod = externalObjectDirectoryRepository.findById(externalObjectDirectory.getId()).get();
 
             if (armProcessingResponseFilesStatus.equals(latestEod.getStatus())) {
@@ -161,7 +160,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
             String responseFilesHashcode = inputUploadFilenameProcessor.getHashcode();
             log.debug("List response files starting with hashcode {}", responseFilesHashcode);
             List<String> responseBlobs = armDataManagementApi.listResponseBlobs(responseFilesHashcode);
-            if (!CollectionUtils.isEmpty(responseBlobs)) {
+            if (CollectionUtils.isNotEmpty(responseBlobs)) {
                 processResponseBlobs(responseBlobs, externalObjectDirectory);
             } else {
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armDropZoneStatus);
@@ -273,7 +272,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                     log.warn("Deleting temporary file: {} failed", jsonPath.toFile());
                 }
             } catch (Exception e) {
-                log.error("Unable to delete temporary file: {}", jsonPath.toFile());
+                log.error("Unable to delete temporary file: {} - {}", jsonPath.toFile(), e.getMessage());
             }
         }
     }
@@ -283,7 +282,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         // Validate the checksum in external object directory table against the Media, TranscriptionDocument, or AnnotationDocument
         if (nonNull(externalObjectDirectory.getMedia())) {
             MediaEntity media = externalObjectDirectory.getMedia();
-            
+
             if (nonNull(media.getChecksum())) {
                 String objectChecksum = media.getChecksum();
                 verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
