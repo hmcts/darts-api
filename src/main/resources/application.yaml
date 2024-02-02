@@ -220,11 +220,14 @@ darts:
     ssl-enabled: ${REDIS_SSL_ENABLED:true}
   audit:
     application-server: ${CLUSTER_NAME:not available}
+  sse:
+    heartbeat: 5 # in seconds
+    sse-preview-timeout: 120 # in seconds
 
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
-  runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
+  runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}z
 
 logging:
   level:
