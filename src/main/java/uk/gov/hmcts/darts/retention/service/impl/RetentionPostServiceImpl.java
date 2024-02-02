@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
+import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
@@ -44,7 +45,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     private final AuditApi auditApi;
 
     @Override
-    public void postRetention(PostRetentionRequest postRetentionRequest) {
+    public PostRetentionResponse postRetention(PostRetentionRequest postRetentionRequest) {
 
         Optional<CourtCaseEntity> caseOpt = caseRepository.findById(postRetentionRequest.getCaseId());
         if (caseOpt.isEmpty()) {
@@ -63,8 +64,14 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         } else {
             newRetentionDate = DateConverterUtil.toOffsetDateTime(postRetentionRequest.getRetentionDate());
         }
-        createNewCaseRetention(postRetentionRequest, courtCase, newRetentionDate);
 
+        if (BooleanUtils.isNotTrue(postRetentionRequest.getValidateOnly())) {
+            createNewCaseRetention(postRetentionRequest, courtCase, newRetentionDate);
+        }
+
+        PostRetentionResponse response = new PostRetentionResponse();
+        response.setRetentionDate(newRetentionDate.toLocalDate());
+        return response;
     }
 
     private void validation(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase) {

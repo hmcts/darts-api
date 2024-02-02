@@ -24,6 +24,7 @@ import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
+import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -36,6 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -177,7 +179,7 @@ class RetentionPostServiceImplTest {
         setupStubs();
 
         when(authorisationApi.userHasOneOfRoles(anyList())).thenReturn(true);
-        
+
         PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
         postRetentionRequest.setCaseId(1);
         postRetentionRequest.setRetentionDate(LocalDate.of(2024, 1, 1));
@@ -225,7 +227,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setRetentionDate(LocalDate.of(2026, 1, 1));
         postRetentionRequest.setComments("TheComments");
 
-        retentionPostService.postRetention(postRetentionRequest);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2026-01-01", response.getRetentionDate().toString());
         verify(caseRetentionRepository).saveAndFlush(caseRetentionEntityArgumentCaptor.capture());
 
         CaseRetentionEntity savedRetention = caseRetentionEntityArgumentCaptor.getValue();
@@ -245,7 +248,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setCaseId(1);
         postRetentionRequest.setRetentionDate(LocalDate.of(2027, 1, 1));
         postRetentionRequest.setComments("TheComments");
-        retentionPostService.postRetention(postRetentionRequest);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2027-01-01", response.getRetentionDate().toString());
 
         verify(caseRetentionRepository).saveAndFlush(caseRetentionEntityArgumentCaptor.capture());
 
@@ -258,6 +262,22 @@ class RetentionPostServiceImplTest {
     }
 
     @Test
+    void happy_path_increaseTime_validateOnly() {
+        setupStubs();
+
+        PostRetentionRequest postRetentionRequest = new PostRetentionRequest();
+        postRetentionRequest.setCaseId(1);
+        postRetentionRequest.setRetentionDate(LocalDate.of(2027, 1, 1));
+        postRetentionRequest.setComments("TheComments");
+        postRetentionRequest.setValidateOnly(true);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2027-01-01", response.getRetentionDate().toString());
+
+
+        verify(caseRetentionRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
     void happy_path_permanent() {
         setupStubs();
 
@@ -265,7 +285,8 @@ class RetentionPostServiceImplTest {
         postRetentionRequest.setCaseId(1);
         postRetentionRequest.setIsPermanentRetention(true);
         postRetentionRequest.setComments("TheComments");
-        retentionPostService.postRetention(postRetentionRequest);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        assertEquals("2123-10-01", response.getRetentionDate().toString());
 
         verify(caseRetentionRepository).saveAndFlush(caseRetentionEntityArgumentCaptor.capture());
 

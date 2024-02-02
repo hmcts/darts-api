@@ -13,6 +13,7 @@ import uk.gov.hmcts.darts.retention.validation.RetentionsPostRequestValidator;
 import uk.gov.hmcts.darts.retentions.http.api.RetentionApi;
 import uk.gov.hmcts.darts.retentions.model.GetCaseRetentionsResponse;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
+import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
 import java.util.List;
 
@@ -39,12 +40,12 @@ public class RetentionController implements RetentionApi {
 
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
     @Authorisation(contextId = ContextIdEnum.CASE_ID, bodyAuthorisation = true,
-        securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, ADMIN},
-        globalAccessSecurityRoles = {JUDGE, ADMIN})
+            securityRoles = {JUDGE, REQUESTER, APPROVER, TRANSCRIBER, TRANSLATION_QA, ADMIN},
+            globalAccessSecurityRoles = {JUDGE, ADMIN})
     @Override
-    public ResponseEntity<Void> retentionsPost(PostRetentionRequest postRetentionRequest) {
+    public ResponseEntity<PostRetentionResponse> retentionsPost(PostRetentionRequest postRetentionRequest) {
         RetentionsPostRequestValidator.validate(postRetentionRequest);
-        retentionPostService.postRetention(postRetentionRequest);
-        return new ResponseEntity<>(HttpStatus.OK);
+        PostRetentionResponse response = retentionPostService.postRetention(postRetentionRequest);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
