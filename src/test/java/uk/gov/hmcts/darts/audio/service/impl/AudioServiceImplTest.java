@@ -7,8 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
@@ -45,12 +47,16 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,14 +77,17 @@ class AudioServiceImplTest {
     @Captor
     ArgumentCaptor<BinaryData> inboundBlobStorageArgumentCaptor;
     @Mock
+    SentServerEventsHeartBeatEmitter heartBeatEmitter;
+    @Captor
+    ArgumentCaptor<Throwable> exceptionCaptor;
+    @Mock
+    SseEmitter emitter;
+    @Mock
     private AudioTransformationService audioTransformationService;
-
     @Mock
     private AudioOperationService audioOperationService;
-
     @Mock
     private MediaRepository mediaRepository;
-
     @Mock
     private FileOperationService fileOperationService;
     @Mock
@@ -99,10 +108,6 @@ class AudioServiceImplTest {
     private ObjectRecordStatusRepository objectRecordStatusRepository;
     @Mock
     private DataManagementApi dataManagementApi;
-
-    @Mock
-    SentServerEventsHeartBeatEmitter emitter;
-
     private AudioService audioService;
 
     @BeforeEach
@@ -124,7 +129,7 @@ class AudioServiceImplTest {
             userIdentity,
             fileContentChecksum,
             courtLogEventRepository,
-            audioConfigurationProperties, emitter
+            audioConfigurationProperties, heartBeatEmitter
         );
     }
 
@@ -152,6 +157,50 @@ class AudioServiceImplTest {
             byte[] bytes = inputStream.readAllBytes();
             assertEquals(DUMMY_FILE_CONTENT, new String(bytes));
         }
+    }
+
+
+    @SuppressWarnings("PMD.CloseResource")
+    @Test
+    void previewFluxShouldReturnError() throws IOException, ExecutionException, InterruptedException {
+
+        MediaEntity mediaEntity = new MediaEntity();
+        mediaEntity.setId(1);
+        mediaEntity.setStart(START_TIME);
+        mediaEntity.setEnd(END_TIME);
+        mediaEntity.setChannel(1);
+
+        Path mediaPath = Path.of("/path/to/audio/sample2-5secs.mp2");
+        when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
+        when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
+
+        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"), true);
+        when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
+
+        BinaryData data = mock(BinaryData.class);
+        InputStream inputStream = mock(InputStream.class);
+        when(fileOperationService.convertFileToBinaryData(any())).thenReturn(data);
+        when(data.toStream()).thenReturn(inputStream);
+        when(inputStream.read(any())).thenThrow(new IOException());
+
+        audioService.startStreamingPreview(
+                mediaEntity.getId(),
+                "bytes=0-1024", emitter
+        );
+        CountDownLatch latch = new CountDownLatch(1);
+        Mockito.doAnswer(invocationOnMock -> {
+            Object result = invocationOnMock.callRealMethod();
+            latch.countDown();
+            return result;
+        }).when(emitter).completeWithError(exceptionCaptor.capture());
+
+        boolean result = latch.await(2, TimeUnit.SECONDS);
+        if (result) {
+            assertEquals("Failed to process audio request", exceptionCaptor.getValue().getMessage());
+        } else {
+            fail("Emitter did not complete with errors");
+        }
+
     }
 
     @Test
