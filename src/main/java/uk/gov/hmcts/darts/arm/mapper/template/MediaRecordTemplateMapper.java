@@ -21,6 +21,7 @@ import static uk.gov.hmcts.darts.arm.util.TemplateConstants.CREATED_DATE_TIME_KE
 import static uk.gov.hmcts.darts.arm.util.TemplateConstants.DZ_FILE_NAME_KEY;
 import static uk.gov.hmcts.darts.arm.util.TemplateConstants.END_DATE_TIME_KEY;
 import static uk.gov.hmcts.darts.arm.util.TemplateConstants.FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.TemplateConstants.FILE_TAG_KEY;
 import static uk.gov.hmcts.darts.arm.util.TemplateConstants.FILE_TYPE_KEY;
 import static uk.gov.hmcts.darts.arm.util.TemplateConstants.HEARING_DATE_KEY;
 import static uk.gov.hmcts.darts.arm.util.TemplateConstants.MAX_CHANNELS_KEY;
@@ -44,8 +45,6 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
         MediaEntity media = externalObjectDirectory.getMedia();
-        String courthouseName = media.getCourtroom().getCourthouse().getCourthouseName();
-        String courtroomName = media.getCourtroom().getName();
 
         contents = parseNullableDateTime(media.getCreatedDateTime(), dateTimeFormatter, contents, CREATED_DATE_TIME_KEY);
 
@@ -64,6 +63,8 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
         contents = parseNullableStrings(hearingDate, contents, HEARING_DATE_KEY);
 
         String comments = "";
+        String courthouseName = media.getCourtroom().getCourthouse().getCourthouseName();
+        String courtroomName = media.getCourtroom().getName();
 
         return contents.replaceAll(FILENAME_KEY, media.getMediaFile())
             .replaceAll(CONTRIBUTOR_KEY, courthouseName + CONTRIBUTOR_SEPARATOR + courtroomName)
@@ -77,7 +78,8 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
             .replaceAll(END_DATE_TIME_KEY, media.getEnd().format(dateTimeFormatter))
             .replaceAll(COURTHOUSE_KEY, courthouseName)
             .replaceAll(COURTROOM_KEY, courtroomName)
-            .replaceAll(DZ_FILE_NAME_KEY, media.getMediaFile());
+            .replaceAll(DZ_FILE_NAME_KEY, media.getMediaFile())
+            .replaceAll(FILE_TAG_KEY, media.getMediaFormat());
 
     }
 
@@ -86,7 +88,7 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
             contents = contents.replaceAll(key, parseableValue);
         } else {
             while (contents.contains(key)) {
-                contents = contents.replace(key, "");
+                contents = contents.replace(key, "null");
             }
         }
         return contents;
@@ -98,7 +100,7 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
             contents = contents.replaceAll(key, createdDateTime);
         } else {
             while (contents.contains(key)) {
-                contents = contents.replace(key, "");
+                contents = contents.replace(key, "null");
             }
         }
         return contents;
