@@ -26,6 +26,10 @@ public class ArmDataManagementConfiguration {
     private String dateTimeFormat;
     private String fileExtension;
     private String listBlobsTimeoutDuration;
+    private String mediaRecordTemplate;
+    private String transcriptionRecordTemplate;
+    private String annotationRecordTemplate;
+    private String caseRecordTemplate;
 
     @Getter
     @Setter
