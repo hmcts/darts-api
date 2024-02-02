@@ -87,7 +87,7 @@ public class HearingsServiceImpl implements HearingsService {
             //admin will see all annotations
             annotations = annotationRepository.findByHearingId(hearingId);
         } else {
-            //judge will only see their own annotations
+            //Non-admin will only see their own annotations
             annotations = annotationRepository.findByHearingIdAndUser(hearingId, authorisationApi.getCurrentUser());
         }
 

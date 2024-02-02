@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.collections4.ListUtils.emptyIfNull;
 
 @UtilityClass
-@SuppressWarnings({"PMD.TooManyMethods"})
 public class GetAnnotationsResponseMapper {
 
     public List<Annotation> mapToAnnotations(List<AnnotationEntity> annotationEntities, Integer hearingId) {

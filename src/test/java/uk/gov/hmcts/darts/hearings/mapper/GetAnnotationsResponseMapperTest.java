@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class GetAnnotationsResponseMapperTest {
 
     @Test
-    void convertOk() {
+    void given_annotationWithDocuments_mapSuccessfully() {
         UserAccountEntity userAccount = CommonTestDataUtil.createUserAccount();
         AnnotationEntity annotationEntity1 = new AnnotationEntity();
         annotationEntity1.setId(1001);
