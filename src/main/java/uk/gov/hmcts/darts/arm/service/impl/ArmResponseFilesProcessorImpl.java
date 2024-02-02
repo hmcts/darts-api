@@ -108,6 +108,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         userAccount = userIdentity.getUserAccount();
     }
 
+    @SuppressWarnings("java:S3655")
     @Transactional
     public void processInputUploadFile(Integer eodId) {
         ExternalObjectDirectoryEntity externalObjectDirectoryEntity = externalObjectDirectoryRepository.findById(eodId).get();
