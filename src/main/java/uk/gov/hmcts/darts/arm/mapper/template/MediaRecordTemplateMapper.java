@@ -80,7 +80,6 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
             .replaceAll(COURTROOM_KEY, courtroomName)
             .replaceAll(DZ_FILE_NAME_KEY, media.getMediaFile())
             .replaceAll(FILE_TAG_KEY, media.getMediaFormat());
-
     }
 
     private String parseNullableStrings(String parseableValue, String contents, String key) {
