@@ -28,12 +28,12 @@ public class AnnotationStub {
     public AnnotationDocumentEntity createAndSaveAnnotationDocumentEntityWith(AnnotationEntity annotationEntity,
                                                                               String fileName,
                                                                               String fileType,
-                                                                              int fileSize,
+                                                                              Integer fileSize,
                                                                               UserAccountEntity uploadedBy,
                                                                               OffsetDateTime uploadedDateTime,
                                                                               String checksum) {
         AnnotationDocumentEntity annotationDocument = new AnnotationDocumentEntity();
-        annotationDocument.setAnnotationId(annotationEntity.getId());
+        annotationDocument.setAnnotation(annotationEntity);
         annotationDocument.setFileName(fileName);
         annotationDocument.setFileType(fileType);
         annotationDocument.setFileSize(fileSize);
