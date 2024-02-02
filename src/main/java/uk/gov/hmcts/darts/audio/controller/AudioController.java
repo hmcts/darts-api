@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,6 @@ import uk.gov.hmcts.darts.audio.model.AudioMetadata;
 import uk.gov.hmcts.darts.audio.service.AudioService;
 import uk.gov.hmcts.darts.audio.util.StreamingResponseEntityUtil;
 import uk.gov.hmcts.darts.authorisation.annotation.Authorisation;
-import uk.gov.hmcts.darts.common.SentServerEventsConfig;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 
 import java.io.InputStream;
@@ -46,7 +46,8 @@ public class AudioController implements AudioApi {
 
     private final AudioService audioService;
     private final AudioResponseMapper audioResponseMapper;
-    private final SentServerEventsConfig sentServerEventsConfig;
+    @Value("${darts.sse.sse-preview-timeout: 120}")
+    private long previewTimeout;
 
     @Override
     @SecurityRequirement(name = SECURITY_SCHEMES_BEARER_AUTH)
@@ -98,7 +99,7 @@ public class AudioController implements AudioApi {
         return audioService.startStreamingPreview(
             mediaId,
             range,
-            new SseEmitter(Duration.ofMinutes(sentServerEventsConfig.getPreviewTimeout()).toMillis())
+            new SseEmitter(Duration.ofMinutes(previewTimeout).toMillis())
         );
     }
 }
