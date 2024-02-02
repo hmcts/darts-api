@@ -10,7 +10,7 @@ ADD lib/ffmpeg-release-amd64-static.tar.xz /usr/local/bin
 RUN cp -p ffmpeg*/ffmpeg /usr/bin
 
  # renovate: datasource=github-releases depName=microsoft/ApplicationInsights-Java
-FROM hmctspublic.azurecr.io/base/java:17-distroless-debug
+FROM hmctspublic.azurecr.io/base/java:17-distroless
 COPY --from=build-env /usr/bin/ffmpeg /usr/bin
 
 COPY lib/applicationinsights.json /opt/app/
