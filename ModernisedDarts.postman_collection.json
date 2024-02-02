@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "44cfc5c6-df96-4e8b-b48a-862e4831f7a2",
+		"_postman_id": "ec93922d-1b02-43bc-923c-126aef6acdbd",
 		"name": "ModernisedDarts",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "30362290"
@@ -2276,7 +2276,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"case_id\": 12345,\n  \"retention_date\": \"2022-05-20\",\n  \"is_permanent_retention\": true,\n  \"comments\": \"commentstring\"\n}"
+							"raw": "{\n  \"case_id\": 26029,\n  \"retention_date\": \"2029-05-19\",\n  \"is_permanent_retention\": false,\n  \"validate_only\": false,\n  \"comments\": \"commentstring\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
 							"raw": "{{serverUrl}}/retentions",
