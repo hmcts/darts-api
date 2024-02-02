@@ -233,7 +233,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 log.error("Unable to write upload file to temporary workspace {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
                 updateExternalObjectDirectoryStatusAndVerificationAttempt(externalObjectDirectory, armDropZoneStatus);
             } catch (Exception e) {
-                log.error("Unable to process arm response upload file {}", uploadFileFilenameProcessor.getUploadFileFilename());
+                log.error("Unable to process arm response upload file {} - {}", uploadFileFilenameProcessor.getUploadFileFilename(), e.getMessage());
                 updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
             } finally {
                 cleanupTemporaryJsonFile(jsonPath);
@@ -283,6 +283,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         // Validate the checksum in external object directory table against the Media, TranscriptionDocument, or AnnotationDocument
         if (nonNull(externalObjectDirectory.getMedia())) {
             MediaEntity media = externalObjectDirectory.getMedia();
+            
             if (nonNull(media.getChecksum())) {
                 String objectChecksum = media.getChecksum();
                 verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
