@@ -73,14 +73,14 @@ public class AudioServiceImpl implements AudioService {
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SentServerEventsHeartBeatEmitter heartBeatEmitter;
 
-    private static AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
-        return new AudioFileInfo(
-            mediaEntity.getStart().toInstant(),
-            mediaEntity.getEnd().toInstant(),
-            mediaEntity.getChannel(),
-            downloadPath,
-            false
-        );
+    private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
+        return AudioFileInfo.builder()
+            .startTime(mediaEntity.getStart().toInstant())
+            .endTime(mediaEntity.getEnd().toInstant())
+            .channel(mediaEntity.getChannel())
+            .mediaFile(mediaEntity.getMediaFile())
+            .path(downloadPath)
+            .build();
     }
 
     private static SseEmitter.SseEventBuilder createPreviewSse(String range, InputStream audioMediaFile) throws IOException {
