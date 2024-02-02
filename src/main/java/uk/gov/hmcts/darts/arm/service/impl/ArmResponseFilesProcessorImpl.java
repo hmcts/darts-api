@@ -101,7 +101,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
     }
 
     @Transactional
-    private List<ExternalObjectDirectoryEntity> getArmDropZoneExternalObjectDirectoryEntities(ExternalLocationTypeEntity armLocation) {
+    public List<ExternalObjectDirectoryEntity> getArmDropZoneExternalObjectDirectoryEntities(ExternalLocationTypeEntity armLocation) {
         return externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(armLocation, armDropZoneStatus);
     }
 
