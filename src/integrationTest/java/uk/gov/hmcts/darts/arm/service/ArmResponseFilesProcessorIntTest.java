@@ -47,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
@@ -759,7 +760,7 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
         armResponseFilesProcessor.processResponseFiles();
 
         ExternalObjectDirectoryEntity foundAnnotationEod = dartsDatabase.getExternalObjectDirectoryRepository().getReferenceById(armEod.getId());
-        assertEquals(FAILURE_CHECKSUM_FAILED.getId(), foundAnnotationEod.getStatus().getId());
+        assertEquals(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED.getId(), foundAnnotationEod.getStatus().getId());
     }
 
     @Test

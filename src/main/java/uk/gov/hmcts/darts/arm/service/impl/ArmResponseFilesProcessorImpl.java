@@ -42,8 +42,8 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.darts.arm.util.ArchiveConstants.ArchiveRecordOperationValues.ARM_FILENAME_SEPARATOR;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_DROP_ZONE;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.ARM_PROCESSING_RESPONSE_FILES;
+import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_ARM_RESPONSE_PROCESSING;
-import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.FAILURE_CHECKSUM_FAILED;
 import static uk.gov.hmcts.darts.common.enums.ObjectRecordStatusEnum.STORED;
 
 @Service
@@ -103,7 +103,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
         armProcessingResponseFilesStatus = objectRecordStatusRepository.findById(ARM_PROCESSING_RESPONSE_FILES.getId()).get();
         armResponseProcessingFailed = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_PROCESSING.getId()).get();
         storedStatus = objectRecordStatusRepository.findById(STORED.getId()).get();
-        checksumFailedStatus = objectRecordStatusRepository.findById(FAILURE_CHECKSUM_FAILED.getId()).get();
+        checksumFailedStatus = objectRecordStatusRepository.findById(FAILURE_ARM_RESPONSE_CHECKSUM_FAILED.getId()).get();
 
         userAccount = userIdentity.getUserAccount();
     }
@@ -306,7 +306,7 @@ public class ArmResponseFilesProcessorImpl implements ArmResponseFilesProcessor 
                 verifyChecksumAndUpdateStatus(armResponseUploadFileRecord, externalObjectDirectory, objectChecksum);
             } else {
                 log.warn("Unable to verify annotation checksum for external object {}", externalObjectDirectory.getId());
-                updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
+                updateExternalObjectDirectoryStatus(externalObjectDirectory, checksumFailedStatus);
             }
         } else {
             updateExternalObjectDirectoryStatus(externalObjectDirectory, armResponseProcessingFailed);
