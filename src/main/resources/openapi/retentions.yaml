@@ -85,12 +85,15 @@ paths:
                     required:
                       - type
                     properties:
-                      type:
-                        $ref: '#/components/schemas/RetentionDateInvalidError'
+                      latest_automated_retention_date:
+                        type: string
+                        format: date
               example:
                 type: "RETENTION_101"
-                title: "Retention date not valid."
+                title: "The retention date being applied is too early."
                 status: 422
+                detail: caseId '26029' must have a retention date after the last completed automated retention date '2026-02-07'.
+                latest_automated_retention_date: 2026-02-07
         '500':
           description: Internal Server Error
           content:
@@ -152,9 +155,3 @@ components:
       enum:
         - "RETENTION_100"
       x-enum-varnames: [ NO_PERMISSION_REDUCE_RETENTION_ERROR ]
-
-    RetentionDateInvalidError:
-      type: string
-      enum:
-        - "RETENTION_101"
-      x-enum-varnames: [ RETENTION_DATE_INVALID_ERROR ]
