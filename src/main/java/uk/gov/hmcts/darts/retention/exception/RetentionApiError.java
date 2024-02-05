@@ -10,33 +10,37 @@ import uk.gov.hmcts.darts.common.exception.DartsApiError;
 public enum RetentionApiError implements DartsApiError {
 
     NO_PERMISSION_REDUCE_RETENTION(
-        "100",
-        HttpStatus.FORBIDDEN,
-        "You do not have permission to reduce the retention period."
+            "100",
+            HttpStatus.FORBIDDEN,
+            "You do not have permission to reduce the retention period."
     ), RETENTION_DATE_TOO_EARLY(
-        "101",
-        HttpStatus.UNPROCESSABLE_ENTITY,
-        "The retention date being applied is too early."
+            "101",
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            "The retention date being applied is too early."
     ), INVALID_REQUEST(
-        "102",
-        HttpStatus.BAD_REQUEST,
-        "The request is invalid."
+            "102",
+            HttpStatus.BAD_REQUEST,
+            "The request is invalid."
     ), CASE_NOT_FOUND(
-        "103",
-        HttpStatus.BAD_REQUEST,
-        "The requested caseId cannot be found."
+            "103",
+            HttpStatus.BAD_REQUEST,
+            "The requested caseId cannot be found."
     ), CASE_NOT_CLOSED(
-        "104",
-        HttpStatus.BAD_REQUEST,
-        "The case must be closed before the retention period can be amended."
+            "104",
+            HttpStatus.BAD_REQUEST,
+            "The case must be closed before the retention period can be amended."
     ), NO_RETENTION_POLICIES_APPLIED(
-        "105",
-        HttpStatus.BAD_REQUEST,
-        "The case must have a retention policy applied before being changed."
+            "105",
+            HttpStatus.BAD_REQUEST,
+            "The case must have a retention policy applied before being changed."
     ), INTERNAL_SERVER_ERROR(
-        "106",
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        "An Internal server error has occurred."
+            "106",
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            "An Internal server error has occurred."
+    ), RETENTION_DATE_TOO_LATE(
+            "107",
+            HttpStatus.UNPROCESSABLE_ENTITY,
+            "The retention date being applied is too late."
     );
 
     private static final String ERROR_TYPE_PREFIX = "RETENTION";

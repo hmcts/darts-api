@@ -18,6 +18,7 @@ import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.testutils.IntegrationBase;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
@@ -50,6 +51,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 SOME_COURTHOUSE,
                 SOME_CASE_NUMBER
         );
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
         dartsDatabase.save(courtCase);
 
@@ -94,6 +96,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 SOME_COURTHOUSE,
                 SOME_CASE_NUMBER
         );
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
         dartsDatabase.save(courtCase);
 
@@ -134,6 +137,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 SOME_COURTHOUSE,
                 SOME_CASE_NUMBER
         );
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
         dartsDatabase.save(courtCase);
 
@@ -177,6 +181,7 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 SOME_COURTHOUSE,
                 SOME_CASE_NUMBER
         );
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
         courtCase.setClosed(true);
         dartsDatabase.save(courtCase);
 
@@ -210,6 +215,49 @@ class RetentionControllerPostRetentionIntTest extends IntegrationBase {
                 .andExpect(jsonPath(
                         "latest_automated_retention_date",
                         is("2024-01-01")
+                ));
+    }
+
+    @Test
+    void givenARetentionDateLaterThanMaxRetentionThenThrow422() throws Exception {
+        CourtCaseEntity courtCase = dartsDatabase.createCase(
+                SOME_COURTHOUSE,
+                SOME_CASE_NUMBER
+        );
+        courtCase.setClosed(true);
+        courtCase.setCaseClosedTimestamp(OffsetDateTime.of(2020, 10, 10, 10, 0, 0, 0, ZoneOffset.UTC));
+        dartsDatabase.save(courtCase);
+
+        UserAccountEntity testUser = dartsDatabase.getUserAccountStub()
+                .createJudgeUser(courtCase.getCourthouse());
+        when(mockUserIdentity.getUserAccount()).thenReturn(testUser);
+
+        dartsDatabase.createCaseRetentionObject(courtCase, CaseRetentionStatus.COMPLETE, OffsetDateTime.parse("2024-01-01T12:00Z"), false);
+
+        String requestBody = """
+                {
+                  "case_id": <<caseId>>,
+                  "retention_date": "2223-05-20",
+                  "is_permanent_retention": false,
+                  "comments": "string"
+                }""";
+
+        requestBody = requestBody.replace("<<caseId>>", courtCase.getId().toString());
+        MockHttpServletRequestBuilder requestBuilder = post(ENDPOINT_URL)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(requestBody);
+        mockMvc.perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
+                .andExpect(jsonPath("type", is("RETENTION_107")))
+                .andExpect(jsonPath("title", is("The retention date being applied is too late.")))
+                .andExpect(jsonPath("status", is(422)))
+                .andExpect(jsonPath(
+                        "detail",
+                        is("caseId '" + courtCase.getId().toString()
+                                   + "' must have a retention date before the maximum retention date '2119-10-10'.")
+                ))
+                .andExpect(jsonPath(
+                        "max_duration",
+                        is("99Y0M0D")
                 ));
     }
 
