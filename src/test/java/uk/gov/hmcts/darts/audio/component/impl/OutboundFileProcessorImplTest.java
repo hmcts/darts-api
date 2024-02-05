@@ -472,11 +472,6 @@ class OutboundFileProcessorImplTest {
                 .endTime(TIME_11_00.toInstant())
                 .path(SOME_DOWNLOAD_PATH)
                 .isTrimmed(true);
-        var session2UntrimmedAudioFileInfoBuilder = AudioFileInfo.builder()
-                .startTime(TIME_11_59.toInstant())
-                .endTime(TIME_12_30.toInstant())
-                .path(SOME_DOWNLOAD_PATH)
-                .isTrimmed(false);
         var session3TrimmedAudioFileInfoBuilder = AudioFileInfo.builder()
                 .startTime(TIME_12_30.toInstant())
                 .endTime(TIME_12_50.toInstant())
@@ -530,6 +525,11 @@ class OutboundFileProcessorImplTest {
 
         List<AudioFileInfo> secondSession = sessions.get(1);
         assertEquals(4, secondSession.size());
+        var session2UntrimmedAudioFileInfoBuilder = AudioFileInfo.builder()
+                .startTime(TIME_11_59.toInstant())
+                .endTime(TIME_12_30.toInstant())
+                .path(SOME_DOWNLOAD_PATH)
+                .isTrimmed(false);
         assertEquals(session2UntrimmedAudioFileInfoBuilder
                              .channel(1)
                              .mediaFile("0002.a00")
