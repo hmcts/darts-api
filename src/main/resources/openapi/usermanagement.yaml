@@ -316,7 +316,6 @@ components:
     UserName:
       minLength: 1
       maxLength: 256
-      pattern: ^\S$|^\S[a-zA-Z '-]*\S$
       type: string
     UserEmailAddress:
       minLength: 1
