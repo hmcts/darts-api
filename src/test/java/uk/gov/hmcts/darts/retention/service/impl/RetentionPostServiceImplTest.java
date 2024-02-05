@@ -23,6 +23,7 @@ import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
 import uk.gov.hmcts.darts.common.util.CommonTestDataUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
+import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
@@ -61,6 +62,9 @@ class RetentionPostServiceImplTest {
     private CurrentTimeHelper currentTimeHelper;
     @Mock
     private AuditApi auditApi;
+
+    @Mock
+    private RetentionDateHelper retentionDateHelper;
 
     @Captor
     ArgumentCaptor<CaseRetentionEntity> caseRetentionEntityArgumentCaptor;
@@ -110,6 +114,8 @@ class RetentionPostServiceImplTest {
         RetentionPolicyTypeEntity retentionPolicyType = new RetentionPolicyTypeEntity();
         retentionPolicyType.setId(1);
         when(retentionPolicyTypeRepository.getReferenceById(anyInt())).thenReturn(retentionPolicyType);
+
+        when(retentionDateHelper.getRetentionDateForPolicy(any(), any())).thenReturn(LocalDate.of(2123, 10, 1));
     }
 
     @Test
@@ -315,7 +321,7 @@ class RetentionPostServiceImplTest {
         CaseRetentionEntity savedRetention = caseRetentionEntityArgumentCaptor.getValue();
         assertEquals("COMPLETE", savedRetention.getCurrentState());
         assertEquals("TheComments", savedRetention.getComments());
-        assertEquals("2123-10-01T10:00Z", savedRetention.getRetainUntil().toString());
+        assertEquals("2123-10-01T00:00Z", savedRetention.getRetainUntil().toString());
         assertEquals(10, savedRetention.getCreatedBy().getId());
         assertEquals(RetentionPolicyEnum.PERMANENT.getPolicyKey(), savedRetention.getRetentionPolicyType().getFixedPolicyKey());
     }

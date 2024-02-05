@@ -88,12 +88,21 @@ paths:
                       latest_automated_retention_date:
                         type: string
                         format: date
-              example:
-                type: "RETENTION_101"
-                title: "The retention date being applied is too early."
-                status: 422
-                detail: caseId '26029' must have a retention date after the last completed automated retention date '2026-02-07'.
-                latest_automated_retention_date: 2026-02-07
+              examples:
+                too_early:
+                  value:
+                    type: "RETENTION_101"
+                    title: "The retention date being applied is too early."
+                    status: 422
+                    detail: caseId '26029' must have a retention date after the last completed automated retention date '2026-02-07'.
+                    latest_automated_retention_date: "2026-02-07"
+                too_late:
+                  value:
+                    type: "RETENTION_107"
+                    title: "The retention date being applied is too late."
+                    status: 422
+                    detail: caseId '26029' must have a retention date before the maximum retention date '2123-01-15'..
+                    max_duration: "99Y0M0D"
         '500':
           description: Internal Server Error
           content:
