@@ -27,6 +27,17 @@ public class AdminUserStub {
         return user;
     }
 
+    public UserAccountEntity givenUserIsJudge(UserIdentity userIdentity) {
+        var user = userAccountStub.createAdminUser();
+
+        Mockito.when(userIdentity.getUserAccount())
+            .thenReturn(user);
+        Mockito.when(userIdentity.userHasGlobalAccess(any()))
+            .thenReturn(true);
+
+        return user;
+    }
+
     public UserAccountEntity givenUserIsNotAuthorised(UserIdentity userIdentity) {
         var user = userAccountStub.getIntegrationTestUserAccountEntity();
         user.setSecurityGroupEntities(Collections.emptySet());
