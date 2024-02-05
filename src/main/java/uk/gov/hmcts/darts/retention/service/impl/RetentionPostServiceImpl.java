@@ -17,18 +17,18 @@ import uk.gov.hmcts.darts.common.helper.CurrentTimeHelper;
 import uk.gov.hmcts.darts.common.repository.CaseRepository;
 import uk.gov.hmcts.darts.common.repository.CaseRetentionRepository;
 import uk.gov.hmcts.darts.common.repository.RetentionPolicyTypeRepository;
-import uk.gov.hmcts.darts.common.util.DateConverterUtil;
 import uk.gov.hmcts.darts.retention.enums.CaseRetentionStatus;
 import uk.gov.hmcts.darts.retention.enums.RetentionPolicyEnum;
 import uk.gov.hmcts.darts.retention.exception.RetentionApiError;
+import uk.gov.hmcts.darts.retention.helper.RetentionDateHelper;
 import uk.gov.hmcts.darts.retention.service.RetentionPostService;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionRequest;
 import uk.gov.hmcts.darts.retentions.model.PostRetentionResponse;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +45,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     private final RetentionPolicyTypeRepository retentionPolicyTypeRepository;
     private final CurrentTimeHelper currentTimeHelper;
     private final AuditApi auditApi;
+    private final RetentionDateHelper retentionDateHelper;
 
     @Override
     public PostRetentionResponse postRetention(PostRetentionRequest postRetentionRequest) {
@@ -60,11 +61,11 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         CourtCaseEntity courtCase = caseOpt.get();
         validation(postRetentionRequest, courtCase);
 
-        OffsetDateTime newRetentionDate;
+        LocalDate newRetentionDate;
         if (BooleanUtils.isTrue(postRetentionRequest.getIsPermanentRetention())) {
-            newRetentionDate = currentTimeHelper.currentOffsetDateTime().plus(99, ChronoUnit.YEARS);
+            newRetentionDate = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
         } else {
-            newRetentionDate = DateConverterUtil.toOffsetDateTime(postRetentionRequest.getRetentionDate());
+            newRetentionDate = postRetentionRequest.getRetentionDate();
         }
 
         if (BooleanUtils.isNotTrue(postRetentionRequest.getValidateOnly())) {
@@ -72,7 +73,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         }
 
         PostRetentionResponse response = new PostRetentionResponse();
-        response.setRetentionDate(newRetentionDate.toLocalDate());
+        response.setRetentionDate(newRetentionDate);
         return response;
     }
 
@@ -118,6 +119,22 @@ public class RetentionPostServiceImpl implements RetentionPostService {
                 );
             }
 
+            //No users can extend the retention date to later than the last max retention date.
+            LocalDate maxRetentionDate = retentionDateHelper.getRetentionDateForPolicy(courtCase, RetentionPolicyEnum.PERMANENT);
+            if (newRetentionDate.isAfter(maxRetentionDate)) {
+                RetentionPolicyTypeEntity retentionPolicy = retentionDateHelper.getRetentionPolicy(RetentionPolicyEnum.PERMANENT);
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("max_duration", retentionPolicy.getDuration());
+                throw new DartsApiException(
+                        RetentionApiError.RETENTION_DATE_TOO_LATE,
+                        MessageFormat.format(
+                                "caseId ''{0}'' must have a retention date before the maximum retention date ''{1}''.",
+                                courtCase.getId().toString(),
+                                maxRetentionDate
+                        ), map
+                );
+            }
+
         }
     }
 
@@ -144,7 +161,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
     }
 
     private CaseRetentionEntity createNewCaseRetention(PostRetentionRequest postRetentionRequest, CourtCaseEntity courtCase,
-                                                       OffsetDateTime newRetentionDate) {
+                                                       LocalDate newRetentionDate) {
         CaseRetentionEntity caseRetention = new CaseRetentionEntity();
         caseRetention.setCourtCase(courtCase);
         UserAccountEntity currentUser = authorisationApi.getCurrentUser();
@@ -152,7 +169,7 @@ public class RetentionPostServiceImpl implements RetentionPostService {
         caseRetention.setCreatedBy(currentUser);
         caseRetention.setSubmittedBy(currentUser);
         caseRetention.setComments(postRetentionRequest.getComments());
-        caseRetention.setRetainUntil(newRetentionDate);
+        caseRetention.setRetainUntil(newRetentionDate.atTime(OffsetTime.of(0, 0, 0, 0, ZoneOffset.UTC)));
         caseRetention.setCurrentState(String.valueOf(CaseRetentionStatus.COMPLETE));
         caseRetention.setRetainUntilAppliedOn(currentTimeHelper.currentOffsetDateTime());
 
