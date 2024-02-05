@@ -43,7 +43,7 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
         String contents = super.mapTemplateContents(externalObjectDirectory, templateFileContents);
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(armDataManagementConfiguration.getDateTimeFormat());
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd_MMM_uuuu");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-DD");
         MediaEntity media = externalObjectDirectory.getMedia();
 
         contents = parseNullableDateTime(media.getCreatedDateTime(), dateTimeFormatter, contents, CREATED_DATE_TIME_KEY);
@@ -58,7 +58,7 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
 
         String hearingDate = null;
         if (!CollectionUtils.isEmpty(media.getHearingList())) {
-            hearingDate = media.getHearingList().get(1).getHearingDate().format(dateFormatter);
+            hearingDate = media.getHearingList().get(0).getHearingDate().format(dateFormatter);
         }
         contents = parseNullableStrings(hearingDate, contents, HEARING_DATE_KEY);
 
@@ -87,7 +87,7 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
             contents = contents.replaceAll(key, parseableValue);
         } else {
             while (contents.contains(key)) {
-                contents = contents.replace(key, "null");
+                contents = contents.replace(key, "");
             }
         }
         return contents;
@@ -99,7 +99,7 @@ public class MediaRecordTemplateMapper extends BaseTemplate {
             contents = contents.replaceAll(key, createdDateTime);
         } else {
             while (contents.contains(key)) {
-                contents = contents.replace(key, "null");
+                contents = contents.replace(key, "");
             }
         }
         return contents;

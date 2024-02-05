@@ -107,7 +107,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
 
         MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, archiveRecordFile);
         archiveRecordFileInfo.setFileGenerationSuccessful(
-            archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
+            archiveRecordFileGenerator.generateArchiveRecord(mappedTemplateFileContents, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
         );
 
     }
