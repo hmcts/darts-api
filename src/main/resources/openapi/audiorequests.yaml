@@ -745,11 +745,11 @@ components:
     AudioRequestsErrorCode:
         type: string
         enum:
-          - "100"
-          - "101"
-          - "102"
-          - "103"
-          - "104"
+          - "AUDIO_REQUESTS_100"
+          - "AUDIO_REQUESTS_101"
+          - "AUDIO_REQUESTS_102"
+          - "AUDIO_REQUESTS_103"
+          - "AUDIO_REQUESTS_104"
         x-enum-varnames: [ MEDIA_REQUEST_NOT_FOUND, MEDIA_REQUEST_NOT_VALID_FOR_USER,  MEDIA_REQUEST_TYPE_IS_INVALID_FOR_ENDPOINT, TRANSFORMED_MEDIA_NOT_FOUND, DUPLICATE_MEDIA_REQUEST ]
 
     AudioRequestsTitleErrors:

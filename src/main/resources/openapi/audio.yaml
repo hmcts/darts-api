@@ -256,11 +256,11 @@ components:
     AddAudioErrorCode:
       type: string
       enum:
-        - "100"
-        - "101"
-        - "102"
-        - "103"
-        - "104"
+        - "AUDIO_100"
+        - "AUDIO_101"
+        - "AUDIO_102"
+        - "AUDIO_103"
+        - "AUDIO_104"
       x-enum-varnames: [ FAILED_TO_PROCESS_AUDIO_REQUEST, REQUESTED_DATA_CANNOT_BE_LOCATED, MEDIA_NOT_FOUND, FAILED_TO_UPLOAD_AUDIO_FILE, MISSING_SYSTEM_USER]
 
     AddAudioTitleErrors:

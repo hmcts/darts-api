@@ -48,7 +48,7 @@ class ExceptionHandlerTest extends IntegrationBase {
     @RequiredArgsConstructor
     enum TestError implements DartsApiError {
         TEST_ERROR(
-            "999",
+            "TEST_999",
             HttpStatus.I_AM_A_TEAPOT,
             "A descriptive title"
         );
@@ -78,7 +78,7 @@ class ExceptionHandlerTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"999",
+                "type":"TEST_999",
                 "title":"A descriptive title",
                 "status":418
             }
@@ -101,7 +101,7 @@ class ExceptionHandlerTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"999",
+                "type":"TEST_999",
                 "title":"A descriptive title",
                 "status":418,
                 "detail":"Some descriptive details"

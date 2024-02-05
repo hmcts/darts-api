@@ -762,12 +762,12 @@ components:
     CaseErrorCode:
       type: string
       enum:
-       - "100"
-       - "101"
-       - "102"
-       - "103"
-       - "104"
-       - "106"
+       - "CASE_100"
+       - "CASE_101"
+       - "CASE_102"
+       - "CASE_103"
+       - "CASE_104"
+       - "CASE_106"
       x-enum-varnames: [ TOO_MANY_RESULTS, NO_CRITERIA_SPECIFIED, CRITERIA_TOO_BROAD, INVALID_REQUEST, CASE_NOT_FOUND, PATCH_CRITERIA_NOT_MET ]
 
     CaseTitleErrors:

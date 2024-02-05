@@ -448,9 +448,9 @@ components:
     UserManagementErrorCode:
       type: string
       enum:
-        - "100"
-        - "101"
-        - "110"
+        - "USER_MANAGEMENT_100"
+        - "USER_NOT_TRANSCRIBER_101"
+        - "USER_NOT_TRANSCRIBER_110"
       x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED ]
 
     UserManagementTitleErrors:
@@ -475,9 +475,9 @@ components:
         UserManagementsErrorCode:
             type: string
             enum:
-              - "100"
-              - "101"
-              - "110"
+              - "USER_100"
+              - "USER_101"
+              - "USER_110"
             x-enum-varnames: [ USER_NOT_FOUND, DUPLICATE_EMAIL, DUPLICATE_SECURITY_GROUP_NAME_NOT_PERMITTED]
 
         UserManagementsTitleErrors:

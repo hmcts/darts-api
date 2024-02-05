@@ -130,7 +130,7 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"101",
+                "type":"AUTHENTICATION_101",
                 "title":"Failed to validate access token",
                 "status":500
             }
@@ -159,7 +159,7 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"100",
+                "type":"AUTHENTICATION_100",
                 "title":"Failed to obtain access token",
                 "status":500
             }
@@ -181,7 +181,7 @@ class HandleOAuthCodeIntTest extends IntegrationBase {
 
         String expectedResponseBody = """
             {
-                "type":"101",
+                "type":"AUTHENTICATION_101",
                 "title":"Failed to validate access token",
                 "status":500
             }

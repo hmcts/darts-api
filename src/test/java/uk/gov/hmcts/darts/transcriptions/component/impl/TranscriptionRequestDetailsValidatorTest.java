@@ -66,7 +66,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(validatable));
 
         // Then
-        assertEquals(URI.create("100"), actualException.getError().getType());
+        assertEquals(URI.create("TRANSCRIPTION_100"), actualException.getError().getType());
     }
 
     @ParameterizedTest
@@ -87,7 +87,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(validatable));
 
         // Then
-        assertEquals("110", actualException.getError().getErrorTypeNumeric());
+        assertEquals("TRANSCRIPTION_110", actualException.getError().getErrorTypeNumeric());
         assertEquals("TRANSCRIPTION", actualException.getError().getErrorTypePrefix());
 
     }
@@ -106,7 +106,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(validatable));
 
         // Then
-        assertEquals("104", actualException.getError().getErrorTypeNumeric());
+        assertEquals(URI.create("CASE_104"), actualException.getError().getType());
         assertEquals("CASE", actualException.getError().getErrorTypePrefix());
     }
 
@@ -123,7 +123,7 @@ class TranscriptionRequestDetailsValidatorTest {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(requestDetails));
 
         // Then
-        assertEquals(URI.create("111"), actualException.getError().getType());
+        assertEquals(URI.create("TRANSCRIPTION_111"), actualException.getError().getType());
 
 
     }
@@ -150,7 +150,7 @@ class TranscriptionRequestDetailsValidatorTest {
     void validateShouldThrowExceptionWhenTranscriptTypeRequiresDatesAndDatesAreNotPresent(TranscriptionRequestDetails requestDetails) {
         var actualException = assertThrows(DARTS_EXCEPTION, () -> validator.validate(requestDetails));
 
-        assertEquals("100", actualException.getError().getErrorTypeNumeric());
+        assertEquals("TRANSCRIPTION_100", actualException.getError().getErrorTypeNumeric());
         assertEquals("TRANSCRIPTION", actualException.getError().getErrorTypePrefix());
     }
 

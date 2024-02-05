@@ -94,7 +94,7 @@ components:
     NoDeregistrationErrorCode:
       type: string
       enum:
-        - "100"
+        - "INVALID_COURTROOM_100"
       x-enum-varnames: [INVALID_COURTROOM]
 
     NoDeregistrationTitleErrors:

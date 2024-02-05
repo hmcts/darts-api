@@ -76,7 +76,7 @@ class AudioControllerPreviewIntTest extends IntegrationBase {
         mockMvc.perform(requestBuilder)
             .andExpect(header().string("Content-Type", "application/problem+json"))
             .andExpect(status().isInternalServerError())
-            .andExpect(jsonPath("$.type").value("101"));
+            .andExpect(jsonPath("$.type").value("AUDIO_101"));
 
     }
 

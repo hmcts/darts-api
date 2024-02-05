@@ -476,11 +476,11 @@ components:
     DailyListErrorCode:
      type: string
      enum:
-      - "100"
-      - "101"
-      - "102"
-      - "103"
-      - "104"
+      - "DAILYLIST_100"
+      - "DAILYLIST_101"
+      - "DAILYLIST_102"
+      - "DAILYLIST_103"
+      - "DAILYLIST_104"
      x-enum-varnames: [ FAILED_TO_PROCESS_DAILYLIST, XML_OR_JSON_NEEDS_TO_BE_PROVIDED, XML_EXTRA_PARAMETERS_MISSING, DAILY_LIST_NOT_FOUND, INTERNAL_ERROR ]
 
     DailyListTitleErrors:

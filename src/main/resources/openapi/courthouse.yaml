@@ -148,8 +148,8 @@ components:
     CourthouseErrorCode:
      type: string
      enum:
-      - "100"
-      - "101"
+      - "COURTHOUSE_100"
+      - "COURTHOUSE_101"
      x-enum-varnames: [ COURTHOUSE_NAME_PROVIDED_ALREADY_EXISTS, COURTHOUSE_CODE_PROVIDED_ALREADY_EXISTS ]
 
     CourthouseTitleErrors:

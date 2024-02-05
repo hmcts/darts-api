@@ -794,13 +794,13 @@ components:
         - "TRANSCRIPTION_102"
         - "TRANSCRIPTION_103"
         - "TRANSCRIPTION_104"
-        - "114"
+        - "TRANSCRIPTION_114"
       x-enum-varnames: [ BAD_REQUEST_TRANSCRIPTION_ID, BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE ,REQUESTER_CANNOT_BE_APPROVER_OR_REJECTER ]
     TranscriptionAuthorisation403ErrorCode:
       type: string
       enum:
         - "AUTHORISATION_100"
-        - "113"
+        - "USER_NOT_TRANSCRIBER_113"
       x-enum-varnames: [ USER_NOT_AUTHORISED_FOR_COURTHOUSE, USER_NOT_TRANSCRIBER ]
     UpdateTranscription409ErrorCode:
       type: string
@@ -885,7 +885,7 @@ components:
     UpdateTranscriptions400ErrorCode:
       type: string
       enum:
-        - "112"
+        - "TRANSCRIPTION_112"
       x-enum-varnames:
         - UPDATE_TRANSCRIPTIONS_PARTIAL_PROBLEM
     GetTranscriptionByIdResponse:
@@ -967,18 +967,18 @@ components:
     TranscriptionsErrorCode:
         type: string
         enum:
-          - "100"
-          - "101"
-          - "102"
-          - "103"
-          - "104"
-          - "105"
-          - "106"
-          - "107"
-          - "108"
-          - "109"
-          - "110"
-          - "111"
+          - "TRANSCRIPTION_100"
+          - "TRANSCRIPTION_101"
+          - "TRANSCRIPTION_102"
+          - "TRANSCRIPTION_103"
+          - "TRANSCRIPTION_104"
+          - "TRANSCRIPTION_105"
+          - "TRANSCRIPTION_106"
+          - "TRANSCRIPTION_107"
+          - "TRANSCRIPTION_108"
+          - "TRANSCRIPTION_109"
+          - "TRANSCRIPTION_110"
+          - "TRANSCRIPTION_111"
         x-enum-varnames: [FAILED_TO_VALIDATE_TRANSCRIPTION_REQUEST, TRANSCRIPTION_NOT_FOUND,  BAD_REQUEST_TRANSCRIPTION_STATUS, BAD_REQUEST_WORKFLOW_COMMENT, BAD_REQUEST_TRANSCRIPTION_TYPE, TRANSCRIPTION_WORKFLOW_ACTION_INVALID, BAD_REQUEST_TRANSCRIPTION_URGENCY, DUPLICATE_TRANSCRIPTION, FAILED_TO_ATTACH_TRANSCRIPT, FAILED_TO_DOWNLOAD_TRANSCRIPT, AUDIO_NOT_FOUND, TIMES_OUTSIDE_OF_HEARING_TIMES, FAILED_TO_UPDATE_TRANSCRIPTIONS, FAILED_TO_UPDATE_TRANSCRIPTIONS, USER_NOT_TRANSCRIBER, BAD_REQUEST_TRANSCRIPTION_REQUESTER_IS_SAME_AS_APPROVER]
 
     TranscriptionsTitleErrors:

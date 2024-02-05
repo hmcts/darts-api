@@ -354,8 +354,8 @@ components:
     EventErrorCode:
       type: string
       enum:
-          - "100"
-          - "101"
+          - "EVENT_100"
+          - "EVENT_101"
       x-enum-varnames: [ EVENT_DATA_NOT_FOUND, EVENT_HANDLER_NOT_FOUND_IN_DB]
 
     EventTitleErrors:

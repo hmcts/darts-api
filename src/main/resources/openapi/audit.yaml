@@ -89,9 +89,9 @@ components:
     AuditErrorCode:
       type: string
       enum:
-        - "100"
-        - "101"
-        - "102"
+        - "AUDIT_100"
+        - "AUDIT_101"
+        - "AUDIT_102"
       x-enum-varnames: [ AUDIT_FILTERS_WERE_EMPTY, FILTER_EMPTY, NO_HEARING_OR_USER_FOUND_WHEN_ADDING_AUDIO_AUDIT]
 
     AuditTitleErrors:

@@ -88,7 +88,7 @@ class AudioRequestsControllerUpdateLastAccessedTest extends IntegrationBase {
         String actualJson = mvcResult.getResponse().getContentAsString();
         String expectedJson = """
             {
-              "type":"101",
+              "type":"AUDIO_REQUESTS_101",
               "title":"The audio request is not valid for this user",
               "status":403
             }""";
