@@ -5,14 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import uk.gov.hmcts.darts.arm.model.ArchiveMetadata;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 @Setter
 @Builder
-//TODO fill in fields
-public class AnnotationCreateArchiveRecordMetadata implements ArchiveMetadata {
+@ToString
+public class RecordMetadata implements ArchiveMetadata {
     @JsonProperty("record_class")
     private String recordClass;
     @JsonProperty("publisher")
@@ -53,13 +54,13 @@ public class AnnotationCreateArchiveRecordMetadata implements ArchiveMetadata {
     @JsonProperty("bf_011")
     private String bf011;
     @JsonProperty("bf_012")
-    private String bf012;
+    private Integer bf012;
     @JsonProperty("bf_013")
-    private String bf013;
+    private Integer bf013;
     @JsonProperty("bf_014")
-    private String bf014;
+    private Integer bf014;
     @JsonProperty("bf_015")
-    private String bf015;
+    private Integer bf015;
     @JsonProperty("bf_016")
     private String bf016;
     @JsonProperty("bf_017")
@@ -70,4 +71,5 @@ public class AnnotationCreateArchiveRecordMetadata implements ArchiveMetadata {
     private String bf019;
     @JsonProperty("bf_020")
     private String bf020;
+
 }

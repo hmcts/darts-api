@@ -174,14 +174,15 @@ darts:
       annotation-record-class: DARTSAnnotation
       temp-blob-workspace: ${user.home}/arm/tempworkspace
       date-time-format: yyyy-MM-dd'T'HH:mm:ss
+      date-format: yyyy-MM-dd
       file-extension: a360
       list-blobs-timeout-duration: 60s
-      
-      media-record-template: templates/arm/live/media-record.tmpl
-      transcription-record-template: :templates/arm/live/transcription-record.tmpl
-      annotation-record-template: templates/arm/live/annotation-record.tmpl
-      case-record-template: templates/arm/live/case-record.tmpl
-      
+
+      media-record-properties-file: properties/arm/live/media-record.properties
+      transcription-record-properties-file: :templates/arm/live/transcription-record.properties
+      annotation-record-properties-file: templates/arm/live/annotation-record.properties
+      case-record-properties-file: templates/arm/live/case-record.properties
+
     arm-api:
       arm-username: ${ARM_USERNAME:}
       arm-password: ${ARM_PASSWORD:}
@@ -190,7 +191,7 @@ darts:
       token-path: /api/v1/token
       update-metadata-path: /api/v3/UpdateMetadata
       download-data-path: /api/v1/downloadBlob/{cabinet_id}/{record_id}/{file_id}
-      
+
     blob:
       connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
       container-name:

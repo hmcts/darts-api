@@ -12,14 +12,12 @@ import uk.gov.hmcts.darts.arm.component.ArchiveRecordFileGenerator;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.enums.ArchiveRecordType;
 import uk.gov.hmcts.darts.arm.mapper.AnnotationArchiveRecordMapper;
+import uk.gov.hmcts.darts.arm.mapper.CaseArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.MediaArchiveRecordMapper;
 import uk.gov.hmcts.darts.arm.mapper.TranscriptionArchiveRecordMapper;
-import uk.gov.hmcts.darts.arm.mapper.template.AnnotationRecordTemplateMapper;
-import uk.gov.hmcts.darts.arm.mapper.template.CaseRecordTemplateMapper;
-import uk.gov.hmcts.darts.arm.mapper.template.MediaRecordTemplateMapper;
-import uk.gov.hmcts.darts.arm.mapper.template.TranscriptionRecordTemplateMapper;
 import uk.gov.hmcts.darts.arm.model.record.AnnotationArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.ArchiveRecordFileInfo;
+import uk.gov.hmcts.darts.arm.model.record.CaseArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.MediaArchiveRecord;
 import uk.gov.hmcts.darts.arm.model.record.TranscriptionArchiveRecord;
 import uk.gov.hmcts.darts.arm.service.ArchiveRecordService;
@@ -44,10 +42,7 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
     private final MediaArchiveRecordMapper mediaArchiveRecordMapper;
     private final TranscriptionArchiveRecordMapper transcriptionArchiveRecordMapper;
     private final AnnotationArchiveRecordMapper annotationArchiveRecordMapper;
-    private final AnnotationRecordTemplateMapper annotationRecordTemplateMapper;
-    private final CaseRecordTemplateMapper caseRecordTemplateMapper;
-    private final MediaRecordTemplateMapper mediaRecordTemplateMapper;
-    private final TranscriptionRecordTemplateMapper transcriptionRecordTemplateMapper;
+    private final CaseArchiveRecordMapper caseArchiveRecordMapper;
 
     @Autowired
     ResourceLoader resourceLoader;
@@ -86,6 +81,12 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
+        CaseArchiveRecord caseArchiveRecord =
+            caseArchiveRecordMapper.mapToCaseArchiveRecord(externalObjectDirectory, archiveRecordFile);
+
+        archiveRecordFileInfo.setFileGenerationSuccessful(
+            archiveRecordFileGenerator.generateArchiveRecord(caseArchiveRecord, archiveRecordFile, ArchiveRecordType.CASE_ARCHIVE_TYPE)
+        );
     }
 
 
@@ -100,14 +101,9 @@ public class ArchiveRecordServiceImpl implements ArchiveRecordService {
         archiveRecordFileInfo.setArchiveRecordFile(archiveRecordFile);
         Files.createDirectories(archiveRecordFile.getParentFile().toPath());
 
-        String templateFileContents = getContentsFromFile(armDataManagementConfiguration.getMediaRecordTemplate());
-
-        String mappedTemplateFileContents = mediaRecordTemplateMapper.mapTemplateContents(externalObjectDirectory, templateFileContents);
-        log.info("Mapped contents {}", mappedTemplateFileContents);
-
         MediaArchiveRecord mediaArchiveRecord = mediaArchiveRecordMapper.mapToMediaArchiveRecord(externalObjectDirectory, archiveRecordFile);
         archiveRecordFileInfo.setFileGenerationSuccessful(
-            archiveRecordFileGenerator.generateArchiveRecord(mappedTemplateFileContents, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
+            archiveRecordFileGenerator.generateArchiveRecord(mediaArchiveRecord, archiveRecordFile, ArchiveRecordType.MEDIA_ARCHIVE_TYPE)
         );
 
     }

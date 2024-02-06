@@ -10,24 +10,25 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 import static java.util.Objects.nonNull;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.CASE_NUMBERS_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.CHANNEL_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.CHECKSUM_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.COMMENTS_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.CONTRIBUTOR_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.COURTHOUSE_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.COURTROOM_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.CREATED_DATE_TIME_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.DZ_FILE_NAME_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.END_DATE_TIME_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.FILENAME_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.FILE_TAG_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.FILE_TYPE_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.HEARING_DATE_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.MAX_CHANNELS_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.OBJECT_ID_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.PARENT_ID_KEY;
-import static uk.gov.hmcts.darts.arm.util.TemplateConstants.START_DATE_TIME_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.CONTRIBUTOR_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.DZ_FILE_NAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.FILENAME_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordCoreProperties.FILE_TAG_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CASE_NUMBERS_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHANNEL_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CHECKSUM_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COMMENTS_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTHOUSE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.COURTROOM_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.CREATED_DATE_TIME_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.END_DATE_TIME_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.FILE_TYPE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.HEARING_DATE_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.MAX_CHANNELS_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.OBJECT_ID_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.PARENT_ID_KEY;
+import static uk.gov.hmcts.darts.arm.util.PropertyConstants.ArchiveRecordPropertyValues.START_DATE_TIME_KEY;
+
 
 public class MediaRecordTemplateMapper extends BaseTemplate {
 
