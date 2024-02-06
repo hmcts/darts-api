@@ -153,7 +153,13 @@ class AudioServiceImplTest {
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
         when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
 
-        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"), false);
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(START_TIME.toInstant())
+            .endTime(END_TIME.toInstant())
+            .channel(1)
+            .mediaFile("testAudio.mp2")
+            .path(Path.of("test"))
+            .build();
         when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
 
         byte[] testStringInBytes = DUMMY_FILE_CONTENT.getBytes(StandardCharsets.UTF_8);
@@ -181,7 +187,12 @@ class AudioServiceImplTest {
         when(mediaRepository.findById(1)).thenReturn(Optional.of(mediaEntity));
         when(audioTransformationService.saveMediaToWorkspace(mediaEntity)).thenReturn(mediaPath);
 
-        AudioFileInfo audioFileInfo = new AudioFileInfo(START_TIME.toInstant(), END_TIME.toInstant(), 1, Path.of("test"), true);
+        AudioFileInfo audioFileInfo = AudioFileInfo.builder()
+            .startTime(START_TIME.toInstant())
+            .endTime(END_TIME.toInstant())
+            .channel(1)
+            .path(Path.of("test"))
+            .build();
         when(audioOperationService.reEncode(anyString(), any())).thenReturn(audioFileInfo);
 
         BinaryData data = mock(BinaryData.class);
@@ -191,8 +202,8 @@ class AudioServiceImplTest {
         when(inputStream.read(any())).thenThrow(new IOException());
 
         audioService.startStreamingPreview(
-                mediaEntity.getId(),
-                "bytes=0-1024", emitter
+            mediaEntity.getId(),
+            "bytes=0-1024", emitter
         );
         CountDownLatch latch = new CountDownLatch(1);
         Mockito.doAnswer(invocationOnMock -> {

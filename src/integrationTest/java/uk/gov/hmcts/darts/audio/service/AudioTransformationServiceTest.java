@@ -2,7 +2,6 @@ package uk.gov.hmcts.darts.audio.service;
 
 import com.azure.core.util.BinaryData;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
@@ -11,7 +10,6 @@ import uk.gov.hmcts.darts.common.entity.ExternalLocationTypeEntity;
 import uk.gov.hmcts.darts.common.entity.ExternalObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.entity.MediaEntity;
 import uk.gov.hmcts.darts.common.entity.ObjectRecordStatusEntity;
-import uk.gov.hmcts.darts.common.entity.TransientObjectDirectoryEntity;
 import uk.gov.hmcts.darts.common.service.FileOperationService;
 import uk.gov.hmcts.darts.common.service.TransientObjectDirectoryService;
 import uk.gov.hmcts.darts.datamanagement.config.DataManagementConfiguration;
@@ -30,7 +28,6 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -69,24 +66,21 @@ class AudioTransformationServiceTest extends IntegrationBase {
     @Autowired
     private ExternalObjectDirectoryStub externalObjectDirectoryStub;
 
-    @Mock
-    private TransientObjectDirectoryEntity mockTransientObjectDirectoryEntity;
-
     @Test
     void shouldGetAudioBlobDataUsingLocation() {
         String containerName = dataManagementConfiguration.getUnstructuredContainerName();
 
         when(mockDataManagementService.getBlobData(
-            containerName,
-            BLOB_LOCATION
+                containerName,
+                BLOB_LOCATION
         )).thenReturn(BINARY_DATA);
 
         BinaryData binaryData = audioTransformationService.getUnstructuredAudioBlob(BLOB_LOCATION);
 
         assertEquals(BINARY_DATA, binaryData);
         verify(mockDataManagementService).getBlobData(
-            eq(containerName),
-            eq(BLOB_LOCATION)
+                containerName,
+                BLOB_LOCATION
         );
         verifyNoMoreInteractions(mockDataManagementService);
     }
@@ -96,16 +90,16 @@ class AudioTransformationServiceTest extends IntegrationBase {
         String containerName = dataManagementConfiguration.getOutboundContainerName();
 
         when(mockDataManagementService.saveBlobData(
-            containerName,
-            BINARY_DATA
+                containerName,
+                BINARY_DATA
         )).thenReturn(BLOB_LOCATION);
 
         UUID externalLocation = audioTransformationService.saveAudioBlobData(BINARY_DATA);
 
         assertEquals(BLOB_LOCATION, externalLocation);
         verify(mockDataManagementService).saveBlobData(
-            eq(containerName),
-            eq(BINARY_DATA)
+                containerName,
+                BINARY_DATA
         );
         verifyNoMoreInteractions(mockDataManagementService);
     }
@@ -152,11 +146,11 @@ class AudioTransformationServiceTest extends IntegrationBase {
     void shouldGetMediaLocation() {
         given.setupTest();
         var externalObjectDirectoryEntity =
-            given.externalObjectDirForMedia(given.getMediaEntity1());
+                given.externalObjectDirForMedia(given.getMediaEntity1());
 
         assertEquals(
-            externalObjectDirectoryEntity.getExternalLocation(),
-            audioTransformationService.getMediaLocation(given.getMediaEntity1()).get()
+                externalObjectDirectoryEntity.getExternalLocation(),
+                audioTransformationService.getMediaLocation(given.getMediaEntity1()).get()
         );
     }
 
@@ -194,30 +188,30 @@ class AudioTransformationServiceTest extends IntegrationBase {
         newMedia = dartsDatabase.save(newMedia);
 
         ExternalLocationTypeEntity externalLocationTypeEntity =
-            dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
+                dartsDatabase.getExternalLocationTypeRepository().getReferenceById(UNSTRUCTURED.getId());
         ObjectRecordStatusEntity objectRecordStatus =
-            dartsDatabase.getObjectRecordStatusRepository().getReferenceById(STORED.getId());
+                dartsDatabase.getObjectRecordStatusRepository().getReferenceById(STORED.getId());
         UUID externalLocation1 = UUID.randomUUID();
         UUID externalLocation2 = UUID.randomUUID();
         ExternalObjectDirectoryEntity externalObjectDirectory1 = externalObjectDirectoryStub.createExternalObjectDirectory(
-            newMedia,
-            objectRecordStatus,
-            externalLocationTypeEntity,
-            externalLocation1
+                newMedia,
+                objectRecordStatus,
+                externalLocationTypeEntity,
+                externalLocation1
         );
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory1);
 
         ExternalObjectDirectoryEntity externalObjectDirectory2 = externalObjectDirectoryStub.createExternalObjectDirectory(
-            newMedia,
-            objectRecordStatus,
-            externalLocationTypeEntity,
-            externalLocation2
+                newMedia,
+                objectRecordStatus,
+                externalLocationTypeEntity,
+                externalLocation2
         );
         dartsDatabase.getExternalObjectDirectoryRepository().saveAndFlush(externalObjectDirectory2);
 
         assertEquals(
-            Optional.of(externalLocation1),
-            audioTransformationService.getMediaLocation(newMedia)
+                Optional.of(externalLocation1),
+                audioTransformationService.getMediaLocation(newMedia)
         );
 
     }
@@ -233,16 +227,16 @@ class AudioTransformationServiceTest extends IntegrationBase {
         Path filePath = Path.of(tempWorkspace).resolve(fileName);
 
         when(mockFileOperationService.saveFileToTempWorkspace(
-            BINARY_DATA,
-            fileName
+                BINARY_DATA,
+                fileName
         )).thenReturn(filePath);
 
         Path actualFilePath = audioTransformationService.saveBlobDataToTempWorkspace(BINARY_DATA, fileName);
 
         assertEquals(filePath, actualFilePath);
         verify(mockFileOperationService).saveFileToTempWorkspace(
-            eq(BINARY_DATA),
-            eq(fileName)
+                BINARY_DATA,
+                fileName
         );
         verifyNoMoreInteractions(mockFileOperationService);
     }

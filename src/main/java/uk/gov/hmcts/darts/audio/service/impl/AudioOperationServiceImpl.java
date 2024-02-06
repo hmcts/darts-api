@@ -73,13 +73,12 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         CommandLine command = generateConcatenateCommand(audioFileInfos, outputPath);
         systemCommandExecutor.execute(command);
 
-        return new AudioFileInfo(
-            getEarliestStartTime(audioFileInfos),
-            getLatestEndTime(audioFileInfos),
-            channel,
-            outputPath,
-            false
-        );
+        return AudioFileInfo.builder()
+            .startTime(getEarliestStartTime(audioFileInfos))
+            .endTime(getLatestEndTime(audioFileInfos))
+            .channel(channel)
+            .path(outputPath)
+            .build();
     }
 
     @Override
@@ -107,14 +106,14 @@ public class AudioOperationServiceImpl implements AudioOperationService {
             CommandLine command = generateConcatenateCommand(seperatedAudioFileInfo, outputPath);
             systemCommandExecutor.execute(command);
 
-            AudioFileInfo audioFileInfo = new AudioFileInfo(
-                getEarliestStartTime(seperatedAudioFileInfo),
-                getLatestEndTime(seperatedAudioFileInfo),
-                channel,
-                outputPath,
-                false
+            audioFileInfoList.add(
+                AudioFileInfo.builder()
+                    .startTime(getEarliestStartTime(seperatedAudioFileInfo))
+                    .endTime(getLatestEndTime(seperatedAudioFileInfo))
+                    .channel(channel)
+                    .path(outputPath)
+                    .build()
             );
-            audioFileInfoList.add(audioFileInfo);
         }
         return audioFileInfoList;
     }
@@ -144,13 +143,12 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         systemCommandExecutor.execute(command);
 
-        return new AudioFileInfo(
-            getEarliestStartTime(audioFilesInfo),
-            getLatestEndTime(audioFilesInfo),
-            0,
-            outputPath,
-            false
-        );
+        return AudioFileInfo.builder()
+            .startTime(getEarliestStartTime(audioFilesInfo))
+            .endTime(getLatestEndTime(audioFilesInfo))
+            .channel(0)
+            .path(outputPath)
+            .build();
     }
 
     @Override
@@ -174,13 +172,14 @@ public class AudioOperationServiceImpl implements AudioOperationService {
 
         systemCommandExecutor.execute(command);
 
-        return new AudioFileInfo(
-            adjustTimeDuration(audioFileInfo.getStartTime(), startDuration),
-            adjustTimeDuration(audioFileInfo.getStartTime(), endDuration),
-            audioFileInfo.getChannel(),
-            outputPath,
-            true
-        );
+        return AudioFileInfo.builder()
+            .startTime(adjustTimeDuration(audioFileInfo.getStartTime(), startDuration))
+            .endTime(adjustTimeDuration(audioFileInfo.getStartTime(), endDuration))
+            .channel(audioFileInfo.getChannel())
+            .mediaFile(audioFileInfo.getMediaFile())
+            .path(outputPath)
+            .isTrimmed(true)
+            .build();
     }
 
     private String toTimeString(Duration duration) {
@@ -217,13 +216,13 @@ public class AudioOperationServiceImpl implements AudioOperationService {
         Date encodeEndDate = new Date();
         log.debug("**Encoding of audio file with command {} took {}ms", command, encodeEndDate.getTime() - encodeStartDate.getTime());
 
-        return new AudioFileInfo(
-            audioFileInfo.getStartTime(),
-            audioFileInfo.getEndTime(),
-            audioFileInfo.getChannel(),
-            outputPath,
-            audioFileInfo.isTrimmed()
-        );
+        return AudioFileInfo.builder()
+            .startTime(audioFileInfo.getStartTime())
+            .endTime(audioFileInfo.getEndTime())
+            .channel(audioFileInfo.getChannel())
+            .path(outputPath)
+            .isTrimmed(audioFileInfo.isTrimmed())
+            .build();
     }
 
     Instant adjustTimeDuration(Instant time, Duration timeDuration) {
