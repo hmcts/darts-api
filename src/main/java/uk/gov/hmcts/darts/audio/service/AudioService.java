@@ -24,5 +24,5 @@ public interface AudioService {
 
     SseEmitter startStreamingPreview(Integer mediaId, String range, SseEmitter emitter);
 
-    void setIsArchived(List<AudioMetadata> audioMetadata);
+    void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId);
 }

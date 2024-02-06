@@ -57,7 +57,7 @@ public class AudioController implements AudioApi {
     public ResponseEntity<List<AudioMetadata>> getAudioMetadata(Integer hearingId) {
         List<MediaEntity> mediaEntities = audioService.getAudioMetadata(hearingId, 1);
         List<AudioMetadata> audioMetadata = audioResponseMapper.mapToAudioMetadata(mediaEntities);
-        audioService.setIsArchived(audioMetadata);
+        audioService.setIsArchived(audioMetadata, hearingId);
 
         return new ResponseEntity<>(audioMetadata, HttpStatus.OK);
     }

@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
-import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
+import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.component.impl.AddAudioRequestMapperImpl;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
@@ -112,7 +112,7 @@ class AudioServiceImplTest {
     @Mock
     private DataManagementApi dataManagementApi;
     @Mock
-    AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
+    AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
     private AudioService audioService;
 
     @BeforeEach
@@ -136,7 +136,7 @@ class AudioServiceImplTest {
             courtLogEventRepository,
             audioConfigurationProperties,
             heartBeatEmitter,
-            audioRequestBeingProcessedFromArchiveQuery
+            audioBeingProcessedFromArchiveQuery
         );
     }
 
@@ -407,13 +407,13 @@ class AudioServiceImplTest {
         int mediaId = 1;
         AudioMetadata audioMetadata = new AudioMetadata();
         audioMetadata.setId(mediaId);
-        List<AudioMetadata> audioMetadataList = Arrays.asList(audioMetadata);
+        List<AudioMetadata> audioMetadataList = List.of(audioMetadata);
         AudioRequestBeingProcessedFromArchiveQueryResult audioRequest = new AudioRequestBeingProcessedFromArchiveQueryResult(mediaId,2,3);
-        List<AudioRequestBeingProcessedFromArchiveQueryResult> archivedArmRecords = Arrays.asList(audioRequest);
+        List<AudioRequestBeingProcessedFromArchiveQueryResult> archivedArmRecords = List.of(audioRequest);
 
-        when(audioRequestBeingProcessedFromArchiveQuery.getResultsByMediaIds(any())).thenReturn(archivedArmRecords);
+        when(audioBeingProcessedFromArchiveQuery.getResults(any())).thenReturn(archivedArmRecords);
 
-        audioService.setIsArchived(audioMetadataList);
+        audioService.setIsArchived(audioMetadataList, 1);
 
         assertEquals(true, audioMetadataList.get(0).getIsArchived());
 

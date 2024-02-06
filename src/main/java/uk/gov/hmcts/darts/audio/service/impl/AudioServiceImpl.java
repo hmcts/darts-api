@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import uk.gov.hmcts.darts.audio.component.AddAudioRequestMapper;
-import uk.gov.hmcts.darts.audio.component.AudioRequestBeingProcessedFromArchiveQuery;
+import uk.gov.hmcts.darts.audio.component.AudioBeingProcessedFromArchiveQuery;
 import uk.gov.hmcts.darts.audio.config.AudioConfigurationProperties;
 import uk.gov.hmcts.darts.audio.exception.AudioApiError;
 import uk.gov.hmcts.darts.audio.model.AddAudioMetadataRequest;
@@ -76,7 +76,7 @@ public class AudioServiceImpl implements AudioService {
     private final CourtLogEventRepository courtLogEventRepository;
     private final AudioConfigurationProperties audioConfigurationProperties;
     private final SentServerEventsHeartBeatEmitter heartBeatEmitter;
-    private final AudioRequestBeingProcessedFromArchiveQuery audioRequestBeingProcessedFromArchiveQuery;
+    private final AudioBeingProcessedFromArchiveQuery audioBeingProcessedFromArchiveQuery;
 
     private AudioFileInfo createAudioFileInfo(MediaEntity mediaEntity, Path downloadPath) {
         return AudioFileInfo.builder()
@@ -232,10 +232,9 @@ public class AudioServiceImpl implements AudioService {
     }
 
     @Override
-    public void setIsArchived(List<AudioMetadata> audioMetadata) {
-        List<Integer> mediaIds = audioMetadata.stream().map(AudioMetadata::getId).toList();
+    public void setIsArchived(List<AudioMetadata> audioMetadata, Integer hearingId) {
         List<AudioRequestBeingProcessedFromArchiveQueryResult> archivedArmRecords =
-            audioRequestBeingProcessedFromArchiveQuery.getResultsByMediaIds(mediaIds);
+            audioBeingProcessedFromArchiveQuery.getResults(hearingId);
 
         for (AudioMetadata audioMetadataItem : audioMetadata) {
             if (archivedArmRecords.stream().anyMatch(archived -> audioMetadataItem.getId().equals(archived.mediaId()))) {
