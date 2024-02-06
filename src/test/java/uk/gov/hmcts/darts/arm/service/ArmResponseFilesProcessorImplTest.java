@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.darts.arm.api.ArmDataManagementApi;
+import uk.gov.hmcts.darts.arm.component.ArmResponseFilesProcessSingleElement;
 import uk.gov.hmcts.darts.arm.config.ArmDataManagementConfiguration;
 import uk.gov.hmcts.darts.arm.service.impl.ArmResponseFilesProcessorImpl;
 import uk.gov.hmcts.darts.authorisation.component.UserIdentity;
@@ -70,6 +71,10 @@ class ArmResponseFilesProcessorImplTest {
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmDropZone;
     @Mock
     private ExternalObjectDirectoryEntity externalObjectDirectoryArmResponseProcessing;
+
+    @Mock
+    private ArmResponseFilesProcessSingleElement armResponseFilesProcessSingleElement;
+
     @Mock
     private MediaEntity mediaEntity;
 
@@ -85,14 +90,15 @@ class ArmResponseFilesProcessorImplTest {
         ObjectMapper objectMapper = objectMapperConfig.objectMapper();
 
         armResponseFilesProcessor = new ArmResponseFilesProcessorImpl(
-            externalObjectDirectoryRepository,
-            objectRecordStatusRepository,
-            externalLocationTypeRepository,
-            armDataManagementApi,
-            fileOperationService,
-            armDataManagementConfiguration,
-            objectMapper,
-            userIdentity
+                externalObjectDirectoryRepository,
+                objectRecordStatusRepository,
+                externalLocationTypeRepository,
+                armDataManagementApi,
+                fileOperationService,
+                armDataManagementConfiguration,
+                objectMapper,
+                userIdentity,
+                armResponseFilesProcessSingleElement
         );
     }
 
@@ -116,8 +122,8 @@ class ArmResponseFilesProcessorImplTest {
 
         List<ExternalObjectDirectoryEntity> inboundList = new ArrayList<>(Collections.singletonList(externalObjectDirectoryArmDropZone));
         when(externalObjectDirectoryRepository.findByExternalLocationTypeAndObjectStatus(
-                 externalLocationTypeArm,
-                 objectRecordStatusArmDropZone
+                     externalLocationTypeArm,
+                     objectRecordStatusArmDropZone
              )
         ).thenReturn(inboundList);
         when(externalObjectDirectoryRepository.findById(1)).thenReturn(Optional.of(externalObjectDirectoryArmResponseProcessing));
