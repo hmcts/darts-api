@@ -175,7 +175,7 @@ class PatchUserIntTest extends IntegrationBase {
         MockHttpServletRequestBuilder request = buildRequest(userId)
             .content("""
                          {
-                           "full_name": " ",
+                           "full_name": "",
                            "description": ""
                          }
                          """);
