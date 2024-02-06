@@ -95,10 +95,6 @@ class ArmResponseFilesProcessorIntTest extends IntegrationBase {
                 externalObjectDirectoryRepository,
                 objectRecordStatusRepository,
                 externalLocationTypeRepository,
-                armDataManagementApi,
-                fileOperationService,
-                armDataManagementConfiguration,
-                objectMapper,
                 userIdentity,
                 armResponseFilesProcessSingleElement
         );
